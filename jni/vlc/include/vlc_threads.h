@@ -389,7 +389,7 @@ static inline void vlc_spin_init (vlc_spinlock_t *spin)
 #endif
 static inline void barrier (void)
 {
-#if defined (__GNUC__) && !defined (__APPLE__) && \
+#if defined (__GNUC__) && !defined (__APPLE__) && !defined(ANDROID) && \
             ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1))
     __sync_synchronize ();
 #elif defined(__APPLE__)

@@ -5,7 +5,7 @@ Any questions please contact tewilove@gmail.com.
 Build steps:
 run build.sh is enough.
 
-if you encounter compiling errors, take a look at this.
+Known issues:
 
 1. there is problem with NDK headers when compiling in ARM mode
 diff -Nurp platforms/android-3/arch-arm/usr/include/asm/byteorder.h.org platforms/android-3/arch-arm/usr/include/asm/byteorder.h

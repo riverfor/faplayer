@@ -21,7 +21,6 @@ FF_COMMON_SRC := \
     libavcodec/aacps.c \
     libavcodec/aacsbr.c \
     libavcodec/aactab.c \
-    libavcodec/aandcttab.c \
     libavcodec/aasc.c \
     libavcodec/ac3.c \
     libavcodec/ac3_parser.c \
@@ -120,11 +119,7 @@ FF_COMMON_SRC := \
     libavcodec/eac3dec.c \
     libavcodec/eac3dec_data.c \
     libavcodec/eacmv.c \
-    libavcodec/eaidct.c \
-    libavcodec/eamad.c \
-    libavcodec/eatgq.c \
     libavcodec/eatgv.c \
-    libavcodec/eatqi.c \
     libavcodec/error_resilience.c \
     libavcodec/escape124.c \
     libavcodec/faanidct.c \
@@ -597,38 +592,19 @@ FF_ARM_NEON_SRC := \
 
 FF_CLFAGS := -std=c99
 FF_CFLAGS += -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
-FF_CFLAGS += -ffast-math -fno-tree-vectorize
+FF_CFLAGS += -fno-strict-aliasing -ffast-math
 
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
 
-LOCAL_MODULE := ffmpeg-6
+LOCAL_MODULE := ffmpeg
 
 LOCAL_C_INCLUDES += $(FF_INCLUDE)
 
 LOCAL_CFLAGS += $(FF_CFLAGS)
 
-LOCAL_CFLAGS += -DHAVE_NEON=0 -march=armv6j -mtune=arm1136j-s -msoft-float
-
-LOCAL_SRC_FILES := \
-    $(FF_COMMON_SRC)
-
-LOCAL_LDLIBS := -lc -lm -lz
-
-include $(BUILD_SHARED_LIBRARY)
-
-include $(CLEAR_VARS)
-
-LOCAL_ARM_MODE := arm
-
-LOCAL_MODULE := ffmpeg-7
-
-LOCAL_C_INCLUDES += $(FF_INCLUDE)
-
-LOCAL_CFLAGS += $(FF_CFLAGS)
-
-LOCAL_CFLAGS += -DHAVE_NEON=1 -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon
+LOCAL_CFLAGS += -DHAVE_NEON=1 -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -mvectorize-with-neon-quad
 
 LOCAL_LDFLAGS += -Wl,--fix-cortex-a8
 
@@ -636,7 +612,7 @@ LOCAL_SRC_FILES := \
     $(FF_COMMON_SRC) \
     $(FF_ARM_NEON_SRC)
 
-LOCAL_LDLIBS := -lc -lm -lz
+LOCAL_LDLIBS := -lc -lm -ldl -lz
 
 include $(BUILD_SHARED_LIBRARY)
 

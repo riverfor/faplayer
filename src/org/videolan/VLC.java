@@ -8,9 +8,7 @@ public class VLC {
 
 	static {
 		System.loadLibrary("vlccore");
-		int arch = SystemUtility.getArmArchitecture();
-		String ffmpeg = String.format("ffmpeg-%d", arch);
-		System.loadLibrary(ffmpeg);
+		System.loadLibrary("ffmpeg");
 	}
 
 	private static VLC mInstance = null;

@@ -30,7 +30,6 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src \
-    $(EXTROOT)/cpufeatures \
     $(EXTROOT)/iconv/include
 
 LOCAL_SRC_FILES := \
@@ -176,9 +175,9 @@ LOCAL_SRC_FILES := \
     src/video_output/vout_wrapper.c \
     src/video_output/window.c
 
-LOCAL_LDLIBS += -llog
+LOCAL_LDLIBS += -ldl -llog
 
-LOCAL_STATIC_LIBRARIES += compat pthread-compat cpufeatures 
+LOCAL_STATIC_LIBRARIES += compat pthread-compat
 
 # please try to use the latest NDK
 # http://code.google.c \om/p/android/issues/detail?id=9439

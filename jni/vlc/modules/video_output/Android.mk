@@ -1,41 +1,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-#libvout_android-3_plugin.so
-
-include $(CLEAR_VARS)
-
-LOCAL_ARM_MODE := arm
-
-LOCAL_MODULE := vout_android-3_plugin
-
-LOCAL_CFLAGS += \
-    -D__PLATFORM__=3 \
-    -D__THROW= \
-    -DHAVE_CONFIG_H \
-    -DNDEBUG \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"vout_android-3\"
-
-LOCAL_C_INCLUDES += \
-    $(DEPROOT)/android-3/include \
-    $(VLCROOT)/compat \
-    $(VLCROOT) \
-    $(VLCROOT)/include \
-    $(VLCROOT)/src
-
-LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
-
-LOCAL_SRC_FILES := \
-    android_Surface.cpp
-
-LOCAL_LDFLAGS += -L$(DEPROOT)/android-3/lib
-LOCAL_LDLIBS += -lui
-
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
-
 #libvout_android-4_plugin.so
 
 include $(CLEAR_VARS)

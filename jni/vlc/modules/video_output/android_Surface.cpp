@@ -57,8 +57,8 @@ struct vout_display_sys_t {
     picture_pool_t *pool;
 };
 
-static int Open(vlc_object_t *object) {
-    vout_display_t *vd = (vout_display_t *)object;
+static int Open(vlc_object_t *p_this) {
+    vout_display_t *vd = (vout_display_t *)p_this;
     vout_display_sys_t *sys;
 
     // get surface infomation
@@ -71,7 +71,11 @@ static int Open(vlc_object_t *object) {
     }
     Surface::SurfaceInfo info;
     surf->lock(&info);
+#if __PLATFORM__ == 4
+    surf->unlock();
+#else
     surf->unlockAndPost();
+#endif
     UnlockSurface();
     video_format_t fmt = vd->fmt;
     // TODO: what about the other formats?
@@ -114,15 +118,15 @@ static int Open(vlc_object_t *object) {
     sys->w = fmt.i_width;
     sys->h = fmt.i_height;
 #if __PLATFORM__ > 4
-    msg_Dbg(object, "SurfaceInfo w = %d, h = %d, s = %d", sys->width, sys->height, sys->stride);
+    msg_Dbg(VLC_OBJECT(p_this), "SurfaceInfo w = %d, h = %d, s = %d", sys->width, sys->height, sys->stride);
 #else
-    msg_Dbg(object, "SurfaceInfo w = %d, h = %d", sys->width, sys->height);
+    msg_Dbg(VLC_OBJECT(p_this), "SurfaceInfo w = %d, h = %d", sys->width, sys->height);
 #endif
     sys->pool = NULL;
     vd->sys = sys;
     vout_display_cfg_t cfg = *vd->cfg;
-    cfg.display.width = info.w;
-    cfg.display.height = info.h;
+    cfg.display.width = sys->width;
+    cfg.display.height = sys->height;
     vout_display_PlacePicture(&sys->place, &vd->source, &cfg, true);
     vd->info.has_hide_mouse = true;
     //vd->info.is_slow = true;
@@ -138,8 +142,8 @@ static int Open(vlc_object_t *object) {
     return VLC_SUCCESS;
 }
 
-static void Close(vlc_object_t *object) {
-    vout_display_t *vd = (vout_display_t *)object;
+static void Close(vlc_object_t *p_this) {
+    vout_display_t *vd = (vout_display_t *)p_this;
     vout_display_sys_t *sys = vd->sys;
 
     if (sys->pool)

@@ -676,7 +676,7 @@ static int vlc_clone_attr (vlc_thread_t *th, pthread_attr_t *attr,
 #endif
 
 #if HAVE_ANDROID
-    /*int prio = priority;
+    int prio = priority;
     if (prio < VLC_THREAD_PRIORITY_LOW)
         prio = VLC_THREAD_PRIORITY_LOW;
     if (prio > VLC_THREAD_PRIORITY_HIGHEST)
@@ -686,7 +686,7 @@ static int vlc_clone_attr (vlc_thread_t *th, pthread_attr_t *attr,
     pthread_attr_setschedpolicy(attr, SCHED_RR);
     prio = min_p + prio * (max_p - min_p) / (VLC_THREAD_PRIORITY_HIGHEST - VLC_THREAD_PRIORITY_LOW);
     struct sched_param sched = { .sched_priority = prio };
-    pthread_attr_setschedparam(attr, &sched);*/
+    pthread_attr_setschedparam(attr, &sched);
     ret = pthread_create_cancel (th, attr, entry, data);
 #else
     ret = pthread_create (th, attr, entry, data);

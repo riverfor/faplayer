@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.stagex.helper.SystemUtility;
 import org.videolan.VLC;
@@ -18,8 +20,13 @@ import android.content.res.AssetManager;
 
 public class Danmaku extends Application {
 
+	private static Pattern mPatternVersion = Pattern.compile("android-(\\d+)");
+
 	protected boolean initialize() {
 		// prepare, orz
+		int code = SystemUtility.getSDKVersionCode();
+		if (code == 6 || code == 7)
+			code = 5;
 		String root = super.getCacheDir().getAbsolutePath();
 		try {
 			ArrayList<String> list = new ArrayList<String>();
@@ -30,6 +37,12 @@ public class Danmaku extends Application {
 			try {
 				while (br.ready()) {
 					String line = br.readLine();
+					Matcher matcher = mPatternVersion.matcher(line);
+					if (matcher.find()) {
+						int value = Integer.parseInt(matcher.group(1));
+						if (value > code)
+							continue;
+					}
 					list.add(line);
 				}
 			} finally {
@@ -70,15 +83,10 @@ public class Danmaku extends Application {
 		// start VLC
 		String libd = String.format("%s/lib", root);
 		VLC.setenv("VLC_PLUGIN_PATH", libd, true);
-		String conf = String.format("%s/etc/vlcrc.3", root);
-		int code = SystemUtility.getSDKVersionCode();
-		if (code == 6 || code == 7)
-			code = 5;
+		String conf = String.format("%s/etc/vlcrc.4", root);
 		String aout = String.format("aout_android-%d", code);
-		// on my x10i freex10 2.2.1 it's using legacy libui.so
-		File test = new File("/system/lib/libsurfaceflinger_client.so");
-		String vout = String
-				.format("vout_android-%d", test.exists() ? code : 5);
+		String vout = String.format("vout_android-%d", code);
+		// XXX: --intf, --aout, --vout don't make sense here
 		VLC.getInstance().create(
 				new String[] { "--verbose", "3", "--no-ignore-config",
 						"--config", conf, "--no-plugins-cache", "--intf",
