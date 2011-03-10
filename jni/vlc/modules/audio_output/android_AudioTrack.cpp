@@ -18,7 +18,7 @@ using namespace android;
 
 struct aout_sys_t {
     int type;
-    int rate;
+    uint32_t rate;
     int channel;
     int format;
     int size;
@@ -51,12 +51,11 @@ static int Open(vlc_object_t *p_this) {
     p_sys = (struct aout_sys_t*)malloc(sizeof(aout_sys_t));
     if (p_sys == NULL)
         return VLC_ENOMEM;
-    p_aout->output.p_sys = p_sys;
     type = AudioSystem::MUSIC;
     p_sys->type = type;
-    // 8000 <= frequency <= 48000
-    if (p_aout->output.output.i_rate < 8000)
-        p_aout->output.output.i_rate = 8000;
+    // 4000 <= frequency <= 48000
+    if (p_aout->output.output.i_rate < 4000)
+        p_aout->output.output.i_rate = 4000;
     if (p_aout->output.output.i_rate > 48000)
         p_aout->output.output.i_rate = 48000;
     rate = p_aout->output.output.i_rate;
@@ -109,8 +108,12 @@ static int Open(vlc_object_t *p_this) {
         free(p_sys);
         return VLC_EGENERIC;
     }
-    p_sys->handle->start();
+
+    p_aout->output.p_sys = p_sys;
     p_aout->output.pf_play = Play;
+
+    p_sys->handle->start();
+
     return VLC_SUCCESS;
 }
 

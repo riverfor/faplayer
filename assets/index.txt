@@ -15,7 +15,10 @@ lib/codec/liblibass_plugin.so
 lib/codec/libavcodec_plugin.so
 lib/audio_mixer/libtrivial_mixer_plugin.so
 lib/audio_mixer/libfloat32_mixer_plugin.so
-lib/audio_output/libaout_android_plugin.so
+lib/audio_output/libaout_android-4_plugin.so
+lib/audio_output/libaout_android-8_plugin.so
+lib/audio_output/libaout_android-5_plugin.so
+lib/audio_output/libaout_android-9_plugin.so
 lib/misc/libfreetype_plugin.so
 lib/audio_filter/libconverter_fixed_plugin.so
 lib/audio_filter/libugly_resampler_plugin.so

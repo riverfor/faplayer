@@ -18,6 +18,7 @@ struct aout_sys_t {
     int format;
     int size;
     int mode;
+    JNIEnv *env;
     jobject audio_track_object;
     jobject audio_track_reference;
     jmethodID audio_track_ctor;
@@ -55,6 +56,7 @@ static int Open(vlc_object_t *p_this) {
     if (p_sys == NULL)
         return VLC_ENOMEM;
     // setup
+    p_sys->env = env;
     clz = (*env)->FindClass(env, "android/media/AudioTrack");
     if (!clz) {
         free(p_sys);
@@ -90,7 +92,6 @@ static int Open(vlc_object_t *p_this) {
     p_sys->format = 0x00000002;
     // bufferSizeInBytes
     p_aout->output.i_nb_samples = (*env)->CallStaticIntMethod(env, clz, p_sys->audio_track_getMinBufferSize, p_sys->rate, p_sys->channel, p_sys->format);
-    p_aout->output.i_nb_samples <<= 1;
     p_sys->size = p_aout->output.i_nb_samples;
     // mode = MODE_STREAM
     p_sys->mode = 0x00000001;
@@ -111,8 +112,6 @@ static int Open(vlc_object_t *p_this) {
     p_aout->output.p_sys = p_sys;
     p_aout->output.pf_play = Play;
 
-    (*gJVM)->DetachCurrentThread(gJVM);
-
     return VLC_SUCCESS;
 }
 
@@ -121,12 +120,10 @@ static void Close(vlc_object_t *p_this) {
     aout_instance_t *p_aout = (aout_instance_t*)p_this;
     struct aout_sys_t *p_sys = p_aout->output.p_sys;
 
-    int err = (*gJVM)->AttachCurrentThread(gJVM, &env, NULL);
-    if (!err) {
-        (*env)->CallVoidMethod(env, p_sys->audio_track_object, p_sys->audio_track_stop);
-        (*env)->DeleteGlobalRef(env, p_sys->audio_track_reference);
-        (*gJVM)->DetachCurrentThread(gJVM);
-    }
+    env = p_sys->env;
+    (*env)->CallVoidMethod(env, p_sys->audio_track_object, p_sys->audio_track_stop);
+    (*env)->DeleteGlobalRef(env, p_sys->audio_track_object);
+    (*gJVM)->DetachCurrentThread(gJVM);
     vlc_object_kill(p_aout);
     vlc_thread_join(p_aout);
     p_aout->b_die = false;
@@ -138,11 +135,7 @@ static void Play(aout_instance_t *p_aout) {
     struct aout_sys_t *p_sys = p_aout->output.p_sys;
     aout_buffer_t *p_buffer;
 
-    int err = (*gJVM)->AttachCurrentThread(gJVM, &env, NULL);
-    if (err) {
-        msg_Err(VLC_OBJECT(p_aout), "Could not attach current thread, will not play");
-        return;
-    }
+    env = p_sys->env;
     while (vlc_object_alive(p_aout)) {
         p_buffer = aout_FifoPop(p_aout, &p_aout->output.fifo);
         if (p_buffer != NULL) {
@@ -170,6 +163,5 @@ static void Play(aout_instance_t *p_aout) {
         else
             break;
     }
-    (*gJVM)->DetachCurrentThread(gJVM);
 }
 

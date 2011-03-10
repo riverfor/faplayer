@@ -1,11 +1,12 @@
-VLC-1.1.7 is on the road!
+VLC-1.2.0-git is on the road!
 
 Any questions please contact tewilove@gmail.com.
 
-Build steps:
-run build.sh is enough.
+Build steps: run build.sh. (for some reason, you have to install ruby-1.9.2 first.)
 
-Known issues:
+If you want to disable NEON version of ffmpeg, open jni/Android.mk and change BUILD_WITH_NEON to 0.
+
+Current NDK related build issues and solutions:
 
 1. there is problem with NDK headers when compiling in ARM mode
 diff -Nurp platforms/android-3/arch-arm/usr/include/asm/byteorder.h.org platforms/android-3/arch-arm/usr/include/asm/byteorder.h

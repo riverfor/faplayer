@@ -590,8 +590,7 @@ FF_ARM_NEON_SRC := \
     libavcodec/arm/vp56dsp_neon.S \
     libavcodec/arm/vp8dsp_neon.S
 
-FF_CLFAGS := -std=c99
-FF_CFLAGS += -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+FF_CFLAGS := -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
 FF_CFLAGS += -fno-strict-aliasing -ffast-math
 
 include $(CLEAR_VARS)
@@ -604,13 +603,19 @@ LOCAL_C_INCLUDES += $(FF_INCLUDE)
 
 LOCAL_CFLAGS += $(FF_CFLAGS)
 
-LOCAL_CFLAGS += -DHAVE_NEON=1 -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -mvectorize-with-neon-quad
-
-LOCAL_LDFLAGS += -Wl,--fix-cortex-a8
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_CFLAGS += -DHAVE_NEON=1 $(NEON_OPT_CFLAGS)
+LOCAL_LDFLAGS += $(NEON_OPT_LDFLAGS)
+else
+LOCAL_CFLAGS += -DHAVE_NEON=0 $(COMMON_OPT_CFLAGS)
+endif
 
 LOCAL_SRC_FILES := \
-    $(FF_COMMON_SRC) \
-    $(FF_ARM_NEON_SRC)
+    $(FF_COMMON_SRC)
+
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_SRC_FILES += $(FF_ARM_NEON_SRC)
+endif
 
 LOCAL_LDLIBS := -lc -lm -ldl -lz
 
