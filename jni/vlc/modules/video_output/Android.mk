@@ -18,6 +18,7 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"vout_android-4\"
 
 LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(DEPROOT)/android-4/include \
@@ -53,6 +54,7 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"vout_android-5\"
 
 LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(DEPROOT)/android-5/include \
@@ -88,6 +90,7 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"vout_android-8\"
 
 LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(DEPROOT)/android-8/include \
@@ -123,6 +126,7 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"vout_android-9\"
 
 LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(DEPROOT)/android-9/include \

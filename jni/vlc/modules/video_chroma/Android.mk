@@ -1,13 +1,13 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# libfreetype_plugin.so
+#libyuv2rgb_plugin.so
 
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
 
-LOCAL_MODULE := freetype_plugin
+LOCAL_MODULE := yuv2rgb_plugin
 
 LOCAL_CFLAGS += \
     -std=c99 \
@@ -15,22 +15,22 @@ LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
     -DNDEBUG \
     -D__PLUGIN__ \
-    -DMODULE_STRING=\"freetype\"
+    -DMODULE_STRING=\"yuv2rgb\"
 
-LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
+LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
-    $(EXTROOT)/iconv/include \
-    $(EXTROOT)/freetype/include \
     $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src
+    $(VLCROOT)/src \
+    $(EXTROOT)/yuv2rgb
 
 LOCAL_SRC_FILES := \
-    freetype.c
+    yuv2rgb.c
 
+LOCAL_STATIC_LIBRARIES += yuv2rgb
 LOCAL_SHARED_LIBRARIES += vlccore
 
 include $(BUILD_SHARED_LIBRARY)

@@ -18,6 +18,7 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"bandlimited_resampler\"
 
 LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
@@ -47,6 +48,9 @@ LOCAL_CFLAGS += \
     -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"ugly_resampler\"
+
+LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
