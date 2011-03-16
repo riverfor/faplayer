@@ -8,6 +8,8 @@
 #include <vlc_vout_display.h>
 #include <vlc_picture_pool.h>
 
+#include <pixman.h>
+
 #ifndef __PLATFORM__
 #error "android api level is not defined!"
 #endif
@@ -43,6 +45,7 @@ static int Control(vout_display_t *, int, va_list);
 static void Manage(vout_display_t *);
 
 static void picture_Strech2(vout_display_t *, picture_t *, picture_t *);
+static void picture_CopyToSurface(vout_display_t *, picture_t *, picture_t *);
 
 struct vout_display_sys_t {
     vout_display_place_t place;
@@ -160,13 +163,15 @@ static picture_pool_t *Pool(vout_display_t *vd, unsigned count) {
     return sys->pool;
 }
 
+//static mtime_t total = 0;
+//static int count = 0;
+
 static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture) {
     VLC_UNUSED(subpicture);
     vout_display_sys_t *sys = vd->sys;
     Surface *surf;
     Surface::SurfaceInfo info;
 
-    //mtime_t bgn = mdate();
     LockSurface();
     surf = (Surface*)(GetSurface());
     if (surf) {
@@ -196,7 +201,15 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
                 surface.p[0].i_pixel_pitch = 2;
                 surface.p[0].i_visible_lines = info.h;
                 surface.p[0].i_visible_pitch = info.w << 1;
-                picture_Strech2(vd, &surface, picture);
+
+                //mtime_t bgn = mdate();
+                picture_Strech2(vd, picture, &surface);
+                //picture_CopyToSurface(vd, picture, &surface);
+                //mtime_t end = mdate();
+                //total += (end - bgn);
+                //count += 1;
+                //msg_Dbg(VLC_OBJECT(vd), "%s takes %lld us, average %lld", __func__, end - bgn, total / count);
+
             }
         default:
             break;
@@ -205,9 +218,6 @@ bail:
         surf->unlockAndPost();
     }
     UnlockSurface();
-    //mtime_t end = mdate();
-    //msg_Dbg(VLC_OBJECT(vd), "%s takes %lld us", __func__, end - bgn);
-
     picture_Release(picture);
 }
 
@@ -241,7 +251,7 @@ static inline void copyrow2(uint16_t *src, int src_w, uint16_t *dst, int dst_w) 
     }
 }
 
-static void picture_Strech2(vout_display_t *vd, picture_t *dst_p, picture_t *src_p) {
+static void picture_Strech2(vout_display_t *vd, picture_t *src_p, picture_t *dst_p) {
     vout_display_sys_t *sys = vd->sys;
     vout_display_place_t *place = &sys->place;
 
@@ -295,4 +305,53 @@ static void picture_Strech2(vout_display_t *vd, picture_t *dst_p, picture_t *src
         pos += inc;
     }
 }
+
+#if 1
+static void picture_CopyToSurface(vout_display_t *vd, picture_t *src_p, picture_t *dst_p) {
+    vout_display_sys_t *sys = vd->sys;
+    vout_display_place_t *place = &sys->place;
+    plane_t *sp = &src_p->p[0];
+    plane_t *dp = &dst_p->p[0];
+    int sw, sh, ss, dw, dh, ds;
+    int srx, sry, srh, srw;
+    int drx, dry, drh, drw;
+
+    sw = sp->i_visible_pitch / sp->i_pixel_pitch;
+    sh = sp->i_visible_lines;
+    ss = sp->i_pitch / sp->i_pixel_pitch;
+    srx = 0;
+    sry = 0;
+    srw = sp->i_visible_pitch / sp->i_pixel_pitch;
+    srh = sp->i_visible_lines;
+    dw = dp->i_visible_pitch / dp->i_pixel_pitch;
+    dh = dp->i_visible_lines;
+    ds = dp->i_pitch / dp->i_pixel_pitch;
+    drx = place->x;
+    dry = place->y;
+    drw = place->width;
+    drh = place->height;
+
+    struct pixman_transform transform;
+    pixman_image_t *src_image, *dst_image;
+
+    src_image = pixman_image_create_bits(PIXMAN_r5g6b5, sw, sh, (uint32_t*)(sp->p_pixels), ss * 2);
+    if (!src_image)
+        return;
+    dst_image = pixman_image_create_bits(PIXMAN_r5g6b5, dw, dh, (uint32_t*)(dp->p_pixels), ds * 2);
+    if (!dst_image) {
+        pixman_image_unref(src_image);
+        return;
+    }
+
+    if (sw == drw && sh == drh) {
+        pixman_image_composite(PIXMAN_OP_SRC, src_image, NULL, dst_image, 0, 0, 0, 0, drx, dry, sw, sh);
+    }
+    else {
+
+    }
+
+    pixman_image_unref(src_image);
+    pixman_image_unref(dst_image);
+}
+#endif
 

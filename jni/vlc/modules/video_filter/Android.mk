@@ -64,7 +64,7 @@ LOCAL_SRC_FILES := \
     chroma.c \
     swscale.c
 
-LOCAL_SHARED_LIBRARIES += vlccore ffmpeg
+LOCAL_SHARED_LIBRARIES += vlccore
 
 include $(BUILD_SHARED_LIBRARY)
 

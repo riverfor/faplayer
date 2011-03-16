@@ -33,7 +33,7 @@ LOCAL_SRC_FILES := \
     demux.c \
     fourcc.c
 
-LOCAL_SHARED_LIBRARIES += vlccore ffmpeg
+LOCAL_SHARED_LIBRARIES += vlccore
 
 include $(BUILD_SHARED_LIBRARY)
 

@@ -35,3 +35,7 @@ LOCAL_SHARED_LIBRARIES += vlccore
 
 include $(BUILD_SHARED_LIBRARY)
 
+include $(CLEAR_VARS)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
+

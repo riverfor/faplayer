@@ -28,9 +28,12 @@ LOCAL_C_INCLUDES += \
     $(EXTROOT)/yuv2rgb
 
 LOCAL_SRC_FILES := \
-    yuv2rgb.c
+    yuv2rgb.c \
+    yuv2rgb16tab.c \
+    yuv420rgb565.S \
+    yuv422rgb565.S \
+    yuv444rgb565.S
 
-LOCAL_STATIC_LIBRARIES += yuv2rgb
 LOCAL_SHARED_LIBRARIES += vlccore
 
 include $(BUILD_SHARED_LIBRARY)

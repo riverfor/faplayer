@@ -21,6 +21,7 @@ LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
+    $(EXTROOT)/pixman/pixman \
     $(DEPROOT)/android-4/include \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -57,6 +58,7 @@ LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
+    $(EXTROOT)/pixman/pixman \
     $(DEPROOT)/android-5/include \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -93,6 +95,7 @@ LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
+    $(EXTROOT)/pixman/pixman \
     $(DEPROOT)/android-8/include \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -129,6 +132,7 @@ LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
+    $(EXTROOT)/pixman/pixman \
     $(DEPROOT)/android-9/include \
     $(VLCROOT)/compat \
     $(VLCROOT) \

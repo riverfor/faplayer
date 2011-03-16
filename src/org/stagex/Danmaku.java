@@ -108,6 +108,8 @@ public class Danmaku extends Application {
 	public void onCreate() {
 		super.onCreate();
 
+		System.setProperty("java.net.preferIPv6Addresses", "false");
+
 		initialize();
 
 	}

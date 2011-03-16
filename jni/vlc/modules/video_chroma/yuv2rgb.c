@@ -7,7 +7,7 @@
 #include <vlc_plugin.h>
 #include <vlc_filter.h>
 
-#include <yuv2rgb.h>
+#include "yuv2rgb.h"
 
 static int Activate(vlc_object_t *);
 static void Deactivate(vlc_object_t *);
@@ -53,10 +53,14 @@ static int Activate(vlc_object_t *p_this) {
 static void Deactivate( vlc_object_t *p_this ) {
 }
 
+static mtime_t total = 0;
+static int count = 0;
+
 static picture_t *yuv420_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
     int width, height;
     picture_t *p_dst;
 
+    mtime_t bgn = mdate();
     if (!p_pic)
         return NULL;
 
@@ -90,6 +94,10 @@ static picture_t *yuv420_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
 
     picture_CopyProperties(p_dst, p_pic);
     picture_Release(p_pic);
+    mtime_t end = mdate();
+    total += (end - bgn);
+    count += 1;
+    msg_Dbg(VLC_OBJECT(p_filter), "%s takes %lld us, average %lld", __func__, end - bgn, total / count);
 
     return p_dst;
 }

@@ -176,13 +176,17 @@ LOCAL_SRC_FILES := \
     src/video_output/vout_wrapper.c \
     src/video_output/window.c
 
-LOCAL_LDLIBS += -ldl -llog
+LOCAL_LDLIBS += -ldl -llog -lz
 
 LOCAL_STATIC_LIBRARIES += compat pthread-compat
 
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_STATIC_LIBRARIES += arm_neon
+endif
+
 # please try to use the latest NDK
-# http://code.google.c \om/p/android/issues/detail?id=9439
-LOCAL_WHOLE_STATIC_LIBRARIES += iconv charset freetype ass
+# http://code.google.com/p/android/issues/detail?id=9439
+LOCAL_WHOLE_STATIC_LIBRARIES += iconv charset freetype ass ffmpeg pixman
 
 include $(BUILD_SHARED_LIBRARY)
 

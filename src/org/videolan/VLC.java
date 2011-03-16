@@ -8,7 +8,6 @@ public class VLC {
 
 	static {
 		System.loadLibrary("vlccore");
-		System.loadLibrary("ffmpeg");
 	}
 
 	private static VLC mInstance = null;

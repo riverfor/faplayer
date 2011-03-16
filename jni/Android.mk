@@ -12,8 +12,8 @@ COMMON_OPT_CFLAGS := -march=armv6j -mtune=arm1136j-s -msoft-float
 COMMON_OPT_CPPFLAGS := -march=armv6j -mtune=arm1136j-s -msoft-float
 COMMON_OPT_LDFLAGS := 
 else
-COMMON_OPT_CFLAGS := -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -mvectorize-with-neon-quad
-COMMON_OPT_CPPFLAGS := -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -mvectorize-with-neon-quad
+COMMON_OPT_CFLAGS := -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon
+COMMON_OPT_CPPFLAGS := -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon
 COMMON_OPT_LDFLAGS := -Wl,--fix-cortex-a8
 endif
 
