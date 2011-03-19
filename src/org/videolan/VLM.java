@@ -36,9 +36,36 @@ public class VLM {
 			return;
 		// TODO: quote
 		String[] temp = line.split("\\s+");
-		if (temp.length != 3)
+		if (temp.length != 3) {
+			Log.d("faplayer", String.format("unable to process: \"%s\"", line));
 			return;
-		mCallbackHandler.onStateChange(temp[0], temp[1], temp[2]);
+		}
+		String name = temp[0];
+		String key = temp[1];
+		String value = temp[2];
+		if (name.compareTo(VLI.MODULE_NAME_INPUT) == 0) {
+			if (key.compareTo(VLI.MODULE_INPUT_KEY_POSITION) == 0) {
+				long val = Long.parseLong(value);
+				mCallbackHandler.onInputPositionChange(val);
+			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_STATE) == 0) {
+				int val = Integer.parseInt(value);
+				mCallbackHandler.onInputStateChange(val);
+			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_LENGTH) == 0) {
+				long val = Long.parseLong(value);
+				mCallbackHandler.onInputLengthChange(val);
+			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_CAN_PAUSE) == 0) {
+				boolean val = Integer.parseInt(value) > 0;
+				mCallbackHandler.onInputCanPauseChange(val);
+			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_CAN_REWIND) == 0) {
+				boolean val = Integer.parseInt(value) > 0;
+				mCallbackHandler.onInputCanRewindChange(val);
+			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_CAN_SEEK) == 0) {
+				boolean val = Integer.parseInt(value) > 0;
+				mCallbackHandler.onInputCanSeekChange(val);
+			}
+		} else {
+			mCallbackHandler.onVlcEvent(name, key, value);
+		}
 	}
 
 	protected boolean wantRead() {
@@ -228,6 +255,12 @@ public class VLM {
 	public void play() {
 		String line;
 		line = String.format("play");
+		writeBytes(line);
+	}
+
+	public void seek(long position) {
+		String line;
+		line = String.format("seek %d", position);
 		writeBytes(line);
 	}
 

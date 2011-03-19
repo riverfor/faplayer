@@ -494,17 +494,25 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         return NULL;
     }
 
-    /* A good idea could be to decode all I pictures and see for the other */
     bool b_better_to_skip = p_sys->i_decode_time_last > p_sys->i_decode_time_average;
     if ( b_better_to_skip )
     {
         p_context->skip_idct = AVDISCARD_NONREF;
         p_context->skip_frame = AVDISCARD_NONREF;
-        p_context->skip_loop_filter = AVDISCARD_NONREF;
     }
-    else if( !p_dec->b_pace_control &&
+    else {
+        p_context->skip_idct = p_sys->i_skip_idct;
+        p_context->skip_frame = p_sys->i_skip_frame;
+    }
+    if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
+        b_drawpicture = 1;
+    else
+        b_drawpicture = 0;
+#if 0
+    /* A good idea could be to decode all I pictures and see for the other */
+    if( !p_dec->b_pace_control &&
         p_sys->b_hurry_up &&
-        (p_sys->i_late_frames > 0) )
+        (p_sys->i_late_frames > 4) )
     {
         b_drawpicture = 0;
         if( p_sys->i_late_frames < 12 )
@@ -531,7 +539,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         else
             b_drawpicture = 0;
     }
-
+#endif
     if( p_context->width <= 0 || p_context->height <= 0 )
     {
         if( p_sys->b_hurry_up )

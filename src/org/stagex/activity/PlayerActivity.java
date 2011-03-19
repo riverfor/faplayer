@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 public class PlayerActivity extends Activity implements VLI {
@@ -28,10 +29,7 @@ public class PlayerActivity extends Activity implements VLI {
 	private SeekBar mSeekBar;
 	private TextView mTextViewLength;
 	private ImageButton mImageButtonPrev;
-	private ImageButton mImageButtonBackward;
-	private ImageButton mImageButtonStop;
 	private ImageButton mImageButtonPlay;
-	private ImageButton mImageButtonForward;
 	private ImageButton mImageButtonNext;
 
 	private SurfaceHolder mSurfaceHolder;
@@ -43,8 +41,12 @@ public class PlayerActivity extends Activity implements VLI {
 	private int mCurrentTime = -1;
 	private int mCurrentLength = -1;
 
-	private int mCanSeek = -1;
 	private int mCanPause = -1;
+	@SuppressWarnings("unused")
+	private int mCanRewind = -1;
+	private int mCanSeek = -1;
+
+	private int mAudioChannelCount = -1;
 
 	private int mDisplayWidth = -1;
 	private int mDisplayHeight = -1;
@@ -55,15 +57,17 @@ public class PlayerActivity extends Activity implements VLI {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case VLI.EVENT_SURFACE_CREATED: {
+				/* this is hopefully called only once */
 				Surface surface = (Surface) msg.obj;
 				VLC.attachVideoOutput(surface);
 				if (mPlayList != null && mCurrentIndex >= 0
 						&& mCurrentIndex < mPlayList.size()) {
-					VLM.getInstance().open("file://" + mPlayList.get(mCurrentIndex));
+					VLM.getInstance().open(mPlayList.get(mCurrentIndex));
 				}
 				break;
 			}
 			case VLI.EVENT_SURFACE_CHANGED: {
+				/* this is hopefully called only once */
 				Surface surface = (Surface) msg.obj;
 				VLC.attachVideoOutput(surface);
 				mDisplayWidth = msg.arg1;
@@ -102,7 +106,7 @@ public class PlayerActivity extends Activity implements VLI {
 				break;
 			}
 			case VLI.EVENT_INPUT_POSITION: {
-				int val = msg.arg1;
+				int val = msg.arg1 / 10;
 				if (val != mCurrentTime) {
 					int hour = val / 3600;
 					val -= hour * 3600;
@@ -120,7 +124,7 @@ public class PlayerActivity extends Activity implements VLI {
 				break;
 			}
 			case VLI.EVENT_INPUT_LENGTH: {
-				int val = msg.arg1;
+				int val = msg.arg1 / 10;
 				int hour = val / 3600;
 				val -= hour * 3600;
 				int minute = val / 60;
@@ -135,10 +139,32 @@ public class PlayerActivity extends Activity implements VLI {
 				}
 				break;
 			}
+			case VLI.EVENT_INPUT_AOUT: {
+				mAudioChannelCount = msg.arg1;
+				break;
+			}
 			case VLI.EVENT_INPUT_VOUT: {
 				mVideoWidth = msg.arg1;
 				mVideoHeight = msg.arg2;
 				break;
+			}
+			case VLI.EVENT_INPUT_MISC: {
+				switch (msg.arg1) {
+				case VLI.EVENT_INPUT_MISC_CAN_PAUSE: {
+					mCanPause = msg.arg2;
+					break;
+				}
+				case VLI.EVENT_INPUT_MISC_CAN_REWIND: {
+					mCanRewind = msg.arg2;
+					break;
+				}
+				case VLI.EVENT_INPUT_MISC_CAN_SEEK: {
+					mCanSeek = msg.arg2;
+					break;
+				}
+				default:
+					break;
+				}
 			}
 			default:
 				break;
@@ -184,6 +210,25 @@ public class PlayerActivity extends Activity implements VLI {
 		});
 		mTextViewTime = (TextView) findViewById(R.id.time);
 		mSeekBar = (SeekBar) findViewById(R.id.seekbar);
+		mSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				if (mCanSeek > 0) {
+					long position = seekBar.getProgress() * 1000 * 100;
+					VLM.getInstance().seek(position);
+				}
+			}
+		});
 		mTextViewLength = (TextView) findViewById(R.id.length);
 		mImageButtonPrev = (ImageButton) findViewById(R.id.prev);
 		mImageButtonPrev.setOnClickListener(new OnClickListener() {
@@ -194,23 +239,15 @@ public class PlayerActivity extends Activity implements VLI {
 					mCurrentIndex--;
 					if (mCurrentIndex < 0)
 						mCurrentIndex = 0;
-					VLM.getInstance().open("file://" + mPlayList.get(mCurrentIndex));
+					VLM.getInstance().open(mPlayList.get(mCurrentIndex));
 				}
-			}
-		});
-		mImageButtonBackward = (ImageButton) findViewById(R.id.backward);
-		mImageButtonStop = (ImageButton) findViewById(R.id.stop);
-		mImageButtonStop.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				VLM.getInstance().stop();
 			}
 		});
 		mImageButtonPlay = (ImageButton) findViewById(R.id.play);
 		mImageButtonPlay.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (mCanPause == 1) {
+				if (mCanPause > 0) {
 					if (mCurrentState == VLI.EVENT_INPUT_STATE_PLAY)
 						VLM.getInstance().pause();
 					else if (mCurrentState == VLI.EVENT_INPUT_STATE_PAUSE)
@@ -218,7 +255,6 @@ public class PlayerActivity extends Activity implements VLI {
 				}
 			}
 		});
-		mImageButtonForward = (ImageButton) findViewById(R.id.forward);
 		mImageButtonNext = (ImageButton) findViewById(R.id.next);
 		mImageButtonNext.setOnClickListener(new OnClickListener() {
 			@Override
@@ -228,7 +264,7 @@ public class PlayerActivity extends Activity implements VLI {
 					mCurrentIndex++;
 					if (mCurrentIndex >= mPlayList.size())
 						mCurrentIndex %= mPlayList.size();
-					VLM.getInstance().open("file://" + mPlayList.get(mCurrentIndex));
+					VLM.getInstance().open(mPlayList.get(mCurrentIndex));
 				}
 			}
 		});
@@ -264,42 +300,61 @@ public class PlayerActivity extends Activity implements VLI {
 
 	}
 
-	public void onStateChange(final String module, final String name,
-			final String value) {
-		if (module.compareTo("input") == 0) {
-			if (name.compareTo("time") == 0) {
-				Message msg = new Message();
-				msg.what = VLI.EVENT_INPUT_POSITION;
-				msg.arg1 = Integer.parseInt(value);
-				mEventHandler.sendMessage(msg);
-			} else if (name.compareTo("state") == 0) {
-				Message msg = new Message();
-				msg.what = VLI.EVENT_INPUT_STATE;
-				msg.arg1 = Integer.parseInt(value);
-				mEventHandler.sendMessage(msg);
-			} else if (name.compareTo("length") == 0) {
-				Message msg = new Message();
-				msg.what = VLI.EVENT_INPUT_LENGTH;
-				msg.arg1 = Integer.parseInt(value);
-				mEventHandler.sendMessage(msg);
-			} else if (name.compareTo("can-seek") == 0) {
-				mCanSeek = Integer.parseInt(value);
-			} else if (name.compareTo("can-pause") == 0) {
-				mCanPause = Integer.parseInt(value);
-			}
-		} else if (module.compareTo("video") == 0) {
-			if (name.compareTo("size") == 0) {
-				String[] temp = value.split("x");
-				if (temp.length == 2) {
-					int width = Integer.parseInt(temp[0]);
-					int height = Integer.parseInt(temp[1]);
-					Message msg = new Message();
-					msg.what = VLI.EVENT_INPUT_VOUT;
-					msg.arg1 = width;
-					msg.arg2 = height;
-					mEventHandler.sendMessage(msg);
-				}
-			}
-		}
+	@Override
+	public void onInputCanPauseChange(boolean value) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_INPUT_MISC;
+		msg.arg1 = VLI.EVENT_INPUT_MISC_CAN_PAUSE;
+		msg.arg2 = value ? 1 : 0;
+		mEventHandler.sendMessage(msg);
 	}
+
+	@Override
+	public void onInputCanRewindChange(boolean value) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_INPUT_MISC;
+		msg.arg1 = VLI.EVENT_INPUT_MISC_CAN_REWIND;
+		msg.arg2 = value ? 1 : 0;
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onInputCanSeekChange(boolean value) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_INPUT_MISC;
+		msg.arg1 = VLI.EVENT_INPUT_MISC_CAN_SEEK;
+		msg.arg2 = value ? 1 : 0;
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onInputLengthChange(long length) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_INPUT_LENGTH;
+		msg.arg1 = (int) (length / 1000 / 100);
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onInputPositionChange(long position) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_INPUT_POSITION;
+		msg.arg1 = (int) (position / 1000 / 100);
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onInputStateChange(int state) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_INPUT_STATE;
+		msg.arg1 = state;
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onVlcEvent(String name, String key, String value) {
+		Log.d("faplayer", String.format(
+				"unable to process: \"%s\" \"%s\" \"%s\"", name, key, value));
+	}
+
 }

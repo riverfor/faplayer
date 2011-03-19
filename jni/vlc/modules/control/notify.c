@@ -9,19 +9,14 @@
 #include <errno.h>
 #include <signal.h>
 #include <assert.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <poll.h>
 
 #include <vlc_interface.h>
 #include <vlc_aout.h>
 #include <vlc_vout.h>
 #include <vlc_playlist.h>
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <sys/types.h>
-#ifdef HAVE_POLL
-#include <poll.h>
-#endif
 #include <vlc_network.h>
 
 static int  Activate(vlc_object_t *);
@@ -30,7 +25,7 @@ static void Run(intf_thread_t *);
 
 static void Notify(intf_thread_t *, const char*, ...);
 
-static void ProcessCommand(intf_thread_t *, const char *);
+static void ProcessCommandLine(intf_thread_t *, const char *);
 
 static int InputEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t oldval, vlc_value_t newval, void *p_data);
 
@@ -207,7 +202,7 @@ static void Run(intf_thread_t *p_intf) {
                 if (b_line && strlen(p_sys->p_read_buffer)) {
                     p_sys->i_read_offset = 0;
                     //msg_Dbg(VLC_OBJECT(p_intf), "%s\n", p_sys->p_read_buffer);
-                    ProcessCommand(p_intf, p_sys->p_read_buffer);
+                    ProcessCommandLine(p_intf, p_sys->p_read_buffer);
                 }
                 if(i_len == 0) {
                     net_Close(p_sys->i_socket);
@@ -264,11 +259,11 @@ static void Notify(intf_thread_t *p_intf, const char* psz_format, ...) {
         i_first = sizeof(p_sys->p_write_buffer) - p_sys->i_write_offset - p_sys->i_write_length;
         i_second = (p_sys->i_write_offset + p_sys->i_write_length + i_size) % sizeof(p_sys->p_write_buffer);
         if (i_first >= i_size) {
-            memcpy(p_sys->p_write_buffer + p_sys->i_write_offset + p_sys->i_write_length, psz_message, i_size);
+            vlc_memcpy(p_sys->p_write_buffer + p_sys->i_write_offset + p_sys->i_write_length, psz_message, i_size);
         }
         else {
-            memcpy(p_sys->p_write_buffer + p_sys->i_write_offset + p_sys->i_write_length, psz_message, i_first);
-            memcpy(p_sys->p_write_buffer, psz_message + i_first, i_second);
+            vlc_memcpy(p_sys->p_write_buffer + p_sys->i_write_offset + p_sys->i_write_length, psz_message, i_first);
+            vlc_memcpy(p_sys->p_write_buffer, psz_message + i_first, i_second);
         }
         p_sys->i_write_length += i_size;
     }
@@ -280,7 +275,7 @@ static void Notify(intf_thread_t *p_intf, const char* psz_format, ...) {
     write(p_sys->i_wakeup[1], &p_sys, 1);
 }
 
-static int ParseLineCommand(char *p_string, char*** p_argv) {
+static int ParseCommandLine(char *p_string, char*** p_argv) {
     if (!p_string || !strlen(p_string)) {
         if (p_argv)
             p_argv = NULL;
@@ -341,14 +336,16 @@ static int ParseLineCommand(char *p_string, char*** p_argv) {
     return i_count;
 }
 
-static void ProcessCommand(intf_thread_t *p_intf, const char *p_string) {
+static void ProcessCommandLine(intf_thread_t *p_intf, const char *p_string) {
     intf_sys_t *p_sys = p_intf->p_sys;
     playlist_t *p_playlist = p_sys->p_playlist;
+    input_thread_t *p_input = playlist_CurrentInput(p_playlist);
     char *p_line = strdup(p_string);
     int i_argc;
     char** p_argv = NULL;
 
-    i_argc = ParseLineCommand(p_line, &p_argv);
+    msg_Dbg(VLC_OBJECT(p_intf), "%s", p_line);
+    i_argc = ParseCommandLine(p_line, &p_argv);
     if (i_argc == 0 || !p_argv)
         goto msg;
     if (i_argc == 1) {
@@ -425,7 +422,8 @@ static void ProcessCommand(intf_thread_t *p_intf, const char *p_string) {
             vlc_gc_decref(p_item);
         }
         else if (!strcmp(p_argv[0], "seek")) {
-
+            mtime_t time = (int64_t)(atoll(p_argv[1]));
+            var_SetTime(p_input, "time", time);
         }
         else
             goto msg;
@@ -456,42 +454,31 @@ static int InputEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t old
         if (val.i_int == PLAYING_S) {
             var_Get(p_input, "can-pause", &val);
             Notify(p_intf, "input can-pause %d\n", val.i_int);
+            var_Get(p_input, "can-rewind", &val);
+            Notify(p_intf, "input can-rewind %d\n", val.i_int);
             var_Get(p_input, "can-seek", &val);
             Notify(p_intf, "input can-seek %d\n", val.i_int);
         }
-        break;
-    }
-    case INPUT_EVENT_DEAD: {
-        break;
-    }
-    case INPUT_EVENT_ABORT: {
         break;
     }
     case INPUT_EVENT_POSITION: {
         vlc_value_t val;
 
         var_Get(p_input, "time", &val);
-        Notify(p_intf, "input time %"PRIu64"\n", val.i_time / 1000000);
+        Notify(p_intf, "input position %"PRIu64"\n", val.i_time);
         break;
     }
     case INPUT_EVENT_LENGTH: {
         vlc_value_t val;
 
         var_Get(p_input, "length", &val);
-        Notify(p_intf, "input length %"PRIu64"\n", val.i_time / 1000000);
+        Notify(p_intf, "input length %"PRIu64"\n", val.i_time);
+        break;
+    }
+    case INPUT_EVENT_AOUT: {
         break;
     }
     case INPUT_EVENT_VOUT: {
-        vout_thread_t *p_vout;
-
-        p_vout = input_GetVout(p_input);
-        if (p_vout) {
-            //int width, height;
-
-            //width = p_vout->i_window_width;
-            //height = p_vout->i_window_height;
-            //Notify(p_intf, "video size %dx%d\n", width, height);
-        }
         break;
     }
     default:

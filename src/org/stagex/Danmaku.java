@@ -83,7 +83,7 @@ public class Danmaku extends Application {
 		// start VLC
 		String libd = String.format("%s/lib", root);
 		VLC.setenv("VLC_PLUGIN_PATH", libd, true);
-		String conf = String.format("%s/etc/vlcrc.4", root);
+		String conf = String.format("%s/etc/vlcrc", root);
 		String aout = String.format("aout_android-%d", code);
 		String vout = String.format("vout_android-%d", code);
 		// XXX: --intf, --aout, --vout don't make sense here

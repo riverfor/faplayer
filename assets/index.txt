@@ -1,8 +1,4 @@
-etc/vlcrc.1
-etc/vlcrc.4
-etc/vlcrc.3
-etc/vlcrc.5
-etc/vlcrc.2
+etc/vlcrc
 lib/control/libnotify_plugin.so
 lib/demux/libavformat_plugin.so
 lib/video_output/libvout_android-8_plugin.so

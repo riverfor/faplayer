@@ -32,6 +32,7 @@ public class FileListAdapter extends BaseAdapter implements
 	private ArrayList<String> mTop = new ArrayList<String>();
 	private ArrayList<String> mBottom = new ArrayList<String>();
 	private ArrayList<String> mList = new ArrayList<String>();
+	private String mFilter = "3gp#amv#ape#asf#avi#flac#flv#hlv#mkv#mov#mp3#mp4#mpeg#mpg#rm#rmvb#tta#wav#wma#wmv";
 
 	public FileListAdapter(Context context, String path) {
 		mContext = context;
@@ -116,7 +117,7 @@ public class FileListAdapter extends BaseAdapter implements
 			Intent intent = new Intent(mContext, PlayerActivity.class);
 			ArrayList<String> list = new ArrayList<String>();
 			for (String name : mBottom) {
-				String path = String.format("%s/%s", mCurrentPath, name);
+				String path = String.format("file://%s/%s", mCurrentPath, name);
 				list.add(path);
 			}
 			Bundle bundle = new Bundle();
@@ -154,8 +155,7 @@ public class FileListAdapter extends BaseAdapter implements
 		if (dot < 0 || dot == name.length() - 1)
 			return false;
 		String ext = name.substring(dot + 1).toLowerCase();
-		String list = "3gp#amv#ape#asf#avi#flac#flv#hlv#mkv#mov#mp3#mp4#mpeg#mpg#rm#rmvb#tta#wav#wma#wmv";
-		if (list.indexOf(ext) < 0)
+		if (mFilter.indexOf(ext) < 0)
 			return false;
 		return true;
 	}

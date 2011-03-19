@@ -1,7 +1,5 @@
 package org.videolan;
 
-import org.stagex.helper.SystemUtility;
-
 import android.view.Surface;
 
 public class VLC {
