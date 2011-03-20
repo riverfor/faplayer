@@ -1,0 +1,15 @@
+Now it looks like a player and it plays well(?).
+But there is still a lot of things to be done.
+
+1. Play/Pause button looks strage.
+2. Time(and more) is not updated when click next/prev button(My buggy interface module?).
+3. Solve libass sigmentation fault(Looks like font issue.).
+4. Try to use pixman instead of current scretch2 function for performance(Looks only a little.).
+5. Compare yuv2rgb by theorarm and libswscale performance. (Is there a better one?)
+6. Make it more user friendly.
+7. Implement danmaku player(acfun.cn/bilibili.us/ichiba.cc and more).
+8. Implement crawler for the sites above(How to merge flv/hlv?).
+9. More work on video decode and video output, the goal is drop less and output more.
+10. Take a look at audio filter/mixer/output and see its performance.
+...
+

@@ -6,7 +6,7 @@
     android:layout_gravity="center" >
 
     <SurfaceView
-        android:id="@+id/message"
+        android:id="@+id/player_view_stage"
         android:keepScreenOn="true"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />

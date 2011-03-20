@@ -6,12 +6,10 @@
 
     <include layout="@layout/player_video" />
 
-    <!--<include layout="@layout/player_message" />-->
-
-    <!--<include layout="@layout/player_detail" />-->
+    <include layout="@layout/player_stage" />
 
     <include layout="@layout/player_control" />
 
-    <!--<include layout="@layout/player_extra" />-->
+    <include layout="@layout/player_misc" />
 
 </FrameLayout>

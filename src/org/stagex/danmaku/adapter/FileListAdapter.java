@@ -1,4 +1,4 @@
-package org.stagex.adapter;
+package org.stagex.danmaku.adapter;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.stagex.activity.PlayerActivity;
-import org.stagex.helper.SystemUtility;
-import org.stagex.R;
+import org.stagex.danmaku.activity.PlayerActivity;
+import org.stagex.danmaku.helper.SystemUtility;
+import org.stagex.danmaku.R;
 
 import android.content.Context;
 import android.content.Intent;

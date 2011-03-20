@@ -1,4 +1,4 @@
-package org.videolan;
+package org.stagex.danmaku.wrapper;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

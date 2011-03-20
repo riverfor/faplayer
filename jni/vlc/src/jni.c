@@ -10,8 +10,8 @@
 
 #include <jni.h>
 
-#define CLASS org_videolan_VLC
-#define KLASS "org/videolan/VLC"
+#define CLASS org_stagex_danmaku_wrapper_VLC
+#define KLASS "org/stagex/danmaku/wrapper/VLC"
 
 #define NAME1(CLZ, FUN) Java_##CLZ##_##FUN
 #define NAME2(CLZ, FUN) NAME1(CLZ, FUN)

@@ -1,8 +1,8 @@
-package org.stagex.activity;
+package org.stagex.danmaku.activity;
 
-import org.stagex.adapter.FileListAdapter;
-import org.stagex.helper.SystemUtility;
-import org.stagex.R;
+import org.stagex.danmaku.adapter.FileListAdapter;
+import org.stagex.danmaku.helper.SystemUtility;
+import org.stagex.danmaku.R;
 
 import android.app.Activity;
 import android.os.Bundle;

@@ -1,4 +1,4 @@
-package org.stagex;
+package org.stagex.danmaku;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.stagex.helper.SystemUtility;
-import org.videolan.VLC;
-import org.videolan.VLM;
+import org.stagex.danmaku.helper.SystemUtility;
+import org.stagex.danmaku.wrapper.VLC;
+import org.stagex.danmaku.wrapper.VLM;
 
 import android.app.Application;
 import android.content.res.AssetManager;

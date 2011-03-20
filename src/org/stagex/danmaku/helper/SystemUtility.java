@@ -1,4 +1,4 @@
-package org.stagex.helper;
+package org.stagex.danmaku.helper;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
