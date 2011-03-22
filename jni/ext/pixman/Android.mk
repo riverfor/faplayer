@@ -4,11 +4,15 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_MODULE := pixman
 
 LOCAL_CFLAGS += \
-    -DHAVE_CONFIG_H
+    -DHAVE_CONFIG_H \
+    -DPIXMAN_NO_TLS
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
