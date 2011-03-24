@@ -6,6 +6,9 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_MODULE := float32_mixer_plugin
 
@@ -17,8 +20,8 @@ LOCAL_CFLAGS += \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"float32_mixer\"
 
-LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
+LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
@@ -38,6 +41,9 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_MODULE := trivial_mixer_plugin
 
@@ -49,8 +55,8 @@ LOCAL_CFLAGS += \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"trivial_mixer\"
 
-LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
+LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \

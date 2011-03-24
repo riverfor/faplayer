@@ -12,6 +12,9 @@ include $(CLEAR_VARS)
 # when loading complex pages in the browser
 #
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_SRC_FILES:= \
 	src/base/ftbbox.c \
@@ -42,7 +45,7 @@ LOCAL_CFLAGS += -fPIC -DPIC
 LOCAL_CFLAGS += "-DDARWIN_NO_CARBON"
 LOCAL_CFLAGS += "-DFT2_BUILD_LIBRARY"
 
-LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
+LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 
 # enable the FreeType internal memory debugger in the simulator
 # you need to define the FT2_DEBUG_MEMORY environment variable
@@ -59,8 +62,8 @@ LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
 
 #LOCAL_CFLAGS += -O2
 
-LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
+LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_MODULE:= freetype
 

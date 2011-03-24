@@ -1,22 +1,16 @@
 package org.stagex.danmaku.activity;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.stagex.danmaku.R;
-import org.stagex.danmaku.comment.Comment;
 import org.stagex.danmaku.comment.CommentManager;
-import org.stagex.danmaku.site.CommentParserFactory;
 import org.stagex.danmaku.wrapper.VLC;
 import org.stagex.danmaku.wrapper.VLI;
 import org.stagex.danmaku.wrapper.VLM;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -37,6 +31,9 @@ import android.widget.TextView;
 
 public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 		OnClickListener, OnSeekBarChangeListener {
+
+	private VLC mVLC = VLC.getInstance();
+	private VLM mVLM = VLM.getInstance();
 
 	private Handler mEventHandler;
 
@@ -61,12 +58,13 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 	private SurfaceHolder mSurfaceHolderVideo;
 	private boolean mVideoSurfaceReady = false;
 
-	private Thread mPrepairThread = null;
-	private ReentrantLock mReadyLock = new ReentrantLock();
-	private Condition mReadyCond = mReadyLock.newCondition();
 	private boolean mPrepairDone = false;
 
-	private CommentManager mCommentManager;
+	private ReentrantLock mPrepairLock = new ReentrantLock();
+	private Condition mPrepairCond = mPrepairLock.newCondition();
+	private Thread mPrepairThread = null;
+
+	private CommentManager mCommentManager = CommentManager.getInstance();
 
 	private ArrayList<String> mPlayList = null;
 	private int mCurrentIndex = -1;
@@ -79,13 +77,19 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 	private int mCurrentLength = -1;
 
 	private int mCanPause = -1;
-	private int mCanRewind = -1;
 	private int mCanSeek = -1;
 
-	private int mAudioChannelCount = -1;
+	private int mVideoMode = VLI.VIDEO_MODE_FIT;
 
-	private int mVideoWidth = -1;
-	private int mVideoHeight = -1;
+	private int mVideoOriginalWidth = -1;
+	private int mVideoOriginalHeight = -1;
+	private int mVideoSurfaceWidth = -1;
+	private int mVideoSurfaceHeight = -1;
+	private int mVideoVisibleWidth = -1;
+	private int mVideoVisibleHeight = -1;
+
+	private int mStageSurfaceWidth = -1;
+	private int mStageSurfaceHeight = -1;
 
 	protected void initializeEvents() {
 		mEventHandler = new Handler() {
@@ -95,14 +99,17 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 					int state = msg.arg1;
 					switch (state) {
 					case VLI.INPUT_STATE_PLAY: {
+						mCommentManager.play();
 						mImageButtonPlay.setImageResource(R.drawable.pause);
 						break;
 					}
 					case VLI.INPUT_STATE_PAUSE: {
+						mCommentManager.pause();
 						mImageButtonPlay.setImageResource(R.drawable.play);
 						break;
 					}
 					case VLI.INPUT_STATE_END: {
+						mCommentManager.pause();
 						mImageButtonPlay.setImageResource(R.drawable.play);
 						break;
 					}
@@ -119,7 +126,7 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 					break;
 				}
 				case VLI.EVENT_INPUT_POSITION: {
-					int val = msg.arg1 / 10;
+					int val = msg.arg1 / 1000;
 					if (val != mCurrentTime) {
 						int hour = val / 3600;
 						val -= hour * 3600;
@@ -134,13 +141,10 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 							mSeekBarProgress.setProgress(mCurrentTime);
 						}
 					}
-					if (mCommentManager != null) {
-						mCommentManager.play(val);
-					}
 					break;
 				}
 				case VLI.EVENT_INPUT_LENGTH: {
-					int val = msg.arg1 / 10;
+					int val = msg.arg1 / 1000;
 					int hour = val / 3600;
 					val -= hour * 3600;
 					int minute = val / 60;
@@ -155,23 +159,19 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 					}
 					break;
 				}
+				case VLI.EVENT_INPUT_ES: {
+					break;
+				}
 				case VLI.EVENT_INPUT_AOUT: {
-					mAudioChannelCount = msg.arg1;
 					break;
 				}
 				case VLI.EVENT_INPUT_VOUT: {
-					mVideoWidth = msg.arg1;
-					mVideoHeight = msg.arg2;
 					break;
 				}
 				case VLI.EVENT_INPUT_MISC: {
 					switch (msg.arg1) {
 					case VLI.INPUT_MISC_CAN_PAUSE: {
 						mCanPause = msg.arg2;
-						break;
-					}
-					case VLI.INPUT_MISC_CAN_REWIND: {
-						mCanRewind = msg.arg2;
 						break;
 					}
 					case VLI.INPUT_MISC_CAN_SEEK: {
@@ -181,6 +181,12 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 					default:
 						break;
 					}
+					break;
+				}
+				case VLI.EVENT_VIDEO_SIZE: {
+					mVideoOriginalWidth = msg.arg1;
+					mVideoOriginalHeight = msg.arg2;
+					setVideoMode(mVideoMode);
 					break;
 				}
 				case VLI.EVENT_PLAYER_PREPAIRING_BGN: {
@@ -199,15 +205,22 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 				}
 				case VLI.EVENT_STAGE_SURFACE_CHANGED: {
 					/* this is hopefully called only once */
-					mCommentManager = new CommentManager(msg.arg1, msg.arg2);
-					mReadyLock.lock();
-					mVideoSurfaceReady = true;
-					mReadyCond.signal();
-					mReadyLock.unlock();
+					mStageSurfaceWidth = msg.arg1;
+					mStageSurfaceHeight = msg.arg2;
+					mCommentManager.attachSurface((Surface) msg.obj,
+							mStageSurfaceWidth, mStageSurfaceHeight);
+					try {
+						mPrepairLock.lock();
+						mStageSurfaceReady = true;
+						mPrepairCond.signal();
+					} finally {
+						mPrepairLock.unlock();
+					}
 					break;
 				}
 				case VLI.EVENT_STAGE_SURFACE_DESTROYED: {
 					/* this is hopefully called only once */
+					mCommentManager.detachSurface();
 					break;
 				}
 				case VLI.EVENT_VIDEO_SURFACE_CREATED: {
@@ -216,16 +229,22 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 				}
 				case VLI.EVENT_VIDEO_SURFACE_CHANGED: {
 					/* this is hopefully called only once */
-					VLC.attachVideoOutput((Surface) msg.obj);
-					mReadyLock.lock();
-					mVideoSurfaceReady = true;
-					mReadyCond.signal();
-					mReadyLock.unlock();
+					mVideoSurfaceWidth = msg.arg1;
+					mVideoSurfaceHeight = msg.arg2;
+					mVLC.attachSurface((Surface) msg.obj, mVideoSurfaceWidth,
+							mVideoSurfaceHeight);
+					try {
+						mPrepairLock.lock();
+						mVideoSurfaceReady = true;
+						mPrepairCond.signal();
+					} finally {
+						mPrepairLock.unlock();
+					}
 					break;
 				}
 				case VLI.EVENT_VIDEO_SURFACE_DESTROYED: {
 					/* this is hopefully called only once */
-					VLC.detachVideoOutput();
+					mVLC.detachSurface();
 					break;
 				}
 				default:
@@ -267,7 +286,7 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 		});
 		mSurfaceViewVideo.setOnTouchListener(this);
 
-		mSurfaceViewStage = (SurfaceView) findViewById(R.id.player_view_stage);
+		mSurfaceViewStage = (SurfaceView) findViewById(R.id.player_surface_stage);
 		mSurfaceHolderStage = mSurfaceViewStage.getHolder();
 		mSurfaceHolderStage.addCallback(new SurfaceHolder.Callback() {
 			@Override
@@ -315,7 +334,41 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 
 		mLinearLayoutControlBar = (LinearLayout) findViewById(R.id.player_control_bar);
 
-		mProgressBarPrepairing = (ProgressBar) findViewById(R.id.player_loading);
+		mProgressBarPrepairing = (ProgressBar) findViewById(R.id.player_prepairing);
+	}
+
+	protected void setVideoMode(int mode) {
+		if (mode < 0)
+			mode = 0;
+		if (mode > 2)
+			mode = 2;
+		switch (mode) {
+		case VLI.VIDEO_MODE_NONE: {
+			mVideoVisibleWidth = (mVideoOriginalWidth > mVideoSurfaceWidth) ? mVideoSurfaceWidth
+					: mVideoOriginalWidth;
+			mVideoVisibleHeight = (mVideoOriginalHeight > mVideoSurfaceHeight) ? mVideoSurfaceHeight
+					: mVideoOriginalHeight;
+			break;
+		}
+		case VLI.VIDEO_MODE_FIT: {
+			int x = mVideoSurfaceWidth << 8 / mVideoOriginalWidth;
+			int y = mVideoSurfaceHeight << 8 / mVideoOriginalHeight;
+			int scale = (x < y ? x : y);
+			mVideoVisibleWidth = (scale * mVideoOriginalWidth) >> 8;
+			mVideoVisibleHeight = (scale * mVideoOriginalHeight) >> 8;
+			break;
+		}
+		case VLI.VIDEO_MODE_FILL: {
+			mVideoVisibleWidth = mVideoOriginalWidth;
+			mVideoVisibleHeight = mVideoOriginalHeight;
+			break;
+		}
+		default:
+			break;
+		}
+		mVideoMode = mode;
+		mCommentManager.setStageSize(mVideoVisibleWidth, mVideoVisibleHeight);
+		mVLM.setVideoSize(mVideoVisibleWidth, mVideoVisibleHeight);
 	}
 
 	protected void setMediaSource(String uri) {
@@ -327,26 +380,22 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 			@Override
 			public void run() {
 				mEventHandler.sendEmptyMessage(VLI.EVENT_PLAYER_PREPAIRING_BGN);
-				mReadyLock.lock();
+				// wait until the surface is ready
+				mPrepairLock.lock();
 				try {
 					try {
 						while (mStageSurfaceReady
 								&& mVideoSurfaceReady == false) {
-							mReadyCond.await();
+							mPrepairCond.await();
 						}
 					} catch (InterruptedException e) {
 					}
 				} finally {
-					mReadyLock.unlock();
+					mPrepairLock.unlock();
 				}
-				ArrayList<Comment> yeah = CommentParserFactory.parse(mUriStage);
-				if (yeah != null) {
-					mCommentManager.set(yeah);
-				}
+				mCommentManager.open(mUriStage);
+				mVLM.open(mUriVideo);
 				mEventHandler.sendEmptyMessage(VLI.EVENT_PLAYER_PREPAIRING_END);
-
-				VLM.getInstance().open(mUriVideo);
-
 			}
 		}));
 		mPrepairThread.start();
@@ -357,15 +406,6 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 		Message msg = new Message();
 		msg.what = VLI.EVENT_INPUT_MISC;
 		msg.arg1 = VLI.INPUT_MISC_CAN_PAUSE;
-		msg.arg2 = value ? 1 : 0;
-		mEventHandler.sendMessage(msg);
-	}
-
-	@Override
-	public void onInputCanRewindChange(boolean value) {
-		Message msg = new Message();
-		msg.what = VLI.EVENT_INPUT_MISC;
-		msg.arg1 = VLI.INPUT_MISC_CAN_REWIND;
 		msg.arg2 = value ? 1 : 0;
 		mEventHandler.sendMessage(msg);
 	}
@@ -383,7 +423,7 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 	public void onInputLengthChange(long length) {
 		Message msg = new Message();
 		msg.what = VLI.EVENT_INPUT_LENGTH;
-		msg.arg1 = (int) (length / 1000 / 100);
+		msg.arg1 = (int) (length / 1000);
 		mEventHandler.sendMessage(msg);
 	}
 
@@ -391,7 +431,7 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 	public void onInputPositionChange(long position) {
 		Message msg = new Message();
 		msg.what = VLI.EVENT_INPUT_POSITION;
-		msg.arg1 = (int) (position / 1000 / 100);
+		msg.arg1 = (int) (position / 1000);
 		mEventHandler.sendMessage(msg);
 	}
 
@@ -404,6 +444,25 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 	}
 
 	@Override
+	public void onAudioStreamChange(int index, int count) {
+
+	}
+
+	@Override
+	public void onSubtitleStreamChange(int index, int count) {
+
+	}
+
+	@Override
+	public void onVideoSizeChange(int width, int height) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_VIDEO_SIZE;
+		msg.arg1 = width;
+		msg.arg2 = height;
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
 	public void onVlcEvent(String name, String key, String value) {
 		Log.d("faplayer", String.format(
 				"unable to process: \"%s\" \"%s\" \"%s\"", name, key, value));
@@ -412,47 +471,40 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		initializeEvents();
-
 		setContentView(R.layout.player);
-
 		initializeControls();
-
-		VLM.getInstance().setCallbackHandler(this);
-
+		mVLM.setCallbackHandler(this);
 		Bundle bundle = getIntent().getExtras().getBundle("playlist");
 		mPlayList = bundle.getStringArrayList("list");
 		mCurrentIndex = bundle.getInt("index");
 
 		if (mPlayList != null && mCurrentIndex >= 0
 				&& mCurrentIndex < mPlayList.size()) {
-			setMediaSource(mPlayList.get(mCurrentIndex));
+			String uri = mPlayList.get(mCurrentIndex);
+			setMediaSource(uri);
 		}
-
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-
-		VLM.getInstance().close();
-
+		mCommentManager.close();
+		mVLM.close();
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
-
-		VLM.getInstance().play();
+		mCommentManager.play();
+		mVLM.play();
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-
-		VLM.getInstance().pause();
-
+		mCommentManager.pause();
+		mVLM.pause();
 	}
 
 	@Override
@@ -486,16 +538,17 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 				mCurrentIndex--;
 				if (mCurrentIndex < 0)
 					mCurrentIndex = 0;
-				setMediaSource(mPlayList.get(mCurrentIndex));
+				String uri = mPlayList.get(mCurrentIndex);
+				setMediaSource(uri);
 			}
 			break;
 		}
 		case R.id.player_button_play: {
 			if (mCanPause > 0) {
 				if (mCurrentState == VLI.INPUT_STATE_PLAY)
-					VLM.getInstance().pause();
+					mVLM.pause();
 				else if (mCurrentState == VLI.INPUT_STATE_PAUSE)
-					VLM.getInstance().play();
+					mVLM.play();
 			}
 			break;
 		}
@@ -505,7 +558,8 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 				mCurrentIndex++;
 				if (mCurrentIndex >= mPlayList.size())
 					mCurrentIndex %= mPlayList.size();
-				setMediaSource(mPlayList.get(mCurrentIndex));
+				String uri = mPlayList.get(mCurrentIndex);
+				setMediaSource(uri);
 			}
 			break;
 		}
@@ -532,8 +586,9 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 		switch (id) {
 		case R.id.player_seekbar_progress: {
 			if (mCanSeek > 0) {
-				long position = seekBar.getProgress() * 1000 * 100;
-				VLM.getInstance().seek(position);
+				long position = seekBar.getProgress();
+				mCommentManager.seek(position);
+				mVLM.seek(position * 1000);
 			}
 			break;
 		}

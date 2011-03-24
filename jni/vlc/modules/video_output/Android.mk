@@ -6,6 +6,9 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_MODULE := vout_android-4_plugin
 
@@ -17,8 +20,8 @@ LOCAL_CFLAGS += \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"vout_android-4\"
 
-LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
+LOCAL_CPPFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/pixman/pixman \
@@ -43,6 +46,9 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_MODULE := vout_android-5_plugin
 
@@ -54,8 +60,8 @@ LOCAL_CFLAGS += \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"vout_android-5\"
 
-LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
+LOCAL_CPPFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/pixman/pixman \
@@ -80,6 +86,9 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_MODULE := vout_android-8_plugin
 
@@ -91,8 +100,8 @@ LOCAL_CFLAGS += \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"vout_android-8\"
 
-LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
+LOCAL_CPPFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/pixman/pixman \
@@ -117,6 +126,9 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_MODULE := vout_android-9_plugin
 
@@ -128,8 +140,8 @@ LOCAL_CFLAGS += \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"vout_android-9\"
 
-LOCAL_CPPFLAGS += $(COMMON_OPT_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
+LOCAL_CPPFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/pixman/pixman \

@@ -6,7 +6,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
 
-    <ProgressBar android:id="@+id/player_loading"
+    <ProgressBar android:id="@+id/player_prepairing"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

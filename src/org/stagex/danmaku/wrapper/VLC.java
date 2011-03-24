@@ -16,20 +16,20 @@ public class VLC {
 
 	protected VLC() {
 	}
-	
+
 	public static native int setenv(String key, String val, boolean overwrite);
-
-	private native void run(String[] args);
-
-	public static native void attachVideoOutput(Surface surface);
-
-	public static native void detachVideoOutput();
 
 	public static VLC getInstance() {
 		if (mInstance == null)
 			mInstance = new VLC();
 		return mInstance;
 	}
+
+	private native void run(String[] args);
+
+	public native void attachSurface(Surface surface, int width, int height);
+
+	public native void detachSurface();
 
 	public void create(final String[] args) {
 		if (mVLCMain != null && mVLCMain.isAlive())
@@ -44,6 +44,6 @@ public class VLC {
 	}
 
 	public void destroy() {
-		// ...
+
 	}
 }

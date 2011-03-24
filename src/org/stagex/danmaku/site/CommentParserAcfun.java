@@ -1,18 +1,12 @@
 package org.stagex.danmaku.site;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 import org.stagex.danmaku.comment.Comment;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
-
-import android.util.Log;
 
 public class CommentParserAcfun extends CommentParser {
 
@@ -72,7 +66,6 @@ public class CommentParserAcfun extends CommentParser {
 					if (currentDepth == 1) {
 						Comment comment = new Comment(commentTime, commentType,
 								commentSize, commentColor, commentText);
-						Log.d("faplayer", comment.toString());
 						result.add(comment);
 					}
 					continue;

@@ -44,24 +44,30 @@ public class VLM {
 		String key = temp[1];
 		String value = temp[2];
 		if (name.compareTo(VLI.MODULE_NAME_INPUT) == 0) {
-			if (key.compareTo(VLI.MODULE_INPUT_KEY_POSITION) == 0) {
+			if (key.compareTo(VLI.MODULE_INPUT_POSITION) == 0) {
 				long val = Long.parseLong(value);
 				mCallbackHandler.onInputPositionChange(val);
-			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_STATE) == 0) {
+			} else if (key.compareTo(VLI.MODULE_INPUT_STATE) == 0) {
 				int val = Integer.parseInt(value);
 				mCallbackHandler.onInputStateChange(val);
-			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_LENGTH) == 0) {
+			} else if (key.compareTo(VLI.MODULE_INPUT_LENGTH) == 0) {
 				long val = Long.parseLong(value);
 				mCallbackHandler.onInputLengthChange(val);
-			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_CAN_PAUSE) == 0) {
+			} else if (key.compareTo(VLI.MODULE_INPUT_CAN_PAUSE) == 0) {
 				boolean val = Integer.parseInt(value) > 0;
 				mCallbackHandler.onInputCanPauseChange(val);
-			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_CAN_REWIND) == 0) {
-				boolean val = Integer.parseInt(value) > 0;
-				mCallbackHandler.onInputCanRewindChange(val);
-			} else if (key.compareTo(VLI.MODULE_INPUT_KEY_CAN_SEEK) == 0) {
+			} else if (key.compareTo(VLI.MODULE_INPUT_CAN_SEEK) == 0) {
 				boolean val = Integer.parseInt(value) > 0;
 				mCallbackHandler.onInputCanSeekChange(val);
+			}
+		} else if (name.compareTo("video") == 0) {
+			if (key.compareTo("size") == 0) {
+				String[] vals = value.split("x");
+				if (vals.length == 2) {
+					int width = Integer.parseInt(vals[0]);
+					int height = Integer.parseInt(vals[1]);
+					mCallbackHandler.onVideoSizeChange(width, height);
+				}
 			}
 		} else {
 			mCallbackHandler.onVlcEvent(name, key, value);
@@ -110,7 +116,6 @@ public class VLM {
 					} catch (UnsupportedEncodingException e) {
 					}
 					if (line != null) {
-						// Log.d("faplayer-java", line);
 						triggerCallback(line);
 					}
 					mLineOffset += mLineLength;
@@ -238,6 +243,10 @@ public class VLM {
 
 	public void setCallbackHandler(VLI handler) {
 		mCallbackHandler = handler;
+	}
+
+	public void setVideoSize(int width, int height) {
+
 	}
 
 	public void open(String file) {

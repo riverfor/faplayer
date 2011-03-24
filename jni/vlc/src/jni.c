@@ -56,7 +56,7 @@ JNIEXPORT int JNICALL NAME(setenv)(JNIEnv *env, jclass klz, jstring key, jstring
     return err;
 }
 
-JNIEXPORT void JNICALL NAME(attachVideoOutput)(JNIEnv *env, jclass klz, jobject surf) {
+JNIEXPORT void JNICALL NAME(attachSurface)(JNIEnv *env, jobject thiz, jobject surf, jint width, jint height) {
     jclass clz;
     jfieldID fid;
     jthrowable exp;
@@ -78,7 +78,7 @@ JNIEXPORT void JNICALL NAME(attachVideoOutput)(JNIEnv *env, jclass klz, jobject 
     vlc_mutex_unlock(&vout_android_lock);
 }
 
-JNIEXPORT void JNICALL NAME(detachVideoOutput)(JNIEnv *env, jclass klz) {
+JNIEXPORT void JNICALL NAME(detachSurface)(JNIEnv *env, jobject thiz) {
     vlc_mutex_lock(&vout_android_lock);
     //(*env)->DeleteGlobalRef(env, vout_android_ref);
     vout_android_surf = NULL;

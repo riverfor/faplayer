@@ -6,9 +6,12 @@ public interface VLI {
 	public final static int EVENT_INPUT_DEAD = 1;
 	public final static int EVENT_INPUT_POSITION = 4;
 	public final static int EVENT_INPUT_LENGTH = 5;
+	public final static int EVENT_INPUT_ES = 9;
 	public final static int EVENT_INPUT_AOUT = 22;
 	public final static int EVENT_INPUT_VOUT = 23;
 	public final static int EVENT_INPUT_MISC = 99;
+	
+	public final static int EVENT_VIDEO_SIZE = 100;
 
 	public final static int EVENT_STAGE_SURFACE_CREATED = 2001;
 	public final static int EVENT_STAGE_SURFACE_CHANGED = 2002;
@@ -29,32 +32,39 @@ public interface VLI {
 	public final static int INPUT_STATE_ERROR = 5;
 
 	public final static int INPUT_MISC_CAN_PAUSE = 0;
-	public final static int INPUT_MISC_CAN_REWIND = 1;
 	public final static int INPUT_MISC_CAN_SEEK = 2;
 
-	public final static int VOUT_MODE_NONE = 0;
-	public final static int VOUT_MODE_FIT = 1;
-	public final static int VOUT_MODE_FILL = 2;
-
 	public final static String MODULE_NAME_INPUT = "input";
-	public final static String MODULE_INPUT_KEY_CAN_PAUSE = "can-pause";
-	public final static String MODULE_INPUT_KEY_CAN_REWIND = "can-rewind";
-	public final static String MODULE_INPUT_KEY_CAN_SEEK = "can-seek";
-	public final static String MODULE_INPUT_KEY_LENGTH = "length";
-	public final static String MODULE_INPUT_KEY_POSITION = "position";
-	public final static String MODULE_INPUT_KEY_STATE = "state";
+	public final static String MODULE_INPUT_CAN_PAUSE = "can-pause";
+	public final static String MODULE_INPUT_CAN_SEEK = "can-seek";
+	public final static String MODULE_INPUT_LENGTH = "length";
+	public final static String MODULE_INPUT_POSITION = "position";
+	public final static String MODULE_INPUT_STATE = "state";
+	public final static String MODULE_INPUT_AUDIO_ES = "audio-es";
+	public final static String MODULE_INPUT_SPU_ES = "spu-es";
+	public final static String MODULE_INPUT_VIDEO_ES = "video-es";
+	public final static String MODULE_NAME_VIDEO = "video";
+	public final static String MODULE_VIDEO_SIZE = "size";
+
+	public final static int VIDEO_MODE_NONE = 0;
+	public final static int VIDEO_MODE_FIT = 1;
+	public final static int VIDEO_MODE_FILL = 2;
 
 	public void onInputCanPauseChange(boolean value);
-
-	public void onInputCanRewindChange(boolean value);
 
 	public void onInputCanSeekChange(boolean value);
 
 	public void onInputLengthChange(long value);
 
+	public void onInputPositionChange(long value);
+
 	public void onInputStateChange(int value);
 
-	public void onInputPositionChange(long value);
+	public void onAudioStreamChange(int index, int count);
+
+	public void onSubtitleStreamChange(int index, int count);
+	
+	public void onVideoSizeChange(int width, int height);
 
 	public void onVlcEvent(String name, String key, String value);
 

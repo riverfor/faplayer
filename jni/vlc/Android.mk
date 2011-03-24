@@ -4,6 +4,9 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
 
 LOCAL_MODULE := vlccore
 
@@ -16,15 +19,15 @@ LOCAL_CFLAGS += \
     -DNDEBUG \
     -DMODULE_STRING=\"main\" \
     -D__LIBVLC__ \
-    -DPACKAGENAME=\"org.stagex\" \
+    -DPACKAGENAME=\"org.stagex.danmaku\" \
     -DLOCALEDIR=\"/data/data/\"PACKAGENAME\"/cache/locale\" \
     -DSYSCONFDIR=\"/data/data/\"PACKAGENAME\"/cache/etc\" \
     -DDATA_PATH=\"/data/data/\"PACKAGENAME\"/cache/share\" \
     -DPKGLIBDIR=\"/data/data/\"PACKAGENAME\"/cache/lib\" \
     -DICONV_CONST=
 
-LOCAL_CFLAGS += $(COMMON_OPT_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_OPT_LDFLAGS)
+LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \

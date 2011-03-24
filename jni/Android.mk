@@ -3,18 +3,23 @@ LOCAL_PATH := $(call my-dir)
 
 BUILD_WITH_NEON := 1
 
+ifeq ($(APP_ABI),armeabi)
+BUILD_WITH_NEON := 0
+endif
+
 VLCROOT := $(LOCAL_PATH)/vlc
 EXTROOT := $(LOCAL_PATH)/ext
 DEPROOT := $(LOCAL_PATH)/dep
 
-ifneq ($(BUILD_WITH_NEON),1)
-COMMON_OPT_CFLAGS := -march=armv6j -mtune=arm1136j-s -msoft-float
-COMMON_OPT_CPPFLAGS := -march=armv6j -mtune=arm1136j-s -msoft-float
-COMMON_OPT_LDFLAGS := 
+# explicit add -mfpu=neon since LOCAL_ARM_NEON does not work well with .S file
+ifeq ($(BUILD_WITH_NEON),1)
+COMMON_TUNE_CFLAGS := -mfpu=neon -mtune=cortex-a8 -mvectorize-with-neon-quad
+COMMON_TUNE_CFLAGS := -mfpu=neon -mtune=cortex-a8 -mvectorize-with-neon-quad
+COMMON_TUNE_LDFLAGS := -Wl,--fix-cortex-a8
 else
-COMMON_OPT_CFLAGS := -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon
-COMMON_OPT_CPPFLAGS := -march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon
-COMMON_OPT_LDFLAGS := -Wl,--fix-cortex-a8
+COMMON_TUNE_CFLAGS := -march=armv6j -mtune=arm1136j-s -msoft-float
+COMMON_TUNE_CPPFLAGS := -march=armv6j -mtune=arm1136j-s -msoft-float
+COMMON_TUNE_LDFLAGS := 
 endif
 
 include $(CLEAR_VARS)

@@ -24,7 +24,8 @@ list.each { |l|
 all.each { |k, a|
     `mkdir -p assets/lib/#{k}`
     a.each { |v|
-        `mv libs/armeabi/#{v} assets/lib/#{k}`
+        `test -f libs/armeabi/#{v} && mv libs/armeabi/#{v} assets/lib/#{k}`
+        `test -f libs/armeabi-v7a/#{v} && mv libs/armeabi-v7a/#{v} assets/lib/#{k}`
     }
 }
 `rm -f assets/index.txt`
