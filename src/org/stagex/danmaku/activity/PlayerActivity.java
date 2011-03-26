@@ -64,7 +64,7 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 	private Condition mPrepairCond = mPrepairLock.newCondition();
 	private Thread mPrepairThread = null;
 
-	private CommentManager mCommentManager = CommentManager.getInstance();
+	private CommentManager mCommentManager = new CommentManager();
 
 	private ArrayList<String> mPlayList = null;
 	private int mCurrentIndex = -1;
@@ -141,6 +141,7 @@ public class PlayerActivity extends Activity implements VLI, OnTouchListener,
 							mSeekBarProgress.setProgress(mCurrentTime);
 						}
 					}
+					mCommentManager.seek(val);
 					break;
 				}
 				case VLI.EVENT_INPUT_LENGTH: {

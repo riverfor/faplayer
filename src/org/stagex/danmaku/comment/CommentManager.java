@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,15 +17,12 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 
 public class CommentManager {
-
-	private static CommentManager mInstance = null;
-
-	private Paint mPaint = new Paint();
 
 	private Surface mSurface = null;
 	private Object mSurfaceLock = new Object();
@@ -39,27 +38,19 @@ public class CommentManager {
 
 	private boolean mExit = false;
 	private boolean mPause = true;
+	private boolean mSeek = true;
+	private Object mSeekLock = new Object();
 
 	private ReentrantLock mPauseLock = new ReentrantLock();
 	private Condition mPauseCond = mPauseLock.newCondition();
 
-	private HashMap<String, Bitmap> mCommentBitmap = new HashMap<String, Bitmap>();
+	private int mCommentIndex = 0;
+	private ArrayList<Comment> mCommentList = new ArrayList<Comment>();
 
-	private ArrayList<Comment> mFlyComment = new ArrayList<Comment>();
-	private ArrayList<Comment> mTopComment = new ArrayList<Comment>();
-	private ArrayList<Comment> mBotComment = new ArrayList<Comment>();
+	private PositionManager mPositionManager = new PositionManager();
 
-	private class Position {
-		public String id = null;
-		public int x = -1;
-		public int y = -1;
-		public int width = -1;
-		public int height = -1;
-		public long start = -1;
-		public long duration = -1;
-	}
-
-	private long mStartTime = -1;
+	private long mTimeStart = -1;
+	private long mTimeOffset = 0;
 
 	private Thread mRendererThread = null;
 
@@ -78,9 +69,9 @@ public class CommentManager {
 			} finally {
 				mReadyLock.unlock();
 			}
-			mStartTime = System.currentTimeMillis();
+			mTimeStart = System.currentTimeMillis();
 			while (!mExit) {
-				// used for frame control
+				// fps
 				long rendererBegin = System.currentTimeMillis();
 				// wait if it is paused
 				boolean pauseTest = false;
@@ -98,27 +89,67 @@ public class CommentManager {
 				}
 				if (pauseTest) {
 					pauseEnd = System.currentTimeMillis();
-					if (mStartTime != -1) {
-						mStartTime += (pauseEnd - pauseBegin);
-					}
+					mTimeStart += (pauseEnd - pauseBegin);
 				}
 				mPauseLock.unlock();
 				// check whether exit is requested
 				if (mExit) {
 					break;
 				}
+				// check whether seek is requested
+				boolean seekTest = false;
+				synchronized (mSeekLock) {
+					seekTest = mSeek;
+					if (mSeek) {
+						mTimeStart = System.currentTimeMillis() - mTimeOffset;
+						mTimeOffset = 0;
+						mSeek = false;
+					}
+				}
+				// current play time
+				long currentTime = System.currentTimeMillis() - mTimeStart;
+				// process positions
+				if (seekTest) {
+					mPositionManager.reset();
+				}
+				int start = seekTest ? 0 : mCommentIndex;
+				for (int i = start; i < mCommentList.size(); i++) {
+					Comment comment = mCommentList.get(i);
+					if (comment.time > currentTime) {
+						mCommentIndex = i;
+						break;
+					}
+					if (currentTime >= comment.time
+							&& currentTime < comment.time
+									+ comment.getDuration()) {
+						mPositionManager.feed(comment);
+					}
+				}
+				mPositionManager.play(currentTime);
 				// let's draw the whole screen
-				long currentTime = System.currentTimeMillis() - mStartTime;
-
-				// check whether we can sleep
+				Log.d("faplayer", String.format("%d comment(s) on stage",
+						mPositionManager.count()));
+				Bitmap bitmap = mPositionManager.snapshot();
+				// TODO: matrix
+				synchronized (mSurfaceLock) {
+					if (mSurface != null) {
+						Canvas canvas;
+						try {
+							canvas = mSurface.lockCanvas(null);
+							mSurface.unlockCanvasAndPost(canvas);
+						} catch (OutOfResourcesException e) {
+						}
+					}
+				}
+				// done, and check whether we can sleep
 				long rendererEnd = System.currentTimeMillis();
 				long rendererEclipsed = (rendererEnd - rendererBegin);
 				if (pauseTest) {
 					rendererEclipsed -= (pauseEnd - pauseBegin);
 				}
-				Log.d("faplayer", String.format("rendered one frame in %d ms",
-						rendererEclipsed));
-				long timeToSleep = (1000 / 25) - rendererEclipsed;
+				Log.d("faplayer",
+						String.format("rendered in %d ms", rendererEclipsed));
+				long timeToSleep = (1000 / 50) - rendererEclipsed;
 				if (timeToSleep > 0) {
 					try {
 						Thread.sleep(timeToSleep);
@@ -129,29 +160,7 @@ public class CommentManager {
 		}
 	}
 
-	public static CommentManager getInstance() {
-		if (mInstance == null) {
-			mInstance = new CommentManager();
-		}
-		return mInstance;
-	}
-
-	protected CommentManager() {
-	}
-
-	protected Bitmap getCommentBitmap(Comment comment) {
-		mPaint.setTextSize(comment.getSize());
-		mPaint.setColor(comment.getColor());
-		String text = comment.getText();
-		FontMetrics metrics = mPaint.getFontMetrics();
-		int width = (int) Math.ceil(mPaint.measureText(text) + 2);
-		int height = (int) Math.ceil(metrics.descent - metrics.ascent + 2);
-		Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
-		if (bitmap == null)
-			return null;
-		Canvas canvas = new Canvas(bitmap);
-		canvas.drawText(text, 1, 1, mPaint);
-		return bitmap;
+	public CommentManager() {
 	}
 
 	public void attachSurface(Surface surface, int width, int height) {
@@ -193,40 +202,26 @@ public class CommentManager {
 		if (yeah == null || yeah.size() == 0) {
 			return;
 		}
-		for (Comment c : yeah) {
-			if (c.getType() == Comment.TYPE_FLY) {
-				mFlyComment.add(c);
-			} else if (c.getType() == Comment.TYPE_TOP) {
-				mTopComment.add(c);
-			} else if (c.getType() == Comment.TYPE_BOT) {
-				mBotComment.add(c);
-			}
-			// XXX: danmaku implementation may be different
-			String key = c.getHashString();
-			Bitmap value = mCommentBitmap.get(key);
-			if (value == null) {
-				value = getCommentBitmap(c);
-				mCommentBitmap.put(key, value);
-			}
-			// XXX: need resize
-			c.setWidth(value.getWidth());
-			c.setHeight(value.getHeight());
-			Log.d("faplayer", c.toString());
-		}
+		mCommentList = yeah;
 		Comparator<Comment> comparator = new Comparator<Comment>() {
 			@Override
 			public int compare(Comment c1, Comment c2) {
-				return (int) (c1.getTime() - c2.getTime());
+				return (int) (c1.time - c2.time);
 			}
 		};
-		Collections.sort(mFlyComment, comparator);
-		Collections.sort(mTopComment, comparator);
-		Collections.sort(mBotComment, comparator);
+		Collections.sort(mCommentList, comparator);
+		for (Comment c : mCommentList) {
+			Log.d("faplayer", c.toString());
+		}
 		mRendererThread = new RendererThread();
 		mRendererThread.start();
 	}
 
 	public void seek(long time) {
+		synchronized (mSeekLock) {
+			mSeek = true;
+			mTimeOffset = time;
+		}
 	}
 
 	public void pause() {
@@ -261,10 +256,5 @@ public class CommentManager {
 			}
 			mRendererThread = null;
 		}
-		mFlyComment.clear();
-		mTopComment.clear();
-		mBotComment.clear();
-		mCommentBitmap.clear();
 	}
-
 }

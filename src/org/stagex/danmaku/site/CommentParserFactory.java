@@ -7,7 +7,7 @@ import org.stagex.danmaku.comment.Comment;
 public class CommentParserFactory {
 
 	public static String[] getParserList() {
-		return new String[] { "Acfun", "Bili", "Ichiba", "Nico" };
+		return new String[] { "Acfun", "Bilibili", "Ichiba", "Nico" };
 	}
 
 	@SuppressWarnings("rawtypes")

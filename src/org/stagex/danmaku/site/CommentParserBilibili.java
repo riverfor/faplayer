@@ -8,7 +8,7 @@ import org.stagex.danmaku.comment.Comment;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-public class CommentParserAcfun extends CommentParser {
+public class CommentParserBilibili extends CommentParser {
 
 	@Override
 	public ArrayList<Comment> parse(String uri) {
@@ -38,26 +38,25 @@ public class CommentParserAcfun extends CommentParser {
 				if (eventType == XmlPullParser.START_TAG) {
 					currentDepth += 1;
 					tagName = parser.getName();
-					if (currentDepth == 1
-							&& tagName.compareTo("information") != 0) {
+					if (currentDepth == 1 && tagName.compareTo("i") != 0) {
 						break;
 					}
-					if (currentDepth == 3) {
-						if (tagName.compareTo("message") == 0) {
+					if (currentDepth == 2) {
+						if (tagName.compareTo("d") == 0) {
 							int count = parser.getAttributeCount();
 							for (int i = 0; i < count; i++) {
 								String name = parser.getAttributeName(i);
 								String value = parser.getAttributeValue(i);
-								if (name.compareTo("fontsize") == 0) {
-									commentSize = Integer.parseInt(value);
-									continue;
-								}
-								if (name.compareTo("color") == 0) {
-									commentColor = Integer.parseInt(value);
-									continue;
-								}
-								if (name.compareTo("mode") == 0) {
-									commentType = Integer.parseInt(value);
+								if (name.compareTo("p") == 0) {
+									String[] props = value.split(",");
+									if (props.length < 4) {
+										continue;
+									}
+									commentTime = (int) (Float
+											.parseFloat(props[0]) * 1000);
+									commentType = Integer.parseInt(props[1]);
+									commentSize = Integer.parseInt(props[2]);
+									commentColor = Integer.parseInt(props[3]);
 									continue;
 								}
 							}
@@ -67,9 +66,9 @@ public class CommentParserAcfun extends CommentParser {
 				}
 				if (eventType == XmlPullParser.END_TAG) {
 					currentDepth -= 1;
-					if (currentDepth == 1) {
+					if (currentDepth == 1 && tagName.compareTo("d") == 0) {
 						Comment comment = new Comment();
-						comment.site = Comment.SITE_ACFUN;
+						comment.site = Comment.SITE_BILIBILI;
 						comment.time = commentTime;
 						comment.type = commentType;
 						comment.size = commentSize;
@@ -80,12 +79,8 @@ public class CommentParserAcfun extends CommentParser {
 					continue;
 				}
 				if (eventType == XmlPullParser.TEXT) {
-					if (currentDepth == 3) {
-						if (tagName.compareTo("playTime") == 0) {
-							commentTime = (int) (Float.parseFloat(parser
-									.getText()) * 1000);
-						}
-						if (tagName.compareTo("message") == 0) {
+					if (currentDepth == 2) {
+						if (tagName.compareTo("d") == 0) {
 							commentText = parser.getText();
 						}
 					}

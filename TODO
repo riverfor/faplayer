@@ -11,5 +11,6 @@ But there is still a lot of things to be done.
 8. Implement crawler for the sites above(How to merge flv/hlv?).
 9. More work on video decode and video output, the goal is drop less and output more.
 10. Take a look at audio filter/mixer/output and see its performance.
+11. Implement simple video mode control(center/full/fit to screen).
 ...
 

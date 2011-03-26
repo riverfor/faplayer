@@ -2,7 +2,9 @@ VLC-1.2.0-git is on the road!
 
 Any questions please contact tewilove@gmail.com.
 
-Build steps: run build.sh. (for some reason, you have to install ruby-1.9.2 first.)
+Build steps:
+1. Edit local.properties to fit your environment.
+2. Run build.sh. (for some reason, you have to install ruby-1.9.2 first.)
 
 If you want to disable NEON version of ffmpeg, open jni/Android.mk and change BUILD_WITH_NEON to 0.
 
