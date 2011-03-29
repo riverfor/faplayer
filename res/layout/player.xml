@@ -4,16 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <SurfaceView
-        android:id="@+id/player_surface_video"
-        android:keepScreenOn="true"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-
-    <SurfaceView
-        android:id="@+id/player_surface_stage"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+    <include layout="@layout/player_video" />
 
     <include layout="@layout/player_control" />
 

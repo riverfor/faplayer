@@ -1,6 +1,5 @@
 package org.stagex.danmaku.comment;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -14,14 +13,16 @@ public class PositionManager {
 	private int mStageWidth = -1;
 	private int mStageHeight = -1;
 
-	private Canvas mCanvas = null;
 	private Bitmap mStage = null;
+	private Canvas mCanvas = null;
 
 	private LinkedList<Position> mFlyUsed = new LinkedList<Position>();
+	private LinkedList<Position> mFlyList = new LinkedList<Position>();
 	private LinkedList<Position> mTopUsed = new LinkedList<Position>();
 	private LinkedList<Position> mBotUsed = new LinkedList<Position>();
 
-	protected void setTopPosition(LinkedList<Position> list, Position p) {
+	protected static void setTopPosition(LinkedList<Position> list, Position p,
+			int height) {
 		int n = list.size();
 		if (n > 0) {
 			// check if there is space before first
@@ -47,13 +48,13 @@ public class PositionManager {
 			}
 			// check if there is space after last
 			Position last = list.getLast();
-			if (mStageHeight - last.y - last.height >= p.height) {
+			if (height - last.y - last.height >= p.height) {
 				p.y = last.y + last.height;
 				list.addLast(p);
 				return;
 			} else {
 				// XXX:
-				p.y = (first.y + first.height + p.height) % mStageHeight;
+				p.y = (first.y + first.height + p.height) % height;
 				list.addLast(p);
 				return;
 			}
@@ -63,7 +64,8 @@ public class PositionManager {
 		}
 	}
 
-	protected void setBotPosition(LinkedList<Position> l, Position p) {
+	protected static void setBotPosition(LinkedList<Position> l, Position p,
+			int height) {
 	}
 
 	public PositionManager() {
@@ -71,7 +73,7 @@ public class PositionManager {
 	}
 
 	public int count() {
-		return (mFlyUsed.size() + mTopUsed.size() + mBotUsed.size());
+		return (mFlyList.size() + mTopUsed.size() + mBotUsed.size());
 	}
 
 	public void feed(Comment c) {
@@ -102,6 +104,7 @@ public class PositionManager {
 			mCanvas = new Canvas(mStage);
 		}
 		Position p = new Position();
+		p.time = c.time;
 		p.id = c.getHashString();
 		p.duration = c.getDuration();
 		p.width = c.getWidth();
@@ -109,21 +112,21 @@ public class PositionManager {
 		switch (c.type) {
 		case Comment.TYPE_FLY: {
 			p.x = mStageWidth;
-			setTopPosition(mFlyUsed, p);
+			setTopPosition(mFlyUsed, p, mStageHeight);
+			mFlyList.add(p);
 			break;
 		}
 		case Comment.TYPE_TOP: {
 			p.x = (mStageWidth - p.width) / 2;
-			setTopPosition(mTopUsed, p);
+			setTopPosition(mTopUsed, p, mStageHeight);
 			break;
 		}
 		case Comment.TYPE_BOT: {
 			p.x = (mStageWidth - p.width) / 2;
-			setBotPosition(mBotUsed, p);
+			setBotPosition(mBotUsed, p, mStageHeight);
 			break;
 		}
 		default: {
-			assert (false);
 			break;
 		}
 		}
@@ -131,8 +134,16 @@ public class PositionManager {
 
 	public void play(long time) {
 		ListIterator<Position> it = null;
-		// calculate fly positions
+		// calculate and clean fly positions
 		it = (ListIterator<Position>) mFlyUsed.iterator();
+		while (it.hasNext()) {
+			Position p = it.next();
+			if ((time - p.time) * (p.width + mStageWidth) / p.duration > p.width) {
+				it.remove();
+				continue;
+			}
+		}
+		it = (ListIterator<Position>) mFlyList.iterator();
 		while (it.hasNext()) {
 			Position p = it.next();
 			if (p.time + p.duration < time) {
@@ -161,12 +172,39 @@ public class PositionManager {
 
 	public void reset() {
 		mFlyUsed.clear();
+		mFlyList.clear();
 		mTopUsed.clear();
 		mBotUsed.clear();
 	}
 
 	public Bitmap snapshot() {
-		// TODO:
+		if (mStage == null || mCanvas == null) {
+			return null;
+		}
+		Log.d("faplayer", "==== begin snapshot ====");
+		mCanvas.drawColor(0xff000000);
+		for (Position p : mFlyList) {
+			Log.d("faplayer",
+					String.format("%d, %d: %s", p.x, p.y,
+							Comment.getComment(p.id).toString()));
+			Bitmap b = Comment.getBitmap(p.id);
+			mCanvas.drawBitmap(b, p.x, p.y, null);
+		}
+		for (Position p : mTopUsed) {
+			Log.d("faplayer",
+					String.format("%d, %d: %s", p.x, p.y,
+							Comment.getComment(p.id).toString()));
+			Bitmap b = Comment.getBitmap(p.id);
+			mCanvas.drawBitmap(b, p.x, p.y, null);
+		}
+		for (Position p : mBotUsed) {
+			Log.d("faplayer",
+					String.format("%d, %d: %s", p.x, p.y,
+							Comment.getComment(p.id).toString()));
+			Bitmap b = Comment.getBitmap(p.id);
+			mCanvas.drawBitmap(b, p.x, p.y, null);
+		}
+		Log.d("faplayer", "====  end snapshot  ====");
 		return mStage;
 	}
 

@@ -3,38 +3,17 @@ package org.stagex.danmaku.comment;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.stagex.danmaku.site.CommentParserFactory;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Paint.FontMetrics;
-import android.graphics.Rect;
 import android.util.Log;
-import android.view.Surface;
-import android.view.Surface.OutOfResourcesException;
 
 public class CommentManager {
 
-	private Surface mSurface = null;
-	private Object mSurfaceLock = new Object();
-
-	private int mWidth = -1;
-	private int mHeight = -1;
-
-	private int mStageWidth = -1;
-	private int mStageHeight = -1;
-
-	private ReentrantLock mReadyLock = new ReentrantLock();
-	private Condition mReadyCond = mReadyLock.newCondition();
+	private CPI mCallbackHandler = null;
 
 	private boolean mExit = false;
 	private boolean mPause = true;
@@ -57,18 +36,6 @@ public class CommentManager {
 	private class RendererThread extends Thread {
 		@Override
 		public void run() {
-			// wait until it is ready to loop
-			try {
-				mReadyLock.lock();
-				try {
-					while (!((mWidth > 0) && (mHeight > 0) && (mStageWidth > 0) && (mStageHeight > 0))) {
-						mReadyCond.await();
-					}
-				} catch (InterruptedException e) {
-				}
-			} finally {
-				mReadyLock.unlock();
-			}
 			mTimeStart = System.currentTimeMillis();
 			while (!mExit) {
 				// fps
@@ -127,19 +94,10 @@ public class CommentManager {
 				}
 				mPositionManager.play(currentTime);
 				// let's draw the whole screen
-				Log.d("faplayer", String.format("%d comment(s) on stage",
-						mPositionManager.count()));
+				Log.d("faplayer", String.format("snapshot: %d", currentTime));
 				Bitmap bitmap = mPositionManager.snapshot();
-				// TODO: matrix
-				synchronized (mSurfaceLock) {
-					if (mSurface != null) {
-						Canvas canvas;
-						try {
-							canvas = mSurface.lockCanvas(null);
-							mSurface.unlockCanvasAndPost(canvas);
-						} catch (OutOfResourcesException e) {
-						}
-					}
+				if (bitmap != null && mCallbackHandler != null) {
+					mCallbackHandler.onSnapshotReady(bitmap);
 				}
 				// done, and check whether we can sleep
 				long rendererEnd = System.currentTimeMillis();
@@ -149,7 +107,7 @@ public class CommentManager {
 				}
 				Log.d("faplayer",
 						String.format("rendered in %d ms", rendererEclipsed));
-				long timeToSleep = (1000 / 50) - rendererEclipsed;
+				long timeToSleep = (1000 / 15) - rendererEclipsed;
 				if (timeToSleep > 0) {
 					try {
 						Thread.sleep(timeToSleep);
@@ -161,39 +119,11 @@ public class CommentManager {
 	}
 
 	public CommentManager() {
+
 	}
 
-	public void attachSurface(Surface surface, int width, int height) {
-		synchronized (mSurfaceLock) {
-			mSurface = surface;
-			try {
-				mReadyLock.lock();
-				mWidth = width;
-				mHeight = height;
-				mReadyCond.signal();
-			} finally {
-				mReadyLock.unlock();
-			}
-		}
-	}
-
-	public void detachSurface() {
-		synchronized (mSurfaceLock) {
-			mSurface = null;
-			mWidth = -1;
-			mHeight = -1;
-		}
-	}
-
-	public void setStageSize(int width, int height) {
-		try {
-			mReadyLock.lock();
-			mStageWidth = width;
-			mStageHeight = height;
-			mReadyCond.signal();
-		} finally {
-			mReadyLock.unlock();
-		}
+	public void setCallbackHandler(CPI handler) {
+		mCallbackHandler = handler;
 	}
 
 	public void open(String uri) {
@@ -210,9 +140,9 @@ public class CommentManager {
 			}
 		};
 		Collections.sort(mCommentList, comparator);
-		for (Comment c : mCommentList) {
-			Log.d("faplayer", c.toString());
-		}
+		// for (Comment c : mCommentList) {
+		// Log.d("faplayer", c.toString());
+		// }
 		mRendererThread = new RendererThread();
 		mRendererThread.start();
 	}
@@ -241,12 +171,6 @@ public class CommentManager {
 	public void close() {
 		if (mRendererThread != null) {
 			mExit = true;
-			try {
-				mReadyLock.lock();
-				mReadyCond.signal();
-			} finally {
-				mReadyLock.unlock();
-			}
 			play();
 			if (mRendererThread.isAlive()) {
 				try {

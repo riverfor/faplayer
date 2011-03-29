@@ -7,7 +7,7 @@
 #include <vlc_plugin.h>
 #include <vlc_vout_display.h>
 #include <vlc_picture_pool.h>
-
+#include <vlc_threads.h>
 #include <pixman.h>
 
 #ifndef __PLATFORM__
@@ -42,13 +42,14 @@ vlc_module_end()
 static picture_pool_t *Pool(vout_display_t *, unsigned);
 static void Display(vout_display_t *, picture_t *, subpicture_t *);
 static int Control(vout_display_t *, int, va_list);
-static void Manage(vout_display_t *);
 
 static void picture_Strech2(vout_display_t *, picture_t *, picture_t *);
 static void picture_CopyToSurface(vout_display_t *, picture_t *, picture_t *);
 
 struct vout_display_sys_t {
     vout_display_place_t place;
+    int dirty;
+    vlc_mutex_t dirty_lock;
     int format;
     int width;
     int height;
@@ -109,9 +110,11 @@ static int Open(vlc_object_t *p_this) {
         fmt.i_bmask = 0;
         break;
     }
-    sys = (struct vout_display_sys_t*)malloc(sizeof(struct vout_display_sys_t));
+    sys = (struct vout_display_sys_t*) malloc(sizeof(struct vout_display_sys_t));
     if (!sys)
         return VLC_ENOMEM;
+    memset(sys, 0, sizeof(*sys));
+    vlc_mutex_init(&sys->dirty_lock);
     sys->format = info.format;
     sys->width = info.w;
     sys->height = info.h;
@@ -130,18 +133,18 @@ static int Open(vlc_object_t *p_this) {
     vout_display_cfg_t cfg = *vd->cfg;
     cfg.display.width = sys->width;
     cfg.display.height = sys->height;
-    vout_display_PlacePicture(&sys->place, &vd->source, &cfg, true);
-    vd->info.has_hide_mouse = true;
-    //vd->info.is_slow = true;
-    // uncomment to disable dr
-    //vd->info.has_pictures_invalid = true;
+    cfg.is_fullscreen = true;
+
+    vout_display_SendEventDisplaySize(vd, sys->width, sys->height, true);
+    vout_display_PlacePicture(&sys->place, &vd->source, &cfg, false);
+
     vd->fmt = fmt;
     vd->pool = Pool;
     vd->prepare = NULL;
     vd->display = Display;
     vd->control = Control;
-    vd->manage  = Manage;
-    vout_display_SendEventDisplaySize(vd, sys->width, sys->height, vd->cfg->is_fullscreen);
+    vd->manage  = NULL;
+
     return VLC_SUCCESS;
 }
 
@@ -149,6 +152,7 @@ static void Close(vlc_object_t *p_this) {
     vout_display_t *vd = (vout_display_t *)p_this;
     vout_display_sys_t *sys = vd->sys;
 
+    vlc_mutex_destroy(&sys->dirty_lock);
     if (sys->pool)
         picture_pool_Delete(sys->pool);
     free(sys);
@@ -171,6 +175,7 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
     vout_display_sys_t *sys = vd->sys;
     Surface *surf;
     Surface::SurfaceInfo info;
+    int dirty = 0;
 
     LockSurface();
     surf = (Surface*)(GetSurface());
@@ -185,6 +190,10 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
             sys->height != info.h)
 #endif
             goto bail;
+        vlc_mutex_lock(&sys->dirty_lock);
+        dirty = sys->dirty;
+        sys->dirty = 0;
+        vlc_mutex_unlock(&sys->dirty_lock);
         switch (info.format) {
         case PIXEL_FORMAT_RGB_565: {
                 picture_t surface;
@@ -201,6 +210,14 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
                 surface.p[0].i_pixel_pitch = 2;
                 surface.p[0].i_visible_lines = info.h;
                 surface.p[0].i_visible_pitch = info.w << 1;
+
+                if (dirty) {
+#if __PLATFORM__ > 4
+                    memset(info.bits, 0, info.w * info.s * 2);
+#else
+                    memset(info.bits, 0, info.w * info.h * 2);
+#endif
+                }
 
                 //mtime_t bgn = mdate();
                 picture_Strech2(vd, picture, &surface);
@@ -222,11 +239,40 @@ bail:
 }
 
 static int Control(vout_display_t *vd, int query, va_list args) {
-    return VLC_EGENERIC;
-}
+    vout_display_sys_t *sys = vd->sys;
 
-static void Manage(vout_display_t *vd) {
-    VLC_UNUSED(vd);
+    switch (query) {
+    case VOUT_DISPLAY_CHANGE_ZOOM:
+    case VOUT_DISPLAY_CHANGE_DISPLAY_FILLED:
+    case VOUT_DISPLAY_CHANGE_SOURCE_ASPECT: {
+        const vout_display_cfg_t *cfg;
+        const video_format_t *source;
+
+        if (query == VOUT_DISPLAY_CHANGE_SOURCE_ASPECT) {
+            source = va_arg(args, const video_format_t *);
+            cfg = vd->cfg;
+        }
+        else {
+            source = &vd->source;
+            cfg = va_arg(args, const vout_display_cfg_t *);
+        }
+        int width = cfg->display.width;
+        int height = cfg->display.height;
+        if (width > sys->width || height > sys->height) {
+            return VLC_EGENERIC;
+        }
+        vout_display_PlacePicture(&sys->place, source, cfg, false);
+        // fill it with black first
+        vlc_mutex_lock(&sys->dirty_lock);
+        sys->dirty = 1;
+        vlc_mutex_unlock(&sys->dirty_lock);
+        return VLC_SUCCESS;
+    }
+    default:
+        break;
+    }
+
+    return VLC_EGENERIC;
 }
 
 static inline void copyrow2(uint16_t *src, int src_w, uint16_t *dst, int dst_w) {

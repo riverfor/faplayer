@@ -10,12 +10,11 @@ public interface VLI {
 	public final static int EVENT_INPUT_AOUT = 22;
 	public final static int EVENT_INPUT_VOUT = 23;
 	public final static int EVENT_INPUT_MISC = 99;
-	
-	public final static int EVENT_VIDEO_SIZE = 100;
 
-	public final static int EVENT_STAGE_SURFACE_CREATED = 2001;
-	public final static int EVENT_STAGE_SURFACE_CHANGED = 2002;
-	public final static int EVENT_STAGE_SURFACE_DESTROYED = 2003;
+	public final static int EVENT_VIDEO_SIZE = 101;
+
+	public final static int EVENT_VOUT_ASPECT_RATIO = 201;
+	public final static int EVENT_VOUT_GEOMETRY = 202;
 
 	public final static int EVENT_VIDEO_SURFACE_CREATED = 1001;
 	public final static int EVENT_VIDEO_SURFACE_CHANGED = 1002;
@@ -45,10 +44,9 @@ public interface VLI {
 	public final static String MODULE_INPUT_VIDEO_ES = "video-es";
 	public final static String MODULE_NAME_VIDEO = "video";
 	public final static String MODULE_VIDEO_SIZE = "size";
-
-	public final static int VIDEO_MODE_NONE = 0;
-	public final static int VIDEO_MODE_FIT = 1;
-	public final static int VIDEO_MODE_FILL = 2;
+	public final static String MODULE_NAME_VIDEO_OUTPUT = "vout";
+	public final static String MODULE_VIDEO_OUTPUT_ASPECT_RATIO = "aspect-ratio";
+	public final static String MODULE_VIDEO_OUTPUT_GEOMETRY = "geometry";
 
 	public void onInputCanPauseChange(boolean value);
 
@@ -63,7 +61,11 @@ public interface VLI {
 	public void onAudioStreamChange(int index, int count);
 
 	public void onSubtitleStreamChange(int index, int count);
-	
+
+	public void onVideoOutputAspectRatioChange(String ratio);
+
+	public void onVideoOutputGeometryChange(int x, int y, int width, int height);
+
 	public void onVideoSizeChange(int width, int height);
 
 	public void onVlcEvent(String name, String key, String value);

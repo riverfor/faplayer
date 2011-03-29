@@ -27,6 +27,7 @@ public class Comment {
 
 	public static Paint mPaint = new Paint();
 	public static HashMap<String, Bitmap> mBitmap = new HashMap<String, Bitmap>();
+	public static HashMap<String, Comment> mComment = new HashMap<String, Comment>();
 
 	public int site = -1;
 	public long time = -1;
@@ -47,13 +48,19 @@ public class Comment {
 		return mBitmap.get(key);
 	}
 
+	public static Comment getComment(String key) {
+		return mComment.get(key);
+	}
+
 	public Comment() {
 	}
 
 	protected void draw() {
 		String key = getHashString();
+		mComment.put(key, this);
 		Bitmap value = mBitmap.get(key);
 		if (value == null) {
+			// XXX: need more work
 			mPaint.setColor(color);
 			mPaint.setTextSize(size);
 			FontMetricsInt metrics = mPaint.getFontMetricsInt();
@@ -66,9 +73,23 @@ public class Comment {
 		}
 		switch (site) {
 		case Comment.SITE_ACFUN: {
+			// XXX
+			if (type == Comment.TYPE_FLY) {
+				mDuration = ((mWidth + Comment.STAGE_WIDTH_ICHIBA) * 2500)
+						/ (Comment.STAGE_WIDTH_ICHIBA);
+			} else {
+				mDuration = 4000;
+			}
 			break;
 		}
 		case Comment.SITE_BILIBILI: {
+			// XXX
+			if (type == Comment.TYPE_FLY) {
+				mDuration = ((mWidth + Comment.STAGE_WIDTH_ICHIBA) * 2500)
+						/ (Comment.STAGE_WIDTH_ICHIBA);
+			} else {
+				mDuration = 4000;
+			}
 			break;
 		}
 		case Comment.SITE_ICHIBA: {
@@ -133,7 +154,8 @@ public class Comment {
 	}
 
 	public String toString() {
-		return String.format("%d|%d|%d|%d|%s", time, type, size, color, text);
+		return String.format("%d|%d|%d|%d|%s - %d|%d|%d", time, type, size,
+				color, text, mWidth, mHeight, mDuration);
 	}
 
 }

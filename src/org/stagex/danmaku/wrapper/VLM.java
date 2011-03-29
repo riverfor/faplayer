@@ -28,6 +28,9 @@ public class VLM {
 	private int mLineLength = 0;
 	private byte[] mLineBuffer = new byte[512];
 
+	int mVideoOutputMask = 0;
+	String[] mVideoAspectRatio = new String[] { "none", "4:3", "16:9", "16:10" };
+
 	protected VLM() {
 	}
 
@@ -60,13 +63,27 @@ public class VLM {
 				boolean val = Integer.parseInt(value) > 0;
 				mCallbackHandler.onInputCanSeekChange(val);
 			}
-		} else if (name.compareTo("video") == 0) {
-			if (key.compareTo("size") == 0) {
+		} else if (name.compareTo(VLI.MODULE_NAME_VIDEO) == 0) {
+			if (key.compareTo(VLI.MODULE_VIDEO_SIZE) == 0) {
 				String[] vals = value.split("x");
 				if (vals.length == 2) {
 					int width = Integer.parseInt(vals[0]);
 					int height = Integer.parseInt(vals[1]);
 					mCallbackHandler.onVideoSizeChange(width, height);
+				}
+			}
+		} else if (name.compareTo(VLI.MODULE_NAME_VIDEO_OUTPUT) == 0) {
+			if (key.compareTo(VLI.MODULE_VIDEO_OUTPUT_ASPECT_RATIO) == 0) {
+				mCallbackHandler.onVideoOutputAspectRatioChange(value);
+			} else if (key.compareTo(VLI.MODULE_VIDEO_OUTPUT_GEOMETRY) == 0) {
+				String[] vals = value.split(",");
+				if (vals.length == 4) {
+					int x = Integer.parseInt(vals[0]);
+					int y = Integer.parseInt(vals[1]);
+					int width = Integer.parseInt(vals[2]);
+					int height = Integer.parseInt(vals[3]);
+					mCallbackHandler.onVideoOutputGeometryChange(x, y, width,
+							height);
 				}
 			}
 		} else {
@@ -116,6 +133,7 @@ public class VLM {
 					} catch (UnsupportedEncodingException e) {
 					}
 					if (line != null) {
+						Log.d("faplayer-java", line);
 						triggerCallback(line);
 					}
 					mLineOffset += mLineLength;
@@ -245,8 +263,10 @@ public class VLM {
 		mCallbackHandler = handler;
 	}
 
-	public void setVideoSize(int width, int height) {
-
+	public void setVideoOutputAspectRatio(String ratio) {
+		String line;
+		line = String.format("vout aspect-ratio \"%s\"", ratio);
+		writeBytes(line);
 	}
 
 	public void open(String file) {
