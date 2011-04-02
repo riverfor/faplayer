@@ -1,5 +1,5 @@
 etc/vlcrc
-lib/control/libnotify_plugin.so
+lib/control/libreporter_plugin.so
 lib/demux/libavformat_plugin.so
 lib/video_output/libvout_android-8_plugin.so
 lib/video_output/libvout_android-9_plugin.so

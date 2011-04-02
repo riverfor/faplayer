@@ -1,7 +1,7 @@
 
 LOCAL_PATH := $(call my-dir)
 
-#libyuv2rgb_plugin.so
+# libyuv2rgb_plugin.so
 
 include $(CLEAR_VARS)
 
@@ -14,9 +14,7 @@ LOCAL_MODULE := yuv2rgb_plugin
 
 LOCAL_CFLAGS += \
     -std=c99 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"yuv2rgb\"
 

@@ -2,7 +2,7 @@
 
 rm -rf libs
 ndk-build $@ || exit 1
-rm -rf assests/lib
+rm -rf assets/lib
 ruby trivial.rb
 rm -rf bin
 ant release

@@ -14,9 +14,7 @@ LOCAL_MODULE := converter_fixed_plugin
 
 LOCAL_CFLAGS += \
     -std=c99 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"converter_fixed\"
 

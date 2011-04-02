@@ -45,11 +45,15 @@ struct intf_sys_t {
 };
 
 vlc_module_begin ()
-    set_shortname(N_("notify"))
+    set_shortname(N_("reporter"))
     set_category(CAT_INTERFACE)
     set_subcategory(SUBCAT_INTERFACE_MAIN)
     set_description(N_("interactive TCP remote control interface"))
+#if HAVE_ANDROID
     set_capability("interface", 25)
+#else
+    set_capability("interface", 0)
+#endif
     set_callbacks(Activate, Deactivate)
 vlc_module_end ()
 

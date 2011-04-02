@@ -14,9 +14,7 @@ LOCAL_CFLAGS += \
     -D__arm__ \
     -D__linux__ \
     -std=c99 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -DMODULE_STRING=\"main\" \
     -D__LIBVLC__ \
     -DPACKAGENAME=\"org.stagex.danmaku\" \

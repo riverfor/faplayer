@@ -14,9 +14,7 @@ LOCAL_MODULE := aout_android-4_plugin
 
 LOCAL_CFLAGS += \
     -D__PLATFORM__=4 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"aout_android-4\"
 
@@ -53,9 +51,7 @@ LOCAL_MODULE := aout_android-5_plugin
 
 LOCAL_CFLAGS += \
     -D__PLATFORM__=5 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"aout_android-5\"
 
@@ -92,9 +88,7 @@ LOCAL_MODULE := aout_android-8_plugin
 
 LOCAL_CFLAGS += \
     -D__PLATFORM__=8 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"aout_android-8\"
 
@@ -131,9 +125,7 @@ LOCAL_MODULE := aout_android-9_plugin
 
 LOCAL_CFLAGS += \
     -D__PLATFORM__=9 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"aout_android-9\"
 

@@ -1,4 +1,6 @@
 
+ifeq ($(BUILD_WITH_NEON),1)
+
 LOCAL_PATH := $(call my-dir)
 
 # libaudio_format_neon_plugin.so
@@ -14,9 +16,7 @@ LOCAL_MODULE := audio_format_neon_plugin
 
 LOCAL_CFLAGS += \
     -std=c99 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"audio_format_neon\"
 
@@ -50,9 +50,7 @@ LOCAL_MODULE := memcpy_neon_plugin
 
 LOCAL_CFLAGS += \
     -std=c99 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"memcpy_neon\"
 
@@ -72,4 +70,6 @@ LOCAL_SRC_FILES := \
 LOCAL_SHARED_LIBRARIES += vlccore
 
 include $(BUILD_SHARED_LIBRARY)
+
+endif
 

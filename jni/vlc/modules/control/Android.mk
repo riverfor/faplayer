@@ -10,15 +10,13 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := notify_plugin
+LOCAL_MODULE := reporter_plugin
 
 LOCAL_CFLAGS += \
     -std=c99 \
-    -D__THROW= \
     -DHAVE_CONFIG_H \
-    -DNDEBUG \
     -D__PLUGIN__ \
-    -DMODULE_STRING=\"notify\"
+    -DMODULE_STRING=\"reporter\"
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -30,7 +28,7 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
-    notify.c
+    reporter.c
 
 LOCAL_SHARED_LIBRARIES += vlccore
 

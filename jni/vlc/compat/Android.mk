@@ -37,7 +37,6 @@ LOCAL_CFLAGS += \
     -Drestrict=__restrict \
     -DANDROID_SMP=0 \
     -D__LIBC_HIDDEN__="__attribute__ ((visibility (\"hidden\")))" \
-    -D__THROW= \
     -D__USE_GNU \
     -Dinternal_function= \
     -DCLONE_SETTLS=0x00080000 \
