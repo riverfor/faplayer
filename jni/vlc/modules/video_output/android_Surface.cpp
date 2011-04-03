@@ -47,17 +47,6 @@ static void picture_Strech2(vout_display_t *, picture_t *, picture_t *);
 static void picture_CopyToSurface(vout_display_t *, picture_t *, picture_t *);
 
 struct vout_display_sys_t {
-    vout_display_place_t place;
-    int dirty;
-    vlc_mutex_t dirty_lock;
-    int format;
-    int width;
-    int height;
-#if __PLATFORM__ > 4
-    int stride;
-#endif
-    int w, h;
-    picture_t *picture;
     picture_pool_t *pool;
 };
 
@@ -81,7 +70,6 @@ static int Open(vlc_object_t *p_this) {
     surf->unlockAndPost();
 #endif
     UnlockSurface();
-    video_format_t fmt = vd->fmt;
     // TODO: what about the other formats?
     const char *chroma_format;
     switch (info.format) {
@@ -89,7 +77,7 @@ static int Open(vlc_object_t *p_this) {
         chroma_format = "RV16";
         break;
     default:
-        msg_Err(vd, "unknown chroma format %d", info.format);
+        msg_Err(vd, "unknown chroma format %08x (android)", info.format);
         return VLC_EGENERIC;
     }    
     vlc_fourcc_t chroma = vlc_fourcc_GetCodecFromString(VIDEO_ES, chroma_format);
@@ -97,6 +85,7 @@ static int Open(vlc_object_t *p_this) {
         msg_Err(vd, "unsupported chroma format %s", chroma_format);
         return VLC_EGENERIC;
     }
+    video_format_t fmt = vd->fmt;
     fmt.i_chroma = chroma;
     switch (chroma) {
     case VLC_CODEC_RGB16:
@@ -105,39 +94,29 @@ static int Open(vlc_object_t *p_this) {
         fmt.i_bmask = 0x001f;
         break;
     default:
-        fmt.i_rmask = 0;
-        fmt.i_gmask = 0;
-        fmt.i_bmask = 0;
-        break;
+        msg_Err(vd, "unknown chroma format %08x (vlc)", chroma);
+        return VLC_EGENERIC;
     }
     sys = (struct vout_display_sys_t*) malloc(sizeof(struct vout_display_sys_t));
     if (!sys)
         return VLC_ENOMEM;
     memset(sys, 0, sizeof(*sys));
-    vlc_mutex_init(&sys->dirty_lock);
-    sys->format = info.format;
-    sys->width = info.w;
-    sys->height = info.h;
 #if __PLATFORM__ > 4
-    sys->stride = info.s;
-#endif
-    sys->w = fmt.i_width;
-    sys->h = fmt.i_height;
-#if __PLATFORM__ > 4
-    msg_Dbg(VLC_OBJECT(p_this), "SurfaceInfo w = %d, h = %d, s = %d", sys->width, sys->height, sys->stride);
+    msg_Dbg(VLC_OBJECT(p_this), "SurfaceInfo w = %d, h = %d, s = %d", info.w, info.h, info.s);
 #else
-    msg_Dbg(VLC_OBJECT(p_this), "SurfaceInfo w = %d, h = %d", sys->width, sys->height);
+    msg_Dbg(VLC_OBJECT(p_this), "SurfaceInfo w = %d, h = %d", info.w, info.h);
 #endif
     sys->pool = NULL;
-    vd->sys = sys;
+
+    // 
     vout_display_cfg_t cfg = *vd->cfg;
-    cfg.display.width = sys->width;
-    cfg.display.height = sys->height;
-    cfg.is_fullscreen = true;
+    cfg.display.width = info.w;
+    cfg.display.height = info.h;
+    cfg.is_fullscreen = false;
 
-    vout_display_SendEventDisplaySize(vd, sys->width, sys->height, true);
-    vout_display_PlacePicture(&sys->place, &vd->source, &cfg, false);
+    vout_display_SendEventDisplaySize(vd, info.w, info.h, false);
 
+    vd->sys = sys;
     vd->fmt = fmt;
     vd->pool = Pool;
     vd->prepare = NULL;
@@ -152,7 +131,6 @@ static void Close(vlc_object_t *p_this) {
     vout_display_t *vd = (vout_display_t *)p_this;
     vout_display_sys_t *sys = vd->sys;
 
-    vlc_mutex_destroy(&sys->dirty_lock);
     if (sys->pool)
         picture_pool_Delete(sys->pool);
     free(sys);
@@ -167,237 +145,90 @@ static picture_pool_t *Pool(vout_display_t *vd, unsigned count) {
     return sys->pool;
 }
 
-//static mtime_t total = 0;
-//static int count = 0;
-
 static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture) {
     VLC_UNUSED(subpicture);
     vout_display_sys_t *sys = vd->sys;
     Surface *surf;
     Surface::SurfaceInfo info;
-    int dirty = 0;
+    int srx, sry, srh, srw;
+    int drx, dry, drh, drw;
+    int sw, sh, ss, dw, dh, ds;
+    int q, q1, q2;
+    pixman_image_t *src_image = NULL, *dst_image = NULL;
+    pixman_transform_t transform;
 
+    if (picture->i_planes != 1) {
+        goto out;
+    }
+    // XXX: DO NOT ASSUME RGB565
+    sw = picture->p[0].i_visible_pitch / picture->p[0].i_pixel_pitch;
+    sh = picture->p[0].i_visible_lines;
+    ss = picture->p[0].i_pitch / picture->p[0].i_pixel_pitch;
+    src_image = pixman_image_create_bits(PIXMAN_r5g6b5, sw, sh, (uint32_t*)(picture->p[0].p_pixels), ss << 1);
+    if (!src_image) {
+        goto out;
+    }
+    srx = 0;
+    sry = 0;
+    srw = sw;
+    srh = sh;
     LockSurface();
     surf = (Surface*)(GetSurface());
     if (surf) {
         surf->lock(&info);
-        if (sys->format != info.format ||
-            sys->width != info.w ||
+        dw = info.w;
+        dh = info.h;
 #if __PLATFORM__ > 4
-            sys->height != info.h ||
-            sys->stride != info.s)
+        ds = info.s;
 #else
-            sys->height != info.h)
+        ds = info.w;
 #endif
-            goto bail;
-        vlc_mutex_lock(&sys->dirty_lock);
-        dirty = sys->dirty;
-        sys->dirty = 0;
-        vlc_mutex_unlock(&sys->dirty_lock);
+        if (sw > dw || dh > sh) {
+            q1 = (dw << 16) / sw;
+            q2 = (dh << 16) / sh;
+            q = (q1 < q2) ? q1 : q2;
+            drw = (sw * q) >> 16;
+            drh = (sh * q) >> 16;
+            q1 = (sw << 16) / dw;
+            q2 = (sh << 16) / dh;
+            q = (q1 < q2) ? q2 : q1;
+            pixman_transform_init_scale(&transform, q, q);
+            pixman_image_set_transform(src_image, &transform);
+        }
+        else {
+            drw = sw;
+            drh = sh;
+        }
+        drx = (dw - drw) >> 1;
+        dry = (dh - drh) >> 1;
+        // msg_Dbg(VLC_OBJECT(vd), "%dx%d %d %d,%d %dx%d => %dx%d %d %d,%d %dx%d", sw, sh, ss, srx, sry, srw, srh, dw, dh, ds, drx, dry, drw, drh);
         switch (info.format) {
         case PIXEL_FORMAT_RGB_565: {
-                picture_t surface;
-
-                memset(&surface, 0, sizeof(surface));
-                surface.i_planes = 1;
-                surface.p[0].p_pixels = (uint8_t*)(info.bits);
-                surface.p[0].i_lines = info.h;
-#if __PLATFORM__ > 4
-                surface.p[0].i_pitch = info.s << 1;
-#else
-                surface.p[0].i_pitch = info.w << 1;
-#endif
-                surface.p[0].i_pixel_pitch = 2;
-                surface.p[0].i_visible_lines = info.h;
-                surface.p[0].i_visible_pitch = info.w << 1;
-
-                if (dirty) {
-#if __PLATFORM__ > 4
-                    memset(info.bits, 0, info.w * info.s * 2);
-#else
-                    memset(info.bits, 0, info.w * info.h * 2);
-#endif
-                }
-
-                //mtime_t bgn = mdate();
-                picture_Strech2(vd, picture, &surface);
-                //picture_CopyToSurface(vd, picture, &surface);
-                //mtime_t end = mdate();
-                //total += (end - bgn);
-                //count += 1;
-                //msg_Dbg(VLC_OBJECT(vd), "%s takes %lld us, average %lld", __func__, end - bgn, total / count);
-
+            dst_image = pixman_image_create_bits(PIXMAN_r5g6b5, dw, dh, (uint32_t*)(info.bits), ds << 1);
+            if (!dst_image) {
+                goto bail;
+            }
+            break;
             }
         default:
-            break;
+            goto bail;
         }
+        pixman_image_composite(PIXMAN_OP_SRC, src_image, NULL, dst_image, srx, sry, 0, 0, drx, dry, srw , srh);
 bail:
         surf->unlockAndPost();
     }
     UnlockSurface();
+    if (src_image) {
+        pixman_image_unref(src_image);
+    }
+    if (dst_image) {
+        pixman_image_unref(dst_image);
+    }
+out:
     picture_Release(picture);
 }
 
 static int Control(vout_display_t *vd, int query, va_list args) {
-    vout_display_sys_t *sys = vd->sys;
-
-    switch (query) {
-    case VOUT_DISPLAY_CHANGE_ZOOM:
-    case VOUT_DISPLAY_CHANGE_DISPLAY_FILLED:
-    case VOUT_DISPLAY_CHANGE_SOURCE_ASPECT: {
-        const vout_display_cfg_t *cfg;
-        const video_format_t *source;
-
-        if (query == VOUT_DISPLAY_CHANGE_SOURCE_ASPECT) {
-            source = va_arg(args, const video_format_t *);
-            cfg = vd->cfg;
-        }
-        else {
-            source = &vd->source;
-            cfg = va_arg(args, const vout_display_cfg_t *);
-        }
-        int width = cfg->display.width;
-        int height = cfg->display.height;
-        if (width > sys->width || height > sys->height) {
-            return VLC_EGENERIC;
-        }
-        vout_display_PlacePicture(&sys->place, source, cfg, false);
-        // fill it with black first
-        vlc_mutex_lock(&sys->dirty_lock);
-        sys->dirty = 1;
-        vlc_mutex_unlock(&sys->dirty_lock);
-        return VLC_SUCCESS;
-    }
-    default:
-        break;
-    }
-
     return VLC_EGENERIC;
 }
-
-static inline void copyrow2(uint16_t *src, int src_w, uint16_t *dst, int dst_w) {
-    int i;
-    int pos, inc;
-    uint16_t pixel = 0;
-
-    if (src_w == dst_w) {
-        vlc_memcpy(dst, src, src_w * sizeof(*src));
-    }
-    else {
-        pos = 0x10000;
-        inc = (src_w << 16) / dst_w;
-        for (i = dst_w; i > 0; --i) {
-            while (pos >= 0x10000) {
-                pixel = *src++;
-                pos -= 0x10000;
-            }
-            *dst++ = pixel;
-            pos += inc;
-        }
-    }
-}
-
-static void picture_Strech2(vout_display_t *vd, picture_t *src_p, picture_t *dst_p) {
-    vout_display_sys_t *sys = vd->sys;
-    vout_display_place_t *place = &sys->place;
-
-    if (src_p->i_planes != 1 || dst_p->i_planes != 1)
-        return;
-    if ((sys->width < place->x + place->width) || (sys->height < place->y + place->height)) {
-        msg_Dbg(VLC_OBJECT(vd), "Surface %dx%d, place %d, %d %dx%d, out of region", sys->width, sys->height, place->x, place->y, place->width, place->height);
-        return;
-    }
-    plane_t *sp = &src_p->p[0];
-    plane_t *dp = &dst_p->p[0];
-    uint16_t *src, *dst;
-    uint16_t *srcp, *dstp;
-    int sw, sh, ss, dw, dh, ds;
-    int srx, sry, srh, srw;
-    int drx, dry, drh, drw;
-    int pos, inc;
-    int dst_max_row;
-    int src_row, dst_row;
-
-    src = (uint16_t*)sp->p_pixels;
-    dst = (uint16_t*)dp->p_pixels;
-    sw = sp->i_visible_pitch / sp->i_pixel_pitch;
-    sh = sp->i_visible_lines;
-    ss = sp->i_pitch / sp->i_pixel_pitch;
-    srx = 0;
-    sry = 0;
-    srw = sp->i_visible_pitch / sp->i_pixel_pitch;
-    srh = sp->i_visible_lines;
-    dw = dp->i_visible_pitch / dp->i_pixel_pitch;
-    dh = dp->i_visible_lines;
-    ds = dp->i_pitch / dp->i_pixel_pitch;
-    drx = place->x;
-    dry = place->y;
-    drw = place->width;
-    drh = place->height;
-    //msg_Dbg(VLC_OBJECT(vd), "%dx%d %d %d,%d %dx%d -> %dx%d %d %d,%d %dx%d", sw, sh, ss, srx, sry, srw, srh, dw, dh, ds, drx, dry, drw, drh);
-    pos = 0x10000;
-    inc = (srh << 16) / drh;
-    src_row = sry;
-    dst_row = dry;
-
-    for (dst_max_row = dst_row + drh; dst_row < dst_max_row; ++dst_row ) {
-        while (pos >= 0x10000) {
-            srcp = src + src_row * ss + srx;
-            ++src_row;
-            pos -= 0x10000;
-        }
-        dstp = dst + dst_row * ds + drx;
-        copyrow2(srcp, srw, dstp, drw);
-        pos += inc;
-    }
-}
-
-#if 1
-static void picture_CopyToSurface(vout_display_t *vd, picture_t *src_p, picture_t *dst_p) {
-    vout_display_sys_t *sys = vd->sys;
-    vout_display_place_t *place = &sys->place;
-    plane_t *sp = &src_p->p[0];
-    plane_t *dp = &dst_p->p[0];
-    int sw, sh, ss, dw, dh, ds;
-    int srx, sry, srh, srw;
-    int drx, dry, drh, drw;
-
-    sw = sp->i_visible_pitch / sp->i_pixel_pitch;
-    sh = sp->i_visible_lines;
-    ss = sp->i_pitch / sp->i_pixel_pitch;
-    srx = 0;
-    sry = 0;
-    srw = sp->i_visible_pitch / sp->i_pixel_pitch;
-    srh = sp->i_visible_lines;
-    dw = dp->i_visible_pitch / dp->i_pixel_pitch;
-    dh = dp->i_visible_lines;
-    ds = dp->i_pitch / dp->i_pixel_pitch;
-    drx = place->x;
-    dry = place->y;
-    drw = place->width;
-    drh = place->height;
-
-    struct pixman_transform transform;
-    pixman_image_t *src_image, *dst_image;
-
-    src_image = pixman_image_create_bits(PIXMAN_r5g6b5, sw, sh, (uint32_t*)(sp->p_pixels), ss * 2);
-    if (!src_image)
-        return;
-    dst_image = pixman_image_create_bits(PIXMAN_r5g6b5, dw, dh, (uint32_t*)(dp->p_pixels), ds * 2);
-    if (!dst_image) {
-        pixman_image_unref(src_image);
-        return;
-    }
-
-    if (sw == drw && sh == drh) {
-        pixman_image_composite(PIXMAN_OP_SRC, src_image, NULL, dst_image, 0, 0, 0, 0, drx, dry, sw, sh);
-    }
-    else {
-
-    }
-
-    pixman_image_unref(src_image);
-    pixman_image_unref(dst_image);
-}
-#endif
 
