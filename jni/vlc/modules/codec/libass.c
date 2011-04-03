@@ -733,8 +733,13 @@ static ass_handle_t *AssHandleHold( decoder_t *p_dec )
     ass_set_font_scale( p_renderer, 1.0 );
     ass_set_line_spacing( p_renderer, 0.0 );
 
+#if HAVE_ANDROID
+    const char *psz_font = "/system/fonts/DroidSansFallback.ttf";
+    const char *psz_family = "Arial";
+#else
     const char *psz_font = NULL; /* We don't ship a default font with VLC */
     const char *psz_family = "Arial"; /* Use Arial if we can't find anything more suitable */
+#endif
 
 #ifdef HAVE_FONTCONFIG
 #if defined(WIN32)
