@@ -90,7 +90,7 @@ public class Danmaku extends Application {
 		VLC.getInstance().create(
 				new String[] { "--verbose", "3", "--no-ignore-config",
 						"--config", conf, "--no-plugins-cache", "--intf",
-						"notify", "--aout", aout, "--vout", vout });
+						"reporter", "--aout", aout, "--vout", vout });
 		// start VLM
 		VLM.getInstance().create(new String[] { "127.0.0.1", "21178" });
 

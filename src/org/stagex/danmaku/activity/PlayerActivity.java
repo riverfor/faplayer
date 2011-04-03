@@ -53,7 +53,8 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	private TextView mTextViewPosition;
 	private SeekBar mSeekBarProgress;
 	private TextView mTextViewLength;
-	private ImageButton mImageButtonMode;
+	private ImageButton mImageButtonAudio;
+	private ImageButton mImageButtonSubtitle;
 	private ImageButton mImageButtonPrev;
 	private ImageButton mImageButtonPlay;
 	private ImageButton mImageButtonNext;
@@ -90,10 +91,6 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	private int mVideoSurfaceWidth = -1;
 	private int mVideoSurfaceHeight = -1;
 
-	private int mVideoOutputAspectRatio = -1;
-	private String[] mVideoOutputAspectRatioString = new String[] { "none",
-			"4:3", "16:9", "16:10" };
-
 	private int mVideoOutputPlaceX = -1;
 	private int mVideoOutputPlaceY = -1;
 	private int mVideoOutputPlaceW = -1;
@@ -104,8 +101,18 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
 				case CPI.EVENT_COMMENT_SNAPSHOT: {
-					if (mVideoOutputPlaceX >= 0 && mVideoOutputPlaceY >= 0
-							&& mVideoOutputPlaceW > 0 && mVideoOutputPlaceH > 0) {
+					if (mVideoSurfaceWidth > 0 && mVideoSurfaceHeight > 0
+							&& mVideoOriginalWidth > 0
+							&& mVideoOriginalHeight > 0) {
+						int q1 = mVideoSurfaceWidth << 16 / mVideoOriginalWidth;
+						int q2 = mVideoSurfaceHeight << 16 / mVideoOriginalHeight;
+						int q = (q1 < q2) ? q1 : q2;
+						mVideoOutputPlaceW = q * mVideoOriginalWidth >> 16;
+						mVideoOutputPlaceH = q * mVideoOriginalHeight >> 16;
+						mVideoOutputPlaceX = (mVideoSurfaceWidth - mVideoOutputPlaceW) >> 1;
+						mVideoOutputPlaceY = (mVideoSurfaceHeight - mVideoOutputPlaceH) >> 1;
+					}
+					if (mVideoOutputPlaceW > 0 && mVideoOutputPlaceH > 0) {
 						Bitmap bitmap = (Bitmap) msg.obj;
 						Matrix matrix = new Matrix();
 						float sx = (float) (mVideoOutputPlaceW)
@@ -207,24 +214,6 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 					}
 					break;
 				}
-				case VLI.EVENT_VOUT_ASPECT_RATIO: {
-					mVideoOutputAspectRatio = -1;
-					String ratio = (String) msg.obj;
-					for (int i = 0; i < mVideoOutputAspectRatioString.length; i++) {
-						if (ratio.compareTo(mVideoOutputAspectRatioString[i]) == 0) {
-							mVideoOutputAspectRatio = i;
-						}
-					}
-					// XXX: update view
-					break;
-				}
-				case VLI.EVENT_VOUT_GEOMETRY: {
-					mVideoOutputPlaceX = msg.arg1 >> 16;
-					mVideoOutputPlaceY = msg.arg1 & 0x0000ffff;
-					mVideoOutputPlaceW = msg.arg2 >> 16;
-					mVideoOutputPlaceH = msg.arg2 & 0x0000ffff;
-					break;
-				}
 				case VLI.EVENT_VIDEO_SIZE: {
 					mVideoOriginalWidth = msg.arg1;
 					mVideoOriginalHeight = msg.arg2;
@@ -309,8 +298,10 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 		mSeekBarProgress = (SeekBar) findViewById(R.id.player_seekbar_progress);
 		mSeekBarProgress.setOnSeekBarChangeListener(this);
 		mTextViewLength = (TextView) findViewById(R.id.player_text_length);
-		mImageButtonMode = (ImageButton) findViewById(R.id.player_button_mode);
-		mImageButtonMode.setOnClickListener(this);
+		mImageButtonAudio = (ImageButton) findViewById(R.id.player_button_audio);
+		mImageButtonAudio.setOnClickListener(this);
+		mImageButtonSubtitle = (ImageButton) findViewById(R.id.player_button_subtitle);
+		mImageButtonSubtitle.setOnClickListener(this);
 		mImageButtonPrev = (ImageButton) findViewById(R.id.player_button_prev);
 		mImageButtonPrev.setOnClickListener(this);
 		mImageButtonPlay = (ImageButton) findViewById(R.id.player_button_play);
@@ -411,23 +402,6 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	}
 
 	@Override
-	public void onVideoOutputAspectRatioChange(String ratio) {
-		Message msg = new Message();
-		msg.what = VLI.EVENT_VOUT_ASPECT_RATIO;
-		msg.obj = ratio;
-		mEventHandler.sendMessage(msg);
-	}
-
-	@Override
-	public void onVideoOutputGeometryChange(int x, int y, int width, int height) {
-		Message msg = new Message();
-		msg.what = VLI.EVENT_VOUT_GEOMETRY;
-		msg.arg1 = x << 16 | y;
-		msg.arg2 = width << 16 | height;
-		mEventHandler.sendMessage(msg);
-	}
-
-	@Override
 	public void onVideoSizeChange(int width, int height) {
 		Message msg = new Message();
 		msg.what = VLI.EVENT_VIDEO_SIZE;
@@ -512,10 +486,10 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	public void onClick(View v) {
 		int id = v.getId();
 		switch (id) {
-		case R.id.player_button_mode: {
-			int ratio = (mVideoOutputAspectRatio + 1)
-					% mVideoOutputAspectRatioString.length;
-			mVLM.setVideoOutputAspectRatio(mVideoOutputAspectRatioString[ratio]);
+		case R.id.player_button_audio: {
+			break;
+		}
+		case R.id.player_button_subtitle: {
 			break;
 		}
 		case R.id.player_button_prev: {

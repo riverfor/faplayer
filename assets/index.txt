@@ -9,6 +9,7 @@ lib/video_filter/libblend_plugin.so
 lib/video_filter/libswscale_plugin.so
 lib/codec/liblibass_plugin.so
 lib/codec/libavcodec_plugin.so
+lib/codec/libsubsdec_plugin.so
 lib/audio_mixer/libtrivial_mixer_plugin.so
 lib/audio_mixer/libfloat32_mixer_plugin.so
 lib/video_chroma/libyuv2rgb_plugin.so

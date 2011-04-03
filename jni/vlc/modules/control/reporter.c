@@ -180,7 +180,6 @@ static void Run(intf_thread_t *p_intf) {
             }
             ssize_t i_len, i_test;
             if (fd[1].revents & POLLIN) {
-                //msg_Dbg(VLC_OBJECT(p_intf), "poll in");
                 bool b_line = false;
                 while ((i_len = recv(fd[1].fd, p_sys->p_read_buffer + p_sys->i_read_offset, 1, 0)) > 0) {
                     char ch;
@@ -208,7 +207,6 @@ static void Run(intf_thread_t *p_intf) {
                 }
                 if (b_line && strlen(p_sys->p_read_buffer)) {
                     p_sys->i_read_offset = 0;
-                    //msg_Dbg(VLC_OBJECT(p_intf), "%s\n", p_sys->p_read_buffer);
                     ProcessCommandLine(p_intf, p_sys->p_read_buffer);
                 }
                 if(i_len == 0) {
@@ -351,7 +349,6 @@ static void ProcessCommandLine(intf_thread_t *p_intf, const char *p_string) {
     int i_argc;
     char** p_argv = NULL;
 
-    //msg_Dbg(VLC_OBJECT(p_intf), "%s", p_line);
     i_argc = ParseCommandLine(p_line, &p_argv);
     if (i_argc == 0 || !p_argv)
         goto msg;
@@ -370,10 +367,6 @@ static void ProcessCommandLine(intf_thread_t *p_intf, const char *p_string) {
         }
         else if (!strcmp(p_argv[0], "close")) {
             playlist_Clear(p_playlist, pl_Unlocked);
-        }
-        else if (!strcmp(p_argv[0], "ff")) {
-        }
-        else if (!strcmp(p_argv[0], "fb")) {
         }
         else if (!strcmp(p_argv[0], "quit")) {
             net_Close(p_sys->i_socket);
@@ -434,15 +427,6 @@ static void ProcessCommandLine(intf_thread_t *p_intf, const char *p_string) {
         }
         else
             goto msg;
-    }
-    else if (i_argc == 3) {
-        if (!strcmp(p_argv[0], "vout")) {
-            if (!strcmp(p_argv[1], "aspect-ratio")) {
-                if(p_sys->p_vout) {
-                    var_SetString(p_sys->p_vout, "aspect-ratio", strcmp(p_argv[2], "none") ? p_argv[2] : "");
-                }
-            }
-        }
     }
     else
         goto msg;
@@ -538,32 +522,9 @@ static int InputEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t old
         Notify(p_intf, "input length %"PRIu64"\n", val.i_time);
         break;
     }
-    case INPUT_EVENT_VOUT: {
-        if (p_sys->p_vout) {
-            var_DelCallback(p_sys->p_vout, "aspect-ratio", VoutEvent, p_intf);
-            vlc_object_release(p_sys->p_vout);
-        }
-        p_sys->p_vout = input_GetVout(p_input);
-        if (p_sys->p_vout) {
-            var_AddCallback(p_sys->p_vout, "aspect-ratio", VoutEvent, p_intf);
-            var_Get(p_sys->p_vout, "aspect-ratio", &val);
-            Notify(p_intf, "vout aspect-ratio %s\n", *val.psz_string == '\0' ? "none" : val.psz_string);
-        }
-        break;
-    }
     default:
         break;
     }
-
-    return VLC_SUCCESS;
-}
-
-static int VoutEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t oldval, vlc_value_t newval, void *p_data) {
-    intf_thread_t *p_intf = p_data;
-    intf_sys_t *p_sys = p_intf->p_sys;
-    vlc_value_t val;
-
-    Notify(p_intf,"vout aspect-ratio %s\n", newval.psz_string);
 
     return VLC_SUCCESS;
 }
