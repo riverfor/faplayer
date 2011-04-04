@@ -183,7 +183,7 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
 #else
         ds = info.w;
 #endif
-        if (sw > dw || dh > sh) {
+        if (sw > dw || sh > dh) {
             q1 = (dw << 16) / sw;
             q2 = (dh << 16) / sh;
             q = (q1 < q2) ? q1 : q2;

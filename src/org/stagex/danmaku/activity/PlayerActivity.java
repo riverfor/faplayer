@@ -6,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.stagex.danmaku.R;
 import org.stagex.danmaku.comment.CPI;
+import org.stagex.danmaku.comment.CommentDrawable;
 import org.stagex.danmaku.comment.CommentManager;
 import org.stagex.danmaku.wrapper.VLC;
 import org.stagex.danmaku.wrapper.VLI;
@@ -13,7 +14,6 @@ import org.stagex.danmaku.wrapper.VLM;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -91,38 +91,18 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	private int mVideoSurfaceWidth = -1;
 	private int mVideoSurfaceHeight = -1;
 
-	private int mVideoOutputPlaceX = -1;
-	private int mVideoOutputPlaceY = -1;
-	private int mVideoOutputPlaceW = -1;
-	private int mVideoOutputPlaceH = -1;
-
 	protected void initializeEvents() {
 		mEventHandler = new Handler() {
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
 				case CPI.EVENT_COMMENT_SNAPSHOT: {
-					if (mVideoSurfaceWidth > 0 && mVideoSurfaceHeight > 0
-							&& mVideoOriginalWidth > 0
-							&& mVideoOriginalHeight > 0) {
-						int q1 = mVideoSurfaceWidth << 16 / mVideoOriginalWidth;
-						int q2 = mVideoSurfaceHeight << 16 / mVideoOriginalHeight;
-						int q = (q1 < q2) ? q1 : q2;
-						mVideoOutputPlaceW = q * mVideoOriginalWidth >> 16;
-						mVideoOutputPlaceH = q * mVideoOriginalHeight >> 16;
-						mVideoOutputPlaceX = (mVideoSurfaceWidth - mVideoOutputPlaceW) >> 1;
-						mVideoOutputPlaceY = (mVideoSurfaceHeight - mVideoOutputPlaceH) >> 1;
-					}
-					if (mVideoOutputPlaceW > 0 && mVideoOutputPlaceH > 0) {
-						Bitmap bitmap = (Bitmap) msg.obj;
-						Matrix matrix = new Matrix();
-						float sx = (float) (mVideoOutputPlaceW)
-								/ (float) (bitmap.getWidth());
-						float sy = (float) (mVideoOutputPlaceH)
-								/ (float) (bitmap.getHeight());
-						matrix.setScale(sx, sy);
-						matrix.setTranslate(mVideoOutputPlaceX,
-								mVideoOutputPlaceY);
-					}
+					Bitmap bitmap = (Bitmap) msg.obj;
+					CommentDrawable snapshot = (CommentDrawable) mViewMessage
+							.getBackground();
+					snapshot.setSize(mViewMessage.getWidth(),
+							mViewMessage.getHeight());
+					snapshot.setBitmap(bitmap);
+					mViewMessage.invalidate();
 					break;
 				}
 				case VLI.EVENT_INPUT_STATE: {
@@ -171,7 +151,7 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 							mSeekBarProgress.setProgress(mCurrentTime);
 						}
 					}
-					mCommentManager.seek(msg.arg1);
+					// mCommentManager.seek(msg.arg1);
 					break;
 				}
 				case VLI.EVENT_INPUT_LENGTH: {
@@ -188,15 +168,6 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 					if (mCurrentLength > 0) {
 						mSeekBarProgress.setMax(mCurrentLength);
 					}
-					break;
-				}
-				case VLI.EVENT_INPUT_ES: {
-					break;
-				}
-				case VLI.EVENT_INPUT_AOUT: {
-					break;
-				}
-				case VLI.EVENT_INPUT_VOUT: {
 					break;
 				}
 				case VLI.EVENT_INPUT_MISC: {
@@ -290,8 +261,9 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 				mEventHandler.dispatchMessage(msg);
 			}
 		});
-		mSurfaceViewVideo.setOnTouchListener(this);
+		// mSurfaceViewVideo.setOnTouchListener(this);
 		mViewMessage = (View) findViewById(R.id.player_view_message);
+		mViewMessage.setBackgroundDrawable(new CommentDrawable());
 		mViewMessage.setOnTouchListener(this);
 
 		mTextViewPosition = (TextView) findViewById(R.id.player_text_position);

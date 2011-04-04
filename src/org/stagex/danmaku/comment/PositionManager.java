@@ -13,9 +13,6 @@ public class PositionManager {
 	private int mStageWidth = -1;
 	private int mStageHeight = -1;
 
-	private Bitmap mStage = null;
-	private Canvas mCanvas = null;
-
 	private LinkedList<Position> mFlyUsed = new LinkedList<Position>();
 	private LinkedList<Position> mFlyList = new LinkedList<Position>();
 	private LinkedList<Position> mTopUsed = new LinkedList<Position>();
@@ -99,9 +96,6 @@ public class PositionManager {
 				break;
 			}
 			}
-			mStage = Bitmap.createBitmap(mStageWidth, mStageHeight,
-					Config.ARGB_8888);
-			mCanvas = new Canvas(mStage);
 		}
 		Position p = new Position();
 		p.time = c.time;
@@ -178,34 +172,37 @@ public class PositionManager {
 	}
 
 	public Bitmap snapshot() {
-		if (mStage == null || mCanvas == null) {
+		if (mStageWidth < 0 || mStageHeight < 0) {
 			return null;
 		}
+		Bitmap bitmap = Bitmap.createBitmap(mStageWidth, mStageHeight,
+				Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmap);
 		Log.d("faplayer", "==== begin snapshot ====");
-		mCanvas.drawColor(0xff000000);
+		canvas.drawColor(0x00000000);
 		for (Position p : mFlyList) {
 			Log.d("faplayer",
 					String.format("%d, %d: %s", p.x, p.y,
 							Comment.getComment(p.id).toString()));
 			Bitmap b = Comment.getBitmap(p.id);
-			mCanvas.drawBitmap(b, p.x, p.y, null);
+			canvas.drawBitmap(b, p.x, p.y, null);
 		}
 		for (Position p : mTopUsed) {
 			Log.d("faplayer",
 					String.format("%d, %d: %s", p.x, p.y,
 							Comment.getComment(p.id).toString()));
 			Bitmap b = Comment.getBitmap(p.id);
-			mCanvas.drawBitmap(b, p.x, p.y, null);
+			canvas.drawBitmap(b, p.x, p.y, null);
 		}
 		for (Position p : mBotUsed) {
 			Log.d("faplayer",
 					String.format("%d, %d: %s", p.x, p.y,
 							Comment.getComment(p.id).toString()));
 			Bitmap b = Comment.getBitmap(p.id);
-			mCanvas.drawBitmap(b, p.x, p.y, null);
+			canvas.drawBitmap(b, p.x, p.y, null);
 		}
 		Log.d("faplayer", "====  end snapshot  ====");
-		return mStage;
+		return bitmap;
 	}
 
 }

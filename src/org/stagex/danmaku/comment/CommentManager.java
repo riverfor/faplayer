@@ -107,7 +107,7 @@ public class CommentManager {
 				}
 				Log.d("faplayer",
 						String.format("rendered in %d ms", rendererEclipsed));
-				long timeToSleep = (1000 / 15) - rendererEclipsed;
+				long timeToSleep = (1000 / 16) - rendererEclipsed;
 				if (timeToSleep > 0) {
 					try {
 						Thread.sleep(timeToSleep);

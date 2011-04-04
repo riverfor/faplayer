@@ -6,7 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.FontMetricsInt;
+import android.graphics.Paint.FontMetrics;
+import android.graphics.Rect;
 
 public class Comment {
 
@@ -25,7 +26,7 @@ public class Comment {
 	public final static int TYPE_TOP = 2;
 	public final static int TYPE_BOT = 4;
 
-	public static Paint mPaint = new Paint();
+	public static Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	public static HashMap<String, Bitmap> mBitmap = new HashMap<String, Bitmap>();
 	public static HashMap<String, Comment> mComment = new HashMap<String, Comment>();
 
@@ -60,15 +61,19 @@ public class Comment {
 		mComment.put(key, this);
 		Bitmap value = mBitmap.get(key);
 		if (value == null) {
-			// XXX: need more work
-			mPaint.setColor(color);
+			// XXX
+			mPaint.setColor(0xff000000 | color);
 			mPaint.setTextSize(size);
-			FontMetricsInt metrics = mPaint.getFontMetricsInt();
-			mWidth = (int) Math.ceil(mPaint.measureText(text));
-			mHeight = metrics.descent - metrics.ascent;
+			Rect bounds = new Rect();
+			mPaint.getTextBounds(text, 0, text.length(), bounds);
+			mWidth = bounds.width();
+			mHeight = bounds.height();
 			value = Bitmap.createBitmap(mWidth, mHeight, Config.ARGB_8888);
 			Canvas canvas = new Canvas(value);
-			canvas.drawText(text, 0, 0, mPaint);
+			canvas.drawColor(0x00000000);
+			FontMetrics metrics = mPaint.getFontMetrics();
+			canvas.drawText(text, 0.0f, mHeight + metrics.top - metrics.ascent,
+					mPaint);
 			mBitmap.put(key, value);
 		}
 		switch (site) {
