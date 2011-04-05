@@ -2,7 +2,7 @@
  * libvlc.c: libvlc instances creation and deletion, interfaces handling
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id$
+ * $Id: dce0ac968cff7a31be63abead016c2d3659f9a79 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -799,7 +799,7 @@ int libvlc_InternalInit( libvlc_int_t *p_libvlc, int i_argc,
 
 #if defined(MEDIA_LIBRARY)
     /* Get the ML */
-    if( var_GetBool( p_libvlc, "load-media-library-on-startup" ) == true )
+    if( var_GetBool( p_libvlc, "load-media-library-on-startup" ) )
     {
         priv->p_ml = ml_Create( VLC_OBJECT( p_libvlc ), NULL );
         if( !priv->p_ml )

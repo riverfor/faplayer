@@ -2,7 +2,7 @@
  * vlc_update.h: VLC update download
  *****************************************************************************
  * Copyright © 2005-2007 the VideoLAN team
- * $Id$
+ * $Id: 1fd5a8593aca6d0f06b34debf5564c207abd8727 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *          Rafaël Carré <funman@videolanorg>

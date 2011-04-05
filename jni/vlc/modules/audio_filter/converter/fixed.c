@@ -2,7 +2,7 @@
  * fixed.c: Fixed-point audio format conversions
  *****************************************************************************
  * Copyright (C) 2002, 2006-2009 the VideoLAN team
- * $Id$
+ * $Id: 9a5b426be8e5fccdf9d205bd5c2c567bd35e2f17 $
  *
  * Authors: Jean-Paul Saman <jpsaman _at_ videolan _dot_ org>
  *          Marc Ariberti <marcari@videolan.org>

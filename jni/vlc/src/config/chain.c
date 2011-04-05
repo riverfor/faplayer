@@ -2,7 +2,7 @@
  * chain.c : configuration module chain parsing stuff
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id$
+ * $Id: d7f063307e5dfaf6b069444f129141ab79d642dd $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>

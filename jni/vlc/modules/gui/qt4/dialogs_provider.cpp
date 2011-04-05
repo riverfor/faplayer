@@ -2,7 +2,7 @@
  * dialogs_provider.cpp : Dialog Provider
  *****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id$
+ * $Id: ed0fa36d2c9fda309af3be3ae6d3ed50ffcecdb1 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>

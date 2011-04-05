@@ -2,7 +2,7 @@
  * sql_delete.c: SQL-based media library: all database delete functions
  *****************************************************************************
  * Copyright (C) 2008-2010 The VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: b0fb25c5646569343b1b61e7b5ae6d814bb59c59 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

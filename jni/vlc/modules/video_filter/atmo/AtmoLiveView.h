@@ -5,7 +5,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: 9d7f57b4b635e4f3a5c552f2dd480685e70ff8df $
  */
 #ifndef _AtmoLiveView_h_
 #define _AtmoLiveView_h_

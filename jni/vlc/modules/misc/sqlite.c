@@ -2,7 +2,7 @@
  * sqlite.c: An SQLite3 wrapper for VLC
  *****************************************************************************
  * Copyright (C) 2008-2009 the VideoLAN team
- * $Id$
+ * $Id: 360577f447289abb69f5bd86e3323a21b8551301 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

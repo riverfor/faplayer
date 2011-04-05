@@ -2,7 +2,7 @@
  * playlist_fetcher.h:
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: 8de22ed9eca6f9ea9291db897e192fd91e9715f8 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>

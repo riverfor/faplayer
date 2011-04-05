@@ -2,7 +2,7 @@
  * omxil.c: Video decoder module making use of OpenMAX IL components.
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id$
+ * $Id: 17cfa6b0592bab20a2bb539950437e6f053ad1fe $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

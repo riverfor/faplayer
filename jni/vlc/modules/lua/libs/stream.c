@@ -2,7 +2,7 @@
  * stream.c: stream functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id$
+ * $Id: 4dcae620646de25394b1cc71ab42fcdbef2c194a $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>

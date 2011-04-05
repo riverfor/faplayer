@@ -2,7 +2,7 @@
  * variables.h: variables handling
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id$
+ * $Id: 16b358421678e229210be72ce1f7e92b43e45c83 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Gildas Bazin <gbazin@netcourrier.com>
@@ -735,6 +735,9 @@ VLC_EXPORT( int, var_InheritURational, ( vlc_object_t *, unsigned *num, unsigned
 #define var_GetString(a,b)   var_GetString( VLC_OBJECT(a),b)
 #define var_GetNonEmptyString(a,b)   var_GetNonEmptyString( VLC_OBJECT(a),b)
 #define var_GetAddress(a,b)  var_GetAddress( VLC_OBJECT(a),b)
+
+VLC_EXPORT( int, var_LocationParse, (vlc_object_t *, const char *mrl, const char *prefix) );
+#define var_LocationParse(o, m, p) var_LocationParse(VLC_OBJECT(o), m, p)
 
 /**
  * @}

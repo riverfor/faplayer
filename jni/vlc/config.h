@@ -50,7 +50,7 @@
 /* #undef CAN_COMPILE_SSSE3 */
 
 /* The ./configure command line */
-#define CONFIGURE_LINE "\\(^_^)/"
+#define CONFIGURE_LINE "./configure  '--host=arm-linux-androideabi' '--disable-httpd' '--disable-sout' '--disable-vlm' '--disable-mad' '--disable-a52' '--disable-libgcrypt' 'host_alias=arm-linux-androideabi'"
 
 /* Copyright string */
 #define COPYRIGHT_MESSAGE "Copyright © 1996-2011 the VideoLAN team"
@@ -86,10 +86,6 @@
 /* Define to 1 if you have the <altivec.h> header file. */
 /* #undef HAVE_ALTIVEC_H */
 
-#ifdef ANDROID
-#define HAVE_ANDROID 1
-#endif
-
 /* Define to 1 if you have the <ApplicationServices/ApplicationServices.h>
    header file. */
 /* #undef HAVE_APPLICATIONSERVICES_APPLICATIONSERVICES_H */
@@ -101,7 +97,7 @@
 #define HAVE_ASPRINTF 1
 
 /* Define to 1 if you have the `atof' function. */
-#define HAVE_ATOF 1
+#define HAVE_ATOF 1 
 
 /* Define to 1 if you have the `atoll' function. */
 #define HAVE_ATOLL 1
@@ -163,6 +159,9 @@
 /* Define if <time.h> defines nanosleep. */
 #define HAVE_DECL_NANOSLEEP 1
 
+/* Define to 1 if you have the `dirfd' function. */
+#define HAVE_DIRFD 1
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
@@ -180,15 +179,6 @@
 
 /* Define to 1 if you have the <dshow.h> header file. */
 /* #undef HAVE_DSHOW_H */
-
-/* Define to 1 if you have the `dup3' function. */
-/* #undef HAVE_DUP3 */
-
-/* Define to 1 if you have the <dvbpsi/dr.h> header file. */
-/* #undef HAVE_DVBPSI_DR_H */
-
-/* Define if you have dvbpsi_GenSDTSections. */
-/* #undef HAVE_DVBPSI_SDT */
 
 /* Define if you have dvdnav_describe_title_chapters. */
 /* #undef HAVE_DVDNAV_DESCRIBE_TITLE_CHAPTERS */
@@ -225,18 +215,6 @@
 
 /* Define to 1 if you have the `fdopendir' function. */
 #define HAVE_FDOPENDIR 1
-
-/* Define to 1 if you have the <ffmpeg/avcodec.h> header file. */
-/* #undef HAVE_FFMPEG_AVCODEC_H */
-
-/* Define to 1 if you have the <ffmpeg/avformat.h> header file. */
-/* #undef HAVE_FFMPEG_AVFORMAT_H */
-
-/* Define to 1 if you have the <ffmpeg/avutil.h> header file. */
-/* #undef HAVE_FFMPEG_AVUTIL_H */
-
-/* Define to 1 if you have the <ffmpeg/swscale.h> header file. */
-/* #undef HAVE_FFMPEG_SWSCALE_H */
 
 /* Define to 1 if you have the <fontconfig/fontconfig.h> header file. */
 /* #undef HAVE_FONTCONFIG_FONTCONFIG_H */
@@ -361,12 +339,6 @@
 /* Define to 1 if you have the <linux/dccp.h> header file. */
 #define HAVE_LINUX_DCCP_H 1
 
-/* Define to 1 if you have the <linux/dvb/frontend.h> header file. */
-/* #undef HAVE_LINUX_DVB_FRONTEND_H */
-
-/* Define to 1 if you have the <linux/dvb/version.h> header file. */
-/* #undef HAVE_LINUX_DVB_VERSION_H */
-
 /* Define to 1 if you have the <linux/fb.h> header file. */
 /* #undef HAVE_LINUX_FB_H */
 
@@ -377,10 +349,10 @@
 #define HAVE_LINUX_VERSION_H 1
 
 /* Define to 1 if you have the <linux/videodev2.h> header file. */
-/* #undef HAVE_LINUX_VIDEODEV2_H */
+#define HAVE_LINUX_VIDEODEV2_H 1
 
 /* Define to 1 if you have the <liveMedia_version.hh> header file. */
-/* #undef HAVE_LIVEMEDIA_VERSION_HH */
+#define HAVE_LIVEMEDIA_VERSION_HH 1
 
 /* Define to 1 if you have the `lldiv' function. */
 #define HAVE_LLDIV 1
@@ -788,10 +760,10 @@
 #endif
 
 /* Define to 1 if the X Window System is missing or not being used. */
-#define X_DISPLAY_MISSING 1
+/* #undef X_DISPLAY_MISSING */
 
 /* Define if the zvbi module is built */
-/* #undef ZVBI_COMPILED */
+#define ZVBI_COMPILED 1
 
 /* Define to '2' to get glibc warnings. */
 #define _FORTIFY_SOURCE 2

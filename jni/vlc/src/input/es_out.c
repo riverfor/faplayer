@@ -2,7 +2,7 @@
  * es_out.c: Es Out handler for input.
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id$
+ * $Id: 70a463445eccb8c5b6be7fd3a465f66092e84619 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Jean-Paul Saman <jpsaman #_at_# m2x dot nl>
@@ -406,7 +406,8 @@ static mtime_t EsOutGetWakeup( es_out_t *out )
     /* We do not have a wake up date if the input cannot have its speed
      * controlled or sout is imposing its own or while buffering
      *
-     * FIXME for !p_input->p->b_can_pace_control a wkeup time is still needed to avoid too strong buffering */
+     * FIXME for !p_input->p->b_can_pace_control a wake-up time is still needed
+     * to avoid too heavy buffering */
     if( !p_input->p->b_can_pace_control ||
         p_input->p->b_out_pace_control ||
         p_sys->b_buffering )
@@ -1194,8 +1195,6 @@ static void EsOutProgramMeta( es_out_t *out, int i_group, const vlc_meta_t *p_me
         return;
     }
     /* Find program */
-    if( !EsOutIsProgramVisible( out, i_group ) )
-        return;
     p_pgrm = EsOutProgramFind( out, i_group );
     if( !p_pgrm )
         return;
@@ -1232,7 +1231,7 @@ static void EsOutProgramMeta( es_out_t *out, int i_group, const vlc_meta_t *p_me
         }
 
         /* ugly but it works */
-        if( psz_text )
+        if( EsOutIsProgramVisible( out, i_group ) && psz_text )
         {
             input_SendEventProgramDel( p_input, i_group );
             input_SendEventProgramAdd( p_input, i_group, psz_text );
@@ -1287,8 +1286,6 @@ static void EsOutProgramEpg( es_out_t *out, int i_group, const vlc_epg_t *p_epg 
     char *psz_cat;
 
     /* Find program */
-    if( !EsOutIsProgramVisible( out, i_group ) )
-        return;
     p_pgrm = EsOutProgramFind( out, i_group );
     if( !p_pgrm )
         return;

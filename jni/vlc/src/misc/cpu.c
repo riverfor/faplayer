@@ -2,7 +2,7 @@
  * cpu.c: CPU detection code
  *****************************************************************************
  * Copyright (C) 1998-2004 the VideoLAN team
- * $Id$
+ * $Id: 4be74dfeeef484b0944399c7db814a1cd1fc4cc3 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Christophe Massiot <massiot@via.ecp.fr>

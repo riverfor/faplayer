@@ -2,7 +2,7 @@
  * interlacing.c
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id$
+ * $Id: ceb6e3024c163ad059df4165d8b5b65eb7fc3435 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -48,6 +48,7 @@ static const char *deinterlace_modes[] = {
     "x",
     "yadif",
     "yadif2x",
+    "phosphor",
     NULL
 };
 static bool DeinterlaceIsModeValid(const char *mode)

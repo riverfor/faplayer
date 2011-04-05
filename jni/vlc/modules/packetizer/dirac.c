@@ -2,7 +2,7 @@
  * dirac.c
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: 0e92cce548529f7b5fa66e6f7d4fbd1653690de8 $
  *
  * Authors: David Flynn <davidf@rd.bbc.co.uk>
  *

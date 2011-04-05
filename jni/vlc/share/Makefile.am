@@ -82,7 +82,10 @@ skins2_default_vlt_FILES = \
 
 skins2/default.vlt: $(skins2_default_vlt_FILES)
 	mkdir -p skins2
-	tar cvvzf skins2/default.vlt -C $(srcdir)/skins2 default/
+	(cd "$(srcdir)/skins2"; find default -print0 | \
+		LC_ALL=C sort -z | \
+		tar cvv --exclude .svn --no-recursion --null -T -) | \
+	gzip -n > skins2/default.vlt
 
 DIST_http = \
 	http/.hosts \
@@ -202,13 +205,13 @@ luac_verbose_0 = @echo "  LUAC   $@";
 if BUILD_LUA
 nobase_vlclib_DATA = \
 	lua/extensions/allocine-fr.luac \
+	lua/intf/cli.luac \
 	lua/intf/dummy.luac \
 	lua/intf/dumpmeta.luac \
 	lua/intf/hotkeys.luac \
 	lua/intf/luac.luac \
 	lua/intf/modules/common.luac \
 	lua/intf/modules/host.luac \
-	lua/intf/rc.luac \
 	lua/intf/telnet.luac \
 	lua/meta/art/04_musicbrainz.luac \
 	lua/meta/art/02_frenchtv.luac \
@@ -261,6 +264,7 @@ EXTRA_DIST += \
 	lua/extensions/README.txt \
 	lua/extensions/allocine-fr.lua \
 	lua/intf/README.txt \
+	lua/intf/cli.lua \
 	lua/intf/dummy.lua \
 	lua/intf/dumpmeta.lua \
 	lua/intf/hotkeys.lua \
@@ -268,7 +272,6 @@ EXTRA_DIST += \
 	lua/intf/luac.lua \
 	lua/intf/modules/common.lua \
 	lua/intf/modules/host.lua \
-	lua/intf/rc.lua \
 	lua/intf/telnet.lua \
 	lua/meta/art/README.txt \
 	lua/meta/art/04_musicbrainz.lua \

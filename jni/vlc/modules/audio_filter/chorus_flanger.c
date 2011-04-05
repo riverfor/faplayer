@@ -2,7 +2,7 @@
  * chorus_flanger.c
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: de0a3edd105be858d7ae90ee98ce1a89359b7378 $
  *
  * Author: Srikanth Raju < srikiraju at gmail dot com >
  *

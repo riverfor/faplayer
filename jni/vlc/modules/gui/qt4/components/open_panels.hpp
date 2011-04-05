@@ -4,7 +4,7 @@
  * Copyright (C) 2006-2009 the VideoLAN team
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
- * $Id$
+ * $Id: 627e5bc6b99fd4e4f9a61eab965ff36d1f75c7ea $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -48,11 +48,9 @@
 
 enum
 {
-    V4L_DEVICE,
     V4L2_DEVICE,
     PVR_DEVICE,
-    DVB_DEVICE,
-    BDA_DEVICE,
+    DTV_DEVICE,
     DSHOW_DEVICE,
     SCREEN_DEVICE,
     JACK_DEVICE
@@ -202,25 +200,21 @@ private:
     QString advMRL;
     QDialog *adv;
 #ifdef WIN32
-    QRadioButton *bdas, *bdat, *bdac, *bdaa, *bdaq;
-    QSpinBox *bdaCard, *bdaFreq, *bdaSrate;
-    QLabel *bdaSrateLabel, *bdaBandLabel;
-    QComboBox *bdaBandBox;
     StringListConfigControl *vdevDshowW, *adevDshowW;
     QLineEdit *dshowVSizeLine;
 #else
-    QRadioButton *dvbs, *dvbt, *dvbc;
-    QLabel *dvbBandLabel, *dvbSrateLabel;
-    QSpinBox  *v4lFreq, *pvrFreq, *pvrBitr;
-    QLineEdit *v4lVideoDevice, *v4lAudioDevice;
+    QSpinBox  *pvrFreq, *pvrBitr;
     QComboBox *v4l2VideoDevice, *v4l2AudioDevice;
     QLineEdit *pvrDevice, *pvrRadioDevice;
-    QComboBox *v4lNormBox, *v4l2StdBox, *pvrNormBox, *dvbBandBox;
-    QSpinBox *dvbCard, *dvbFreq, *dvbSrate;
+    QComboBox *v4l2StdBox, *pvrNormBox;
     QSpinBox *jackChannels, *jackCaching;
     QCheckBox *jackPace, *jackConnect;
     QLineEdit *jackPortsSelected;
 #endif
+    QRadioButton *dvbc, *dvbs, *dvbs2, *dvbt, *atsc, *cqam;
+    QLabel *dvbBandLabel, *dvbSrateLabel, *dvbModLabel;
+    QComboBox *dvbQamBox, *dvbPskBox, *dvbBandBox;
+    QSpinBox *dvbCard, *dvbFE, *dvbFreq, *dvbSrate;
     QDoubleSpinBox *screenFPS;
 
 public slots:

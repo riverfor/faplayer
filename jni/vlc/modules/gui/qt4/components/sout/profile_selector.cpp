@@ -2,7 +2,7 @@
  * profile_selector.cpp : A small profile selector and editor
  ****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: e279c6bf3dfb330be87826d1bfbe75158281427e $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *

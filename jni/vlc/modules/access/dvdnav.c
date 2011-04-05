@@ -2,7 +2,7 @@
  * dvdnav.c: DVD module using the dvdnav library.
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id$
+ * $Id: a2b7550ca370fa58055c0aeb69e199350bcfc63f $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -201,7 +201,7 @@ static int Open( vlc_object_t *p_this )
     else
         psz_file = strdup( p_demux->psz_file );
 
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
     if( psz_file != NULL )
     {
         /* Remove trailing backslash, otherwise dvdnav_open will fail */

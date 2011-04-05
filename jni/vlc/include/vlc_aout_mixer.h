@@ -2,7 +2,7 @@
  * vlc_aout_mixer.h : audio output mixer interface
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id$
+ * $Id: 5fd2ce0953dc8814fc6e7cfa921503fb60bb917c $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>

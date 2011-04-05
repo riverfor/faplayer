@@ -2,7 +2,7 @@
  * variables.c: Generic lua<->vlc variables interface
  *****************************************************************************
  * Copyright (C) 2007-2010 the VideoLAN team
- * $Id$
+ * $Id: 26bc0d9057d37646a6387c7ff83c32482ded593a $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -532,7 +532,7 @@ static int vlclua_del_callback( lua_State *L )
         lua_pop( L, 1 );
         /* obj var func data callbacks index */
     }
-    if( b_found == false )
+    if( !b_found )
         /* obj var func data callbacks */
         return luaL_error( L, "Couldn't find matching callback." );
     /* else */

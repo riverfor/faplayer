@@ -2,7 +2,7 @@
  * podcast.c : podcast playlist imports
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id$
+ * $Id: 445d0c70b54e155ac5f061b8f71fefd2dc4da771 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -286,7 +286,7 @@ static int Demux( demux_t *p_demux )
                     vlc_gc_decref( p_input );
                     b_item = false;
                 }
-                else if( !strcmp( psz_elname, "image" ) )
+                else if( !strcmp( node, "image" ) )
                 {
                     b_image = false;
                 }

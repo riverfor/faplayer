@@ -2,7 +2,7 @@
  * mp4.c : MP4 file input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2004, 2010 the VideoLAN team
- * $Id$
+ * $Id: 04854f85d66ba6356bcfced8137cc59fc9fed069 $
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
  * This program is free software; you can redistribute it and/or modify

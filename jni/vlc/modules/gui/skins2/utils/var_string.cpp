@@ -2,7 +2,7 @@
  * var_string.cpp
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id$
+ * $Id: fd913c33f9b964a7543a5ab8206abdea167be89e $
  *
  * Author: Erwan Tulou      <erwan10 aT videolan DoT org>
  *

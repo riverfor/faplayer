@@ -2,7 +2,7 @@
  * info.h
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id$
+ * $Id: 341b1f1adff7eb46139b227242ae2fd81eb14fc1 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -86,15 +86,14 @@ static inline info_t *info_category_VaAddInfo(info_category_t *cat,
                                               const char *name,
                                               const char *format, va_list args)
 {
-	info_t *info = info_category_FindInfo(cat, NULL, name);
-	if (!info) {
-		info = info_New(name, NULL);
+    info_t *info = info_category_FindInfo(cat, NULL, name);
+    if (!info) {
+        info = info_New(name, NULL);
         if (!info)
             return NULL;
-	    INSERT_ELEM(cat->pp_infos, cat->i_infos, cat->i_infos, info);
-    } else {
+        INSERT_ELEM(cat->pp_infos, cat->i_infos, cat->i_infos, info);
+    } else
         free(info->psz_value);
-    }
     if (vasprintf(&info->psz_value, format, args) == -1)
         info->psz_value = NULL;
     return info;

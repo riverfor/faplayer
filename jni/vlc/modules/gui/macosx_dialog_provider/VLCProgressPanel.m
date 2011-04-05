@@ -2,7 +2,7 @@
  * VLCProgressPanel.m: A Generic Progress Indicator Panel created for VLC
  *****************************************************************************
  * Copyright (C) 2009-2010 the VideoLAN team
- * $Id$
+ * $Id: d06dbc721f551618d946596507b40aec79ec222a $
  *
  * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
  *

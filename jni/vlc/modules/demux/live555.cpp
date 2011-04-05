@@ -2,7 +2,7 @@
  * live555.cpp : LIVE555 Streaming Media support.
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id$
+ * $Id: a09c2c0d2b4c91b0831c8932ec124295a0a3a796 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Derk-Jan Hartman <hartman at videolan. org>
@@ -697,7 +697,7 @@ static int SessionsSetup( demux_t *p_demux )
     unsigned int   i_buffer = 0;
     unsigned const thresh = 200000; /* RTP reorder threshold .2 second (default .1) */
 
-    b_rtsp_tcp    = var_InheritBool( p_demux, "rtsp-tcp" ) ||
+    b_rtsp_tcp    = var_CreateGetBool( p_demux, "rtsp-tcp" ) ||
                     var_InheritBool( p_demux, "rtsp-http" );
     i_client_port = var_InheritInteger( p_demux, "rtp-client-port" );
 
@@ -783,7 +783,7 @@ static int SessionsSetup( demux_t *p_demux )
                      * use and try again */
                     if( p_sys->i_live555_ret == 461 )
                         p_sys->rtsp->sendSetupCommand( *sub, default_live555_callback, False,
-                                                       toBool( b_rtsp_tcp ), False );
+                                                       !toBool( b_rtsp_tcp ), False );
                     if( p_sys->i_live555_ret != 461 || !wait_Live555_response( p_demux ) )
                     {
                         msg_Err( p_demux, "SETUP of'%s/%s' failed %s",
@@ -1575,6 +1575,10 @@ static int RollOverTcp( demux_t *p_demux )
     var_SetBool( p_demux, "rtsp-tcp", true );
 
     /* We close the old RTSP session */
+    p_sys->rtsp->sendTeardownCommand( *p_sys->ms, NULL );
+    Medium::close( p_sys->ms );
+    RTSPClient::close( p_sys->rtsp );
+
     for( i = 0; i < p_sys->i_track; i++ )
     {
         live_track_t *tk = p_sys->track[i];
@@ -1588,10 +1592,6 @@ static int RollOverTcp( demux_t *p_demux )
     }
     if( p_sys->i_track ) free( p_sys->track );
     if( p_sys->p_out_asf ) stream_Delete( p_sys->p_out_asf );
-
-    p_sys->rtsp->sendTeardownCommand( *p_sys->ms, NULL );
-    Medium::close( p_sys->ms );
-    RTSPClient::close( p_sys->rtsp );
 
     p_sys->ms = NULL;
     p_sys->rtsp = NULL;

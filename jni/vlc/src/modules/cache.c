@@ -2,7 +2,7 @@
  * cache.c: Plugins cache
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: 057a94402dfae014eed4cd0f15308659fa7c249d $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Ethan C. Baldridge <BaldridgeE@cadmus.com>

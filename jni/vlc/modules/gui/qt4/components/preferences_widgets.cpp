@@ -2,7 +2,7 @@
  * preferences_widgets.cpp : Widgets for preferences displays
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id$
+ * $Id: b97521a5df907b61b31569f5902190b8573b3dc1 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -1122,7 +1122,7 @@ BoolConfigControl::BoolConfigControl( vlc_object_t *_p_this,
 
 void BoolConfigControl::finish()
 {
-    checkbox->setChecked( p_item->value.i == true );
+    checkbox->setChecked( p_item->value.i );
     if( p_item->psz_longtext )
         checkbox->setToolTip( formatTooltip(qtr(p_item->psz_longtext)) );
 }

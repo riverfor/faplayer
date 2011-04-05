@@ -2,7 +2,7 @@
  * directx.c: Windows DirectDraw video output
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id$
+ * $Id: 35dd5fb1d53a71fef7248d19bbe4202549f4740a $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

@@ -2,7 +2,7 @@
  * vlm.hpp : VLM Management
  ****************************************************************************
  * Copyright ( C ) 2006 the VideoLAN team
- * $Id$
+ * $Id: 6feee5893d16528f295a00f796053d93402c6ff9 $
  *
  * Authors: Jean-François Massol <jf.massol@gmail.com>
  *          Jean-Baptiste Kempf <jb@videolan.org>

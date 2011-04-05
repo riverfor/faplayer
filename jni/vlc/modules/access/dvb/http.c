@@ -28,44 +28,26 @@
 # include "config.h"
 #endif
 
+#ifdef ENABLE_HTTPD
 #include <vlc_common.h>
 #include <vlc_access.h>
-
-#ifdef HAVE_UNISTD_H
-#   include <unistd.h>
-#endif
+#include <vlc_httpd.h>
+#include <vlc_acl.h>
 
 #include <sys/types.h>
 
 /* Include dvbpsi headers */
-#ifdef HAVE_DVBPSI_DR_H
-#   include <dvbpsi/dvbpsi.h>
-#   include <dvbpsi/descriptor.h>
-#   include <dvbpsi/pat.h>
-#   include <dvbpsi/pmt.h>
-#   include <dvbpsi/dr.h>
-#   include <dvbpsi/psi.h>
-#   include <dvbpsi/demux.h>
-#   include <dvbpsi/sdt.h>
-#else
-#   include "dvbpsi.h"
-#   include "descriptor.h"
-#   include "tables/pat.h"
-#   include "tables/pmt.h"
-#   include "descriptors/dr.h"
-#   include "psi.h"
-#   include "demux.h"
-#   include "tables/sdt.h"
-#endif
-
-#ifdef ENABLE_HTTPD
-#   include <vlc_httpd.h>
-#   include <vlc_acl.h>
-#endif
+# include <dvbpsi/dvbpsi.h>
+# include <dvbpsi/descriptor.h>
+# include <dvbpsi/pat.h>
+# include <dvbpsi/pmt.h>
+# include <dvbpsi/dr.h>
+# include <dvbpsi/psi.h>
+# include <dvbpsi/demux.h>
+# include <dvbpsi/sdt.h>
 
 #include "dvb.h"
 
-#ifdef ENABLE_HTTPD
 struct httpd_file_sys_t
 {
     access_t         *p_access;
@@ -205,12 +187,12 @@ void HTTPClose( access_t *p_access )
         {
             /* Unlock the thread if it is stuck in HttpCallback */
             vlc_mutex_lock( &p_sys->httpd_mutex );
-            if ( p_sys->b_request_frontend_info == true )
+            if ( p_sys->b_request_frontend_info )
             {
                 p_sys->b_request_frontend_info = false;
                 p_sys->psz_frontend_info = strdup("");
             }
-            if ( p_sys->b_request_mmi_info == true )
+            if ( p_sys->b_request_mmi_info )
             {
                 p_sys->b_request_mmi_info = false;
                 p_sys->psz_mmi_info = strdup("");
@@ -260,7 +242,7 @@ static int HttpCallback( httpd_file_sys_t *p_args,
     p_sys->i_httpd_timeout = mdate() + INT64_C(3000000); /* 3 s */
     p_sys->psz_request = psz_request;
     p_sys->b_request_frontend_info = true;
-    if ( p_sys->i_ca_handle )
+    if ( p_sys->p_cam != NULL )
     {
         p_sys->b_request_mmi_info = true;
     }

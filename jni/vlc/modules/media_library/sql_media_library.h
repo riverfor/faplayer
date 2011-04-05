@@ -2,7 +2,7 @@
  * sql_media_library.h : Media Library Interface
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team and AUTHORS
- * $Id$
+ * $Id: 312eee80462bc161a125645ae15de78a5be6adb9 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

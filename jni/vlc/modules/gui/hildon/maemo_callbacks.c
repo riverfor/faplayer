@@ -2,7 +2,7 @@
  * maemo_callbacks.c : Callbacks for the maemo plugin.
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: 073488e6e74c259346fcff4925829dccd56e24ea $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Gildas Bazin <gbazin@videolan.org>

@@ -2,7 +2,7 @@
  * fluidsynth.c: Software MIDI synthetizer using libfluidsynth
  *****************************************************************************
  * Copyright © 2007 Rémi Denis-Courmont
- * $Id$
+ * $Id: 6d1e3562f68f9fe0778eb58e07eaefa53a0cb939 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -238,7 +238,7 @@ static aout_buffer_t *DecodeBlock (decoder_t *p_dec, block_t **pp_block)
     unsigned samples =
         (p_block->i_pts - date_Get (&p_sys->end_date)) * 441 / 10000;
     if (samples == 0)
-        return NULL;
+        goto drop;
 
     p_out = decoder_NewAudioBuffer (p_dec, samples);
     if (p_out == NULL)

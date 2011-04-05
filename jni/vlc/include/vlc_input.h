@@ -2,7 +2,7 @@
  * vlc_input.h: Core input structures
  *****************************************************************************
  * Copyright (C) 1999-2006 the VideoLAN team
- * $Id$
+ * $Id: afa7a81a38b3f317e7c96dc8ff23f6264d7621b6 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -635,8 +635,7 @@ static inline int input_ModifyPcrSystem( input_thread_t *p_input, bool b_absolut
 }
 
 /* */
-typedef struct input_clock_t input_clock_t;
-VLC_EXPORT( decoder_t *, input_DecoderNew, ( input_thread_t *, es_format_t *, input_clock_t *, sout_instance_t * ) LIBVLC_USED );
+VLC_EXPORT( decoder_t *, input_DecoderCreate, ( vlc_object_t *, es_format_t *, input_resource_t * ) LIBVLC_USED );
 VLC_EXPORT( void, input_DecoderDelete, ( decoder_t * ) );
 VLC_EXPORT( void, input_DecoderDecode,( decoder_t *, block_t *, bool b_do_pace ) );
 

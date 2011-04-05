@@ -44,11 +44,10 @@
 #   define _APPLE_C_SOURCE    1 /* Proper pthread semantics on OSX */
 
 #   include <unistd.h> /* _POSIX_SPIN_LOCKS */
-
-#   if defined (ANDROID)
-#   include <pthread-compat.h>
+#   ifdef ANDROID
+#       include "pthread-compat.h"
 #   else
-#   include <pthread.h>
+#       include <pthread.h>
 #   endif
 
 /* Unnamed POSIX semaphores not supported on Mac OS X, use Mach semaphores instead */
@@ -75,21 +74,17 @@
 #   define VLC_THREAD_PRIORITY_HIGHEST 22
 
 #elif defined(LIBVLC_USE_PTHREAD)
-#if defined (ANDROID)
 #   define VLC_THREAD_PRIORITY_LOW      0
 #   define VLC_THREAD_PRIORITY_INPUT   10
-#   define VLC_THREAD_PRIORITY_AUDIO    5
-#   define VLC_THREAD_PRIORITY_VIDEO    0
+#   ifdef ANDROID
+#       define VLC_THREAD_PRIORITY_AUDIO   19
+#       define VLC_THREAD_PRIORITY_VIDEO   20
+#   else
+#       define VLC_THREAD_PRIORITY_AUDIO    5
+#       define VLC_THREAD_PRIORITY_VIDEO    0
+#   endif
 #   define VLC_THREAD_PRIORITY_OUTPUT  15
 #   define VLC_THREAD_PRIORITY_HIGHEST 20
-#else
-#   define VLC_THREAD_PRIORITY_LOW      0
-#   define VLC_THREAD_PRIORITY_INPUT   10
-#   define VLC_THREAD_PRIORITY_AUDIO    5
-#   define VLC_THREAD_PRIORITY_VIDEO   20
-#   define VLC_THREAD_PRIORITY_OUTPUT  15
-#   define VLC_THREAD_PRIORITY_HIGHEST 20
-#endif
 
 #elif defined(WIN32) || defined(UNDER_CE)
 /* Define different priorities for WinNT/2K/XP and Win9x/Me */
@@ -389,7 +384,7 @@ static inline void vlc_spin_init (vlc_spinlock_t *spin)
 #endif
 static inline void barrier (void)
 {
-#if defined (__GNUC__) && !defined (__APPLE__) && !defined(ANDROID) && \
+#if defined (__GNUC__) && !defined (__APPLE__) && \
             ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1))
     __sync_synchronize ();
 #elif defined(__APPLE__)

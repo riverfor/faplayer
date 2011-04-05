@@ -2,7 +2,7 @@
  * os.c : Low-level dynamic library handling
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: 630bf5463296429e0bf4559e2bab63010e21c622 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Ethan C. Baldridge <BaldridgeE@cadmus.com>

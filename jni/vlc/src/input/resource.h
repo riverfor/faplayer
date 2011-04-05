@@ -2,7 +2,7 @@
  * resource.h
  *****************************************************************************
  * Copyright (C) 2008 Laurent Aimar
- * $Id$
+ * $Id: 12ed768f946fa6abc5f2034b750efd158897b6eb $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org >
  *

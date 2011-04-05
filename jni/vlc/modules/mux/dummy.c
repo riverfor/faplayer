@@ -2,7 +2,7 @@
  * dummy.c: dummy muxer module for vlc
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id$
+ * $Id: e1eec70061635e1c738ca186171676ed0cc0f9e7 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Eric Petit <titer@videolan.org>

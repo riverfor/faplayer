@@ -4,7 +4,7 @@
  *   (http://developers.videolan.org/libdca.html).
  *****************************************************************************
  * Copyright (C) 2001, 2002libdca the VideoLAN team
- * $Id$
+ * $Id: 7089e3b530c9b4446ae19643dc10d7c1a4fa7171 $
  *
  * Author: Gildas Bazin <gbazin@videolan.org>
  *

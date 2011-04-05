@@ -2,7 +2,7 @@
  * raop.c: Remote Audio Output Protocol streaming support
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: 17c74839d4d042a231e908eaecb74a6e17b9ffc3 $
  *
  * Author: Michael Hanselmann
  *

@@ -2,7 +2,7 @@
  * x11_timer.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 6f640c5c07067a1665f53b9baee56ef90b0337c5 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>

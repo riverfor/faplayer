@@ -4,7 +4,7 @@
  * VLC specific code:
  * 
  * Copyright © 2008 the VideoLAN team
- * $Id$
+ * $Id: 71ecdd1033e078797f4c26102bf55b7b56210358 $
  *
  * Authors: Rafaël Carré <funman@videolanorg>
  *

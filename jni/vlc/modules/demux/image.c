@@ -2,7 +2,7 @@
  * image.c: Image demuxer
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id$
+ * $Id: 1b74c248aa779a5d837ab3682c4a057862c4e23f $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

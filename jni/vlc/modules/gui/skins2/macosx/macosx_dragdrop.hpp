@@ -2,7 +2,7 @@
  * macosx_dragdrop.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 1fd5b03a83f34d4bb13edfa6e6c12ea6e2953d3d $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *

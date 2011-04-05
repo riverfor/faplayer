@@ -2,7 +2,7 @@
  * media.c: Libvlc API media descripor management
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id$
+ * $Id: aecde243df610e658ab4fb8a09828493fdf2bb54 $
  *
  * Authors: Pierre d'Herbemont <pdherbemont@videolan.org>
  *

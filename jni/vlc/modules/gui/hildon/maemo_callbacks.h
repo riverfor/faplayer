@@ -2,7 +2,7 @@
 * maemo_callbacks.h : Callbacks header file for the maemo plugin.
 *****************************************************************************
 * Copyright (C) 2008 the VideoLAN team
-* $Id$
+* $Id: 678134463edfab690b35b0824111de2690a868e6 $
 *
 * Authors: Antoine Lejeune <phytos@videolan.org>
 *

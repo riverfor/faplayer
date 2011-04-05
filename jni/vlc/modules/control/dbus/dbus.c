@@ -4,7 +4,7 @@
  * Copyright © 2006-2008 Rafaël Carré
  * Copyright © 2007-2010 Mirsal Ennaime
  * Copyright © 2009-2010 The VideoLAN team
- * $Id$
+ * $Id: fd677475f4329c6c298d748570ee25edc521f4f5 $
  *
  * Authors:    Rafaël Carré <funman at videolanorg>
  *             Mirsal Ennaime <mirsal at mirsal fr>
@@ -355,7 +355,7 @@ static dbus_bool_t add_timeout( DBusTimeout *p_timeout, void *p_data )
     intf_thread_t *p_intf = (intf_thread_t*) p_data;
     intf_sys_t    *p_sys  = (intf_sys_t*) p_intf->p_sys;
 
-    timeout_info_t *p_info = calloc( sizeof( timeout_info_t ), 1 );
+    timeout_info_t *p_info = calloc( 1, sizeof( timeout_info_t ) );
     p_info->i_remaining = dbus_timeout_get_interval( p_timeout ) * 1000;/* µs */
     p_info->p_timeout = p_timeout;
 
@@ -724,7 +724,7 @@ static void Run          ( intf_thread_t *p_intf )
         vlc_mutex_lock( &p_sys->lock );
 
         int i_watches = vlc_array_count( p_sys->p_watches );
-        struct pollfd *p_fds = calloc( sizeof( struct pollfd ), i_watches );
+        struct pollfd *p_fds = calloc( i_watches, sizeof( struct pollfd ) );
 
         int i_fds = GetPollFds( p_intf, p_fds );
 

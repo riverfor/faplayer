@@ -2,7 +2,7 @@
  * motion.c: control VLC with laptop built-in motion sensors
  *****************************************************************************
  * Copyright (C) 2006 - 2007 the VideoLAN team
- * $Id$
+ * $Id: e97fb49322262fae2c7579ec4f7cb12f68bac826 $
  *
  * Author: Sam Hocevar <sam@zoy.org>
  *         Jérôme Decoodt <djc@videolan.org> (unimotion integration)
@@ -35,11 +35,8 @@
 #include <vlc_common.h>
 #include <vlc_plugin.h>
 #include <vlc_interface.h>
+#include <vlc_playlist.h>
 #include <vlc_vout.h>
-
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
 
 #ifdef __APPLE__
 # include "TargetConditionals.h"
@@ -189,11 +186,11 @@ static void RunIntf( intf_thread_t *p_intf )
 
     for( ;; )
     {
-        vout_thread_t *p_vout;
         const char *psz_filter, *psz_type;
         bool b_change = false;
 
         /* Wait a bit, get orientation, change filter if necessary */
+#warning FIXME: check once (or less) per picture, not once per interval
         msleep( INTF_IDLE_SLEEP );
 
         int canc = vlc_savecancel();
@@ -243,14 +240,24 @@ static void RunIntf( intf_thread_t *p_intf )
 
         if( b_change )
         {
-            p_vout = (vout_thread_t *)
-                vlc_object_find( p_intf, VLC_OBJECT_VOUT, FIND_ANYWHERE );
-            if( p_vout )
-            {
-                config_PutPsz( p_vout, "transform-type", psz_type );
-                var_SetString( p_vout, "video-filter", psz_filter );
-                vlc_object_release( p_vout );
+#warning FIXME: refactor this plugin as a video filter!
+            input_thread_t *p_input;
 
+            p_input = playlist_CurrentInput( pl_Get( p_intf ) );
+            if( p_input )
+            {
+                vout_thread_t *p_vout;
+
+                p_vout = input_GetVout( p_input );
+                if( p_vout )
+                {
+#warning FIXME: do not override the permanent configuration!
+#warning FIXME: transform-type does not exist anymore
+                    config_PutPsz( p_vout, "transform-type", psz_type );
+                    var_SetString( p_vout, "video-filter", psz_filter );
+                    vlc_object_release( p_vout );
+                }
+                vlc_object_release( p_input );
                 i_oldx = i_x;
             }
         }

@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
  * Copyright (C) 2002-2007 Rémi Denis-Courmont
- * $Id$
+ * $Id: 3bbb2dc0d7e8c931e3c7decdd64bc84bca2f45a4 $
  *
  * Author: Rémi Denis-Courmont <rem # videolan.org>
  *

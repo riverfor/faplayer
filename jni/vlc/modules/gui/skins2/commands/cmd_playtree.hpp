@@ -2,7 +2,7 @@
  * cmd_playtree.hpp
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id$
+ * $Id: 97d6fa1e329f6a25426fe174ca8096823ff4ad25 $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Clément Stenac <zorglub@videolan.org>

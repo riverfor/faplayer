@@ -2,7 +2,7 @@
  * extended_panels.cpp : Extended controls panels
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id$
+ * $Id: afb66814ea75736fbde8f93c9d02591e77645df7 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea .t videolan d@t org>

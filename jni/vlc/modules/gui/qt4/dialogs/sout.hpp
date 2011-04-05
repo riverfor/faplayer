@@ -2,7 +2,7 @@
  * sout.hpp : Stream output dialog ( old-style, ala WX )
  ****************************************************************************
  * Copyright ( C ) 2006 the VideoLAN team
- * $Id$
+ * $Id: 85c1284ca30df23e1bdd2d45bf83bc143347852b $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *

@@ -2,7 +2,7 @@
  * stream_output.h : stream output module
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id$
+ * $Id: 404d63122780e7dedda9cc5026d28929bc3139f5 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -58,21 +58,6 @@ struct sout_instance_t
     /** Private */
     sout_instance_sys_t *p_sys;
 };
-
-/** Stream output statistics */
-typedef enum
-{
-    SOUT_STATISTIC_DECODED_VIDEO,
-    SOUT_STATISTIC_DECODED_AUDIO,
-    SOUT_STATISTIC_DECODED_SUBTITLE,
-
-    /* Use them only if you do not goes through a access_out module */
-    SOUT_STATISTIC_SENT_PACKET,
-    SOUT_STATISTIC_SENT_BYTE,
-
-} sout_statistic_t;
-
-VLC_EXPORT( void, sout_UpdateStatistic, ( sout_instance_t *p_sout, sout_statistic_t, int ) );
 
 /****************************************************************************
  * sout_stream_id_t: opaque (private for all sout_stream_t)

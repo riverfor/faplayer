@@ -2,7 +2,7 @@
  * vlc.h: VLC specific lua library functions.
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id$
+ * $Id: 0d214f0d23f9240714793e68e2a10d87ff9fb80c $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>

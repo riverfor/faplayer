@@ -2,7 +2,7 @@
  * float32.c : precise float32 audio mixer implementation
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id$
+ * $Id: 3df474c3b457372081db9ed6c58383d62a313e5d $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *

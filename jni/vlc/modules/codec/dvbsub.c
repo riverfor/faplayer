@@ -4,7 +4,7 @@
  *****************************************************************************
  * Copyright (C) 2003 ANEVIA
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id$
+ * $Id: 11055fb12f8e2a0a9d6cf188b5d38de0e5ba587c $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Damien LUCAS <damien.lucas@anevia.com>
@@ -135,7 +135,6 @@ vlc_module_begin ()
 
     add_integer( ENC_CFG_PREFIX "x", -1, ENC_POSX_TEXT, ENC_POSX_LONGTEXT, false )
     add_integer( ENC_CFG_PREFIX "y", -1, ENC_POSY_TEXT, ENC_POSY_LONGTEXT, false )
-    add_obsolete_integer( ENC_CFG_PREFIX "timeout" ) /* Suppressed since 0.8.5 */
 vlc_module_end ()
 
 static const char *const ppsz_enc_options[] = { "x", "y", NULL };

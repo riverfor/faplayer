@@ -2,7 +2,7 @@
  * extended.cpp : Extended controls - Undocked
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id$
+ * $Id: b5e484b178699e457d53bfed4d767e0a1480d69a $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>

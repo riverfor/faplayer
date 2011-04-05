@@ -2,7 +2,7 @@
  * intf.c: interface configuration handling
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: fb04f20fd2376780959ac0ab000c6293a22a378d $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

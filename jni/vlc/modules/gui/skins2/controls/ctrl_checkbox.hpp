@@ -2,7 +2,7 @@
  * ctrl_checkbox.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 78fff7c41e49559d8d5e79e7dcf00d1005664165 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>

@@ -2,7 +2,7 @@
  * cmd_muxer.hpp
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id$
+ * $Id: f7f4397fa74110163d202d53fb625a88615cc16c $
  *
  * Authors: Olivier Teulière <ipkiss@via.ecp.fr>
  *

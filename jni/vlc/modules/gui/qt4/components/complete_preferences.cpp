@@ -2,7 +2,7 @@
  * preferences.cpp : "Normal preferences"
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id$
+ * $Id: 9702c6f93f0306edadccf038e7dc5401e78f7ee5 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -441,7 +441,7 @@ AdvPrefsPanel::AdvPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
             ( p_item->i_type == CONFIG_CATEGORY ||
               p_item->i_type == CONFIG_SUBCATEGORY ) )
             break;
-        if( p_item->b_internal == true ) continue;
+        if( p_item->b_internal ) continue;
 
         if( p_item->i_type == CONFIG_SECTION )
         {

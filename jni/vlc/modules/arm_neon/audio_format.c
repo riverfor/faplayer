@@ -29,6 +29,10 @@
 
 #include <assert.h>
 
+#ifndef __asm__
+#define asm __asm__
+#endif
+
 static int Open (vlc_object_t *);
 
 vlc_module_begin ()
@@ -88,7 +92,7 @@ static block_t *Do_F32_S32 (filter_t *filter, block_t *inbuf)
 
     if (nb_samples & 1)
     {
-        __asm__ volatile (
+        asm volatile (
             "vldr.32 s0, [%[outp]]\n"
             "vcvt.s32.f32 d0, d0, #28\n"
             "vstr.32 s0, [%[outp]]\n"
@@ -99,7 +103,7 @@ static block_t *Do_F32_S32 (filter_t *filter, block_t *inbuf)
     }
 
     if (nb_samples & 2)
-        __asm__ volatile (
+        asm volatile (
             "vld1.f32 {d0}, [%[outp]]\n"
             "vcvt.s32.f32 d0, d0, #28\n"
             "vst1.s32 {d0}, [%[outp]]!\n"
@@ -108,7 +112,7 @@ static block_t *Do_F32_S32 (filter_t *filter, block_t *inbuf)
             : "d0", "memory");
 
     if (nb_samples & 4)
-        __asm__ volatile (
+        asm volatile (
             "vld1.f32 {q0}, [%[outp]]\n"
             "vcvt.s32.f32 q0, q0, #28\n"
             "vst1.s32 {q0}, [%[outp]]!\n"
@@ -117,7 +121,7 @@ static block_t *Do_F32_S32 (filter_t *filter, block_t *inbuf)
             : "q0", "memory");
 
     while (outp != endp)
-        __asm__ volatile (
+        asm volatile (
             "vld1.f32 {q0-q1}, [%[outp]]\n"
             "vcvt.s32.f32 q0, q0, #28\n"
             "vcvt.s32.f32 q1, q1, #28\n"

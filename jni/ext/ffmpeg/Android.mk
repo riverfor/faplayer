@@ -615,7 +615,6 @@ FF_ARM_NEON_SRC := \
 
 FF_CFLAGS := -std=c99
 FF_CFLAGS += -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
-FF_CFLAGS += -mlong-calls -fno-strict-aliasing
 
 include $(CLEAR_VARS)
 

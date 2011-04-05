@@ -5,7 +5,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: ac8aff880e894b4d207fd5279e097aea2817e05b $
 */
 
 #include "AtmoExternalCaptureInput.h"
@@ -132,7 +132,7 @@ void CAtmoExternalCaptureInput::DeliverNewSourceDataPaket(BITMAPINFOHEADER *bmpI
 
 DWORD CAtmoExternalCaptureInput::Execute(void)
 {
-    while ((this->m_bTerminated == ATMO_FALSE) && (this->m_pAtmoThread->b_die == false)) {
+    while ((this->m_bTerminated == ATMO_FALSE) && !this->m_pAtmoThread->b_die) {
           vlc_mutex_lock( &m_WakeupLock );
           vlc_cond_timedwait(&m_WakeupCond, &m_WakeupLock, mdate() + 75000 );
 

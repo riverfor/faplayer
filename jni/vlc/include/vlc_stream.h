@@ -2,7 +2,7 @@
  * vlc_stream.h: Stream (between access and demux) descriptor and methods
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id$
+ * $Id: a45022e9e3fe2eb4af0357a41a2aec9b33201125 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -181,7 +181,7 @@ VLC_EXPORT( stream_t *, stream_MemoryNew, (vlc_object_t *p_obj, uint8_t *p_buffe
 #define stream_MemoryNew( a, b, c, d ) stream_MemoryNew( VLC_OBJECT(a), b, c, d )
 
 /**
- * Create a stream_t reading from an URL.
+ * Create a stream_t reading from a URL.
  * You must delete it using stream_Delete.
  */
 VLC_EXPORT( stream_t *, stream_UrlNew, (vlc_object_t *p_this, const char *psz_url ) );

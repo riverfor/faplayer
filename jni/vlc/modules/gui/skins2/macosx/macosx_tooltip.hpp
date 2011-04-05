@@ -2,7 +2,7 @@
  * macosx_tooltip.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: a559d2920c4a797ca88f24fafe53a7ce429bb188 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *

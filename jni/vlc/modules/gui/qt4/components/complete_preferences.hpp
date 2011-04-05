@@ -2,7 +2,7 @@
  * preferences_tree.hpp : Tree of modules for preferences
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id$
+ * $Id: 32ad1896b8e0c5ed91449ef802a0c51ff4ad3a3c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *

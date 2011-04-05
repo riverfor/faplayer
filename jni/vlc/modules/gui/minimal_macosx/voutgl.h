@@ -2,7 +2,7 @@
  * voutgl.h: MacOS X OpenGL provider
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: 3e51ea08c9d4fb2031e9eddbd383795f8ede7d30 $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Florian G. Pflug <fgp@phlo.org>

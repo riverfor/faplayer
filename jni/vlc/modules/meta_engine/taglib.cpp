@@ -2,7 +2,7 @@
  * taglib.cpp: Taglib tag parser/writer
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id$
+ * $Id: f6dfaaa780d014ae72f143044a5f38047ba78fa6 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Rafaël Carré <funman@videolanorg>

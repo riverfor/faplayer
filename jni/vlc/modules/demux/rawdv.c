@@ -2,7 +2,7 @@
  * rawdv.c : raw DV input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: 26c5b4532ed5fc3be1d73280ab1fcda27bd41b7c $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *          Paul Corke <paul dot corke at datatote dot co dot uk>

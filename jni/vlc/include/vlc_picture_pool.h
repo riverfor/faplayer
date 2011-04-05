@@ -2,7 +2,7 @@
  * vlc_picture_pool.h: picture pool definitions
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: d22dbed8e9a6fc05bc5cd8400ade70e258fea03b $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

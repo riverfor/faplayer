@@ -2,7 +2,7 @@
  * rar.c: uncompressed RAR stream filter
  *****************************************************************************
  * Copyright (C) 2008-2010 Laurent Aimar
- * $Id$
+ * $Id: fcf9180f0d7d1ca94978754b7e87c1d5253f63e8 $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

@@ -2,7 +2,7 @@
  * about.m: MacOS X About Panel
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id$
+ * $Id: 9ebc8be7566599304d394f5711a0246c0ea29904 $
  *
  * Authors: Derk-Jan Hartman <thedj@users.sourceforge.net>
  *          Felix Paul Kühne <fkuehne -at- videolan.org>

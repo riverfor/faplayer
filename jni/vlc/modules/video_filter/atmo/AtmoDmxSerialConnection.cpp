@@ -6,7 +6,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: bc47035e81fe9e5f76786531dc2e4a21d5371b96 $
  */
 #include "AtmoDefs.h"
 #include "AtmoDmxSerialConnection.h"

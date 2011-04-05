@@ -2,7 +2,7 @@
  * sidestatusview.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2005-2008 the VideoLAN team
- * $Id$
+ * $Id: 25c96f73950ba4469a9ee442dc72b2c156fb2330 $
  *
  * Authors: Eric Dudiak <dudiak at gmail dot com>
  *          Colloquy <http://colloquy.info/>

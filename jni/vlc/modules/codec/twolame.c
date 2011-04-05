@@ -3,7 +3,7 @@
  *            (using libtwolame from http://users.tpg.com.au/adslblvi/)
  *****************************************************************************
  * Copyright (C) 2004-2005 the VideoLAN team
- * $Id$
+ * $Id: 98b37e3cc248b94d25bc78850588039c9d237cc6 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *

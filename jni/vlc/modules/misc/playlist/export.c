@@ -2,7 +2,7 @@
  * export.c :  Playlist export module
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id$
+ * $Id: da7fa0128e1f45d5e4b60fec460381f8b7fc59fa $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *

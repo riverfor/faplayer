@@ -2,7 +2,7 @@
  * libasf.c : asf stream demux module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2003 the VideoLAN team
- * $Id$
+ * $Id: cee5b7b8177d1d44e6f418848829d3c0a673558d $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>

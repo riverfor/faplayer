@@ -4,7 +4,7 @@
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id$
+ * $Id: 76365662b78c65c88564410bb15adee1afa7e8f5 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Rémi Denis-Courmont <rem$videolan,org>

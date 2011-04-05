@@ -3,7 +3,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: 0640ca59d8c116d0f8f885e69ee6f736fbbdb3ba $
  */
 
 #ifndef _dmxtools_h_

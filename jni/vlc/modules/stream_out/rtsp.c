@@ -4,7 +4,7 @@
  * Copyright (C) 2003-2004, 2010 the VideoLAN team
  * Copyright © 2007 Rémi Denis-Courmont
  *
- * $Id$
+ * $Id: 6a8534a81cfb13de3eacdee728e6db4721132c6d $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Pierre Ynard
@@ -442,7 +442,7 @@ int RtspTrackAttach( rtsp_stream_t *rtsp, const char *name,
         goto out;
 
     rtsp_strack_t *tr = NULL;
-    for (int i = 0; session->trackc; i++)
+    for (int i = 0; i < session->trackc; i++)
     {
         if (session->trackv[i].id == id)
         {
@@ -466,6 +466,7 @@ int RtspTrackAttach( rtsp_stream_t *rtsp, const char *name,
         vlc_rand_bytes (&track.ssrc, sizeof (track.ssrc));
 
         INSERT_ELEM(session->trackv, session->trackc, session->trackc, track);
+        tr = session->trackv + session->trackc - 1;
     }
 
     *ssrc = ntohl(tr->ssrc);
@@ -500,7 +501,7 @@ void RtspTrackDetach( rtsp_stream_t *rtsp, const char *name,
     if (session == NULL)
         goto out;
 
-    for (int i = 0; session->trackc; i++)
+    for (int i = 0; i < session->trackc; i++)
     {
         rtsp_strack_t *tr = session->trackv + i;
         if (tr->sout_id == sout_id)

@@ -2,7 +2,7 @@
  * libs.h: VLC Lua wrapper libraries
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: 8bca89c41d6f6bd8dff382567a14d51c061c10c1 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *

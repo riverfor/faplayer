@@ -2,7 +2,7 @@
  * es.c : Generic audio ES input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id$
+ * $Id: 627fc7c3c8c2f4254caf7f3d14611b757a317f0f $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>

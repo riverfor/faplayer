@@ -2,7 +2,7 @@
  * mvar.c : Variables handling for the HTTP Interface
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: 36e6ba96a7abed6199a1dd09dc05f26a6181062e $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -527,7 +527,7 @@ mvar_t *mvar_FileSetNew( intf_thread_t *p_intf, char *name,
         char psz_tmp[strlen( psz_dir ) + 1 + strlen( psz_name ) + 1];
         mvar_t *f;
 
-#if defined( WIN32 )
+#if defined( WIN32 ) || defined( __OS2__ )
         if( psz_dir[0] == '\0' || (psz_dir[0] == '\\' && psz_dir[1] == '\0') )
         {
             strcpy( psz_tmp, psz_name );
@@ -556,7 +556,7 @@ mvar_t *mvar_FileSetNew( intf_thread_t *p_intf, char *name,
         mvar_AppendNewVar( f, "ext", psz_ext );
         free( psz_ext );
 
-#if defined( WIN32 )
+#if defined( WIN32 ) || defined( __OS2__ )
         if( psz_dir[0] == '\0' || (psz_dir[0] == '\\' && psz_dir[1] == '\0') )
         {
             char psz_tmp[3];
@@ -625,7 +625,7 @@ static void mvar_VlmSetNewLoop( char *name, vlm_t *vlm, mvar_t *s,
 
     /* Add a node with name and info */
     set = mvar_New( name, "set" );
-    if( b_name == true )
+    if( b_name )
     {
         mvar_AppendNewVar( set, "name", el->psz_name );
     }

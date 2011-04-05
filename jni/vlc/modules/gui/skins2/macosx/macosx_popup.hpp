@@ -2,7 +2,7 @@
  * macosx_popup.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 5d903a42fb7fde91d064519acb4cf8f1cecc8cb4 $
  *
  * Authors: Olivier Teulière <ipkiss@via.ecp.fr>
  *

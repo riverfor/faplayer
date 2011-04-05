@@ -2,7 +2,7 @@
  * vlc_vlm.h: VLM core structures
  *****************************************************************************
  * Copyright (C) 2000, 2001 the VideoLAN team
- * $Id$
+ * $Id: c9f68f257177cd835f18bd81005455fe62fa61f7 $
  *
  * Authors: Simon Latapie <garf@videolan.org>
  *          Laurent Aimar <fenrir@videolan.org>

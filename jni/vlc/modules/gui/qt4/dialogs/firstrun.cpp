@@ -2,7 +2,7 @@
  * firstrun : First Run dialogs
  ****************************************************************************
  * Copyright © 2009 VideoLAN
- * $Id$
+ * $Id: 52b4fefce96bc1c67792081d6444522cfffbcb18 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *

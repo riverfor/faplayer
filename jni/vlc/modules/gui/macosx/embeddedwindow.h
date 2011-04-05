@@ -2,7 +2,7 @@
  * embeddedwindow.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2005-2007 the VideoLAN team
- * $Id$
+ * $Id: 451d7627f4a9ca08a7c7e019f564b1db815d1841 $
  *
  * Authors: Benjamin Pracht <bigben at videolan dot org>
  *
@@ -41,6 +41,8 @@
     IBOutlet id o_btn_volume_down;
     IBOutlet id o_volumeslider;
     IBOutlet id o_btn_volume_up;
+    IBOutlet id o_backgroundimg_right;
+    IBOutlet id o_backgroundimg_middle;
     IBOutlet id o_timeslider;
     IBOutlet id o_main_pgbar;
     IBOutlet id o_time;

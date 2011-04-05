@@ -2,7 +2,7 @@
  * swscale.c: scaling and chroma conversion using libswscale
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: bafb2a4b29f2bf37b6242c104496f41f65862a5e $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -35,11 +35,7 @@
 #include <vlc_filter.h>
 #include <vlc_cpu.h>
 
-#ifdef HAVE_LIBSWSCALE_SWSCALE_H
-#   include <libswscale/swscale.h>
-#elif defined(HAVE_FFMPEG_SWSCALE_H)
-#   include <ffmpeg/swscale.h>
-#endif
+#include <libswscale/swscale.h>
 
 #include "../codec/avcodec/chroma.h" // Chroma Avutil <-> VLC conversion
 

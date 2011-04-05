@@ -3,7 +3,7 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id$
+ * $Id: 66b0a2609e20ac48df81c08c18f5b9e607ed2908 $
  */
 #include <stdlib.h>
 #include <string.h>

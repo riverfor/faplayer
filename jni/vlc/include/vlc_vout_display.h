@@ -2,7 +2,7 @@
  * vlc_vout_display.h: vout_display_t definitions
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: f7d4ff0bb0d6569bf90466246a81eaaa7ba3a454 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

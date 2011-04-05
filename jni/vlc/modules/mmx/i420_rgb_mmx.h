@@ -2,7 +2,7 @@
  * transforms_yuvmmx.h: MMX YUV transformation assembly
  *****************************************************************************
  * Copyright (C) 1999-2007 the VideoLAN team
- * $Id$
+ * $Id: cd1155b4ba230e0c6142938df501df0c0376b499 $
  *
  * Authors: Olie Lho <ollie@sis.com.tw>
  *          Gaël Hendryckx <jimmy@via.ecp.fr>

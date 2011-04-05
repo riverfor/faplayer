@@ -2,7 +2,7 @@
  * extensions.cpp: Extensions manager for Qt: dialogs manager
  ****************************************************************************
  * Copyright (C) 2009-2010 VideoLAN and authors
- * $Id$
+ * $Id: 0d3655f9afc4e11875a67fcfa9dd1e00483c0cb3 $
  *
  * Authors: Jean-Philippe André < jpeg # videolan.org >
  *

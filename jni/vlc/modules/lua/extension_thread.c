@@ -2,7 +2,7 @@
  * extension_thread.c: Extensions Manager, Threads manager (no Lua here)
  *****************************************************************************
  * Copyright (C) 2009-2010 VideoLAN and authors
- * $Id$
+ * $Id: 20bd4189b9616ff249d5c660b9122b6bd7351f9e $
  *
  * Authors: Jean-Philippe André < jpeg # videolan.org >
  *

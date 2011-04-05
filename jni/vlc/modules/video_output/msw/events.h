@@ -2,7 +2,7 @@
  * event.h: Windows video output header file
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id$
+ * $Id: 2b21965f94d05a73eba74834e6ff540e97897ea5 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Damien Fouilleul <damienf@videolan.org>

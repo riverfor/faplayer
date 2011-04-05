@@ -2,7 +2,7 @@
  * libvlc_media_list.h:  libvlc_media_list API
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id$
+ * $Id: bd7563585547ddd87484dc96516f7c3a7f904578 $
  *
  * Authors: Pierre d'Herbemont
  *

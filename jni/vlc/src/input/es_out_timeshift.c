@@ -2,7 +2,7 @@
  * es_out_timeshift.c: Es Out timeshift.
  *****************************************************************************
  * Copyright (C) 2008 Laurent Aimar
- * $Id$
+ * $Id: 7ff0013f2af22f6a332b9947eb2e923ad46226ee $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org>
  *
@@ -332,12 +332,12 @@ es_out_t *input_EsOutTimeshiftNew( input_thread_t *p_input, es_out_t *p_next_out
         p_sys->i_tmp_size_max = 50*1024*1024;
     else
         p_sys->i_tmp_size_max = __MAX( i_tmp_size_max, 1*1024*1024 );
-    msg_Dbg( p_input, "using timeshift granularity of %d MiB",
-             (int)p_sys->i_tmp_size_max/(1024*1024) );
 
     char *psz_tmp_path = var_CreateGetNonEmptyString( p_input, "input-timeshift-path" );
     p_sys->psz_tmp_path = GetTmpPath( psz_tmp_path );
-    msg_Dbg( p_input, "using timeshift path '%s'", p_sys->psz_tmp_path );
+
+    msg_Dbg( p_input, "using timeshift granularity of %d MiB, in path '%s'",
+             (int)p_sys->i_tmp_size_max/(1024*1024), p_sys->psz_tmp_path );
 
 #if 0
 #define S(t) msg_Err( p_input, "SIZEOF("#t")=%d", sizeof(t) )
@@ -1584,7 +1584,7 @@ static char *GetTmpPath( char *psz_path )
         return strdup( "C:" );
     }
 #else
-    psz_path = strdup( "/tmp" );
+    psz_path = strdup( DIR_SEP"tmp" );
 #endif
 
     return psz_path;

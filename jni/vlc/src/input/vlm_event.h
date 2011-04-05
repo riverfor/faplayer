@@ -2,7 +2,7 @@
  * vlm_event.h: VLM event functions
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: 39914fe81a6188a5cf4bb8b8fe25c13c0b2b1f4d $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ fr>
  *

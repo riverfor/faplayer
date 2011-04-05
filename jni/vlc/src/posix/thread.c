@@ -69,19 +69,9 @@ void vlc_trace (const char *fn, const char *file, unsigned line)
 
 static inline unsigned long vlc_threadid (void)
 {
-#if defined (__linux__)
-#if HAVE_ANDROID
-     return syscall (__NR_gettid);
-#else
-     /* glibc does not provide a call for this */
-     return syscall (SYS_gettid);
-#endif
-#else
      union { pthread_t th; unsigned long int i; } v = { };
      v.th = pthread_self ();
      return v.i;
-
-#endif
 }
 
 #ifndef NDEBUG
@@ -401,7 +391,7 @@ int vlc_cond_timedwait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex,
 #else
     lldiv_t d = lldiv( deadline, CLOCK_FREQ );
     struct timespec ts = { d.quot, d.rem * (1000000000 / CLOCK_FREQ) };
-#if HAVE_ANDROID
+#ifdef ANDROID
     int val = pthread_cond_timedwait_cancel (p_condvar, p_mutex, &ts);
 #else
     int val = pthread_cond_timedwait (p_condvar, p_mutex, &ts);
@@ -675,18 +665,7 @@ static int vlc_clone_attr (vlc_thread_t *th, pthread_attr_t *attr,
     assert (ret == 0); /* fails iif VLC_STACKSIZE is invalid */
 #endif
 
-#if HAVE_ANDROID
-    int prio = priority;
-    if (prio < VLC_THREAD_PRIORITY_LOW)
-        prio = VLC_THREAD_PRIORITY_LOW;
-    if (prio > VLC_THREAD_PRIORITY_HIGHEST)
-        prio = VLC_THREAD_PRIORITY_HIGHEST;
-    int min_p = sched_get_priority_min(SCHED_RR);
-    int max_p = sched_get_priority_max(SCHED_RR);
-    pthread_attr_setschedpolicy(attr, SCHED_RR);
-    prio = min_p + prio * (max_p - min_p) / (VLC_THREAD_PRIORITY_HIGHEST - VLC_THREAD_PRIORITY_LOW);
-    struct sched_param sched = { .sched_priority = prio };
-    pthread_attr_setschedparam(attr, &sched);
+#ifdef ANDROID
     ret = pthread_create_cancel (th, attr, entry, data);
 #else
     ret = pthread_create (th, attr, entry, data);

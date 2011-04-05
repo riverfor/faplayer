@@ -3,7 +3,7 @@
  * Collection of useful common types and macros definitions
  *****************************************************************************
  * Copyright (C) 1998-2005 the VideoLAN team
- * $Id$
+ * $Id: 9cfd1a3eb6f44145a872fb9e4a18a5e898e2db9b $
  *
  * Authors: Samuel Hocevar <sam@via.ecp.fr>
  *          Vincent Seguin <seguin@via.ecp.fr>
@@ -780,7 +780,6 @@ static inline uint64_t ntoh64 (uint64_t ll)
 /* win32, cl and icl support */
 #   if defined( _MSC_VER ) || !defined( __MINGW32__ )
 #       define __attribute__(x)
-#       define __inline__      __inline
 #       define S_IFBLK         0x3000  /* Block */
 #       define S_ISBLK(m)      (0)
 #       define S_ISCHR(m)      (0)
@@ -892,7 +891,7 @@ VLC_EXPORT( const char *, VLC_Compiler, ( void ) LIBVLC_USED );
 #include "vlc_main.h"
 #include "vlc_configuration.h"
 
-#if defined( WIN32 ) || defined( UNDER_CE ) || defined( __SYMBIAN32__ )
+#if defined( WIN32 ) || defined( UNDER_CE ) || defined( __SYMBIAN32__ ) || defined( __OS2__ )
 #   define DIR_SEP_CHAR '\\'
 #   define DIR_SEP "\\"
 #   define PATH_SEP_CHAR ';'

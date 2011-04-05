@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2007 Pierre d'Herbemont
  * Copyright (C) 2007 the VideoLAN team
- * $Id$
+ * $Id: 4239899e6367387d588983103c8a5d496a222b3e $
  *
  * Authors: Pierre d'Herbemont <pdherbemont # videolan.org>
  *

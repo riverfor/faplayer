@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2004 Daniel Molkentin <molkentin@kde.org>
- * $Id$
+ * $Id: 9b3abdb1899d60b0ec8f4b379c3895649e049726 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  * The "ClickLineEdit" control is based on code by  Daniel Molkentin
@@ -65,7 +65,7 @@ void ClickLineEdit::setText( const QString &txt )
 void ClickLineEdit::paintEvent( QPaintEvent *pe )
 {
     QLineEdit::paintEvent( pe );
-    if ( mDrawClickMsg == true && !hasFocus() ) {
+    if ( mDrawClickMsg && !hasFocus() ) {
         QPainter p( this );
         QPen tmp = p.pen();
         p.setPen( palette().color( QPalette::Disabled, QPalette::Text ) );
@@ -86,7 +86,7 @@ void ClickLineEdit::dropEvent( QDropEvent *ev )
 
 void ClickLineEdit::focusInEvent( QFocusEvent *ev )
 {
-    if ( mDrawClickMsg == true ) {
+    if ( mDrawClickMsg ) {
         mDrawClickMsg = false;
         repaint();
     }

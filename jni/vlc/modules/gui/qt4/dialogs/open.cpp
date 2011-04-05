@@ -2,7 +2,7 @@
  * open.cpp : Advanced open dialog
  *****************************************************************************
  * Copyright © 2006-2009 the VideoLAN team
- * $Id$
+ * $Id: 24d065307c548ddab236e54375c2823b60868e43 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *

@@ -2,7 +2,7 @@
  * sidebarview.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2005-2008 the VideoLAN team
- * $Id$
+ * $Id: 2c1570b3d956b00a0f5a0007cd7610b1d0fb760b $
  *
  * Authors: Eric Dudiak <dudiak at gmail dot com>
  *          Colloquy <http://colloquy.info/>

@@ -4,7 +4,7 @@
  * Copyright (C) 2009 Pierre d'Herbemont
  * Partial Copyright (C) 2009 Felix Paul Kühne
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: 2932ea744b25ffa5ad8190a8256b6cad0ff7524f $
  *
  * Authors: Pierre d'Herbemont <pdherbemont # videolan.org>
  *          Felix Paul Kühne <fkuehne # videolan.org

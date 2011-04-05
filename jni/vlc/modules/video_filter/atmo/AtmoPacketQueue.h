@@ -6,7 +6,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: 31ad98dc405af3990f0933ec292cd7fb418e6d81 $
  */
 
 #ifndef _AtmoPacketQueue_

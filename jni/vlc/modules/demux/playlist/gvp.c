@@ -2,7 +2,7 @@
  * gvp.c: Google Video Playlist demuxer
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id$
+ * $Id: 2747d985c2f66ce94c93b20b21e8c3aef5e538bd $
  *
  * Authors: Antoine Cellerier <dionoea @t videolan d.t org>
  *

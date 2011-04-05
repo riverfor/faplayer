@@ -2,7 +2,7 @@
  * macosx_timer.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 29d59f9431b6781fc087225f39b499795bf96d25 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *

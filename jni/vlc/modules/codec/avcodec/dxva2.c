@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2009 Geoffroy Couprie
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: 595f1d667b2d31beed2b96cfe074e5a60e423580 $
  *
  * Authors: Geoffroy Couprie <geal@videolan.org>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -39,8 +39,6 @@
 #       define DXVA2API_USE_BITFIELDS
 #       include <libavcodec/dxva2.h>
 #   endif
-#elif defined(HAVE_FFMPEG_AVCODEC_H)
-#   include <ffmpeg/avcodec.h>
 #else
 #   include <avcodec.h>
 #endif

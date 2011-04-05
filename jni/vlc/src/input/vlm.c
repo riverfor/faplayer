@@ -2,7 +2,7 @@
  * vlm.c: VLM interface plugin
  *****************************************************************************
  * Copyright (C) 2000-2005 the VideoLAN team
- * $Id$
+ * $Id: 1ee81cc120b6a9df6c5f68d57007815bdb8ec25a $
  *
  * Authors: Simon Latapie <garf@videolan.org>
  *          Laurent Aimar <fenrir@videolan.org>
@@ -472,7 +472,7 @@ static void* Manage( void* p_object )
         {
             mtime_t i_real_date = vlm->schedule[i]->i_date;
 
-            if( vlm->schedule[i]->b_enabled == true )
+            if( vlm->schedule[i]->b_enabled )
             {
                 if( vlm->schedule[i]->i_date == 0 ) // now !
                 {

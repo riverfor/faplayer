@@ -2,7 +2,7 @@
  * ml_model.cpp: the media library's model
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: 623fdbfc7c72a161096f74e19733c2efd712e9b2 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -24,6 +24,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #ifdef MEDIA_LIBRARY
 

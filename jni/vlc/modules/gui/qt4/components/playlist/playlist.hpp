@@ -2,7 +2,7 @@
  * interface_widgets.hpp : Playlist Widgets
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id$
+ * $Id: bfac66b9eeed4e7a4867a8ee519336a5bff98699 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>

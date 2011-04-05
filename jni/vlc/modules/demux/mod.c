@@ -2,7 +2,7 @@
  * mod.c: MOD file demuxer (using libmodplug)
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id$
+ * $Id: 2bafec5b136b65eb73d619a55b94a1629b9bb117 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  * Konstanty Bialkowski <konstanty@ieee.org>

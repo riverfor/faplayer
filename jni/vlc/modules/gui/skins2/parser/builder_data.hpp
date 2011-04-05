@@ -2,7 +2,7 @@
  * builder_data.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: a14bdf52cd308fe234a07001695f56e9a8980fab $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teuliere <ipkiss@via.ecp.fr>

@@ -2,7 +2,7 @@
  * flac.c: flac packetizer module.
  *****************************************************************************
  * Copyright (C) 1999-2001 the VideoLAN team
- * $Id$
+ * $Id: 449b88d490121c85ac7979dbdf94fd45d78b3aa6 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Sigmund Augdal Helberg <dnumgis@videolan.org>

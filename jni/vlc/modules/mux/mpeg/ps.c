@@ -3,7 +3,7 @@
  *       multiplexer module for vlc
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id$
+ * $Id: 4a3ab9328f83a4a8aae6dfe7b864bae3c7c44e0b $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Eric Petit <titer@videolan.org>

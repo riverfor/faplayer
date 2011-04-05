@@ -2,7 +2,7 @@
  * menus.hpp : Menus handling
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id$
+ * $Id: 21ea0d94df764567668557bf18b8794ed833f2be $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -29,11 +29,11 @@
 
 #include <QObject>
 #include <QAction>
+#include <QMenu>
 #include <vector>
 
 using namespace std;
 
-class QMenu;
 class QMenuBar;
 class QSystemTrayIcon;
 
@@ -94,26 +94,31 @@ public:
 private:
     /* All main Menus */
     static QMenu *FileMenu( intf_thread_t *, QWidget * );
-    static QMenu *SDMenu( intf_thread_t *, QWidget * );
 
     static QMenu *ToolsMenu( QMenu * );
-    static QMenu *ToolsMenu( QWidget * );
+    static QMenu *ToolsMenu( QWidget *parent ) { return ToolsMenu( new QMenu( parent ) ); }
 
-    static QMenu *ViewMenu( intf_thread_t *, QWidget * );
     static QMenu *ViewMenu( intf_thread_t *, QMenu *, MainInterface * mi = NULL );
 
     static QMenu *InterfacesMenu( intf_thread_t *p_intf, QMenu * );
     static void ExtensionsMenu( intf_thread_t *p_intf, QMenu * );
 
     static QMenu *NavigMenu( intf_thread_t *, QMenu * );
-    static QMenu *NavigMenu( intf_thread_t *, QWidget * );
+    static QMenu *NavigMenu( intf_thread_t *p_intf, QWidget *parent ) {
+        return NavigMenu( p_intf, new QMenu( parent ) );
+    }
     static QMenu *RebuildNavigMenu( intf_thread_t *, QMenu *);
 
-    static QMenu *VideoMenu( intf_thread_t *, QMenu * );
-    static QMenu *VideoMenu( intf_thread_t *, QWidget * );
+    static QMenu *VideoMenu( intf_thread_t *, QMenu *, bool b_subtitle = true );
+    static QMenu *VideoMenu( intf_thread_t *p_intf, QWidget *parent ) {
+        return VideoMenu( p_intf, new QMenu( parent ) );
+    }
+    static QMenu *SubMenu(intf_thread_t *p_intf, QMenu *current);
 
     static QMenu *AudioMenu( intf_thread_t *, QMenu * );
-    static QMenu *AudioMenu( intf_thread_t *, QWidget * );
+    static QMenu *AudioMenu( intf_thread_t *p_intf, QWidget *parent ) {
+        return AudioMenu( p_intf, new QMenu( parent ) );
+    }
 
     static QMenu *HelpMenu( QWidget * );
 

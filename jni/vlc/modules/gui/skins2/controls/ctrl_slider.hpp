@@ -2,7 +2,7 @@
  * ctrl_slider.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: df010a5e6951e9c15d180015876402ae263ebaec $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>

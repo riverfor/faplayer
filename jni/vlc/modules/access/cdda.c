@@ -2,7 +2,7 @@
  * cdda.c : CD digital audio input module for vlc
  *****************************************************************************
  * Copyright (C) 2000, 2003-2006, 2008-2009 the VideoLAN team
- * $Id$
+ * $Id: 99b9d9e3b8003e9d869e432dfeb4e65cb6f55c56 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@netcourrier.com>
@@ -150,7 +150,7 @@ static int Open( vlc_object_t *p_this )
     }
     else psz_name = ToLocaleDup( p_access->psz_filepath );
 
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
     if( psz_name[0] && psz_name[1] == ':' &&
         psz_name[2] == '\\' && psz_name[3] == '\0' ) psz_name[2] = '\0';
 #endif

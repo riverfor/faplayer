@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2000-2006 the VideoLAN team
  * Copyright (C) 2010 Laurent Aimar
- * $Id$
+ * $Id: 5e86fc0cfbc7af34ece86c3e3903340023422ba9 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>

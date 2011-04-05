@@ -2,7 +2,7 @@
  * http.h: Headers for the HTTP interface
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: ebf1efa4e9336fd42762627eac19f0d702864b5f $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *          Laurent Aimar <fenrir@via.ecp.fr>

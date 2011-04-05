@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
  * Copyright (C) 2008 Laurent Aimar
- * $Id$
+ * $Id: db712d4ec4098df8e9bcb7298d56df722a97d1f2 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -29,6 +29,9 @@
 #include <vlc_codec.h>
 
 #define BLOCK_FLAG_CORE_FLUSH (1 <<BLOCK_FLAG_CORE_PRIVATE_SHIFT)
+
+decoder_t *input_DecoderNew( input_thread_t *, es_format_t *, input_clock_t *,
+                             sout_instance_t * ) LIBVLC_USED;
 
 /**
  * This function changes the pause state.

@@ -2,7 +2,7 @@
  * EPGRuler.coo: EPGRuler
  ****************************************************************************
  * Copyright © 2009-2010 VideoLAN
- * $Id$
+ * $Id: 76053914b343318add017d858eb51cfd8d140404 $
  *
  * Authors: Ludovic Fauvet <etix@l0cal.com>
  *
@@ -92,5 +92,15 @@ void EPGRuler::paintEvent( QPaintEvent *event )
         p.drawText( posx + 1, 12, 50, 15, Qt::AlignLeft, current.toString( "hh'h'" ) );
         posx += spacing;
         current = current.addSecs( 60 * 60 );
+    }
+
+    /* draw current time line */
+    posx = localStartTime.secsTo( QDateTime::currentDateTime() ) * m_scale;
+    if ( posx <= width() && posx >= 0 )
+    {
+        QPen pen( QPen( QColor( 255, 0 , 0, 128 ) ) );
+        pen.setWidth( 3 );
+        p.setPen( pen );
+        p.drawLine( posx - 1, 15, posx - 1, 30 );
     }
 }

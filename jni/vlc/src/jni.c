@@ -6,7 +6,7 @@
 #include <vlc/vlc.h>
 #include <vlc_common.h>
 
-#if HAVE_ANDROID
+#ifdef ANDROID
 
 #include <jni.h>
 

@@ -2,7 +2,7 @@
  * libmp4.c : LibMP4 library for mp4 module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2004, 2010 the VideoLAN team
- * $Id$
+ * $Id: b6f860f9f224535eb53f454eef696497b29beb93 $
  *
  * Author: Laurent Aimar <fenrir@via.ecp.fr>
  *

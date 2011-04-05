@@ -2,7 +2,7 @@
  * EPGRuler.h: EPGRuler
  ****************************************************************************
  * Copyright © 2009-2010 VideoLAN
- * $Id$
+ * $Id: cb29fbc0397b6d75389ed0e34bbf8d2422e9a070 $
  *
  * Authors: Ludovic Fauvet <etix@l0cal.com>
  *

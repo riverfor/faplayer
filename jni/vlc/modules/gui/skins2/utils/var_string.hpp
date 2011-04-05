@@ -2,7 +2,7 @@
  * var_string.hpp
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id$
+ * $Id: 7a7a2d3f9d4a27f006694087505a648b891cc18a $
  *
  * Author: Erwan Tulou      <erwan10 aT videolan DoT org>
  *

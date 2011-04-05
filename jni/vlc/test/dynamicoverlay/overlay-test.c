@@ -2,7 +2,7 @@
  * overlay-test.c : test program for the dynamic overlay plugin
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id$
+ * $Id: 2b453db5ff519c521ce184a2b7916743d20d8bd3 $
  *
  * Author: Søren Bøg <avacore@videolan.org>
  *

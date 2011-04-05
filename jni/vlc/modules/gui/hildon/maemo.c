@@ -2,7 +2,7 @@
  * maemo.c : Maemo plugin for VLC
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: 9fa98097bfdf8123d5e69326451ee34b11e7efb6 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Gildas Bazin <gbazin@videolan.org>

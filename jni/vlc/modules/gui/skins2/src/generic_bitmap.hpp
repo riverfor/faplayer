@@ -2,7 +2,7 @@
  * generic_bitmap.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 800a8a0828b9a2e72f43a42ba775fef0afa10726 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>

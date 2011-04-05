@@ -2,7 +2,7 @@
  * snapshot.c : vout internal snapshot
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: 887c32d0bcd95a088ceaecd11497d85b283fe631 $
  *
  * Authors: Gildas Bazin <gbazin _AT_ videolan _DOT_ org>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>

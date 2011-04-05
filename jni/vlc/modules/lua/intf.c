@@ -2,7 +2,7 @@
  * intf.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id$
+ * $Id: 3971b61b52f6632d141dab0a549fd9391b0e92a4 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -70,9 +70,11 @@ static const struct
     const char *psz_shortcut;
     const char *psz_name;
 } pp_shortcuts[] = {
-    { "luarc", "rc" },
+    { "luacli", "cli" },
+    { "luarc", "cli" },
 #ifndef WIN32
-    { "rc", "rc" },
+    { "cli", "cli" },
+    { "rc", "cli" },
 #endif
     { "luahotkeys", "hotkeys" },
     /* { "hotkeys", "hotkeys" }, */
@@ -333,7 +335,7 @@ int Open_LuaIntf( vlc_object_t *p_this )
                 free( psz_telnet_host );
                 vlc_UrlClean( &url );
 
-                asprintf( &psz_telnet_host, "%s:%d", psz_esc_host ? psz_esc_host : "", i_telnet_port );
+                asprintf( &psz_telnet_host, "telnet://%s:%d", psz_esc_host ? psz_esc_host : "", i_telnet_port );
                 free( psz_esc_host );
             }
 
@@ -347,13 +349,15 @@ int Open_LuaIntf( vlc_object_t *p_this )
             free( psz_telnet_passwd );
             free( psz_telnet_host );
         }
-        else if( !strcmp( psz_name, "rc" ) )
+        else if( !strcmp( psz_name, "cli" ) )
         {
             char *psz_rc_host = var_CreateGetNonEmptyString( p_intf, "rc-host" );
+            if( !psz_rc_host )
+                psz_rc_host = var_CreateGetNonEmptyString( p_intf, "cli-host" );
             if( psz_rc_host )
             {
                 char *psz_esc_host = config_StringEscape( psz_rc_host );
-                asprintf( &psz_config, "rc={host='%s'}", psz_esc_host );
+                asprintf( &psz_config, "cli={host='%s'}", psz_esc_host );
 
                 free( psz_esc_host );
                 free( psz_rc_host );
@@ -379,6 +383,19 @@ int Open_LuaIntf( vlc_object_t *p_this )
             lua_getglobal( L, "config" );
             if( lua_istable( L, -1 ) )
             {
+                if( !strcmp( psz_name, "cli" ) )
+                {
+                    lua_getfield( L, -1, "rc" );
+                    if( lua_istable( L, -1 ) )
+                    {
+                        /* msg_Warn( p_intf, "The `rc' lua interface script "
+                                          "was renamed `cli', please update "
+                                          "your configuration!" ); */
+                        lua_setfield( L, -2, "cli" );
+                    }
+                    else
+                        lua_pop( L, 1 );
+                }
                 lua_getfield( L, -1, psz_name );
                 if( lua_istable( L, -1 ) )
                 {
@@ -390,10 +407,30 @@ int Open_LuaIntf( vlc_object_t *p_this )
         free( psz_config );
     }
 
-    if( b_config_set == false )
+    if( !b_config_set )
     {
         lua_newtable( L );
         lua_setglobal( L, "config" );
+    }
+
+    /* Wrapper for legacy telnet config */
+    if ( !strcmp( psz_name, "telnet" ) )
+    {
+        /* msg_Warn( p_intf, "The `telnet' lua interface script was replaced "
+                          "by `cli', please update your configuration!" ); */
+
+        char *wrapped_file = vlclua_find_file( p_this, "intf", "cli" );
+        if( !wrapped_file )
+        {
+            msg_Err( p_intf, "Couldn't find lua interface script \"cli\", "
+                             "needed by telnet wrapper" );
+            p_intf->psz_header = NULL;
+            lua_close( p_sys->L );
+            goto error;
+        }
+        lua_pushstring( L, wrapped_file );
+        lua_setglobal( L, "wrapped_file" );
+        free( wrapped_file );
     }
 
     p_sys->L = L;

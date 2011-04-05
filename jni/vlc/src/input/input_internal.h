@@ -2,7 +2,7 @@
  * input_internal.h: Internal input structures
  *****************************************************************************
  * Copyright (C) 1998-2006 the VideoLAN team
- * $Id$
+ * $Id: f947ce5494eceefae86ab1c697021b98c496b026 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *

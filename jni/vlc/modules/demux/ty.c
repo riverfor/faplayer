@@ -6,7 +6,7 @@
  * based on code by Christopher Wingert for tivo-mplayer
  * tivo(at)wingert.org, February 2003
  *
- * $Id$
+ * $Id: 75e2f3cb3a185b8c054210c1166bb59e595f01de $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

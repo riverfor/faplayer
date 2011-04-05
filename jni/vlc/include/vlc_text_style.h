@@ -2,7 +2,7 @@
  * vlc_text_style.h: text_style_t definition and helpers.
  *****************************************************************************
  * Copyright (C) 1999-2010 the VideoLAN team
- * $Id$
+ * $Id: c7a4d270cef07919d3ff03cb101e21cba0c4b527 $
  *
  * Authors: Derk-Jan Hartman <hartman _AT_ videolan _DOT_ org>
  *          basOS G <noxelia 4t gmail , com>

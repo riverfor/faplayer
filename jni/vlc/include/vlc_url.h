@@ -2,7 +2,7 @@
  * vlc_url.h: URL related macros
  *****************************************************************************
  * Copyright (C) 2002-2006 the VideoLAN team
- * $Id$
+ * $Id: ef163d42cbda9062ce9144b4f853561af16076b1 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Rémi Denis-Courmont <rem # videolan.org>

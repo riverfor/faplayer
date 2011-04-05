@@ -2,7 +2,7 @@
  * sharpen.c: Sharpen video filter
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id$
+ * $Id: 28f98623c52bfe349ee7e5ca28ca2c67d4087efa $
  *
  * Author: Jérémy DEMEULE <dj_mulder at djduron dot no-ip dot org>
  *         Jean-Baptiste Kempf <jb at videolan dot org>

@@ -2,7 +2,7 @@
  * input.c : internal management of input streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id$
+ * $Id: 8fcd834838996c10352c303b1094cf7d01e2df51 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *

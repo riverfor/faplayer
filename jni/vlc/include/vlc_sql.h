@@ -2,7 +2,7 @@
  * vlc_sql.h: SQL abstraction layer
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: ed976001eb97f7ef086666cb5ad0df89674a1406 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

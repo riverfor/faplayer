@@ -2,7 +2,7 @@
  * gestures.c: control vlc with mouse gestures
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id$
+ * $Id: 69ae8e259b7a4f0be1d44fcfd0bf0ad67ad81156 $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *

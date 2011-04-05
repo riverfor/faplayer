@@ -2,7 +2,7 @@
  * audio.c: audio decoder using ffmpeg library
  *****************************************************************************
  * Copyright (C) 1999-2003 the VideoLAN team
- * $Id$
+ * $Id: 9cafc381c642a7ee5834f0a6cd451b9431984c02 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -37,8 +37,6 @@
 /* ffmpeg header */
 #ifdef HAVE_LIBAVCODEC_AVCODEC_H
 #   include <libavcodec/avcodec.h>
-#elif defined(HAVE_FFMPEG_AVCODEC_H)
-#   include <ffmpeg/avcodec.h>
 #else
 #   include <avcodec.h>
 #endif
@@ -50,7 +48,7 @@
  *****************************************************************************/
 struct decoder_sys_t
 {
-    FFMPEG_COMMON_MEMBERS
+    AVCODEC_COMMON_MEMBERS
 
     /* Temporary buffer for libavcodec */
     int     i_output_max;

@@ -2,7 +2,7 @@
  * qt4.cpp : QT4 interface
  ****************************************************************************
  * Copyright © 2006-2009 the VideoLAN team
- * $Id$
+ * $Id: 980ba3472dbe9d3ba1a17151655676495749bdd2 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -244,7 +244,7 @@ vlc_module_begin ()
 #ifdef UPDATE_CHECK
     add_bool( "qt-updates-notif", true, UPDATER_TEXT,
               UPDATER_LONGTEXT, false )
-    add_integer( "qt-updates-days", 7, UPDATER_DAYS_TEXT,
+    add_integer( "qt-updates-days", 3, UPDATER_DAYS_TEXT,
                  UPDATER_DAYS_TEXT, false )
 #endif
     add_string( "qt-slider-colours", "255;255;255;20;210;20;255;199;15;245;39;29",
@@ -267,7 +267,7 @@ vlc_module_begin ()
 
 #ifdef WIN32
     add_bool( "qt-disable-volume-keys"             /* name */,
-              false                                /* default value */,
+              true                                 /* default value */,
               QT_DISABLE_VOLUME_KEYS_TEXT          /* text */,
               QT_DISABLE_VOLUME_KEYS_LONGTEXT      /* longtext */,
               false                                /* advanced mode only */)

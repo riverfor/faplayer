@@ -2,7 +2,7 @@
  * filter.c : filter_t helpers.
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: 630a216a56d032cc21a418e626bd469de627c22f $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

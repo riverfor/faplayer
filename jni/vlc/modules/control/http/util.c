@@ -2,7 +2,7 @@
  * util.c : Utility functions for HTTP interface
  *****************************************************************************
  * Copyright (C) 2001-2005 the VideoLAN team
- * $Id$
+ * $Id: 80b92defeec670fab679b311a4c37e5e74c30104 $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -39,7 +39,7 @@
  * File and directory functions
  ****************************************************************************/
 
-/* ToUrl: create a good name for an url from filename */
+/* ToUrl: create a good name for a url from filename */
 static char *FileToUrl( const char *name, bool *pb_index )
 {
     *pb_index = false;

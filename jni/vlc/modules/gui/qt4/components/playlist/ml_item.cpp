@@ -2,7 +2,7 @@
  * ml_item.cpp: the media library's result item
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: 89b58296adc4a6313b42ade87b6e6886b15d30f5 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -24,6 +24,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #ifdef MEDIA_LIBRARY
 

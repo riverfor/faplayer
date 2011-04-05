@@ -2,7 +2,7 @@
  * httpd.c: HTTPd wrapper
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id$
+ * $Id: 9d218afc9cff6e7b4c1086b56a3b3b8bb59260a7 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *

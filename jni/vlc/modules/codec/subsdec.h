@@ -2,7 +2,7 @@
  * subsdec.h : text/ASS-SSA/USF subtitles headers
  *****************************************************************************
  * Copyright (C) 2000-2006 the VideoLAN team
- * $Id$
+ * $Id: aaf307dd1b4bcd72627cdd9836c9a79e6d797dad $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Samuel Hocevar <sam@zoy.org>

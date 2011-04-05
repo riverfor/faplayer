@@ -2,7 +2,7 @@
  * macosx_window.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: f47746f7197a975db5ee7179d44633ef1d4347e7 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *

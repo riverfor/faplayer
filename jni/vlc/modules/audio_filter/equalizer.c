@@ -2,7 +2,7 @@
  * equalizer.c:
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id$
+ * $Id: 8bcc468b2500bf1b46d81718a8eb86e48adce83c $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -530,7 +530,7 @@ static int PresetCallback( vlc_object_t *p_aout, char const *psz_cmd,
                 free( psz_newbands );
                 psz_newbands = psz;
             }
-            if( p_sys->b_first == false )
+            if( !p_sys->b_first )
             {
                 vlc_mutex_unlock( &p_sys->lock );
                 var_SetString( p_aout, "equalizer-bands", psz_newbands );

@@ -2,7 +2,7 @@
  * avio.h: access using libavformat library
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: c0de75c5a2a1f364f494ac7839c866ea28ee1e6f $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

@@ -2,7 +2,7 @@
 * atmo.cpp : "Atmo Light" video filter
 *****************************************************************************
 * Copyright (C) 2000-2006 the VideoLAN team
-* $Id$
+* $Id: b8b6f7d8cdbd19b9507be44ee4a01cdfa3115100 $
 *
 * Authors: André Weber (WeberAndre@gmx.de)
 *
@@ -816,7 +816,7 @@ static int32_t AtmoInitialize(filter_t *p_filter, bool b_for_thread)
     filter_sys_t *p_sys = p_filter->p_sys;
     if(p_sys->p_atmo_config)
     {
-        if(b_for_thread == false)
+        if(!b_for_thread)
         {
             /* open com port */
             /* setup Output Threads ... */
@@ -1086,7 +1086,7 @@ static void Atmo_Shutdown(filter_t *p_filter)
 {
     filter_sys_t *p_sys = p_filter->p_sys;
 
-    if(p_sys->b_enabled == true)
+    if(p_sys->b_enabled)
     {
         msg_Dbg( p_filter, "shut down atmo!");
         /*
@@ -1765,7 +1765,7 @@ static void Atmo_SetupParameters(filter_t *p_filter)
     if(psz_path != NULL)
     {
         strcpy(p_sys->sz_framepath, psz_path);
-#if defined( WIN32 )
+#if defined( WIN32 ) || defined( __OS2__ )
         size_t i_strlen = strlen(p_sys->sz_framepath);
         if((i_strlen>0) && (p_sys->sz_framepath[i_strlen-1] != '\\'))
         {
@@ -2252,7 +2252,7 @@ static void CreateMiniImage( filter_t *p_filter, picture_t *p_inpic)
     /*
     if debugging enabled save every 128th image to disk
     */
-    if((p_sys->b_saveframes == true) && (p_sys->sz_framepath[0] != 0 ))
+    if(p_sys->b_saveframes && p_sys->sz_framepath[0] != 0 )
     {
 
         if((p_sys->ui_frame_counter & 127) == 0)
@@ -2301,9 +2301,8 @@ static picture_t * Filter( filter_t *p_filter, picture_t *p_pic )
     
     vlc_mutex_lock( &p_sys->filter_lock );
 
-    if((p_sys->b_enabled == true) &&
-        (p_sys->pf_extract_mini_image != NULL) &&
-        (p_sys->b_pause_live == false))
+    if(p_sys->b_enabled && p_sys->pf_extract_mini_image &&
+       !p_sys->b_pause_live)
     {
         p_sys->i_crop_x_offset  = p_filter->fmt_in.video.i_x_offset;
         p_sys->i_crop_y_offset  = p_filter->fmt_in.video.i_y_offset;
@@ -2458,7 +2457,7 @@ static int StateCallback( vlc_object_t *p_this, char const *psz_cmd,
     filter_t *p_filter = (filter_t *)p_data;
     filter_sys_t *p_sys = (filter_sys_t *)p_filter->p_sys;
 
-    if((p_sys->b_usepausecolor == true) && (p_sys->b_enabled == true))
+    if(p_sys->b_usepausecolor && p_sys->b_enabled)
     {
         msg_Dbg(p_filter, "state change from: %"PRId64" to %"PRId64, oldval.i_int,
             newval.i_int);
@@ -2536,7 +2535,7 @@ static void AddStateVariableCallback(filter_t *p_filter)
 *****************************************************************************
 * Delete the callback function to the "state" variable of the input thread...
 * first find the PlayList and get the input thread from there to attach
-* my callback? is vlc_object_find the right way for this??
+* my callback.
 *****************************************************************************/
 static void DelStateVariableCallback( filter_t *p_filter )
 {

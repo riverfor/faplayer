@@ -2,7 +2,7 @@
  * http_auth.c: HTTP authentication for clients as per RFC2617
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id$
+ * $Id: e2334ecbe3e51160392507dd9bb2a51fc85e5d30 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Christophe Massiot <massiot@via.ecp.fr>

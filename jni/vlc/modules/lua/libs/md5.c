@@ -2,7 +2,7 @@
  * md5.c: md5 hashing functions
  *****************************************************************************
  * Copyright (C) 2010 Antoine Cellerier
- * $Id$
+ * $Id: 1531a20e8e6cbf49e7d1b926c8377fa3912d7205 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *

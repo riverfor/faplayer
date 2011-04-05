@@ -2,7 +2,7 @@
  * caca.c: Color ASCII Art "vout display" module using libcaca
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id$
+ * $Id: 08786a99410a083a9cda9c9a2a47c209c6046da7 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>

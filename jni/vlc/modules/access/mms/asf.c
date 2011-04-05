@@ -2,7 +2,7 @@
  * asf.c: MMS access plug-in
  *****************************************************************************
  * Copyright (C) 2001-2004 the VideoLAN team
- * $Id$
+ * $Id: 52e972984ccc89715a53d9b4d014fb632a97484b $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *

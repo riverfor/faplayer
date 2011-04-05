@@ -2,7 +2,7 @@
  * media_pool.c : Media pool for watching system
  *****************************************************************************
  * Copyright (C) 2009-2010 the VideoLAN team and AUTHORS
- * $Id$
+ * $Id: 0e81320af3dbc20f8a9b583c1ccf12ff5c8caddb $
  *
  * Authors: Srikanth Raju <srikiraju at gmail dot com>
  *

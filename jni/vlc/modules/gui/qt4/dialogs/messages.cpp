@@ -2,7 +2,7 @@
  * Messages.cpp : Information about an item
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id$
+ * $Id: 61472d3128457a2101e2534a007e171add02ec50 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *
@@ -257,17 +257,14 @@ void MessagesDialog::buildTree( QTreeWidgetItem *parentItem,
         item = new QTreeWidgetItem( ui.modulesTree );
 
     char *name = vlc_object_get_name( p_obj );
-    if( name != NULL )
-    {
-        item->setText( 0, qfu( p_obj->psz_object_type ) + " \"" +
-                       qfu( name ) + "\" (" +
-                       QString::number((uintptr_t)p_obj) + ")" );
-        free( name );
-    }
-    else
-        item->setText( 0, qfu( p_obj->psz_object_type ) + " (" +
-                       QString::number((uintptr_t)p_obj) + ")" );
-
+    item->setText( 0, QString("%1%2 (0x%3)")
+                   .arg( qfu( p_obj->psz_object_type ) )
+                   .arg( ( name != NULL )
+                         ? QString( " \"%1\"" ).arg( qfu( name ) )
+                             : "" )
+                   .arg( (uintptr_t)p_obj, 0, 16 )
+                 );
+    free( name );
     item->setExpanded( true );
 
     vlc_list_t *l = vlc_list_children( p_obj );

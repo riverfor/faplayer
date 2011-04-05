@@ -2,7 +2,7 @@
  * vlc_http.h: Shared code for HTTP clients
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id$
+ * $Id: ff4971864878d9a174cb086007ad2002cd762a3f $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Christophe Massiot <massiot@via.ecp.fr>

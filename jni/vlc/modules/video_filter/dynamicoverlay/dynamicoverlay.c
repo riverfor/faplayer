@@ -2,7 +2,7 @@
  * dynamicoverlay.c : dynamic overlay plugin for vlc
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id$
+ * $Id: caa5f752ce154b911532bbd57f7efd0f48d1def5 $
  *
  * Author: Søren Bøg <avacore@videolan.org>
  *
@@ -273,8 +273,7 @@ static subpicture_t *Filter( filter_t *p_filter, mtime_t date )
             p_cmddesc->p_command->pf_parser( p_cmd, p_end,
                                              &p_cmddesc->params );
 
-            if( ( p_cmddesc->p_command->b_atomic == true ) &&
-                ( p_sys->b_atomic == true ) )
+            if( p_cmddesc->p_command->b_atomic && p_sys->b_atomic )
                 QueueEnqueue( &p_sys->atomic, p_cmddesc );
             else
                 QueueEnqueue( &p_sys->pending, p_cmddesc );
@@ -333,7 +332,7 @@ static subpicture_t *Filter( filter_t *p_filter, mtime_t date )
         }
     }
 
-    if( p_sys->b_updated == false )
+    if( !p_sys->b_updated )
         return NULL;
 
     subpicture_t *p_spu = NULL;

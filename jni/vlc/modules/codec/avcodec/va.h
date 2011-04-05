@@ -2,7 +2,7 @@
  * va.h: Video Acceleration API for avcodec
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: 1cc784430796c634cecf541c245a74e056dd70c9 $
  *
  * Authors: Laurent Aimar <fenrir_AT_ videolan _DOT_ org>
  *

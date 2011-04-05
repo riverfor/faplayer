@@ -2,7 +2,7 @@
  * VLCDebug.m: Front Row plugin
  *****************************************************************************
  * Copyright (C) 2007 - 2008 the VideoLAN Team
- * $Id$
+ * $Id: 3b67bee722356189565cd8d350472e41ef3a84e4 $
  *
  * Authors: hyei
  *

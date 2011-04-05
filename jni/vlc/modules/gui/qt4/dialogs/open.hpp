@@ -2,7 +2,7 @@
  * open.hpp : advanced open dialog
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id$
+ * $Id: 47deea615c93e624bf347e1335ecebba22f48392 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *

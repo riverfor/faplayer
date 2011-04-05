@@ -4,7 +4,7 @@
  * interface, such as message output.
  *****************************************************************************
  * Copyright (C) 1999, 2000 the VideoLAN team
- * $Id$
+ * $Id: 49743a9b392d1e862c5f60f5236a7bfd001db45b $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *

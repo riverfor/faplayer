@@ -2,7 +2,7 @@
  * i422_i420.c : Planar YUV 4:2:2 to Planar YUV 4:2:0 conversion module for vlc
  *****************************************************************************
  * Copyright (C) 2000, 2001 - 2007 the VideoLAN team
- * $Id$
+ * $Id: c9291679b600b3ea07d63deebbf79115f78d271d $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Damien Fouilleul <damienf@videolan.org>

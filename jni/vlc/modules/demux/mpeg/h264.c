@@ -2,7 +2,7 @@
  * h264.c : H264 Video demuxer
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id$
+ * $Id: b46723534280ee166748db1864ff97810246b42b $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *

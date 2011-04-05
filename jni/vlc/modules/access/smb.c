@@ -2,7 +2,7 @@
  * smb.c: SMB input module
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id$
+ * $Id: d2e44b1b52bbf482bf796129741684e120a7fc5e $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

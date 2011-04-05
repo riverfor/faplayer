@@ -2,7 +2,7 @@
  * gradfun.c: wrapper for the gradfun filter from mplayer
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id$
+ * $Id: 761f69ba4db1d39de49fa22c14dc26da93ecb10b $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

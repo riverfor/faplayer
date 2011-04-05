@@ -2,7 +2,7 @@
  * osd.c: transcoding stream output module (osd)
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id$
+ * $Id: ac42a7b9c09e2d634f1487d0ace6a37dfed8271e $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>

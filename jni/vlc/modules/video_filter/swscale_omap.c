@@ -2,7 +2,7 @@
  * swscale_omap.c: scaling and chroma conversion using libswscale_nokia770
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: 24fb386575b14c825ecefbb05984c418cbdaa7bc $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *

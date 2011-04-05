@@ -2,7 +2,7 @@
  * simple_preferences.cpp : "Simple preferences"
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id$
+ * $Id: f54b433b6a8ac934f06ca941a4620a25a17b41b3 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -507,8 +507,6 @@ SPrefsPanel::SPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
             #ifdef WIN32
             TestCaC( "dshow-caching" );
             #else
-            if (module_exists ("v4l"))
-                TestCaC( "v4l-caching" );
             if (module_exists ("access_jack"))
                 TestCaC( "jack-input-caching" );
             if (module_exists ("v4l2"))
@@ -689,6 +687,14 @@ SPrefsPanel::SPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
                     p_config, this, false, gLayout, line );
             controls.append( control );
 
+#ifdef WIN32
+            line++;
+
+            p_config = config_FindConfig( VLC_OBJECT(p_intf), "qt-disable-volume-keys" );
+            control = new BoolConfigControl( VLC_OBJECT(p_intf), p_config, this, gLayout, line );
+            controls.append( control );
+#endif
+
             break;
         }
     }
@@ -803,8 +809,6 @@ void SPrefsPanel::apply()
             #ifdef WIN32
             CaC( "dshow-caching" );
             #else
-            if (module_exists ( "v4l" ))
-                CaC( "v4l-caching" );
             if (module_exists ( "access_jack" ))
             CaC( "jack-input-caching" );
             if (module_exists ( "v4l2" ))
@@ -823,9 +827,10 @@ void SPrefsPanel::apply()
     case SPrefsInterface:
     {
         if( qobject_cast<QRadioButton *>(optionWidgets[skinRB])->isChecked() )
-            config_PutPsz( p_intf, "intf", "skins2" );
-        if( qobject_cast<QRadioButton *>(optionWidgets[qtRB])->isChecked() )
-            config_PutPsz( p_intf, "intf", "qt" );
+            config_PutPsz( p_intf, "intf", "skins2,any" );
+        else
+        //if( qobject_cast<QRadioButton *>(optionWidgets[qtRB])->isChecked() )
+            config_PutPsz( p_intf, "intf", "" );
         if( qobject_cast<QComboBox *>(optionWidgets[styleCB]) )
             getSettings()->setValue( "MainWindow/QtStyle",
                 qobject_cast<QComboBox *>(optionWidgets[styleCB])->currentText() );

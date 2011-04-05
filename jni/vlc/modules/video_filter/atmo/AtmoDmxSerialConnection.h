@@ -4,7 +4,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: 53ef12a8702c0b1db5df453ec6e3f4e6577df813 $
  */
 #ifndef _AtmoDmxSerialConnection_h_
 #define _AtmoDmxSerialConnection_h_

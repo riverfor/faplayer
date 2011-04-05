@@ -4,7 +4,7 @@
  * It includes functions allowing to declare, get or set configuration options.
  *****************************************************************************
  * Copyright (C) 1999-2006 the VideoLAN team
- * $Id$
+ * $Id: 31cd7615e0d2f03a580b65f64e0ed59ed81e5923 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -203,7 +203,7 @@ VLC_EXPORT( int,    config_SaveConfigFile, ( vlc_object_t *, const char * ) );
 VLC_EXPORT( void,   config_ResetAll, ( vlc_object_t * ) );
 #define config_ResetAll(a) config_ResetAll(VLC_OBJECT(a))
 
-VLC_EXPORT( module_config_t *, config_FindConfig,( vlc_object_t *, const char * ) LIBVLC_USED LIBVLC_MALLOC );
+VLC_EXPORT( module_config_t *, config_FindConfig,( vlc_object_t *, const char * ) LIBVLC_USED );
 VLC_EXPORT(char *, config_GetDataDir, ( vlc_object_t * ) LIBVLC_USED LIBVLC_MALLOC );
 #define config_GetDataDir(a) config_GetDataDir(VLC_OBJECT(a))
 VLC_EXPORT(const char *, config_GetLibDir, ( void ) LIBVLC_USED);

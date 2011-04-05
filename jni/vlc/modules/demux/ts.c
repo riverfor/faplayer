@@ -2,7 +2,7 @@
  * ts.c: Transport Stream input module for VLC.
  *****************************************************************************
  * Copyright (C) 2004-2005 the VideoLAN team
- * $Id$
+ * $Id: 4c209f2caf9f3994040ae2658e1c092080bb0bee $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Jean-Paul Saman <jpsaman #_at_# m2x.nl>
@@ -48,44 +48,22 @@
 #include "../mux/mpeg/csa.h"
 
 /* Include dvbpsi headers */
-#ifdef HAVE_DVBPSI_DR_H
-#   include <dvbpsi/dvbpsi.h>
-#   include <dvbpsi/demux.h>
-#   include <dvbpsi/descriptor.h>
-#   include <dvbpsi/pat.h>
-#   include <dvbpsi/pmt.h>
-#   include <dvbpsi/sdt.h>
-#   include <dvbpsi/dr.h>
-#   include <dvbpsi/psi.h>
-#else
-#   include "dvbpsi.h"
-#   include "demux.h"
-#   include "descriptor.h"
-#   include "tables/pat.h"
-#   include "tables/pmt.h"
-#   include "tables/sdt.h"
-#   include "descriptors/dr.h"
-#   include "psi.h"
-#endif
+# include <dvbpsi/dvbpsi.h>
+# include <dvbpsi/demux.h>
+# include <dvbpsi/descriptor.h>
+# include <dvbpsi/pat.h>
+# include <dvbpsi/pmt.h>
+# include <dvbpsi/sdt.h>
+# include <dvbpsi/dr.h>
+# include <dvbpsi/psi.h>
 
 /* EIT support */
-#ifdef _DVBPSI_DR_4D_H_
-#   define TS_USE_DVB_SI 1
-#   ifdef HAVE_DVBPSI_DR_H
-#       include <dvbpsi/eit.h>
-#   else
-#       include "tables/eit.h"
-#   endif
-#endif
+# include <dvbpsi/eit.h>
 
 /* TDT support */
 #ifdef _DVBPSI_DR_58_H_
 #   define TS_USE_TDT 1
-#   ifdef HAVE_DVBPSI_DR_H
-#       include <dvbpsi/tot.h>
-#   else
-#       include "tables/tot.h"
-#   endif
+#   include <dvbpsi/tot.h>
 #else
 #   include <time.h>
 #endif
@@ -406,10 +384,8 @@ static int  PIDFillFormat( ts_pid_t *pid, int i_stream_type );
 
 static void PATCallBack( demux_t *, dvbpsi_pat_t * );
 static void PMTCallBack( demux_t *p_demux, dvbpsi_pmt_t *p_pmt );
-#ifdef TS_USE_DVB_SI
 static void PSINewTableCallBack( demux_t *, dvbpsi_handle,
                                  uint8_t  i_table_id, uint16_t i_extension );
-#endif
 static int ChangeKeyCallback( vlc_object_t *, char const *, vlc_value_t, vlc_value_t, void * );
 
 static inline int PIDGet( block_t *p )
@@ -676,7 +652,6 @@ static int Open( vlc_object_t *p_this )
     PIDInit( pat, true, NULL );
     pat->psi->handle = dvbpsi_AttachPAT( (dvbpsi_pat_callback)PATCallBack,
                                          p_demux );
-#ifdef TS_USE_DVB_SI
     if( p_sys->b_dvb_meta )
     {
         ts_pid_t *sdt = &p_sys->pid[0x11];
@@ -707,7 +682,6 @@ static int Open( vlc_object_t *p_this )
                 p_sys->b_access_control = false;
         }
     }
-#endif
 
     /* Init PMT array */
     TAB_INIT( p_sys->i_pmt, p_sys->pmt );
@@ -2610,121 +2584,15 @@ static void ValidateDVBMeta( demux_t *p_demux, int i_pid )
     p_sys->b_dvb_meta = false;
 }
 
+#include "dvb-text.h"
 
-#ifdef TS_USE_DVB_SI
-/* FIXME same than dvbsi_to_utf8 from dvb access */
 static char *EITConvertToUTF8( const unsigned char *psz_instring,
                                size_t i_length,
                                bool b_broken )
 {
-    const char *psz_encoding;
-    char psz_encbuf[sizeof( "ISO_8859-123" )];
-    size_t offset = 1;
-
-    if( i_length < 1 ) return NULL;
-    if( psz_instring[0] >= 0x20 )
-    {
-        /* According to ETSI EN 300 468 Annex A, this should be ISO6937,
-         * but some broadcasters use different charset... */
-        if( b_broken )
-           psz_encoding = "ISO_8859-1";
-        else
-           psz_encoding = "ISO_6937";
-
-        offset = 0;
-    }
-    else switch( psz_instring[0] )
-    {
-    case 0x01:
-        psz_encoding = "ISO_8859-5";
-        break;
-    case 0x02:
-        psz_encoding = "ISO_8859-6";
-        break;
-    case 0x03:
-        psz_encoding = "ISO_8859-7";
-        break;
-    case 0x04:
-        psz_encoding = "ISO_8859-8";
-        break;
-    case 0x05:
-        psz_encoding = "ISO_8859-9";
-        break;
-    case 0x06:
-        psz_encoding = "ISO_8859-10";
-        break;
-    case 0x07:
-        psz_encoding = "ISO_8859-11";
-        break;
-    case 0x08:
-        psz_encoding = "ISO_8859-12";
-        break;
-    case 0x09:
-        psz_encoding = "ISO_8859-13";
-        break;
-    case 0x0a:
-        psz_encoding = "ISO_8859-14";
-        break;
-    case 0x0b:
-        psz_encoding = "ISO_8859-15";
-        break;
-    case 0x10:
-#warning Is Latin-10 (psz_instring[2] == 16) really illegal?
-        if( i_length < 3 || psz_instring[1] != 0x00 || psz_instring[2] > 15
-         || psz_instring[2] == 0 )
-        {
-            psz_encoding = "UTF-8";
-            offset = 0;
-        }
-        else
-        {
-            sprintf( psz_encbuf, "ISO_8859-%u", psz_instring[2] );
-            psz_encoding = psz_encbuf;
-            offset = 3;
-        }
-        break;
-    case 0x11:
-#warning Is there a BOM or do we use a fixed endianess?
-        psz_encoding = "UTF-16";
-        break;
-    case 0x12:
-        psz_encoding = "KSC5601-1987";
-        break;
-    case 0x13:
-        psz_encoding = "GB2312"; /* GB-2312-1980 */
-        break;
-    case 0x14:
-        psz_encoding = "BIG-5";
-        break;
-    case 0x15:
-        psz_encoding = "UTF-8";
-        break;
-    default:
-        /* invalid */
-        psz_encoding = "UTF-8";
-        offset = 0;
-    }
-
-    psz_instring += offset;
-    i_length -= offset;
-
-    char *psz = FromCharset( psz_encoding, psz_instring, i_length );
-    if( psz == NULL )
-    {    /* Invalid character set (e.g. ISO_8859-12) */
-        psz = strndup( (const char *)psz_instring, i_length );
-        if( unlikely(psz == NULL) )
-            return NULL;
-        EnsureUTF8( psz );
-    }
-
-    /* Convert EIT-coded CR/LFs */
-    for(char *p = strstr( psz, "\xc2\x8a" ); p != NULL;
-        p = strstr( p, "\xc2\x8a" ))
-    {
-        p[0] = ' ';
-        p[1] = '\n';
-    }
-    return psz;
+    if( b_broken )
+        return FromCharset( "ISO_8859-1", psz_instring, i_length );
+    return vlc_from_EIT( psz_instring, i_length );
 }
 
 static void SDTCallBack( demux_t *p_demux, dvbpsi_sdt_t *p_sdt )
@@ -3129,7 +2997,6 @@ static void PSINewTableCallBack( demux_t *p_demux, dvbpsi_handle h,
 #endif
 
 }
-#endif
 
 /*****************************************************************************
  * PMT callback and helpers

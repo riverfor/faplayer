@@ -2,7 +2,7 @@
  * wave.c : Wave video effect plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2008 the VideoLAN team
- * $Id$
+ * $Id: 6ad3ac27171ea742ab29c72cf651cb756075b283 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Antoine Cellerier <dionoea -at- videolan -dot- org>

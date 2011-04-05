@@ -2,7 +2,7 @@
  * playlist.cpp : Custom widgets for the playlist
  ****************************************************************************
  * Copyright © 2007-2010 the VideoLAN team
- * $Id$
+ * $Id: 3c4d95a30a433c3775403dc640dccd5516ba32fd $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -138,6 +138,7 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
              mainView, search( const QString& ) );
     CONNECT( searchEdit, searchDelayedChanged( const QString& ),
              mainView, searchDelayed( const QString & ) );
+
     CONNECT( mainView, viewChanged( const QModelIndex& ),
              this, changeView( const QModelIndex &) );
     layout->setColumnStretch( 3, 3 );
@@ -145,6 +146,7 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
     /* Connect the activation of the selector to a redefining of the PL */
     DCONNECT( selector, activated( playlist_item_t * ),
               mainView, setRoot( playlist_item_t * ) );
+    mainView->setRoot( p_root );
 
 
     split = new PlaylistSplitter( this );
@@ -228,7 +230,7 @@ void PlaylistWidget::changeView( const QModelIndex& index )
 {
     searchEdit->clear();
     locationBar->setIndex( index );
-    int i = mainView->getViewNumber();
+    int i = mainView->currentViewIndex();
     viewActions[i]->setChecked(true);
 }
 

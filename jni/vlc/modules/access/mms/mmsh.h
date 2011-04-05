@@ -2,7 +2,7 @@
  * mmsh.h:
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id$
+ * $Id: a49fda8c54fc64666a82cbf95e1f9f17cd41432d $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *

@@ -2,7 +2,7 @@
  * motion_blur.c : motion blur filter for vlc
  *****************************************************************************
  * Copyright (C) 2000, 2001, 2002, 2003 the VideoLAN team
- * $Id$
+ * $Id: 6cca33932d749529caf11e196fd6b3b01f74a358 $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *          Antoine Cellerier <dionoea &t videolan d.t org>

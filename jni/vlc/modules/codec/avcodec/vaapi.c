@@ -2,7 +2,7 @@
  * vaapi.c: VAAPI helpers for the ffmpeg decoder
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: 710fddd1d1a5898c07142b579fb05e650b1cf983 $
  *
  * Authors: Laurent Aimar <fenrir_AT_ videolan _DOT_ org>
  *
@@ -31,8 +31,6 @@
 
 #ifdef HAVE_LIBAVCODEC_AVCODEC_H
 #   include <libavcodec/avcodec.h>
-#elif defined(HAVE_FFMPEG_AVCODEC_H)
-#   include <ffmpeg/avcodec.h>
 #else
 #   include <avcodec.h>
 #endif

@@ -2,7 +2,7 @@
  * invmem_decoder.c: memory video driver for vlc
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: acad577320bdfa3163c0a6eedd6c7d80727dff60 $
  *
  * Authors: Robert Paciorek <robert@opcode.eu.org> <http://opcode.eu.org/bercik>
  * based on:

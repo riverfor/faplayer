@@ -2,7 +2,7 @@
  * icon_view.hpp : Icon view for the Playlist
  ****************************************************************************
  * Copyright © 2010 the VideoLAN team
- * $Id$
+ * $Id: 88c0d43fa5479722179f88aad9d85c4fab22ac66 $
  *
  * Authors:         Jean-Baptiste Kempf <jb@videolan.org>
  *

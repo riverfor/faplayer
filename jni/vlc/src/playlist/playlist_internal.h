@@ -2,7 +2,7 @@
  * playlist_internal.h : Playlist internals
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: 85b98eebe5628aa3a6f8133caba9b86d46955518 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>

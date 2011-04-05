@@ -2,7 +2,7 @@
  * video_text.c : OSD text manipulation functions
  *****************************************************************************
  * Copyright (C) 1999-2010 the VideoLAN team
- * $Id$
+ * $Id: 72e253ac7cffc065347fa48a2e62d4dfaa609071 $
  *
  * Author: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *         Laurent Aimar <fenrir _AT_ videolan _DOT_ org>

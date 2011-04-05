@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2008-2009 Rémi Denis-Courmont
- * $Id$
+ * $Id: 2f37f6d48039572f2a49ea59cc21c50a410d0313 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Daniel Stranger <vlc at schmaller dot de>
@@ -147,10 +147,10 @@ static char *encode_URI_bytes (const char *psz_uri, size_t len)
 }
 
 /**
- * Encodes an URI component (RFC3986 §2).
+ * Encodes a URI component (RFC3986 §2).
  *
  * @param psz_uri nul-terminated UTF-8 representation of the component.
- * Obviously, you can't pass an URI containing a nul character, but you don't
+ * Obviously, you can't pass a URI containing a nul character, but you don't
  * want to do that, do you?
  *
  * @return encoded string (must be free()'d), or NULL for ENOMEM.
@@ -945,7 +945,7 @@ char *str_format( vlc_object_t *p_this, const char *psz_src )
  */
 void filename_sanitize( char *str )
 {
-#if defined( WIN32 )
+#if defined( WIN32 ) || defined( __OS2__ )
     char *str_base = str;
 #endif
 
@@ -959,7 +959,7 @@ void filename_sanitize( char *str )
         return;
     }
 
-#if defined( WIN32 )
+#if defined( WIN32 ) || defined( __OS2__ )
     // Change leading spaces into underscores
     while( *str && *str == ' ' )
         *str++ = '_';
@@ -972,7 +972,7 @@ void filename_sanitize( char *str )
             case '/':
 #if defined( __APPLE__ )
             case ':':
-#elif defined( WIN32 )
+#elif defined( WIN32 ) || defined( __OS2__ )
             case '\\':
             case '*':
             case '"':
@@ -987,7 +987,7 @@ void filename_sanitize( char *str )
         str++;
     }
 
-#if defined( WIN32 )
+#if defined( WIN32 ) || defined( __OS2__ )
     // Change trailing spaces into underscores
     str--;
     while( str != str_base )
@@ -1004,7 +1004,7 @@ void filename_sanitize( char *str )
  */
 void path_sanitize( char *str )
 {
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
     /* check drive prefix if path is absolute */
     if( (((unsigned char)(str[0] - 'A') < 26)
       || ((unsigned char)(str[0] - 'a') < 26)) && (':' == str[1]) )
@@ -1015,7 +1015,7 @@ void path_sanitize( char *str )
 #if defined( __APPLE__ )
         if( *str == ':' )
             *str = '_';
-#elif defined( WIN32 )
+#elif defined( WIN32 ) || defined( __OS2__ )
         if( strchr( "*\"?:|<>", *str ) )
             *str = '_';
         if( *str == '/' )
@@ -1031,8 +1031,8 @@ void path_sanitize( char *str )
 #endif
 
 /**
- * Convert a file path to an URI.
- * If already an URI, return a copy of the string.
+ * Convert a file path to a URI.
+ * If already a URI, return a copy of the string.
  * @param path path to convert (or URI to copy)
  * @param scheme URI scheme to use (default is auto: "file", "fd" or "smb")
  * @return a nul-terminated URI string (use free() to release it),
@@ -1045,12 +1045,12 @@ char *make_URI (const char *path, const char *scheme)
     if (scheme == NULL && !strcmp (path, "-"))
         return strdup ("fd://0"); // standard input
     if (strstr (path, "://") != NULL)
-        return strdup (path); /* Already an URI */
+        return strdup (path); /* Already a URI */
     /* Note: VLC cannot handle URI schemes without double slash after the
      * scheme name (such as mailto: or news:). */
 
     char *buf;
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
     /* Drive letter */
     if (isalpha (path[0]) && (path[1] == ':'))
     {
@@ -1066,7 +1066,7 @@ char *make_URI (const char *path, const char *scheme)
 #endif
     if (!strncmp (path, "\\\\", 2))
     {   /* Windows UNC paths */
-#ifndef WIN32
+#if !defined( WIN32 ) && !defined( __OS2__ )
         if (scheme != NULL)
             return NULL; /* remote files not supported */
 
@@ -1145,7 +1145,7 @@ char *make_URI (const char *path, const char *scheme)
 }
 
 /**
- * Tries to convert an URI to a local (UTF-8-encoded) file path.
+ * Tries to convert a URI to a local (UTF-8-encoded) file path.
  * @param url URI to convert
  * @return NULL on error, a nul-terminated string otherwise
  * (use free() to release it)
@@ -1183,7 +1183,7 @@ char *make_path (const char *url)
 #endif
         /* Leading slash => local path */
         if (*path == DIR_SEP_CHAR)
-#if !defined (WIN32) || defined (UNDER_CE)
+#if (!defined (WIN32) && !defined (__OS2__)) || defined (UNDER_CE)
             return path;
 #else
             return memmove (path, path + 1, strlen (path + 1) + 1);
@@ -1193,7 +1193,7 @@ char *make_path (const char *url)
         if (!strncasecmp (path, "localhost"DIR_SEP, 10))
             return memmove (path, path + 9, strlen (path + 9) + 1);
 
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
         if (*path && asprintf (&ret, "\\\\%s", path) == -1)
             ret = NULL;
 #endif
@@ -1207,7 +1207,7 @@ char *make_path (const char *url)
         if (*end)
             goto out;
 
-#ifndef WIN32
+#if !defined( WIN32 ) && !defined( __OS2__ )
         switch (fd)
         {
             case 0:

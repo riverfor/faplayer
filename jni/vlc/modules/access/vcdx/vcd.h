@@ -3,7 +3,7 @@
  *         using libcdio, libvcd and libvcdinfo
  *****************************************************************************
  * Copyright (C) 2003, 2004 the VideoLAN team
- * $Id$
+ * $Id: caf31ad69f16e05508f8e158ce0f835192a3d737 $
  *
  * Authors: Rocky Bernstein <rocky@panix.com>
  *

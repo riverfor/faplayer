@@ -2,7 +2,7 @@
  * anim_bitmap.cpp
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id$
+ * $Id: 32880183edd42f4af9224387e140b9df9bacb572 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *

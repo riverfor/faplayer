@@ -2,7 +2,7 @@
  * voutgl.m: iOS X OpenGLES provider
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id$
+ * $Id: b4e04475e11eaa62bbdd82cb4532ae31648dbdeb $
  *
  * Authors: Romain Goyet <romain.goyet at likid dot org>
  *

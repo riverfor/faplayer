@@ -3,7 +3,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: f916cba9c9253ebe8a1b8f70a492c6c7361e8bec $
  */
 #include "AtmoThread.h"
 

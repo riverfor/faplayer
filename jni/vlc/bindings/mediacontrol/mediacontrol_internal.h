@@ -2,7 +2,7 @@
  * control.h: private header for mediacontrol
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id$
+ * $Id: f248a8b61f69c7d78800659226fffd70a79974d6 $
  *
  * Authors: Olivier Aubert <olivier.aubert@liris.univ-lyon1.fr>
  *

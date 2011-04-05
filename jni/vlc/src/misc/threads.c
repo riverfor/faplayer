@@ -2,7 +2,7 @@
  * threads.c : threads implementation for the VideoLAN client
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: 27ab0d05dd5ed1eaf17985ece4f737d8d5e3ff1d $
  *
  * Authors: Jean-Marc Dressler <polux@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -42,7 +42,7 @@
 # include <sched.h>
 #endif
 
-#if HAVE_ANDROID
+#ifdef ANDROID
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
@@ -51,7 +51,7 @@ struct vlc_thread_boot
 {
     void * (*entry) (vlc_object_t *);
     vlc_object_t *object;
-#if HAVE_ANDROID
+#ifdef ANDROID
     int priority;
 #endif
 };
@@ -60,11 +60,13 @@ static void *thread_entry (void *data)
 {
     vlc_object_t *obj = ((struct vlc_thread_boot *)data)->object;
     void *(*func) (vlc_object_t *) = ((struct vlc_thread_boot *)data)->entry;
-#if HAVE_ANDROID
+
+#ifdef ANDROID
     int priority = ((struct vlc_thread_boot *)data)->priority;
     priority = 19 - priority * (19 + 20) / (VLC_THREAD_PRIORITY_HIGHEST - VLC_THREAD_PRIORITY_LOW);
     setpriority(PRIO_PROCESS, 0, priority);
 #endif
+
     free (data);
     msg_Dbg (obj, "thread started");
     func (obj);
@@ -91,7 +93,7 @@ int vlc_thread_create( vlc_object_t *p_this, void *(*func) ( vlc_object_t * ),
         return errno;
     boot->entry = func;
     boot->object = p_this;
-#if HAVE_ANDROID
+#ifdef ANDROID
     boot->priority = i_priority;
 #endif
 

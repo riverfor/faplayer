@@ -2,7 +2,7 @@
  * avcodec.h: decoder and encoder using libavcodec
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id$
+ * $Id: 8047db96a926464d44c37130a2f03a2a34007951 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -256,7 +256,7 @@ int ffmpeg_OpenCodec( decoder_t *p_dec );
    "for encoding the audio bitstream. It takes the following options: " \
    "main, low, ssr (not supported) and ltp (default: main)" )
 
-#define FFMPEG_COMMON_MEMBERS   \
+#define AVCODEC_COMMON_MEMBERS   \
     int i_cat;                  \
     int i_codec_id;             \
     const char *psz_namecodec;  \

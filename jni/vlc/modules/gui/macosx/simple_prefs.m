@@ -2,7 +2,7 @@
 * simple_prefs.m: Simple Preferences for Mac OS X
 *****************************************************************************
 * Copyright (C) 2008-2009 the VideoLAN team
-* $Id$
+* $Id: c0e08be569dbdc99a3b710deaf6272d2852aaea9 $
 *
 * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
 *

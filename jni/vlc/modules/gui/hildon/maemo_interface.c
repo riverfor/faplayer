@@ -2,7 +2,7 @@
  * maemo_interface.c : Interface creation of the maemo plugin
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: b6a2bd72a364fd6fed23ad8d3bec268c2a171a9e $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *

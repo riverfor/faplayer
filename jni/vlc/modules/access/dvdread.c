@@ -2,7 +2,7 @@
  * dvdread.c : DvdRead input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2006 the VideoLAN team
- * $Id$
+ * $Id: 8c7570cee43a4ecfc2bde39404168cd7dfaed23c $
  *
  * Authors: Stéphane Borel <stef@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -178,7 +178,7 @@ static int Open( vlc_object_t *p_this )
     else
         psz_file = strdup( p_demux->psz_file );
 
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
     if( psz_file != NULL )
     {
         size_t flen = strlen( psz_file );

@@ -2,7 +2,7 @@
  * coredialogs.h: Mac OS X Core Dialogs
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id$
+ * $Id: 66b2f8ba8404082c039d21c84b822657f6432a6f $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>

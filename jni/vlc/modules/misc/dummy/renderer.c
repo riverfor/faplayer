@@ -2,7 +2,7 @@
  * renderer.c : dummy text rendering functions
  *****************************************************************************
  * Copyright (C) 2000, 2001 the VideoLAN team
- * $Id$
+ * $Id: 75c76932c31c901b9064bfcbae05ec08b3505250 $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *

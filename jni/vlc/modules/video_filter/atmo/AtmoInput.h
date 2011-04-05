@@ -5,7 +5,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: 0425eb1bbc4ee267415a744cc67abef151314a5b $
  */
 #ifndef _AtmoInput_h_
 #define _AtmoInput_h_

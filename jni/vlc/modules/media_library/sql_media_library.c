@@ -2,7 +2,7 @@
  * sql_media_library.c: SQL-based media library
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: c56479bd6a966f984fc6762848aa157895dc0876 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -1128,7 +1128,7 @@ ml_media_t* GetMedia( media_library_t* p_ml, int id,
         else
         {
             ml_LockMedia( p_media );
-            if( p_media->b_sparse == true && select == ML_MEDIA )
+            if( p_media->b_sparse && select == ML_MEDIA )
                 reload = true;
             /* Utilise ML_MEDIA_EXTRA load? TODO */
             ml_UnlockMedia( p_media );

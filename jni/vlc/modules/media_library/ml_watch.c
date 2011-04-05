@@ -2,7 +2,7 @@
  * ml_watch.c: SQL-based media library: Medias watching system
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team and AUTHORS
- * $Id$
+ * $Id: f542d81814fc6e6faf32e0268c583b42b670692e $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

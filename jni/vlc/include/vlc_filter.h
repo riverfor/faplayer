@@ -2,7 +2,7 @@
  * vlc_filter.h: filter related structures and functions
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: ea24344e707c5bfa8827d317294056ecd6d52eee $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>

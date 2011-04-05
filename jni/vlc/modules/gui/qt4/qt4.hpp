@@ -2,7 +2,7 @@
  * qt4.hpp : QT4 interface
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id$
+ * $Id: 366115da8e4902dc9c5bab58a5e0d20bd8e8d652 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -74,6 +74,9 @@ struct intf_sys_t
 
     QString filepath;        /* Last path used in dialogs */
 
+#ifdef WIN32
+    bool disable_volume_keys;
+#endif
 };
 
 #define THEPL pl_Get(p_intf)

@@ -2,7 +2,7 @@
  * langfromtelx.c: dynamic language setting from telx
  *****************************************************************************
  * Copyright (C) 2009, 2011 VideoLAN
- * $Id$
+ * $Id: bc5871d917335230737c5919718d22fa09c973d0 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *

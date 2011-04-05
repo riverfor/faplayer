@@ -2,7 +2,7 @@
  * zip.h: Module (access+filter) to extract different archives, based on zlib
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: 6137a0e6aa06cfb1d97809322d79c99f47bf4bb7 $
  *
  * Authors: Jean-Philippe André <jpeg@videolan.org>
  *

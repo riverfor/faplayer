@@ -2,7 +2,7 @@
  * dynamicoverlay_commands.c : dynamic overlay plugin commands
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: a7d3b477ab139f637655ea5c1de48e7235c73aa8 $
  *
  * Author: Søren Bøg <avacore@videolan.org>
  *         Jean-Paul Saman <jpsaman@videolan.org>
@@ -664,7 +664,7 @@ static int exec_GetVisibility( filter_t *p_filter,
     if( p_ovl == NULL )
         return VLC_EGENERIC;
 
-    p_results->b_visible = ( p_ovl->b_active == true ) ? 1 : 0;
+    p_results->b_visible = p_ovl->b_active ? 1 : 0;
     return VLC_SUCCESS;
 }
 

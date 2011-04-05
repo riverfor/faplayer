@@ -2,7 +2,7 @@
  * evt_menu.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: b960549ee4d3ac8fa014ae9f3f122dd7db0ef003 $
  *
  * Authors: Olivier Teulière <ipkiss@via.ecp.fr>
  *

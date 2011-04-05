@@ -2,7 +2,7 @@
  * standard.c: standard stream output module
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id$
+ * $Id: 45580024ae984fccd5b91f15ee16885d2d17a7c4 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -75,7 +75,7 @@
     "that will be announced in the SDP (Session Descriptor)." )
 #define URL_TEXT N_("Session URL")
 #define URL_LONGTEXT N_( \
-    "This allows you to give an URL with more details about the stream " \
+    "This allows you to give a URL with more details about the stream " \
     "(often the website of the streaming organization), that will " \
     "be announced in the SDP (Session Descriptor)." )
 #define EMAIL_TEXT N_("Session email")
@@ -129,8 +129,6 @@ vlc_module_begin ()
                                         true )
     add_string( SOUT_CFG_PREFIX "phone", "", PHONE_TEXT, PHONE_LONGTEXT,
                                         true )
-    add_obsolete_bool( SOUT_CFG_PREFIX "sap-ipv6" )
-
     set_callbacks( Open, Close )
 vlc_module_end ()
 

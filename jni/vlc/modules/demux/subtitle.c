@@ -2,7 +2,7 @@
  * subtitle.c: Demux for subtitle text files.
  *****************************************************************************
  * Copyright (C) 1999-2007 the VideoLAN team
- * $Id$
+ * $Id: 7fcd8d6c537a305dc53d5e9935c1213c5e987d71 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Derk-Jan Hartman <hartman at videolan dot org>
@@ -1681,7 +1681,7 @@ static int ParseJSS( demux_t *p_demux, subtitle_t *p_subtitle, int i_idx )
             continue;
         }
     }
-	
+
     while( psz_text[ strlen( psz_text ) - 1 ] == '\\' )
     {
         const char *s2 = TextGetLine( txt );
@@ -1702,7 +1702,7 @@ static int ParseJSS( demux_t *p_demux, subtitle_t *p_subtitle, int i_idx )
         if( !psz_text )
              return VLC_ENOMEM;
 
-		psz_orig = psz_text;
+        psz_orig = psz_text;
         strcat( psz_text, s2 );
     }
 
@@ -1787,7 +1787,7 @@ static int ParseJSS( demux_t *p_demux, subtitle_t *p_subtitle, int i_idx )
             else if( *(psz_text + 1 ) == '\r' ||  *(psz_text + 1 ) == '\n' ||
                      *(psz_text + 1 ) == '\0' )
             {
-				psz_text++;
+                psz_text++;
             }
             break;
         default:

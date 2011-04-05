@@ -2,7 +2,7 @@
  * interface_widgets.cpp : Custom widgets for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id$
+ * $Id: 2f346c39a454972f83e4aeb9522b6cd8999c09b8 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>

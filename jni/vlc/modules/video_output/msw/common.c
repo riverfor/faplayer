@@ -2,7 +2,7 @@
  * common.c:
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id$
+ * $Id: 414b93dd4c792f2d1b13c5faeb022a9badf0e6a8 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

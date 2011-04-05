@@ -2,7 +2,7 @@
  * item_list.h : Item list data structure for Watching system
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team  and AUTHORS
- * $Id$
+ * $Id: 2d24686ea19fc3f7f5c8ed7927981eb679a5d82c $
  *
  * Authors: Srikanth Raju <srikiraju at gmail dot com>
  *

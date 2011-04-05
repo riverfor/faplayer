@@ -2,7 +2,7 @@
  * pes.c: PES packetizer used by the MPEG multiplexers
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id$
+ * $Id: a366f57bdcc11e7fb62c20f21de0adb7016ad802 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Eric Petit <titer@videolan.org>

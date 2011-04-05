@@ -2,7 +2,7 @@
  * mux.c: muxer using ffmpeg (libavformat).
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id$
+ * $Id: 19f49c8602d9b99d963758238ff16aa952db35f7 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -33,12 +33,7 @@
 #include <vlc_block.h>
 #include <vlc_sout.h>
 
-/* ffmpeg header */
-#ifdef HAVE_LIBAVFORMAT_AVFORMAT_H
-#   include <libavformat/avformat.h>
-#elif defined(HAVE_FFMPEG_AVFORMAT_H)
-#   include <ffmpeg/avformat.h>
-#endif
+#include <libavformat/avformat.h>
 
 #include "avformat.h"
 #include "../../codec/avcodec/avcodec.h"

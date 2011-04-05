@@ -2,7 +2,7 @@
  * filter.c : DirectShow access module for vlc
  *****************************************************************************
  * Copyright (C) 2002-2010 the VideoLAN team
- * $Id$
+ * $Id: 1178225817797f36ec9431187822ef34b6f91800 $
  *
  * Author: Gildas Bazin <gbazin@videolan.org>
  *
@@ -260,7 +260,7 @@ HRESULT CapturePin::CustomGetSample( VLCMediaSample *vlc_sample )
     msg_Dbg( p_input, "CapturePin::CustomGetSample" );
 #endif
 
-    if( samples_queue.size() )
+    if( !samples_queue.empty() )
     {
         *vlc_sample = samples_queue.back();
         samples_queue.pop_back();
@@ -592,7 +592,7 @@ STDMETHODIMP CapturePin::EndFlush( void )
     VLCMediaSample vlc_sample;
 
     vlc_mutex_lock( &p_sys->lock );
-    while( samples_queue.size() )
+    while( !samples_queue.empty() )
     {
         vlc_sample = samples_queue.back();
         samples_queue.pop_back();

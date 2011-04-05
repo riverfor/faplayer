@@ -2,7 +2,7 @@
  * vlc_keys.h: keycode defines
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id$
+ * $Id: 01c59b06690954f78b4309c93f87739cfcbd50e5 $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *

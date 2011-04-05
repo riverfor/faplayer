@@ -2,7 +2,7 @@
  * vlc_arrays.h : Arrays and data structures handling
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id$
+ * $Id: c61c870b94dbd28e49d0bee39879d7a21bd0d54a $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>

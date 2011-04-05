@@ -2,7 +2,7 @@
  * poll.c: I/O event multiplexing
  *****************************************************************************
  * Copyright © 2007 Rémi Denis-Courmont
- * $Id$
+ * $Id: 37cf83272656f4781aaa22b8ca8f03a97937cc88 $
  *
  * Author: Rémi Denis-Courmont
  *

@@ -2,7 +2,7 @@
  * erase.c : logo erase video filter
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id$
+ * $Id: 4bcb02090cfeb886502dc110e1832f1f1cac0cbe $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *

@@ -2,7 +2,7 @@
  * common.h: Windows video output header file
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id$
+ * $Id: d905586dc19eb742668b7d546faa4e5bb651453f $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Damien Fouilleul <damienf@videolan.org>

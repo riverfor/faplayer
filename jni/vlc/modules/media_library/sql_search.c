@@ -2,7 +2,7 @@
  * sql_search.c: SQL-based media library: all find/get functions
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team and AUTHORS
- * $Id$
+ * $Id: 439b580c1e6422d0af27f8bf6b44917e8bbbe5db $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -764,7 +764,7 @@ int BuildSelect( media_library_t *p_ml,
                         psz_on2 == NULL ? "" : " AND " );
             }
         }
-        if( join == true )
+        if( join )
         {
             if( psz_peoplerole && *psz_peoplerole )
             {
@@ -956,7 +956,8 @@ static int BuildWhere( media_library_t* p_ml, char **ppsz_where, ml_ftree_t* tre
             if( i_ret != VLC_SUCCESS )
                 goto parsefail;
             /* Ignore right parse tree as this is a special node */
-            if( asprintf( ppsz_where, "%s", psz_left ? psz_left : "" ) == -1 )
+            *ppsz_where = strdup( psz_left ? psz_left : "" );
+            if( !*ppsz_where )
             {
                 i_ret = VLC_ENOMEM;
                 goto parsefail;

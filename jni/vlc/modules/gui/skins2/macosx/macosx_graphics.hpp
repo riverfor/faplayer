@@ -2,7 +2,7 @@
  * macosx_graphics.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 05ae82340e96145019816e7b33f7c304ddd1a2db $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *

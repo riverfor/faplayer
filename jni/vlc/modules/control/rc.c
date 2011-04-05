@@ -2,7 +2,7 @@
  * rc.c : remote control stdin/stdout module for vlc
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id$
+ * $Id: c6310b0d9356dea20c02104e59fa247272cb41bf $
  *
  * Author: Peter Surda <shurdeek@panorama.sth.ac.at>
  *         Jean-Paul Saman <jpsaman #_at_# m2x _replaceWith#dot_ nl>
@@ -1270,8 +1270,8 @@ static int Playlist( vlc_object_t *p_this, char const *psz_cmd,
 
         if( strlen( newval.psz_string ) > 0 )
         {
-            if ( ( !strncmp( newval.psz_string, "on", 2 ) && ( val.b_bool == true ) ) ||
-                 ( !strncmp( newval.psz_string, "off", 3 ) && ( val.b_bool == false ) ) )
+            if ( ( !strncmp( newval.psz_string, "on", 2 )  &&  val.b_bool ) ||
+                 ( !strncmp( newval.psz_string, "off", 3 ) && !val.b_bool ) )
             {
                 b_update = false;
             }
@@ -1292,8 +1292,8 @@ static int Playlist( vlc_object_t *p_this, char const *psz_cmd,
 
         if( strlen( newval.psz_string ) > 0 )
         {
-            if ( ( !strncmp( newval.psz_string, "on", 2 ) && ( val.b_bool == true ) ) ||
-                 ( !strncmp( newval.psz_string, "off", 3 ) && ( val.b_bool == false ) ) )
+            if ( ( !strncmp( newval.psz_string, "on", 2 )  &&  val.b_bool ) ||
+                 ( !strncmp( newval.psz_string, "off", 3 ) && !val.b_bool ) )
             {
                 b_update = false;
             }
@@ -1314,8 +1314,8 @@ static int Playlist( vlc_object_t *p_this, char const *psz_cmd,
 
         if( strlen( newval.psz_string ) > 0 )
         {
-            if ( ( !strncmp( newval.psz_string, "on", 2 ) && ( val.b_bool == true ) ) ||
-                 ( !strncmp( newval.psz_string, "off", 3 ) && ( val.b_bool == false ) ) )
+            if ( ( !strncmp( newval.psz_string, "on", 2 )  &&  val.b_bool ) ||
+                 ( !strncmp( newval.psz_string, "off", 3 ) && !val.b_bool ) )
             {
                 b_update = false;
             }

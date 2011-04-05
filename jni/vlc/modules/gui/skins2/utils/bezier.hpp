@@ -2,7 +2,7 @@
  * bezier.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 6c3a9b422ce3cf896983fbfb13174b4df1a6f4dd $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>

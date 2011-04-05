@@ -5,7 +5,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: d4512eca10bb59862063faa387eecdbbcf96ef47 $
  */
 
 #define __STDC_FORMAT_MACROS 1

@@ -2,7 +2,7 @@
  * remoteosd.c: remote osd over vnc filter module
  *****************************************************************************
  * Copyright (C) 2007-2008 Matthias Bauer
- * $Id$
+ * $Id: 488b3717efc7475b5a6163d1e7a15a92b2027f95 $
  *
  * Authors: Matthias Bauer <matthias dot bauer #_at_# gmx dot ch>
  *
@@ -222,8 +222,6 @@ struct filter_sys_t
 
     picture_t     *p_pic;              /* The picture with OSD data from VNC */
 
-    vout_thread_t *p_vout;             /* Pointer to video-out thread */
-
     int           i_socket;            /* Socket used for VNC */
 
     uint16_t      i_vnc_width;          /* The with of the VNC screen */
@@ -309,13 +307,7 @@ static int CreateFilter ( vlc_object_t *p_this )
     p_filter->pf_sub_filter = Filter;
     p_filter->pf_sub_mouse  = MouseEvent;
 
-    p_sys->p_vout = vlc_object_find( p_this, VLC_OBJECT_VOUT, FIND_PARENT );
-
-    if( p_sys->p_vout )
-    {
-        var_AddCallback( p_sys->p_vout->p_libvlc, "key-pressed",
-                         KeyEvent, p_this );
-    }
+    var_AddCallback( p_filter->p_libvlc, "key-pressed", KeyEvent, p_this );
 
     es_format_Init( &p_filter->fmt_out, SPU_ES, VLC_CODEC_SPU );
     p_filter->fmt_out.i_priority = 0;
@@ -363,13 +355,7 @@ static void DestroyFilter( vlc_object_t *p_this )
 
     stop_osdvnc( p_filter );
 
-    if( p_sys->p_vout )
-    {
-        var_DelCallback( p_sys->p_vout->p_libvlc, "key-pressed",
-                         KeyEvent, p_this );
-
-        vlc_object_release( p_sys->p_vout );
-    }
+    var_DelCallback( p_filter->p_libvlc, "key-pressed", KeyEvent, p_this );
 
     var_Destroy( p_this, RMTOSD_CFG "host" );
     var_Destroy( p_this, RMTOSD_CFG "port" );
@@ -803,8 +789,8 @@ static void* update_request_thread( vlc_object_t *p_thread_obj )
     udr.w = htons(p_sys->i_vnc_width);
     udr.h = htons(p_sys->i_vnc_height);
 
-    if( write_exact(p_filter, p_sys->i_socket, (char*)&udr,
-           sz_rfbFramebufferUpdateRequestMsg) == false)
+    if( !write_exact(p_filter, p_sys->i_socket, (char*)&udr,
+                     sz_rfbFramebufferUpdateRequestMsg) )
     {
         msg_Err( p_filter, "Could not write rfbFramebufferUpdateRequestMsg." );
         p_sys->b_continue = false;
@@ -819,8 +805,8 @@ static void* update_request_thread( vlc_object_t *p_thread_obj )
         while( vlc_object_alive( p_thread_obj ) )
         {
             msleep( i_poll_interval_microsec );
-            if( write_exact(p_filter, p_sys->i_socket, (char*)&udr,
-                   sz_rfbFramebufferUpdateRequestMsg) == false)
+            if( !write_exact(p_filter, p_sys->i_socket, (char*)&udr,
+                             sz_rfbFramebufferUpdateRequestMsg))
             {
                 msg_Err( p_filter, "Could not write rfbFramebufferUpdateRequestMsg." );
                 break;
@@ -1012,7 +998,7 @@ static bool process_server_message ( filter_t *p_filter,
             msg->scme.nColours = htons(msg->scme.nColours);
             msg->scme.firstColour = htons(msg->scme.firstColour);
             int i_datasize;
-            if ( p_sys->b_alpha_from_vnc == true )
+            if ( p_sys->b_alpha_from_vnc )
             {
                 i_datasize = 2 * msg->scme.nColours * 4;
             }
@@ -1041,7 +1027,7 @@ static bool process_server_message ( filter_t *p_filter,
             for (int i = 0; i < msg->scme.nColours; i++)
             {
                 i_color_index = i+msg->scme.firstColour;
-                if ( p_sys->b_alpha_from_vnc == true )
+                if ( p_sys->b_alpha_from_vnc )
                 {
                     i_alpha = p_sys->read_buffer[i_offset];
                     i_offset += 2;

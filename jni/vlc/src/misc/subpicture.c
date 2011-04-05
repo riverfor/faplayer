@@ -2,7 +2,7 @@
  * subpicture.c: Subpicture functions
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
- * $Id$
+ * $Id: 303f115a8aeb5f00c7e22d8b4204cd281c22d9e9 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

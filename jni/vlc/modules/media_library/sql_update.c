@@ -2,7 +2,7 @@
  * sql_update.c: SQL-based media library: all database update functions
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team and AUTHORS
- * $Id$
+ * $Id: c10e01f91b816bb2949674b11cccc32327efc576 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

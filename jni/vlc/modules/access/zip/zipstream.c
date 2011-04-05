@@ -2,7 +2,7 @@
  * zipstream.c: stream_filter that creates a XSPF playlist from a Zip archive
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: ac3f87cf30fa5368982acf8d5c111e90117d0b54 $
  *
  * Authors: Jean-Philippe André <jpeg@videolan.org>
  *

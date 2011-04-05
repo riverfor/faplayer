@@ -2,7 +2,7 @@
  * VLCApplianceController.h: Front Row plugin
  *****************************************************************************
  * Copyright (C) 2007 - 2008 the VideoLAN Team
- * $Id$
+ * $Id: ab6ae7f5fcbd5b05086fef39647a8f982f4b8370 $
  *
  * Authors: hyei
  *

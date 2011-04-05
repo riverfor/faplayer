@@ -6,7 +6,7 @@
  * thread, and destroy a previously oppened video output thread.
  *****************************************************************************
  * Copyright (C) 2000-2007 the VideoLAN team
- * $Id$
+ * $Id: c66c16c1331c6c71f6426a130cee299ca600a536 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -956,17 +956,10 @@ static int ThreadDisplayRenderPicture(vout_thread_t *vout, bool is_forced)
      * - be sure to end up with a direct buffer.
      * - blend subtitles, and in a fast access buffer
      */
-    bool is_direct;
-    picture_t *todisplay;
-
-    if (filtered && do_early_spu && subpic) {
-        if (vd->info.is_slow) {
-            is_direct = false;
-            todisplay = picture_NewFromFormat(&vd->source); /* FIXME a pool ? */
-        } else {
-            is_direct = true;
-            todisplay = picture_pool_Get(vout->p->display_pool);
-        }
+    bool is_direct = vout->p->decoder_pool == vout->p->display_pool;
+    picture_t *todisplay = filtered;
+    if (do_early_spu && subpic) {
+        todisplay = picture_pool_Get(vout->p->private_pool);
         if (todisplay) {
             VideoFormatCopyCropAr(&todisplay->format, &filtered->format);
             picture_Copy(todisplay, filtered);
@@ -979,9 +972,6 @@ static int ThreadDisplayRenderPicture(vout_thread_t *vout, bool is_forced)
 
         if (!todisplay)
             return VLC_EGENERIC;
-    } else {
-        is_direct = vout->p->decoder_pool == vout->p->display_pool;
-        todisplay = filtered;
     }
 
     picture_t *direct;

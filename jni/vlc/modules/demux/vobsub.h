@@ -2,7 +2,7 @@
  * vobsub.h: Vobsub support
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: cabdefb1f396daa568889fee0ef21c6ed66de572 $
  *
  * Authors: John Stebbins
  *

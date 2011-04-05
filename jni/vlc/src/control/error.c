@@ -38,7 +38,7 @@ static void libvlc_setup_threads (bool init)
     vlc_mutex_lock (&lock);
     if (init)
     {
-#if HAVE_ANDROID
+#ifdef ANDROID
         if (refs++ == 0) {
             vlc_threadvar_create (&context, free);
             pthread_cancel_initialize ();
@@ -51,7 +51,7 @@ static void libvlc_setup_threads (bool init)
     else
     {
         assert (refs > 0);
-#if HAVE_ANDROID
+#ifdef ANDROID
         if (--refs == 0) {
             vlc_threadvar_delete (&context);
             pthread_cancel_deinitialize ();

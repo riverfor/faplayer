@@ -2,7 +2,7 @@
  * omxil_utils.h: helper functions
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id$
+ * $Id: e4aad8d72eacb590360b4f0ebb63fcc3758485ad $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

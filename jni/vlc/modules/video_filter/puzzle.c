@@ -2,7 +2,7 @@
  * puzzle.c : Puzzle game
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id$
+ * $Id: c57775387e7a390ce20a77630493b93156cf1bda $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *

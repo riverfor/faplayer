@@ -2,7 +2,7 @@
  * libvlc.h:  libvlc external API
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id$
+ * $Id: 2552d6b39b311a3d35d72b7eebf0e180ff3d54aa $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>

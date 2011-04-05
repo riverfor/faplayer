@@ -2,7 +2,7 @@
  * maemo_menus.c : menus creation for the maemo plugin
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id$
+ * $Id: 71f17fcb147806d374a2b345f5e0ce0218df248a $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

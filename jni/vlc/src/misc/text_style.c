@@ -2,7 +2,7 @@
  * text_style.c
  *****************************************************************************
  * Copyright (C) 1999-2010 the VideoLAN team
- * $Id$
+ * $Id: cfc718302afd151abe6fdf77e84e5354a1c23cda $
  *
  * Author: basOS G <noxelia 4t gmail , com>
  *

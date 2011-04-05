@@ -2,7 +2,7 @@
  * nsv.c: NullSoft Video demuxer.
  *****************************************************************************
  * Copyright (C) 2004-2007 the VideoLAN team
- * $Id$
+ * $Id: d81251d23f74e334869f35edfb9434b9393b995d $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *

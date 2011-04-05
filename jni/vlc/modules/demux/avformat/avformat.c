@@ -2,7 +2,7 @@
  * avformat.c: demuxer and muxer using libavformat library
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: a12564d3358a5d6966a9fd29753f0f8bac305777 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>

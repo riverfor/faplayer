@@ -2,7 +2,7 @@
  * oss.c : OSS /dev/dsp module for vlc
  *****************************************************************************
  * Copyright (C) 2000-2002 the VideoLAN team
- * $Id$
+ * $Id: d44ab8adc4b1a7ef8111a84646434784bbb18cff $
  *
  * Authors: Michel Kaempf <maxx@via.ecp.fr>
  *          Sam Hocevar <sam@zoy.org>
@@ -71,7 +71,6 @@
 struct aout_sys_t
 {
     int i_fd;
-    int b_workaround_buggy_driver;
     int i_fragstotal;
     mtime_t max_buffer_duration;
 };
@@ -94,22 +93,15 @@ static mtime_t BufferDuration( aout_instance_t * p_aout );
 /*****************************************************************************
  * Module descriptor
  *****************************************************************************/
-#define BUGGY_TEXT N_("Try to work around buggy OSS drivers")
-#define BUGGY_LONGTEXT N_( \
-    "Some buggy OSS drivers just don't like when their internal buffers " \
-    "are completely filled (the sound gets heavily hashed). If you have one " \
-    "of these drivers, then you need to enable this option." )
-
 vlc_module_begin ()
     set_shortname( "OSS" )
-    set_description( N_("UNIX OSS audio output") )
+    set_description( N_("Open Sound System") )
 
     set_category( CAT_AUDIO )
     set_subcategory( SUBCAT_AUDIO_AOUT )
     add_loadfile( "oss-audio-device", "/dev/dsp",
                   N_("OSS DSP device"), NULL, false )
         add_deprecated_alias( "dspdev" )   /* deprecated since 0.9.3 */
-    add_bool( "oss-buggy", false, BUGGY_TEXT, BUGGY_LONGTEXT, true )
 
     set_capability( "audio output", 100 )
     add_shortcut( "oss" )
@@ -509,9 +501,6 @@ static int Open( vlc_object_t *p_this )
         aout_VolumeSoftInit( p_aout );
     }
 
-    p_aout->output.p_sys->b_workaround_buggy_driver =
-        var_InheritBool( p_aout, "oss-buggy" );
-
     /* Create OSS thread and wait for its readiness. */
     if( vlc_thread_create( p_aout, OSSThread,
                            VLC_THREAD_PRIORITY_OUTPUT ) )
@@ -598,20 +587,6 @@ static void* OSSThread( vlc_object_t *p_this )
         if ( p_aout->output.output.i_format != VLC_CODEC_SPDIFL )
         {
             mtime_t buffered = BufferDuration( p_aout );
-
-            if( p_aout->output.p_sys->b_workaround_buggy_driver )
-            {
-#define i_fragstotal p_aout->output.p_sys->i_fragstotal
-                /* Wait a bit - we don't want our buffer to be full */
-                if( buffered > (p_aout->output.p_sys->max_buffer_duration
-                                / i_fragstotal * (i_fragstotal - 1)) )
-                {
-                    msleep((p_aout->output.p_sys->max_buffer_duration
-                                / i_fragstotal ));
-                    buffered = BufferDuration( p_aout );
-                }
-#undef i_fragstotal
-            }
 
             /* Next buffer will be played at mdate() + buffered */
             p_buffer = aout_OutputNextBuffer( p_aout, mdate() + buffered,

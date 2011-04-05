@@ -2,7 +2,7 @@
  * rar.c: uncompressed RAR access
  *****************************************************************************
  * Copyright (C) 2008-2010 Laurent Aimar
- * $Id$
+ * $Id: 92dd94364f2016f152f739bf4dee2799167d458b $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

@@ -2,7 +2,7 @@
  * playlist_item.cpp : Manage playlist item
  ****************************************************************************
  * Copyright © 2006-2008 the VideoLAN team
- * $Id$
+ * $Id: aab77281d6666a16b4d0296f78b7fefd50c418f0 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>

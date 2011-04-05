@@ -2,7 +2,7 @@
  * acl.c: Access list related functions
  *****************************************************************************
  * Copyright (C) 2007-2010 the VideoLAN team
- * $Id$
+ * $Id: 4deb66e6dd5b89c2e7235613e6a4e2ad2408ab90 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *

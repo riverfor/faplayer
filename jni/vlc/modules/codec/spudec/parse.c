@@ -2,7 +2,7 @@
  * parse.c: SPU parser
  *****************************************************************************
  * Copyright (C) 2000-2001, 2005, 2006 the VideoLAN team
- * $Id$
+ * $Id: 99a8c4702da49bf03729cdd0f816849a52be61c3 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Laurent Aimar <fenrir@via.ecp.fr>

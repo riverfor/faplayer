@@ -2,7 +2,7 @@
  * sdl.c : SDL audio output plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2002 the VideoLAN team
- * $Id$
+ * $Id: 89bbfb1eb0d24dffa666f92b0849c89e5d75b464 $
  *
  * Authors: Michel Kaempf <maxx@via.ecp.fr>
  *          Sam Hocevar <sam@zoy.org>

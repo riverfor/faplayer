@@ -2,7 +2,7 @@
  * vlc.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id$
+ * $Id: e209e6fd7e99da1767961ea543f40f1cf14aad1e $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -85,6 +85,11 @@
 #define RCHOST_TEXT N_("TCP command input")
 #define RCHOST_LONGTEXT N_("Accept commands over a socket rather than stdin. " \
             "You can set the address and port the interface will bind to." )
+#define CLIHOST_TEXT N_("CLI input")
+#define CLIHOST_LONGTEXT N_( "Accept commands from this source. " \
+    "The CLI defaults to stdin (\"*console\"), but can also bind to a " \
+    "plain TCP socket (\"localhost:4212\") or use the telnet protocol " \
+    "(\"telnet://0.0.0.0:4212\")" )
 
 static int vlc_sd_probe_Open( vlc_object_t * );
 
@@ -109,8 +114,9 @@ vlc_module_begin ()
             add_string ( "http-host", NULL, HOST_TEXT, HOST_LONGTEXT, true )
             add_string ( "http-src",  NULL, SRC_TEXT,  SRC_LONGTEXT,  true )
             add_bool   ( "http-index", false, INDEX_TEXT, INDEX_LONGTEXT, true )
-        set_section( N_("Lua RC"), 0 )
+        set_section( N_("Lua CLI"), 0 )
             add_string( "rc-host", NULL, RCHOST_TEXT, RCHOST_LONGTEXT, true )
+            add_string( "cli-host", NULL, CLIHOST_TEXT, CLIHOST_LONGTEXT, true )
         set_section( N_("Lua Telnet"), 0 )
             add_string( "telnet-host", "localhost", TELNETHOST_TEXT,
                         TELNETHOST_LONGTEXT, true )
@@ -142,8 +148,10 @@ vlc_module_begin ()
 
     add_submodule ()
         set_description( N_("Lua Interface Module (shortcuts)") )
+        add_shortcut( "luacli" )
         add_shortcut( "luarc" )
 #ifndef WIN32
+        add_shortcut( "cli" )
         add_shortcut( "rc" )
 #endif
         set_capability( "interface", 25 )
@@ -275,7 +283,7 @@ int vlclua_scripts_batch_execute( vlc_object_t *p_this,
     char **ppsz_dir_list = NULL;
     int i_ret;
 
-    if((i_ret = vlclua_dir_list( p_this, luadirname, &ppsz_dir_list ) != VLC_SUCCESS))
+    if( (i_ret = vlclua_dir_list( p_this, luadirname, &ppsz_dir_list )) != VLC_SUCCESS)
         return i_ret;
 
     i_ret = VLC_EGENERIC;

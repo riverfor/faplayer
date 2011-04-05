@@ -2,7 +2,7 @@
  * VLCMediaLayer.m: Front Row plugin
  *****************************************************************************
  * Copyright (C) 2007 - 2008 the VideoLAN Team
- * $Id$
+ * $Id: 96c9a78724cfa27708c6c220689784334cb7e508 $
  *
  * Authors: hyei
  *

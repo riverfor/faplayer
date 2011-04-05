@@ -2,7 +2,7 @@
  * sftp.c: SFTP input module
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: 8957678bfc9dc6e253da60fbdcc625ee59c8a25f $
  *
  * Authors: Rémi Duraffort <ivoire@videolan.org>
  *

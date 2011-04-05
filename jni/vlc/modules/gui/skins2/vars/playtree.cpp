@@ -2,7 +2,7 @@
  * playtree.cpp
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id$
+ * $Id: 4e8ba7b38e88ab2510f3296c69f7ccc77990c23a $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Clément Stenac <zorglub@videolan.org>

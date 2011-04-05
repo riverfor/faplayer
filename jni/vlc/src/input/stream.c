@@ -2,7 +2,7 @@
  * stream.c
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id$
+ * $Id: ded3b8fdc0e6888767bcd0de9b5b4c4f3d8cb49c $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -260,16 +260,8 @@ stream_t *stream_UrlNew( vlc_object_t *p_parent, const char *psz_url )
     strcpy( psz_dup, psz_url );
     input_SplitMRL( &psz_access, &psz_demux, &psz_path, psz_dup );
 
-    /* Get a weak link to the parent input */
-    /* FIXME: This should probably be removed in favor of a NULL input. */
-    input_thread_t *p_input = (input_thread_t *)vlc_object_find( p_parent, VLC_OBJECT_INPUT, FIND_PARENT );
-    
     /* Now try a real access */
-    p_access = access_New( p_parent, p_input, psz_access, psz_demux, psz_path );
-
-    if(p_input)
-        vlc_object_release((vlc_object_t*)p_input);
-
+    p_access = access_New( p_parent, NULL, psz_access, psz_demux, psz_path );
     if( p_access == NULL )
     {
         msg_Err( p_parent, "no suitable access module for `%s'", psz_url );
@@ -384,7 +376,7 @@ stream_t *stream_AccessNew( access_t *p_access, char **ppsz_list )
 
     if( p_sys->method == STREAM_METHOD_BLOCK )
     {
-        msg_Dbg( s, "Using AStream*Block" );
+        msg_Dbg( s, "Using block method for AStream*" );
         s->pf_read = AStreamReadBlock;
         s->pf_peek = AStreamPeekBlock;
 
@@ -411,7 +403,7 @@ stream_t *stream_AccessNew( access_t *p_access, char **ppsz_list )
 
         assert( p_sys->method == STREAM_METHOD_STREAM );
 
-        msg_Dbg( s, "Using AStream*Stream" );
+        msg_Dbg( s, "Using stream method for AStream*" );
 
         s->pf_read = AStreamReadStream;
         s->pf_peek = AStreamPeekStream;
@@ -667,7 +659,7 @@ static void AStreamPrebufferBlock( stream_t *s )
     int64_t i_first = 0;
     int64_t i_start;
 
-    msg_Dbg( s, "pre buffering" );
+    msg_Dbg( s, "starting pre-buffering" );
     i_start = mdate();
     for( ;; )
     {
@@ -1420,7 +1412,7 @@ static void AStreamPrebufferStream( stream_t *s )
     int64_t i_first = 0;
     int64_t i_start;
 
-    msg_Dbg( s, "pre buffering" );
+    msg_Dbg( s, "starting pre-buffering" );
     i_start = mdate();
     for( ;; )
     {

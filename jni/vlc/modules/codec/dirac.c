@@ -7,7 +7,7 @@
  *          ##
  *****************************************************************************
  * Copyright (C) 2004-2008 the VideoLAN team
- * $Id$
+ * $Id: 7573f3d7dcf260b2c12f0ee5a1aec67b51e9ab64 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  * Rewritten: David Flynn <davidf at rd.bbc.co.uk>

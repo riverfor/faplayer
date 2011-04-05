@@ -2,7 +2,7 @@
  * evt_input.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 8b947762c51b4d2f397bf8de98739d0fcf3bc082 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>

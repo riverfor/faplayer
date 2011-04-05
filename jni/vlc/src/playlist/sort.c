@@ -2,7 +2,7 @@
  * sort.c : Playlist sorting functions
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id$
+ * $Id: 6446ff0c52600689d237242e1b732da2fd1fc3ad $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>

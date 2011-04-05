@@ -2,7 +2,7 @@
  * ncurses.c : NCurses interface for vlc
  *****************************************************************************
  * Copyright © 2001-2010 the VideoLAN team
- * $Id$
+ * $Id: 33087e013ece5205ef1986fa6d95e77ae5477e7e $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Laurent Aimar <fenrir@via.ecp.fr>

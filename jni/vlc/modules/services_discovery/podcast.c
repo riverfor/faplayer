@@ -2,7 +2,7 @@
  * podcast.c:  Podcast services discovery module
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id$
+ * $Id: b97c56b6b39b924f8c333beced584f55079c87c2 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *

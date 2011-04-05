@@ -5,7 +5,7 @@
  *   Jukebox    |    |   (  <_> )  \___|    < | \_\ (  <_> > <  <
  *   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \
  *                     \/            \/     \/    \/            \/
- * $Id$
+ * $Id: fcc5b2645d194b0c10de6adf90ed7d9bd0ec4ae4 $
  *
  * Copyright (C) 2006 Antonius Hellmann
  *

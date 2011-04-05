@@ -2,7 +2,7 @@
  * gnutls.c
  *****************************************************************************
  * Copyright (C) 2004-2006 Rémi Denis-Courmont
- * $Id$
+ * $Id: 520c9147ef186be6ed600281cdd211eba47d2950 $
  *
  * Authors: Rémi Denis-Courmont <rem # videolan.org>
  *
@@ -91,9 +91,6 @@ vlc_module_begin ()
     set_category( CAT_ADVANCED )
     set_subcategory( SUBCAT_ADVANCED_MISC )
 
-    add_obsolete_bool( "tls-check-cert" )
-    add_obsolete_bool( "tls-check-hostname" )
-
     add_submodule ()
         set_description( N_("GnuTLS server") )
         set_capability( "tls server", 1 )
@@ -101,7 +98,6 @@ vlc_module_begin ()
         set_subcategory( SUBCAT_ADVANCED_MISC )
         set_callbacks( OpenServer, CloseServer )
 
-        add_obsolete_integer( "gnutls-dh-bits" )
         add_integer( "gnutls-cache-timeout", CACHE_TIMEOUT,
                     CACHE_TIMEOUT_TEXT, CACHE_TIMEOUT_LONGTEXT, true )
         add_integer( "gnutls-cache-size", CACHE_SIZE, CACHE_SIZE_TEXT,
@@ -753,7 +749,7 @@ static void CloseClient (vlc_object_t *obj)
     tls_session_t *client = (tls_session_t *)obj;
     tls_client_sys_t *p_sys = (tls_client_sys_t *)(client->p_sys);
 
-    if (p_sys->session.b_handshaked == true)
+    if (p_sys->session.b_handshaked)
         gnutls_bye (p_sys->session.session, GNUTLS_SHUT_WR);
     gnutls_deinit (p_sys->session.session);
     /* credentials must be free'd *after* gnutls_deinit() */
@@ -902,7 +898,7 @@ gnutls_SessionClose (tls_server_t *p_server, tls_session_t *p_session)
     tls_session_sys_t *p_sys = p_session->p_sys;
     (void)p_server;
 
-    if( p_sys->b_handshaked == true )
+    if( p_sys->b_handshaked )
         gnutls_bye( p_sys->session, GNUTLS_SHUT_WR );
     gnutls_deinit( p_sys->session );
 

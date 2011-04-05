@@ -2,7 +2,7 @@
  * sdl_image.c: sdl decoder module making use of libsdl_image.
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id$
+ * $Id: bd28da76913d8a73188a64a2c70177cc21456089 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *

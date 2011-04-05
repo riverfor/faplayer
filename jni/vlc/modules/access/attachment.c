@@ -2,7 +2,7 @@
  * attachment.c: Input reading an attachment.
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: b2de45a707c1937c37d8bef66635c01e2194ac9e $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

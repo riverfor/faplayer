@@ -2,7 +2,7 @@
  * maemo_input.h : Input handling header file for the maemo plugin.
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: 2286c698f9cde38942ad35683bfd4b674921852a $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *

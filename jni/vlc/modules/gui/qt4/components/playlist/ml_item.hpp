@@ -2,7 +2,7 @@
  * ml_item.hpp: the media library's result item
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: 0a9257f58d4e649be20c1e54821d0d5cc4d05efe $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

@@ -2,7 +2,7 @@
  * vlc_input_item.h: Core input item
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id$
+ * $Id: 5d5106b12161035ed074fca84619b226ec4df55d $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>

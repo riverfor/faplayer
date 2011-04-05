@@ -2,7 +2,7 @@
  * record.c: record stream output module
  *****************************************************************************
  * Copyright (C) 2008-2009 the VideoLAN team
- * $Id$
+ * $Id: a75e27918bf5279cbe2969aaae2933f34c5a3105 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *

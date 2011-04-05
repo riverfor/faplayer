@@ -2,7 +2,7 @@
  * vlc_media_library.h: SQL-based media library
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: 994fa860b5c0d4bb31810ad5b850851f61f1c283 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -537,7 +537,7 @@ static inline void ml_gc_decref( ml_media_t* p_media )
     pool = p_gc->pool;
     vlc_spin_unlock (&p_gc->spin);
 
-    if( refs == 0 && pool == false )
+    if( refs == 0 && !pool )
     {
         vlc_spin_destroy (&p_gc->spin);
         p_gc->pf_destructor (p_gc);
@@ -783,7 +783,7 @@ static inline void ml_GenericFreeFindTree( ml_ftree_t* tree, bool freestrings )
         free( tree->right );
     }
     if( tree->op == ML_OP_NONE && ml_AttributeIsString( tree->criteria )
-            && freestrings == true)
+            && freestrings)
     {
         free( tree->value.str );
         if( tree->criteria == ML_PEOPLE )

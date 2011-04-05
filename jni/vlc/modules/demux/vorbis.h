@@ -2,7 +2,7 @@
  * vorbis.h: Vorbis Comment parser
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id$
+ * $Id: 21fbb353b98df72b0029c047f94490fb8a6787c4 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

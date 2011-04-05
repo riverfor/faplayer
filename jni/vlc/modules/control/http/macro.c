@@ -2,7 +2,7 @@
  * macro.c : Custom <vlc> macro handling
  *****************************************************************************
  * Copyright (C) 2001-2005 the VideoLAN team
- * $Id$
+ * $Id: a0e330220cbe32b6bbe71a00e7f00a1ab68b059d $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -919,7 +919,7 @@ void Execute( httpd_file_sys_t *p_args,
                     char *p;
                     char sep;
 
-#if defined( WIN32 )
+#if defined( WIN32 ) || defined( __OS2__ )
                     sep = '\\';
 #else
                     sep = '/';

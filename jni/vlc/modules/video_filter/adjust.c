@@ -2,7 +2,7 @@
  * adjust.c : Contrast/Hue/Saturation/Brightness video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2006 the VideoLAN team
- * $Id$
+ * $Id: fbe7f0af1a7d0c802cd98c91637df17893fd5aa8 $
  *
  * Authors: Simon Latapie <garf@via.ecp.fr>
  *          Antoine Cellerier <dionoea -at- videolan d0t org>
@@ -246,7 +246,7 @@ static picture_t *FilterPlanar( filter_t *p_filter, picture_t *p_pic )
     /*
      * Threshold mode drops out everything about luma, contrast and gamma.
      */
-    if( b_thres != true )
+    if( !b_thres )
     {
 
         /* Contrast is a fast but kludged function, so I put this gap to be
@@ -435,7 +435,7 @@ static picture_t *FilterPacked( filter_t *p_filter, picture_t *p_pic )
     uint8_t *p_out, *p_out_v;
     int i_y_offset, i_u_offset, i_v_offset;
 
-    int i_lines, i_visible_lines, i_pitch, i_visible_pitch;
+    int i_visible_lines, i_pitch, i_visible_pitch;
 
     bool b_thres;
     double  f_hue;
@@ -448,7 +448,6 @@ static picture_t *FilterPacked( filter_t *p_filter, picture_t *p_pic )
 
     if( !p_pic ) return NULL;
 
-    i_lines = p_pic->p->i_lines;
     i_visible_lines = p_pic->p->i_visible_lines;
     i_pitch = p_pic->p->i_pitch;
     i_visible_pitch = p_pic->p->i_visible_pitch;
@@ -485,7 +484,7 @@ static picture_t *FilterPacked( filter_t *p_filter, picture_t *p_pic )
     /*
      * Threshold mode drops out everything about luma, contrast and gamma.
      */
-    if( b_thres != true )
+    if( !b_thres )
     {
 
         /* Contrast is a fast but kludged function, so I put this gap to be

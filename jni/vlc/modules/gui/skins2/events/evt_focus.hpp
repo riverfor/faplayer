@@ -2,7 +2,7 @@
  * evt_focus.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id$
+ * $Id: 4e2d50db2289fe4331107e1c63b6f188c8c9586d $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>

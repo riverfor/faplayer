@@ -2,7 +2,7 @@
  * flac.c: flac decoder/encoder module making use of libflac
  *****************************************************************************
  * Copyright (C) 1999-2001 the VideoLAN team
- * $Id$
+ * $Id: c348a426bdc2080a35ab8543a7a6867997ab46cc $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Sigmund Augdal Helberg <dnumgis@videolan.org>

@@ -2,7 +2,7 @@
  * core.c management of the modules configuration
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: 5a11a32bb082be2ae146b13a0f429f911c0287fe $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

@@ -1,4 +1,4 @@
-Changes between 1.1.7 and 1.2.0-git:
+Changes between 1.1.x and 1.2.0-git:
 ------------------------------------
 
 Important changes for packagers:
@@ -17,6 +17,7 @@ Access
  * Multiple files are now supported inside RAR files
  * BDA: experimental support for ClearQam devices
  * DVB-S scanning support
+ * DVB-C scanning scans correct modulation/symbolrate if needed
  * DShow: support for freq and video standard selection
  * Support for VDR recordings (http://www.tvdr.de/) folders
  * Blu-Ray Discs integration using libbluray
@@ -67,6 +68,7 @@ Video Filter:
  * New posterize filter for lowering the number of colors
  * Atmo ambilight: improve Fnordlicht up to 254 channels
  * New sepia filter for creating sepia effect in videos
+ * New deinterlacer mode Phosphor, a framerate doubling CRT TV simulator
 
 Audio Output:
  * New audio output based on AudioQueue API for iOS
@@ -108,6 +110,44 @@ Removed modules:
  * hal, v4l, gapi, omapfb, hd1000a, hd1000v: obsolete unmaintained modules
  * id3tag: use taglib
  * upnp: use upnp_intel
+
+
+Changes between 1.1.7 and 1.1.8:
+--------------------------------
+
+Mac OS X Interface:
+ * New UI graphics by Damien Erambert
+
+Interfaces:
+ * Oldrc interface is again the default RC interface, on Windows
+ * Luarc, luahttp and luatelnet fixes
+ * Qt and Mac OS X fixes
+ * numerous Skins2 fixes, notably winamp2 skins
+
+Encoder:
+ * new libschroedinger-based Dirac codec encoder, faster than the current one
+
+Access/Demuxers/Codecs:
+ * Subtitles auto-detection is back for .txt files
+ * vod/rtsp server and rtsp input fixes
+ * mp4 demuxer improvements
+ * ogg, rstp input, video filters minor fixes
+ * taglib's replaygain is fixed for mp3
+ * vobsub support has an improved auto-detection
+ * fix a crash in malformed ape files
+
+Miscellaneous fixes in:
+ * Pulseaudio audio output, notably for usb cards
+ * Stacktraces are now limited in size on Windows
+ * Video resolution is now limited to 8192x8192, for security reasons
+   See CORE-2011-0208, CVE-2010-3275, CVE-2010-3276
+ * Configure and build system improvements
+ * DirectShow and BDA build headers have been updated
+
+Translations:
+ * Update for Finnish, Galician, Dutch, Chinese, German, Japanese, Lithuanian,
+   Slovak, French, Polish, Estonian, Brazillian Portuguese and Hebrew
+ * New icelandic translation
 
 
 Changes between 1.1.6 and 1.1.7:

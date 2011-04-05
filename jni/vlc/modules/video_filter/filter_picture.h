@@ -2,7 +2,7 @@
  * filter_picture.h: Common picture functions for filters
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id$
+ * $Id: e582219ca576c06b3369aeab78b2b7ff835be758 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *

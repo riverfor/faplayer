@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1999-2010 the VideoLAN team
  * Copyright (C) 2004-2005 M2X
- * $Id$
+ * $Id: bdf78cab168f30ad531a7a0ebe9e71d8434a4da1 $
  *
  * Authors: Jean-Paul Saman <jpsaman #_at_# m2x dot nl>
  *          Gildas Bazin <gbazin@videolan.org>

@@ -2,7 +2,7 @@
  * recents.cpp : Recents MRL (menu)
  *****************************************************************************
  * Copyright © 2006-2008 the VideoLAN team
- * $Id$
+ * $Id: 5112c99f7f0d09efb9d7c36a8067b4707bfbaad7 $
  *
  * Authors: Ludovic Fauvet <etix@l0cal.com>
  *

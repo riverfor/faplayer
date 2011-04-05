@@ -2,7 +2,7 @@
  * avcodec.c: video and audio decoder and encoder using libavcodec
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: e1e9f1785047d1a807899ae92cb25811f452175a $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -39,8 +39,6 @@
 #define HAVE_MMX 1
 #ifdef HAVE_LIBAVCODEC_AVCODEC_H
 #   include <libavcodec/avcodec.h>
-#elif defined(HAVE_FFMPEG_AVCODEC_H)
-#   include <ffmpeg/avcodec.h>
 #else
 #   include <avcodec.h>
 #endif
@@ -59,7 +57,7 @@
 struct decoder_sys_t
 {
     /* Common part between video and audio decoder */
-    FFMPEG_COMMON_MEMBERS
+    AVCODEC_COMMON_MEMBERS
 };
 
 /****************************************************************************
@@ -130,7 +128,7 @@ vlc_module_begin ()
         change_integer_range( 0, 2 )
     add_bool( "ffmpeg-fast", false, FAST_TEXT, FAST_LONGTEXT, false )
     add_integer ( "ffmpeg-skiploopfilter", 0, SKIPLOOPF_TEXT,
-                  SKIPLOOPF_LONGTEXT, true )
+                  SKIPLOOPF_LONGTEXT, false)
         change_safe ()
         change_integer_list( nloopf_list, nloopf_list_text )
 

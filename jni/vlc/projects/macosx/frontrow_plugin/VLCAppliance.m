@@ -2,7 +2,7 @@
  * VLCAppliance.m: Front Row plugin
  *****************************************************************************
  * Copyright (C) 2007 - 2008 the VideoLAN Team
- * $Id$
+ * $Id: e7e3c88b8c085c6c028dbbe60d83a12d4a3870a0 $
  *
  * Authors: hyei
  *

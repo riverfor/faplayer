@@ -2,7 +2,7 @@
  * intf.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id$
+ * $Id: 96d032577c8e882b687df17d1e16f92a6793bff3 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *

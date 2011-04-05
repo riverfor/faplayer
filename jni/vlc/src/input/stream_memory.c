@@ -2,7 +2,7 @@
  * stream_memory.c: stream_t wrapper around memory buffer
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id$
+ * $Id: 67ac7f7d52d20d74e5176807818c811d276fad67 $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *
@@ -76,15 +76,9 @@ stream_t *stream_MemoryNew( vlc_object_t *p_this, uint8_t *p_buffer,
     s->pf_peek    = Peek;
     s->pf_control = Control;
     s->pf_destroy = Delete;
+    s->p_input = NULL;
 
     vlc_object_attach( s, p_this );
-
-    /* Get a weak link to the parent input */
-    /* FIXME: The usage of vlc_object_find has to be removed. */
-    s->p_input = (input_thread_t *)vlc_object_find( p_this, VLC_OBJECT_INPUT, FIND_PARENT );
-    if(s->p_input)
-        vlc_object_release((vlc_object_t*)s->p_input);
-
     return s;
 }
 
@@ -104,7 +98,6 @@ static int Control( stream_t *s, int i_query, va_list args )
 
     bool *p_bool;
     uint64_t   *pi_64, i_64;
-    int        i_int;
 
     switch( i_query )
     {
@@ -138,7 +131,6 @@ static int Control( stream_t *s, int i_query, va_list args )
             return VLC_EGENERIC;
 
         case STREAM_CONTROL_ACCESS:
-            i_int = (int) va_arg( args, int );
             msg_Err( s, "Hey, what are you thinking ?"
                      "DON'T USE STREAM_CONTROL_ACCESS !!!" );
             return VLC_EGENERIC;

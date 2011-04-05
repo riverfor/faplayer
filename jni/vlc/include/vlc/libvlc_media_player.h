@@ -2,7 +2,7 @@
  * libvlc_media_player.h:  libvlc_media_player external API
  *****************************************************************************
  * Copyright (C) 1998-2010 the VideoLAN team
- * $Id$
+ * $Id: 67ad363e8e6f7ebe33700e5bfe8c2eb728fb9376 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>

@@ -2,7 +2,7 @@
  * vlc_strings.h: String functions
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id$
+ * $Id: 42304257dd97a2a1e608691298e2396fceda7de2 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *

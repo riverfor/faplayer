@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
  * Copyright (C) 2008 Laurent Aimar
- * $Id$
+ * $Id: d8fae458e80a028206d4457c123d43ae08677dcc $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org >
  *
@@ -136,7 +136,6 @@ struct vout_thread_sys_t
     picture_pool_t  *display_pool;
     picture_pool_t  *decoder_pool;
     picture_fifo_t  *decoder_fifo;
-    bool            is_decoder_pool_slow;
     vout_chrono_t   render;           /**< picture render time estimator */
 };
 

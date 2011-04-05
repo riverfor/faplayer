@@ -2,7 +2,7 @@
  * cdrom.c: cdrom tools
  *****************************************************************************
  * Copyright (C) 1998-2001 the VideoLAN team
- * $Id$
+ * $Id: 3f260a2b4fd5dbf30e1d7f5c4bd41dec71dcd86a $
  *
  * Authors: Johan Bilien <jobi@via.ecp.fr>
  *          Gildas Bazin <gbazin@netcourrier.com>

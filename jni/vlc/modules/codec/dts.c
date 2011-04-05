@@ -2,7 +2,7 @@
  * dts.c: parse DTS audio sync info and packetize the stream
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id$
+ * $Id: d12c89ae43cb949fa29fc3f06eeade61171c5ba7 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Gildas Bazin <gbazin@netcourrier.com>

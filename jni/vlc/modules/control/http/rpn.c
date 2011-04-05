@@ -2,7 +2,7 @@
  * rpn.c : RPN evaluator for the HTTP Interface
  *****************************************************************************
  * Copyright (C) 2001-2006 the VideoLAN team
- * $Id$
+ * $Id: 289d45b650fc2d59a9ee9a086ec56b0ff82a674a $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *          Laurent Aimar <fenrir@via.ecp.fr>

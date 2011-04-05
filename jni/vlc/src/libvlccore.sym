@@ -185,7 +185,7 @@ input_CreateAndStart
 input_CreateFilename
 input_DecoderDecode
 input_DecoderDelete
-input_DecoderNew
+input_DecoderCreate
 input_GetItem
 input_item_AddInfo
 input_item_AddOption
@@ -397,7 +397,6 @@ sout_MuxNew
 sout_MuxSendBuffer
 sout_StreamChainDelete
 sout_StreamChainNew
-sout_UpdateStatistic
 spu_Create
 spu_Destroy
 spu_PutSubpicture
@@ -486,6 +485,7 @@ var_TriggerCallback
 var_Type
 var_Inherit
 var_InheritURational
+var_LocationParse
 video_format_CopyCrop
 video_format_ScaleCropAr
 video_format_FixRgb
@@ -579,7 +579,6 @@ vlc_mutex_unlock
 vlc_global_mutex
 vlc_object_attach
 vlc_object_create
-vlc_object_find
 vlc_object_find_name
 vlc_object_hold
 vlc_object_kill

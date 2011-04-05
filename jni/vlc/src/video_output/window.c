@@ -2,7 +2,7 @@
  * window.c: "vout window" managment
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: 0892d0b832af778aea618cb734bea5c0fe0e586a $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

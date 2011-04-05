@@ -2,7 +2,7 @@
  * open.m: Open dialogues for VLC's MacOS X port
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id$
+ * $Id: 030742625d8361700ca31708f51b12750bd3ae05 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>

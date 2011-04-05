@@ -2,7 +2,7 @@
  * VLCMediaListController.m: Front Row plugin
  *****************************************************************************
  * Copyright (C) 2007 - 2008 the VideoLAN Team
- * $Id$
+ * $Id: 698d3c50c599f1d7f7ad8d0bfef3bdbdae91cb2a $
  *
  * Authors: Pierre d'Herbemont <pdherbemont at videolan dot org>
  *

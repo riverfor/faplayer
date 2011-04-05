@@ -2,7 +2,7 @@
  * fsc_window.cpp
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id$
+ * $Id: 5c9051d1fbfb31454cd6efbb9d33e58dd2d65c3f $
  *
  * Author: Erwan Tulou      <erwan10 at videolan Dot Org>
  *

@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1999-2010 the VideoLAN team
  * Copyright (C) 2010 Laurent Aimar
- * $Id$
+ * $Id: be7bc301cd441a47607d2bdb8cf2fea5a7c13376 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>

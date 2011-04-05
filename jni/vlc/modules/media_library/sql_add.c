@@ -2,7 +2,7 @@
  * sql_media_library.c: SQL-based media library
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: 4f58a9554e2d29d39840b138d9509c7ae3f37a59 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -258,7 +258,7 @@ int AddPeople( media_library_t *p_ml, const char *psz_name,
 int AddInputItem( media_library_t *p_ml, input_item_t *p_input )
 {
     assert( p_ml );
-    if( !p_input )
+    if( !p_input || !p_input->psz_uri )
         return VLC_EGENERIC;
     int i_ret = VLC_SUCCESS;
 

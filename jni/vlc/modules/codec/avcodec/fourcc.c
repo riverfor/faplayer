@@ -2,7 +2,7 @@
  * fourcc.c: libavcodec <-> libvlc conversion routines
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id$
+ * $Id: 6cba8236a6faf58c6c1c98b935561b6750bbd085 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -31,8 +31,6 @@
 
 #ifdef HAVE_LIBAVCODEC_AVCODEC_H
 #   include <libavcodec/avcodec.h>
-#elif defined(HAVE_FFMPEG_AVCODEC_H)
-#   include <ffmpeg/avcodec.h>
 #else
 #   include <avcodec.h>
 #endif

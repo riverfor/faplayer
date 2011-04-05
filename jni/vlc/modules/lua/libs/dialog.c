@@ -2,7 +2,7 @@
  * dialog.c: Functions to create interface dialogs from Lua extensions
  *****************************************************************************
  * Copyright (C) 2009-2010 VideoLAN and authors
- * $Id$
+ * $Id: 3ca67b24de7ca2b6c261b2f94a1f5f3e9d637134 $
  *
  * Authors: Jean-Philippe André < jpeg # videolan.org >
  *

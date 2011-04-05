@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2007 Vincent Penne
  * Some code converted from ProjectX java dvb decoder (c) 2001-2005 by dvb.matt
- * $Id$
+ * $Id: 2b01e6a460b7c3693bccd690e3dbc018832d2777 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

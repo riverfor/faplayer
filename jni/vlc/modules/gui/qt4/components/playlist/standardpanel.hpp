@@ -2,7 +2,7 @@
  * panels.hpp : Panels for the playlist
  ****************************************************************************
  * Copyright (C) 2000-2005 the VideoLAN team
- * $Id$
+ * $Id: 3853918fdde104368b9f1d56ee01c5ab893de08a $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -67,7 +67,7 @@ public:
            PICTUREFLOW_VIEW,
            VIEW_COUNT };
 
-    const int getViewNumber();
+    const int currentViewIndex();
 
 protected:
 
@@ -101,13 +101,14 @@ private:
 public slots:
     void setRoot( playlist_item_t * );
     void browseInto( const QModelIndex& );
-    void browseInto( );
 
 private slots:
     void deleteSelection();
     void handleExpansion( const QModelIndex& );
     void handleRootChange();
     void activate( const QModelIndex & );
+
+    void browseInto();
     void browseInto( input_item_t * );
 
     void gotoPlayingItem();

@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
  * Copyright (C) 2008 Laurent Aimar
- * $Id$
+ * $Id: 127958754c7d39fc9b4be14caed9ae9e88ce2739 $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org >
  *
@@ -34,6 +34,7 @@
  * XXX input_clock_GetTS can be called from any threads. All others functions
  * MUST be called from one and only one thread.
  */
+typedef struct input_clock_t input_clock_t;
 
 /**
  * This function creates a new input_clock_t.

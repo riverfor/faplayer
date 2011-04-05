@@ -2,7 +2,7 @@
  * m3u.c : M3U playlist format import
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id$
+ * $Id: 704e055e8284e113d0e577b17096365a2ccef469 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Sigmund Augdal Helberg <dnumgis@videolan.org>
@@ -97,7 +97,7 @@ static bool ContainsURL( demux_t *p_demux )
 
     while( p_peek + sizeof( "https://" ) < p_peek_end )
     {
-        /* One line starting with an URL is enough */
+        /* One line starting with a URL is enough */
         if( !strncasecmp( (const char *)p_peek, "http://", 7 ) ||
             !strncasecmp( (const char *)p_peek, "mms://", 6 ) ||
             !strncasecmp( (const char *)p_peek, "rtsp://", 7 ) ||

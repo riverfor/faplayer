@@ -2,7 +2,7 @@
  * m3u.c : M3U playlist export module
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id$
+ * $Id: 72e9581b87f8d147d17034087b9d0dee2ce2a25d $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *

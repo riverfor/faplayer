@@ -2,7 +2,7 @@
  * vlc_epg.h: Electronic Program Guide
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id$
+ * $Id: 87e5678efa16e32e6fb1d63820812467cea6fc3c $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *

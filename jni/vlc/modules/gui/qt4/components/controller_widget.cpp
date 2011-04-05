@@ -2,7 +2,7 @@
  * Controller_widget.cpp : Controller Widget for the controllers
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id$
+ * $Id: b6208b5b6708d65fb4a73d424ac03dd6a008c9c6 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *

@@ -2,7 +2,7 @@
  * playlist_model.cpp : Manage playlist model
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id$
+ * $Id: 03ed94c9b01a00a8c8abee3ddb31641ed4e607ca $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakkka <ileoo (at) videolan dot org>
@@ -1053,7 +1053,7 @@ void PLModel::popupExplore()
                    !strncasecmp( psz_access, "file", 4 ) ||
                    !strncasecmp( psz_access, "dire", 4 ) ))
             {
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
                 /* Qt openURL doesn't know to open files that starts with a / or \ */
                 if( psz_path[0] == '/' || psz_path[0] == '\\'  )
                     psz_path++;

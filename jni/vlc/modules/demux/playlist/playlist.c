@@ -2,7 +2,7 @@
  * playlist.c :  Playlist import module
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id$
+ * $Id: c17bcd66c51a8099003e1b484a9d26cc86fc91f4 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -203,7 +203,7 @@ char *ProcessMRL( const char *psz_mrl, const char *psz_prefix )
     /* FIXME: that's wrong if the playlist is not a local file */
     if( *psz_mrl == DIR_SEP_CHAR )
         goto uri;
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
     /* Drive letter (this assumes URL scheme are not a single character) */
     if( isalpha(psz_mrl[0]) && psz_mrl[1] == ':' )
         goto uri;

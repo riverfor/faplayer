@@ -2,7 +2,7 @@
  * scaletempo.c: Scale audio tempo while maintaining pitch
  *****************************************************************************
  * Copyright © 2008 the VideoLAN team
- * $Id$
+ * $Id: fa31eb925caadf62c874b050904101fdfc8bae39 $
  *
  * Authors: Rov Juvano <rovjuvano@users.sourceforge.net>
  *

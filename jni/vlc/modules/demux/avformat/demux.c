@@ -2,7 +2,7 @@
  * demux.c: demuxer using ffmpeg (libavformat).
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id$
+ * $Id: db8f020fd49f402e75ee7cdd7382a14a223659ce $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -38,12 +38,7 @@
 #include <vlc_charset.h>
 #include <vlc_avcodec.h>
 
-/* ffmpeg header */
-#if defined(HAVE_LIBAVFORMAT_AVFORMAT_H)
-#   include <libavformat/avformat.h>
-#elif defined(HAVE_FFMPEG_AVFORMAT_H)
-#   include <ffmpeg/avformat.h>
-#endif
+#include <libavformat/avformat.h>
 
 #include "../../codec/avcodec/avcodec.h"
 #include "../../codec/avcodec/chroma.h"

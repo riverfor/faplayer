@@ -2,7 +2,7 @@
  * udp.c
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id$
+ * $Id: 482c391a4891203cce03cce1d85c8b3d9d307426 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Eric Petit <titer@videolan.org>
@@ -81,8 +81,6 @@ vlc_module_begin ()
     add_integer( SOUT_CFG_PREFIX "caching", DEFAULT_PTS_DELAY / 1000, CACHING_TEXT, CACHING_LONGTEXT, true )
     add_integer( SOUT_CFG_PREFIX "group", 1, GROUP_TEXT, GROUP_LONGTEXT,
                                  true )
-    add_obsolete_integer( SOUT_CFG_PREFIX "late" )
-    add_obsolete_bool( SOUT_CFG_PREFIX "raw" )
 
     set_capability( "sout access", 0 )
     add_shortcut( "udp" )

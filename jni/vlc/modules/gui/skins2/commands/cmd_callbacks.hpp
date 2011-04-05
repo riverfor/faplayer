@@ -2,7 +2,7 @@
  * cmd_callbacks.hpp
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id$
+ * $Id: 76cf23decdff4ee23478d6faf3f4a4f40bf4972e $
  *
  * Author: Erwan Tulou      <erwan10 aT videolan doT org >
  *         JP Dinger        <jpd (at) videolan (dot) org>

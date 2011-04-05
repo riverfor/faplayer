@@ -2,7 +2,7 @@
  * ml_configuration.cpp: ML's configuration dialog (folder view)
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: 7fa9d384fc5de220d9ee09a1f57b607425adf668 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -24,8 +24,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "ml_configuration.hpp"
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #ifdef MEDIA_LIBRARY
+
+#include "ml_configuration.hpp"
 
 #include <QTreeView>
 #include <QPushButton>

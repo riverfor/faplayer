@@ -2,7 +2,7 @@
  * delay.c: delay a stream
  *****************************************************************************
  * Copyright (C) 2011 VideoLAN
- * $Id$
+ * $Id: dce5c5d2c25cae96cf4fd752d9c7a1944ee54164 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *

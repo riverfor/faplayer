@@ -2,7 +2,7 @@
  * errors.cpp : Errors
  ****************************************************************************
  * Copyright ( C ) 2006 the VideoLAN team
- * $Id$
+ * $Id: 698c4c7d91f461a88cabacddd5cb518772104585 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>

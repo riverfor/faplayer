@@ -2,7 +2,7 @@
  * item_list.c: An input_item_t+media_id couple list for the media library
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: ad91ae004b1219330c2d1090d9c8a8399d3ad2c8 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

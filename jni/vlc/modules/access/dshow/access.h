@@ -3,7 +3,7 @@
  * access_sys_t definition
  *****************************************************************************
  * Copyright (C) 2002, 2004, 2010-2011 the VideoLAN team
- * $Id$
+ * $Id: f9ef1dc06bfa924f835e8a8ddaf371605b928e53 $
  *
  * Author: Gildas Bazin <gbazin@videolan.org>
  *

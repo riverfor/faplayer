@@ -2,7 +2,7 @@
  * xml.c: XML related functions
  *****************************************************************************
  * Copyright (C) 2010 Antoine Cellerier
- * $Id$
+ * $Id: f8b0afef97711b67bcf04ca867b45b36199a1ebd $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *

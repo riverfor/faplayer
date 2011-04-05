@@ -2,7 +2,7 @@
  * utils.c: helper functions
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id$
+ * $Id: df1c0769d80bfd6494c95e53d952cc1142a40541 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

@@ -2,7 +2,7 @@
  * modules.h : Module descriptor and load functions
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id$
+ * $Id: af982b27a9488b7c7ef457a13ea5d30dc4f0e046 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *

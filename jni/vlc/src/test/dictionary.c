@@ -3,7 +3,7 @@
  * dictionary.c: Tests for vlc_dictionary_t
  *****************************************************************************
  * Copyright (C) 2007 Pierre d'Herbemont
- * $Id$
+ * $Id: 7d7f9365d783e6299bf9b5195d3b2f3bc5656faa $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

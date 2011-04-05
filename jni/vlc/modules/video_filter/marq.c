@@ -2,7 +2,7 @@
  * marq.c : marquee display video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2003-2008 the VideoLAN team
- * $Id$
+ * $Id: c4e8e4b84f5059806d02fa438a11b23acc88a707 $
  *
  * Authors: Mark Moriarty
  *          Sigmund Augdal Helberg <dnumgis@videolan.org>
@@ -177,13 +177,6 @@ vlc_module_begin ()
                  REFRESH_LONGTEXT, false )
 
     add_shortcut( "time" )
-    add_obsolete_string( "time-format" )
-    add_obsolete_string( "time-x" )
-    add_obsolete_string( "time-y" )
-    add_obsolete_string( "time-position" )
-    add_obsolete_string( "time-opacity" )
-    add_obsolete_string( "time-color" )
-    add_obsolete_string( "time-size" )
 vlc_module_end ()
 
 static const char *const ppsz_filter_options[] = {
@@ -279,7 +272,7 @@ static subpicture_t *Filter( filter_t *p_filter, mtime_t date )
     vlc_mutex_lock( &p_sys->lock );
     if( p_sys->last_time + p_sys->i_refresh > date )
         goto out;
-    if( p_sys->b_need_update == false )
+    if( !p_sys->b_need_update )
         goto out;
 
     p_spu = filter_NewSubpicture( p_filter );

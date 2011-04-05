@@ -2,7 +2,7 @@
  * libxml.c: XML parser using libxml2
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id$
+ * $Id: da9d065eb9dcaded32eec3d71de8841bd8cad775 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2007 Faustino E. Osuna
  * Copyright (C) 2007 the VideoLAN team
- * $Id$
+ * $Id: 1844e7ee3b8d41a3e67a2d582e3fd9e1829a4608 $
  *
  * Authors: Faustino E. Osuna <enrique.osuna # gmail.com>
  *

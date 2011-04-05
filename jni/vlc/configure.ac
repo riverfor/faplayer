@@ -238,10 +238,6 @@ case "${host_os}" in
     then
         echo ""
         echo "Building with Mac OS X defaults:"
-        with_macosx_version_min="10.5"
-        echo "  Assuming --with-macosx-version-min=10.5"
-        with_macosx_sdk="/Developer/SDKs/MacOSX${with_macosx_version_min}.sdk"
-        echo "  Assuming --with-macosx-sdk=/Developer/SDKs/MacOSX${with_macosx_version_min}.sdk"
         build_dir=`pwd`
         echo "  Assuming --prefix=${build_dir}/vlc_install_dir"
         ac_default_prefix="${build_dir}/vlc_install_dir"
@@ -282,6 +278,15 @@ case "${host_os}" in
         CXX="${CXX} -isysroot ${with_macosx_sdk}"
         OBJC="${OBJC} -isysroot ${with_macosx_sdk}"
         LD="${LD} -syslibroot ${with_macosx_sdk}"
+    else
+        echo "  No desired SDK version given, falling back to 10.5"
+        CPP="${CPP} -isysroot /Developer/SDKs/MacOSX10.5.sdk"
+        CC="${CC} -isysroot /Developer/SDKs/MacOSX10.5.sdk"
+        CXX="${CXX} -isysroot /Developer/SDKs/MacOSX10.5.sdk"
+        OBJC="${OBJC} -isysroot /Developer/SDKs/MacOSX10.5.sdk"
+        LD="${LD} -syslibroot /Developer/SDKs/MacOSX10.5.sdk"
+        with_macosx_version_min="10.5"
+        echo "  Assuming --with-macosx-version-min=10.5"
     fi
     AC_ARG_WITH(macosx-version-min,
        [  --with-macosx-version-min=VERSION compile for MacOSX VERSION and above])
@@ -380,17 +385,22 @@ case "${host_os}" in
   symbian*)
     SYS=symbian
     ;;
+  *os2*)
+    SYS=os2
+    LDFLAGS_save="${LDFLAGS_save} -Zomf -Zbin-files -Zargs-wild"; LDFLAGS="${LDFLAGS_save}"
+    ;;
   *)
     SYS="${host_os}"
     ;;
 esac
-AM_CONDITIONAL(HAVE_DARWIN, test "${SYS}" = "darwin")
-AM_CONDITIONAL(HAVE_LINUX, [test "${SYS}" = "linux"])
-AM_CONDITIONAL(HAVE_WIN32, test "${SYS}" = "mingw32")
-AM_CONDITIONAL(HAVE_WIN64, test "${HAVE_WIN64}" = "1")
-AM_CONDITIONAL(HAVE_WINCE, test "${SYS}" = "mingwce")
+AM_CONDITIONAL(HAVE_DARWIN,  test "${SYS}" = "darwin")
+AM_CONDITIONAL(HAVE_LINUX,   test "${SYS}" = "linux")
+AM_CONDITIONAL(HAVE_OS2,     test "${SYS}" = "os2")
+AM_CONDITIONAL(HAVE_WIN32,   test "${SYS}" = "mingw32")
+AM_CONDITIONAL(HAVE_WIN64,   test "${HAVE_WIN64}" = "1")
+AM_CONDITIONAL(HAVE_WINCE,   test "${SYS}" = "mingwce")
 AM_CONDITIONAL(HAVE_SYMBIAN, test "${SYS}" = "symbian")
-AM_CONDITIONAL(USE_PEFLAGS, [test "${enable_peflags}" = "yes"])
+AM_CONDITIONAL(USE_PEFLAGS,  test "${enable_peflags}" = "yes")
 
 dnl
 dnl Sadly autoconf doesn't think about testing foo.exe when ask to test
@@ -548,7 +558,7 @@ need_libc=false
 
 dnl Check for usual libc functions
 AC_CHECK_FUNCS([daemon fcntl fdopendir fstatvfs fork getenv getpwuid_r gettimeofday isatty lstat memalign mmap openat pread posix_fadvise posix_madvise posix_memalign setlocale stricmp strnicmp uselocale])
-AC_REPLACE_FUNCS([asprintf atof atoll getcwd getdelim getpid gmtime_r lldiv localtime_r nrand48 rewind setenv strcasecmp strcasestr strdup strlcpy strncasecmp strndup strnlen strsep strtof strtok_r strtoll swab tdestroy vasprintf])
+AC_REPLACE_FUNCS([asprintf atof atoll dirfd getcwd getdelim getpid gmtime_r lldiv localtime_r nrand48 rewind setenv strcasecmp strcasestr strdup strlcpy strncasecmp strndup strnlen strsep strtof strtok_r strtoll swab tdestroy vasprintf])
 AC_CHECK_FUNCS(fdatasync,,
   [AC_DEFINE(fdatasync, fsync, [Alias fdatasync() to fsync() if missing.])
 ])
@@ -557,7 +567,7 @@ AC_CHECK_FUNCS(fdatasync,,
 AC_FUNC_STRCOLL
 
 dnl Check for non-standard system calls
-AC_CHECK_FUNCS([accept4 dup3 pipe2 eventfd vmsplice sched_getaffinity])
+AC_CHECK_FUNCS([accept4 pipe2 eventfd vmsplice sched_getaffinity])
 
 AH_BOTTOM([#include <vlc_fixups.h>])
 
@@ -1911,24 +1921,6 @@ then
 fi
 
 dnl
-dnl  Windows DirectShow BDA access module
-dnl
-AC_ARG_ENABLE(bda,
-  AS_HELP_STRING([--enable-bda],[Win32 DirectShow BDA support (default
-		  enabled on Win32)]))
-if test "${enable_bda}" != "no"
-then
-  if test "${SYS}" = "mingw32"
-  then
-      AC_CHECK_HEADERS(dshow.h,
-      [ VLC_ADD_PLUGIN([bda])
-        VLC_ADD_CXXFLAGS([bda],[])
-        VLC_ADD_LIBS([bda],[-lstrmiids -lole32 -loleaut32 -luuid]) ])
-  fi
-fi
-
-
-dnl
 dnl  Blu-ray Disc Support with libbluray
 dnl
 PKG_ENABLE_MODULES_VLC([BLURAY], [libbluray], [libbluray >= 0.2 ], (libbluray for Blu-ray disc support ) )
@@ -1936,7 +1928,7 @@ PKG_ENABLE_MODULES_VLC([BLURAY], [libbluray], [libbluray >= 0.2 ], (libbluray fo
 dnl
 dnl  OpenCV wrapper and example filters
 dnl
-PKG_ENABLE_MODULES_VLC([OPENCV], [opencv_example], [opencv], (OpenCV (computer vision) filter), [off])
+PKG_ENABLE_MODULES_VLC([OPENCV], [opencv_example opencv_wrapper], [opencv], (OpenCV (computer vision) filter), [off])
 
 
 dnl
@@ -1964,113 +1956,6 @@ if test "${enable_sftp}" = "yes"; then
     VLC_ADD_PLUGIN([access_sftp])
     VLC_ADD_LIBS([access_sftp], [-lssh2])
   ])
-fi
-
-dnl
-dnl  libdvbpsi ts demux/mux
-dnl
-AC_ARG_ENABLE(dvbpsi,
-  [  --enable-dvbpsi         dvbpsi ts mux and demux module (default enabled)])
-have_dvbpsi=no
-if test "${enable_dvbpsi}" != "no"
-then
-  AC_ARG_WITH(dvbpsi,
-  [  --with-dvbpsi=PATH      libdvbpsi headers and libraries])
-  AC_ARG_WITH(dvbpsi,
-  [  --with-dvbpsi-tree=PATH libdvbpsi tree for static linking])
-  case "${with_dvbpsi}" in
-  ""|yes)
-    if test -z "${with_dvbpsi_tree}"
-    then
-      AC_CHECK_HEADERS(dvbpsi/dr.h,
-        [ VLC_ADD_PLUGIN([ts])
-          if test "${enable_sout}" != "no"; then
-            VLC_ADD_PLUGIN([mux_ts])
-          fi
-          VLC_ADD_LIBS([mux_ts ts dvb],[-ldvbpsi])
-	  have_dvbpsi=yes],
-        [  AC_MSG_WARN([cannot find libdvbpsi headers]) ],
-        [#if defined( HAVE_STDINT_H )
-#   include <stdint.h>
-#elif defined( HAVE_INTTYPES_H )
-#   include <inttypes.h>
-#endif
-#include <dvbpsi/dvbpsi.h>
-#include <dvbpsi/descriptor.h>
-#include <dvbpsi/pat.h>
-#include <dvbpsi/pmt.h>])
-    else
-      AC_MSG_CHECKING(for libdvbpsi.a in ${with_dvbpsi_tree})
-      real_dvbpsi_tree="`cd ${with_dvbpsi_tree} 2>/dev/null && pwd`"
-      if test -z "${real_dvbpsi_tree}"
-      then
-        dnl  The given directory can't be found
-        AC_MSG_RESULT(no)
-        AC_MSG_ERROR([cannot cd to ${with_dvbpsi_tree}])
-      fi
-      if test -f "${real_dvbpsi_tree}/src/.libs/libdvbpsi.a"
-      then
-        dnl  Use a custom libdvbpsi
-        AC_MSG_RESULT(${real_dvbpsi_tree}/src/.libs/libdvbpsi.a)
-        VLC_ADD_PLUGIN([ts])
-        if test "${enable_sout}" != "no"; then
-          VLC_ADD_PLUGIN([mux_ts])
-        fi
-        VLC_ADD_CPPFLAGS([mux_ts ts dvb],[-I${real_dvbpsi_tree}/src])
-        VLC_ADD_LIBS([mux_ts ts dvb],[${real_dvbpsi_tree}/src/.libs/libdvbpsi.a])
-	have_dvbpsi=yes
-      else
-        dnl  The given libdvbpsi wasn't built
-        AC_MSG_RESULT(no)
-        AC_MSG_ERROR([cannot find ${real_dvbpsi_tree}/src/.libs/libdvbpsi.a, make sure you compiled libdvbpsi in ${with_dvbpsi_tree}])
-      fi
-    fi
-  ;;
-  no)
-    dnl  Compile without dvbpsi
-  ;;
-  *)
-    AC_MSG_CHECKING(for dvbpsi headers in ${with_dvbpsi})
-    if test -z "${with_dvbpsi}"
-    then
-      LDFLAGS_test=""
-      CPPFLAGS_test=""
-    else
-      LDFLAGS_test="-L${with_dvbpsi}/lib"
-      CPPFLAGS_test="-I${with_dvbpsi}/include"
-    fi
-    CPPFLAGS="${CPPFLAGS_save} ${CPPFLAGS_test}"
-    AC_CHECK_HEADERS([dvbpsi/dr.h],[
-      VLC_ADD_PLUGIN([ts])
-      if test "${enable_sout}" != "no"; then
-        AC_CHECK_LIB(dvbpsi, dvbpsi_SDTServiceAddDescriptor,
-           [VLC_ADD_PLUGIN([mux_ts])], [], [${LDFLAGS_test} -ldvbpsi])
-      fi
-      VLC_ADD_CPPFLAGS([mux_ts ts dvb],[${CPPFLAGS_test}])
-      VLC_ADD_LIBS([mux_ts ts dvb],[${LDFLAGS_test} -ldvbpsi])
-      have_dvbpsi=yes
-    ],[
-      if test -n "${enable_dvbpsi}"
-      then
-        AC_MSG_ERROR([Could not find libdvbpsi on your system: you may get it from www.videolan.org, you'll need at least version 0.1.6])
-      fi
-    ],
-    [#if defined( HAVE_STDINT_H )
-#   include <stdint.h>
-#elif defined( HAVE_INTTYPES_H )
-#   include <inttypes.h>
-#endif
-#include <dvbpsi/dvbpsi.h>
-#include <dvbpsi/descriptor.h>
-#include <dvbpsi/pat.h>
-#include <dvbpsi/pmt.h>])
-    CPPFLAGS="${CPPFLAGS_save}"
-  ;;
-  esac
-  AC_CHECK_LIB(dvbpsi, dvbpsi_GenSDTSections, [
-    AC_DEFINE(HAVE_DVBPSI_SDT, 1, [Define if you have dvbpsi_GenSDTSections.])
-  ], [], [${LIBS_ts}])
-
 fi
 
 dnl
@@ -2228,29 +2113,16 @@ then
 fi
 
 dnl
-dnl  DVB-S/DVB-T/DVB-C satellite/teresterial/cable input using v4l2
+dnl  libdvbpsi check for ts mux/demux
 dnl
-AC_ARG_ENABLE(dvb,
-  [  --enable-dvb            DVB-S/T/C card support (default enabled)])
-
-if test "${enable_dvb}" != "no"
-then
-    AS_IF([test "${have_dvbpsi}" = "yes" ],[
-    AC_ARG_WITH(dvb,
-     [  --with-dvb=PATH         path to a dvb- and v4l2-enabled kernel tree],[],[])
-     if test "${with_dvb}" != "no" -a -n "${with_dvb}"
-     then
-       VLC_ADD_CFLAGS([dvb],[-I${with_dvb}/include])
-     fi
-     CPPFLAGS="${CPPFLAGS_save} -I${with_dvb}/include"
-     AC_CHECK_HEADERS(linux/dvb/version.h linux/dvb/frontend.h, [
-     VLC_ADD_PLUGIN([dvb])
-     ],[AC_MSG_WARN(linux-dvb headers not found, dvb disabled)])
-     CPPFLAGS="${CPPFLAGS_save}"
-   ],[
-     AC_MSG_WARN([the dvb access module requires libdvbpsi])
-    ])
+PKG_WITH_MODULES([DVBPSI], [libdvbpsi],
+    VLC_ADD_PLUGIN([ts])
+    VLC_ADD_LIBS([ts],[-ldvbpsi])
+if test "${enable_sout}" != "no"; then
+    VLC_ADD_PLUGIN([mux_ts])
+    VLC_ADD_LIBS([mux_ts],[-ldvbpsi])
 fi
+)
 
 dnl
 dnl  Screen capture module
@@ -2309,7 +2181,27 @@ AS_IF([test "${enable_gme}" != "no"], [
 dnl
 dnl  SIDPlay plugin
 dnl
-PKG_ENABLE_MODULES_VLC([SID], [], [libsidplay2], [C64 sid demux support], [auto], [], [-lresid-builder])
+PKG_WITH_MODULES([SID], [libsidplay2],
+		AC_LANG_PUSH(C++)
+		oldCPPFLAGS="$CPPFLAGS"
+		CPPFLAGS="$CPPFLAGS $SID_CFLAGS"
+		AC_CHECK_HEADER([sidplay/builders/resid.h], [
+			VLC_ADD_PLUGIN([sid])
+			VLC_ADD_CFLAGS([sid], [$SID_CFLAGS])
+			VLC_ADD_LIBS([sid], [$SID_LIBS] [-lresid-builder])
+		], [
+			AS_IF([test "x${enable_sid}" = "xyes"],
+				[AC_MSG_ERROR(Library libresid-builder needed for sid was not found)],
+				[AC_MSG_WARN(Library libresid-builder needed for sid was not found)]
+				)
+		])
+		CPPFLAGS="$oldCPPFLAGS"
+		AC_LANG_POP(C++),
+		AS_IF([test "x${enable_sid}" = "xyes"],
+			[AC_MSG_ERROR(Library libsidplay2 needed for sid was not found)],
+			[AC_MSG_WARN(Library libsidplay2 needed for sid was not found)]
+			),
+		[C64 sid demux support], [auto])
 
 
 dnl
@@ -2560,8 +2452,8 @@ AS_IF([test "${enable_avcodec}" != "no"], [
       VLC_SAVE_FLAGS
       CPPFLAGS="${CPPFLAGS} ${AVCODEC_CFLAGS}"
       CFLAGS="${CFLAGS} ${AVCODEC_CFLAGS}"
-      AC_CHECK_HEADERS(libavcodec/avcodec.h ffmpeg/avcodec.h)
-      AC_CHECK_HEADERS(libavutil/avutil.h ffmpeg/avutil.h)
+      AC_CHECK_HEADERS(libavcodec/avcodec.h)
+      AC_CHECK_HEADERS(libavutil/avutil.h)
       VLC_ADD_PLUGIN([avcodec])
       VLC_ADD_LIBS([avcodec],[$AVCODEC_LIBS])
       AS_IF([test "${ac_cv_ld_bsymbolic}" != "no"], [
@@ -2677,8 +2569,8 @@ then
       VLC_SAVE_FLAGS
       CPPFLAGS="${CPPFLAGS} ${AVFORMAT_CFLAGS}"
       CFLAGS="${CFLAGS} ${AVFORMAT_CFLAGS}"
-      AC_CHECK_HEADERS(libavformat/avformat.h ffmpeg/avformat.h libavformat/avio.h)
-      AC_CHECK_HEADERS(libavutil/avutil.h ffmpeg/avutil.h)
+      AC_CHECK_HEADERS(libavformat/avformat.h libavformat/avio.h)
+      AC_CHECK_HEADERS(libavutil/avutil.h)
       AS_IF([test "$enable_merge_ffmpeg" = "no"], [
         VLC_ADD_PLUGIN([avformat access_avio])
         VLC_ADD_LIBS([avformat access_avio],[$AVFORMAT_LIBS $AVUTIL_LIBS])
@@ -2710,7 +2602,7 @@ then
       VLC_SAVE_FLAGS
       CPPFLAGS="${CPPFLAGS} ${SWSCALE_CFLAGS}"
       CFLAGS="${CFLAGS} ${SWSCALE_CFLAGS}"
-      AC_CHECK_HEADERS(libswscale/swscale.h ffmpeg/swscale.h)
+      AC_CHECK_HEADERS(libswscale/swscale.h)
       VLC_ADD_PLUGIN([swscale])
       VLC_ADD_LIBS([swscale],[$SWSCALE_LIBS])
       VLC_ADD_CFLAGS([swscale],[$SWSCALE_CFLAGS])
@@ -3285,8 +3177,7 @@ AC_ARG_ENABLE(fribidi,
   [  --enable-fribidi        fribidi support (default enabled)])
 AC_ARG_ENABLE(fontconfig,
   [  --enable-fontconfig     fontconfig support (default enabled)])
-if test "${enable_freetype}" != "no"
-then
+if test "${enable_freetype}" != "no"; then
    PKG_CHECK_MODULES(FREETYPE, freetype2,[
       VLC_ADD_PLUGIN([freetype])
       have_freetype=yes
@@ -3295,16 +3186,20 @@ then
         VLC_ADD_LIBS([freetype],[-liconv -lz])
       fi
       VLC_ADD_LIBS([freetype skins2],[${FREETYPE_LIBS}])
-      if test "${enable_fontconfig}" != "no"
-      then
-        AC_CHECK_HEADERS(fontconfig/fontconfig.h,
-          [VLC_ADD_CPPFLAGS([freetype],[-DHAVE_FONTCONFIG])
-           VLC_ADD_LIBS([freetype],[-lfontconfig])])
-        AC_CHECK_HEADERS(Carbon/Carbon.h,
-          [VLC_ADD_LDFLAGS([freetype],[-Wl,-framework,Carbon])])
+
+      if test "${SYS}" != "mingw32"; then
+          if test "${enable_fontconfig}" != "no"; then
+            AC_CHECK_HEADERS(fontconfig/fontconfig.h,
+              [VLC_ADD_CPPFLAGS([freetype],[-DHAVE_FONTCONFIG])
+               VLC_ADD_LIBS([freetype],[-lfontconfig])])
+            AC_CHECK_HEADERS(Carbon/Carbon.h,
+              [VLC_ADD_LDFLAGS([freetype],[-Wl,-framework,Carbon])])
+          fi
+      else
+          VLC_ADD_LIBS([freetype],[-lgdi32])
       fi
 
-     dnl fribidi support
+      dnl fribidi support
       if test "${enable_fribidi}" != "no"
       then
         PKG_CHECK_MODULES(FRIBIDI, fribidi, [
@@ -3333,16 +3228,6 @@ dnl
 dnl  SVG module
 dnl
 PKG_ENABLE_MODULES_VLC([SVG], [], [librsvg-2.0 >= 2.9.0], [SVG rendering library],[auto])
-
-dnl
-dnl Snapshot vout module (with cache)
-dnl
-AC_ARG_ENABLE(snapshot,
-  [  --enable-snapshot       snapshot module (default disabled)])
-if test "${enable_snapshot}" = "yes"
-then
-  VLC_ADD_PLUGIN([snapshot])
-fi
 
 dnl
 dnl  iOS vout module
@@ -3439,14 +3324,10 @@ fi
 dnl
 dnl  Linux framebuffer module
 dnl
-AC_ARG_ENABLE(fb,
-  [  --enable-fb             Linux framebuffer support (default enabled on Linux)])
-    if test "${enable_fb}" != "no"
-    then
-      AC_CHECK_HEADERS(linux/fb.h, [
-        VLC_ADD_PLUGIN([fb])
-      ])
-    fi
+AC_CHECK_HEADER([linux/fb.h], [
+  VLC_ADD_PLUGIN([fb])
+])
+
 
 dnl
 dnl  DirectFB module
@@ -3857,7 +3738,6 @@ AC_ARG_ENABLE(macosx-vlc-app,
 AM_CONDITIONAL(BUILD_MACOSX_VLC_APP, [test "${enable_macosx_vlc_app}" != "no" &&
     (test "${SYS}" = "darwin" || test "${enable_macosx_vlc_app}" = "yes") ])
 
-
 dnl
 dnl  ncurses module
 dnl
@@ -3993,16 +3873,6 @@ then
 fi
 
 EXTEND_HELP_STRING([Misc options:])
-
-dnl
-dnl compiling for android?
-dnl
-
-AC_ARG_ENABLE(android,
-  [  --enable-android       compile for android (default disable)])
-AS_IF([test "${enable_android}" = "yes"], [
-  AC_DEFINE([HAVE_ANDROID], 1, [Define to 1 if building for android])
-])
 
 dnl
 dnl libgcrypt
@@ -4351,9 +4221,7 @@ AC_CONFIG_FILES([
   test/Makefile
   modules/access/Makefile
   modules/access/bd/Makefile
-  modules/access/bda/Makefile
   modules/access/dshow/Makefile
-  modules/access/dvb/Makefile
   modules/access/mms/Makefile
   modules/access/rtp/Makefile
   modules/access/rtsp/Makefile
@@ -4363,10 +4231,6 @@ AC_CONFIG_FILES([
   modules/access/zip/Makefile
   modules/access_output/Makefile
   modules/audio_filter/Makefile
-  modules/audio_filter/channel_mixer/Makefile
-  modules/audio_filter/converter/Makefile
-  modules/audio_filter/resampler/Makefile
-  modules/audio_filter/spatializer/Makefile
   modules/audio_mixer/Makefile
   modules/audio_output/Makefile
   modules/codec/Makefile
@@ -4479,7 +4343,7 @@ build flavour         : "
 test "${enable_debug}" = "yes" && printf "debug "
 test "${enable_cprof}" = "yes" && printf "cprof "
 test "${enable_gprof}" = "yes" && printf "gprof "
-test "${enable_optimizations}" = "yes" && printf "optim "
+test "${enable_optimizations}" != "no" && printf ${enable_optimizations}
 echo ""
 if test "${enable_vlc}" != "no"; then
 echo "vlc aliases           :${ALIASES}"

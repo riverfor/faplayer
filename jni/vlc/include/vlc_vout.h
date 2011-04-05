@@ -2,7 +2,7 @@
  * vlc_video.h: common video definitions
  *****************************************************************************
  * Copyright (C) 1999 - 2008 the VideoLAN team
- * $Id$
+ * $Id: ad08f3975f9d39d0e8356727b7544cefc8b71da7 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@via.ecp.fr>

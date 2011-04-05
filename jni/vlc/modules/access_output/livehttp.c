@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
  * Copyright (C) 2009-2010 by Keary Griffin
- * $Id$
+ * $Id: b2c55f301a7556e655fb27f9db79c034f6cf6a9a $
  *
  * Authors: Keary Griffin <kearygriffin at gmail.com>
  *

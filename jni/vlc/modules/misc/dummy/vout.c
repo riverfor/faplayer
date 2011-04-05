@@ -2,7 +2,7 @@
  * vout.c: Dummy video output display method for testing purposes
  *****************************************************************************
  * Copyright (C) 2000-2009 the VideoLAN team
- * $Id$
+ * $Id: 045bab655b93d8bf96873fc82e74949471bd8ed7 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *

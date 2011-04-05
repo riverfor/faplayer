@@ -2,7 +2,7 @@
  * i18n: I18n tests
  *****************************************************************************
  * Copyright (C) 2006 Rémi Denis-Courmont
- * $Id$
+ * $Id: 5121157c9003459d385be19563fc825e35614695 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

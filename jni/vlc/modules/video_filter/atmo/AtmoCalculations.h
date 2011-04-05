@@ -4,7 +4,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id$
+ * $Id: a8b97f05503025908219552ee5648b04913e1992 $
  */
 
 #ifndef _AtmoCalculations_h_

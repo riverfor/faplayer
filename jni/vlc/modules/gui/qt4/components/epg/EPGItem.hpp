@@ -2,7 +2,7 @@
  * EPGItem.h : EPGItem
  ****************************************************************************
  * Copyright © 2009-2010 VideoLAN
- * $Id$
+ * $Id: 932e419a7381f87c7e688d54a30ee5f2c2feec6b $
  *
  * Authors: Ludovic Fauvet <etix@l0cal.com>
  *
@@ -24,44 +24,47 @@
 #ifndef EPGITEM_H
 #define EPGITEM_H
 
+#include <vlc_common.h>
+#include <vlc_epg.h>
 #include <QGraphicsItem>
+#include <QDateTime>
 
 class QPainter;
 class QString;
-class QDateTime;
 
 class EPGView;
 
 class EPGItem : public QGraphicsItem
 {
 public:
-    EPGItem( EPGView *view );
-    virtual ~EPGItem() { }
+    EPGItem( vlc_epg_event_t *data, EPGView *view );
 
     virtual QRectF boundingRect() const;
     virtual void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0 );
 
     const QDateTime& start() const;
+    QDateTime end();
 
     int duration() const;
-    int getChannelNb() const;
-
-    void setChannelNb( int channelNb );
-    void setStart( const QDateTime& start );
+    const QString& name() { return m_name; };
+    QString description();
+    bool setData( vlc_epg_event_t * );
+    void setRow( unsigned int );
+    void setCurrent( bool );
     void setDuration( int duration );
-    void setName( const QString& name );
-    void setDescription( const QString& description );
-    void setShortDescription( const QString& shortDescription );
-    void setCurrent( bool current );
     void updatePos();
+    bool endsBefore( const QDateTime & ) const;
+    bool playsAt( const QDateTime & ) const;
 
 protected:
     virtual void focusInEvent( QFocusEvent * event );
+    virtual void hoverEnterEvent ( QGraphicsSceneHoverEvent * );
+    virtual void hoverLeaveEvent ( QGraphicsSceneHoverEvent * );
 
 private:
     EPGView     *m_view;
     QRectF      m_boundingRect;
-    int         m_channelNb;
+    unsigned int i_row;
 
     QDateTime   m_start;
     int         m_duration;

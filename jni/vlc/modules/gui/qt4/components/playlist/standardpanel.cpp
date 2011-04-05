@@ -2,7 +2,7 @@
  * standardpanel.cpp : The "standard" playlist panel : just a treeview
  ****************************************************************************
  * Copyright © 2000-2010 VideoLAN
- * $Id$
+ * $Id: ae19f712880d59631a62f29c5ffc0629d09b413e $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -378,7 +378,7 @@ void StandardPLPanel::showView( int i_view )
     gotoPlayingItem();
 }
 
-const int StandardPLPanel::getViewNumber()
+const int StandardPLPanel::currentViewIndex()
 {
     if( currentView == treeView )
         return TREE_VIEW;

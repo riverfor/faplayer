@@ -2,7 +2,7 @@
  * audio.c: transcoding stream output module (audio)
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id$
+ * $Id: 3537f862d961343c6b2d0446546b79fcdc1eba86 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -356,7 +356,6 @@ int transcode_audio_process( sout_stream_t *p_stream,
     while( (p_audio_buf = id->p_decoder->pf_decode_audio( id->p_decoder,
                                                           &in )) )
     {
-        sout_UpdateStatistic( p_stream->p_sout, SOUT_STATISTIC_DECODED_AUDIO, 1 );
         if( p_sys->b_master_sync )
         {
             mtime_t i_dts = date_Get( &id->interpolated_pts ) + 1;

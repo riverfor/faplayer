@@ -2,7 +2,7 @@
  * ml_model.hpp ML model
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id$
+ * $Id: f1c5fbe9687d6ce29f63d14d2f5ec37df6fa89ae $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>

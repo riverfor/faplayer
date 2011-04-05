@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2010 the VideoLAN team
- * $Id$
+ * $Id: 5c558e9c566271bf3f132638702a146c762beec7 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -1140,7 +1140,7 @@ bool matroska_segment_c::Select( mtime_t i_start_time )
         else if( !strcmp( p_tk->psz_codec, "S_TEXT/ASCII" ) )
         {
             p_fmt->i_codec = VLC_CODEC_SUBT;
-            p_fmt->subs.psz_encoding = NULL; /* Is there a place where it is stored ? */
+            p_fmt->subs.psz_encoding = strdup( "ASCII" );
         }
         else if( !strcmp( p_tk->psz_codec, "S_TEXT/UTF8" ) )
         {

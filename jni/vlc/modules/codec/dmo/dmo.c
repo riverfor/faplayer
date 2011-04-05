@@ -2,7 +2,7 @@
  * dmo.c : DirectMedia Object decoder module for vlc
  *****************************************************************************
  * Copyright (C) 2002, 2003 the VideoLAN team
- * $Id$
+ * $Id: 33c30775765ccf0db381d5ab3c2062d5e6204a62 $
  *
  * Author: Gildas Bazin <gbazin@videolan.org>
  *

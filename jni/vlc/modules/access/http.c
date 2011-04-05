@@ -2,7 +2,7 @@
  * http.c: HTTP input module
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id$
+ * $Id: 39a587839ae5d30f79449c0226a8d21972acd155 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -143,8 +143,6 @@ vlc_module_begin ()
     add_bool( "http-use-IE-proxy", false, USE_IE_PROXY_TEXT,
               USE_IE_PROXY_LONGTEXT, true )
 #endif
-    add_obsolete_string("http-user")
-    add_obsolete_string("http-pwd")
     /* 'itpc' = iTunes Podcast */
     add_shortcut( "http", "https", "unsv", "itpc", "icyx" )
     set_callbacks( Open, Close )
@@ -1162,7 +1160,7 @@ static int Connect( access_t *p_access, uint64_t i_tell )
     setsockopt (p_sys->fd, SOL_SOCKET, SO_KEEPALIVE, &(int){ 1 }, sizeof (int));
 
     /* Initialize TLS/SSL session */
-    if( p_sys->b_ssl == true )
+    if( p_sys->b_ssl )
     {
         /* CONNECT to establish TLS tunnel through HTTP proxy */
         if( p_sys->b_proxy )

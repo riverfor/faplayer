@@ -2,7 +2,7 @@
  * mixer.c : audio output mixing operations
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id$
+ * $Id: 8b1fd3acdb82109b28c15f556525ac7d73d960f3 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *

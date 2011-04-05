@@ -2,7 +2,7 @@
  * Messages.hpp : Information about a stream
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id$
+ * $Id: 85bc88975a5bf1f4dd5c209acc1dbd5d74b5d98a $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *

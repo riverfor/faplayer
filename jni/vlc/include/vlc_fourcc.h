@@ -2,7 +2,7 @@
  * vlc_fourcc.h: Definition of various FOURCC and helpers
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: 7e06368949f3c3e43d1b0df934d6c0d3b58bc41c $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ com>
  *

@@ -2,7 +2,7 @@
  * vlc_httpd.h: builtin HTTP/RTSP server.
  *****************************************************************************
  * Copyright (C) 2004-2006 the VideoLAN team
- * $Id$
+ * $Id: 6e287351c4880587fd5432835605ffe29d843e97 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -110,7 +110,7 @@ VLC_EXPORT( httpd_url_t *,  httpd_UrlNew, ( httpd_host_t *, const char *psz_url,
 VLC_EXPORT( httpd_url_t *,  httpd_UrlNewUnique, ( httpd_host_t *, const char *psz_url, const char *psz_user, const char *psz_password, const vlc_acl_t *p_acl ) LIBVLC_USED );
 /* register callback on a url */
 VLC_EXPORT( int,            httpd_UrlCatch, ( httpd_url_t *, int i_msg, httpd_callback_t, httpd_callback_sys_t * ) );
-/* delete an url */
+/* delete a url */
 VLC_EXPORT( void,           httpd_UrlDelete, ( httpd_url_t * ) );
 
 /* Default client mode is FILE, use these to change it */

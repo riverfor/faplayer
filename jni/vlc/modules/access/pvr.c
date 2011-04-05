@@ -2,7 +2,7 @@
  * pvr.c
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id$
+ * $Id: c45ddc6b18963cf181693d5c701084fc7bd4a6b2 $
  *
  * Authors: Eric Petit <titer@videolan.org>
  *          Paul Corke <paulc@datatote.co.uk>

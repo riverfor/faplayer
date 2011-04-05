@@ -2,7 +2,7 @@
  * subtitle.c: subtitle decoder using ffmpeg library
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id$
+ * $Id: e5b9e6a89e80a87eff4f3ec9c6f20316e030c671 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -39,8 +39,6 @@
 #   ifdef HAVE_AVCODEC_VAAPI
 #       include <libavcodec/vaapi.h>
 #   endif
-#elif defined(HAVE_FFMPEG_AVCODEC_H)
-#   include <ffmpeg/avcodec.h>
 #else
 #   include <avcodec.h>
 #endif
@@ -50,7 +48,7 @@
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT( 52, 25, 0 )
 
 struct decoder_sys_t {
-    FFMPEG_COMMON_MEMBERS
+    AVCODEC_COMMON_MEMBERS
 };
 
 static subpicture_t *ConvertSubtitle(decoder_t *, AVSubtitle *, mtime_t pts);

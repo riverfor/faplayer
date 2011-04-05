@@ -2,7 +2,7 @@
  * video.c: video decoder using the ffmpeg library
  *****************************************************************************
  * Copyright (C) 1999-2001 the VideoLAN team
- * $Id$
+ * $Id: dacf915d3f4263beaaf9326f4b6fc9d3c116220b $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -61,7 +61,7 @@
  *****************************************************************************/
 struct decoder_sys_t
 {
-    FFMPEG_COMMON_MEMBERS
+    AVCODEC_COMMON_MEMBERS
 
     /* Video decoder specific part */
     mtime_t i_pts;
@@ -96,13 +96,6 @@ struct decoder_sys_t
     vlc_va_t *p_va;
 
     vlc_sem_t sem_mt;
-
-    /* */
-    int i_decode_call_count;
-    mtime_t i_decode_time_average;
-    mtime_t i_decode_time_last;
-    mtime_t i_decode_time_total;
-
 };
 
 #ifdef HAVE_AVCODEC_MT
@@ -419,12 +412,6 @@ int InitVideoDec( decoder_t *p_dec, AVCodecContext *p_context,
         return VLC_EGENERIC;
     }
 
-    /* */
-    p_sys->i_decode_call_count = 0;
-    p_sys->i_decode_time_average = 0;
-    p_sys->i_decode_time_last = 0;
-    p_sys->i_decode_time_total = 0;
-
     return VLC_SUCCESS;
 }
 
@@ -494,21 +481,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         return NULL;
     }
 
-    bool b_better_to_skip = p_sys->i_decode_time_last > p_sys->i_decode_time_average;
-    if ( b_better_to_skip )
-    {
-        p_context->skip_idct = AVDISCARD_NONREF;
-        p_context->skip_frame = AVDISCARD_NONREF;
-    }
-    else {
-        p_context->skip_idct = p_sys->i_skip_idct;
-        p_context->skip_frame = p_sys->i_skip_frame;
-    }
-    if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
-        b_drawpicture = 1;
-    else
-        b_drawpicture = 0;
-#if 0
     /* A good idea could be to decode all I pictures and see for the other */
     if( !p_dec->b_pace_control &&
         p_sys->b_hurry_up &&
@@ -539,7 +511,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         else
             b_drawpicture = 0;
     }
-#endif
+
     if( p_context->width <= 0 || p_context->height <= 0 )
     {
         if( p_sys->b_hurry_up )
@@ -596,8 +568,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
 
         post_mt( p_sys );
 
-        mtime_t bgn = mdate();
-
         i_used = avcodec_decode_video( p_context, p_sys->p_ff_pic,
                                        &b_gotpicture,
                                        p_block->i_buffer <= 0 && p_sys->b_flush ? NULL : p_block->p_buffer, p_block->i_buffer );
@@ -613,14 +583,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
                                            &b_gotpicture, p_block->p_buffer,
                                            p_block->i_buffer );
         }
-
-        mtime_t end = mdate();
-
-        p_sys->i_decode_call_count += 1;
-        p_sys->i_decode_time_last = end - bgn;
-        p_sys->i_decode_time_total += p_sys->i_decode_time_last;
-        p_sys->i_decode_time_average = p_sys->i_decode_time_total / p_sys->i_decode_call_count;
-
         wait_mt( p_sys );
 
         if( p_sys->b_flush )
