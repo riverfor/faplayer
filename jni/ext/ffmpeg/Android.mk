@@ -21,11 +21,13 @@ FF_COMMON_SRC := \
     libavcodec/aacps.c \
     libavcodec/aacsbr.c \
     libavcodec/aactab.c \
+    libavcodec/aandcttab.c \
     libavcodec/aasc.c \
     libavcodec/ac3.c \
     libavcodec/ac3_parser.c \
     libavcodec/ac3dec.c \
     libavcodec/ac3dec_data.c \
+    libavcodec/ac3dsp.c \
     libavcodec/ac3tab.c \
     libavcodec/acelp_filters.c \
     libavcodec/acelp_pitch_delay.c \
@@ -40,12 +42,16 @@ FF_COMMON_SRC := \
     libavcodec/anm.c \
     libavcodec/ansi.c \
     libavcodec/apedec.c \
+    libavcodec/arm/ac3dsp_arm.S \
+    libavcodec/arm/ac3dsp_armv6.S \
+    libavcodec/arm/ac3dsp_init_arm.c \
     libavcodec/arm/dcadsp_init_arm.c \
     libavcodec/arm/dsputil_arm.S \
     libavcodec/arm/dsputil_armv6.S \
     libavcodec/arm/dsputil_init_arm.c \
     libavcodec/arm/dsputil_init_armv5te.c \
     libavcodec/arm/dsputil_init_armv6.c \
+    libavcodec/arm/fft_fixed_init_arm.c \
     libavcodec/arm/fft_init_arm.c \
     libavcodec/arm/fmtconvert_init_arm.c \
     libavcodec/arm/h264dsp_init_arm.c \
@@ -99,6 +105,7 @@ FF_COMMON_SRC := \
     libavcodec/dca_parser.c \
     libavcodec/dcadsp.c \
     libavcodec/dct.c \
+    libavcodec/dfa.c \
     libavcodec/dirac.c \
     libavcodec/dirac_parser.c \
     libavcodec/dnxhd_parser.c \
@@ -119,12 +126,17 @@ FF_COMMON_SRC := \
     libavcodec/eac3dec.c \
     libavcodec/eac3dec_data.c \
     libavcodec/eacmv.c \
+    libavcodec/eaidct.c \
+    libavcodec/eamad.c \
+    libavcodec/eatgq.c \
     libavcodec/eatgv.c \
+    libavcodec/eatqi.c \
     libavcodec/error_resilience.c \
     libavcodec/escape124.c \
     libavcodec/faanidct.c \
     libavcodec/faxcompr.c \
-    libavcodec/fft.c \
+    libavcodec/fft_fixed.c \
+    libavcodec/fft_float.c \
     libavcodec/ffv1.c \
     libavcodec/flac.c \
     libavcodec/flac_parser.c \
@@ -179,6 +191,8 @@ FF_COMMON_SRC := \
     libavcodec/jpegls.c \
     libavcodec/jpeglsdec.c \
     libavcodec/jrevdct.c \
+    libavcodec/jvdec.c \
+    libavcodec/kbdwin.c \
     libavcodec/kgv1dec.c \
     libavcodec/kmvc.c \
     libavcodec/lagarith.c \
@@ -189,7 +203,8 @@ FF_COMMON_SRC := \
     libavcodec/lsp.c \
     libavcodec/lzw.c \
     libavcodec/mace.c \
-    libavcodec/mdct.c \
+    libavcodec/mdct_fixed.c \
+    libavcodec/mdct_float.c \
     libavcodec/mdec.c \
     libavcodec/mimic.c \
     libavcodec/mjpeg.c \
@@ -273,6 +288,7 @@ FF_COMMON_SRC := \
     libavcodec/sgidec.c \
     libavcodec/shorten.c \
     libavcodec/simple_idct.c \
+    libavcodec/sinewin.c \
     libavcodec/sipr.c \
     libavcodec/sipr16k.c \
     libavcodec/smacker.c \
@@ -363,6 +379,7 @@ FF_COMMON_SRC := \
     libavformat/ape.c \
     libavformat/apetag.c \
     libavformat/applehttp.c \
+    libavformat/applehttpproto.c \
     libavformat/asf.c \
     libavformat/asfcrypt.c \
     libavformat/asfdec.c \
@@ -385,6 +402,7 @@ FF_COMMON_SRC := \
     libavformat/concat.c \
     libavformat/cutils.c \
     libavformat/daud.c \
+    libavformat/dfa.c \
     libavformat/diracdec.c \
     libavformat/dnxhddec.c \
     libavformat/dsicin.c \
@@ -419,6 +437,7 @@ FF_COMMON_SRC := \
     libavformat/iss.c \
     libavformat/iv8.c \
     libavformat/ivfdec.c \
+    libavformat/jvdec.c \
     libavformat/lmlm4.c \
     libavformat/lxfdec.c \
     libavformat/m4vdec.c \
@@ -427,6 +446,7 @@ FF_COMMON_SRC := \
     libavformat/md5proto.c \
     libavformat/metadata.c \
     libavformat/metadata_compat.c \
+    libavformat/microdvddec.c \
     libavformat/mm.c \
     libavformat/mmf.c \
     libavformat/mms.c \
@@ -579,11 +599,14 @@ FF_ARM_NEON_SRC := \
     libavcodec/arm/mpegvideo_neon.S \
     libavcodec/arm/simple_idct_neon.S \
     libavcodec/arm/fft_neon.S \
+    libavcodec/arm/fft_fixed_neon.S \
     libavcodec/arm/mdct_neon.S \
+    libavcodec/arm/mdct_fixed_neon.S \
     libavcodec/arm/rdft_neon.S \
     libavcodec/arm/h264dsp_neon.S \
     libavcodec/arm/h264idct_neon.S \
     libavcodec/arm/h264pred_neon.S \
+    libavcodec/arm/ac3dsp_neon.S \
     libavcodec/arm/dcadsp_neon.S \
     libavcodec/arm/synth_filter_neon.S \
     libavcodec/arm/vp3dsp_neon.S \

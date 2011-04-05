@@ -13,8 +13,8 @@ DEPROOT := $(LOCAL_PATH)/dep
 
 # explicit add -mfpu=neon since LOCAL_ARM_NEON does not work well with .S file
 ifeq ($(BUILD_WITH_NEON),1)
-COMMON_TUNE_CFLAGS := -mfpu=neon -mtune=cortex-a8 -mvectorize-with-neon-quad
-COMMON_TUNE_CFLAGS := -mfpu=neon -mtune=cortex-a8 -mvectorize-with-neon-quad
+COMMON_TUNE_CFLAGS := -mfpu=neon -mtune=cortex-a8
+COMMON_TUNE_CFLAGS := -mfpu=neon -mtune=cortex-a8
 COMMON_TUNE_LDFLAGS := -Wl,--fix-cortex-a8
 else
 COMMON_TUNE_CFLAGS := -march=armv6j -mtune=arm1136j-s -msoft-float
