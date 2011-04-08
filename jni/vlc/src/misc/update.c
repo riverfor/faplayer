@@ -2,7 +2,7 @@
  * update.c: VLC update checking and downloading
  *****************************************************************************
  * Copyright © 2005-2008 the VideoLAN team
- * $Id: dcbb53a1fcac8cc1d0e8428b7cd731324648fdf2 $
+ * $Id: 0c939a0b37fcd2792920a3fb62efad7f7a8ef5f0 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *          Rémi Duraffort <ivoire at via.ecp.fr>

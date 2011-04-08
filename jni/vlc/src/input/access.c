@@ -2,7 +2,7 @@
  * access.c
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id: a8bf50013c8c52e77567359cf791fcb8bf60e063 $
+ * $Id: b8a2f031e3652a1df4503113de9c17744052c3dc $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

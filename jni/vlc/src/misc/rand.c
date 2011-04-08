@@ -2,7 +2,7 @@
  * rand.c : non-predictible random bytes generator
  *****************************************************************************
  * Copyright © 2007 Rémi Denis-Courmont
- * $Id: 618b25bd7c7707f95f2a619194dff363b1e98f74 $
+ * $Id: 82c67c3d7f4626ce10b8495d7dc6c83f51b65705 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

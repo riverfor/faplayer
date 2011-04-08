@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2000-2010 the VideoLAN team
  * Copyright (C) 2009-2010 Laurent Aimar
- * $Id: f197830cc603c5ab67981c834ae033a130235d4c $
+ * $Id: b63f843af09df15c6a5197d6c7713bfefee47417 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>

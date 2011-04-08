@@ -2,7 +2,7 @@
  * input_interface.h: Input functions usable outside input code.
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: 6a7a28c3e60d1f62e7913c9e8f98c2604d16a88b $
+ * $Id: 8e8704d4598786230d3744b6473014123ffaed17 $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org >
  *

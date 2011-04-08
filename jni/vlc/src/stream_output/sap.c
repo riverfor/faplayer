@@ -2,7 +2,7 @@
  * sap.c : SAP announce handler
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: be2ce6be39d5f845029b257b584ced82a749b095 $
+ * $Id: e07233372fb5cfbf0f70fe2f7b8cb84b68e8e1fe $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Rémi Denis-Courmont <rem # videolan.org>

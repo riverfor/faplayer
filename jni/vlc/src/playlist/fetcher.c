@@ -2,7 +2,7 @@
  * fetcher.c: Art fetcher thread.
  *****************************************************************************
  * Copyright © 1999-2009 the VideoLAN team
- * $Id: abb68c46511301762dcd7ddb4c87c13b5f03687c $
+ * $Id: 1a643b05d85341736c120e7ba001262ebac75951 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>

@@ -2,7 +2,7 @@
  * utf8.c: Test for UTF-8 encoding/decoding stuff
  *****************************************************************************
  * Copyright (C) 2006 Rémi Denis-Courmont
- * $Id: 261fba7c761f88f1c4b610a20beecbf9c39cf0fd $
+ * $Id: 3a29bc24a3d9c017fdf6580ae99222230d98ba24 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

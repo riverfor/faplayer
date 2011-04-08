@@ -2,7 +2,7 @@
  * services_discovery.c : Manage playlist services_discovery modules
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 95a4878c3e83f82dcd236f44e17db610fc49de6b $
+ * $Id: 65e2970e58d9a86b02ccdac8a2add5e6db2e6d0a $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *

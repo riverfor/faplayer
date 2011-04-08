@@ -2,7 +2,7 @@
  * interlacing.h: Interlacing related helpers
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id: 5d7e115d51f8dc3bdeb24d4a8b137240b0147bf4 $
+ * $Id: d755531e40f06519006f737ed460362d71624b78 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

@@ -2,7 +2,7 @@
  * meta.c : Metadata handling
  *****************************************************************************
  * Copyright (C) 1998-2004 the VideoLAN team
- * $Id: 40226804b40feec0147168d3d1b16a4d3070cd4a $
+ * $Id: a285d7077a43b27b6e6cfa0c3916e298e82f844d $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Clément Stenac <zorglub@videolan.org

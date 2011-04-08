@@ -2,7 +2,7 @@
  * fourcc.c: fourcc helpers functions
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: e86a273daa58dc637806ce9d6a18950e96c6fa90 $
+ * $Id: d942147c7221cdfc13772b9d15b991eaf6c03612 $
  *
  * Authors: Laurent Aimar <fenrir@videolan.org>
  *

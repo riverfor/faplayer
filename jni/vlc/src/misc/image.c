@@ -2,7 +2,7 @@
  * image.c : wrapper for image reading/writing facilities
  *****************************************************************************
  * Copyright (C) 2004-2007 the VideoLAN team
- * $Id: 4ad5aa02ef1e4311c104f4276e2b2abdc32861a3 $
+ * $Id: 8e7780c45b26c1f1461dcb0ee6491d154e65fd6e $
  *
  * Author: Gildas Bazin <gbazin@videolan.org>
  *

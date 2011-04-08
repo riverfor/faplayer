@@ -2,7 +2,7 @@
  * stream.c
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: ded3b8fdc0e6888767bcd0de9b5b4c4f3d8cb49c $
+ * $Id: 4e7d08cd3ceae1c6327e18c87978a96eec8a92b4 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *

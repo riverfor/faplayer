@@ -2,7 +2,7 @@
  * postprocessing.h: Post processing related helpers
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id: 365022e7267732a16dd52658b8b66ac161a4abc2 $
+ * $Id: 2915363015af084c6a67e46246a3d3a09f3e5ec9 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *

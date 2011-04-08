@@ -2,7 +2,7 @@
  * sql.c: SQL Connection: Creators and destructors
  *****************************************************************************
  * Copyright (C) 2008-2009 the VideoLAN team
- * $Id: 6b2f6aadfb5b704757d00de5eec57efaf83f7269 $
+ * $Id: 2b81ef7f0392aea447c007ead61f133b5c94ea75 $
  *
  * Authors: Srikanth Raju <srikiraju at gmail dot com>
  *

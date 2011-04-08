@@ -4,7 +4,7 @@
  * modules, especially intf modules. See vlc_config.h for output configuration.
  *****************************************************************************
  * Copyright (C) 1998-2005 the VideoLAN team
- * $Id: c5fb2811a09f58d66a74c8801c53d9dfcb331822 $
+ * $Id: aa957d4eb775a91d6ad4d3370626a2e61ecc452f $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -54,6 +54,10 @@
 
 #include <vlc_charset.h>
 #include "../libvlc.h"
+
+#ifdef ANDROID
+#include "debug.h"
+#endif
 
 /*****************************************************************************
  * Local macros
@@ -519,7 +523,11 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
 
     int canc = vlc_savecancel ();
     /* Send the message to stderr */
+#ifdef ANDROID
+    debug( "[%s%p%s] %s%s%s %s%s: %s%s%s\n",
+#else
     utf8_fprintf( stderr, "[%s%p%s] %s%s%s %s%s: %s%s%s\n",
+#endif
                   priv->b_color ? GREEN : "",
                   (void *)p_item->i_object_id,
                   priv->b_color ? GRAY : "",

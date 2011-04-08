@@ -17,6 +17,7 @@ LOCAL_MODULE := audio_format_neon_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
+    -fasm \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"audio_format_neon\"
 
@@ -87,10 +88,11 @@ LOCAL_MODULE := yuv2rgb_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
+    -fasm \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"yuv2rgb\"
 
-LOCAL_CPPFLAGS += $(COMMON_TUNE_CFLAGS)
+LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
@@ -105,6 +107,11 @@ LOCAL_SRC_FILES := \
     yuv420rgb565.S \
     yuv422rgb565.S \
     yuv444rgb565.S
+
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_CFLAGS += -DHAVE_NEON=1
+LOCAL_SRC_FILES += yuv2rgb.aurora.S yuv2rgb.mozilla.c
+endif
 
 LOCAL_SHARED_LIBRARIES += vlccore
 

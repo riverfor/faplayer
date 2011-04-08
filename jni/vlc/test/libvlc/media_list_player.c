@@ -1,7 +1,7 @@
 /*
  * media_list_player.c - libvlc smoke test
  *
- * $Id: 9664fa7db2612e2d5efaaf382300191864da1fc9 $
+ * $Id: af46b5e4ccb5122ff3ab826f4f6f678615d1fc98 $
  */
 
 /**********************************************************************

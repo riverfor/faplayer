@@ -29,10 +29,6 @@
 
 #include <assert.h>
 
-#ifndef __asm__
-#define asm __asm__
-#endif
-
 static int Open (vlc_object_t *);
 
 vlc_module_begin ()

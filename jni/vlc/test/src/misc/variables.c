@@ -2,7 +2,7 @@
  * variables.c: test for variables
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 952c1e62b309bc8f365e9eeaac0a4c8ee140d2b3 $
+ * $Id: 15e7fc5d0df865ecee61f43b1601b1ec3ad618e1 $
  *
  * Authors: Rémi Duraffort <ivoire@videolan.org>
  *

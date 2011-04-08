@@ -2,7 +2,7 @@
  * decoder.c: Functions for the management of decoders
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: bd016f0f8e27f72929e1df29dbbc750b161575d0 $
+ * $Id: 72022c738618f3a5f4bd5158e1d5c9eaa4d47e46 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>

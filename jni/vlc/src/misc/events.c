@@ -4,7 +4,7 @@
  * It is more lightweight than variable based callback.
  *****************************************************************************
  * Copyright (C) 1998-2005 the VideoLAN team
- * $Id: 7afc33881d7face72a6f2e012cf367b6fb4c8bb8 $
+ * $Id: 555a7a4a34dc6ee416422915a972e61cd86069a6 $
  *
  * Authors: Pierre d'Herbemont <pdherbemont # videolan.org >
  *

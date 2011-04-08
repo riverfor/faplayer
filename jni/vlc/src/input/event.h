@@ -2,7 +2,7 @@
  * event.h: Input event functions
  *****************************************************************************
  * Copyright (C) 2008 Laurent Aimar
- * $Id: e180b247b5885a0af31ea628f32dd0057d517276 $
+ * $Id: 31eea4d9133213f3622201ca80019bda0256904e $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ fr>
  *

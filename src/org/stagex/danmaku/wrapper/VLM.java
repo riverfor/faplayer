@@ -116,7 +116,7 @@ public class VLM {
 					} catch (UnsupportedEncodingException e) {
 					}
 					if (line != null) {
-						Log.d("faplayer-java", line);
+						// Log.d("faplayer-java", line);
 						triggerCallback(line);
 					}
 					mLineOffset += mLineLength;

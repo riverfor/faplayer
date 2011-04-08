@@ -2,7 +2,7 @@
  * input.c: input thread
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
- * $Id: 92c85654c6ba26ab9ef6866ffdf5d08dffbde17e $
+ * $Id: 63a148029d21448996035d65d0fa8ac81deb1ba4 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>

@@ -2,7 +2,7 @@
  * vlm_event.c: Events
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 1e5916abc09be4300be8120576b61f82c3659179 $
+ * $Id: 47772995359a924f088390f3b1f9de9e05ea66d7 $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org>
  *

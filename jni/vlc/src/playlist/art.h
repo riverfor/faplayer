@@ -2,7 +2,7 @@
  * art.h:
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id: a3b6a690723233fbbb5778b905fa3cefac8573b6 $
+ * $Id: 5d5ff63f890096c7447c92964ba2a4759a252615 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>

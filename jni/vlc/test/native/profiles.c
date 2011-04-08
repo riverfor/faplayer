@@ -2,7 +2,7 @@
  * profiles.c: Test streaming profiles
  *****************************************************************************
  * Copyright (C) 2006 The VideoLAN project
- * $Id: 35d650daa8c5e4e7ccd1cd4ec05bcd18c338f488 $
+ * $Id: 8096fe90c7ce3e67c69d1bd986b0e3c95a07e334 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
