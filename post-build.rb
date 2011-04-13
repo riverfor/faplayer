@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!/usr/bin/env ruby
 
 all = Hash.new
 list = `find . -name Android.mk`.split("\n")

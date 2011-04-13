@@ -3,8 +3,6 @@ LOCAL_PATH := $(call my-dir)
 
 ifeq ($(BUILD_WITH_NEON),1)
 
-# libaudio_format_neon_plugin.so
-
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
@@ -18,8 +16,8 @@ LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
     -fasm \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"audio_format_neon\"
+    -DMODULE_STRING=\"audio_format_neon\" \
+    -DMODULE_NAME=audio_format_neon
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -34,11 +32,7 @@ LOCAL_SRC_FILES := \
     audio_format.c \
     s32_s16.S
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
-
-# libmemcpy_neon_plugin.so
+include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -52,8 +46,8 @@ LOCAL_MODULE := memcpy_neon_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"memcpy_neon\"
+    -DMODULE_STRING=\"memcpy_neon\" \
+    -DMODULE_NAME=memcpy_neon
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -68,13 +62,9 @@ LOCAL_SRC_FILES := \
     memcpy.c \
     memcpy_impl.S
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 
 endif
-
-# libyuv2rgb_plugin.so
 
 include $(CLEAR_VARS)
 
@@ -89,8 +79,8 @@ LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
     -fasm \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"yuv2rgb\"
+    -DMODULE_STRING=\"yuv2rgb\" \
+    -DMODULE_NAME=yuv2rgb
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -113,7 +103,5 @@ LOCAL_CFLAGS += -DHAVE_NEON=1
 LOCAL_SRC_FILES += yuv2rgb.aurora.S yuv2rgb.mozilla.c
 endif
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 

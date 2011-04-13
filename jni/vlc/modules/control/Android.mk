@@ -1,8 +1,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# libnotify_plugin.so
-
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
@@ -15,8 +13,8 @@ LOCAL_MODULE := reporter_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"reporter\"
+    -DMODULE_STRING=\"reporter\" \
+    -DMODULE_NAME=reporter
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -30,7 +28,5 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     reporter.c
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 

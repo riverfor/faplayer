@@ -10,6 +10,8 @@
 
 #include <jni.h>
 
+#include "libvlcjni.h"
+
 #define CLASS org_stagex_danmaku_wrapper_VLC
 #define KLASS "org/stagex/danmaku/wrapper/VLC"
 
@@ -105,7 +107,7 @@ JNIEXPORT void JNICALL NAME(run)(JNIEnv *env, jobject thiz, jobject args) {
         arg = (*env)->GetObjectArrayElement(env, args, i);
         argv[i] = (*env)->GetStringUTFChars(env, arg, NULL);
     }
-    vlc = libvlc_new(argc, argv);
+    vlc = libvlc_new_with_builtins(argc, argv, vlc_builtins_modules);
     if (vlc) {
         libvlc_set_user_agent(vlc, "VLC media player", NULL);
         if (libvlc_add_intf(vlc, NULL) == 0) {

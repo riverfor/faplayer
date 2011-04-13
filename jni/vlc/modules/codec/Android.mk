@@ -1,8 +1,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# liblibass_plugin.so
-
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
@@ -16,29 +14,25 @@ LOCAL_MODULE := liblibass_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"libass\"
+    -DMODULE_STRING=\"libass\" \
+    -DMODULE_NAME=libass
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
+    $(EXTROOT)/iconv/include \
+    $(EXTROOT)/freetype/include \
+    $(EXTROOT)/libass/include \
     $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src \
-    $(EXTROOT)/iconv/include \
-    $(EXTROOT)/freetype/include \
-    $(EXTROOT)/libass/include
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     libass.c
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
-
-# libsubsdec_plugin.so
+include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -52,8 +46,8 @@ LOCAL_MODULE := subsdec_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"subsdec\"
+    -DMODULE_STRING=\"subsdec\" \
+    -DMODULE_NAME=subsdec
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -68,9 +62,7 @@ LOCAL_SRC_FILES := \
     subsass.c \
     subsdec.c
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 

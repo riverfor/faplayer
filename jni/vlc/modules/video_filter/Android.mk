@@ -1,8 +1,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# libblend_plugin.so
-
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
@@ -15,8 +13,8 @@ LOCAL_MODULE := blend_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"blend\"
+    -DMODULE_STRING=\"blend\" \
+    -DMODULE_NAME=blend
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -30,11 +28,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     blend.c
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
-
-# libswscale_plugin.so
+include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -48,8 +42,8 @@ LOCAL_MODULE := swscale_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"swscale\"
+    -DMODULE_STRING=\"swscale\" \
+    -DMODULE_NAME=swscale
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -63,10 +57,7 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT)/modules/codec/avcodec
 
 LOCAL_SRC_FILES := \
-    chroma.c \
     swscale.c
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 

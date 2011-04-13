@@ -35,9 +35,9 @@ LOCAL_C_INCLUDES += \
     $(EXTROOT)/iconv/include
 
 LOCAL_SRC_FILES := \
-    src/jni.c \
     src/libvlc-module.c \
     src/libvlc.c \
+    src/libvlcjni.c \
     src/missing.c \
     src/revision.c \
     src/version.c \
@@ -188,6 +188,9 @@ endif
 # please try to use the latest NDK
 # http://code.google.com/p/android/issues/detail?id=9439
 LOCAL_WHOLE_STATIC_LIBRARIES += iconv charset freetype ass ffmpeg pixman
+
+# modules, do NOT edit this line
+LOCAL_STATIC_LIBRARIES += aout_android_plugin audio_format_neon_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libass_plugin memcpy_neon_plugin reporter_plugin simple_channel_mixer_plugin subsdec_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vout_android_plugin yuv2rgb_plugin
 
 include $(BUILD_SHARED_LIBRARY)
 

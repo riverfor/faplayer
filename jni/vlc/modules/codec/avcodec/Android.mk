@@ -1,8 +1,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# libavcodec_plugin.so
-
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
@@ -15,8 +13,8 @@ LOCAL_MODULE := avcodec_plugin
 LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
-    -D__PLUGIN__ \
-    -DMODULE_STRING=\"avcodec\"
+    -DMODULE_STRING=\"avcodec\" \
+    -DMODULE_NAME=avcodec
 
 LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
@@ -38,7 +36,5 @@ LOCAL_SRC_FILES := \
     subtitle.c \
     video.c
 
-LOCAL_SHARED_LIBRARIES += vlccore
-
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 

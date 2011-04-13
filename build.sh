@@ -1,9 +1,10 @@
 #!/bin/sh
 
 rm -rf libs
+ruby pre-build.rb
 ndk-build $@ || exit 1
 rm -rf assets/lib
-ruby trivial.rb
+ruby post-build.rb
 rm -rf bin
 ant release
 test -f bin/faplayer-unsigned.apk || exit 1
