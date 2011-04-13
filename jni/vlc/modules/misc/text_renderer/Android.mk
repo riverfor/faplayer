@@ -20,12 +20,12 @@ LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
-    $(EXTROOT)/iconv/include \
-    $(EXTROOT)/freetype/include \
     $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src
+    $(VLCROOT)/src \
+    $(EXTROOT)/iconv/include \
+    $(EXTROOT)/freetype/include
 
 LOCAL_SRC_FILES := \
     freetype.c

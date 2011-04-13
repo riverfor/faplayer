@@ -28,11 +28,11 @@ LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
+    $(EXTROOT)/iconv/include \
     $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src \
-    $(EXTROOT)/iconv/include
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     src/libvlc-module.c \

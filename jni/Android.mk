@@ -9,7 +9,6 @@ endif
 
 VLCROOT := $(LOCAL_PATH)/vlc
 EXTROOT := $(LOCAL_PATH)/ext
-DEPROOT := $(LOCAL_PATH)/dep
 
 COMMON_TUNE_CFLAGS := -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math
 COMMON_TUNE_CPPFLAGS := -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math

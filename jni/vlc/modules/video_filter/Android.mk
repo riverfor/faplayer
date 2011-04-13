@@ -53,8 +53,7 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src \
-    $(EXTROOT)/ffmpeg \
-    $(VLCROOT)/modules/codec/avcodec
+    $(EXTROOT)/ffmpeg
 
 LOCAL_SRC_FILES := \
     swscale.c
