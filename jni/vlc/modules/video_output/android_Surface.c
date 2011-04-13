@@ -8,23 +8,15 @@
 #include <vlc_vout_display.h>
 #include <vlc_picture_pool.h>
 #include <vlc_threads.h>
+
+#include <dlfcn.h>
 #include <pixman.h>
 
-#ifndef __PLATFORM__
-#error "android api level is not defined!"
-#endif
+void LockSurface();
+void UnlockSurface();
+void *GetSurface();
 
-#if __PLATFORM__ < 8
-#include <ui/Surface.h>
-#else
-#include <surfaceflinger/Surface.h>
-#endif
-
-using namespace android;
-
-extern "C" void LockSurface();
-extern "C" void UnlockSurface();
-extern "C" void *GetSurface();
+static void *InitLibrary();
 
 static int Open (vlc_object_t *);
 static void Close(vlc_object_t *);
@@ -34,7 +26,7 @@ vlc_module_begin()
     set_category(CAT_VIDEO)
     set_subcategory(SUBCAT_VIDEO_VOUT)
     set_description(N_("Android Surface video output"))
-    set_capability("vout display", __PLATFORM__)
+    set_capability("vout display", 25)
     add_shortcut("android")
     set_callbacks(Open, Close)
 vlc_module_end()
@@ -46,43 +38,92 @@ static int Control(vout_display_t *, int, va_list);
 static void picture_Strech2(vout_display_t *, picture_t *, picture_t *);
 static void picture_CopyToSurface(vout_display_t *, picture_t *, picture_t *);
 
+// _ZN7android7Surface4lockEPNS0_11SurfaceInfoEb
+typedef void (*Surface_lock)(void *, void *, int);
+// _ZN7android7Surface13unlockAndPostEv
+typedef void (*Surface_unlockAndPost)(void *);
+
 struct vout_display_sys_t {
     picture_pool_t *pool;
+    void *libsfc_or_ui;
 };
+
+typedef struct _SurfaceInfo {
+    uint32_t    w;
+    uint32_t    h;
+    uint32_t    s;
+    uint32_t    a;
+    uint32_t    b;
+    uint32_t    c;
+    uint32_t    reserved[2];
+} SurfaceInfo;
+
+static Surface_lock s_lock = NULL;
+static Surface_unlockAndPost s_unlockAndPost = NULL;
+
+static void *InitLibrary() {
+    void *p_library;
+
+    p_library = dlopen("libsurfaceflinger_client.so", RTLD_NOW);
+    if (p_library) {
+        s_lock = (Surface_lock)(dlsym(p_library, "_ZN7android7Surface4lockEPNS0_11SurfaceInfoEb"));
+        s_unlockAndPost = (Surface_unlockAndPost)(dlsym(p_library, "_ZN7android7Surface13unlockAndPostEv"));
+        if (s_lock && s_unlockAndPost) {
+            return p_library;
+        }
+        dlclose(p_library);
+    }
+    p_library = dlopen("libui.so", RTLD_NOW);
+    if (p_library) {
+        s_lock = (Surface_lock)(dlsym(p_library, "_ZN7android7Surface4lockEPNS0_11SurfaceInfoEb"));
+        s_unlockAndPost = (Surface_unlockAndPost)(dlsym(p_library, "_ZN7android7Surface13unlockAndPostEv"));
+        if (s_lock && s_unlockAndPost) {
+            return p_library;
+        }
+        dlclose(p_library);
+    }
+    return NULL;
+}
 
 static int Open(vlc_object_t *p_this) {
     vout_display_t *vd = (vout_display_t *)p_this;
     vout_display_sys_t *sys;
+    void *surf;
+    SurfaceInfo info;
+    void *p_library;
 
-    // get surface infomation
-    LockSurface();
-    Surface *surf = (Surface*) GetSurface();
-    if (!surf) {
-        UnlockSurface();
-        msg_Err(vd, "android surface is not ready");
+    p_library = InitLibrary();
+    if (!p_library) {
+        msg_Err(VLC_OBJECT(p_this), "Could not initialize libui.so/libsurfaceflinger_client.so!");
         return VLC_EGENERIC;
     }
-    Surface::SurfaceInfo info;
-    surf->lock(&info);
-#if __PLATFORM__ == 4
-    surf->unlock();
-#else
-    surf->unlockAndPost();
-#endif
+    LockSurface();
+    surf = GetSurface();
+    if (!surf) {
+        UnlockSurface();
+        dlclose(p_library);
+        msg_Err(vd, "No surface is attached!");
+        return VLC_EGENERIC;
+    }
+    s_lock(surf, &info, 1);
+    s_unlockAndPost(surf);
     UnlockSurface();
     // TODO: what about the other formats?
+    int pixel_format = info.s >= info.w ? info.b : info.a;
     const char *chroma_format;
-    switch (info.format) {
-    case PIXEL_FORMAT_RGB_565:
+    switch (pixel_format) {
+    case 4:     // PIXEL_FORMAT_RGB_565
         chroma_format = "RV16";
         break;
     default:
-        msg_Err(vd, "unknown chroma format %08x (android)", info.format);
+        dlclose(p_library);
+        msg_Err(vd, "Unknown chroma format %08x (android)", pixel_format);
         return VLC_EGENERIC;
     }    
     vlc_fourcc_t chroma = vlc_fourcc_GetCodecFromString(VIDEO_ES, chroma_format);
     if (!chroma) {
-        msg_Err(vd, "unsupported chroma format %s", chroma_format);
+        dlclose(p_library);
+        msg_Err(vd, "Unsupported chroma format %s", chroma_format);
         return VLC_EGENERIC;
     }
     video_format_t fmt = vd->fmt;
@@ -94,21 +135,17 @@ static int Open(vlc_object_t *p_this) {
         fmt.i_bmask = 0x001f;
         break;
     default:
-        msg_Err(vd, "unknown chroma format %08x (vlc)", chroma);
+        dlclose(p_library);
+        msg_Err(vd, "Unknown chroma format %08x (vlc)", chroma);
         return VLC_EGENERIC;
     }
     sys = (struct vout_display_sys_t*) malloc(sizeof(struct vout_display_sys_t));
     if (!sys)
         return VLC_ENOMEM;
     memset(sys, 0, sizeof(*sys));
-#if __PLATFORM__ > 4
-    msg_Dbg(VLC_OBJECT(p_this), "SurfaceInfo w = %d, h = %d, s = %d", info.w, info.h, info.s);
-#else
-    msg_Dbg(VLC_OBJECT(p_this), "SurfaceInfo w = %d, h = %d", info.w, info.h);
-#endif
     sys->pool = NULL;
+    sys->libsfc_or_ui = p_library;
 
-    // 
     vout_display_cfg_t cfg = *vd->cfg;
     cfg.display.width = info.w;
     cfg.display.height = info.h;
@@ -148,8 +185,8 @@ static picture_pool_t *Pool(vout_display_t *vd, unsigned count) {
 static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture) {
     VLC_UNUSED(subpicture);
     vout_display_sys_t *sys = vd->sys;
-    Surface *surf;
-    Surface::SurfaceInfo info;
+    void *surf;
+    SurfaceInfo info;
     int srx, sry, srh, srw;
     int drx, dry, drh, drw;
     int sw, sh, ss, dw, dh, ds;
@@ -173,16 +210,12 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
     srw = sw;
     srh = sh;
     LockSurface();
-    surf = (Surface*)(GetSurface());
+    surf = GetSurface();
     if (surf) {
-        surf->lock(&info);
+        s_lock(surf, &info, 1);
         dw = info.w;
         dh = info.h;
-#if __PLATFORM__ > 4
-        ds = info.s;
-#else
-        ds = info.w;
-#endif
+        ds = info.s >= info.w ? info.s : info.w;
         if (sw > dw || sh > dh) {
             q1 = (dw << 16) / sw;
             q2 = (dh << 16) / sh;
@@ -202,9 +235,10 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
         drx = (dw - drw) >> 1;
         dry = (dh - drh) >> 1;
         // msg_Dbg(VLC_OBJECT(vd), "%dx%d %d %d,%d %dx%d => %dx%d %d %d,%d %dx%d", sw, sh, ss, srx, sry, srw, srh, dw, dh, ds, drx, dry, drw, drh);
-        switch (info.format) {
-        case PIXEL_FORMAT_RGB_565: {
-            dst_image = pixman_image_create_bits(PIXMAN_r5g6b5, dw, dh, (uint32_t*)(info.bits), ds << 1);
+        int pixel_format = info.s >= info.w ? info.b : info.a;
+        switch (pixel_format) {
+        case 4: {       // PIXEL_FORMAT_RGB_565
+            dst_image = pixman_image_create_bits(PIXMAN_r5g6b5, dw, dh, (uint32_t*)(info.s >= info.w ? info.c : info.b), ds << 1);
             if (!dst_image) {
                 goto bail;
             }
@@ -215,7 +249,7 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
         }
         pixman_image_composite(PIXMAN_OP_SRC, src_image, NULL, dst_image, srx, sry, 0, 0, drx, dry, srw , srh);
 bail:
-        surf->unlockAndPost();
+        s_unlockAndPost(surf);
     }
     UnlockSurface();
     if (src_image) {

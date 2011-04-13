@@ -135,7 +135,7 @@ static picture_t *yuv420_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
     int width, height;
     picture_t *p_dst;
 
-    mtime_t bgn = mdate();
+    // mtime_t bgn = mdate();
     if (!p_pic)
         return NULL;
 

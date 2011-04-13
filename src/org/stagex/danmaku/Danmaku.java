@@ -8,10 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.stagex.danmaku.helper.SystemUtility;
 import org.stagex.danmaku.wrapper.VLC;
 import org.stagex.danmaku.wrapper.VLM;
 
@@ -20,13 +17,8 @@ import android.content.res.AssetManager;
 
 public class Danmaku extends Application {
 
-	private static Pattern mPatternVersion = Pattern.compile("android-(\\d+)");
-
 	protected boolean initialize() {
 		// prepare, orz
-		int code = SystemUtility.getSDKVersionCode();
-		if (code == 6 || code == 7)
-			code = 5;
 		String root = super.getCacheDir().getAbsolutePath();
 		try {
 			ArrayList<String> list = new ArrayList<String>();
@@ -37,12 +29,6 @@ public class Danmaku extends Application {
 			try {
 				while (br.ready()) {
 					String line = br.readLine();
-					Matcher matcher = mPatternVersion.matcher(line);
-					if (matcher.find()) {
-						int value = Integer.parseInt(matcher.group(1));
-						if (value > code)
-							continue;
-					}
 					list.add(line);
 				}
 			} finally {
@@ -84,8 +70,8 @@ public class Danmaku extends Application {
 		String libd = String.format("%s/lib", root);
 		VLC.setenv("VLC_PLUGIN_PATH", libd, true);
 		String conf = String.format("%s/etc/vlcrc", root);
-		String aout = String.format("aout_android-%d", code);
-		String vout = String.format("vout_android-%d", code);
+		String aout = String.format("aout_android");
+		String vout = String.format("vout_android");
 		// XXX: --intf, --aout, --vout don't make sense here
 		VLC.getInstance().create(
 				new String[] { "--verbose", "3", "--no-ignore-config",
