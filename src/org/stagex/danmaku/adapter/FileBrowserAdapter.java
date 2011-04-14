@@ -8,6 +8,7 @@ import java.util.Comparator;
 
 import org.stagex.danmaku.R;
 import org.stagex.danmaku.activity.PlayerActivity;
+import org.stagex.danmaku.activity.TestActivity;
 import org.stagex.danmaku.helper.SystemUtility;
 
 import android.content.Context;
@@ -20,11 +21,13 @@ import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 public class FileBrowserAdapter extends BaseAdapter implements
-		OnItemClickListener, OnKeyListener, FilenameFilter {
+		OnItemClickListener, OnItemLongClickListener, OnKeyListener,
+		FilenameFilter {
 
 	private Context mContext;
 	private String mCurrentPath;
@@ -126,6 +129,14 @@ public class FileBrowserAdapter extends BaseAdapter implements
 			intent.putExtra("playlist", bundle);
 			mContext.startActivity(intent);
 		}
+	}
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view,
+			int position, long id) {
+		Intent intent = new Intent(mContext, TestActivity.class);
+		mContext.startActivity(intent);
+		return true;
 	}
 
 	@Override

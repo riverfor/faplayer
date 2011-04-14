@@ -36,6 +36,9 @@ f = File.open('jni/vlc/src/libvlcjni.h', 'w') { |f|
 }
 n = `grep -n '# modules' jni/vlc/Android.mk | cut -d: -f1`
 n = n.to_i + 1
-all = all.join(' ')
-`sed -i "#{n} c\\LOCAL_STATIC_LIBRARIES += #{all}" jni/vlc/Android.mk`
+old = `sed -n #{n}p jni/vlc/Android.mk`.strip!
+new = 'LOCAL_STATIC_LIBRARIES += ' + all.join(' ')
+if old != new
+    `sed -i "#{n} c\\#{new}" jni/vlc/Android.mk`
+end
 

@@ -25,6 +25,7 @@ public class FileBrowserActivity extends Activity {
 		mFileList = (ListView) findViewById(R.id.file_list);
 		mFileList.setAdapter(mFileAdapter);
 		mFileList.setOnItemClickListener(mFileAdapter);
+		mFileList.setOnItemLongClickListener(mFileAdapter);
 	}
 
 	@Override
