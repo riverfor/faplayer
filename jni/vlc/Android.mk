@@ -179,18 +179,16 @@ LOCAL_SRC_FILES := \
 
 LOCAL_LDLIBS += -ldl -llog -lz
 
+# modules, do NOT edit this line
+LOCAL_STATIC_LIBRARIES += access_http_plugin access_mms_plugin aout_android_plugin audio_format_neon_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libass_plugin memcpy_neon_plugin realrtsp_plugin reporter_plugin rtp_plugin simple_channel_mixer_plugin subsdec_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vout_android_plugin yuv2rgb_plugin
+
 LOCAL_STATIC_LIBRARIES += compat pthread-compat
 
 ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_STATIC_LIBRARIES += arm_neon
 endif
 
-# please try to use the latest NDK
-# http://code.google.com/p/android/issues/detail?id=9439
-LOCAL_WHOLE_STATIC_LIBRARIES += iconv charset freetype ass ffmpeg pixman
-
-# modules, do NOT edit this line
-LOCAL_STATIC_LIBRARIES += access_http_plugin access_mms_plugin aout_android_plugin audio_format_neon_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libass_plugin memcpy_neon_plugin realrtsp_plugin reporter_plugin rtp_plugin simple_channel_mixer_plugin subsdec_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vout_android_plugin yuv2rgb_plugin
+LOCAL_STATIC_LIBRARIES += iconv charset ass freetype ffmpeg pixman
 
 include $(BUILD_SHARED_LIBRARY)
 
