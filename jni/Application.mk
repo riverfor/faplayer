@@ -8,3 +8,5 @@ OPT_CPPFLAGS := $(OPT_CLFAGS)
 # override default
 APP_CFLAGS := $(APP_CFLAGS) $(OPT_CFLAGS)
 APP_CPPFLAGS := $(APP_CPPFLAGS) $(OPT_CPPFLAGS) 
+# stl
+APP_STL := stlport_static

@@ -5,7 +5,7 @@
 	android:orientation="vertical" >
 
 	<EditText android:id="@+id/test_uri"
-	    android:text="mms://stream1.beijing-2008.org/CN/INFO/2008changguan/jijian.wmv"
+	    android:text="rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov"
         android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
 
