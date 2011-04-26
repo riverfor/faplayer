@@ -48,7 +48,8 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_CFLAGS += -DUSE_ARM_NEON
 LOCAL_SRC_FILES += \
     pixman/pixman-arm-neon.c \
-    pixman/pixman-arm-neon-asm.S
+    pixman/pixman-arm-neon-asm.S \
+    pixman/pixman-arm-neon-asm-bilinear.S
 else
 LOCAL_CFLAGS += -DUSE_ARM_SIMD
 LOCAL_SRC_FILES += \

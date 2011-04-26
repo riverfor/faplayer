@@ -84,7 +84,7 @@
 #define PACKAGE_NAME "pixman"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "pixman 0.21.7"
+#define PACKAGE_STRING "pixman 0.21.8"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pixman"
@@ -93,7 +93,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.21.7"
+#define PACKAGE_VERSION "0.21.8"
 
 /* enable TIMER_BEGIN/TIMER_END macros */
 /* #undef PIXMAN_TIMERS */
@@ -105,10 +105,10 @@
 #define STDC_HEADERS 1
 
 /* Whether the tool chain supports __attribute__((constructor)) */
-/* #undef TOOLCHAIN_SUPPORTS_ATTRIBUTE_CONSTRUCTOR */
+#define TOOLCHAIN_SUPPORTS_ATTRIBUTE_CONSTRUCTOR /**/
 
 /* Whether the tool chain supports __thread */
-/* #undef TOOLCHAIN_SUPPORTS__THREAD */
+#define TOOLCHAIN_SUPPORTS__THREAD /**/
 
 /* use ARM NEON assembly optimizations */
 /* #undef USE_ARM_NEON */
@@ -123,7 +123,7 @@
 /* #undef USE_MMX */
 
 /* use OpenMP in the test suite */
-#define USE_OPENMP 1
+/* #undef USE_OPENMP */
 
 /* use SSE2 compiler intrinsics */
 /* #undef USE_SSE2 */
@@ -132,7 +132,7 @@
 /* #undef USE_VMX */
 
 /* Version number of package */
-#define VERSION "0.21.7"
+#define VERSION "0.21.8"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
