@@ -165,8 +165,5 @@ LOCAL_SRC_FILES := \
     liveMedia/our_md5hl.c \
     liveMedia/rtcp_from_spec.c
 
-LOCAL_CPPFLAGS += $(COMMON_TUNE_CPPFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 include $(BUILD_STATIC_LIBRARY)
 

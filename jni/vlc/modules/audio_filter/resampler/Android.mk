@@ -16,9 +16,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"bandlimited_resampler\" \
     -DMODULE_NAME=bandlimited_resampler
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -44,9 +41,6 @@ LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"ugly_resampler\" \
     -DMODULE_NAME=ugly_resampler
-
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \

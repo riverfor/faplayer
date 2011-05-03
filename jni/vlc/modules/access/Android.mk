@@ -16,9 +16,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"filesystem\" \
     -DMODULE_NAME=filesystem
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -46,9 +43,6 @@ LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"access_http\" \
     -DMODULE_NAME=access_http
-
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \

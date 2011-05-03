@@ -16,9 +16,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"freetype\" \
     -DMODULE_NAME=freetype
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \

@@ -1,6 +1,10 @@
-1. Improve AOUT
-2. Reconsider current control flow
-3. Fix armeabi build
-4. Fix bugs on UI
-5. Fix danmaku play
+TODO
+( ) fix UI bugs and improve UI
+( ) improve AOUT
+( ) rework control flow
+( ) fix armeabi build
+( ) fix danmaku
+( ) viewer for acfun/bilibili and so on(nicovideo needs login so do it later)
+( ) download video & danmaku from acfun/bilibili(nicovideo needs login so do it later)
+( ) merge multiple flv files into one for sina/qq/? source
 

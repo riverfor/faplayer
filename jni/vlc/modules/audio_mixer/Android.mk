@@ -16,9 +16,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"float32_mixer\" \
     -DMODULE_NAME=float32_mixer
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -44,9 +41,6 @@ LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"trivial_mixer\" \
     -DMODULE_NAME=trivial_mixer
-
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \

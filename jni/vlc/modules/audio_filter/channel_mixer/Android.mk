@@ -16,9 +16,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"simple_channel_mixer\" \
     -DMODULE_NAME=simple_channel_mixer
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \

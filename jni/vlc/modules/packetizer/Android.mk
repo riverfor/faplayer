@@ -16,9 +16,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"packetizer_copy\" \
     -DMODULE_NAME=packetizer_copy
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -74,9 +71,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"packetizer_flac\" \
     -DMODULE_NAME=packetizer_flac
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -102,9 +96,6 @@ LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"packetizer_h264\" \
     -DMODULE_NAME=packetizer_h264
-
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
@@ -132,9 +123,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"packetizer_mlp\" \
     -DMODULE_NAME=packetizer_mlp
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -160,9 +148,6 @@ LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"packetizer_mpeg4audio\" \
     -DMODULE_NAME=packetizer_mpeg4audio
-
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
@@ -190,9 +175,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"packetizer_mpeg4video\" \
     -DMODULE_NAME=packetizer_mpeg4video
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -219,9 +201,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"packetizer_mpegvideo\" \
     -DMODULE_NAME=packetizer_mpegvideo
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -247,9 +226,6 @@ LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"packetizer_vc1\" \
     -DMODULE_NAME=packetizer_vc1
-
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \

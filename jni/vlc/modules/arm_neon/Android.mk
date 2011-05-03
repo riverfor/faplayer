@@ -19,9 +19,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"audio_format_neon\" \
     -DMODULE_NAME=audio_format_neon
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
@@ -48,9 +45,6 @@ LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"memcpy_neon\" \
     -DMODULE_NAME=memcpy_neon
-
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
@@ -81,9 +75,6 @@ LOCAL_CFLAGS += \
     -fasm \
     -DMODULE_STRING=\"yuv2rgb\" \
     -DMODULE_NAME=yuv2rgb
-
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \

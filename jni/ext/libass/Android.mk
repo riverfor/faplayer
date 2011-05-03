@@ -13,9 +13,6 @@ LOCAL_MODULE := ass
 LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/iconv/include \
     $(EXTROOT)/freetype/include \

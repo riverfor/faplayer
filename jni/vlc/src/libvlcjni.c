@@ -66,14 +66,14 @@ JNIEXPORT void JNICALL NAME(attachSurface)(JNIEnv *env, jobject thiz, jobject su
     vlc_mutex_lock(&vout_android_lock);
     //vout_android_ref = (*env)->NewGlobalRef(env, surf);
     clz = (*env)->GetObjectClass(env, surf);
-    fid = (*env)->GetFieldID(env, clz, "mSurface", "I");
+    fid = (*env)->GetFieldID(env, clz, "mNativeSurface", "I");
     if (fid == NULL) {
         exp = (*env)->ExceptionOccurred(env);
         if (exp) {
             (*env)->DeleteLocalRef(env, exp);
             (*env)->ExceptionClear(env);
         }
-        fid = (*env)->GetFieldID(env, clz, "mNativeSurface", "I");
+        fid = (*env)->GetFieldID(env, clz, "mSurface", "I");
     }
     vout_android_surf = (void*)(*env)->GetIntField(env, surf, fid);
     (*env)->DeleteLocalRef(env, clz);

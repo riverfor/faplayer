@@ -16,9 +16,6 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"vout_android\" \
     -DMODULE_NAME=vout_android
 
-LOCAL_CPPFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/pixman/pixman \
     $(VLCROOT)/compat \

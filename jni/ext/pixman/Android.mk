@@ -57,8 +57,5 @@ LOCAL_SRC_FILES += \
     pixman/pixman-arm-simd-asm.S
 endif
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 include $(BUILD_STATIC_LIBRARY)
 
