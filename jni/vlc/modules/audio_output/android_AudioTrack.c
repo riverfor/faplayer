@@ -19,8 +19,10 @@ typedef int (*AudioSystem_getOutputSamplingRate)(int *, int);
 // _ZN7android10AudioTrack16getMinFrameCountEPiij
 typedef int (*AudioTrack_getMinFrameCount)(int *, int, unsigned int);
 
+// _ZN7android10AudioTrackC1EijiiijPFviPvS1_ES1_ii
+typedef void (*AudioTrack_ctor)(void *, int, unsigned int, int, int, int, unsigned int, void (*)(int, void *, void *), void *, int, int);
 // _ZN7android10AudioTrackC1EijiiijPFviPvS1_ES1_i
-typedef void (*AudioTrack_ctor)(void *, int, unsigned int, int, int, int, unsigned int, void (*)(int, void *, void *), void *, int);
+typedef void (*AudioTrack_ctor_legacy)(void *, int, unsigned int, int, int, int, unsigned int, void (*)(int, void *, void *), void *, int);
 // _ZN7android10AudioTrackD1Ev
 typedef void (*AudioTrack_dtor)(void *);
 // _ZNK7android10AudioTrack9initCheckEv
@@ -49,6 +51,7 @@ static AudioSystem_getOutputLatency as_getOutputLatency = NULL;
 static AudioSystem_getOutputSamplingRate as_getOutputSamplingRate = NULL;
 static AudioTrack_getMinFrameCount at_getMinFrameCount = NULL;
 static AudioTrack_ctor at_ctor = NULL;
+static AudioTrack_ctor_legacy at_ctor_legacy = NULL;
 static AudioTrack_dtor at_dtor = NULL;
 static AudioTrack_initCheck at_initCheck = NULL;
 static AudioTrack_start at_start = NULL;
@@ -82,7 +85,8 @@ void *InitLibrary() {
     as_getOutputLatency = (AudioSystem_getOutputLatency)(dlsym(p_library, "_ZN7android11AudioSystem16getOutputLatencyEPji"));
     as_getOutputSamplingRate = (AudioSystem_getOutputSamplingRate)(dlsym(p_library, "_ZN7android11AudioSystem21getOutputSamplingRateEPii"));
     at_getMinFrameCount = (AudioTrack_getMinFrameCount)(dlsym(p_library, "_ZN7android10AudioTrack16getMinFrameCountEPiij"));
-    at_ctor = (AudioTrack_ctor)(dlsym(p_library, "_ZN7android10AudioTrackC1EijiiijPFviPvS1_ES1_i"));
+    at_ctor = (AudioTrack_ctor)(dlsym(p_library, "_ZN7android10AudioTrackC1EijiiijPFviPvS1_ES1_ii"));
+    at_ctor_legacy = (AudioTrack_ctor_legacy)(dlsym(p_library, "_ZN7android10AudioTrackC1EijiiijPFviPvS1_ES1_i"));
     at_dtor = (AudioTrack_dtor)(dlsym(p_library, "_ZN7android10AudioTrackD1Ev"));
     at_initCheck = (AudioTrack_initCheck)(dlsym(p_library, "_ZNK7android10AudioTrack9initCheckEv"));
     at_start = (AudioTrack_start)(dlsym(p_library, "_ZN7android10AudioTrack5startEv"));
@@ -95,7 +99,7 @@ void *InitLibrary() {
         return NULL;
     }
     // need all in the list
-    if (!(at_ctor && at_dtor && at_initCheck && at_start && at_stop && at_write && at_flush)) {
+    if (!((at_ctor || at_ctor_legacy) && at_dtor && at_initCheck && at_start && at_stop && at_write && at_flush)) {
         dlclose(p_library);
         return NULL;
     }
@@ -176,13 +180,17 @@ static int Open(vlc_object_t *p_this) {
         free(p_sys);
         return VLC_ENOMEM;
     }
+    // higher than android 2.2
+    if (at_ctor)
+        at_ctor(p_sys->AudioTrack, p_sys->type, p_sys->rate, p_sys->format, p_sys->channel, p_sys->size, 0, NULL, NULL, 0, 0);
     // higher than android 1.6
-    at_ctor(p_sys->AudioTrack, p_sys->type, p_sys->rate, p_sys->format, p_sys->channel, p_sys->size, 0, NULL, NULL, 0);
+    else if (at_ctor_legacy)
+        at_ctor_legacy(p_sys->AudioTrack, p_sys->type, p_sys->rate, p_sys->format, p_sys->channel, p_sys->size, 0, NULL, NULL, 0);
     status = at_initCheck(p_sys->AudioTrack);
     // android 1.6
     if (status != 0) {
         p_sys->channel = (p_sys->channel == 12) ? 2 : 1;
-        at_ctor(p_sys->AudioTrack, p_sys->type, p_sys->rate, p_sys->format, p_sys->channel, p_sys->size, 0, NULL, NULL, 0);
+        at_ctor_legacy(p_sys->AudioTrack, p_sys->type, p_sys->rate, p_sys->format, p_sys->channel, p_sys->size, 0, NULL, NULL, 0);
         status = at_initCheck(p_sys->AudioTrack);
     }
     if (status != 0) {
