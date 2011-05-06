@@ -144,9 +144,12 @@ static int mov_read_udta_string(MOVContext *c, AVIOContext *pb, MOVAtom atom)
     case MKTAG(0xa9,'n','a','m'): key = "title";     break;
     case MKTAG(0xa9,'a','u','t'):
     case MKTAG(0xa9,'A','R','T'): key = "artist";    break;
+    case MKTAG( 'a','A','R','T'): key = "album_artist";break;
     case MKTAG(0xa9,'w','r','t'): key = "composer";  break;
     case MKTAG( 'c','p','r','t'):
     case MKTAG(0xa9,'c','p','y'): key = "copyright"; break;
+    case MKTAG(0xa9,'g','r','p'): key = "grouping"; break;
+    case MKTAG(0xa9,'l','y','r'): key = "lyrics"; break;
     case MKTAG(0xa9,'c','m','t'):
     case MKTAG(0xa9,'i','n','f'): key = "comment";   break;
     case MKTAG(0xa9,'a','l','b'): key = "album";     break;
@@ -588,7 +591,7 @@ static int mov_read_moov(MOVContext *c, AVIOContext *pb, MOVAtom atom)
 static int mov_read_moof(MOVContext *c, AVIOContext *pb, MOVAtom atom)
 {
     c->fragment.moof_offset = avio_tell(pb) - 8;
-    av_dlog(c->fc, "moof offset %llx\n", c->fragment.moof_offset);
+    av_dlog(c->fc, "moof offset %"PRIx64"\n", c->fragment.moof_offset);
     return mov_read_default(c, pb, atom);
 }
 
@@ -1027,7 +1030,6 @@ int ff_mov_read_stsd_entries(MOVContext *c, AVIOContext *pb, int entries)
                 unsigned int color_start, color_count, color_end;
                 unsigned char r, g, b;
 
-                st->codec->palctrl = av_malloc(sizeof(*st->codec->palctrl));
                 if (color_greyscale) {
                     int color_index, color_dec;
                     /* compute the greyscale palette */
@@ -1037,7 +1039,7 @@ int ff_mov_read_stsd_entries(MOVContext *c, AVIOContext *pb, int entries)
                     color_dec = 256 / (color_count - 1);
                     for (j = 0; j < color_count; j++) {
                         r = g = b = color_index;
-                        st->codec->palctrl->palette[j] =
+                        sc->palette[j] =
                             (r << 16) | (g << 8) | (b);
                         color_index -= color_dec;
                         if (color_index < 0)
@@ -1058,7 +1060,7 @@ int ff_mov_read_stsd_entries(MOVContext *c, AVIOContext *pb, int entries)
                         r = color_table[j * 3 + 0];
                         g = color_table[j * 3 + 1];
                         b = color_table[j * 3 + 2];
-                        st->codec->palctrl->palette[j] =
+                        sc->palette[j] =
                             (r << 16) | (g << 8) | (b);
                     }
                 } else {
@@ -1080,12 +1082,12 @@ int ff_mov_read_stsd_entries(MOVContext *c, AVIOContext *pb, int entries)
                             avio_r8(pb);
                             b = avio_r8(pb);
                             avio_r8(pb);
-                            st->codec->palctrl->palette[j] =
+                            sc->palette[j] =
                                 (r << 16) | (g << 8) | (b);
                         }
                     }
                 }
-                st->codec->palctrl->palette_changed = 1;
+                sc->has_palette = 1;
             }
         } else if(st->codec->codec_type==AVMEDIA_TYPE_AUDIO) {
             int bits_per_sample, flags;
@@ -1722,7 +1724,7 @@ static int mov_open_dref(AVIOContext **pb, char *src, MOVDref *ref)
 
             av_strlcat(filename, ref->path + l + 1, 1024);
 
-            if (!avio_open(pb, filename, URL_RDONLY))
+            if (!avio_open(pb, filename, AVIO_FLAG_READ))
                 return 0;
         }
     }
@@ -2181,6 +2183,15 @@ static int mov_read_elst(MOVContext *c, AVIOContext *pb, MOVAtom atom)
     return 0;
 }
 
+static int mov_read_chan(MOVContext *c, AVIOContext *pb, MOVAtom atom)
+{
+    if (atom.size < 16)
+        return AVERROR_INVALIDDATA;
+    avio_skip(pb, 4);
+    ff_mov_read_chan(c->fc, atom.size - 4, c->fc->streams[0]->codec);
+    return 0;
+}
+
 static const MOVParseTableEntry mov_default_parse_table[] = {
 { MKTAG('a','v','s','s'), mov_read_extradata },
 { MKTAG('c','h','p','l'), mov_read_chpl },
@@ -2234,6 +2245,7 @@ static const MOVParseTableEntry mov_default_parse_table[] = {
 { MKTAG('d','a','c','3'), mov_read_dac3 }, /* AC-3 info */
 { MKTAG('w','i','d','e'), mov_read_wide }, /* place holder */
 { MKTAG('c','m','o','v'), mov_read_cmov },
+{ MKTAG('c','h','a','n'), mov_read_chan },
 { 0, NULL }
 };
 
@@ -2368,7 +2380,7 @@ static int mov_read_header(AVFormatContext *s, AVFormatParameters *ap)
         av_log(s, AV_LOG_ERROR, "moov atom not found\n");
         return -1;
     }
-    av_dlog(mov->fc, "on_parse_exit_offset=%lld\n", avio_tell(pb));
+    av_dlog(mov->fc, "on_parse_exit_offset=%"PRId64"\n", avio_tell(pb));
 
     if (pb->seekable && mov->chapter_track > 0)
         mov_read_chapters(s);
@@ -2417,7 +2429,7 @@ static int mov_read_packet(AVFormatContext *s, AVPacket *pkt)
             mov_read_default(mov, s->pb, (MOVAtom){ AV_RL32("root"), INT64_MAX }) < 0 ||
             url_feof(s->pb))
             return AVERROR_EOF;
-        av_dlog(s, "read fragments, offset 0x%llx\n", avio_tell(s->pb));
+        av_dlog(s, "read fragments, offset 0x%"PRIx64"\n", avio_tell(s->pb));
         goto retry;
     }
     sc = st->priv_data;
@@ -2433,9 +2445,20 @@ static int mov_read_packet(AVFormatContext *s, AVPacket *pkt)
         ret = av_get_packet(sc->pb, pkt, sample->size);
         if (ret < 0)
             return ret;
+        if (sc->has_palette) {
+            uint8_t *pal;
+
+            pal = av_packet_new_side_data(pkt, AV_PKT_DATA_PALETTE, AVPALETTE_SIZE);
+            if (!pal) {
+                av_log(mov->fc, AV_LOG_ERROR, "Cannot append palette to packet\n");
+            } else {
+                memcpy(pal, sc->palette, AVPALETTE_SIZE);
+                sc->has_palette = 0;
+            }
+        }
 #if CONFIG_DV_DEMUXER
         if (mov->dv_demux && sc->dv_audio_container) {
-            dv_produce_packet(mov->dv_demux, pkt, pkt->data, pkt->size);
+            dv_produce_packet(mov->dv_demux, pkt, pkt->data, pkt->size, pkt->pos);
             av_free(pkt->data);
             pkt->size = 0;
             ret = dv_get_packet(mov->dv_demux, pkt);

@@ -2,6 +2,7 @@
 vlc_declare_plugin(access_http);
 vlc_declare_plugin(access_mms);
 vlc_declare_plugin(aout_android);
+vlc_declare_plugin(audio_format_neon);
 vlc_declare_plugin(avcodec);
 vlc_declare_plugin(avformat);
 vlc_declare_plugin(bandlimited_resampler);
@@ -12,6 +13,7 @@ vlc_declare_plugin(float32_mixer);
 vlc_declare_plugin(freetype);
 vlc_declare_plugin(libass);
 vlc_declare_plugin(live555);
+vlc_declare_plugin(memcpy_neon);
 vlc_declare_plugin(packetizer_copy);
 vlc_declare_plugin(packetizer_dirac);
 vlc_declare_plugin(packetizer_flac);
@@ -35,6 +37,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(access_http),
 	vlc_plugin(access_mms),
 	vlc_plugin(aout_android),
+	vlc_plugin(audio_format_neon),
 	vlc_plugin(avcodec),
 	vlc_plugin(avformat),
 	vlc_plugin(bandlimited_resampler),
@@ -45,6 +48,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(freetype),
 	vlc_plugin(libass),
 	vlc_plugin(live555),
+	vlc_plugin(memcpy_neon),
 	vlc_plugin(packetizer_copy),
 	vlc_plugin(packetizer_dirac),
 	vlc_plugin(packetizer_flac),

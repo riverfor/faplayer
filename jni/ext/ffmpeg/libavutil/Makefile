@@ -3,6 +3,7 @@ include $(SUBDIR)../config.mak
 NAME = avutil
 
 HEADERS = adler32.h                                                     \
+          aes.h                                                         \
           attributes.h                                                  \
           audioconvert.h                                                \
           avassert.h                                                    \
@@ -33,7 +34,7 @@ HEADERS = adler32.h                                                     \
           random_seed.h                                                 \
           rational.h                                                    \
           samplefmt.h                                                   \
-          sha1.h                                                        \
+          sha.h                                                         \
 
 BUILT_HEADERS = avconfig.h
 

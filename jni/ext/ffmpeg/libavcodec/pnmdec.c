@@ -52,7 +52,7 @@ static int pnm_decode_frame(AVCodecContext *avctx, void *data,
         av_log(avctx, AV_LOG_ERROR, "get_buffer() failed\n");
         return -1;
     }
-    p->pict_type = FF_I_TYPE;
+    p->pict_type = AV_PICTURE_TYPE_I;
     p->key_frame = 1;
 
     switch (avctx->pix_fmt) {
@@ -199,7 +199,6 @@ AVCodec ff_pgm_decoder = {
     pnm_decode_frame,
     CODEC_CAP_DR1,
     .pix_fmts  = (const enum PixelFormat[]){PIX_FMT_GRAY8, PIX_FMT_GRAY16BE, PIX_FMT_NONE},
-    .max_lowres = 5,
     .long_name = NULL_IF_CONFIG_SMALL("PGM (Portable GrayMap) image"),
 };
 #endif
@@ -216,7 +215,6 @@ AVCodec ff_pgmyuv_decoder = {
     pnm_decode_frame,
     CODEC_CAP_DR1,
     .pix_fmts  = (const enum PixelFormat[]){PIX_FMT_YUV420P, PIX_FMT_NONE},
-    .max_lowres = 5,
     .long_name = NULL_IF_CONFIG_SMALL("PGMYUV (Portable GrayMap YUV) image"),
 };
 #endif
@@ -233,7 +231,6 @@ AVCodec ff_ppm_decoder = {
     pnm_decode_frame,
     CODEC_CAP_DR1,
     .pix_fmts  = (const enum PixelFormat[]){PIX_FMT_RGB24, PIX_FMT_RGB48BE, PIX_FMT_NONE},
-    .max_lowres = 5,
     .long_name = NULL_IF_CONFIG_SMALL("PPM (Portable PixelMap) image"),
 };
 #endif
@@ -250,7 +247,6 @@ AVCodec ff_pbm_decoder = {
     pnm_decode_frame,
     CODEC_CAP_DR1,
     .pix_fmts  = (const enum PixelFormat[]){PIX_FMT_MONOWHITE, PIX_FMT_NONE},
-    .max_lowres = 5,
     .long_name = NULL_IF_CONFIG_SMALL("PBM (Portable BitMap) image"),
 };
 #endif
@@ -267,7 +263,6 @@ AVCodec ff_pam_decoder = {
     pnm_decode_frame,
     CODEC_CAP_DR1,
     .pix_fmts  = (const enum PixelFormat[]){PIX_FMT_RGB24, PIX_FMT_RGB32, PIX_FMT_GRAY8, PIX_FMT_MONOWHITE, PIX_FMT_NONE},
-    .max_lowres = 5,
     .long_name = NULL_IF_CONFIG_SMALL("PAM (Portable AnyMap) image"),
 };
 #endif

@@ -67,6 +67,7 @@ FF_COMMON_SRC := \
     libavcodec/arm/vp8_armv6.S \
     libavcodec/arm/vp8dsp_init_arm.c \
     libavcodec/ass.c \
+    libavcodec/ass_split.c \
     libavcodec/assdec.c \
     libavcodec/asv1.c \
     libavcodec/atrac.c \
@@ -164,6 +165,7 @@ FF_COMMON_SRC := \
     libavcodec/h264_cabac.c \
     libavcodec/h264_cavlc.c \
     libavcodec/h264_direct.c \
+    libavcodec/h264_hl_motion.c \
     libavcodec/h264_loopfilter.c \
     libavcodec/h264_parser.c \
     libavcodec/h264_ps.c \
@@ -185,6 +187,7 @@ FF_COMMON_SRC := \
     libavcodec/interplayvideo.c \
     libavcodec/intrax8.c \
     libavcodec/intrax8dsp.c \
+    libavcodec/inverse.c \
     libavcodec/ituh263dec.c \
     libavcodec/ivi_common.c \
     libavcodec/ivi_dsp.c \
@@ -240,10 +243,10 @@ FF_COMMON_SRC := \
     libavcodec/msrle.c \
     libavcodec/msrledec.c \
     libavcodec/msvideo1.c \
+    libavcodec/mxpegdec.c \
     libavcodec/nellymoser.c \
     libavcodec/nellymoserdec.c \
     libavcodec/nuv.c \
-    libavcodec/opt.c \
     libavcodec/options.c \
     libavcodec/parser.c \
     libavcodec/pcm-mpeg.c \
@@ -328,7 +331,7 @@ FF_COMMON_SRC := \
     libavcodec/vmnc.c \
     libavcodec/vorbis.c \
     libavcodec/vorbis_data.c \
-    libavcodec/vorbis_dec.c \
+    libavcodec/vorbisdec.c \
     libavcodec/vp3.c \
     libavcodec/vp3_parser.c \
     libavcodec/vp3dsp.c \
@@ -400,6 +403,7 @@ FF_COMMON_SRC := \
     libavformat/cavsvideodec.c \
     libavformat/cdg.c \
     libavformat/concat.c \
+    libavformat/crypto.c \
     libavformat/cutils.c \
     libavformat/daud.c \
     libavformat/dfa.c \
@@ -445,7 +449,6 @@ FF_COMMON_SRC := \
     libavformat/matroskadec.c \
     libavformat/md5proto.c \
     libavformat/metadata.c \
-    libavformat/metadata_compat.c \
     libavformat/microdvddec.c \
     libavformat/mm.c \
     libavformat/mmf.c \
@@ -471,6 +474,7 @@ FF_COMMON_SRC := \
     libavformat/nutdec.c \
     libavformat/nuv.c \
     libavformat/oggdec.c \
+    libavformat/oggparsecelt.c \
     libavformat/oggparsedirac.c \
     libavformat/oggparseflac.c \
     libavformat/oggparseogm.c \
@@ -483,6 +487,7 @@ FF_COMMON_SRC := \
     libavformat/os_support.c \
     libavformat/pcm.c \
     libavformat/pcmdec.c \
+    libavformat/pmpdec.c \
     libavformat/psxstr.c \
     libavformat/pva.c \
     libavformat/qcp.c \
@@ -548,8 +553,10 @@ FF_COMMON_SRC := \
     libavformat/wc3movie.c \
     libavformat/westwood.c \
     libavformat/wtv.c \
+    libavformat/wtvdec.c \
     libavformat/wv.c \
     libavformat/xa.c \
+    libavformat/xwma.c \
     libavformat/yop.c \
     libavformat/yuv4mpeg.c \
     libavutil/adler32.c \

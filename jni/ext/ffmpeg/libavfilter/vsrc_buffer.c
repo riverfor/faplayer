@@ -34,11 +34,12 @@ typedef struct {
     int               h, w;
     enum PixelFormat  pix_fmt;
     AVRational        time_base;     ///< time_base to set in the output link
-    AVRational        pixel_aspect;
+    AVRational        sample_aspect_ratio;
+    char              sws_param[256];
 } BufferSourceContext;
 
 int av_vsrc_buffer_add_frame2(AVFilterContext *buffer_filter, AVFrame *frame,
-                              int64_t pts, AVRational pixel_aspect, int width,
+                              int64_t pts, int width,
                               int height, enum PixelFormat  pix_fmt,
                               const char *sws_param)
 {
@@ -53,12 +54,18 @@ int av_vsrc_buffer_add_frame2(AVFilterContext *buffer_filter, AVFrame *frame,
         //return -1;
     }
 
+    if(!c->sws_param[0]){
+        snprintf(c->sws_param, 255, "%d:%d:%s", c->w, c->h, sws_param);
+    }
+
     if(width != c->w || height != c->h || pix_fmt != c->pix_fmt){
         AVFilterContext *scale= buffer_filter->outputs[0]->dst;
         AVFilterLink *link;
 
-        av_log(buffer_filter, AV_LOG_INFO, "Changing filter graph input to accept %dx%d %d (%d %d)\n",
-               width,height,pix_fmt, c->pix_fmt, scale->outputs[0]->format);
+        av_log(buffer_filter, AV_LOG_INFO,
+               "Buffer video input changed from size:%dx%d fmt:%s to size:%dx%d fmt:%s\n",
+               c->w, c->h, av_pix_fmt_descriptors[c->pix_fmt].name,
+               width, height, av_pix_fmt_descriptors[pix_fmt].name);
 
         if(!scale || strcmp(scale->filter->name,"scale")){
             AVFilter *f= avfilter_get_by_name("scale");
@@ -67,7 +74,7 @@ int av_vsrc_buffer_add_frame2(AVFilterContext *buffer_filter, AVFrame *frame,
             if(avfilter_open(&scale, f, "Input equalizer") < 0)
                 return -1;
 
-            if((ret=avfilter_init_filter(scale, sws_param, NULL))<0){
+            if((ret=avfilter_init_filter(scale, c->sws_param, NULL))<0){
                 avfilter_free(scale);
                 return ret;
             }
@@ -76,8 +83,12 @@ int av_vsrc_buffer_add_frame2(AVFilterContext *buffer_filter, AVFrame *frame,
                 avfilter_free(scale);
                 return ret;
             }
+            scale->outputs[0]->time_base = scale->inputs[0]->time_base;
 
             scale->outputs[0]->format= c->pix_fmt;
+        } else if(!strcmp(scale->filter->name, "scale")) {
+            snprintf(c->sws_param, 255, "%d:%d:%s", scale->outputs[0]->w, scale->outputs[0]->h, sws_param);
+            scale->filter->init(scale, c->sws_param, NULL);
         }
 
         c->pix_fmt= scale->inputs[0]->format= pix_fmt;
@@ -93,20 +104,22 @@ int av_vsrc_buffer_add_frame2(AVFilterContext *buffer_filter, AVFrame *frame,
     memcpy(c->frame.linesize, frame->linesize, sizeof(frame->linesize));
     c->frame.interlaced_frame= frame->interlaced_frame;
     c->frame.top_field_first = frame->top_field_first;
+    c->frame.key_frame = frame->key_frame;
+    c->frame.pict_type = frame->pict_type;
+    c->frame.sample_aspect_ratio = frame->sample_aspect_ratio;
     c->pts = pts;
-    c->pixel_aspect = pixel_aspect;
     c->has_frame = 1;
 
     return 0;
 }
 
 int av_vsrc_buffer_add_frame(AVFilterContext *buffer_filter, AVFrame *frame,
-                             int64_t pts, AVRational pixel_aspect)
+                             int64_t pts)
 {
     BufferSourceContext *c = buffer_filter->priv;
 
     return av_vsrc_buffer_add_frame2(buffer_filter, frame,
-                              pts, pixel_aspect, c->w,
+                              pts, c->w,
                               c->h, c->pix_fmt, "");
 }
 
@@ -119,7 +132,7 @@ static av_cold int init(AVFilterContext *ctx, const char *args, void *opaque)
     if (!args ||
         (n = sscanf(args, "%d:%d:%127[^:]:%d:%d:%d:%d", &c->w, &c->h, pix_fmt_str,
                     &c->time_base.num, &c->time_base.den,
-                    &c->pixel_aspect.num, &c->pixel_aspect.den)) != 7) {
+                    &c->sample_aspect_ratio.num, &c->sample_aspect_ratio.den)) != 7) {
         av_log(ctx, AV_LOG_ERROR, "Expected 7 arguments, but only %d found in '%s'\n", n, args);
         return AVERROR(EINVAL);
     }
@@ -151,7 +164,7 @@ static int config_props(AVFilterLink *link)
 
     link->w = c->w;
     link->h = c->h;
-    link->sample_aspect_ratio = c->pixel_aspect;
+    link->sample_aspect_ratio = c->sample_aspect_ratio;
     link->time_base = c->time_base;
 
     return 0;
@@ -179,9 +192,11 @@ static int request_frame(AVFilterLink *link)
                   picref->format, link->w, link->h);
 
     picref->pts                    = c->pts;
-    picref->video->pixel_aspect    = c->pixel_aspect;
+    picref->video->sample_aspect_ratio = c->frame.sample_aspect_ratio;
     picref->video->interlaced      = c->frame.interlaced_frame;
     picref->video->top_field_first = c->frame.top_field_first;
+    picref->video->key_frame       = c->frame.key_frame;
+    picref->video->pict_type       = c->frame.pict_type;
     avfilter_start_frame(link, avfilter_ref_buffer(picref, ~0));
     avfilter_draw_slice(link, 0, link->h, 1);
     avfilter_end_frame(link);

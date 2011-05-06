@@ -57,12 +57,12 @@ typedef struct {
 #define OFFSET(x) offsetof(MovieContext, x)
 
 static const AVOption movie_options[]= {
-{"format_name",  "set format name",         OFFSET(format_name),  FF_OPT_TYPE_STRING, 0,  CHAR_MIN, CHAR_MAX },
-{"f",            "set format name",         OFFSET(format_name),  FF_OPT_TYPE_STRING, 0,  CHAR_MIN, CHAR_MAX },
-{"stream_index", "set stream index",        OFFSET(stream_index), FF_OPT_TYPE_INT,   -1,  -1,       INT_MAX  },
-{"si",           "set stream index",        OFFSET(stream_index), FF_OPT_TYPE_INT,   -1,  -1,       INT_MAX  },
-{"seek_point",   "set seekpoint (seconds)", OFFSET(seek_point_d), FF_OPT_TYPE_DOUBLE, 0,  0,        (INT64_MAX-1) / 1000000 },
-{"sp",           "set seekpoint (seconds)", OFFSET(seek_point_d), FF_OPT_TYPE_DOUBLE, 0,  0,        (INT64_MAX-1) / 1000000 },
+{"format_name",  "set format name",         OFFSET(format_name),  FF_OPT_TYPE_STRING, {.str =  0},  CHAR_MIN, CHAR_MAX },
+{"f",            "set format name",         OFFSET(format_name),  FF_OPT_TYPE_STRING, {.str =  0},  CHAR_MIN, CHAR_MAX },
+{"stream_index", "set stream index",        OFFSET(stream_index), FF_OPT_TYPE_INT,    {.dbl = -1},  -1,       INT_MAX  },
+{"si",           "set stream index",        OFFSET(stream_index), FF_OPT_TYPE_INT,    {.dbl = -1},  -1,       INT_MAX  },
+{"seek_point",   "set seekpoint (seconds)", OFFSET(seek_point_d), FF_OPT_TYPE_DOUBLE, {.dbl =  0},  0,        (INT64_MAX-1) / 1000000 },
+{"sp",           "set seekpoint (seconds)", OFFSET(seek_point_d), FF_OPT_TYPE_DOUBLE, {.dbl =  0},  0,        (INT64_MAX-1) / 1000000 },
 {NULL},
 };
 
@@ -230,7 +230,6 @@ static int movie_get_frame(AVFilterLink *outlink)
     while ((ret = av_read_frame(movie->format_ctx, &pkt)) >= 0) {
         // Is this a packet from the video stream?
         if (pkt.stream_index == movie->stream_index) {
-            movie->codec_ctx->reordered_opaque = pkt.pos;
             avcodec_decode_video2(movie->codec_ctx, movie->frame, &frame_decoded, &pkt);
 
             if (frame_decoded) {
@@ -247,17 +246,20 @@ static int movie_get_frame(AVFilterLink *outlink)
                 movie->picref->pts = movie->frame->pkt_pts == AV_NOPTS_VALUE ?
                     movie->frame->pkt_dts : movie->frame->pkt_pts;
 
-                movie->picref->pos                    = movie->frame->reordered_opaque;
-                movie->picref->video->pixel_aspect = st->sample_aspect_ratio.num ?
-                    st->sample_aspect_ratio : movie->codec_ctx->sample_aspect_ratio;
+                movie->picref->pos                    = movie->frame->pkt_pos;
+                if (!movie->frame->sample_aspect_ratio.num)
+                    movie->picref->video->sample_aspect_ratio = st->sample_aspect_ratio;
                 movie->picref->video->interlaced      = movie->frame->interlaced_frame;
                 movie->picref->video->top_field_first = movie->frame->top_field_first;
+                movie->picref->video->key_frame       = movie->frame->key_frame;
+                movie->picref->video->pict_type       = movie->frame->pict_type;
                 av_dlog(outlink->src,
                         "movie_get_frame(): file:'%s' pts:%"PRId64" time:%lf pos:%"PRId64" aspect:%d/%d\n",
                         movie->file_name, movie->picref->pts,
                         (double)movie->picref->pts * av_q2d(st->time_base),
                         movie->picref->pos,
-                        movie->picref->video->pixel_aspect.num, movie->picref->video->pixel_aspect.den);
+                        movie->picref->video->sample_aspect_ratio.num,
+                        movie->picref->video->sample_aspect_ratio.den);
                 // We got it. Free the packet since we are returning
                 av_free_packet(&pkt);
 
@@ -290,6 +292,8 @@ static int request_frame(AVFilterLink *outlink)
     avfilter_start_frame(outlink, outpicref);
     avfilter_draw_slice(outlink, 0, outlink->h, 1);
     avfilter_end_frame(outlink);
+    avfilter_unref_buffer(movie->picref);
+    movie->picref = NULL;
 
     return 0;
 }

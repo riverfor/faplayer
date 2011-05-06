@@ -132,8 +132,8 @@ static void init_rtp_handler(RTPDynamicProtocolHandler *handler,
         return;
     codec->codec_id          = handler->codec_id;
     rtsp_st->dynamic_handler = handler;
-    if (handler->open)
-        rtsp_st->dynamic_protocol_context = handler->open();
+    if (handler->alloc)
+        rtsp_st->dynamic_protocol_context = handler->alloc();
 }
 
 /* parse the rtpmap description: <codec_name>/<clock_rate>[/<other params>] */
@@ -526,7 +526,7 @@ void ff_rtsp_close_streams(AVFormatContext *s)
         rtsp_st = rt->rtsp_streams[i];
         if (rtsp_st) {
             if (rtsp_st->dynamic_handler && rtsp_st->dynamic_protocol_context)
-                rtsp_st->dynamic_handler->close(
+                rtsp_st->dynamic_handler->free(
                     rtsp_st->dynamic_protocol_context);
             av_free(rtsp_st);
         }
@@ -1116,14 +1116,14 @@ int ff_rtsp_make_setup_request(AVFormatContext *s, const char *host, int port,
                                 "?localport=%d", j);
                     /* we will use two ports per rtp stream (rtp and rtcp) */
                     j += 2;
-                    if (ffurl_open(&rtsp_st->rtp_handle, buf, URL_RDWR) == 0)
+                    if (ffurl_open(&rtsp_st->rtp_handle, buf, AVIO_FLAG_READ_WRITE) == 0)
                         goto rtp_opened;
                 }
             }
 
 #if 0
             /* then try on any port */
-            if (ffurl_open(&rtsp_st->rtp_handle, "rtp://", URL_RDONLY) < 0) {
+            if (ffurl_open(&rtsp_st->rtp_handle, "rtp://", AVIO_FLAG_READ) < 0) {
                 err = AVERROR_INVALIDDATA;
                 goto fail;
             }
@@ -1269,7 +1269,7 @@ int ff_rtsp_make_setup_request(AVFormatContext *s, const char *host, int port,
                         namebuf, sizeof(namebuf), NULL, 0, NI_NUMERICHOST);
             ff_url_join(url, sizeof(url), "rtp", NULL, namebuf,
                         port, "?ttl=%d", ttl);
-            if (ffurl_open(&rtsp_st->rtp_handle, url, URL_RDWR) < 0) {
+            if (ffurl_open(&rtsp_st->rtp_handle, url, AVIO_FLAG_READ_WRITE) < 0) {
                 err = AVERROR_INVALIDDATA;
                 goto fail;
             }
@@ -1396,7 +1396,7 @@ redirect:
                  av_get_random_seed(), av_get_random_seed());
 
         /* GET requests */
-        if (ffurl_alloc(&rt->rtsp_hd, httpname, URL_RDONLY) < 0) {
+        if (ffurl_alloc(&rt->rtsp_hd, httpname, AVIO_FLAG_READ) < 0) {
             err = AVERROR(EIO);
             goto fail;
         }
@@ -1417,7 +1417,7 @@ redirect:
         }
 
         /* POST requests */
-        if (ffurl_alloc(&rt->rtsp_hd_out, httpname, URL_WRONLY) < 0 ) {
+        if (ffurl_alloc(&rt->rtsp_hd_out, httpname, AVIO_FLAG_WRITE) < 0 ) {
             err = AVERROR(EIO);
             goto fail;
         }
@@ -1460,7 +1460,7 @@ redirect:
     } else {
         /* open the tcp connection */
         ff_url_join(tcpname, sizeof(tcpname), "tcp", NULL, host, port, NULL);
-        if (ffurl_open(&rt->rtsp_hd, tcpname, URL_RDWR) < 0) {
+        if (ffurl_open(&rt->rtsp_hd, tcpname, AVIO_FLAG_READ_WRITE) < 0) {
             err = AVERROR(EIO);
             goto fail;
         }
@@ -1807,7 +1807,7 @@ static int sdp_read_header(AVFormatContext *s, AVFormatParameters *ap)
                     namebuf, rtsp_st->sdp_port,
                     "?localport=%d&ttl=%d", rtsp_st->sdp_port,
                     rtsp_st->sdp_ttl);
-        if (ffurl_open(&rtsp_st->rtp_handle, url, URL_RDWR) < 0) {
+        if (ffurl_open(&rtsp_st->rtp_handle, url, AVIO_FLAG_READ_WRITE) < 0) {
             err = AVERROR_INVALIDDATA;
             goto fail;
         }
@@ -1863,7 +1863,7 @@ static int rtp_read_header(AVFormatContext *s,
     if (!ff_network_init())
         return AVERROR(EIO);
 
-    ret = ffurl_open(&in, s->filename, URL_RDONLY);
+    ret = ffurl_open(&in, s->filename, AVIO_FLAG_READ);
     if (ret)
         goto fail;
 

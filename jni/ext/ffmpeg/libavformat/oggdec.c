@@ -45,6 +45,7 @@ static const struct ogg_codec * const ogg_codecs[] = {
     &ff_vorbis_codec,
     &ff_theora_codec,
     &ff_flac_codec,
+    &ff_celt_codec,
     &ff_old_dirac_codec,
     &ff_old_flac_codec,
     &ff_ogm_video_codec,
@@ -241,6 +242,16 @@ ogg_read_page (AVFormatContext * s, int *str)
 
     idx = ogg_find_stream (ogg, serial);
     if (idx < 0){
+        if (ogg->headers) {
+            int n;
+
+            for (n = 0; n < ogg->nstreams; n++) {
+                av_freep(&ogg->streams[n].buf);
+                av_freep(&ogg->streams[n].private);
+            }
+            ogg->curidx   = -1;
+            ogg->nstreams = 0;
+        }
         idx = ogg_new_stream (s, serial);
         if (idx < 0)
             return -1;
@@ -376,8 +387,7 @@ ogg_packet (AVFormatContext * s, int *str, int *dstart, int *dsize, int64_t *fpo
 
             // We have reached the first non-header packet in this stream.
             // Unfortunately more header packets may still follow for others,
-            // so we reset this later unless we are done with the headers
-            // for all streams.
+            // but if we continue with header parsing we may lose data packets.
             ogg->headers = 1;
 
             // Update the header state for all streams and
@@ -386,8 +396,6 @@ ogg_packet (AVFormatContext * s, int *str, int *dstart, int *dsize, int64_t *fpo
                 s->data_offset = os->sync_pos;
             for (i = 0; i < ogg->nstreams; i++) {
                 struct ogg_stream *cur_os = ogg->streams + i;
-                if (cur_os->header > 0)
-                    ogg->headers = 0;
 
                 // if we have a partial non-header packet, its start is
                 // obviously at or after the data start

@@ -56,3 +56,4 @@ const AVCodecTag ff_codec_caf_tags[] = {
   /*{ MPEG4TwinVQ               MKBETAG('t','w','v','q') },*/
     { CODEC_ID_NONE,            0 },
 };
+
