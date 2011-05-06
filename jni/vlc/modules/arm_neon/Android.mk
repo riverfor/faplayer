@@ -6,9 +6,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
-ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
-endif
 
 LOCAL_MODULE := audio_format_neon_plugin
 
@@ -34,9 +32,7 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
-ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
-endif
 
 LOCAL_MODULE := memcpy_neon_plugin
 
@@ -91,7 +87,7 @@ LOCAL_SRC_FILES := \
 
 ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_CFLAGS += -DHAVE_NEON=1
-LOCAL_SRC_FILES += yuv2rgb.aurora.S yuv2rgb.mozilla.c
+LOCAL_SRC_FILES += yuv2rgb.444.S yuv2rgb.422.S yuv2rgb.420.c
 endif
 
 include $(BUILD_STATIC_LIBRARY)

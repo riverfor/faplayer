@@ -1,5 +1,5 @@
 # armeabi/armeabi-v7a
-APP_ABI := armeabi-v7a
+APP_ABI := armeabi
 # default depends on AndroidManifest.xml
 APP_OPTIM := release
 # default is -O2

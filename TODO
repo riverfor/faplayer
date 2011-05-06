@@ -2,7 +2,7 @@ TODO
 ( ) fix UI bugs and improve UI
 ( ) improve AOUT
 ( ) rework control flow
-( ) fix armeabi build
+(X) fix armeabi build
 ( ) fix danmaku
 ( ) viewer for acfun/bilibili and so on(nicovideo needs login so do it later)
 ( ) download video & danmaku from acfun/bilibili(nicovideo needs login so do it later)
