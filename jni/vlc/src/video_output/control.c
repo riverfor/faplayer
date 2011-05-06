@@ -2,7 +2,7 @@
  * control.c : vout internal control
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 96cb186c894dd582d32674a40449ac27fbab1fd2 $
+ * $Id: 6e33b458f14b9d7a4bd3d54ac036db8a6ccbff0e $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -45,6 +45,7 @@ void vout_control_cmd_Clean(vout_control_cmd_t *cmd)
         break;
     case VOUT_CONTROL_OSD_TITLE:
     case VOUT_CONTROL_CHANGE_FILTERS:
+    case VOUT_CONTROL_CHANGE_SUB_SOURCES:
     case VOUT_CONTROL_CHANGE_SUB_FILTERS:
         free(cmd->u.string);
         break;

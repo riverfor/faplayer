@@ -2,7 +2,7 @@
  * x11_display.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 48e8f3e98c7d9d6a52d128cd4822f9ddf85ee0bb $
+ * $Id: dc42dd1316484d3564f405ef6b97764798236637 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -186,7 +186,7 @@ X11Display::X11Display( intf_thread_t *pIntf ): SkinObject( pIntf ),
         break;
 
     default:
-        msg_Err( getIntf(), "unsupported depth: %d bpp\n", depth );
+        msg_Err( getIntf(), "unsupported depth: %d bpp", depth );
         m_pDisplay = NULL;
         break;
     }

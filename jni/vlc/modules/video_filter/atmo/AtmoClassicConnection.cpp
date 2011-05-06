@@ -4,9 +4,12 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: 74f1f67b7a94f3f24ebf4bd44c423b785f0280c6 $
+ * $Id: 629c28d2b8b117d15d204e4b9c11d39eeb3b5cba $
  */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include "AtmoDefs.h"
 #include "AtmoClassicConnection.h"

@@ -2,7 +2,7 @@
  * v4l2.c : Video4Linux2 input module for vlc
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 0654e4ab3a75c19a2fd8f206a998a4fbe6aa4905 $
+ * $Id: 108b7ecd9cdd94a6af5cf358ea3203b4e44883de $
  *
  * Authors: Benjamin Pracht <bigben at videolan dot org>
  *          Richard Hosking <richard at hovis dot net>
@@ -74,6 +74,9 @@ static void DemuxClose( vlc_object_t * );
 static int  AccessOpen ( vlc_object_t * );
 static void AccessClose( vlc_object_t * );
 
+#define DEVICE_TEXT N_( "Device" )
+#define DEVICE_LONGTEXT N_( \
+    "Video device (Default: /dev/video0)." )
 #define STANDARD_TEXT N_( "Standard" )
 #define STANDARD_LONGTEXT N_( \
     "Video standard (Default, SECAM, PAL, or NTSC)." )
@@ -281,6 +284,8 @@ vlc_module_begin ()
     set_subcategory( SUBCAT_INPUT_ACCESS )
 
     set_section( N_( "Video input" ), NULL )
+    add_string( CFG_PREFIX "dev", "/dev/video0", DEVICE_TEXT, DEVICE_LONGTEXT,
+                 false )
     add_integer( CFG_PREFIX "standard", 0, STANDARD_TEXT,
                  STANDARD_LONGTEXT, false )
         change_integer_list( i_standards_list, psz_standards_list_text )
@@ -368,8 +373,6 @@ vlc_module_begin ()
                 AUDIO_LOUDNESS_LONGTEXT, true )
     add_string( CFG_PREFIX "set-ctrls", NULL, S_CTRLS_TEXT,
               S_CTRLS_LONGTEXT, true )
-
-    add_obsolete_string( CFG_PREFIX "dev" )
 
     add_obsolete_string( CFG_PREFIX "adev" )
     add_obsolete_integer( CFG_PREFIX "audio-method" )
@@ -705,6 +708,8 @@ static int DemuxOpen( vlc_object_t *p_this )
  *****************************************************************************/
 static void GetV4L2Params( demux_sys_t *p_sys, vlc_object_t *p_obj )
 {
+    p_sys->psz_device = var_CreateGetNonEmptyString( p_obj, "v4l2-dev" );
+
     p_sys->i_selected_standard_id =
         i_standards_list[var_CreateGetInteger( p_obj, "v4l2-standard" )];
 
@@ -743,7 +748,6 @@ static void GetV4L2Params( demux_sys_t *p_sys, vlc_object_t *p_obj )
     }
     free( psz_aspect );
 
-    p_sys->psz_device = NULL;
     p_sys->i_fd = -1;
 
     p_sys->p_es = NULL;
@@ -1001,8 +1005,11 @@ static void ParseMRL( demux_sys_t *p_sys, char *psz_path, vlc_object_t *p_obj )
 
     /* Main device */
     if( *psz_dup )
+    {
+        free( p_sys->psz_device );
         p_sys->psz_device = strdup( psz_dup );
-    else
+    }
+    else if( p_sys->psz_device == NULL )
         p_sys->psz_device = strdup( V4L2_DEFAULT );
     free( psz_dup );
 }
@@ -1851,6 +1858,32 @@ static int OpenVideoDev( vlc_object_t *p_obj, demux_sys_t *p_sys, bool b_demux )
     }
 #endif
 
+    /* Select standard */
+
+    if( p_sys->i_selected_standard_id != V4L2_STD_UNKNOWN )
+    {
+        if( v4l2_ioctl( i_fd, VIDIOC_S_STD, &p_sys->i_selected_standard_id ) < 0 )
+        {
+            msg_Err( p_obj, "cannot set standard (%m)" );
+            goto open_failed;
+        }
+        if( v4l2_ioctl( i_fd, VIDIOC_G_STD, &p_sys->i_selected_standard_id ) < 0 )
+        {
+            msg_Err( p_obj, "cannot get standard (%m). This should never happen!" );
+            goto open_failed;
+        }
+        msg_Dbg( p_obj, "Set standard to (0x%"PRIx64"):", p_sys->i_selected_standard_id );
+        int i_standard;
+        for( i_standard = 0; i_standard<p_sys->i_standard; i_standard++)
+        {
+            if( p_sys->p_standards[i_standard].id & p_sys->i_selected_standard_id )
+            {
+                msg_Dbg( p_obj, "  %s",
+                        p_sys->p_standards[i_standard].name );
+            }
+        }
+    }
+
     /* Tune the tuner */
     if( p_sys->i_frequency >= 0 )
     {
@@ -1890,32 +1923,6 @@ static int OpenVideoDev( vlc_object_t *p_obj, demux_sys_t *p_sys, bool b_demux )
             goto open_failed;
         }
         msg_Dbg( p_obj, "Tuner audio mode set" );
-    }
-
-    /* Select standard */
-
-    if( p_sys->i_selected_standard_id != V4L2_STD_UNKNOWN )
-    {
-        if( v4l2_ioctl( i_fd, VIDIOC_S_STD, &p_sys->i_selected_standard_id ) < 0 )
-        {
-            msg_Err( p_obj, "cannot set standard (%m)" );
-            goto open_failed;
-        }
-        if( v4l2_ioctl( i_fd, VIDIOC_G_STD, &p_sys->i_selected_standard_id ) < 0 )
-        {
-            msg_Err( p_obj, "cannot get standard (%m). This should never happen!" );
-            goto open_failed;
-        }
-        msg_Dbg( p_obj, "Set standard to (0x%"PRIx64"):", p_sys->i_selected_standard_id );
-        int i_standard;
-        for( i_standard = 0; i_standard<p_sys->i_standard; i_standard++)
-        {
-            if( p_sys->p_standards[i_standard].id & p_sys->i_selected_standard_id )
-            {
-                msg_Dbg( p_obj, "  %s",
-                        p_sys->p_standards[i_standard].name );
-            }
-        }
     }
 
     /* Select input */

@@ -2,7 +2,7 @@
  * menus.cpp : Qt menus
  *****************************************************************************
  * Copyright © 2006-2011 the VideoLAN team
- * $Id: 0e21b2a2aca657e419e857786362599a1e22ded2 $
+ * $Id: 11b5715a8bab95032eb1d2bf6ef582226e14b2e2 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -309,7 +309,7 @@ void QVLCMenu::createMenuBar( MainInterface *mi,
        setDesktopAware set to false */
     QMenuBar *bar = mi->menuBar();
 
-    addMenuToMainbar( FileMenu( p_intf, bar ), qtr( "&Media" ), bar );
+    addMenuToMainbar( FileMenu( p_intf, bar, mi ), qtr( "&Media" ), bar );
 
     /* Dynamic menus, rebuilt before being showed */
     BAR_DADD( NavigMenu( p_intf, bar ), qtr( "P&layback" ), 3 );
@@ -329,7 +329,7 @@ void QVLCMenu::createMenuBar( MainInterface *mi,
  * Media ( File ) Menu
  * Opening, streaming and quit
  **/
-QMenu *QVLCMenu::FileMenu( intf_thread_t *p_intf, QWidget *parent )
+QMenu *QVLCMenu::FileMenu( intf_thread_t *p_intf, QWidget *parent, MainInterface *mi )
 {
     QMenu *menu = new QMenu( parent );
     QAction *action;
@@ -378,6 +378,12 @@ QMenu *QVLCMenu::FileMenu( intf_thread_t *p_intf, QWidget *parent )
                                SLOT( activatePlayQuit( bool ) ) );
     action->setCheckable( true );
     action->setChecked( THEMIM->getPlayExitState() );
+
+    if( mi->getSysTray() )
+    {
+        action = menu->addAction( qtr( "Close to systray"), mi,
+                                 SLOT( toggleUpdateSystrayMenu() ) );
+    }
 
     addDPStaticEntry( menu, qtr( "&Quit" ) ,
         ":/menu/quit", SLOT( quit() ), "Ctrl+Q" );
@@ -597,7 +603,7 @@ QMenu *QVLCMenu::AudioMenu( intf_thread_t *p_intf, QMenu * current )
 }
 
 /* Subtitles */
-QMenu *QVLCMenu::SubMenu( intf_thread_t *p_intf, QMenu *current )
+QMenu *QVLCMenu::SubtitleMenu( intf_thread_t *p_intf, QMenu *current )
 {
     QAction *action;
     QMenu *submenu = new QMenu( qtr( "&Subtitles Track" ), current );
@@ -624,7 +630,7 @@ QMenu *QVLCMenu::VideoMenu( intf_thread_t *p_intf, QMenu *current, bool b_subtit
     {
         addActionWithSubmenu( current, "video-es", qtr( "Video &Track" ) );
         if( b_subtitle)
-            SubMenu( p_intf, current );
+            SubtitleMenu( p_intf, current );
 
         current->addSeparator();
 
@@ -982,7 +988,9 @@ void QVLCMenu::PopupMenu( intf_thread_t *p_intf, bool show )
         if( action->menu()->isEmpty() )
             action->setEnabled( false );
 
-        SubMenu( p_intf, menu )->setTitle( qtr( "Subti&tle") );
+        submenu = SubtitleMenu( p_intf, menu );
+        submenu->setTitle( qtr( "Subti&tle") );
+        UpdateItem( p_intf, menu, "spu-es", VLC_OBJECT(p_input), true );
 
         /* Playback menu for chapters */
         submenu = new QMenu( menu );

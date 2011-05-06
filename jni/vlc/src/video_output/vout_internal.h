@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
  * Copyright (C) 2008 Laurent Aimar
- * $Id: 4767cb5d7086b120c01e73245528a1ba6886c9b6 $
+ * $Id: bea55c6274f7bb33a58ccd51fe47d73f53efefc6 $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org >
  *
@@ -149,6 +149,7 @@ void vout_ControlChangeCropRatio(vout_thread_t *, unsigned num, unsigned den);
 void vout_ControlChangeCropWindow(vout_thread_t *, int x, int y, int width, int height);
 void vout_ControlChangeCropBorder(vout_thread_t *, int left, int top, int right, int bottom);
 void vout_ControlChangeFilters(vout_thread_t *, const char *);
+void vout_ControlChangeSubSources(vout_thread_t *, const char *);
 void vout_ControlChangeSubFilters(vout_thread_t *, const char *);
 void vout_ControlChangeSubMargin(vout_thread_t *, int);
 

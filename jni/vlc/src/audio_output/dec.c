@@ -2,7 +2,7 @@
  * dec.c : audio output API towards decoders
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: ddd2f69008514a810f1c5c6097f461c5774c75e8 $
+ * $Id: ecf81b8dbbc3a7def3ecf5d1652d90320694b004 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -37,13 +37,14 @@
 
 #include "aout_internal.h"
 
-/*****************************************************************************
- * aout_DecNew : create a decoder
- *****************************************************************************/
-static aout_input_t * DecNew( aout_instance_t * p_aout,
-                              audio_sample_format_t *p_format,
-                              const audio_replay_gain_t *p_replay_gain,
-                              const aout_request_vout_t *p_request_vout )
+#undef aout_DecNew
+/**
+ * Creates an audio output
+ */
+aout_input_t *aout_DecNew( aout_instance_t *p_aout,
+                           audio_sample_format_t *p_format,
+                           const audio_replay_gain_t *p_replay_gain,
+                           const aout_request_vout_t *p_request_vout )
 {
     aout_input_t * p_input;
 
@@ -81,12 +82,7 @@ static aout_input_t * DecNew( aout_instance_t * p_aout,
     /* We can only be called by the decoder, so no need to lock
      * p_input->lock. */
     aout_lock_mixer( p_aout );
-
-    if ( p_aout->i_nb_inputs >= AOUT_MAX_INPUTS )
-    {
-        msg_Err( p_aout, "too many inputs already (%d)", p_aout->i_nb_inputs );
-        goto error;
-    }
+    assert( p_aout->i_nb_inputs == 0 );
 
     p_input = calloc( 1, sizeof(aout_input_t));
     if( !p_input )
@@ -94,7 +90,6 @@ static aout_input_t * DecNew( aout_instance_t * p_aout,
 
     vlc_mutex_init( &p_input->lock );
 
-    p_input->b_changed = false;
     p_input->b_error = true;
     p_input->b_paused = false;
     p_input->i_pause_date = 0;
@@ -166,29 +161,6 @@ error:
     return NULL;
 }
 
-aout_input_t * __aout_DecNew( vlc_object_t * p_this,
-                              aout_instance_t ** pp_aout,
-                              audio_sample_format_t * p_format,
-                              const audio_replay_gain_t *p_replay_gain,
-                              const aout_request_vout_t *p_request_video )
-{
-    aout_instance_t *p_aout = *pp_aout;
-    if ( p_aout == NULL )
-    {
-        msg_Dbg( p_this, "no aout present, spawning one" );
-        p_aout = aout_New( p_this );
-
-        /* Everything failed, I'm a loser, I just wanna die */
-        if( p_aout == NULL )
-            return NULL;
-
-        vlc_object_attach( p_aout, p_this );
-        *pp_aout = p_aout;
-    }
-
-    return DecNew( p_aout, p_format, p_replay_gain, p_request_video );
-}
-
 /*****************************************************************************
  * aout_DecDelete : delete a decoder
  *****************************************************************************/
@@ -216,9 +188,8 @@ int aout_DecDelete( aout_instance_t * p_aout, aout_input_t * p_input )
     }
 
     /* Remove the input from the list. */
-    memmove( &p_aout->pp_inputs[i_input], &p_aout->pp_inputs[i_input + 1],
-             (AOUT_MAX_INPUTS - i_input - 1) * sizeof(aout_input_t *) );
     p_aout->i_nb_inputs--;
+    assert( p_aout->i_nb_inputs == 0 );
 
     aout_InputDelete( p_aout, p_input );
 
@@ -249,8 +220,8 @@ int aout_DecDelete( aout_instance_t * p_aout, aout_input_t * p_input )
 aout_buffer_t * aout_DecNewBuffer( aout_input_t * p_input,
                                    size_t i_nb_samples )
 {
-    aout_buffer_t * p_buffer;
-    mtime_t duration;
+    block_t *block;
+    size_t length;
 
     aout_lock_input( NULL, p_input );
 
@@ -260,25 +231,18 @@ aout_buffer_t * aout_DecNewBuffer( aout_input_t * p_input,
         return NULL;
     }
 
-    duration = (1000000 * (mtime_t)i_nb_samples) / p_input->input.i_rate;
-
-    /* This necessarily allocates in the heap. */
-    p_buffer = aout_BufferAlloc( &p_input->input_alloc, duration, NULL );
-    if( p_buffer != NULL )
-        p_buffer->i_buffer = i_nb_samples * p_input->input.i_bytes_per_frame
-                                  / p_input->input.i_frame_length;
-
-    /* Suppose the decoder doesn't have more than one buffered buffer */
-    p_input->b_changed = false;
+    length = i_nb_samples * p_input->input.i_bytes_per_frame
+                          / p_input->input.i_frame_length;
+    block = block_Alloc( length );
 
     aout_unlock_input( NULL, p_input );
 
-    if( p_buffer == NULL )
-        return NULL;
-
-    p_buffer->i_nb_samples = i_nb_samples;
-    p_buffer->i_pts = p_buffer->i_length = 0;
-    return p_buffer;
+    if( likely(block != NULL) )
+    {
+        block->i_nb_samples = i_nb_samples;
+        block->i_pts = block->i_length = 0;
+    }
+    return block;
 }
 
 /*****************************************************************************
@@ -315,25 +279,6 @@ int aout_DecPlay( aout_instance_t * p_aout, aout_input_t * p_input,
 
         aout_BufferFree( p_buffer );
         return -1;
-    }
-
-    if( p_input->b_changed )
-    {
-        /* Maybe the allocation size has changed. Re-allocate a buffer. */
-        aout_buffer_t * p_new_buffer;
-        mtime_t duration = (1000000 * (mtime_t)p_buffer->i_nb_samples)
-                            / p_input->input.i_rate;
-
-        p_new_buffer = aout_BufferAlloc( &p_input->input_alloc, duration, NULL);
-        vlc_memcpy( p_new_buffer->p_buffer, p_buffer->p_buffer,
-                    p_buffer->i_buffer );
-        p_new_buffer->i_nb_samples = p_buffer->i_nb_samples;
-        p_new_buffer->i_buffer = p_buffer->i_buffer;
-        p_new_buffer->i_pts = p_buffer->i_pts;
-        p_new_buffer->i_length = p_buffer->i_length;
-        aout_BufferFree( p_buffer );
-        p_buffer = p_new_buffer;
-        p_input->b_changed = false;
     }
 
     aout_InputCheckAndRestart( p_aout, p_input );

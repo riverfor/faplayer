@@ -4,7 +4,7 @@
  *****************************************************************************
  * Copyright (C) 2003 ANEVIA
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: 11055fb12f8e2a0a9d6cf188b5d38de0e5ba587c $
+ * $Id: bc3f29f97cd1134946028ca7809e2ef742fa6200 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Damien LUCAS <damien.lucas@anevia.com>
@@ -441,7 +441,7 @@ static subpicture_t *Decode( decoder_t *p_dec, block_t **pp_block )
         decode_segment( p_dec, &p_sys->bs );
     }
 
-    if( bs_read( &p_sys->bs, 8 ) != 0xff ) /* End marker */
+    if( ( bs_read( &p_sys->bs, 8 ) & 0x3f ) != 0x3f ) /* End marker */
     {
         msg_Warn( p_dec, "end marker not found (corrupted subtitle ?)" );
         block_Release( p_block );

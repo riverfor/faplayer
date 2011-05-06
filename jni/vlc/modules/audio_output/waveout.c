@@ -2,7 +2,7 @@
  * waveout.c : Windows waveOut plugin for vlc
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 402e580eb5e97cc6a9ac1729f551bb08d4788cd1 $
+ * $Id: aea4b55634e1d08ecbb33976790847550bed6588 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          André Weber
@@ -18,8 +18,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
 /*****************************************************************************
@@ -33,7 +33,7 @@
 #include <vlc_common.h>
 #include <vlc_plugin.h>
 #include <vlc_aout.h>
-#include <vlc_charset.h>
+#include <vlc_charset.h>                        /* FromLocaleDup, LocaleFree */
 
 #include "windows_audio_common.h"
 
@@ -68,8 +68,7 @@ static int PlayWaveOut   ( aout_instance_t *, HWAVEOUT, WAVEHDR *,
 static void CALLBACK WaveOutCallback ( HWAVEOUT, UINT, DWORD, DWORD, DWORD );
 static void* WaveOutThread( vlc_object_t * );
 
-static int VolumeGet( aout_instance_t *, audio_volume_t * );
-static int VolumeSet( aout_instance_t *, audio_volume_t );
+static int VolumeSet( aout_instance_t *, audio_volume_t, bool );
 
 static int WaveOutClearDoneBuffers(aout_sys_t *p_sys);
 
@@ -81,7 +80,6 @@ static const char psz_device_name_fmt[] = "%s ($%x,$%x)";
 
 static const char *const ppsz_adev[] = { "wavemapper", };
 static const char *const ppsz_adev_text[] = { N_("Microsoft Soundmapper") };
-
 
 
 /*****************************************************************************
@@ -107,7 +105,6 @@ vlc_module_begin ()
        change_string_list( ppsz_adev, ppsz_adev_text, ReloadWaveoutDevices )
        change_need_restart ()
        change_action_add( ReloadWaveoutDevices, N_("Refresh list") )
-
 
     set_callbacks( Open, Close )
 vlc_module_end ()
@@ -305,7 +302,6 @@ static int Open( vlc_object_t *p_this )
             if( waveOutGetVolume( p_aout->output.p_sys->h_waveout, &i_dummy )
                 == MMSYSERR_NOERROR )
             {
-                p_aout->output.pf_volume_get = VolumeGet;
                 p_aout->output.pf_volume_set = VolumeSet;
             }
         }
@@ -475,7 +471,7 @@ static void Probe( aout_instance_t * p_aout )
     }
 
     var_AddCallback( p_aout, "audio-device", aout_ChannelsRestart, NULL );
-    var_SetBool( p_aout, "intf-change", true );
+    var_TriggerCallback( p_aout, "intf-change" );
 }
 
 /*****************************************************************************
@@ -588,14 +584,13 @@ static int OpenWaveOut( aout_instance_t *p_aout, uint32_t i_device_id, int i_for
                         bool b_probe )
 {
     MMRESULT result;
-    unsigned int i;
 
     /* Set sound format */
 
 #define waveformat p_aout->output.p_sys->waveformat
 
     waveformat.dwChannelMask = 0;
-    for( i = 0; i < sizeof(pi_channels_src)/sizeof(uint32_t); i++ )
+    for( unsigned i = 0; i < sizeof(pi_channels_src)/sizeof(uint32_t); i++ )
     {
         if( i_channels & pi_channels_src[i] )
             waveformat.dwChannelMask |= pi_channels_in[i];
@@ -756,7 +751,7 @@ static int PlayWaveOut( aout_instance_t *p_aout, HWAVEOUT h_waveout,
     /* Prepare the buffer */
     if( p_buffer != NULL )
     {
-        p_waveheader->lpData = p_buffer->p_buffer;
+        p_waveheader->lpData = (LPSTR)p_buffer->p_buffer;
         /*
           copy the buffer to the silence buffer :) so in case we don't
           get the next buffer fast enough (I will repeat this one a time
@@ -781,7 +776,7 @@ static int PlayWaveOut( aout_instance_t *p_aout, HWAVEOUT h_waveout,
                            0x00, p_aout->output.p_sys->i_buffer_size );
            }
         }
-        p_waveheader->lpData = p_aout->output.p_sys->p_silence_buffer;
+        p_waveheader->lpData = (LPSTR)p_aout->output.p_sys->p_silence_buffer;
     }
 
     p_waveheader->dwUser = p_buffer ? (DWORD_PTR)p_buffer : (DWORD_PTR)1;
@@ -815,14 +810,14 @@ static void CALLBACK WaveOutCallback( HWAVEOUT h_waveout, UINT uMsg,
 {
     (void)h_waveout;    (void)dwParam1;    (void)dwParam2;
     aout_instance_t *p_aout = (aout_instance_t *)_p_aout;
-    int i, i_queued_frames = 0;
+    int i_queued_frames = 0;
 
     if( uMsg != WOM_DONE ) return;
 
     if( !vlc_object_alive (p_aout) ) return;
 
     /* Find out the current latency */
-    for( i = 0; i < FRAMES_NUM; i++ )
+    for( int i = 0; i < FRAMES_NUM; i++ )
     {
         /* Check if frame buf is available */
         if( !(p_aout->output.p_sys->waveheader[i].dwFlags & WHDR_DONE) )
@@ -1021,24 +1016,12 @@ static void* WaveOutThread( vlc_object_t *p_this )
     return NULL;
 }
 
-static int VolumeGet( aout_instance_t * p_aout, audio_volume_t * pi_volume )
+static int VolumeSet( aout_instance_t * p_aout, audio_volume_t i_volume,
+                      bool mute )
 {
-    DWORD i_waveout_vol;
+    if( mute )
+        i_volume = AOUT_VOLUME_MIN;
 
-#ifdef UNDER_CE
-    waveOutGetVolume( 0, &i_waveout_vol );
-#else
-    waveOutGetVolume( p_aout->output.p_sys->h_waveout, &i_waveout_vol );
-#endif
-
-    i_waveout_vol &= 0xFFFF;
-    *pi_volume = p_aout->output.i_volume =
-        (i_waveout_vol * AOUT_VOLUME_MAX + 0xFFFF /*rounding*/) / 2 / 0xFFFF;
-    return 0;
-}
-
-static int VolumeSet( aout_instance_t * p_aout, audio_volume_t i_volume )
-{
     unsigned long i_waveout_vol = i_volume * 0xFFFF * 2 / AOUT_VOLUME_MAX;
     i_waveout_vol |= (i_waveout_vol << 16);
 
@@ -1047,8 +1030,6 @@ static int VolumeSet( aout_instance_t * p_aout, audio_volume_t i_volume )
 #else
     waveOutSetVolume( p_aout->output.p_sys->h_waveout, i_waveout_vol );
 #endif
-
-    p_aout->output.i_volume = i_volume;
     return 0;
 }
 
@@ -1124,18 +1105,19 @@ static int ReloadWaveoutDevices( vlc_object_t *p_this, char const *psz_name,
 */
 static uint32_t findDeviceID(char *psz_device_name)
 {
-    if(!psz_device_name)
+    if( !psz_device_name )
        return WAVE_MAPPER;
 
     uint32_t wave_devices = waveOutGetNumDevs();
     WAVEOUTCAPS caps;
     char sz_dev_name[MAXPNAMELEN+32];
-    for(uint32_t i=0; i<wave_devices; i++)
+
+    for( uint32_t i = 0; i < wave_devices; i++ )
     {
-        if(waveOutGetDevCaps(i, &caps, sizeof(WAVEOUTCAPS))
+        if( waveOutGetDevCaps( i, &caps, sizeof(WAVEOUTCAPS) )
            == MMSYSERR_NOERROR)
         {
-            sprintf(sz_dev_name, psz_device_name_fmt, caps.szPname,
+            sprintf( sz_dev_name, psz_device_name_fmt, caps.szPname,
                                                caps.wMid,
                                                caps.wPid
                                               );

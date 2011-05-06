@@ -2,7 +2,7 @@
  * portaudio.c : portaudio (v19) audio output plugin
  *****************************************************************************
  * Copyright (C) 2002, 2006 the VideoLAN team
- * $Id: 2c6a0ea1dfb0e9f2fddc5979ed853f30ad24c56f $
+ * $Id: 8d9897284c9a6176103aa1767ec6f9efe1a0b040 $
  *
  * Authors: Frederic Ruget <frederic.ruget@free.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -434,7 +434,7 @@ static int PAOpenDevice( aout_instance_t *p_aout )
         }
 
         var_AddCallback( p_aout, "audio-device", aout_ChannelsRestart, NULL );
-        var_SetBool( p_aout, "intf-change", true );
+        var_TriggerCallback( p_aout, "intf-change" );
     }
 
     /* Audio format is paFloat32 (always supported by portaudio v19) */

@@ -2,7 +2,7 @@
  * Controller.hpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: e32cb21b6bfee340a1c29d47f4acb2301b674903 $
+ * $Id: bd051c4bd5040d8440a5833edc6ef1bbd8c229ce $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -32,6 +32,7 @@
 
 #include <QFrame>
 #include <QString>
+#include <QSizeGrip>
 
 #define MAIN_TB1_DEFAULT "64;39;64;38;65"
 #define MAIN_TB2_DEFAULT "0-2;64;3;1;4;64;7;9;64;10;20;19;64-4;37;65;35-4"
@@ -50,7 +51,7 @@ class QBoxLayout;
 
 class QAbstractSlider;
 class QAbstractButton;
-class InputSlider;
+class SeekSlider;
 class QToolButton;
 
 class VolumeClickHandler;
@@ -64,8 +65,8 @@ typedef enum buttonType_e
     PLAY_BUTTON,
     STOP_BUTTON,
     OPEN_BUTTON,
-    PREVIOUS_BUTTON,
-    NEXT_BUTTON,
+    PREV_SLOW_BUTTON,
+    NEXT_FAST_BUTTON,
     SLOWER_BUTTON,
     FASTER_BUTTON,
     FULLSCREEN_BUTTON,
@@ -83,6 +84,8 @@ typedef enum buttonType_e
     RANDOM_BUTTON,
     LOOP_BUTTON,
     INFO_BUTTON,
+    PREVIOUS_BUTTON,
+    NEXT_BUTTON,
     BUTTON_MAX,
 
     SPLITTER = 0x20,
@@ -93,6 +96,7 @@ typedef enum buttonType_e
     MENU_BUTTONS,
     TELETEXT_BUTTONS,
     ADVANCED_CONTROLLER,
+    PLAYBACK_BUTTONS,
     SPECIAL_MAX,
 
     WIDGET_SPACER = 0x40,
@@ -102,21 +106,22 @@ typedef enum buttonType_e
 
 
 static const char* const nameL[BUTTON_MAX] = { N_("Play"), N_("Stop"), N_("Open"),
-    N_("Previous"), N_("Next"), N_("Slower"), N_("Faster"), N_("Fullscreen"),
+    N_("Previous/Backward"), N_("Next/Forward"), N_("Slower"), N_("Faster"), N_("Fullscreen"),
    N_("De-Fullscreen"), N_("Extended panel"), N_("Playlist"), N_("Snapshot"),
    N_("Record"), N_("A->B Loop"), N_("Frame By Frame"), N_("Trickplay Reverse"),
    N_("Step backward" ), N_("Step forward"), N_("Quit"), N_("Random"),
-   N_("Loop/Repeat mode"), N_("Information") };
+   N_("Loop/Repeat mode"), N_("Information"), N_("Previous"), N_("Next") };
 static const char* const tooltipL[BUTTON_MAX] = { I_PLAY_TOOLTIP,
     N_("Stop playback"), N_("Open a medium"),
-    N_("Previous media in the playlist"),
-    N_("Next media in the playlist"), N_("Slower"), N_("Faster"),
+    N_("Previous media in the playlist, skip backward when keep-pressed"),
+    N_("Next media in the playlist, skip forward when keep-pressed"), N_("Slower"), N_("Faster"),
     N_("Toggle the video in fullscreen"), N_("Toggle the video out fullscreen"),
     N_("Show extended settings" ), N_( "Show playlist" ),
     N_( "Take a snapshot" ), N_( "Record" ),
     N_( "Loop from point A to point B continuously." ), N_("Frame by frame"),
     N_("Reverse"), N_("Step backward"), N_("Step forward"), N_("Quit"),
-    N_("Random"), N_("Change the loop and repeat modes"), N_("Information") };
+    N_("Random"), N_("Change the loop and repeat modes"), N_("Information"),
+    N_("Previous media in the playlist"), N_("Next media in the playlist")};
 static const QString iconL[BUTTON_MAX] ={ ":/toolbar/play_b", ":/toolbar/stop_b",
     ":/toolbar/eject", ":/toolbar/previous_b", ":/toolbar/next_b",
     ":/toolbar/slower", ":/toolbar/faster", ":/toolbar/fullscreen",
@@ -124,7 +129,8 @@ static const QString iconL[BUTTON_MAX] ={ ":/toolbar/play_b", ":/toolbar/stop_b"
     ":/toolbar/snapshot", ":/toolbar/record", ":/toolbar/atob_nob",
     ":/toolbar/frame", ":/toolbar/reverse", ":/toolbar/skip_back",
     ":/toolbar/skip_fw", ":/toolbar/clear", ":/buttons/playlist/shuffle_on",
-    ":/buttons/playlist/repeat_all", ":/menu/info" };
+    ":/buttons/playlist/repeat_all", ":/menu/info",
+    ":/toolbar/previous_b", ":/toolbar/next_b", };
 
 enum
 {
@@ -163,6 +169,8 @@ private:
     QFrame *discFrame();
     QFrame *telexFrame();
     void applyAttributes( QToolButton *, bool b_flat, bool b_big );
+
+    QHBoxLayout         *buttonGroupLayout;
 protected slots:
     virtual void setStatus( int );
 
@@ -197,12 +205,17 @@ public:
     /* p_intf, advanced control visible or not, blingbling or not */
     ControlsWidget( intf_thread_t *_p_i, bool b_advControls,
                     QWidget *_parent = 0 );
-    virtual ~ControlsWidget();
+
+    void setGripVisible( bool b_visible )
+    { grip->setVisible( b_visible ); }
 
 protected:
     friend class MainInterface;
 
     bool b_advancedVisible;
+
+private:
+    QSizeGrip *grip;
 
 protected slots:
     void toggleAdvanced();
@@ -265,6 +278,7 @@ private:
     QTimer *p_slowHideTimer;
     bool b_slow_hide_begin;
     int  i_slow_hide_timeout;
+    float f_opacity;
 #endif
 
     int i_mouse_last_x, i_mouse_last_y;

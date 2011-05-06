@@ -2,7 +2,7 @@
  * win32text.c : Text drawing routines using the TextOut win32 API
  *****************************************************************************
  * Copyright (C) 2002 - 2009 the VideoLAN team
- * $Id: 8a1baacb924b8b54bc1f46effe1e1b758e525731 $
+ * $Id: 6e88c37cc5975cbd740105e392ce7cdf8eb790f3 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Pierre Ynard
@@ -74,7 +74,7 @@ static int SetFont( filter_t *, int );
 #define FONTSIZER_TEXT N_("Relative font size")
 #define FONTSIZER_LONGTEXT N_("This is the relative default size of the " \
   "fonts that will be rendered on the video. If absolute font size is set, "\
-   "relative size will be overriden." )
+   "relative size will be overridden." )
 
 static int const pi_sizes[] = { 20, 18, 16, 12, 6 };
 static char *const ppsz_sizes_text[] = {
@@ -226,6 +226,8 @@ static int Render( filter_t *p_filter, subpicture_region_t *p_region,
     fmt.i_width = fmt.i_visible_width = i_width + (b_outline ? 4 : 0);
     fmt.i_height = fmt.i_visible_height = i_height + (b_outline ? 4 : 0);
     fmt.i_x_offset = fmt.i_y_offset = 0;
+    fmt.i_sar_num = 1;
+    fmt.i_sar_den = 1;
 
     /* Build palette */
     fmt.p_palette = calloc( 1, sizeof(*fmt.p_palette) );

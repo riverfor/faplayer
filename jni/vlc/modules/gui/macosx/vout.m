@@ -2,7 +2,7 @@
  * vout.m: MacOS X video output module
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id: 487c1ebf44e09c65e809df56a48d8131fd91ea64 $
+ * $Id: 7034bad5574d132b59f876c21b845f79da793bb4 $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Florian G. Pflug <fgp@phlo.org>
@@ -54,6 +54,9 @@
 #include <vlc_vout_window.h>
 #include <vlc_vout_display.h>
 #include <vlc_keys.h>
+#include <vlc_url.h>
+
+#if 0
 
 /*****************************************************************************
  * DeviceCallback: Callback triggered when the video-device variable is changed
@@ -180,7 +183,7 @@ int DeviceCallback( vlc_object_t *p_this, const char *psz_variable,
 
     if( [o_screens count] <= 0 )
     {
-        msg_Err( p_vout, "no OSX screens available" );
+        msg_Err( VLCIntf, "no OSX screens available" );
         return NO;
     }
 
@@ -302,7 +305,7 @@ int DeviceCallback( vlc_object_t *p_this, const char *psz_variable,
     if( psz_title )
         o_title = [NSString stringWithUTF8String: psz_title];
 
-    char *psz_uri = input_item_GetURI( p_item );
+    char *psz_uri = decode_URI( input_item_GetURI( p_item ) );
     if( psz_uri )
         o_mrl = [NSMutableString stringWithUTF8String: psz_uri];
 
@@ -508,7 +511,7 @@ int DeviceCallback( vlc_object_t *p_this, const char *psz_variable,
                 val.i_int |= (int)CocoaKeyToVLC( key );
             var_Set( p_vout->p_libvlc, "key-pressed", val );
         }
-        else msg_Warn( p_vout, "could not send keyevent to VLC core" );
+        else msg_Dbg( VLCIntf, "could not send keyevent to VLC core" );
     }
     else
         [super keyDown: o_event];
@@ -1145,4 +1148,6 @@ int DeviceCallback( vlc_object_t *p_this, const char *psz_variable,
 }
 
 @end
+
+#endif
 

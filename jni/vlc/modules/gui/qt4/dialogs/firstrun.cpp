@@ -2,7 +2,7 @@
  * firstrun : First Run dialogs
  ****************************************************************************
  * Copyright © 2009 VideoLAN
- * $Id: 52b4fefce96bc1c67792081d6444522cfffbcb18 $
+ * $Id: 0b9667e6ec6c0c8e2ee8a3b373a9e6611b27b470 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *
@@ -51,8 +51,11 @@ void FirstRun::save()
 #endif
     config_PutInt( p_intf,  "qt-privacy-ask", 0 );
 
+    /* FIXME Should not save here. This will not work as expected if another
+     * plugin overwrote items of its own. */
+#warning FIXME
     /* We have to save here because the user may not launch Prefs */
-    config_SaveConfigFile( p_intf, NULL );
+    config_SaveConfigFile( p_intf );
     close();
 }
 

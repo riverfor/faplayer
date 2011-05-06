@@ -2,7 +2,7 @@
  * libvlc-module.c: Options for the main (libvlc itself) module
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: fe11033a2b27d707e4711416baee45690f16d505 $
+ * $Id: 73d61d8a542b7d77f0ff6e0539af1cca25700251 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -270,11 +270,6 @@ static const char *const ppsz_snap_formats[] =
     "You can set the default audio output volume here, in a range from 0 to " \
     "1024.")
 
-#define VOLUME_SAVE_TEXT N_("Audio output saved volume")
-#define VOLUME_SAVE_LONGTEXT N_( \
-    "This saves the audio output volume when you use the mute function. " \
-    "You should not change this option manually.")
-
 #define VOLUME_STEP_TEXT N_("Audio output volume step")
 #define VOLUME_STEP_LONGTEXT N_( \
     "The step size of the volume is adjustable using this option, " \
@@ -482,11 +477,13 @@ static const char * const  ppsz_deinterlace_text[] = {
     "Deinterlace method to use for video processing.")
 static const char * const ppsz_deinterlace_mode[] = {
     "discard", "blend", "mean", "bob",
-    "linear", "x", "yadif", "yadif2x", "phosphor"
+    "linear", "x", "yadif", "yadif2x", "phosphor",
+    "ivtc"
 };
 static const char * const ppsz_deinterlace_mode_text[] = {
     N_("Discard"), N_("Blend"), N_("Mean"), N_("Bob"),
-    N_("Linear"), "X", "Yadif", "Yadif (2x)", N_("Phosphor")
+    N_("Linear"), "X", "Yadif", "Yadif (2x)", N_("Phosphor"),
+    N_("Film NTSC (IVTC)")
 };
 
 static const int pi_pos_values[] = { 0, 1, 2, 4, 8, 5, 6, 9, 10 };
@@ -786,12 +783,18 @@ static const char *const ppsz_clock_descriptions[] =
     "This is the maximum size in bytes of the temporary files " \
     "that will be used to store the timeshifted streams." )
 
+#define INPUT_TITLE_FORMAT_TEXT N_( "Change title according to current media" )
+#define INPUT_TITLE_FORMAT_LONGTEXT N_( "This option allows you to set the title according to what's being played<br>"  \
+    "$a: Artist<br>$b: Album<br>$c: Copyright<br>$t: Title<br>$g: Genre<br>"  \
+    "$n: Track num<br>$p: Now playing<br>$A: Date<br>$D: Duration<br>"  \
+    "$Z: \"Now playing\" (Fall back on Title - Artist)" )
+
 // DEPRECATED
 #define SUB_CAT_LONGTEXT N_( \
     "These options allow you to modify the behavior of the subpictures " \
-    "subsystem. You can for example enable subpictures filters (logo, etc.). " \
+    "subsystem. You can for example enable subpictures sources (logo, etc.). " \
     "Enable these filters here and configure them in the " \
-    "\"subpictures filters\" modules section. You can also set many " \
+    "\"subsources filters\" modules section. You can also set many " \
     "miscellaneous subpictures options." )
 
 #define SUB_MARGIN_TEXT N_("Force subtitle position")
@@ -812,10 +815,15 @@ static const char *const ppsz_clock_descriptions[] =
 #define TEXTRENDERER_LONGTEXT N_( \
     "VLC normally uses Freetype for rendering, but this allows you to use svg for instance.")
 
+#define SUB_SOURCE_TEXT N_("Subpictures source module")
+#define SUB_SOURCE_LONGTEXT N_( \
+    "This adds so-called \"subpicture sources\". These filters overlay " \
+    "some images or text over the video (like a logo, arbitrary text, ...)." )
+
 #define SUB_FILTER_TEXT N_("Subpictures filter module")
 #define SUB_FILTER_LONGTEXT N_( \
-    "This adds so-called \"subpicture filters\". These filters overlay " \
-    "some images or text over the video (like a logo, arbitrary text, ...)." )
+    "This adds so-called \"subpicture filters\". These filter subpictures " \
+    "created by subtitles decoders or other subpictures sources." )
 
 #define SUB_AUTO_TEXT N_("Autodetect subtitle files")
 #define SUB_AUTO_LONGTEXT N_( \
@@ -954,11 +962,6 @@ static const char *const ppsz_clock_descriptions[] =
 #define ENCODER_LONGTEXT N_( \
     "This allows you to select a list of encoders that VLC will use in " \
     "priority.")
-
-#define SYSTEM_CODEC_TEXT N_("Prefer system plugins over VLC")
-#define SYSTEM_CODEC_LONGTEXT N_( \
-    "Indicates whether VLC will prefer native plugins installed " \
-    "on system over VLC owns plugins whenever a choice is available." )
 
 /*****************************************************************************
  * Sout
@@ -1805,6 +1808,8 @@ vlc_module_begin ()
     add_integer( "sub-margin", 0, SUB_MARGIN_TEXT,
                  SUB_MARGIN_LONGTEXT, true )
     set_section( N_( "Overlays" ) , NULL )
+    add_module_list_cat( "sub-source", SUBCAT_VIDEO_SUBPIC, NULL, NULL,
+                SUB_SOURCE_TEXT, SUB_SOURCE_LONGTEXT, false )
     add_module_list_cat( "sub-filter", SUBCAT_VIDEO_SUBPIC, NULL, NULL,
                 SUB_FILTER_TEXT, SUB_FILTER_LONGTEXT, false )
 
@@ -1948,6 +1953,8 @@ vlc_module_begin ()
     add_integer( "input-timeshift-granularity", -1, INPUT_TIMESHIFT_GRANULARITY_TEXT,
                  INPUT_TIMESHIFT_GRANULARITY_LONGTEXT, true )
 
+    add_string( "input-title-format", "$Z", INPUT_TITLE_FORMAT_TEXT, INPUT_TITLE_FORMAT_LONGTEXT, false );
+
 /* Decoder options */
     add_category_hint( N_("Decoders"), CODEC_CAT_LONGTEXT , true )
     add_string( "codec", NULL, CODEC_TEXT,
@@ -1966,8 +1973,7 @@ vlc_module_begin ()
     set_subcategory( SUBCAT_INPUT_VCODEC )
     set_subcategory( SUBCAT_INPUT_ACODEC )
     set_subcategory( SUBCAT_INPUT_SCODEC )
-    add_bool( "prefer-system-codecs", false, SYSTEM_CODEC_TEXT,
-                                SYSTEM_CODEC_LONGTEXT, false )
+    add_obsolete_bool( "prefer-system-codecs" )
 
     set_subcategory( SUBCAT_INPUT_STREAM_FILTER )
     add_module_list_cat( "stream-filter", SUBCAT_INPUT_STREAM_FILTER, NULL, NULL,
@@ -1996,7 +2002,7 @@ vlc_module_begin ()
                                 SOUT_MUX_CACHING_LONGTEXT, true )
 
     set_section( N_("VLM"), NULL )
-    add_string( "vlm-conf", NULL, VLM_CONF_TEXT,
+    add_loadfile( "vlm-conf", NULL, VLM_CONF_TEXT,
                     VLM_CONF_LONGTEXT, true )
 
 

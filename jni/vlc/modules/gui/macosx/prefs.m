@@ -2,7 +2,7 @@
  * prefs.m: MacOS X module for vlc
  *****************************************************************************
  * Copyright (C) 2002-2006 the VideoLAN team
- * $Id: 8c56c8c285621520102303134fce240f9b7f8870 $
+ * $Id: de04314bfa4cbd474d35a091a87c9b62c8802581 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videolan dot org>
@@ -212,7 +212,7 @@ static VLCPrefs *_o_sharedMainInstance = nil;
 {
     /* TODO: call savePrefs on Root item */
     [_rootTreeItem applyChanges];
-    config_SaveConfigFile( p_intf, NULL );
+    config_SaveConfigFile( p_intf );
     [o_prefs_window orderOut:self];
 }
 
@@ -516,8 +516,9 @@ static VLCPrefs *_o_sharedMainInstance = nil;
 
 - (id)initWithConfigItem: (module_config_t *) configItem
 {
-    NSString * name = [[[VLCMain sharedInstance] localizedString:configItem->psz_name] autorelease];
+    NSString * name = [[VLCMain sharedInstance] localizedString:configItem->psz_name];
     self = [super initWithName:name];
+    [name release];
     if( self != nil )
     {
         _configItem = configItem;

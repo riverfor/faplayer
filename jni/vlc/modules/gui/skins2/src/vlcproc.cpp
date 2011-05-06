@@ -2,7 +2,7 @@
  * vlcproc.cpp
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: 02519e945699f46b0ac00cdea8a48ceeea0bfe9d $
+ * $Id: 5528fd7a8ca6215663ef0656d82f3a918495d67c $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -151,7 +151,7 @@ VlcProc::VlcProc( intf_thread_t *pIntf ): SkinObject( pIntf ),
 #define ADD_CALLBACK( p_object, var ) \
     var_AddCallback( p_object, var, onGenericCallback, this );
 
-    ADD_CALLBACK( pIntf->p_sys->p_playlist, "volume-change" )
+    ADD_CALLBACK( pIntf->p_sys->p_playlist, "volume" )
     ADD_CALLBACK( pIntf->p_libvlc, "intf-show" )
 
     ADD_CALLBACK( pIntf->p_sys->p_playlist, "item-current" )
@@ -203,7 +203,7 @@ VlcProc::~VlcProc()
 
     interaction_Unregister( getIntf() );
 
-    var_DelCallback( getIntf()->p_sys->p_playlist, "volume-change",
+    var_DelCallback( getIntf()->p_sys->p_playlist, "volume",
                      onGenericCallback, this );
     var_DelCallback( getIntf()->p_libvlc, "intf-show",
                      onGenericCallback, this );
@@ -385,7 +385,7 @@ int VlcProc::onGenericCallback( vlc_object_t *pObj, const char *pVariable,
     }
 
     ADD_CALLBACK_ENTRY( "item-current", on_item_current_changed, false )
-    ADD_CALLBACK_ENTRY( "volume-change", on_volume_changed, true )
+    ADD_CALLBACK_ENTRY( "volume", on_volume_changed, true )
 
     ADD_CALLBACK_ENTRY( "bit-rate", on_bit_rate_changed, false )
     ADD_CALLBACK_ENTRY( "sample-rate", on_sample_rate_changed, false )
@@ -694,8 +694,7 @@ void VlcProc::on_volume_changed( vlc_object_t* p_obj, vlc_value_t newVal )
     (void)p_obj; (void)newVal;
     playlist_t* pPlaylist = getIntf()->p_sys->p_playlist;
 
-    audio_volume_t volume;
-    aout_VolumeGet( pPlaylist, &volume );
+    audio_volume_t volume = aout_VolumeGet( pPlaylist );
     SET_VOLUME( m_cVarVolume, volume, false );
     SET_BOOL( m_cVarMute, volume == 0 );
 }
@@ -797,8 +796,7 @@ void VlcProc::init_variables()
     SET_BOOL( m_cVarLoop, var_GetBool( pPlaylist, "loop" ) );
     SET_BOOL( m_cVarRepeat, var_GetBool( pPlaylist, "repeat" ) );
 
-    audio_volume_t volume;
-    aout_VolumeGet( pPlaylist, &volume );
+    audio_volume_t volume = aout_VolumeGet( pPlaylist );
     SET_VOLUME( m_cVarVolume, volume, false );
     SET_BOOL( m_cVarMute, volume == 0 );
 

@@ -2,7 +2,7 @@
  * aout_internal.h : internal defines for audio output
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: e7eae8974bcee3d213d5ce8e6cb1eca592b62c5e $
+ * $Id: fb87f523dbaa7ebd4308b3175f3a8a12daf4368d $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -50,7 +50,6 @@ struct aout_input_t
     vlc_mutex_t             lock;
 
     audio_sample_format_t   input;
-    aout_alloc_t            input_alloc;
 
     /* pre-filters */
     filter_t *              pp_filters[AOUT_MAX_FILTERS];
@@ -73,9 +72,6 @@ struct aout_input_t
 
     /* If b_error == 1, there is no input pipeline. */
     bool              b_error;
-
-    /* Did we just change the output format? (expect buffer inconsistencies) */
-    bool              b_changed;
 
     /* last rate from input */
     int               i_last_input_rate;
@@ -118,7 +114,6 @@ int aout_MixerNew( aout_instance_t * p_aout );
 void aout_MixerDelete( aout_instance_t * p_aout );
 void aout_MixerRun( aout_instance_t * p_aout );
 int aout_MixerMultiplierSet( aout_instance_t * p_aout, float f_multiplier );
-int aout_MixerMultiplierGet( aout_instance_t * p_aout, float * pf_multiplier );
 
 /* From output.c : */
 int aout_OutputNew( aout_instance_t * p_aout,
@@ -141,19 +136,9 @@ void aout_FifoDestroy( aout_instance_t * p_aout, aout_fifo_t * p_fifo );
 void aout_FormatsPrint( aout_instance_t * p_aout, const char * psz_text, const audio_sample_format_t * p_format1, const audio_sample_format_t * p_format2 );
 bool aout_ChangeFilterString( vlc_object_t *, aout_instance_t *, const char *psz_variable, const char *psz_name, bool b_add );
 
-/* From intf.c :*/
-int aout_VolumeSoftGet( aout_instance_t *, audio_volume_t * );
-int aout_VolumeSoftSet( aout_instance_t *, audio_volume_t );
-int aout_VolumeSoftInfos( aout_instance_t *, audio_volume_t * );
-int aout_VolumeNoneGet( aout_instance_t *, audio_volume_t * );
-int aout_VolumeNoneSet( aout_instance_t *, audio_volume_t );
-int aout_VolumeNoneInfos( aout_instance_t *, audio_volume_t * );
-
 /* From dec.c */
-#define aout_DecNew(a, b, c, d, e) __aout_DecNew(VLC_OBJECT(a), b, c, d, e)
-aout_input_t * __aout_DecNew( vlc_object_t *, aout_instance_t **,
-                              audio_sample_format_t *, const audio_replay_gain_t *,
-                              const aout_request_vout_t * );
+aout_input_t *aout_DecNew( aout_instance_t *, audio_sample_format_t *,
+                   const audio_replay_gain_t *, const aout_request_vout_t * );
 int aout_DecDelete ( aout_instance_t *, aout_input_t * );
 aout_buffer_t * aout_DecNewBuffer( aout_input_t *, size_t );
 void aout_DecDeleteBuffer( aout_instance_t *, aout_input_t *, aout_buffer_t * );

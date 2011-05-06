@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2004 Daniel Molkentin <molkentin@kde.org>
- * $Id: b7245cccaa81f31e2e932ca4ec73bcff7dd84109 $
+ * $Id: 90c779194be7a85557e61537774adb086f851f24 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  * The "ClickLineEdit" control is based on code by  Daniel Molkentin
@@ -36,6 +36,7 @@
 #include <QKeyEvent>
 #include <QWheelEvent>
 #include <QPixmap>
+#include <QApplication>
 #include <vlc_keys.h>
 
 QFramelessButton::QFramelessButton( QWidget *parent )
@@ -410,4 +411,27 @@ SpinningIcon::SpinningIcon( QWidget *parent, bool noIdleFrame )
 
 SpinningIcon::~SpinningIcon()
 {
+}
+
+QToolButtonExt::QToolButtonExt(QWidget *parent, int ms ): longClick( false )
+{
+    setAutoRepeat( true );
+    /* default to twice the doubleclick delay */
+    setAutoRepeatDelay( ( ms > 0 )? ms : 2 * QApplication::doubleClickInterval() );
+    setAutoRepeatInterval( 100 );
+    connect( this, SIGNAL(released()), this, SLOT(releasedSlot()) );
+}
+
+void QToolButtonExt::releasedSlot()
+{
+    if( isDown() )
+        longClick = true;
+
+    if( longClick )
+        emit longClicked();
+    else
+        emit shortClicked();
+
+    if( !isDown() )
+        longClick = false;
 }

@@ -2,7 +2,7 @@
  * selector.cpp : Playlist source selector
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: 32bf8e659fba6dbd9389814365d3299a058207e4 $
+ * $Id: e2ed853ea13dc82326caa73f9348e271f876eb82 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf
@@ -148,6 +148,7 @@ PLSelector::PLSelector( QWidget *p, intf_thread_t *_p_intf )
     palette.setColor( QPalette::Window, QColor(209,215,226) );
     setPalette( palette );
 #endif
+    setMinimumHeight( 120 );
 }
 
 PLSelector::~PLSelector()

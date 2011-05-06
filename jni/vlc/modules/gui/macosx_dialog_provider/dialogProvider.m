@@ -2,7 +2,7 @@
  * dialogProvider.m: Minimal Dialog Provider for Mac OS X
  *****************************************************************************
  * Copyright (C) 2009-2011 the VideoLAN team
- * $Id: 3086ff74c2d6f422b81cc24c3a898fe7a4d52851 $
+ * $Id: 4e24853ec0df042a5622a41206565d682c992eb5 $
  *
  * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
  *          Pierre d'Herbemont <pdherbemont # videolan dot>
@@ -477,8 +477,6 @@ bool checkProgressPanel (void *priv)
 
         config_PutPsz(p_intf, "lastfm-username", [lastFMUsername UTF8String]);
         config_PutPsz(p_intf, "lastfm-password", [lastFMPassword UTF8String]);
-        config_SaveConfigFile(p_intf, "main");
-        config_SaveConfigFile(p_intf, "audioscrobbler");
     }
     else
         msg_Err(p_intf,"Last.FM module not found, no action");
@@ -769,6 +767,16 @@ static void updateControlFromWidget(NSView *control, extension_widget_t *widget,
                 image = [[NSImage alloc] initWithContentsOfURL:[NSURL fileURLWithPath:string]];
             [imageView setImage:image];
             [image release];
+            break;
+        }
+        case EXTENSION_WIDGET_SPIN_ICON:
+        {
+            assert([control isKindOfClass:[NSProgressIndicator class]]);
+            NSProgressIndicator *progressIndicator = (NSProgressIndicator *)control;
+            if( widget->i_spin_loops != 0 )
+                [progressIndicator startAnimation:self];
+            else
+                [progressIndicator stopAnimation:self];
             break;
         }
     }

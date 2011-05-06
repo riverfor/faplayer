@@ -2,7 +2,7 @@
  * svg.c : Put SVG on the video
  *****************************************************************************
  * Copyright (C) 2002, 2003 the VideoLAN team
- * $Id: 82ac582515009e449661c7ea6fef45d2aded8e64 $
+ * $Id: 344197cb8fcface07fc8a1d7fabe45a5c0699229 $
  *
  * Authors: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>
  *
@@ -32,9 +32,6 @@
 #include <vlc_common.h>
 #include <vlc_plugin.h>
 #include <vlc_fs.h>
-#include <vlc_vout.h>
-#include <vlc_osd.h>
-#include <vlc_block.h>
 #include <vlc_filter.h>
 
 #include <sys/types.h>

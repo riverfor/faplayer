@@ -1,7 +1,7 @@
 /*****************************************************************************
  * AppleRemote.h
  * AppleRemote
- * $Id: 12e8ca3bd01e21dc22a7b8cc7e85fcbb04f3ee74 $
+ * $Id: b1cb764cad06a11b13aec5d534fda9d06738c3b4 $
  *
  * Created by Martin Kahr on 11.03.06 under a MIT-style license.
  * Copyright (c) 2006 martinkahr.com. All rights reserved.
@@ -108,6 +108,7 @@ The class is not thread safe
 
     IBOutlet id delegate;
 }
++ (AppleRemote *)sharedInstance;
 
 - (int) remoteId;
 

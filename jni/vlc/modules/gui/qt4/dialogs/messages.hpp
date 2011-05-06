@@ -2,7 +2,7 @@
  * Messages.hpp : Information about a stream
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 85bc88975a5bf1f4dd5c209acc1dbd5d74b5d98a $
+ * $Id: 24ba1950ac2f53e3edab1d10bbb6cb429c4f61d9 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *
@@ -58,10 +58,13 @@ private slots:
     void changeVerbosity( int );
     void clear();
     void updateTree();
+    void tabChanged( int );
+
 private:
     void buildTree( QTreeWidgetItem *, vlc_object_t * );
 
     friend class    Singleton<MessagesDialog>;
+    QPushButton *updateButton;
 };
 
 #endif

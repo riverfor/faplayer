@@ -2,7 +2,7 @@
  * avi.c : AVI file Stream input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: dbb88fa196b7bd7612332b0d050d84d6096f02e4 $
+ * $Id: df525ad225683c638516aee38c7294a72f67172b $
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -89,6 +89,11 @@ static int Demux_Seekable  ( demux_t * );
 static int Demux_UnSeekable( demux_t * );
 
 #define __ABS( x ) ( (x) < 0 ? (-(x)) : (x) )
+
+static char *FromACP( const char *str )
+{
+    return FromCharset(vlc_pgettext("GetACP", "CP1252"), str, strlen(str));
+}
 
 typedef struct
 {
@@ -592,7 +597,7 @@ static int Open( vlc_object_t * p_this )
                 continue;
         }
         if( p_strn )
-            fmt.psz_description = FromLatin1( p_strn->p_str );
+            fmt.psz_description = FromACP( p_strn->p_str );
         if( tk->p_out_muxed == NULL )
             tk->p_es = es_out_Add( p_demux->out, &fmt );
         TAB_APPEND( p_sys->i_track, p_sys->track, tk );
@@ -2494,7 +2499,7 @@ static void AVI_MetaLoad( demux_t *p_demux,
         avi_chunk_STRING_t *p_strz = AVI_ChunkFind( p_info, p_dsc[i].i_id, 0 );
         if( !p_strz )
             continue;
-        char *psz_value = FromLatin1( p_strz->p_str );
+        char *psz_value = FromACP( p_strz->p_str );
         if( !psz_value )
             continue;
 
@@ -2609,7 +2614,7 @@ static void AVI_ExtractSubtitle( demux_t *p_demux,
     i_size -= 6;
 
     if( !psz_description )
-        psz_description = p_strn ? FromLatin1( p_strn->p_str ) : NULL;
+        psz_description = p_strn ? FromACP( p_strn->p_str ) : NULL;
     char *psz_name;
     if( asprintf( &psz_name, "subtitle%d.srt", p_sys->i_attachment ) <= 0 )
         psz_name = NULL;

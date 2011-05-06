@@ -4,7 +4,7 @@
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: 115dbe9ffc6cce42a2ef2e9a5dde211a035b9fd1 $
+ * $Id: ac8afb58f862dfbccc6b4fa80615e4e34e343510 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Rémi Denis-Courmont <rem$videolan,org>
@@ -527,7 +527,7 @@ static int gettimeofday (struct timeval *tv, void *tz )
 uint64_t NTPtime64 (void)
 {
     struct timespec ts;
-#if defined (CLOCK_REALTIME)
+#if defined (CLOCK_REALTIME) && !defined (__OS2__)
     clock_gettime (CLOCK_REALTIME, &ts);
 #else
     {

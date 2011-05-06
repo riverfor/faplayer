@@ -4,8 +4,12 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: 1003ff08bd0361ac9aa2fb6f5b8b5b226e2ba89a $
+ * $Id: 84bb008af7589dd94ac59e46c3cb4fd4d627d2b9 $
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include <stdio.h>
 #include <string.h>

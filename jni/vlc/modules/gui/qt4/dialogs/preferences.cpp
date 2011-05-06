@@ -2,7 +2,7 @@
  * preferences.cpp : Preferences
  *****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 2bfa9db793a3488580724f2b5ef0fa7256551e67 $
+ * $Id: 20a11ca156bed3aed2bd8fe4c45db1091544ba87 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -295,7 +295,7 @@ void PrefsDialog::save()
     }
 
     /* Save to file */
-    if( config_SaveConfigFile( p_intf, NULL ) != 0 )
+    if( config_SaveConfigFile( p_intf ) != 0 )
     {
         ErrorsDialog::getInstance (p_intf)->addError( qtr( "Cannot save Configuration" ),
             qtr("Preferences file could not be saved") );
@@ -322,7 +322,7 @@ void PrefsDialog::reset()
     if( ret == QMessageBox::Ok )
     {
         config_ResetAll( p_intf );
-        config_SaveConfigFile( p_intf, NULL );
+        config_SaveConfigFile( p_intf );
         getSettings()->clear();
 
         accept();

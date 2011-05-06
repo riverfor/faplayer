@@ -2,7 +2,7 @@
  * dynamicoverlay.c : dynamic overlay plugin for vlc
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: caa5f752ce154b911532bbd57f7efd0f48d1def5 $
+ * $Id: 52dba04e8f3dbab1980aed66e9366fce09d77ef9 $
  *
  * Author: Søren Bøg <avacore@videolan.org>
  *
@@ -68,7 +68,7 @@ vlc_module_begin ()
     set_shortname( N_("Overlay" ))
     set_category( CAT_VIDEO )
     set_subcategory( SUBCAT_VIDEO_VFILTER )
-    set_capability( "sub filter", 0 )
+    set_capability( "sub source", 0 )
 
     add_loadfile( "overlay-input", NULL, INPUT_TEXT, INPUT_LONGTEXT,
                   false )
@@ -113,7 +113,7 @@ static int Create( vlc_object_t *p_this )
     p_sys->b_atomic = false;
     vlc_mutex_init( &p_sys->lock );
 
-    p_filter->pf_sub_filter = Filter;
+    p_filter->pf_sub_source = Filter;
 
     config_ChainParse( p_filter, "overlay-", ppsz_filter_options,
                        p_filter->p_cfg );

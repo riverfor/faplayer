@@ -2,7 +2,7 @@
  * control.h : vout internal control
  *****************************************************************************
  * Copyright (C) 2009-2010 Laurent Aimar
- * $Id: 742613438c2efb5b30b09689e6555031da0b830f $
+ * $Id: 343411b0dac908f2a8d9b4ae88a2597ab2ff9d4b $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -39,6 +39,7 @@ enum {
     VOUT_CONTROL_FLUSH_SUBPICTURE,      /* integer */
     VOUT_CONTROL_OSD_TITLE,             /* string */
     VOUT_CONTROL_CHANGE_FILTERS,        /* string */
+    VOUT_CONTROL_CHANGE_SUB_SOURCES,    /* string */
     VOUT_CONTROL_CHANGE_SUB_FILTERS,    /* string */
     VOUT_CONTROL_CHANGE_SUB_MARGIN,     /* integer */
 

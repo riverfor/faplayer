@@ -2,7 +2,7 @@
  * quartztext.c : Put text on the video, using Mac OS X Quartz Engine
  *****************************************************************************
  * Copyright (C) 2007, 2009 the VideoLAN team
- * $Id: 1f23e0d993814052460e409be121c9e129aa8976 $
+ * $Id: a0efdaebde0aac3432260f3a3bcd82e082eb231f $
  *
  * Authors: Bernie Purcell <bitmap@videolan.org>
  *
@@ -38,7 +38,7 @@
 
 #include <TargetConditionals.h>
 
-#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+#if TARGET_OS_IPHONE
 #include <CoreText/CoreText.h>
 #include <CoreGraphics/CoreGraphics.h>
 
@@ -1038,6 +1038,8 @@ static int RenderYUVA( filter_t *p_filter, subpicture_region_t *p_region,
     fmt.i_width = fmt.i_visible_width = i_width;
     fmt.i_height = fmt.i_visible_height = __MIN( i_height, i_textblock_height + VERTICAL_MARGIN * 2);
     fmt.i_x_offset = fmt.i_y_offset = 0;
+    fmt.i_sar_num = 1;
+    fmt.i_sar_den = 1;
 
     p_region->p_picture = picture_NewFromFormat( &fmt );
     if( !p_region->p_picture )

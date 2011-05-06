@@ -2,7 +2,7 @@
  * Controller.cpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: b2f09578eb6ddf04a4879611433b94593ca02304 $
+ * $Id: cc4e535af99add8325db3f5c0099826835494384 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -80,12 +80,10 @@ void ActionsManager::doAction( int id_action )
         case REVERSE_ACTION:
             THEMIM->getIM()->reverse(); break;
         case SKIP_BACK_ACTION:
-            var_SetInteger( p_intf->p_libvlc, "key-action",
-                    ACTIONID_JUMP_BACKWARD_SHORT );
+            skipBackward();
             break;
         case SKIP_FW_ACTION:
-            var_SetInteger( p_intf->p_libvlc, "key-action",
-                    ACTIONID_JUMP_FORWARD_SHORT );
+            skipForward();
             break;
         case QUIT_ACTION:
             THEDP->quit();  break;
@@ -185,5 +183,15 @@ void ActionsManager::AudioUp()
 void ActionsManager::AudioDown()
 {
     aout_VolumeDown( THEPL, 1, NULL );
+}
+
+void ActionsManager::skipForward()
+{
+    THEMIM->getIM()->jumpFwd();
+}
+
+void ActionsManager::skipBackward()
+{
+    THEMIM->getIM()->jumpBwd();
 }
 

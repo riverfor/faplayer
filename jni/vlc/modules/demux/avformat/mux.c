@@ -2,7 +2,7 @@
  * mux.c: muxer using ffmpeg (libavformat).
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: 19f49c8602d9b99d963758238ff16aa952db35f7 $
+ * $Id: f11c491947fd74b0355da4cc06741896cdb6d660 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -96,12 +96,20 @@ int OpenMux( vlc_object_t *p_this )
     psz_mux = var_GetNonEmptyString( p_mux, "ffmpeg-mux" );
     if( psz_mux )
     {
+#if( LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT( 52, 45, 0 ) )
+        file_oformat = av_guess_format( psz_mux, NULL, NULL );
+#else
         file_oformat = guess_format( psz_mux, NULL, NULL );
+#endif
     }
     else
     {
         file_oformat =
-            guess_format(NULL, p_mux->p_access->psz_path, NULL);
+#if( LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT( 52, 45, 0 ) )
+            av_guess_format( NULL, p_mux->p_access->psz_path, NULL);
+#else
+            guess_format( NULL, p_mux->p_access->psz_path, NULL);
+#endif
     }
     if (!file_oformat)
     {
@@ -116,7 +124,7 @@ int OpenMux( vlc_object_t *p_this )
     p_mux->pf_mux       = Mux;
     p_mux->p_sys = p_sys = malloc( sizeof( sout_mux_sys_t ) );
 
-    p_sys->oc = av_alloc_format_context();
+    p_sys->oc = avformat_alloc_context();
     p_sys->oc->oformat = file_oformat;
 
     /* Create I/O wrapper */
@@ -225,7 +233,7 @@ static int AddStream( sout_mux_t *p_mux, sout_input_t *p_input )
     switch( p_input->p_fmt->i_cat )
     {
     case AUDIO_ES:
-        codec->codec_type = CODEC_TYPE_AUDIO;
+        codec->codec_type = AVMEDIA_TYPE_AUDIO;
         codec->channels = p_input->p_fmt->audio.i_channels;
         codec->sample_rate = p_input->p_fmt->audio.i_rate;
         codec->time_base = (AVRational){1, codec->sample_rate};
@@ -240,7 +248,7 @@ static int AddStream( sout_mux_t *p_mux, sout_input_t *p_input )
             p_input->p_fmt->video.i_frame_rate = 25;
             p_input->p_fmt->video.i_frame_rate_base = 1;
         }
-        codec->codec_type = CODEC_TYPE_VIDEO;
+        codec->codec_type = AVMEDIA_TYPE_VIDEO;
         codec->width = p_input->p_fmt->video.i_width;
         codec->height = p_input->p_fmt->video.i_height;
         av_reduce( &codec->sample_aspect_ratio.num,
@@ -311,7 +319,7 @@ static int MuxBlock( sout_mux_t *p_mux, sout_input_t *p_input )
     pkt.size = p_data->i_buffer;
     pkt.stream_index = i_stream;
 
-    if( p_data->i_flags & BLOCK_FLAG_TYPE_I ) pkt.flags |= PKT_FLAG_KEY;
+    if( p_data->i_flags & BLOCK_FLAG_TYPE_I ) pkt.flags |= AV_PKT_FLAG_KEY;
 
     /* avformat expects pts/dts which start from 0 */
     p_data->i_dts -= p_mux->p_sys->i_initial_dts;

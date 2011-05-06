@@ -1,8 +1,8 @@
 /*****************************************************************************
  * intf.m: MacOS X interface module
  *****************************************************************************
- * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: b227981d28548a4fb0e67052e756c24f170f6f4a $
+ * Copyright (C) 2002-2011 the VideoLAN team
+ * $Id: f75bb1764c62400573ed18906b1b99d2550efada $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -34,6 +34,7 @@
 #include <vlc_keys.h>
 #include <vlc_dialog.h>
 #include <vlc_url.h>
+#include <vlc_modules.h>
 #include <unistd.h> /* execl() */
 
 #import "intf.h"
@@ -53,9 +54,9 @@
 #import "AppleRemote.h"
 #import "eyetv.h"
 #import "simple_prefs.h"
+#import "AudioEffects.h"
 
 #import <AddressBook/AddressBook.h>         /* for crashlog send mechanism */
-#import <IOKit/hidsystem/ev_keymap.h>         /* for the media key support */
 #import <Sparkle/Sparkle.h>                 /* we're the update delegate */
 
 /*****************************************************************************
@@ -64,9 +65,6 @@
 static void Run ( intf_thread_t *p_intf );
 
 static void * ManageThread( void *user_data );
-
-static unichar VLCKeyToCocoa( unsigned int i_key );
-static unsigned int VLCModifiersToCocoa( unsigned int i_key );
 
 static void updateProgressPanel (void *, const char *, float);
 static bool checkProgressPanel (void *);
@@ -353,7 +351,7 @@ static VLCMain *_o_sharedMainInstance = nil;
     o_wizard = [[VLCWizard alloc] init];
     o_extended = nil;
     o_bookmarks = [[VLCBookmarks alloc] init];
-    o_embedded_list = [[VLCEmbeddedList alloc] init];
+    //o_embedded_list = [[VLCEmbeddedList alloc] init];
     o_coredialogs = [[VLCCoreDialogProvider alloc] init];
     o_info = [[VLCInfo alloc] init];
 
@@ -366,7 +364,6 @@ static VLCMain *_o_sharedMainInstance = nil;
                                                                    object: @"VLCEyeTVSupport"
                                                                  userInfo: NULL
                                                        deliverImmediately: YES];
-
     return _o_sharedMainInstance;
 }
 
@@ -380,7 +377,7 @@ static VLCMain *_o_sharedMainInstance = nil;
 
 - (void)awakeFromNib
 {
-    unsigned int i_key = 0;
+    NSString* o_key;
     playlist_t *p_playlist;
     vlc_value_t val;
 
@@ -405,76 +402,76 @@ static VLCMain *_o_sharedMainInstance = nil;
     [toolbar setAutosavesConfiguration:YES];
     [o_window setToolbar:toolbar];
 
-    i_key = config_GetInt( p_intf, "key-quit" );
-    [o_mi_quit setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_quit setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-play-pause" );
-    [o_mi_play setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_play setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-stop" );
-    [o_mi_stop setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_stop setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-faster" );
-    [o_mi_faster setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_faster setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-slower" );
-    [o_mi_slower setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_slower setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-rate-normal" );
-    [o_mi_normalSpeed setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_normalSpeed setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-prev" );
-    [o_mi_previous setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_previous setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-next" );
-    [o_mi_next setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_next setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-jump+short" );
-    [o_mi_fwd setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_fwd setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-jump-short" );
-    [o_mi_bwd setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_bwd setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-jump+medium" );
-    [o_mi_fwd1m setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_fwd1m setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-jump-medium" );
-    [o_mi_bwd1m setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_bwd1m setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-jump+long" );
-    [o_mi_fwd5m setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_fwd5m setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-jump-long" );
-    [o_mi_bwd5m setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_bwd5m setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-vol-up" );
-    [o_mi_vol_up setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_vol_up setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-vol-down" );
-    [o_mi_vol_down setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_vol_down setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-vol-mute" );
-    [o_mi_mute setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_mute setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-toggle-fullscreen" );
-    [o_mi_fullscreen setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_fullscreen setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-snapshot" );
-    [o_mi_snapshot setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_snapshot setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-random" );
-    [o_mi_random setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_random setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-zoom-half" );
-    [o_mi_half_window setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_half_window setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-zoom-original" );
-    [o_mi_normal_window setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_normal_window setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-    i_key = config_GetInt( p_intf, "key-zoom-double" );
-    [o_mi_double_window setKeyEquivalent: [NSString stringWithFormat:@"%C", VLCKeyToCocoa( i_key )]];
-    [o_mi_double_window setKeyEquivalentModifierMask: VLCModifiersToCocoa(i_key)];
-
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-quit" )];
+    [o_mi_quit setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_quit setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-play-pause" )];
+    [o_mi_play setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_play setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-stop" )];
+    [o_mi_stop setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_stop setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-faster" )];
+    [o_mi_faster setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_faster setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-slower" )];
+    [o_mi_slower setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_slower setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-rate-normal" )];
+    [o_mi_normalSpeed setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_normalSpeed setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-prev" )];
+    [o_mi_previous setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_previous setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-next" )];
+    [o_mi_next setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_next setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-jump+short" )];
+    [o_mi_fwd setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_fwd setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-jump-short" )];
+    [o_mi_bwd setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_bwd setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-jump+medium" )];
+    [o_mi_fwd1m setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_fwd1m setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-jump-medium" )];
+    [o_mi_bwd1m setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_bwd1m setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-jump+long" )];
+    [o_mi_fwd5m setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_fwd5m setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-jump-long" )];
+    [o_mi_bwd5m setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_bwd5m setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-vol-up" )];
+    [o_mi_vol_up setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_vol_up setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-vol-down" )];
+    [o_mi_vol_down setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_vol_down setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-vol-mute" )];
+    [o_mi_mute setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_mute setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-toggle-fullscreen" )];
+    [o_mi_fullscreen setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_fullscreen setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-snapshot" )];
+    [o_mi_snapshot setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_snapshot setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-random" )];
+    [o_mi_random setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_random setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-zoom-half" )];
+    [o_mi_half_window setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_half_window setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-zoom-original" )];
+    [o_mi_normal_window setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_normal_window setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-zoom-double" )];
+    [o_mi_double_window setKeyEquivalent: [self VLCKeyToString: o_key]];
+    [o_mi_double_window setKeyEquivalentModifierMask: [self VLCModifiersToCocoa:o_key]];
+    
     var_Create( p_intf, "intf-change", VLC_VAR_BOOL );
 
     [self setSubmenusEnabled: FALSE];
@@ -543,16 +540,21 @@ static VLCMain *_o_sharedMainInstance = nil;
     /* take care of tint changes during runtime */
     o_img_play = [NSImage imageNamed: @"play"];
     o_img_pause = [NSImage imageNamed: @"pause"];
-    [self controlTintChanged];
-    [[NSNotificationCenter defaultCenter] addObserver: self
-                                             selector: @selector( controlTintChanged )
-                                                 name: NSControlTintDidChangeNotification
-                                               object: nil];
 
     /* init Apple Remote support */
     o_remote = [[AppleRemote alloc] init];
     [o_remote setClickCountEnabledButtons: kRemoteButtonPlay];
     [o_remote setDelegate: _o_sharedMainInstance];
+
+    /* init media key support */
+    o_mediaKeyController = [[SPMediaKeyTap alloc] initWithDelegate:self];
+    b_mediaKeySupport = config_GetInt( VLCIntf, "macosx-mediakeys" );
+    [o_mediaKeyController startWatchingMediaKeys];
+    [o_mediaKeyController setShouldInterceptMediaKeyEvents:b_mediaKeySupport];
+    [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(coreChangedMediaKeySupportSetting:) name: @"VLCMediaKeySupportSettingChanged" object: nil];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                             [SPMediaKeyTap defaultMediaKeyUserBundleIdentifiers], kMediaKeyUsingBundleIdentifiersDefaultsKey,
+                                                             nil]];
 
     /* yeah, we are done */
     nib_main_loaded = TRUE;
@@ -716,7 +718,7 @@ static VLCMain *_o_sharedMainInstance = nil;
     [o_mi_close_window setTitle: _NS("Close Window")];
     [o_mi_player setTitle: _NS("Player...")];
     [o_mi_controller setTitle: _NS("Controller...")];
-    [o_mi_equalizer setTitle: _NS("Equalizer...")];
+    [o_mi_audioeffects setTitle: _NS("Audio Effects...")];
     [o_mi_extended setTitle: _NS("Extended Controls...")];
     [o_mi_bookmarks setTitle: _NS("Bookmarks...")];
     [o_mi_playlist setTitle: _NS("Playlist...")];
@@ -816,12 +818,6 @@ static VLCMain *_o_sharedMainInstance = nil;
     /* make sure that the current volume is saved */
     config_PutInt( p_intf->p_libvlc, "volume", i_lastShownVolume );
 
-    /* save the prefs if they were changed in the extended panel */
-    if(o_extended && [o_extended configChanged])
-    {
-        [o_extended savePrefs];
-    }
-
     /* unsubscribe from the interactive dialogues */
     dialog_Unregister( p_intf );
     var_DelCallback( p_intf, "dialog-error", DialogCallback, self );
@@ -848,9 +844,10 @@ static VLCMain *_o_sharedMainInstance = nil;
         [o_open release];
 
     if( nib_extended_loaded )
-    {
         [o_extended release];
-    }
+
+    if (nib_audioeffects_loaded)
+        [o_audioeffects release];
 
     if( nib_bookmarks_loaded )
         [o_bookmarks release];
@@ -973,49 +970,54 @@ static NSString * VLCToolbarMediaControl     = @"VLCToolbarMediaControl";
 }
 
 #pragma mark -
-#pragma mark Other notification
+#pragma mark Media Key support
 
-- (void)controlTintChanged
+-(void)mediaKeyTap:(SPMediaKeyTap*)keyTap receivedMediaKeyEvent:(NSEvent*)event
 {
-    BOOL b_playing = NO;
+    if( b_mediaKeySupport )
+       {
+        assert([event type] == NSSystemDefined && [event subtype] == SPSystemDefinedEventMediaKeys);
 
-    if( [o_btn_play alternateImage] == o_img_play_pressed )
-        b_playing = YES;
+        int keyCode = (([event data1] & 0xFFFF0000) >> 16);
+        int keyFlags = ([event data1] & 0x0000FFFF);
+        int keyState = (((keyFlags & 0xFF00) >> 8)) == 0xA;
+        int keyRepeat = (keyFlags & 0x1);
 
-    if( [NSColor currentControlTint] == NSGraphiteControlTint )
-    {
-        o_img_play_pressed = [NSImage imageNamed: @"play_graphite"];
-        o_img_pause_pressed = [NSImage imageNamed: @"pause_graphite"];
+        if( keyCode == NX_KEYTYPE_PLAY && keyState == 0 )
+            var_SetInteger( p_intf->p_libvlc, "key-action", ACTIONID_PLAY_PAUSE );
 
-        [o_btn_prev setAlternateImage: [NSImage imageNamed: @"previous_graphite"]];
-        [o_btn_rewind setAlternateImage: [NSImage imageNamed: @"skip_previous_graphite"]];
-        [o_btn_stop setAlternateImage: [NSImage imageNamed: @"stop_graphite"]];
-        [o_btn_ff setAlternateImage: [NSImage imageNamed: @"skip_forward_graphite"]];
-        [o_btn_next setAlternateImage: [NSImage imageNamed: @"next_graphite"]];
-        [o_btn_fullscreen setAlternateImage: [NSImage imageNamed: @"fullscreen_graphite"]];
-        [o_btn_playlist setAlternateImage: [NSImage imageNamed: @"playlistdrawer_graphite"]];
-        [o_btn_equalizer setAlternateImage: [NSImage imageNamed: @"equalizerdrawer_graphite"]];
+        if( keyCode == NX_KEYTYPE_FAST && !b_mediakeyJustJumped )
+        {
+            if( keyState == 0 && keyRepeat == 0 )
+                var_SetInteger( p_intf->p_libvlc, "key-action", ACTIONID_NEXT );
+            else if( keyRepeat == 1 )
+            {
+                var_SetInteger( p_intf->p_libvlc, "key-action", ACTIONID_JUMP_FORWARD_SHORT );
+                b_mediakeyJustJumped = YES;
+                [self performSelector:@selector(resetMediaKeyJump)
+                           withObject: NULL
+                           afterDelay:0.25];
+            }
+        }
+
+        if( keyCode == NX_KEYTYPE_REWIND && !b_mediakeyJustJumped )
+        {
+            if( keyState == 0 && keyRepeat == 0 )
+                var_SetInteger( p_intf->p_libvlc, "key-action", ACTIONID_PREV );
+            else if( keyRepeat == 1 )
+            {
+                var_SetInteger( p_intf->p_libvlc, "key-action", ACTIONID_JUMP_BACKWARD_SHORT );
+                b_mediakeyJustJumped = YES;
+                [self performSelector:@selector(resetMediaKeyJump)
+                           withObject: NULL
+                           afterDelay:0.25];
+            }
+        }
     }
-    else
-    {
-        o_img_play_pressed = [NSImage imageNamed: @"play_blue"];
-        o_img_pause_pressed = [NSImage imageNamed: @"pause_blue"];
-
-        [o_btn_prev setAlternateImage: [NSImage imageNamed: @"previous_blue"]];
-        [o_btn_rewind setAlternateImage: [NSImage imageNamed: @"skip_previous_blue"]];
-        [o_btn_stop setAlternateImage: [NSImage imageNamed: @"stop_blue"]];
-        [o_btn_ff setAlternateImage: [NSImage imageNamed: @"skip_forward_blue"]];
-        [o_btn_next setAlternateImage: [NSImage imageNamed: @"next_blue"]];
-        [o_btn_fullscreen setAlternateImage: [NSImage imageNamed: @"fullscreen_blue"]];
-        [o_btn_playlist setAlternateImage: [NSImage imageNamed: @"playlistdrawer_blue"]];
-        [o_btn_equalizer setAlternateImage: [NSImage imageNamed: @"equalizerdrawer_blue"]];
-    }
-
-    if( b_playing )
-        [o_btn_play setAlternateImage: o_img_play_pressed];
-    else
-        [o_btn_play setAlternateImage: o_img_pause_pressed];
 }
+
+#pragma mark -
+#pragma mark Other notification
 
 /* Listen to the remote in exclusive mode, only when VLC is the active
    application */
@@ -1297,20 +1299,6 @@ static struct
     {0,0}
 };
 
-static unichar VLCKeyToCocoa( unsigned int i_key )
-{
-    unsigned int i;
-
-    for( i = 0; nskeys_to_vlckeys[i].i_vlckey != 0; i++ )
-    {
-        if( nskeys_to_vlckeys[i].i_vlckey == (i_key & ~KEY_MODIFIER) )
-        {
-            return nskeys_to_vlckeys[i].i_nskey;
-        }
-    }
-    return (unichar)(i_key & ~KEY_MODIFIER);
-}
-
 unsigned int CocoaKeyToVLC( unichar i_key )
 {
     unsigned int i;
@@ -1325,19 +1313,34 @@ unsigned int CocoaKeyToVLC( unichar i_key )
     return (unsigned int)i_key;
 }
 
-static unsigned int VLCModifiersToCocoa( unsigned int i_key )
+- (unsigned int)VLCModifiersToCocoa:(NSString *)theString
 {
     unsigned int new = 0;
-    if( i_key & KEY_MODIFIER_COMMAND )
+
+    if([theString rangeOfString:@"Command"].location != NSNotFound)
         new |= NSCommandKeyMask;
-    if( i_key & KEY_MODIFIER_ALT )
+    if([theString rangeOfString:@"Alt"].location != NSNotFound)
         new |= NSAlternateKeyMask;
-    if( i_key & KEY_MODIFIER_SHIFT )
+    if([theString rangeOfString:@"Shift"].location != NSNotFound)
         new |= NSShiftKeyMask;
-    if( i_key & KEY_MODIFIER_CTRL )
+    if([theString rangeOfString:@"Ctrl"].location != NSNotFound)
         new |= NSControlKeyMask;
     return new;
 }
+
+- (NSString *)VLCKeyToString:(NSString *)theString
+{
+    if (![theString isEqualToString:@""]) {
+        theString = [theString stringByReplacingOccurrencesOfString:@"Command" withString:@""];
+        theString = [theString stringByReplacingOccurrencesOfString:@"Alt" withString:@""];
+        theString = [theString stringByReplacingOccurrencesOfString:@"Shift" withString:@""];
+        theString = [theString stringByReplacingOccurrencesOfString:@"Ctrl" withString:@""];
+        theString = [theString stringByReplacingOccurrencesOfString:@"+" withString:@""];
+        theString = [theString stringByReplacingOccurrencesOfString:@"-" withString:@""];
+    }
+    return theString;
+}
+
 
 /*****************************************************************************
  * hasDefinedShortcutKey: Check to see if the key press is a defined VLC
@@ -1351,21 +1354,38 @@ static unsigned int VLCModifiersToCocoa( unsigned int i_key )
     unsigned int i_pressed_modifiers = 0;
     const struct hotkey *p_hotkeys;
     int i;
-
+    NSMutableString *tempString = [[[NSMutableString alloc] init] autorelease];
+    NSMutableString *tempStringPlus = [[[NSMutableString alloc] init] autorelease];
+    
     val.i_int = 0;
     p_hotkeys = p_intf->p_libvlc->p_hotkeys;
 
     i_pressed_modifiers = [o_event modifierFlags];
 
-    if( i_pressed_modifiers & NSShiftKeyMask )
+    if( i_pressed_modifiers & NSShiftKeyMask ) {
         val.i_int |= KEY_MODIFIER_SHIFT;
-    if( i_pressed_modifiers & NSControlKeyMask )
+        [tempString appendString:@"Shift-"];
+        [tempStringPlus appendString:@"Shift+"];
+    }
+    if( i_pressed_modifiers & NSControlKeyMask ) {
         val.i_int |= KEY_MODIFIER_CTRL;
-    if( i_pressed_modifiers & NSAlternateKeyMask )
+        [tempString appendString:@"Ctrl-"];
+        [tempStringPlus appendString:@"Ctrl+"];
+    }
+    if( i_pressed_modifiers & NSAlternateKeyMask ) {
         val.i_int |= KEY_MODIFIER_ALT;
-    if( i_pressed_modifiers & NSCommandKeyMask )
+        [tempString appendString:@"Alt-"];
+        [tempStringPlus appendString:@"Alt+"];
+    }
+    if( i_pressed_modifiers & NSCommandKeyMask ) {
         val.i_int |= KEY_MODIFIER_COMMAND;
-
+        [tempString appendString:@"Command-"];
+        [tempStringPlus appendString:@"Command+"];
+    }
+    
+    [tempString appendString:[[o_event charactersIgnoringModifiers] lowercaseString]];
+    [tempStringPlus appendString:[[o_event charactersIgnoringModifiers] lowercaseString]];
+    
     key = [[o_event charactersIgnoringModifiers] characterAtIndex: 0];
 
     switch( key )
@@ -1385,17 +1405,43 @@ static unsigned int VLCModifiersToCocoa( unsigned int i_key )
 
     val.i_int |= CocoaKeyToVLC( key );
 
-    for( i = 0; p_hotkeys[i].psz_action != NULL; i++ )
+    if( [o_usedHotkeys indexOfObject: tempString] != NSNotFound || [o_usedHotkeys indexOfObject: tempStringPlus] != NSNotFound )
     {
-        if( p_hotkeys[i].i_key == val.i_int )
-        {
-            var_Set( p_intf->p_libvlc, "key-pressed", val );
-            return YES;
-        }
+        var_SetInteger( p_intf->p_libvlc, "key-pressed", val.i_int );
+        return YES;
     }
 
     return NO;
 }
+
+- (void)updateCurrentlyUsedHotkeys
+{
+    NSMutableArray *o_tempArray = [[NSMutableArray alloc] init];
+    /* Get the main Module */
+    module_t *p_main = module_get_main();
+    assert( p_main );
+    unsigned confsize;
+    module_config_t *p_config;
+    
+    p_config = module_config_get (p_main, &confsize);
+    
+    for (size_t i = 0; i < confsize; i++)
+    {
+        module_config_t *p_item = p_config + i;
+        
+        if( (p_item->i_type & CONFIG_ITEM) && p_item->psz_name != NULL
+           && !strncmp( p_item->psz_name , "key-", 4 )
+           && !EMPTY_STR( p_item->psz_text ) )
+        {
+            if (p_item->value.psz)
+                [o_tempArray addObject: [NSString stringWithUTF8String:p_item->value.psz]];
+        }
+    }
+    module_config_free (p_config);
+    module_release (p_main);
+    o_usedHotkeys = [[NSArray alloc] initWithArray: o_usedHotkeys copyItems: YES];    
+}
+
 
 #pragma mark -
 #pragma mark Other objects getters
@@ -1625,7 +1671,7 @@ static void manage_cleanup( void * args )
     audio_volume_t i_volume;
     playlist_t * p_playlist = pl_Get( p_intf );
 
-    aout_VolumeGet( p_playlist, &i_volume );
+    i_volume = aout_VolumeGet( p_playlist );
 
     if( i_volume != i_lastShownVolume )
     {
@@ -2204,6 +2250,17 @@ end:
     [o_extended showPanel];
 }
 
+- (IBAction)showAudioEffects:(id)sender
+{
+    if (!o_audioeffects)
+        o_audioeffects = [[VLCAudioEffects alloc] init];
+
+    if (!nib_audioeffects_loaded)
+        nib_audioeffects_loaded = [NSBundle loadNibNamed:@"AudioEffects" owner:NSApp];
+
+    [o_audioeffects toggleWindow:sender];
+}
+
 - (IBAction)showBookmarks:(id)sender
 {
     /* we need the wizard-nib for the bookmarks's extract functionality */
@@ -2593,7 +2650,7 @@ end:
     [saveFolderPanel setCanChooseFiles: YES];
     [saveFolderPanel setCanSelectHiddenExtension: NO];
     [saveFolderPanel setCanCreateDirectories: YES];
-    [saveFolderPanel setRequiredFileType: @"rtfd"];
+    [saveFolderPanel setAllowedFileTypes: [NSArray arrayWithObject:@"rtfd"]];
     [saveFolderPanel beginSheetForDirectory:nil file: [NSString stringWithFormat: _NS("VLC Debug Log (%s).rtfd"), VERSION_MESSAGE] modalForWindow: o_msgs_panel modalDelegate:self didEndSelector:@selector(saveDebugLogAsRTF:returnCode:contextInfo:) contextInfo:nil];
 }
 
@@ -2602,7 +2659,7 @@ end:
     BOOL b_returned;
     if( returnCode == NSOKButton )
     {
-        b_returned = [o_messages writeRTFDToFile: [sheet filename] atomically: YES];
+        b_returned = [o_messages writeRTFDToFile: [[sheet URL] path] atomically: YES];
         if(! b_returned )
             msg_Warn( p_intf, "Error while saving the debug log" );
     }
@@ -2828,103 +2885,23 @@ end:
     [o_inv invoke];
     [o_lock unlockWithCondition: 1];
 }
+- (void)resetMediaKeyJump
+{
+    b_mediakeyJustJumped = NO;
+}
+- (void)coreChangedMediaKeySupportSetting: (NSNotification *)o_notification
+{
+    b_mediaKeySupport = config_GetInt( VLCIntf, "macosx-mediakeys" );
+    [o_mediaKeyController setShouldInterceptMediaKeyEvents:b_mediaKeySupport];
+}
 
 @end
 
 /*****************************************************************************
  * VLCApplication interface
- * exclusively used to implement media key support on Al Apple keyboards
- *   b_justJumped is required as the keyboard send its events faster than
- *    the user can actually jump through his media
  *****************************************************************************/
 
 @implementation VLCApplication
-
-- (void)awakeFromNib
-{
-	b_active = b_mediaKeySupport = config_GetInt( VLCIntf, "macosx-mediakeys" );
-    b_activeInBackground = config_GetInt( VLCIntf, "macosx-mediakeys-background" );
-    [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(coreChangedMediaKeySupportSetting:) name: @"VLCMediaKeySupportSettingChanged" object: nil];
-    [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(appGotActiveOrInactive:) name: @"NSApplicationDidBecomeActiveNotification" object: nil];
-    [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(appGotActiveOrInactive:) name: @"NSApplicationWillResignActiveNotification" object: nil];
-}
-
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver: self];
-    [super dealloc];
-}
-
-- (void)appGotActiveOrInactive: (NSNotification *)o_notification
-{
-    if(( [[o_notification name] isEqualToString: @"NSApplicationWillResignActiveNotification"] && !b_activeInBackground ) || !b_mediaKeySupport)
-        b_active = NO;
-    else
-        b_active = YES;
-}
-
-- (void)coreChangedMediaKeySupportSetting: (NSNotification *)o_notification
-{
-    b_active = b_mediaKeySupport = config_GetInt( VLCIntf, "macosx-mediakeys" );
-    b_activeInBackground = config_GetInt( VLCIntf, "macosx-mediakeys-background" );
-}
-
-
-- (void)sendEvent: (NSEvent*)event
-{
-    if( b_active )
-	{
-        if( [event type] == NSSystemDefined && [event subtype] == 8 )
-        {
-            int keyCode = (([event data1] & 0xFFFF0000) >> 16);
-            int keyFlags = ([event data1] & 0x0000FFFF);
-            int keyState = (((keyFlags & 0xFF00) >> 8)) == 0xA;
-            int keyRepeat = (keyFlags & 0x1);
-
-            if( keyCode == NX_KEYTYPE_PLAY && keyState == 0 )
-                var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_PLAY_PAUSE );
-
-            if( keyCode == NX_KEYTYPE_FAST && !b_justJumped )
-            {
-                if( keyState == 0 && keyRepeat == 0 )
-                {
-                    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_NEXT );
-                }
-                else if( keyRepeat == 1 )
-                {
-                    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_FORWARD_SHORT );
-                    b_justJumped = YES;
-                    [self performSelector:@selector(resetJump)
-                               withObject: NULL
-                               afterDelay:0.25];
-                }
-            }
-
-            if( keyCode == NX_KEYTYPE_REWIND && !b_justJumped )
-            {
-                if( keyState == 0 && keyRepeat == 0 )
-                {
-                    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_PREV );
-                }
-                else if( keyRepeat == 1 )
-                {
-                    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_BACKWARD_SHORT );
-                    b_justJumped = YES;
-                    [self performSelector:@selector(resetJump)
-                               withObject: NULL
-                               afterDelay:0.25];
-                }
-            }
-        }
-    }
-	[super sendEvent: event];
-}
-
-- (void)resetJump
-{
-    b_justJumped = NO;
-}
-
 // when user selects the quit menu from dock it sends a terminate:
 // but we need to send a stop: to properly exits libvlc.
 // However, we are not able to change the action-method sent by this standard menu item.
@@ -2932,6 +2909,7 @@ end:
 // see [af97f24d528acab89969d6541d83f17ce1ecd580] that introduced the removal of setjmp() and longjmp() 
 - (void)terminate:(id)sender
 {
+    [self activateIgnoringOtherApps:YES];
     [self stop:sender];
 }
 

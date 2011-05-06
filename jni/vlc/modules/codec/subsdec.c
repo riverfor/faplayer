@@ -2,7 +2,7 @@
  * subsdec.c : text subtitles decoder
  *****************************************************************************
  * Copyright (C) 2000-2006 the VideoLAN team
- * $Id: 21f2211cd7053c4822b775991d4ec770a647f5a5 $
+ * $Id: 48abf5e1ce80c3c1c9d41f05d7dfb7cb9f0ed103 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Samuel Hocevar <sam@zoy.org>
@@ -31,20 +31,12 @@
 # include "config.h"
 #endif
 
-#include "subsdec.h"
+#include <vlc_common.h>
 #include <vlc_plugin.h>
+#include <vlc_codec.h>
+#include <vlc_charset.h>
 
-/*****************************************************************************
- * Local prototypes
- *****************************************************************************/
-static int  OpenDecoder   ( vlc_object_t * );
-static void CloseDecoder  ( vlc_object_t * );
-
-static subpicture_t   *DecodeBlock   ( decoder_t *, block_t ** );
-static subpicture_t   *ParseText     ( decoder_t *, block_t * );
-static char           *StripTags      ( char * );
-static char           *CreateHtmlSubtitle( int *pi_align, char * );
-
+#include "substext.h"
 
 /*****************************************************************************
  * Module descriptor.
@@ -162,31 +154,6 @@ static const char *const ppsz_encoding_names[] = {
     N_("Vietnamese (VISCII)"),
     N_("Vietnamese (Windows-1258)"),
 };
-/*
-SSA supports charset selection.
-The following known charsets are used:
-
-0 = Ansi - Western European
-1 = default
-2 = symbol
-3 = invalid
-77 = Mac
-128 = Japanese (Shift JIS)
-129 = Hangul
-130 = Johab
-134 = GB2312 Simplified Chinese
-136 = Big5 Traditional Chinese
-161 = Greek
-162 = Turkish
-163 = Vietnamese
-177 = Hebrew
-178 = Arabic
-186 = Baltic
-204 = Russian (Cyrillic)
-222 = Thai
-238 = Eastern European
-254 = PC 437
-*/
 
 static const int  pi_justification[] = { 0, 1, 2 };
 static const char *const ppsz_justification_text[] = {
@@ -203,6 +170,8 @@ static const char *const ppsz_justification_text[] = {
 #define FORMAT_LONGTEXT N_("Some subtitle formats allow for text formatting. " \
  "VLC partly implements this, but you can choose to disable all formatting.")
 
+static int  OpenDecoder   ( vlc_object_t * );
+static void CloseDecoder  ( vlc_object_t * );
 
 vlc_module_begin ()
     set_shortname( N_("Subtitles"))
@@ -225,6 +194,25 @@ vlc_module_begin ()
 vlc_module_end ()
 
 /*****************************************************************************
+ * Local prototypes
+ *****************************************************************************/
+#define NO_BREAKING_SPACE  "&#160;"
+
+struct decoder_sys_t
+{
+    int                 i_align;          /* Subtitles alignment on the vout */
+
+    vlc_iconv_t         iconv_handle;            /* handle to iconv instance */
+    bool                b_autodetect_utf8;
+};
+
+
+static subpicture_t   *DecodeBlock   ( decoder_t *, block_t ** );
+static subpicture_t   *ParseText     ( decoder_t *, block_t * );
+static char           *StripTags      ( char * );
+static char           *CreateHtmlSubtitle( int *pi_align, char * );
+
+/*****************************************************************************
  * OpenDecoder: probe the decoder and return score
  *****************************************************************************
  * Tries to launch a decoder and return score so that the interface is able
@@ -238,7 +226,6 @@ static int OpenDecoder( vlc_object_t *p_this )
     switch( p_dec->fmt_in.i_codec )
     {
         case VLC_CODEC_SUBT:
-        case VLC_CODEC_SSA:
         case VLC_CODEC_ITU_T140:
             break;
         default:
@@ -258,11 +245,6 @@ static int OpenDecoder( vlc_object_t *p_this )
     p_sys->i_align = 0;
     p_sys->iconv_handle = (vlc_iconv_t)-1;
     p_sys->b_autodetect_utf8 = false;
-    p_sys->b_ass = false;
-    p_sys->i_original_height = -1;
-    p_sys->i_original_width = -1;
-    TAB_INIT( p_sys->i_ssa_styles, p_sys->pp_ssa_styles );
-    TAB_INIT( p_sys->i_images, p_sys->pp_images );
 
     char *psz_charset = NULL;
 
@@ -337,13 +319,6 @@ static int OpenDecoder( vlc_object_t *p_this )
 
     p_sys->i_align = var_InheritInteger( p_dec, "subsdec-align" );
 
-    if( p_dec->fmt_in.i_codec == VLC_CODEC_SSA
-     && var_InheritBool( p_dec, "subsdec-formatted" ) )
-    {
-        if( p_dec->fmt_in.i_extra > 0 )
-            ParseSSAHeader( p_dec );
-    }
-
     return VLC_SUCCESS;
 }
 
@@ -386,37 +361,6 @@ static void CloseDecoder( vlc_object_t *p_this )
     if( p_sys->iconv_handle != (vlc_iconv_t)-1 )
         vlc_iconv_close( p_sys->iconv_handle );
 
-    if( p_sys->pp_ssa_styles )
-    {
-        int i;
-        for( i = 0; i < p_sys->i_ssa_styles; i++ )
-        {
-            if( !p_sys->pp_ssa_styles[i] )
-                continue;
-
-            free( p_sys->pp_ssa_styles[i]->psz_stylename );
-            free( p_sys->pp_ssa_styles[i]->font_style.psz_fontname );
-            free( p_sys->pp_ssa_styles[i] );
-        }
-        TAB_CLEAN( p_sys->i_ssa_styles, p_sys->pp_ssa_styles );
-    }
-    if( p_sys->pp_images )
-    {
-        int i;
-        for( i = 0; i < p_sys->i_images; i++ )
-        {
-            if( !p_sys->pp_images[i] )
-                continue;
-
-            if( p_sys->pp_images[i]->p_pic )
-                picture_Release( p_sys->pp_images[i]->p_pic );
-            free( p_sys->pp_images[i]->psz_filename );
-
-            free( p_sys->pp_images[i] );
-        }
-        TAB_CLEAN( p_sys->i_images, p_sys->pp_images );
-    }
-
     free( p_sys );
 }
 
@@ -428,7 +372,6 @@ static subpicture_t *ParseText( decoder_t *p_dec, block_t *p_block )
     decoder_sys_t *p_sys = p_dec->p_sys;
     subpicture_t *p_spu = NULL;
     char *psz_subtitle = NULL;
-    video_format_t fmt;
 
     /* We cannot display a subpicture with no date */
     if( p_block->i_pts <= VLC_TS_INVALID )
@@ -507,82 +450,27 @@ static subpicture_t *ParseText( decoder_t *p_dec, block_t *p_block )
     }
 
     /* Create the subpicture unit */
-    p_spu = decoder_NewSubpicture( p_dec, NULL );
+    p_spu = decoder_NewSubpictureText( p_dec );
     if( !p_spu )
     {
-        msg_Warn( p_dec, "can't get spu buffer" );
         free( psz_subtitle );
         return NULL;
     }
+    p_spu->i_start    = p_block->i_pts;
+    p_spu->i_stop     = p_block->i_pts + p_block->i_length;
+    p_spu->b_ephemer  = (p_block->i_length == 0);
+    p_spu->b_absolute = false;
 
-    /* Create a new subpicture region */
-    memset( &fmt, 0, sizeof(video_format_t) );
-    fmt.i_chroma = VLC_CODEC_TEXT;
-    fmt.i_width = fmt.i_height = 0;
-    fmt.i_x_offset = fmt.i_y_offset = 0;
-    p_spu->p_region = subpicture_region_New( &fmt );
-    if( !p_spu->p_region )
-    {
-        msg_Err( p_dec, "cannot allocate SPU region" );
-        free( psz_subtitle );
-        decoder_DeleteSubpicture( p_dec, p_spu );
-        return NULL;
-    }
+    subpicture_updater_sys_t *p_spu_sys = p_spu->updater.p_sys;
 
-    /* Decode and format the subpicture unit */
-    if( p_dec->fmt_in.i_codec != VLC_CODEC_SSA )
-    {
-        /* Normal text subs, easy markup */
-        p_spu->p_region->i_align = SUBPICTURE_ALIGN_BOTTOM | p_sys->i_align;
-        p_spu->p_region->i_x = p_sys->i_align ? 20 : 0;
-        p_spu->p_region->i_y = 10;
+    p_spu_sys->align = SUBPICTURE_ALIGN_BOTTOM | p_sys->i_align;
+    p_spu_sys->text  = StripTags( psz_subtitle );
+    if( var_InheritBool( p_dec, "subsdec-formatted" ) )
+        p_spu_sys->html = CreateHtmlSubtitle( &p_spu_sys->align, psz_subtitle );
 
-        /* Remove formatting from string */
-
-        p_spu->p_region->psz_text = StripTags( psz_subtitle );
-        if( var_InheritBool( p_dec, "subsdec-formatted" ) )
-        {
-            p_spu->p_region->psz_html = CreateHtmlSubtitle( &p_spu->p_region->i_align, psz_subtitle );
-        }
-
-        p_spu->i_start = p_block->i_pts;
-        p_spu->i_stop = p_block->i_pts + p_block->i_length;
-        p_spu->b_ephemer = (p_block->i_length == 0);
-        p_spu->b_absolute = false;
-    }
-    else
-    {
-        /* Decode SSA/USF strings */
-        ParseSSAString( p_dec, psz_subtitle, p_spu );
-
-        p_spu->i_start = p_block->i_pts;
-        p_spu->i_stop = p_block->i_pts + p_block->i_length;
-        p_spu->b_ephemer = (p_block->i_length == 0);
-        p_spu->b_absolute = false;
-        p_spu->i_original_picture_width = p_sys->i_original_width;
-        p_spu->i_original_picture_height = p_sys->i_original_height;
-    }
     free( psz_subtitle );
 
     return p_spu;
-}
-
-char* GotoNextLine( char *psz_text )
-{
-    char *p_newline = psz_text;
-
-    while( p_newline[0] != '\0' )
-    {
-        if( p_newline[0] == '\n' || p_newline[0] == '\r' )
-        {
-            p_newline++;
-            while( p_newline[0] == '\n' || p_newline[0] == '\r' )
-                p_newline++;
-            break;
-        }
-        else p_newline++;
-    }
-    return p_newline;
 }
 
 /* Function now handles tags with attribute values, and tries

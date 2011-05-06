@@ -353,7 +353,6 @@ modules/codec/dvbsub.c
 modules/codec/faad.c
 modules/codec/flac.c
 modules/codec/fluidsynth.c
-modules/codec/invmem.c
 modules/codec/kate.c
 modules/codec/libass.c
 modules/codec/libmpeg2.c
@@ -375,9 +374,7 @@ modules/codec/speex.c
 modules/codec/spudec/parse.c
 modules/codec/spudec/spudec.c
 modules/codec/spudec/spudec.h
-modules/codec/subsass.c
 modules/codec/subsdec.c
-modules/codec/subsdec.h
 modules/codec/subsusf.c
 modules/codec/t140.c
 modules/codec/svcdsub.c
@@ -401,13 +398,6 @@ modules/control/gestures.c
 modules/control/globalhotkeys/win32.c
 modules/control/globalhotkeys/xcb.c
 modules/control/hotkeys.c
-modules/control/http/http.c
-modules/control/http/http.h
-modules/control/http/macro.c
-modules/control/http/macros.h
-modules/control/http/mvar.c
-modules/control/http/rpn.c
-modules/control/http/util.c
 modules/control/lirc.c
 modules/control/motion.c
 modules/control/netsync.c
@@ -1068,7 +1058,9 @@ modules/video_filter/clone.c
 modules/video_filter/colorthres.c
 modules/video_filter/crop.c
 modules/video_filter/croppadd.c
-modules/video_filter/deinterlace.c
+modules/video_filter/deinterlace/algo_phosphor.h
+modules/video_filter/deinterlace/deinterlace.c
+modules/video_filter/deinterlace/deinterlace.h
 modules/video_filter/dynamicoverlay/dynamicoverlay.c
 modules/video_filter/dynamicoverlay/dynamicoverlay.h
 modules/video_filter/dynamicoverlay/dynamicoverlay_buffer.c
@@ -1088,7 +1080,6 @@ modules/video_filter/logo.c
 modules/video_filter/magnify.c
 modules/video_filter/marq.c
 modules/video_filter/mirror.c
-modules/video_filter/mmx.h
 modules/video_filter/mosaic.c
 modules/video_filter/mosaic.h
 modules/video_filter/motionblur.c
@@ -1113,7 +1104,6 @@ modules/video_filter/scene.c
 modules/video_filter/sepia.c
 modules/video_filter/sharpen.c
 modules/video_filter/swscale.c
-modules/video_filter/swscale_omap.c
 modules/video_filter/transform.c
 modules/video_filter/wall.c
 modules/video_filter/wave.c

@@ -1,8 +1,8 @@
 /*****************************************************************************
  * Upnp.cpp :  UPnP discovery module (libupnp)
  *****************************************************************************
- * Copyright (C) 2004-2008 the VideoLAN team
- * $Id: 27eb8083bcde5a6bec665b2f3635b0aeacb8b4cc $
+ * Copyright (C) 2004-2011 the VideoLAN team
+ * $Id: 05d79ae4596eb893e804a7800bc1e7d6601faa24 $
  *
  * Authors: Rémi Denis-Courmont <rem # videolan.org> (original plugin)
  *          Christian Henz <henz # c-lab.de>
@@ -25,9 +25,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-/*
-  \TODO: Debug messages: "__FILE__, __LINE__" ok ???, Wrn/Err ???
-*/
+#define __STDC_CONSTANT_MACROS 1
+
 #undef PACKAGE_NAME
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -40,11 +39,15 @@
 
 #include <assert.h>
 
-// Constants
+/*
+ * Constants
+*/
 const char* MEDIA_SERVER_DEVICE_TYPE = "urn:schemas-upnp-org:device:MediaServer:1";
 const char* CONTENT_DIRECTORY_SERVICE_TYPE = "urn:schemas-upnp-org:service:ContentDirectory:1";
 
-// VLC handle
+/*
+ * VLC handle
+ */
 struct services_discovery_sys_t
 {
     UpnpClient_Handle client_handle;
@@ -52,13 +55,16 @@ struct services_discovery_sys_t
     vlc_mutex_t callback_lock;
 };
 
-// VLC callback prototypes
+/*
+ * VLC callback prototypes
+ */
 static int Open( vlc_object_t* );
 static void Close( vlc_object_t* );
-VLC_SD_PROBE_HELPER("upnp", "Universal Plug'n'Play", SD_CAT_LAN)
+VLC_SD_PROBE_HELPER( "upnp", "Universal Plug'n'Play", SD_CAT_LAN )
 
-// Module descriptor
-
+/*
+ * Module descriptor
+ */
 vlc_module_begin();
     set_shortname( "UPnP" );
     set_description( N_( "Universal Plug'n'Play" ) );
@@ -70,19 +76,23 @@ vlc_module_begin();
     VLC_SD_PROBE_SUBMODULE
 vlc_module_end();
 
-
-// More prototypes...
-
+/*
+ * Local prototypes
+ */
 static int Callback( Upnp_EventType event_type, void* p_event, void* p_user_data );
 
 const char* xml_getChildElementValue( IXML_Element* p_parent,
                                       const char*   psz_tag_name );
 
+const char* xml_getChildElementAttributeValue( IXML_Element* p_parent,
+                                        const char* psz_tag_name_,
+                                        const char* psz_attribute_ );
+
 IXML_Document* parseBrowseResult( IXML_Document* p_doc );
 
-
-// VLC callbacks...
-
+/*
+ * Initializes UPNP instance.
+ */
 static int Open( vlc_object_t *p_this )
 {
     int i_res;
@@ -90,13 +100,16 @@ static int Open( vlc_object_t *p_this )
     services_discovery_sys_t *p_sys  = ( services_discovery_sys_t * )
             calloc( 1, sizeof( services_discovery_sys_t ) );
 
-    if(!(p_sd->p_sys = p_sys))
+    if( !( p_sd->p_sys = p_sys ) )
         return VLC_ENOMEM;
 
+    /* Initialize on first IPv4-capable adapter and first open port
+     * TODO: use UpnpInit2() to utilize IPv6.
+     */
     i_res = UpnpInit( 0, 0 );
     if( i_res != UPNP_E_SUCCESS )
     {
-        msg_Err( p_sd, "%s", UpnpGetErrorMessage( i_res ) );
+        msg_Err( p_sd, "Initialization failed: %s", UpnpGetErrorMessage( i_res ) );
         free( p_sys );
         return VLC_EGENERIC;
     }
@@ -104,19 +117,21 @@ static int Open( vlc_object_t *p_this )
     p_sys->p_server_list = new MediaServerList( p_sd );
     vlc_mutex_init( &p_sys->callback_lock );
 
+    /* Register a control point */
     i_res = UpnpRegisterClient( Callback, p_sd, &p_sys->client_handle );
     if( i_res != UPNP_E_SUCCESS )
     {
-        msg_Err( p_sd, "%s", UpnpGetErrorMessage( i_res ) );
+        msg_Err( p_sd, "Client registration failed: %s", UpnpGetErrorMessage( i_res ) );
         Close( (vlc_object_t*) p_sd );
         return VLC_EGENERIC;
     }
 
+    /* Search for media servers */
     i_res = UpnpSearchAsync( p_sys->client_handle, 5,
             MEDIA_SERVER_DEVICE_TYPE, p_sd );
     if( i_res != UPNP_E_SUCCESS )
     {
-        msg_Err( p_sd, "Search failed: %s", UpnpGetErrorMessage( i_res ) );
+        msg_Err( p_sd, "Error sending search request: %s", UpnpGetErrorMessage( i_res ) );
         Close( (vlc_object_t*) p_sd );
         return VLC_EGENERIC;
     }
@@ -132,6 +147,9 @@ static int Open( vlc_object_t *p_this )
     return VLC_SUCCESS;
 }
 
+/*
+ * Releases resources.
+ */
 static void Close( vlc_object_t *p_this )
 {
     services_discovery_t *p_sd = ( services_discovery_t* )p_this;
@@ -145,34 +163,57 @@ static void Close( vlc_object_t *p_this )
     free( p_sd->p_sys );
 }
 
-// XML utility functions:
+/* XML utility functions */
 
-// Returns the value of a child element, or 0 on error
+/*
+ * Returns the value of a child element, or NULL on error
+ */
 const char* xml_getChildElementValue( IXML_Element* p_parent,
                                       const char*   psz_tag_name_ )
 {
-    if ( !p_parent ) return 0;
-    if ( !psz_tag_name_ ) return 0;
+    if ( !p_parent ) return NULL;
+    if ( !psz_tag_name_ ) return NULL;
 
-    char* psz_tag_name = strdup( psz_tag_name_ );
-    IXML_NodeList* p_node_list = ixmlElement_getElementsByTagName( p_parent, psz_tag_name );
-    free( psz_tag_name );
-    if ( !p_node_list ) return 0;
+    IXML_NodeList* p_node_list = ixmlElement_getElementsByTagName( p_parent, psz_tag_name_ );
+    if ( !p_node_list ) return NULL;
 
     IXML_Node* p_element = ixmlNodeList_item( p_node_list, 0 );
     ixmlNodeList_free( p_node_list );
-    if ( !p_element ) return 0;
+    if ( !p_element ) return NULL;
 
     IXML_Node* p_text_node = ixmlNode_getFirstChild( p_element );
-    if ( !p_text_node ) return 0;
+    if ( !p_text_node ) return NULL;
 
     return ixmlNode_getNodeValue( p_text_node );
 }
 
-// Extracts the result document from a SOAP response
+/*
+ * Returns the value of a child element's attribute, or NULL on error
+ */
+const char* xml_getChildElementAttributeValue( IXML_Element* p_parent,
+                                        const char* psz_tag_name_,
+                                        const char* psz_attribute_ )
+{
+    if ( !p_parent ) return NULL;
+    if ( !psz_tag_name_ ) return NULL;
+    if ( !psz_attribute_ ) return NULL;
+
+    IXML_NodeList* p_node_list = ixmlElement_getElementsByTagName( p_parent, psz_tag_name_ );
+    if ( !p_node_list ) return NULL;
+
+    IXML_Node* p_element = ixmlNodeList_item( p_node_list, 0 );
+    ixmlNodeList_free( p_node_list );
+    if ( !p_element ) return NULL;
+
+    return ixmlElement_getAttribute( (IXML_Element*) p_element, psz_attribute_ );
+}
+
+/*
+ * Extracts the result document from a SOAP response
+ */
 IXML_Document* parseBrowseResult( IXML_Document* p_doc )
 {
-    ixmlRelaxParser(1);
+    ixmlRelaxParser( 1 );
 
     if ( !p_doc ) return 0;
 
@@ -191,17 +232,16 @@ IXML_Document* parseBrowseResult( IXML_Document* p_doc )
     if ( !p_text_node ) return 0;
 
     const char* psz_result_string = ixmlNode_getNodeValue( p_text_node );
-    char* psz_result_xml = strdup( psz_result_string );
 
-    IXML_Document* p_browse_doc = ixmlParseBuffer( psz_result_xml );
-
-    free( psz_result_xml );
+    IXML_Document* p_browse_doc = ixmlParseBuffer( psz_result_string );
 
     return p_browse_doc;
 }
 
 
-// Handles all UPnP events
+/*
+ * Handles all UPnP events
+ */
 static int Callback( Upnp_EventType event_type, void* p_event, void* p_user_data )
 {
     services_discovery_t* p_sd = ( services_discovery_t* ) p_user_data;
@@ -221,11 +261,9 @@ static int Callback( Upnp_EventType event_type, void* p_event, void* p_user_data
         i_res = UpnpDownloadXmlDoc( p_discovery->Location, &p_description_doc );
         if ( i_res != UPNP_E_SUCCESS )
         {
-            msg_Dbg( p_sd,
-                    "%s:%d: Could not download device description!",
-                    __FILE__, __LINE__ );
-            msg_Dbg( p_sd, "Fetching data from %s failed: %s",
-					 p_discovery->Location, UpnpGetErrorMessage( i_res ) );
+            msg_Warn( p_sd, "Could not download device description! "
+                            "Fetching data from %s failed: %s",
+                            p_discovery->Location, UpnpGetErrorMessage( i_res ) );
             return i_res;
         }
 
@@ -241,6 +279,7 @@ static int Callback( Upnp_EventType event_type, void* p_event, void* p_user_data
         struct Upnp_Discovery* p_discovery = ( struct Upnp_Discovery* )p_event;
 
         p_sys->p_server_list->removeServer( p_discovery->DeviceId );
+
     }
     break;
 
@@ -256,7 +295,7 @@ static int Callback( Upnp_EventType event_type, void* p_event, void* p_user_data
     case UPNP_EVENT_AUTORENEWAL_FAILED:
     case UPNP_EVENT_SUBSCRIPTION_EXPIRED:
     {
-        // Re-subscribe...
+        /* Re-subscribe. */
 
         Upnp_Event_Subscribe* p_s = ( Upnp_Event_Subscribe* )p_event;
 
@@ -274,19 +313,21 @@ static int Callback( Upnp_EventType event_type, void* p_event, void* p_user_data
         break;
 
     default:
-    msg_Dbg( p_sd,
-            "%s:%d: DEBUG: UNHANDLED EVENT ( TYPE=%d )",
-            __FILE__, __LINE__, event_type );
-    break;
+        msg_Err( p_sd, "Unhandled event, please report ( type=%d )", event_type );
+        break;
     }
 
     return UPNP_E_SUCCESS;
 }
 
 
-// Class implementations...
+/*
+ * Local class implementations.
+ */
 
-// MediaServer...
+/*
+ * MediaServer
+ */
 
 void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
                                           const char*    p_location,
@@ -294,22 +335,21 @@ void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
 {
     if ( !p_doc )
     {
-        msg_Dbg( p_sd, "%s:%d: NULL", __FILE__, __LINE__ );
+        msg_Err( p_sd, "Null IXML_Document" );
         return;
     }
 
     if ( !p_location )
     {
-        msg_Dbg( p_sd, "%s:%d: NULL", __FILE__, __LINE__ );
+        msg_Err( p_sd, "Null location" );
         return;
     }
 
     const char* psz_base_url = p_location;
 
-    // Try to extract baseURL
-
+    /* Try to extract baseURL */
     IXML_NodeList* p_url_list = ixmlDocument_getElementsByTagName( p_doc, "baseURL" );
-    if ( !p_url_list )
+    if ( p_url_list )
     {
 
         if ( IXML_Node* p_url_node = ixmlNodeList_item( p_url_list, 0 ) )
@@ -321,7 +361,7 @@ void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
         ixmlNodeList_free( p_url_list );
     }
 
-    // Get devices
+    /* Get devices */
     IXML_NodeList* p_device_list =
                 ixmlDocument_getElementsByTagName( p_doc, "device" );
 
@@ -336,9 +376,7 @@ void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
                                                                "deviceType" );
             if ( !psz_device_type )
             {
-                msg_Dbg( p_sd,
-                        "%s:%d: no deviceType!",
-                        __FILE__, __LINE__ );
+                msg_Warn( p_sd, "No deviceType found!" );
                 continue;
             }
 
@@ -348,18 +386,16 @@ void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
             const char* psz_udn = xml_getChildElementValue( p_device_element, "UDN" );
             if ( !psz_udn )
             {
-                msg_Dbg( p_sd, "%s:%d: no UDN!",
-                        __FILE__, __LINE__ );
+                msg_Warn( p_sd, "No UDN!" );
                 continue;
             }
 
-	    // Check if server is already added
+            /* Check if server is already added */
             if ( p_sd->p_sys->p_server_list->getServer( psz_udn ) != 0 )
-	    {
-		msg_Dbg( p_sd, "%s:%d: server with uuid '%s' already exists.",
-                        __FILE__, __LINE__, psz_udn );
+            {
+                msg_Warn( p_sd, "Server with uuid '%s' already exists.", psz_udn );
                 continue;
-	    }
+            }
 
             const char* psz_friendly_name =
                        xml_getChildElementValue( p_device_element,
@@ -367,7 +403,7 @@ void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
 
             if ( !psz_friendly_name )
             {
-                msg_Dbg( p_sd, "%s:%d: no friendlyName!", __FILE__, __LINE__ );
+                msg_Dbg( p_sd, "No friendlyName!" );
                 continue;
             }
 
@@ -380,7 +416,7 @@ void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
                 continue;
             }
 
-            // Check for ContentDirectory service...
+            /* Check for ContentDirectory service. */
             IXML_NodeList* p_service_list =
                        ixmlElement_getElementsByTagName( p_device_element,
                                                          "service" );
@@ -396,7 +432,10 @@ void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
                         xml_getChildElementValue( p_service_element,
                                                   "serviceType" );
                     if ( !psz_service_type )
+                    {
+                        msg_Warn( p_sd, "No service type found." );
                         continue;
+                    }
 
                     if ( strcmp( CONTENT_DIRECTORY_SERVICE_TYPE,
                                 psz_service_type ) != 0 )
@@ -406,53 +445,49 @@ void MediaServer::parseDeviceDescription( IXML_Document* p_doc,
                         xml_getChildElementValue( p_service_element,
                                                   "eventSubURL" );
                     if ( !psz_event_sub_url )
+                    {
+                        msg_Warn( p_sd, "No event subscription url found." );
                         continue;
+                    }
 
                     const char* psz_control_url =
                         xml_getChildElementValue( p_service_element,
                                                   "controlURL" );
                     if ( !psz_control_url )
+                    {
+                        msg_Warn( p_sd, "No control url found." );
                         continue;
+                    }
 
-                    // Try to subscribe to ContentDirectory service
+                    /* Try to subscribe to ContentDirectory service */
 
                     char* psz_url = ( char* ) malloc( strlen( psz_base_url ) +
                             strlen( psz_event_sub_url ) + 1 );
                     if ( psz_url )
                     {
-                        char* psz_s1 = strdup( psz_base_url );
-                        char* psz_s2 = strdup( psz_event_sub_url );
-
-                        if ( UpnpResolveURL( psz_s1, psz_s2, psz_url ) ==
+                        if ( UpnpResolveURL( psz_base_url, psz_event_sub_url, psz_url ) ==
                                 UPNP_E_SUCCESS )
                         {
                             p_server->setContentDirectoryEventURL( psz_url );
                             p_server->subscribeToContentDirectory();
                         }
 
-                        free( psz_s1 );
-                        free( psz_s2 );
                         free( psz_url );
                     }
 
-                    // Try to browse content directory...
+                    /* Try to browse content directory. */
 
                     psz_url = ( char* ) malloc( strlen( psz_base_url ) +
                             strlen( psz_control_url ) + 1 );
                     if ( psz_url )
                     {
-                        char* psz_s1 = strdup( psz_base_url );
-                        char* psz_s2 = strdup( psz_control_url );
-
-                        if ( UpnpResolveURL( psz_s1, psz_s2, psz_url ) ==
+                        if ( UpnpResolveURL( psz_base_url, psz_control_url, psz_url ) ==
                                 UPNP_E_SUCCESS )
                         {
                             p_server->setContentDirectoryControlURL( psz_url );
                             p_server->fetchContents();
                         }
 
-                        free( psz_s1 );
-                        free( psz_s2 );
                         free( psz_url );
                     }
                }
@@ -483,7 +518,7 @@ MediaServer::~MediaServer()
 
 const char* MediaServer::getUDN() const
 {
-  return _UDN.c_str();
+    return _UDN.c_str();
 }
 
 const char* MediaServer::getFriendlyName() const
@@ -511,6 +546,10 @@ const char* MediaServer::getContentDirectoryControlURL() const
     return _content_directory_control_url.c_str();
 }
 
+/**
+ * Subscribes current client handle to Content Directory Service.
+ * CDS exports the server shares to clients.
+ */
 void MediaServer::subscribeToContentDirectory()
 {
     const char* psz_url = getContentDirectoryEventURL();
@@ -532,12 +571,13 @@ void MediaServer::subscribeToContentDirectory()
     }
     else
     {
-        msg_Dbg( _p_sd,
-                "%s:%d: WARNING: '%s': %s", __FILE__, __LINE__,
+        msg_Dbg( _p_sd, "Subscribe failed: '%s': %s",
                 getFriendlyName(), UpnpGetErrorMessage( i_res ) );
     }
 }
-
+/*
+ * Constructs UpnpAction to browse available content.
+ */
 IXML_Document* MediaServer::_browseAction( const char* psz_object_id_,
                                            const char* psz_browser_flag_,
                                            const char* psz_filter_,
@@ -555,106 +595,87 @@ IXML_Document* MediaServer::_browseAction( const char* psz_object_id_,
         return 0;
     }
 
-    char* psz_object_id = strdup( psz_object_id_ );
-    char* psz_browse_flag = strdup( psz_browser_flag_ );
-    char* psz_filter = strdup( psz_filter_ );
-    char* psz_starting_index = strdup( psz_starting_index_ );
-    char* psz_requested_count = strdup( psz_requested_count_ );
-    char* psz_sort_criteria = strdup( psz_sort_criteria_ );
     char* psz_service_type = strdup( CONTENT_DIRECTORY_SERVICE_TYPE );
 
     int i_res;
 
     i_res = UpnpAddToAction( &p_action, "Browse",
-            psz_service_type, "ObjectID", psz_object_id );
+            psz_service_type, "ObjectID", psz_object_id_ );
 
     if ( i_res != UPNP_E_SUCCESS )
     {
-        msg_Dbg( _p_sd,
-                 "%s:%d: ERROR: %s", __FILE__, __LINE__,
-                 UpnpGetErrorMessage( i_res ) );
+        msg_Dbg( _p_sd, "AddToAction 'ObjectID' failed: %s",
+                UpnpGetErrorMessage( i_res ) );
         goto browseActionCleanup;
     }
 
     i_res = UpnpAddToAction( &p_action, "Browse",
-            psz_service_type, "BrowseFlag", psz_browse_flag );
+            psz_service_type, "BrowseFlag", psz_browser_flag_ );
 
     if ( i_res != UPNP_E_SUCCESS )
     {
-        msg_Dbg( _p_sd,
-             "%s:%d: ERROR: %s", __FILE__, __LINE__,
-             UpnpGetErrorMessage( i_res ) );
+        msg_Dbg( _p_sd, "AddToAction 'BrowseFlag' failed: %s", 
+                UpnpGetErrorMessage( i_res ) );
         goto browseActionCleanup;
     }
 
     i_res = UpnpAddToAction( &p_action, "Browse",
-            psz_service_type, "Filter", psz_filter );
+            psz_service_type, "Filter", psz_filter_ );
 
     if ( i_res != UPNP_E_SUCCESS )
     {
-        msg_Dbg( _p_sd,
-             "%s:%d: ERROR: %s", __FILE__, __LINE__,
-             UpnpGetErrorMessage( i_res ) );
+        msg_Dbg( _p_sd, "AddToAction 'Filter' failed: %s",
+                UpnpGetErrorMessage( i_res ) );
         goto browseActionCleanup;
     }
 
     i_res = UpnpAddToAction( &p_action, "Browse",
-            psz_service_type, "StartingIndex", psz_starting_index );
+            psz_service_type, "StartingIndex", psz_starting_index_ );
 
     if ( i_res != UPNP_E_SUCCESS )
     {
-        msg_Dbg( _p_sd,
-             "%s:%d: ERROR: %s", __FILE__, __LINE__,
-             UpnpGetErrorMessage( i_res ) );
+        msg_Dbg( _p_sd, "AddToAction 'StartingIndex' failed: %s",
+                UpnpGetErrorMessage( i_res ) );
         goto browseActionCleanup;
     }
 
     i_res = UpnpAddToAction( &p_action, "Browse",
-            psz_service_type, "RequestedCount", psz_requested_count );
+            psz_service_type, "RequestedCount", psz_requested_count_ );
 
     if ( i_res != UPNP_E_SUCCESS )
     {
-        msg_Dbg( _p_sd,
-                "%s:%d: ERROR: %s", __FILE__, __LINE__,
-                UpnpGetErrorMessage( i_res ) ); goto browseActionCleanup; }
+        msg_Dbg( _p_sd, "AddToAction 'RequestedCount' failed: %s",
+                UpnpGetErrorMessage( i_res ) );
+        goto browseActionCleanup;
+    }
 
     i_res = UpnpAddToAction( &p_action, "Browse",
-            psz_service_type, "SortCriteria", psz_sort_criteria );
+            psz_service_type, "SortCriteria", psz_sort_criteria_ );
 
     if ( i_res != UPNP_E_SUCCESS )
     {
-        msg_Dbg( _p_sd,
-             "%s:%d: ERROR: %s", __FILE__, __LINE__,
-             UpnpGetErrorMessage( i_res ) );
+        msg_Dbg( _p_sd, "AddToAction 'SortCriteria' failed: %s",
+                UpnpGetErrorMessage( i_res ) );
         goto browseActionCleanup;
     }
 
     i_res = UpnpSendAction( _p_sd->p_sys->client_handle,
               psz_url,
-              CONTENT_DIRECTORY_SERVICE_TYPE,
-              0,
+              psz_service_type,
+              0, /* ignored in SDK, must be NULL */
               p_action,
               &p_response );
 
     if ( i_res != UPNP_E_SUCCESS )
     {
-        msg_Dbg( _p_sd,
-                "%s:%d: ERROR: %s when trying the send() action with URL: %s",
-                __FILE__, __LINE__,
+        msg_Err( _p_sd, "%s when trying the send() action with URL: %s",
                 UpnpGetErrorMessage( i_res ), psz_url );
 
         ixmlDocument_free( p_response );
         p_response = 0;
     }
 
- browseActionCleanup:
-
-    free( psz_object_id );
-    free( psz_browse_flag );
-    free( psz_filter );
-    free( psz_starting_index );
-    free( psz_requested_count );
-    free( psz_sort_criteria );
+browseActionCleanup:
 
     free( psz_service_type );
 
@@ -664,12 +685,12 @@ IXML_Document* MediaServer::_browseAction( const char* psz_object_id_,
 
 void MediaServer::fetchContents()
 {
-    // Delete previous contents to prevent duplicate entries
+    /* Delete previous contents to prevent duplicate entries */
     if ( _p_contents )
     {
-	delete _p_contents;
-	services_discovery_RemoveItem( _p_sd, _p_input_item );
-	services_discovery_AddItem( _p_sd, _p_input_item, NULL );
+        delete _p_contents;
+        services_discovery_RemoveItem( _p_sd, _p_input_item );
+        services_discovery_AddItem( _p_sd, _p_input_item, NULL );
     }
 
     Container* root = new Container( 0, "0", getFriendlyName() );
@@ -682,12 +703,14 @@ void MediaServer::fetchContents()
     _buildPlaylist( _p_contents, NULL );
 }
 
+/*
+ * Fetches and parses the UPNP response
+ */
 bool MediaServer::_fetchContents( Container* p_parent )
 {
     if (!p_parent)
     {
-        msg_Dbg( _p_sd,
-                "%s:%d: parent==NULL", __FILE__, __LINE__ );
+        msg_Err( _p_sd, "No parent" );
         return false;
     }
 
@@ -696,9 +719,7 @@ bool MediaServer::_fetchContents( Container* p_parent )
                                       "*", "0", "0", "" );
     if ( !p_response )
     {
-        msg_Dbg( _p_sd,
-                "%s:%d: ERROR! No response from browse() action",
-                __FILE__, __LINE__ );
+        msg_Err( _p_sd, "No response from browse() action" );
         return false;
     }
 
@@ -707,10 +728,16 @@ bool MediaServer::_fetchContents( Container* p_parent )
 
     if ( !p_result )
     {
-        msg_Dbg( _p_sd, "%s:%d: ERROR! browse() response parsing failed",
-                __FILE__, __LINE__ );
+        msg_Err( _p_sd, "browse() response parsing failed" );
         return false;
     }
+#ifndef NDEBUG
+    else
+    {
+        msg_Dbg( _p_sd, "Got DIDL document: %s",
+                ixmlPrintDocument( p_result ) );
+    }
+#endif
 
     IXML_NodeList* containerNodeList =
                 ixmlDocument_getElementsByTagName( p_result, "container" );
@@ -746,7 +773,7 @@ bool MediaServer::_fetchContents( Container* p_parent )
 
             if ( resource && childCount < 1 )
             {
-                Item* item = new Item( p_parent, objectID, title, resource );
+                Item* item = new Item( p_parent, objectID, title, resource, -1 );
                 p_parent->addItem( item );
             }
 
@@ -789,7 +816,24 @@ bool MediaServer::_fetchContents( Container* p_parent )
             if ( !resource )
                 continue;
 
-            Item* item = new Item( p_parent, objectID, title, resource );
+            const char* psz_duration = xml_getChildElementAttributeValue( itemElement,
+                                                                    "res",
+                                                                    "duration" );
+
+            mtime_t i_duration = -1;
+            int i_hours, i_minutes, i_seconds, i_decis;
+
+            if ( psz_duration )
+            {
+                if( sscanf( psz_duration, "%02d:%02d:%02d.%d",
+                        &i_hours, &i_minutes, &i_seconds, &i_decis ))
+                    i_duration = INT64_C(1000000) * ( i_hours*3600 +
+                                                      i_minutes*60 +
+                                                      i_seconds ) +
+                                 INT64_C(100000) * i_decis;
+            }
+
+            Item* item = new Item( p_parent, objectID, title, resource, i_duration );
             p_parent->addItem( item );
         }
         ixmlNodeList_free( itemNodeList );
@@ -799,6 +843,43 @@ bool MediaServer::_fetchContents( Container* p_parent )
     return true;
 }
 
+// TODO: Create a permanent fix for the item duplication bug. The current fix
+// is essentially only a small hack. Although it fixes the problem, it introduces
+// annoying cosmetic issues with the playlist. For example, when the UPnP Server
+// rebroadcasts it's directory structure, the VLC Client deletes the old directory
+// structure, causing the user to go back to the root node of the directory. The
+// directory is then rebuilt, and the user is forced to traverse through the directory
+// to find the item they were looking for. Some servers may not push the directory
+// structure too often, but we cannot rely on this fix.
+//
+// I have thought up another fix, but this would require certain features to
+// be present within the VLC services discovery. Currently, services_discovery_AddItem
+// does not allow the programmer to nest items. It only allows a "2 deep" scope.
+// An example of the limitation is below:
+//
+// Root Directory
+// + Item 1
+// + Item 2
+//
+// services_discovery_AddItem will not let the programmer specify a child-node to
+// insert items into, so we would not be able to do the following:
+//
+// Root Directory
+// + Item 1
+//   + Sub Item 1
+// + Item 2
+//   + Sub Item 1 of Item 2
+//     + Sub-Sub Item 1 of Sub Item 1
+//
+// This creates a HUGE limitation on what we are able to do. If we were able to do
+// the above, we could simply preserve the old directory listing, and compare what items
+// do not exist in the new directory listing, then remove them from the shown listing using
+// services_discovery_RemoveItem. If new files were introduced within an already existing
+// container, we could simply do so with services_discovery_AddItem.
+
+/*
+ * Builds playlist based on available input items.
+ */
 void MediaServer::_buildPlaylist( Container* p_parent, input_item_node_t *p_input_node )
 {
     bool b_send = p_input_node == NULL;
@@ -810,7 +891,7 @@ void MediaServer::_buildPlaylist( Container* p_parent, input_item_node_t *p_inpu
         Container* p_container = p_parent->getContainer( i );
 
         input_item_t* p_input_item = input_item_New( _p_sd, "vlc://nop",
-						    p_container->getTitle() );
+                                                    p_container->getTitle() );
         input_item_node_t *p_new_node =
             input_item_node_AppendItem( p_input_node, p_input_item );
 
@@ -822,9 +903,14 @@ void MediaServer::_buildPlaylist( Container* p_parent, input_item_node_t *p_inpu
     {
         Item* p_item = p_parent->getItem( i );
 
-        input_item_t* p_input_item = input_item_New( _p_sd,
+        input_item_t* p_input_item = input_item_NewExt( _p_sd,
                                                p_item->getResource(),
-                                               p_item->getTitle() );
+                                               p_item->getTitle(),
+                                               0,
+                                               NULL,
+                                               0,
+                                               p_item->getDuration() );
+
         assert( p_input_item );
         input_item_node_AppendItem( p_input_node, p_input_item );
         p_item->setInputItem( p_input_item );
@@ -836,14 +922,19 @@ void MediaServer::_buildPlaylist( Container* p_parent, input_item_node_t *p_inpu
 
 void MediaServer::setInputItem( input_item_t* p_input_item )
 {
-    if(_p_input_item == p_input_item)
+    if( _p_input_item == p_input_item )
         return;
 
-    if(_p_input_item)
+    if( _p_input_item )
         vlc_gc_decref( _p_input_item );
 
     vlc_gc_incref( p_input_item );
     _p_input_item = p_input_item;
+}
+
+input_item_t* MediaServer::getInputItem() const
+{
+    return _p_input_item;
 }
 
 bool MediaServer::compareSID( const char* psz_sid )
@@ -852,8 +943,9 @@ bool MediaServer::compareSID( const char* psz_sid )
 }
 
 
-// MediaServerList...
-
+/*
+ * MediaServerList class
+ */
 MediaServerList::MediaServerList( services_discovery_t* p_sd )
 {
     _p_sd = p_sd;
@@ -875,7 +967,10 @@ bool MediaServerList::addServer( MediaServer* p_server )
     msg_Dbg( _p_sd, "Adding server '%s' with uuid '%s'", p_server->getFriendlyName(), p_server->getUDN() );
 
     p_input_item = input_item_New( _p_sd, "vlc://nop",
-				  p_server->getFriendlyName() );
+                                  p_server->getFriendlyName() );
+
+    input_item_SetDescription( p_input_item, p_server->getUDN() );
+
     p_server->setInputItem( p_input_item );
 
     services_discovery_AddItem( _p_sd, p_input_item, NULL );
@@ -922,8 +1017,9 @@ void MediaServerList::removeServer( const char* psz_udn )
     MediaServer* p_server = getServer( psz_udn );
     if ( !p_server ) return;
 
-    msg_Dbg( _p_sd,
-            "Removing server '%s'", p_server->getFriendlyName() );
+    msg_Dbg( _p_sd, "Removing server '%s'", p_server->getFriendlyName() );
+
+    services_discovery_RemoveItem( _p_sd, p_server->getInputItem() );
 
     std::vector<MediaServer*>::iterator it;
     for ( it = _list.begin(); it != _list.end(); ++it )
@@ -938,23 +1034,25 @@ void MediaServerList::removeServer( const char* psz_udn )
 }
 
 
-// Item...
-
+/*
+ * Item class
+ */
 Item::Item( Container* p_parent, const char* psz_object_id, const char* psz_title,
-	   const char* psz_resource )
+           const char* psz_resource, mtime_t i_duration )
 {
     _parent = p_parent;
 
     _objectID = psz_object_id;
     _title = psz_title;
     _resource = psz_resource;
+    _duration = i_duration;
 
     _p_input_item = NULL;
 }
 
 Item::~Item()
 {
-    if(_p_input_item)
+    if( _p_input_item )
         vlc_gc_decref( _p_input_item );
 }
 
@@ -973,26 +1071,26 @@ const char* Item::getResource() const
     return _resource.c_str();
 }
 
+const mtime_t Item::getDuration() const
+{
+    return _duration;
+}
+
 void Item::setInputItem( input_item_t* p_input_item )
 {
-    if(_p_input_item == p_input_item)
+    if( _p_input_item == p_input_item )
         return;
 
-    if(_p_input_item)
+    if( _p_input_item )
         vlc_gc_decref( _p_input_item );
 
     vlc_gc_incref( p_input_item );
     _p_input_item = p_input_item;
 }
 
-input_item_t* Item::getInputItem() const
-{
-    return _p_input_item;
-}
-
-
-// Container...
-
+/*
+ * Container class
+ */
 Container::Container( Container*  p_parent,
                       const char* psz_object_id,
                       const char* psz_title )
@@ -1017,7 +1115,7 @@ Container::~Container()
         delete _items[i];
     }
 
-    if(_p_input_item )
+    if( _p_input_item )
         vlc_gc_decref( _p_input_item );
 }
 
@@ -1070,10 +1168,10 @@ Container* Container::getParent()
 
 void Container::setInputItem( input_item_t* p_input_item )
 {
-    if(_p_input_item == p_input_item)
+    if( _p_input_item == p_input_item )
         return;
 
-    if(_p_input_item)
+    if( _p_input_item )
         vlc_gc_decref( _p_input_item );
 
     vlc_gc_incref( p_input_item );

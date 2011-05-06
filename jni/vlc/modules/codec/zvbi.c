@@ -2,7 +2,7 @@
  * zvbi.c : VBI and Teletext PES demux and decoder using libzvbi
  *****************************************************************************
  * Copyright (C) 2007, M2X
- * $Id: 32f4c1fc0c7c0dd9abaed63c0353e2311f07bc34 $
+ * $Id: 3b02ae9c0ec75d34ba84fd694daf2162ac6f1d52 $
  *
  * Authors: Derk-Jan Hartman <djhartman at m2x dot nl>
  *          Jean-Paul Saman <jpsaman at m2x dot nl>
@@ -58,7 +58,7 @@ static void Close( vlc_object_t * );
 #define PAGE_LONGTEXT N_("Open the indicated Teletext page." \
         "Default page is index 100")
 
-#define OPAQUE_TEXT N_("Text is always opaque")
+#define OPAQUE_TEXT N_("Teletext transparency")
 #define OPAQUE_LONGTEXT N_("Setting vbi-opaque to false " \
         "makes the boxed text transparent." )
 

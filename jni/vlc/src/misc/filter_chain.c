@@ -2,7 +2,7 @@
  * filter_chain.c : Handle chains of filter_t objects.
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id: cb9be4a03eb8d51c3b3a84ba2dc12251c90f1710 $
+ * $Id: 859d4ad4c256e3119c4f8542ba4af59d4de0d973 $
  *
  * Author: Antoine Cellerier <dionoea at videolan dot org>
  *
@@ -293,17 +293,31 @@ block_t *filter_chain_AudioFilter( filter_chain_t *p_chain, block_t *p_block )
     return p_block;
 }
 
-void filter_chain_SubFilter( filter_chain_t *p_chain,
+void filter_chain_SubSource( filter_chain_t *p_chain,
                              mtime_t display_date )
 {
     for( chained_filter_t *f = p_chain->first; f != NULL; f = f->next )
     {
         filter_t *p_filter = &f->filter;
-        subpicture_t *p_subpic = p_filter->pf_sub_filter( p_filter, display_date );
+        subpicture_t *p_subpic = p_filter->pf_sub_source( p_filter, display_date );
         /* XXX I find that spu_t cast ugly */
         if( p_subpic )
             spu_PutSubpicture( (spu_t*)p_chain->p_this, p_subpic );
     }
+}
+
+subpicture_t *filter_chain_SubFilter( filter_chain_t *p_chain, subpicture_t *p_subpic )
+{
+    for( chained_filter_t *f = p_chain->first; f != NULL; f = f->next )
+    {
+        filter_t *p_filter = &f->filter;
+
+        p_subpic = p_filter->pf_sub_filter( p_filter, p_subpic );
+
+        if( !p_subpic )
+            break;
+    }
+    return p_subpic;
 }
 
 int filter_chain_MouseFilter( filter_chain_t *p_chain, vlc_mouse_t *p_dst, const vlc_mouse_t *p_src )

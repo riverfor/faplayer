@@ -2,7 +2,7 @@
  * directx.c: Windows DirectX audio output method
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 7e9694d1e293ccccada8f33d1fa81caf51232985 $
+ * $Id: 2897af7884e535f3863d8820a77a453392c33662 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -565,7 +565,7 @@ static void Probe( aout_instance_t * p_aout )
     }
 
     var_AddCallback( p_aout, "audio-device", aout_ChannelsRestart, NULL );
-    var_SetBool( p_aout, "intf-change", true );
+    var_TriggerCallback( p_aout, "intf-change" );
 }
 
 /*****************************************************************************

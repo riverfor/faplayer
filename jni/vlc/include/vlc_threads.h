@@ -76,13 +76,8 @@
 #elif defined(LIBVLC_USE_PTHREAD)
 #   define VLC_THREAD_PRIORITY_LOW      0
 #   define VLC_THREAD_PRIORITY_INPUT   10
-#   ifdef ANDROID
-#       define VLC_THREAD_PRIORITY_AUDIO   19
-#       define VLC_THREAD_PRIORITY_VIDEO   20
-#   else
-#       define VLC_THREAD_PRIORITY_AUDIO    5
-#       define VLC_THREAD_PRIORITY_VIDEO    0
-#   endif
+#   define VLC_THREAD_PRIORITY_AUDIO    5
+#   define VLC_THREAD_PRIORITY_VIDEO    0
 #   define VLC_THREAD_PRIORITY_OUTPUT  15
 #   define VLC_THREAD_PRIORITY_HIGHEST 20
 

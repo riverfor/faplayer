@@ -2,7 +2,7 @@
  * extended.h: MacOS X Extended interface panel
  *****************************************************************************
  * Copyright (C) 2005-2007 the VideoLAN team
- * $Id: ed8ad986ead462fcf2785072a99dbd58709f7ae7 $
+ * $Id: 0a33f6354114b52cf4be086cabffc5829f421004 $
  *
  * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
  *
@@ -80,7 +80,6 @@
 
     /* global variables */
     NSView * o_currentlyshown_view;
-    BOOL o_config_changed;
 }
 
 - (IBAction)viewSelectorAction:(id)sender;
@@ -95,12 +94,10 @@
 - (IBAction)moreInfoVideoFilters:(id)sender;
 
 + (VLCExtended *)sharedInstance;
-- (BOOL)configChanged;
 
 - (void)showPanel;
 - (void)initStrings;
 - (void)changeVoutFiltersString: (char *)psz_name onOrOff: (bool )b_add;
 - (void)changeVideoFiltersString: (char *)psz_name onOrOff: (bool )b_add;
 - (void)changeAFiltersString: (char *)psz_name onOrOff: (bool )b_add;
-- (void)savePrefs;
 @end

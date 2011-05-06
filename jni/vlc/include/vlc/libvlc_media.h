@@ -2,7 +2,7 @@
  * libvlc.h:  libvlc external API
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 1cc568a6e211406d2b7cafdc48990f787a86c00f $
+ * $Id: c6ad77798a00e3d2df9e91cbae9f7842cef645e6 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -494,7 +494,7 @@ VLC_PUBLIC_API void *libvlc_media_get_user_data( libvlc_media_t *p_md );
  * \param tracks address to store an allocated array of Elementary Streams
  * descriptions (must be freed by the caller)
  *
- * return the number of Elementary Streams
+ * \return the number of Elementary Streams
  */
 VLC_PUBLIC_API
 int libvlc_media_get_tracks_info( libvlc_media_t *p_md,

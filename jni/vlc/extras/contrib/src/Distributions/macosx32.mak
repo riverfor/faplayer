@@ -1,5 +1,5 @@
 # Darwin rules
-TOOLS = .libtool .intl .pkgcfg .yasm .automake
+TOOLS = .autoconf .automake .libtool .intl .pkgcfg .yasm
 
 all: .freetype \
     .fribidi .a52 .mpeg2 .mad .ogg .vorbis .vorbisenc .theora \
@@ -8,7 +8,7 @@ all: .freetype \
     .png .gpg-error .gcrypt .gnutls .cddb .cdio .vcdimager \
     .SDL_image .gecko .mpcdec \
     .dca .tag .x264 .goom2k4 .lua .zvbi .fluid .fontconfig .ncurses \
-    .schroedinger .libass .libupnp .kate .sqlite3 .BWToolKit .Sparkle
+    .schroedinger .libass .libupnp .kate .sqlite3 .BGHUDAppKit .Growl .Sparkle
 
 # .expat don't work with SDK yet
 # .glib .IDL .gecko are required to build the mozilla plugin

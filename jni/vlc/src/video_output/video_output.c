@@ -6,7 +6,7 @@
  * thread, and destroy a previously oppened video output thread.
  *****************************************************************************
  * Copyright (C) 2000-2007 the VideoLAN team
- * $Id: cbbd566603892677227556e3f4893f4bcd99f0d5 $
+ * $Id: 430876185cbef148db8f099ef817d60c05df592e $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -552,6 +552,11 @@ void vout_ControlChangeFilters(vout_thread_t *vout, const char *filters)
     vout_control_PushString(&vout->p->control, VOUT_CONTROL_CHANGE_FILTERS,
                             filters);
 }
+void vout_ControlChangeSubSources(vout_thread_t *vout, const char *filters)
+{
+    vout_control_PushString(&vout->p->control, VOUT_CONTROL_CHANGE_SUB_SOURCES,
+                            filters);
+}
 void vout_ControlChangeSubFilters(vout_thread_t *vout, const char *filters)
 {
     vout_control_PushString(&vout->p->control, VOUT_CONTROL_CHANGE_SUB_FILTERS,
@@ -918,7 +923,18 @@ static int ThreadDisplayRenderPicture(vout_thread_t *vout, bool is_forced)
     const vlc_fourcc_t *subpicture_chromas;
     video_format_t fmt_spu;
     if (do_dr_spu) {
-        fmt_spu = vd->source; /* TODO improve */
+        vout_display_place_t place;
+        vout_display_PlacePicture(&place, &vd->source, vd->cfg, false);
+
+        fmt_spu = vd->source;
+        if (fmt_spu.i_width * fmt_spu.i_height < place.width * place.height) {
+            fmt_spu.i_sar_num = vd->cfg->display.sar.num;
+            fmt_spu.i_sar_den = vd->cfg->display.sar.den;
+            fmt_spu.i_width          =
+            fmt_spu.i_visible_width  = place.width;
+            fmt_spu.i_height         =
+            fmt_spu.i_visible_height = place.height;
+        }
         subpicture_chromas = vd->info.subpicture_chromas;
     } else {
         if (do_early_spu) {
@@ -1161,10 +1177,16 @@ static void ThreadDisplayOsdTitle(vout_thread_t *vout, const char *string)
                  string);
 }
 
+static void ThreadChangeSubSources(vout_thread_t *vout, const char *filters)
+{
+    spu_ChangeSources(vout->p->spu, filters);
+}
+
 static void ThreadChangeSubFilters(vout_thread_t *vout, const char *filters)
 {
     spu_ChangeFilters(vout->p->spu, filters);
 }
+
 static void ThreadChangeSubMargin(vout_thread_t *vout, int margin)
 {
     spu_ChangeMargin(vout->p->spu, margin);
@@ -1503,6 +1525,9 @@ static void *Thread(void *object)
                 break;
             case VOUT_CONTROL_CHANGE_FILTERS:
                 ThreadChangeFilters(vout, NULL, cmd.u.string, false);
+                break;
+            case VOUT_CONTROL_CHANGE_SUB_SOURCES:
+                ThreadChangeSubSources(vout, cmd.u.string);
                 break;
             case VOUT_CONTROL_CHANGE_SUB_FILTERS:
                 ThreadChangeSubFilters(vout, cmd.u.string);

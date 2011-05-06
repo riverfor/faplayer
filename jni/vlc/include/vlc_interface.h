@@ -4,7 +4,7 @@
  * interface, such as message output.
  *****************************************************************************
  * Copyright (C) 1999, 2000 the VideoLAN team
- * $Id: 49743a9b392d1e862c5f60f5236a7bfd001db45b $
+ * $Id: d803a08fdf650d73f8727810e0e97272f170b5b4 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -173,7 +173,7 @@ typedef enum vlc_dialog {
                          "oga", "ogg", "oma", "s3m", "spx" \
                          "wav", "wma", "wv", "xm"
 
-#define EXTENSIONS_VIDEO_CSV "asf", "avi", "divx", "dv", "flv", "gxf", "iso", \
+#define EXTENSIONS_VIDEO_CSV "asf", "avi", "divx", "dv", "f4v", "flv", "gxf", "iso", \
                              "m1v", "m2v", "m2t", "m2ts", "m4v", "mkv", "mov",\
                              "mp2", "mp4", "mpeg", "mpeg1", \
                              "mpeg2", "mpeg4", "mpg", "mts", "mxf", "nuv", \
@@ -222,7 +222,7 @@ typedef enum vlc_dialog {
     "*.xa;"  \
     "*.xm"
 
-#define EXTENSIONS_VIDEO "*.3g2;*.3gp;*.3gp2;*.3gpp;*.amv;*.asf;*.avi;*.bin;*.cue;*.divx;*.dv;*.flv;*.gxf;*.iso;*.m1v;*.m2v;" \
+#define EXTENSIONS_VIDEO "*.3g2;*.3gp;*.3gp2;*.3gpp;*.amv;*.asf;*.avi;*.bin;*.cue;*.divx;*.dv;*f4v;*.flv;*.gxf;*.iso;*.m1v;*.m2v;" \
                          "*.m2t;*.m2ts;*.m4v;*.mkv;*.mov;*.mp2;*.mp2v;*.mp4;*.mp4v;*.mpa;*.mpe;*.mpeg;*.mpeg1;" \
                          "*.mpeg2;*.mpeg4;*.mpg;*.mpv2;*.mts;*.mxf;*.nsv;*.nuv;" \
                          "*.ogg;*.ogm;*.ogv;*.ogx;*.ps;" \

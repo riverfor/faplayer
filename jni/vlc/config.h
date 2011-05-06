@@ -50,7 +50,7 @@
 /* #undef CAN_COMPILE_SSSE3 */
 
 /* The ./configure command line */
-#define CONFIGURE_LINE "./configure  '--host=arm-linux-androideabi' '--disable-httpd' '--disable-sout' '--disable-vlm' '--disable-mad' '--disable-a52' '--disable-libgcrypt' 'host_alias=arm-linux-androideabi'"
+#define CONFIGURE_LINE "./configure  '--host=arm-linux-androideabi' '--disable-mad' '--disable-a52' '--disable-libgcrypt' '--disable-sout' '--disable-httpd' '--disable-vlm' 'host_alias=arm-linux-androideabi'"
 
 /* Copyright string */
 #define COPYRIGHT_MESSAGE "Copyright © 1996-2011 the VideoLAN team"
@@ -97,7 +97,7 @@
 #define HAVE_ASPRINTF 1
 
 /* Define to 1 if you have the `atof' function. */
-#define HAVE_ATOF 1 
+#define HAVE_ATOF 1
 
 /* Define to 1 if you have the `atoll' function. */
 #define HAVE_ATOLL 1
@@ -259,7 +259,7 @@
 /* #undef HAVE_GROWL_GROWLDEFINES_H */
 
 /* Define if you have the iconv() function and it works. */
-#define HAVE_ICONV 1
+/* #undef HAVE_ICONV */
 
 /* Define to 1 if you have the `inet_aton' function. */
 #define HAVE_INET_ATON 1
@@ -328,13 +328,13 @@
 /* #undef HAVE_LIBSSH2_H */
 
 /* Define to 1 if you have the <libswscale/swscale.h> header file. */
-#define HAVE_LIBSWSCALE_SWSCALE_H 1
+/* #undef HAVE_LIBSWSCALE_SWSCALE_H */
 
 /* Define to 1 if you have the <libtar.h> header file. */
 /* #undef HAVE_LIBTAR_H */
 
 /* Define if libv4l2 is available */
-/* #undef HAVE_LIBV4L2 */
+#define HAVE_LIBV4L2 1
 
 /* Define to 1 if you have the <linux/dccp.h> header file. */
 #define HAVE_LINUX_DCCP_H 1
@@ -765,7 +765,10 @@
 /* Define if the zvbi module is built */
 #define ZVBI_COMPILED 1
 
-/* Define to '2' to get glibc warnings. */
+/* Define to 64 for large files support. */
+#define _FILE_OFFSET_BITS 64
+
+/* Define to 2 to get glibc warnings. */
 #define _FORTIFY_SOURCE 2
 
 /* Define to 1 if on MINIX. */
@@ -778,8 +781,17 @@
 /* Define to 1 if you need to in order for `stat' and other things to work. */
 /* #undef _POSIX_SOURCE */
 
+/* Define to expose reentrant functions. */
+#define _REENTRANT /**/
+
+/* Same as _REENTANT for some other OSes. */
+#define _THREAD_SAFE /**/
+
 /* Define to '0x0501' for Windows XP APIs. */
 /* #undef _WIN32_WINNT */
+
+/* Define within the LibVLC source code tree. */
+#define __LIBVLC__ /**/
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

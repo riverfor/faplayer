@@ -2,7 +2,7 @@
  * direct3d.c: Windows Direct3D video output module
  *****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- *$Id: caf578328ad885476e7d8628e4eae6e9bd5947dd $
+ *$Id: da11e58dd6be5d4d30d3fac650a6b12db7839c99 $
  *
  * Authors: Damien Fouilleul <damienf@videolan.org>
  *
@@ -58,6 +58,10 @@ static void Close(vlc_object_t *);
 #define DESKTOP_LONGTEXT N_(\
     "The desktop mode allows you to display the video on the desktop.")
 
+#define HW_BLENDING_TEXT N_("Use hardware blending support")
+#define HW_BLENDING_LONGTEXT N_(\
+    "Try to use hardware acceleration for subtitles/OSD blending.")
+
 #define D3D_HELP N_("Recommended video output for Windows Vista and later versions")
 
 vlc_module_begin ()
@@ -68,6 +72,7 @@ vlc_module_begin ()
     set_subcategory(SUBCAT_VIDEO_VOUT)
 
     add_bool("direct3d-desktop", false, DESKTOP_TEXT, DESKTOP_LONGTEXT, true)
+    add_bool("direct3d-hw-blending", true, HW_BLENDING_TEXT, HW_BLENDING_LONGTEXT, true)
 
     set_capability("vout display", 240)
     add_shortcut("direct3d")
@@ -84,6 +89,11 @@ vlc_module_end ()
 /*****************************************************************************
  * Local prototypes.
  *****************************************************************************/
+static const vlc_fourcc_t d3d_subpicture_chromas[] = {
+    VLC_CODEC_RGBA,
+    0
+};
+
 struct picture_sys_t
 {
     LPDIRECT3DSURFACE9 surface;
@@ -105,7 +115,30 @@ static void Direct3DDestroy(vout_display_t *);
 static int  Direct3DOpen (vout_display_t *, video_format_t *);
 static void Direct3DClose(vout_display_t *);
 
-static void Direct3DRenderScene(vout_display_t *vd, LPDIRECT3DSURFACE9 surface);
+/* */
+typedef struct
+{
+    FLOAT       x,y,z;      // vertex untransformed position
+    FLOAT       rhw;        // eye distance
+    D3DCOLOR    diffuse;    // diffuse color
+    FLOAT       tu, tv;     // texture relative coordinates
+} CUSTOMVERTEX;
+#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)
+
+typedef struct d3d_region_t {
+    D3DFORMAT          format;
+    unsigned           width;
+    unsigned           height;
+    CUSTOMVERTEX       vertex[4];
+    LPDIRECT3DTEXTURE9 texture;
+} d3d_region_t;
+
+static void Direct3DDeleteRegions(int, d3d_region_t *);
+
+static int  Direct3DImportPicture(vout_display_t *vd, d3d_region_t *, LPDIRECT3DSURFACE9 surface);
+static void Direct3DImportSubpicture(vout_display_t *vd, int *, d3d_region_t **, subpicture_t *);
+
+static void Direct3DRenderScene(vout_display_t *vd, d3d_region_t *, int, d3d_region_t *);
 
 /* */
 static int DesktopCallback(vlc_object_t *, char const *, vlc_value_t, vlc_value_t, void *);
@@ -158,6 +191,15 @@ static int Open(vlc_object_t *object)
     info.has_hide_mouse = false;
     info.has_pictures_invalid = true;
     info.has_event_thread = true;
+    if (var_InheritBool(vd, "direct3d-hw-blending") &&
+        (sys->d3dcaps.SrcBlendCaps  & D3DPBLENDCAPS_SRCALPHA) &&
+        (sys->d3dcaps.DestBlendCaps & D3DPBLENDCAPS_INVSRCALPHA) &&
+        (sys->d3dcaps.TextureCaps   & D3DPTEXTURECAPS_ALPHA) &&
+        (sys->d3dcaps.TextureOpCaps & D3DTEXOPCAPS_SELECTARG1) &&
+        (sys->d3dcaps.TextureOpCaps & D3DTEXOPCAPS_MODULATE))
+        info.subpicture_chromas = d3d_subpicture_chromas;
+    else
+        info.subpicture_chromas = NULL;
 
     /* Interaction */
     vlc_mutex_init(&sys->lock);
@@ -242,11 +284,11 @@ static void Direct3DUnlockSurface(picture_t *);
 
 static void Prepare(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture)
 {
+    vout_display_sys_t *sys = vd->sys;
     LPDIRECT3DSURFACE9 surface = picture->p_sys->surface;
 #if 0
     picture_Release(picture);
     VLC_UNUSED(subpicture);
-    Direct3DRenderScene(vd, surface);
 #else
     /* FIXME it is a bit ugly, we need the surface to be unlocked for
      * rendering.
@@ -255,10 +297,34 @@ static void Prepare(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
      * wrapper, we can't */
 
     Direct3DUnlockSurface(picture);
-
-    Direct3DRenderScene(vd, surface);
     VLC_UNUSED(subpicture);
 #endif
+
+    /* check if device is still available */
+    HRESULT hr = IDirect3DDevice9_TestCooperativeLevel(sys->d3ddev);
+    if (FAILED(hr)) {
+        if (hr == D3DERR_DEVICENOTRESET && !sys->reset_device) {
+            vout_display_SendEventPicturesInvalid(vd);
+            sys->reset_device = true;
+        }
+        return;
+    }
+
+    d3d_region_t picture_region;
+    if (!Direct3DImportPicture(vd, &picture_region, surface)) {
+        int subpicture_region_count     = 0;
+        d3d_region_t *subpicture_region = NULL;
+        if (subpicture)
+            Direct3DImportSubpicture(vd, &subpicture_region_count, &subpicture_region,
+                                     subpicture);
+
+        Direct3DRenderScene(vd, &picture_region,
+                            subpicture_region_count, subpicture_region);
+
+        Direct3DDeleteRegions(sys->d3dregion_count, sys->d3dregion);
+        sys->d3dregion_count = subpicture_region_count;
+        sys->d3dregion       = subpicture_region;
+    }
 }
 
 static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture)
@@ -282,8 +348,9 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
     /* XXX See Prepare() */
     Direct3DLockSurface(picture);
     picture_Release(picture);
-    VLC_UNUSED(subpicture);
 #endif
+    if (subpicture)
+        subpicture_Delete(subpicture);
 
     CommonDisplay(vd);
 }
@@ -406,10 +473,7 @@ static void Manage (vout_display_t *vd)
         vout_display_SendEventPicturesInvalid(vd);
     }
 
-#if 0
-    /*
-     * Position Change
-     */
+    /* Position Change */
     if (sys->changes & DX_POSITION_CHANGE) {
 #if 0 /* need that when bicubic filter is available */
         RECT rect;
@@ -427,9 +491,9 @@ static void Manage (vout_display_t *vd)
                 return VLC_EGENERIC;
         }
 #endif
+        sys->clear_scene = true;
         sys->changes &= ~DX_POSITION_CHANGE;
     }
-#endif
 }
 
 /**
@@ -464,13 +528,13 @@ static int Direct3DCreate(vout_display_t *vd)
     /*
     ** Get device capabilities
     */
-    D3DCAPS9 d3dCaps;
-    ZeroMemory(&d3dCaps, sizeof(d3dCaps));
-    HRESULT hr = IDirect3D9_GetDeviceCaps(d3dobj, D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &d3dCaps);
+    ZeroMemory(&sys->d3dcaps, sizeof(sys->d3dcaps));
+    HRESULT hr = IDirect3D9_GetDeviceCaps(d3dobj, D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &sys->d3dcaps);
     if (FAILED(hr)) {
        msg_Err(vd, "Could not read adapter capabilities. (hr=0x%lX)", hr);
        return VLC_EGENERIC;
     }
+
     /* TODO: need to test device capabilities and select the right render function */
 
     return VLC_SUCCESS;
@@ -651,7 +715,7 @@ static int Direct3DReset(vout_display_t *vd)
 static int  Direct3DCreatePool(vout_display_t *vd, video_format_t *fmt);
 static void Direct3DDestroyPool(vout_display_t *vd);
 
-static int  Direct3DCreateScene(vout_display_t *vd);
+static int  Direct3DCreateScene(vout_display_t *vd, const video_format_t *fmt);
 static void Direct3DDestroyScene(vout_display_t *vd);
 
 /**
@@ -663,7 +727,7 @@ static int Direct3DCreateResources(vout_display_t *vd, video_format_t *fmt)
         msg_Err(vd, "Direct3D picture pool initialization failed");
         return VLC_EGENERIC;
     }
-    if (Direct3DCreateScene(vd)) {
+    if (Direct3DCreateScene(vd, fmt)) {
         msg_Err(vd, "Direct3D scene initialization failed !");
         return VLC_EGENERIC;
     }
@@ -903,21 +967,10 @@ static void Direct3DDestroyPool(vout_display_t *vd)
     sys->pool = NULL;
 }
 
-/* */
-typedef struct
-{
-    FLOAT       x,y,z;      // vertex untransformed position
-    FLOAT       rhw;        // eye distance
-    D3DCOLOR    diffuse;    // diffuse color
-    FLOAT       tu, tv;     // texture relative coordinates
-} CUSTOMVERTEX;
-
-#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_TEX1)
-
 /**
  * It allocates and initializes the resources needed to render the scene.
  */
-static int Direct3DCreateScene(vout_display_t *vd)
+static int Direct3DCreateScene(vout_display_t *vd, const video_format_t *fmt)
 {
     vout_display_sys_t *sys = vd->sys;
     LPDIRECT3DDEVICE9       d3ddev = sys->d3ddev;
@@ -930,8 +983,8 @@ static int Direct3DCreateScene(vout_display_t *vd)
      */
     LPDIRECT3DTEXTURE9 d3dtex;
     hr = IDirect3DDevice9_CreateTexture(d3ddev,
-                                        sys->d3dpp.BackBufferWidth,
-                                        sys->d3dpp.BackBufferHeight,
+                                        fmt->i_width,
+                                        fmt->i_height,
                                         1,
                                         D3DUSAGE_RENDERTARGET,
                                         sys->d3dpp.BackBufferFormat,
@@ -964,14 +1017,31 @@ static int Direct3DCreateScene(vout_display_t *vd)
     sys->d3dtex = d3dtex;
     sys->d3dvtc = d3dvtc;
 
+    sys->d3dregion_count = 0;
+    sys->d3dregion       = NULL;
+
+    sys->clear_scene = true;
+
     // Texture coordinates outside the range [0.0, 1.0] are set
     // to the texture color at 0.0 or 1.0, respectively.
     IDirect3DDevice9_SetSamplerState(d3ddev, 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
     IDirect3DDevice9_SetSamplerState(d3ddev, 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 
     // Set linear filtering quality
-    IDirect3DDevice9_SetSamplerState(d3ddev, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-    IDirect3DDevice9_SetSamplerState(d3ddev, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+    if (sys->d3dcaps.TextureFilterCaps & D3DPTFILTERCAPS_MINFLINEAR) {
+        msg_Dbg(vd, "Using D3DTEXF_LINEAR for minification");
+        IDirect3DDevice9_SetSamplerState(d3ddev, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+    } else {
+        msg_Dbg(vd, "Using D3DTEXF_POINT for minification");
+        IDirect3DDevice9_SetSamplerState(d3ddev, 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+    }
+    if (sys->d3dcaps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFLINEAR) {
+        msg_Dbg(vd, "Using D3DTEXF_LINEAR for magnification");
+        IDirect3DDevice9_SetSamplerState(d3ddev, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+    } else {
+        msg_Dbg(vd, "Using D3DTEXF_POINT for magnification");
+        IDirect3DDevice9_SetSamplerState(d3ddev, 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+    }
 
     // set maximum ambient light
     IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_AMBIENT, D3DCOLOR_XRGB(255,255,255));
@@ -992,20 +1062,23 @@ static int Direct3DCreateScene(vout_display_t *vd)
     IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_STENCILENABLE, FALSE);
 
     // manage blending
-    IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHABLENDENABLE, TRUE);
+    IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHABLENDENABLE, FALSE);
     IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
     IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_DESTBLEND,D3DBLEND_INVSRCALPHA);
-    IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHATESTENABLE,TRUE);
-    IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHAREF, 0x10);
-    IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHAFUNC,D3DCMP_GREATER);
+
+    if (sys->d3dcaps.AlphaCmpCaps & D3DPCMPCAPS_GREATER) {
+        IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHATESTENABLE,TRUE);
+        IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHAREF, 0x00);
+        IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHAFUNC,D3DCMP_GREATER);
+    }
 
     // Set texture states
-    IDirect3DDevice9_SetTextureStageState(d3ddev, 0, D3DTSS_COLOROP,D3DTOP_MODULATE);
+    IDirect3DDevice9_SetTextureStageState(d3ddev, 0, D3DTSS_COLOROP,D3DTOP_SELECTARG1);
     IDirect3DDevice9_SetTextureStageState(d3ddev, 0, D3DTSS_COLORARG1,D3DTA_TEXTURE);
-    IDirect3DDevice9_SetTextureStageState(d3ddev, 0, D3DTSS_COLORARG2,D3DTA_DIFFUSE);
 
-    // turn off alpha operation
-    IDirect3DDevice9_SetTextureStageState(d3ddev, 0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+    IDirect3DDevice9_SetTextureStageState(d3ddev, 0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+    IDirect3DDevice9_SetTextureStageState(d3ddev, 0, D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+    IDirect3DDevice9_SetTextureStageState(d3ddev, 0, D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
 
     msg_Dbg(vd, "Direct3D scene created successfully");
 
@@ -1019,6 +1092,8 @@ static void Direct3DDestroyScene(vout_display_t *vd)
 {
     vout_display_sys_t *sys = vd->sys;
 
+    Direct3DDeleteRegions(sys->d3dregion_count, sys->d3dregion);
+
     LPDIRECT3DVERTEXBUFFER9 d3dvtc = sys->d3dvtc;
     if (d3dvtc)
         IDirect3DVertexBuffer9_Release(d3dvtc);
@@ -1029,125 +1104,224 @@ static void Direct3DDestroyScene(vout_display_t *vd)
 
     sys->d3dvtc = NULL;
     sys->d3dtex = NULL;
+
+    sys->d3dregion_count = 0;
+    sys->d3dregion       = NULL;
+
     msg_Dbg(vd, "Direct3D scene released successfully");
 }
 
+static void Direct3DSetupVertices(CUSTOMVERTEX *vertices,
+                                  const RECT src_full,
+                                  const RECT src_crop,
+                                  const RECT dst,
+                                  int alpha)
+{
+    const float src_full_width  = src_full.right  - src_full.left;
+    const float src_full_height = src_full.bottom - src_full.top;
+    vertices[0].x  = dst.left;
+    vertices[0].y  = dst.top;
+    vertices[0].tu = src_crop.left / src_full_width;
+    vertices[0].tv = src_crop.top  / src_full_height;
+
+    vertices[1].x  = dst.right;
+    vertices[1].y  = dst.top;
+    vertices[1].tu = src_crop.right / src_full_width;
+    vertices[1].tv = src_crop.top   / src_full_height;
+
+    vertices[2].x  = dst.right;
+    vertices[2].y  = dst.bottom;
+    vertices[2].tu = src_crop.right  / src_full_width;
+    vertices[2].tv = src_crop.bottom / src_full_height;
+
+    vertices[3].x  = dst.left;
+    vertices[3].y  = dst.bottom;
+    vertices[3].tu = src_crop.left   / src_full_width;
+    vertices[3].tv = src_crop.bottom / src_full_height;
+
+    for (int i = 0; i < 4; i++) {
+        /* -0.5f is a "feature" of DirectX and it seems to apply to Direct3d also */
+        /* http://www.sjbrown.co.uk/2003/05/01/fix-directx-rasterisation/ */
+        vertices[i].x -= 0.5;
+        vertices[i].y -= 0.5;
+
+        vertices[i].z       = 0.0f;
+        vertices[i].rhw     = 1.0f;
+        vertices[i].diffuse = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+    }
+}
+
 /**
- * It copies picture surface into a texture and renders into a scene.
- *
- * This function is intented for higher end 3D cards, with pixel shader support
- * and at least 64 MiB of video RAM.
+ * It copies picture surface into a texture and setup the associated d3d_region_t.
  */
-static void Direct3DRenderScene(vout_display_t *vd, LPDIRECT3DSURFACE9 surface)
+static int Direct3DImportPicture(vout_display_t *vd,
+                                 d3d_region_t *region,
+                                 LPDIRECT3DSURFACE9 source)
 {
     vout_display_sys_t *sys = vd->sys;
-    LPDIRECT3DDEVICE9 d3ddev = sys->d3ddev;
     HRESULT hr;
 
-    // check if device is still available
-    hr = IDirect3DDevice9_TestCooperativeLevel(d3ddev);
-    if (FAILED(hr)) {
-        if (hr == D3DERR_DEVICENOTRESET && !sys->reset_device) {
-            vout_display_SendEventPicturesInvalid(vd);
-            sys->reset_device = true;
-        }
-        return;
-    }
-    /* */
-    LPDIRECT3DTEXTURE9      d3dtex  = sys->d3dtex;
-    LPDIRECT3DVERTEXBUFFER9 d3dvtc  = sys->d3dvtc;
-
-    /* Clear the backbuffer and the zbuffer */
-    hr = IDirect3DDevice9_Clear(d3ddev, 0, NULL, D3DCLEAR_TARGET,
-                              D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-    if (FAILED(hr)) {
-        msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        return;
-    }
-    /*  retrieve picture surface */
-    LPDIRECT3DSURFACE9 d3dsrc = surface;
-    if (!d3dsrc) {
+    if (!source) {
         msg_Dbg(vd, "no surface to render ?");
-        return;
+        return VLC_EGENERIC;
     }
 
     /* retrieve texture top-level surface */
-    LPDIRECT3DSURFACE9 d3ddest;
-    hr = IDirect3DTexture9_GetSurfaceLevel(d3dtex, 0, &d3ddest);
+    LPDIRECT3DSURFACE9 destination;
+    hr = IDirect3DTexture9_GetSurfaceLevel(sys->d3dtex, 0, &destination);
     if (FAILED(hr)) {
         msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        return;
+        return VLC_EGENERIC;
     }
 
     /* Copy picture surface into texture surface
-     * color space conversion and scaling happen here */
-    RECT src = vd->sys->rect_src_clipped;
-    RECT dst = vd->sys->rect_dest_clipped;
-
-    hr = IDirect3DDevice9_StretchRect(d3ddev, d3dsrc, &src, d3ddest, &dst, D3DTEXF_LINEAR);
-    IDirect3DSurface9_Release(d3ddest);
+     * color space conversion happen here */
+    hr = IDirect3DDevice9_StretchRect(sys->d3ddev, source, NULL, destination, NULL, D3DTEXF_NONE);
+    IDirect3DSurface9_Release(destination);
     if (FAILED(hr)) {
         msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
+        return VLC_EGENERIC;
+    }
+
+    /* */
+    region->texture = sys->d3dtex;
+    Direct3DSetupVertices(region->vertex,
+                          vd->sys->rect_src,
+                          vd->sys->rect_src_clipped,
+                          vd->sys->rect_dest_clipped, 255);
+    return VLC_SUCCESS;
+}
+
+static void Direct3DDeleteRegions(int count, d3d_region_t *region)
+{
+    for (int i = 0; i < count; i++) {
+        if (region[i].texture)
+            IDirect3DTexture9_Release(region[i].texture);
+    }
+    free(region);
+}
+
+static void Direct3DImportSubpicture(vout_display_t *vd,
+                                     int *count_ptr, d3d_region_t **region,
+                                     subpicture_t *subpicture)
+{
+    vout_display_sys_t *sys = vd->sys;
+
+    int count = 0;
+    for (subpicture_region_t *r = subpicture->p_region; r; r = r->p_next)
+        count++;
+
+    *count_ptr = count;
+    *region    = calloc(count, sizeof(**region));
+    if (*region == NULL) {
+        *count_ptr = 0;
         return;
     }
 
-    /* Update the vertex buffer */
-    CUSTOMVERTEX *vertices;
-    hr = IDirect3DVertexBuffer9_Lock(d3dvtc, 0, 0, (void **)&vertices, D3DLOCK_DISCARD);
-    if (FAILED(hr)) {
-        msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        return;
+    int i = 0;
+    for (subpicture_region_t *r = subpicture->p_region; r; r = r->p_next, i++) {
+        d3d_region_t *d3dr = &(*region)[i];
+        HRESULT hr;
+
+        d3dr->texture = NULL;
+        for (int j = 0; j < sys->d3dregion_count; j++) {
+            d3d_region_t *cache = &sys->d3dregion[j];
+            if (cache->texture &&
+                cache->format == D3DFMT_A8R8G8B8 &&
+                cache->width  == r->fmt.i_visible_width &&
+                cache->height == r->fmt.i_visible_height) {
+                msg_Dbg(vd, "Reusing %dx%d texture for OSD",
+                        cache->width, cache->height);
+                *d3dr = *cache;
+                memset(cache, 0, sizeof(*cache));
+            }
+        }
+        if (!d3dr->texture) {
+            d3dr->format = D3DFMT_A8R8G8B8;
+            d3dr->width  = r->fmt.i_visible_width;
+            d3dr->height = r->fmt.i_visible_height;
+            hr = IDirect3DDevice9_CreateTexture(sys->d3ddev,
+                                                d3dr->width, d3dr->height,
+                                                1,
+                                                D3DUSAGE_DYNAMIC,
+                                                d3dr->format,
+                                                D3DPOOL_DEFAULT,
+                                                &d3dr->texture,
+                                                NULL);
+            if (FAILED(hr)) {
+                d3dr->texture = NULL;
+                msg_Err(vd, "Failed to create %dx%d texture for OSD",
+                        d3dr->width, d3dr->height);
+                continue;
+            }
+            msg_Dbg(vd, "Created %dx%d texture for OSD",
+                    r->fmt.i_visible_width, r->fmt.i_visible_height);
+        }
+
+        D3DLOCKED_RECT lock;
+        hr = IDirect3DTexture9_LockRect(d3dr->texture, 0, &lock, NULL, 0);
+        if (SUCCEEDED(hr)) {
+            uint8_t *dst_data  = lock.pBits;
+            int      dst_pitch = lock.Pitch;
+            for (unsigned y = 0; y < r->fmt.i_visible_height; y++) {
+                int copy_pitch = __MIN(dst_pitch, r->p_picture->p->i_visible_pitch);
+                memcpy(&dst_data[y * dst_pitch],
+                       &r->p_picture->p->p_pixels[y * r->p_picture->p->i_pitch],
+                       copy_pitch);
+            }
+            hr = IDirect3DTexture9_UnlockRect(d3dr->texture, 0);
+            if (FAILED(hr))
+                msg_Err(vd, "Failed to unlock the texture");
+        } else {
+            msg_Err(vd, "Failed to lock the texture");
+        }
+
+        /* Map the subpicture to sys->rect_dest */
+        RECT src;
+        src.left   = 0;
+        src.right  = src.left + r->fmt.i_visible_width;
+        src.top    = 0;
+        src.bottom = src.top  + r->fmt.i_visible_height;
+
+        const RECT video = sys->rect_dest;
+        const float scale_w = (float)(video.right  - video.left) / subpicture->i_original_picture_width;
+        const float scale_h = (float)(video.bottom - video.top)  / subpicture->i_original_picture_height;
+
+        RECT dst;
+        dst.left   = video.left + scale_w * r->i_x,
+        dst.right  = dst.left + scale_w * r->fmt.i_visible_width,
+        dst.top    = video.top  + scale_h * r->i_y,
+        dst.bottom = dst.top  + scale_h * r->fmt.i_visible_height,
+        Direct3DSetupVertices(d3dr->vertex,
+                              src, src, dst,
+                              subpicture->i_alpha * r->i_alpha / 255);
     }
+}
 
-    /* Setup vertices */
-    const float f_width  = vd->sys->d3dpp.BackBufferWidth;
-    const float f_height = vd->sys->d3dpp.BackBufferHeight;
+static int Direct3DRenderRegion(vout_display_t *vd,
+                                d3d_region_t *region)
+{
+    vout_display_sys_t *sys = vd->sys;
 
-    /* -0.5f is a "feature" of DirectX and it seems to apply to Direct3d also */
-    /* http://www.sjbrown.co.uk/2003/05/01/fix-directx-rasterisation/ */
-    vertices[0].x       = -0.5f;       // left
-    vertices[0].y       = -0.5f;       // top
-    vertices[0].z       = 0.0f;
-    vertices[0].diffuse = D3DCOLOR_ARGB(255, 255, 255, 255);
-    vertices[0].rhw     = 1.0f;
-    vertices[0].tu      = 0.0f;
-    vertices[0].tv      = 0.0f;
+    LPDIRECT3DDEVICE9 d3ddev = vd->sys->d3ddev;
 
-    vertices[1].x       = f_width - 0.5f;    // right
-    vertices[1].y       = -0.5f;       // top
-    vertices[1].z       = 0.0f;
-    vertices[1].diffuse = D3DCOLOR_ARGB(255, 255, 255, 255);
-    vertices[1].rhw     = 1.0f;
-    vertices[1].tu      = 1.0f;
-    vertices[1].tv      = 0.0f;
+    LPDIRECT3DVERTEXBUFFER9 d3dvtc = sys->d3dvtc;
+    LPDIRECT3DTEXTURE9      d3dtex = region->texture;
 
-    vertices[2].x       = f_width - 0.5f;    // right
-    vertices[2].y       = f_height - 0.5f;   // bottom
-    vertices[2].z       = 0.0f;
-    vertices[2].diffuse = D3DCOLOR_ARGB(255, 255, 255, 255);
-    vertices[2].rhw     = 1.0f;
-    vertices[2].tu      = 1.0f;
-    vertices[2].tv      = 1.0f;
+    HRESULT hr;
 
-    vertices[3].x       = -0.5f;       // left
-    vertices[3].y       = f_height - 0.5f;   // bottom
-    vertices[3].z       = 0.0f;
-    vertices[3].diffuse = D3DCOLOR_ARGB(255, 255, 255, 255);
-    vertices[3].rhw     = 1.0f;
-    vertices[3].tu      = 0.0f;
-    vertices[3].tv      = 1.0f;
-
-    hr= IDirect3DVertexBuffer9_Unlock(d3dvtc);
+    /* Import vertices */
+    void *vertex;
+    hr = IDirect3DVertexBuffer9_Lock(d3dvtc, 0, 0, &vertex, D3DLOCK_DISCARD);
     if (FAILED(hr)) {
         msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        return;
+        return -1;
     }
-
-    // Begin the scene
-    hr = IDirect3DDevice9_BeginScene(d3ddev);
+    memcpy(vertex, region->vertex, sizeof(region->vertex));
+    hr = IDirect3DVertexBuffer9_Unlock(d3dvtc);
     if (FAILED(hr)) {
         msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        return;
+        return -1;
     }
 
     // Setup our texture. Using textures introduces the texture stage states,
@@ -1157,33 +1331,76 @@ static void Direct3DRenderScene(vout_display_t *vd, LPDIRECT3DSURFACE9 surface)
     hr = IDirect3DDevice9_SetTexture(d3ddev, 0, (LPDIRECT3DBASETEXTURE9)d3dtex);
     if (FAILED(hr)) {
         msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        IDirect3DDevice9_EndScene(d3ddev);
-        return;
+        return -1;
     }
 
     // Render the vertex buffer contents
     hr = IDirect3DDevice9_SetStreamSource(d3ddev, 0, d3dvtc, 0, sizeof(CUSTOMVERTEX));
     if (FAILED(hr)) {
         msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        IDirect3DDevice9_EndScene(d3ddev);
-        return;
+        return -1;
     }
 
     // we use FVF instead of vertex shader
     hr = IDirect3DDevice9_SetFVF(d3ddev, D3DFVF_CUSTOMVERTEX);
     if (FAILED(hr)) {
         msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        IDirect3DDevice9_EndScene(d3ddev);
-        return;
+        return -1;
     }
 
     // draw rectangle
     hr = IDirect3DDevice9_DrawPrimitive(d3ddev, D3DPT_TRIANGLEFAN, 0, 2);
     if (FAILED(hr)) {
         msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
-        IDirect3DDevice9_EndScene(d3ddev);
+        return -1;
+    }
+    return 0;
+}
+
+/**
+ * It renders the scene.
+ *
+ * This function is intented for higher end 3D cards, with pixel shader support
+ * and at least 64 MiB of video RAM.
+ */
+static void Direct3DRenderScene(vout_display_t *vd,
+                                d3d_region_t *picture,
+                                int subpicture_count,
+                                d3d_region_t *subpicture)
+{
+    vout_display_sys_t *sys = vd->sys;
+    LPDIRECT3DDEVICE9 d3ddev = sys->d3ddev;
+    HRESULT hr;
+
+    if (sys->clear_scene) {
+        /* Clear the backbuffer and the zbuffer */
+        hr = IDirect3DDevice9_Clear(d3ddev, 0, NULL, D3DCLEAR_TARGET,
+                                  D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+        if (FAILED(hr)) {
+            msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
+            return;
+        }
+        sys->clear_scene = false;
+    }
+
+    // Begin the scene
+    hr = IDirect3DDevice9_BeginScene(d3ddev);
+    if (FAILED(hr)) {
+        msg_Dbg(vd, "%s:%d (hr=0x%0lX)", __FUNCTION__, __LINE__, hr);
         return;
     }
+
+    Direct3DRenderRegion(vd, picture);
+
+    if (subpicture_count > 0)
+        IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHABLENDENABLE, TRUE);
+    for (int i = 0; i < subpicture_count; i++) {
+        d3d_region_t *r = &subpicture[i];
+        if (r->texture)
+            Direct3DRenderRegion(vd, r);
+    }
+    if (subpicture_count > 0)
+        IDirect3DDevice9_SetRenderState(d3ddev, D3DRS_ALPHABLENDENABLE, FALSE);
 
     // End the scene
     hr = IDirect3DDevice9_EndScene(d3ddev);

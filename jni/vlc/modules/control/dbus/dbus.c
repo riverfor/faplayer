@@ -4,7 +4,7 @@
  * Copyright © 2006-2008 Rafaël Carré
  * Copyright © 2007-2010 Mirsal Ennaime
  * Copyright © 2009-2010 The VideoLAN team
- * $Id: fd677475f4329c6c298d748570ee25edc521f4f5 $
+ * $Id: f0e6ee01f93d67c05f96907a21dbd2b40f1e4653 $
  *
  * Authors:    Rafaël Carré <funman at videolanorg>
  *             Mirsal Ennaime <mirsal at mirsal fr>
@@ -52,7 +52,6 @@
 #include "dbus_tracklist.h"
 
 #include <vlc_common.h>
-#include <vlc_fixups.h>
 #include <vlc_plugin.h>
 #include <vlc_interface.h>
 #include <vlc_playlist.h>

@@ -2,7 +2,7 @@
  * update.c: VLC update checking and downloading
  *****************************************************************************
  * Copyright © 2005-2008 the VideoLAN team
- * $Id: 0c939a0b37fcd2792920a3fb62efad7f7a8ef5f0 $
+ * $Id: 02adb3ac3a0458bca9be67cd63d4978cb4bb67e8 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *          Rémi Duraffort <ivoire at via.ecp.fr>
@@ -333,7 +333,7 @@ static bool GetUpdateFile( update_t *p_update )
         else
         {
             free( p_hash );
-            msg_Err( p_update->p_libvlc, "Key signature invalid !\n" );
+            msg_Err( p_update->p_libvlc, "Key signature invalid !" );
             goto error;
         }
     }

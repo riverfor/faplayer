@@ -2,7 +2,7 @@
  * intf.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: 3971b61b52f6632d141dab0a549fd9391b0e92a4 $
+ * $Id: c2c203f04b8964a866ed7d410337629bf15916f2 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -81,7 +81,7 @@ static const struct
     { "luatelnet", "telnet" },
     { "telnet", "telnet" },
     { "luahttp", "http" },
-    /* { "http", "http" }, */
+    { "http", "http" },
     { NULL, NULL } };
 
 static const char *WordInList( const char *psz_list, const char *psz_word )

@@ -2,7 +2,7 @@
  * screen.c: Screen capture module.
  *****************************************************************************
  * Copyright (C) 2004-2008 the VideoLAN team
- * $Id: a092b9d24487a468c30d935f8d3c34372e3abbaa $
+ * $Id: 59f7e240c84cfeffae80e3c1c6d028f7ded418fc $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -18,8 +18,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
 /*****************************************************************************
@@ -32,7 +32,7 @@
 
 #include <vlc_common.h>
 #include <vlc_plugin.h>
-#include <vlc_modules.h>
+#include <vlc_modules.h>                 /* module_need for "video blending" */
 #include "screen.h"
 
 /*****************************************************************************
@@ -63,12 +63,8 @@
     "Left coordinate of the subscreen top left corner." )
 
 #define WIDTH_TEXT N_( "Subscreen width" )
-#define WIDTH_LONGTEXT N_( \
-    "Subscreen width" )
 
 #define HEIGHT_TEXT N_( "Subscreen height" )
-#define HEIGHT_LONGTEXT N_( \
-    "Subscreen height"  )
 
 #define FOLLOW_MOUSE_TEXT N_( "Follow the mouse" )
 #define FOLLOW_MOUSE_LONGTEXT N_( \
@@ -99,25 +95,24 @@ vlc_module_begin ()
 
     add_integer( "screen-caching", DEFAULT_PTS_DELAY / 1000,
         CACHING_TEXT, CACHING_LONGTEXT, true )
-    add_float( "screen-fps", SCREEN_FPS, FPS_TEXT, FPS_LONGTEXT, true )
+    add_float( "screen-fps", SCREEN_FPS, FPS_TEXT, FPS_LONGTEXT, false )
 
 #ifdef SCREEN_SUBSCREEN
     add_integer( "screen-top", 0, TOP_TEXT, TOP_LONGTEXT, true )
     add_integer( "screen-left", 0, LEFT_TEXT, LEFT_LONGTEXT, true )
-    add_integer( "screen-width", 0, WIDTH_TEXT, WIDTH_LONGTEXT, true )
-    add_integer( "screen-height", 0, HEIGHT_TEXT, HEIGHT_LONGTEXT, true )
+    add_integer( "screen-width", 0, WIDTH_TEXT, WIDTH_TEXT, true )
+    add_integer( "screen-height", 0, HEIGHT_TEXT, HEIGHT_TEXT, true )
+
     add_bool( "screen-follow-mouse", false, FOLLOW_MOUSE_TEXT,
-              FOLLOW_MOUSE_LONGTEXT, true )
+              FOLLOW_MOUSE_LONGTEXT, false )
 #endif
 
 #ifdef SCREEN_MOUSE
-    add_loadfile( "screen-mouse-image", "", MOUSE_TEXT, MOUSE_LONGTEXT,
-                  true )
+    add_loadfile( "screen-mouse-image", "", MOUSE_TEXT, MOUSE_LONGTEXT, true )
 #endif
 
 #ifdef WIN32
-    add_integer( "screen-fragment-size", 0, FRAGS_TEXT,
-        FRAGS_LONGTEXT, true )
+    add_integer( "screen-fragment-size", 0, FRAGS_TEXT, FRAGS_LONGTEXT, true )
 #endif
 
     set_capability( "access_demux", 0 )

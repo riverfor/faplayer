@@ -2,7 +2,7 @@
  * playlist.cpp : Custom widgets for the playlist
  ****************************************************************************
  * Copyright © 2007-2010 the VideoLAN team
- * $Id: 3c4d95a30a433c3775403dc640dccd5516ba32fd $
+ * $Id: c2d6334ddbdce23eb43b89df7931e676d2c35f4c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -87,10 +87,10 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
     /* Initialisation of the playlist */
     playlist_t * p_playlist = THEPL;
     PL_LOCK;
-    playlist_item_t *p_root = THEPL->p_playing;
+    playlist_item_t *p_root = p_playlist->p_playing;
     PL_UNLOCK;
 
-    setMinimumWidth( 350 );
+    setMinimumWidth( 400 );
 
     PLModel *model = new PLModel( p_playlist, p_intf, p_root, this );
     mainView = new StandardPLPanel( this, p_intf, p_root, selector, model );
@@ -148,7 +148,7 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
               mainView, setRoot( playlist_item_t * ) );
     mainView->setRoot( p_root );
 
-
+    /* */
     split = new PlaylistSplitter( this );
 
     /* Add the two sides of the QSplitter */
@@ -261,9 +261,16 @@ void LocationBar::setIndex( const QModelIndex &index )
     while( true )
     {
         PLItem *item = model->getItem( i );
+        QString text;
 
-        char *fb_name = input_item_GetTitleFbName( item->inputItem() );
-        QString text = qfu(fb_name);
+        char *fb_name = input_item_GetTitle( item->inputItem() );
+        if( !EMPTY_STR( fb_name ) )
+             text = qfu(fb_name);
+        else
+        {
+            fb_name = input_item_GetName( item->inputItem() );
+            text = qtr(fb_name);
+        }
         free(fb_name);
 
         QAbstractButton *btn = new LocationButton( text, first, !first, this );

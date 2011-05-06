@@ -1,8 +1,8 @@
 /*****************************************************************************
  * intf.h: MacOS X interface module
  *****************************************************************************
- * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 7af260924e6548deea7f4048ebeccb76763f424c $
+ * Copyright (C) 2002-2011 the VideoLAN team
+ * $Id: 006c4c12ef9cd0913042a8a8611fffa945877b62 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -36,6 +36,7 @@
 #include <vlc_input.h>
 
 #include <Cocoa/Cocoa.h>
+#import "SPMediaKeyTap.h"                   /* for the media key support */
 
 /*****************************************************************************
  * Local prototypes.
@@ -110,6 +111,7 @@ struct intf_sys_t
     id o_coredialogs;           /* VLCCoreDialogProvider */
     VLCInformation * o_info;    /* VLCInformation */
     id o_eyetv;                 /* VLCEyeTVController */
+    id o_audioeffects;          /* VLCAudioEffects */
     BOOL nib_main_loaded;       /* main nibfile */
     BOOL nib_open_loaded;       /* open nibfile */
     BOOL nib_about_loaded;      /* about nibfile */
@@ -119,6 +121,7 @@ struct intf_sys_t
     BOOL nib_prefs_loaded;      /* preferences nibfile */
     BOOL nib_info_loaded;       /* information panel nibfile */
     BOOL nib_coredialogs_loaded; /* CoreDialogs nibfile */
+    BOOL nib_audioeffects_loaded; /* audio effects panel */
 
     IBOutlet VLCControllerWindow * o_window;                     /* main window */
     IBOutlet NSView * o_playlist_view;                          /* playlist view  */
@@ -142,7 +145,7 @@ struct intf_sys_t
     IBOutlet NSButton * o_btn_next;     /* btn next       */
     IBOutlet NSButton * o_btn_fullscreen;/* btn fullscreen (embedded vout window) */
     IBOutlet NSButton * o_btn_playlist; /* btn playlist   */
-    IBOutlet NSButton * o_btn_equalizer; /* eq btn */
+    IBOutlet NSButton * o_btn_audioEffects; /* AudioEffects btn */
 
     NSImage * o_img_play;       /* btn play img   */
     NSImage * o_img_pause;      /* btn pause img  */
@@ -277,7 +280,7 @@ struct intf_sys_t
     IBOutlet NSMenuItem * o_mi_close_window;
     IBOutlet NSMenuItem * o_mi_player;
     IBOutlet NSMenuItem * o_mi_controller;
-    IBOutlet NSMenuItem * o_mi_equalizer;
+    IBOutlet NSMenuItem * o_mi_audioeffects;
     IBOutlet NSMenuItem * o_mi_extended;
     IBOutlet NSMenuItem * o_mi_bookmarks;
     IBOutlet NSMenuItem * o_mi_playlist;
@@ -337,14 +340,19 @@ struct intf_sys_t
 
     AppleRemote * o_remote;
     BOOL b_remote_button_hold; /* true as long as the user holds the left,right,plus or minus on the remote control */
+
+    /* media key support */
+    BOOL b_mediaKeySupport;
+    BOOL b_mediakeyJustJumped;
+    SPMediaKeyTap * o_mediaKeyController;
+
+    NSArray *o_usedHotkeys;
 }
 
 + (VLCMain *)sharedInstance;
 
 - (intf_thread_t *)intf;
 - (void)setIntf:(intf_thread_t *)p_mainintf;
-
-- (void)controlTintChanged;
 
 - (id)controls;
 - (id)simplePreferences;
@@ -366,6 +374,9 @@ struct intf_sys_t
 - (char *)delocalizeString:(NSString *)psz;
 - (NSString *)wrapString: (NSString *)o_in_string toWidth: (int)i_width;
 - (BOOL)hasDefinedShortcutKey:(NSEvent *)o_event;
+- (NSString *)VLCKeyToString:(NSString *)theString;
+- (unsigned int)VLCModifiersToCocoa:(NSString *)theString;
+- (void)updateCurrentlyUsedHotkeys;
 
 - (void)initStrings;
 
@@ -394,6 +405,7 @@ struct intf_sys_t
 
 - (IBAction)showWizard:(id)sender;
 - (IBAction)showExtended:(id)sender;
+- (IBAction)showAudioEffects:(id)sender;
 - (IBAction)showBookmarks:(id)sender;
 
 - (IBAction)viewAbout:(id)sender;
@@ -418,10 +430,13 @@ struct intf_sys_t
 
 - (void)windowDidBecomeKey:(NSNotification *)o_notification;
 
+- (void)mediaKeyTap:(SPMediaKeyTap*)keyTap receivedMediaKeyEvent:(NSEvent*)event;
 @end
 
 @interface VLCMain (Internal)
 - (void)handlePortMessage:(NSPortMessage *)o_msg;
+- (void)resetMediaKeyJump;
+- (void)coreChangedMediaKeySupportSetting: (NSNotification *)o_notification;
 @end
 
 /*****************************************************************************
@@ -430,14 +445,5 @@ struct intf_sys_t
 
 @interface VLCApplication : NSApplication
 {
-    BOOL b_justJumped;
-	BOOL b_mediaKeySupport;
-    BOOL b_activeInBackground;
-    BOOL b_active;
 }
-
-- (void)coreChangedMediaKeySupportSetting: (NSNotification *)o_notification;
-- (void)sendEvent: (NSEvent*)event;
-- (void)resetJump;
-
 @end

@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2004 Daniel Molkentin <molkentin@kde.org>
- * $Id: aa4f2c5279b1ab7292feccbae30f682a353903ed $
+ * $Id: 0faf1fb3feeed896ef558a683539da6dc7f163df $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  * The "ClickLineEdit" control is based on code by  Daniel Molkentin
@@ -27,7 +27,11 @@
 #ifndef _SEARCHLINEEDIT_H_
 #define _SEARCHLINEEDIT_H_
 
+#ifdef __APPLE__
+#include "../qt4.hpp"
+#else
 #include "qt4.hpp"
+#endif
 #include <QLineEdit>
 
 #if HAS_QT47

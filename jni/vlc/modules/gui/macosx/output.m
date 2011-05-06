@@ -2,7 +2,7 @@
  * output.m: MacOS X Output Dialog
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: 14ff97b768d3136a167695b04c08b2967d5afc90 $
+ * $Id: 51b2bcf2007f40158d5073d053004a2ed32afc45 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -528,7 +528,7 @@
     if( [o_save_panel runModalForDirectory: nil
             file: o_name] == NSOKButton )
     {
-        NSString *o_filename = [o_save_panel filename];
+        NSString *o_filename = [[o_save_panel URL] path];
         [o_file_field setStringValue: o_filename];
         [self outputInfoChanged: nil];
     }

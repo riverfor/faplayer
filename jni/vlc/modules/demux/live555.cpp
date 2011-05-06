@@ -2,7 +2,7 @@
  * live555.cpp : LIVE555 Streaming Media support.
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id: a09c2c0d2b4c91b0831c8932ec124295a0a3a796 $
+ * $Id: dd262b5ae191ee265ee73029690966b40672a06c $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Derk-Jan Hartman <hartman at videolan. org>
@@ -1078,7 +1078,8 @@ static int SessionsSetup( demux_t *p_demux )
                 sub->rtcpInstance()->setByeHandler( StreamClose, tk );
             }
 
-            if( tk->p_es || tk->b_quicktime || tk->b_muxed || tk->b_asf )
+            if( tk->p_es || tk->b_quicktime || ( tk->b_muxed && tk->p_out_muxed ) ||
+                ( tk->b_asf && p_sys->p_out_asf ) )
             {
                 /* Append */
                 p_sys->track = (live_track_t**)xrealloc( p_sys->track,

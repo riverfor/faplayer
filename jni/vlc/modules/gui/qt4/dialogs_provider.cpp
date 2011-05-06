@@ -2,7 +2,7 @@
  * dialogs_provider.cpp : Dialog Provider
  *****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: ed0fa36d2c9fda309af3be3ae6d3ed50ffcecdb1 $
+ * $Id: e73f425e0959fd44be4e269076eacd1006f737eb $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -515,10 +515,8 @@ static void openDirectory( intf_thread_t *p_intf, bool pl, bool go )
 
     /* FIXME: playlist_AddInput() can fail */
     playlist_AddInput( THEPL, p_input,
-                      go ? ( PLAYLIST_APPEND | PLAYLIST_GO ) : PLAYLIST_APPEND,
+                       go ? ( PLAYLIST_APPEND | PLAYLIST_GO ) : PLAYLIST_APPEND,
                        PLAYLIST_END, pl, pl_Unlocked );
-    if( !go )
-        input_Read( THEPL, p_input );
     vlc_gc_decref( p_input );
 }
 
@@ -555,29 +553,32 @@ void DialogsProvider::saveAPlaylist()
     static const struct
     {
         char filter_name[14];
-        char filter_patterns[7];
+        char filter_patterns[5];
         char module[12];
     } types[] = {
-        { N_("XSPF playlist"), "*.xspf", "export-xspf", },
-        { N_("M3U8 playlist"), "*.m3u8", "export-m3u8", },
-        { N_("M3U playlist"), "*.m3u", "export-m3u", },
-        { N_("HTML playlist"), "*.html", "export-html", },
+        { N_("XSPF playlist"), "xspf", "export-xspf", },
+        { N_("M3U playlist"),  "m3u",  "export-m3u", },
+        { N_("M3U8 playlist"), "m3u8", "export-m3u8", },
+        { N_("HTML playlist"), "html", "export-html", },
     };
-    QString filters, selected;
+
+    QStringList filters;
+    QString ext = getSettings()->value( "last-playlist-ext" ).toString();
 
     for( size_t i = 0; i < sizeof (types) / sizeof (types[0]); i++ )
     {
-        if( !filters.isEmpty() )
-            filters += ";;";
-        filters += qfu( vlc_gettext( types[i].filter_name ) );
-        filters += " (";
-        filters += qfu( types[i].filter_patterns );
-        filters += ")";
+        QString tmp = qfu( vlc_gettext( types[i].filter_name ) ) + " (*." + types[i].filter_patterns + ")";
+        if( ext == qfu( types[i].filter_patterns ) )
+            filters.insert( 0, tmp );
+        else
+            filters.append( tmp );
     }
 
+    QString selected;
     QString file = QFileDialog::getSaveFileName( NULL,
                                   qtr( "Save playlist as..." ),
-                                  p_intf->p_sys->filepath, filters, &selected );
+                                  p_intf->p_sys->filepath, filters.join( ";;" ),
+                                  &selected );
     if( file.isEmpty() )
         return;
 
@@ -586,6 +587,7 @@ void DialogsProvider::saveAPlaylist()
         {
             playlist_Export( THEPL, qtu( toNativeSeparators( file ) ),
                              THEPL->p_playing, types[i].module );
+            getSettings()->setValue( "last-playlist-ext", types[i].filter_patterns );
             break;
         }
 }
@@ -680,15 +682,22 @@ void DialogsProvider::loadSubtitlesFile()
     if( !p_item ) return;
 
     char *path = input_item_GetURI( p_item );
-    if( !path ) path = strdup( "" );
-
-    char *sep = strrchr( path, DIR_SEP_CHAR );
-    if( sep ) *sep = '\0';
+    char *path2 = NULL;
+    if( path )
+    {
+        path2 = make_path( path );
+        free( path );
+        if( path2 )
+        {
+            char *sep = strrchr( path2, DIR_SEP_CHAR );
+            if( sep ) *sep = '\0';
+        }
+    }
 
     QStringList qsl = showSimpleOpen( qtr( "Open subtitles..." ),
                                       EXT_FILTER_SUBTITLE,
-                                      qfu( path ) );
-    free( path );
+                                      qfu( path2 ) );
+    free( path2 );
     foreach( const QString &qsFile, qsl )
     {
         if( input_AddSubtitle( p_input, qtu( toNativeSeparators( qsFile ) ),

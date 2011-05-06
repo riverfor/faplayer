@@ -2,7 +2,7 @@
  * Controller_widget.cpp : Controller Widget for the controllers
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: b6208b5b6708d65fb4a73d424ac03dd6a008c9c6 $
+ * $Id: 6ad8825c510bf9d1bfc09851066227bbc0568d50 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -35,7 +35,6 @@
 
 #include <QLabel>
 #include <QHBoxLayout>
-#include <QSpinBox>
 #include <QMenu>
 #include <QWidgetAction>
 #include <QMouseEvent>
@@ -43,7 +42,7 @@
 SoundWidget::SoundWidget( QWidget *_parent, intf_thread_t * _p_intf,
                           bool b_shiny, bool b_special )
                          : QWidget( _parent ), p_intf( _p_intf),
-                           b_is_muted( false )
+                           b_is_muted( false ), b_ignore_valuechanged( false )
 {
     /* We need a layout for this widget */
     QHBoxLayout *layout = new QHBoxLayout( this );
@@ -63,6 +62,9 @@ SoundWidget::SoundWidget( QWidget *_parent, intf_thread_t * _p_intf,
     {
         volumeMenu = NULL; subLayout = NULL;
         volumeControlWidget = NULL;
+
+        /* And add the label */
+        layout->addWidget( volMuteLabel, 0, Qt::AlignBottom );
     }
     else
     {
@@ -77,10 +79,10 @@ SoundWidget::SoundWidget( QWidget *_parent, intf_thread_t * _p_intf,
         QWidgetAction *widgetAction = new QWidgetAction( volumeControlWidget );
         widgetAction->setDefaultWidget( volumeControlWidget );
         volumeMenu->addAction( widgetAction );
-    }
 
-    /* And add the label */
-    layout->addWidget( volMuteLabel );
+        /* And add the label */
+        layout->addWidget( volMuteLabel );
+    }
 
     /* Slider creation: shiny or clean */
     if( b_shiny )
@@ -112,8 +114,9 @@ SoundWidget::SoundWidget( QWidget *_parent, intf_thread_t * _p_intf,
     updateMuteStatus();
 
     /* Volume control connection */
-    CONNECT( volumeSlider, valueChanged( int ), this, refreshLabels( void ) );
-    CONNECT( volumeSlider, sliderMoved( int ), this, userUpdateVolume( int ) );
+    volumeSlider->setTracking( true );
+    CONNECT( volumeSlider, valueChanged( int ), this, valueChangedFilter( int ) );
+    CONNECT( this, valueReallyChanged( int ), this, userUpdateVolume( int ) );
     CONNECT( THEMIM, volumeChanged( void ), this, libUpdateVolume( void ) );
     CONNECT( THEMIM, soundMuteChanged( void ), this, updateMuteStatus( void ) );
 }
@@ -151,6 +154,7 @@ void SoundWidget::userUpdateVolume( int i_sliderVolume )
     playlist_t *p_playlist = pl_Get( p_intf );
     int i_res = i_sliderVolume  * (AOUT_VOLUME_MAX / 2) / VOLUME_MAX;
     aout_VolumeSet( p_playlist, i_res );
+    refreshLabels();
 }
 
 /* libvlc changed value event slot */
@@ -160,15 +164,22 @@ void SoundWidget::libUpdateVolume()
     audio_volume_t i_volume;
     playlist_t *p_playlist = pl_Get( p_intf );
 
-    aout_VolumeGet( p_playlist, &i_volume );
+    i_volume = aout_VolumeGet( p_playlist );
     i_volume = ( ( i_volume + 1 ) *  VOLUME_MAX )/ (AOUT_VOLUME_MAX/2);
-    int i_gauge = volumeSlider->value();
-    if ( !b_is_muted && /* do not show mute effect on volume (set to 0) */
-        ( i_volume - i_gauge > 1 || i_gauge - i_volume > 1 )
-    )
+
+    if ( i_volume - volumeSlider->value() != 0 )
     {
+        b_ignore_valuechanged = true;
         volumeSlider->setValue( i_volume );
+        b_ignore_valuechanged = false;
     }
+    refreshLabels();
+}
+
+void SoundWidget::valueChangedFilter( int i_val )
+{
+    /* valueChanged is also emitted when the lib setValue() */
+    if ( !b_ignore_valuechanged ) emit valueReallyChanged( i_val );
 }
 
 /* libvlc mute/unmute event slot */
@@ -224,14 +235,14 @@ bool SoundWidget::eventFilter( QObject *obj, QEvent *e )
 /**
  * Play Button
  **/
-void PlayButton::updateButton( bool b_playing )
+void PlayButton::updateButtonIcons( bool b_playing )
 {
     setIcon( b_playing ? QIcon( ":/toolbar/pause_b" ) : QIcon( ":/toolbar/play_b" ) );
     setToolTip( b_playing ? qtr( "Pause the playback" )
                           : qtr( I_PLAY_TOOLTIP ) );
 }
 
-void AtoB_Button::setIcons( bool timeA, bool timeB )
+void AtoB_Button::updateButtonIcons( bool timeA, bool timeB )
 {
     if( !timeA && !timeB)
     {
@@ -251,7 +262,7 @@ void AtoB_Button::setIcons( bool timeA, bool timeB )
     }
 }
 
-void LoopButton::updateIcons( int value )
+void LoopButton::updateButtonIcons( int value )
 {
     setChecked( value != NORMAL );
     setIcon( ( value == REPEAT_ONE ) ? QIcon( ":/buttons/playlist/repeat_one" )

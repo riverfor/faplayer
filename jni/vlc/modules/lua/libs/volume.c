@@ -2,7 +2,7 @@
  * volume.c
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: afa15dceb472a39b90163673bc81741784592179 $
+ * $Id: f9e038d987d6aa5d4cdf846cca337dbbe2e6b2a7 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -61,11 +61,8 @@ static int vlclua_volume_set( lua_State *L )
 static int vlclua_volume_get( lua_State *L )
 {
     playlist_t *p_this = vlclua_get_playlist_internal( L );
-    audio_volume_t i_volume;
-    if( aout_VolumeGet( p_this, &i_volume ) == VLC_SUCCESS )
-        lua_pushnumber( L, i_volume );
-    else
-        lua_pushnil( L );
+    audio_volume_t i_volume = aout_VolumeGet( p_this );
+    lua_pushnumber( L, i_volume );
     return 1;
 }
 

@@ -2,7 +2,7 @@
  * simple_preferences.cpp : "Simple preferences"
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id: f54b433b6a8ac934f06ca941a4620a25a17b41b3 $
+ * $Id: b957b730af3698df669ef9f9be8d7b1fa854672a $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -69,8 +69,9 @@ SPrefsCatList::SPrefsCatList( intf_thread_t *_p_intf, QWidget *_parent, bool sma
 
 #define ADD_CATEGORY( button, label, icon, numb )                           \
     QToolButton * button = new QToolButton( this );                         \
-    button->setIcon( QIcon( ":/prefsmenu/" #icon ) );                   \
+    button->setIcon( QIcon( ":/prefsmenu/" #icon ) );                       \
     button->setText( label );                                               \
+    button->setToolTip( label + qtr("Preferences") );                       \
     button->setToolButtonStyle( Qt::ToolButtonTextUnderIcon );              \
     button->setIconSize( QSize( icon_height, icon_height ) );               \
     button->resize( icon_height + 6 , icon_height + 6 );                    \
@@ -266,6 +267,7 @@ SPrefsPanel::SPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
             QComboBox * name ## Device = new QComboBox( name ## Control ); \
             name ## Layout->addWidget( name ## Device ); \
             name ## Label->setBuddy( name ## Device ); \
+            name ## Device->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Preferred  );\
             outputAudioLayout->addWidget( name ## Control, outputAudioLayout->rowCount(), 0, 1, -1 );
 
 #define audioControl2( name) \
@@ -289,7 +291,6 @@ SPrefsPanel::SPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
             {
                 audioControl( alsa );
                 optionWidgets.append( alsaControl );
-
                 CONFIG_GENERIC_NO_UI( "alsa-audio-device" , StringList, alsaLabel,
                                 alsaDevice );
             }
@@ -768,7 +769,7 @@ void SPrefsPanel::apply()
     for( i = controls.begin() ; i != controls.end() ; ++i )
     {
         ConfigControl *c = qobject_cast<ConfigControl *>(*i);
-        c->doApply( p_intf );
+        c->doApply();
     }
 
     switch( number )
@@ -887,7 +888,6 @@ void SPrefsPanel::changeStyle( QString s_style )
 
 #ifdef WIN32
 #include <QDialogButtonBox>
-#include <QHeaderView>
 #include "util/registry.hpp"
 #include <string>
 

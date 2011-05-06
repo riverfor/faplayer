@@ -2,7 +2,7 @@
  * preferences_widgets.hpp : Widgets for preferences panels
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 1ba310e6c5b2c94e8aec14127e47114d15cb5f87 $
+ * $Id: e0dc46f86b9f51933d33073ba4636e6668f21cb2 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -43,7 +43,6 @@
 #include <QLabel>
 #include <QDoubleSpinBox>
 #include <QPushButton>
-#include <QVector>
 #include <QDialog>
 #include <QFontComboBox>
 
@@ -76,7 +75,7 @@ public slots:
  * Variable controls
  *******************************************************/
 
-class ConfigControl : public QObject
+class   ConfigControl : public QObject
 {
     Q_OBJECT
 public:
@@ -90,26 +89,22 @@ public:
     {
         widget = NULL;
     }
-    virtual ~ConfigControl() {};
-    virtual int getType() = 0;
-    const char * getName() { return  p_item->psz_name; }
-    QWidget *getWidget() { assert( widget ); return widget; }
-    bool isAdvanced() { return p_item->b_advanced; }
+    virtual int getType() const = 0;
+    const char * getName() const { return  p_item->psz_name; }
+    QWidget *getWidget() const { assert( widget ); return widget; }
+    bool isAdvanced() const { return p_item->b_advanced; }
     virtual void hide() { getWidget()->hide(); };
     virtual void show() { getWidget()->show(); };
 
     static ConfigControl * createControl( vlc_object_t*,
-                                          module_config_t*,QWidget* );
-    static ConfigControl * createControl( vlc_object_t*,
                                           module_config_t*,QWidget*,
-                                          QGridLayout *, int& );
-    void doApply( intf_thread_t *);
+                                          QGridLayout *, int line = 0 );
+    virtual void doApply() = 0;
 protected:
     vlc_object_t *p_this;
     module_config_t *p_item;
     QString _name;
     QWidget *widget;
-    bool _advanced;
 #if 0
 /* You shouldn't use that now..*/
 signals:
@@ -128,9 +123,9 @@ public:
             ConfigControl(a,b,c) {};
     VIntConfigControl( vlc_object_t *a, module_config_t *b ) :
                 ConfigControl(a,b) {};
-    virtual ~VIntConfigControl() {};
-    virtual int getValue() = 0;
-    virtual int getType() { return CONFIG_ITEM_INTEGER; }
+    virtual int getValue() const = 0;
+    virtual int getType() const { return CONFIG_ITEM_INTEGER; }
+    virtual void doApply();
 };
 
 class IntegerConfigControl : public VIntConfigControl
@@ -138,15 +133,14 @@ class IntegerConfigControl : public VIntConfigControl
 Q_OBJECT
 public:
     IntegerConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                          QGridLayout *, int& );
+                          QGridLayout *, int );
     IntegerConfigControl( vlc_object_t *, module_config_t *,
                           QLabel*, QSpinBox* );
     IntegerConfigControl( vlc_object_t *, module_config_t *,
                           QLabel*, QSlider* );
-    virtual ~IntegerConfigControl() {};
-    virtual int getValue();
-    virtual void show() { spin->show(); if( label ) label->show(); }
-    virtual void hide() { spin->hide(); if( label ) label->hide(); }
+    virtual int getValue() const;
+    virtual void show() const { spin->show(); if( label ) label->show(); }
+    virtual void hide() const { spin->hide(); if( label ) label->hide(); }
 
 protected:
     QSpinBox *spin;
@@ -159,7 +153,7 @@ class IntegerRangeConfigControl : public IntegerConfigControl
 {
 public:
     IntegerRangeConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                               QGridLayout *, int& );
+                               QGridLayout *, int );
     IntegerRangeConfigControl( vlc_object_t *, module_config_t *,
                                QLabel*, QSpinBox* );
 private:
@@ -171,8 +165,7 @@ class IntegerRangeSliderConfigControl : public VIntConfigControl
 public:
     IntegerRangeSliderConfigControl( vlc_object_t *, module_config_t *,
                                 QLabel *, QSlider * );
-    virtual ~IntegerRangeSliderConfigControl() {};
-    virtual int getValue();
+    virtual int getValue() const;
 protected:
          QSlider *slider;
 private:
@@ -185,11 +178,10 @@ class IntegerListConfigControl : public VIntConfigControl
 Q_OBJECT
 public:
     IntegerListConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                              bool, QGridLayout*, int& );
+                              bool, QGridLayout*, int );
     IntegerListConfigControl( vlc_object_t *, module_config_t *, QLabel *,
                               QComboBox*, bool );
-    virtual ~IntegerListConfigControl() {};
-    virtual int getValue();
+    virtual int getValue() const;
     virtual void hide() { combo->hide(); if( label ) label->hide(); }
     virtual void show() { combo->show(); if( label ) label->show(); }
 private:
@@ -205,14 +197,13 @@ class BoolConfigControl : public VIntConfigControl
 {
 public:
     BoolConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                       QGridLayout *, int& );
+                       QGridLayout *, int );
     BoolConfigControl( vlc_object_t *, module_config_t *,
                        QLabel *, QAbstractButton*, bool );
-    virtual ~BoolConfigControl() {};
-    virtual int getValue();
+    virtual int getValue() const;
     virtual void show() { checkbox->show(); }
     virtual void hide() { checkbox->hide(); }
-    virtual int getType() { return CONFIG_ITEM_BOOL; }
+    virtual int getType() const { return CONFIG_ITEM_BOOL; }
 private:
     QAbstractButton *checkbox;
     void finish();
@@ -229,9 +220,9 @@ public:
                 ConfigControl(a,b,c) {};
     VFloatConfigControl( vlc_object_t *a, module_config_t *b ) :
                 ConfigControl(a,b) {};
-    virtual ~VFloatConfigControl() {};
-    virtual float getValue() = 0;
-    virtual int getType() { return CONFIG_ITEM_FLOAT; }
+    virtual float getValue() const = 0;
+    virtual int getType() const { return CONFIG_ITEM_FLOAT; }
+    virtual void doApply();
 };
 
 class FloatConfigControl : public VFloatConfigControl
@@ -239,11 +230,10 @@ class FloatConfigControl : public VFloatConfigControl
     Q_OBJECT
 public:
     FloatConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                        QGridLayout *, int& );
+                        QGridLayout *, int );
     FloatConfigControl( vlc_object_t *, module_config_t *,
                         QLabel*, QDoubleSpinBox* );
-    virtual ~FloatConfigControl() {};
-    virtual float getValue();
+    virtual float getValue() const;
     virtual void show() { spin->show(); if( label ) label->show(); }
     virtual void hide() { spin->hide(); if( label ) label->hide(); }
 
@@ -260,7 +250,7 @@ class FloatRangeConfigControl : public FloatConfigControl
     Q_OBJECT
 public:
     FloatRangeConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                             QGridLayout *, int& );
+                             QGridLayout *, int );
     FloatRangeConfigControl( vlc_object_t *, module_config_t *,
                              QLabel*, QDoubleSpinBox* );
 private:
@@ -278,9 +268,9 @@ public:
                 ConfigControl(a,b,c) {};
     VStringConfigControl( vlc_object_t *a, module_config_t *b ) :
                 ConfigControl(a,b) {};
-    virtual ~VStringConfigControl() {};
-    virtual QString getValue() = 0;
-    virtual int getType() { return CONFIG_ITEM_STRING; }
+    virtual QString getValue() const = 0;
+    virtual int getType() const { return CONFIG_ITEM_STRING; }
+    virtual void doApply();
 };
 
 class StringConfigControl : public VStringConfigControl
@@ -288,11 +278,10 @@ class StringConfigControl : public VStringConfigControl
     Q_OBJECT
 public:
     StringConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                         QGridLayout *, int&,  bool pwd );
+                         QGridLayout *, int,  bool pwd );
     StringConfigControl( vlc_object_t *, module_config_t *, QLabel *,
                          QLineEdit*,  bool pwd );
-    virtual ~StringConfigControl() {};
-    virtual QString getValue() { return text->text(); };
+    virtual QString getValue() const { return text->text(); };
     virtual void show() { text->show(); if( label ) label->show(); }
     virtual void hide() { text->hide(); if( label ) label->hide(); }
 private:
@@ -306,11 +295,10 @@ class FileConfigControl : public VStringConfigControl
     Q_OBJECT
 public:
     FileConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                       QGridLayout *, int& );
+                       QGridLayout *, int );
     FileConfigControl( vlc_object_t *, module_config_t *, QLabel *,
                        QLineEdit *, QPushButton * );
-    virtual ~FileConfigControl() {};
-    virtual QString getValue() { return text->text(); };
+    virtual QString getValue() const { return text->text(); };
     virtual void show() { text->show(); if( label ) label->show(); browse->show(); }
     virtual void hide() { text->hide(); if( label ) label->hide(); browse->hide(); }
 public slots:
@@ -327,10 +315,9 @@ class DirectoryConfigControl : public FileConfigControl
     Q_OBJECT
 public:
     DirectoryConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                            QGridLayout *, int& );
+                            QGridLayout *, int );
     DirectoryConfigControl( vlc_object_t *, module_config_t *, QLabel *,
                             QLineEdit *, QPushButton * );
-    virtual ~DirectoryConfigControl() {};
 public slots:
     virtual void updateField();
 };
@@ -340,11 +327,10 @@ class FontConfigControl : public VStringConfigControl
     Q_OBJECT
 public:
     FontConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                       QGridLayout *, int&);
+                       QGridLayout *, int);
     FontConfigControl( vlc_object_t *, module_config_t *, QLabel *,
                        QFontComboBox *);
-    virtual ~FontConfigControl() {};
-    virtual QString getValue(){ return font->currentFont().family(); }
+    virtual QString getValue() const { return font->currentFont().family(); }
 protected:
     QLabel *label;
     QFontComboBox *font;
@@ -354,11 +340,10 @@ class ModuleConfigControl : public VStringConfigControl
 {
 public:
     ModuleConfigControl( vlc_object_t *, module_config_t *, QWidget *, bool,
-                         QGridLayout*, int& );
+                         QGridLayout*, int );
     ModuleConfigControl( vlc_object_t *, module_config_t *, QLabel *,
                          QComboBox*, bool );
-    virtual ~ModuleConfigControl() {};
-    virtual QString getValue();
+    virtual QString getValue() const;
     virtual void hide() { combo->hide(); if( label ) label->hide(); }
     virtual void show() { combo->show(); if( label ) label->show(); }
 private:
@@ -378,18 +363,18 @@ class ModuleListConfigControl : public VStringConfigControl
     friend class ConfigControl;
 public:
     ModuleListConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                             bool, QGridLayout*, int& );
+                             bool, QGridLayout*, int );
 //    ModuleListConfigControl( vlc_object_t *, module_config_t *, QLabel *,
 //                         QComboBox*, bool );
     virtual ~ModuleListConfigControl();
-    virtual QString getValue();
+    virtual QString getValue() const;
     virtual void hide();
     virtual void show();
 public slots:
     void onUpdate();
 private:
     void finish( bool );
-    QVector<checkBoxListItem*> modules;
+    QList<checkBoxListItem*> modules;
     QGroupBox *groupBox;
     QLineEdit *text;
 };
@@ -399,11 +384,10 @@ class StringListConfigControl : public VStringConfigControl
     Q_OBJECT
 public:
     StringListConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                             bool, QGridLayout*, int& );
+                             bool, QGridLayout*, int );
     StringListConfigControl( vlc_object_t *, module_config_t *, QLabel *,
                              QComboBox*, bool );
-    virtual ~StringListConfigControl() {};
-    virtual QString getValue();
+    virtual QString getValue() const;
     virtual void hide() { combo->hide(); if( label ) label->hide(); }
     virtual void show() { combo->show(); if( label ) label->show(); }
     QComboBox *combo;
@@ -450,7 +434,7 @@ public:
     QString getValue() const { return value; }
 
     void setGlobal( bool _value ) { b_global = _value; }
-    bool getGlobal()  const { return b_global; }
+    bool getGlobal() const { return b_global; }
 public slots:
     virtual void clear(void) { value = qfu(""); QLineEdit::clear(); }
 private:
@@ -467,12 +451,11 @@ class KeySelectorControl : public ConfigControl
     Q_OBJECT
 public:
     KeySelectorControl( vlc_object_t *, module_config_t *, QWidget *,
-                        QGridLayout*, int& );
-    virtual int getType() { return CONFIG_ITEM_KEY; }
-    virtual ~KeySelectorControl() {};
+                        QGridLayout*, int );
+    virtual int getType() const { return CONFIG_ITEM_KEY; }
     virtual void hide() { table->hide(); if( label ) label->hide(); }
     virtual void show() { table->show(); if( label ) label->show(); }
-    void doApply();
+    virtual void doApply();
 private:
     void finish();
     QLabel *label;

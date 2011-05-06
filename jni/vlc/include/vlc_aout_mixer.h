@@ -2,7 +2,7 @@
  * vlc_aout_mixer.h : audio output mixer interface
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 5fd2ce0953dc8814fc6e7cfa921503fb60bb917c $
+ * $Id: 10d80fe5be7333e1136a3c0f878aa9f3efbef876 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -84,8 +84,7 @@ struct aout_mixer_t {
     float                 multiplier;
 
     /* Array of mixer inputs */
-    unsigned              input_count;
-    aout_mixer_input_t    **input;
+    aout_mixer_input_t    *input;
 
     /* Mix input into the given buffer (mandatory) */
     void (*mix)(aout_mixer_t *, aout_buffer_t *);

@@ -2,7 +2,7 @@
  * notify.c : libnotify notification plugin
  *****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: b663caa330ae5d7a695294ca702d08727e19f8e2 $
+ * $Id: 0dc494d07fc5f9e20de189da3dd00b647f82075c $
  *
  * Authors: Christophe Mutricy <xtophe -at- videolan -dot- org>
  *
@@ -39,7 +39,7 @@
 #include <libnotify/notify.h>
 
 #ifndef NOTIFY_CHECK_VERSION
-#define NOTIFY_CHECK_VERSION(x,y,z) 0
+# define NOTIFY_CHECK_VERSION(x,y,z) 0
 #endif
 
 /*****************************************************************************
@@ -122,6 +122,7 @@ static int Open( vlc_object_t *p_this )
 
     /* */
     var_AddCallback( pl_Get( p_intf ), "item-current", ItemChange, p_intf );
+    var_AddCallback( pl_Get( p_intf ), "item-change", ItemChange, p_intf );
 
     return VLC_SUCCESS;
 }
@@ -135,6 +136,7 @@ static void Close( vlc_object_t *p_this )
     intf_sys_t      *p_sys  = p_intf->p_sys;
 
     var_DelCallback( pl_Get( p_this ), "item-current", ItemChange, p_this );
+    var_DelCallback( pl_Get( p_this ), "item-change", ItemChange, p_this );
 
     if( p_sys->notification )
     {
@@ -318,9 +320,9 @@ static int Notify( vlc_object_t *p_this, const char *psz_temp, GdkPixbuf *pix,
     notification = notify_notification_new( _("Now Playing"),
                                             psz_temp, NULL
 #if NOTIFY_CHECK_VERSION (0, 7, 0)
-					    );
+                                          );
 #else
-					    , NULL );
+                                          , NULL );
 #endif
     notify_notification_set_timeout( notification,
                                 var_InheritInteger(p_this, "notify-timeout") );

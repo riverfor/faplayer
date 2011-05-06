@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1999-2010 the VideoLAN team
  * Copyright (C) 2010 Laurent Aimar
- * $Id: be7bc301cd441a47607d2bdb8cf2fea5a7c13376 $
+ * $Id: 0773716a67b903003d1c9fc0431abfabf71d26ba $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -80,7 +80,7 @@ VLC_EXPORT( void, spu_PutSubpicture, ( spu_t *, subpicture_t * ) );
  *
  * The returned value if non NULL must be released by subpicture_Delete().
  */
-VLC_EXPORT( subpicture_t *, spu_Render, ( spu_t *, const vlc_fourcc_t *p_chroma_list, const video_format_t *p_fmt_dst, const video_format_t *p_fmt_src, mtime_t render_subtitle_date, mtime_t render_osd_date, bool b_subtitle_only ) );
+VLC_EXPORT( subpicture_t *, spu_Render, ( spu_t *, const vlc_fourcc_t *p_chroma_list, const video_format_t *p_fmt_dst, const video_format_t *p_fmt_src, mtime_t render_subtitle_date, mtime_t render_osd_date, bool ignore_osd ) );
 
 /**
  * It registers a new SPU channel.
@@ -91,6 +91,11 @@ VLC_EXPORT( int, spu_RegisterChannel, ( spu_t * ) );
  * It clears all subpictures associated to a SPU channel.
  */
 VLC_EXPORT( void, spu_ClearChannel, ( spu_t *, int ) );
+
+/**
+ * It changes the sub sources list
+ */
+VLC_EXPORT( void, spu_ChangeSources, ( spu_t *, const char * ) );
 
 /**
  * It changes the sub filters list

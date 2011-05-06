@@ -2,7 +2,7 @@
  * vlm.c: VLM interface plugin
  *****************************************************************************
  * Copyright (C) 2000-2005 the VideoLAN team
- * $Id: 1656c28e4ae9073253950b1cc1c764f35d44b533 $
+ * $Id: 1273b1bab5bc4b7c7b89826957d84dfe7df0f7ad $
  *
  * Authors: Simon Latapie <garf@videolan.org>
  *          Laurent Aimar <fenrir@videolan.org>
@@ -49,6 +49,7 @@
 #include <vlc_charset.h>
 #include <vlc_fs.h>
 #include <vlc_sout.h>
+#include <vlc_url.h>
 #include "../stream_output/stream_output.h"
 #include "../libvlc.h"
 
@@ -522,9 +523,11 @@ error:
     return VLC_EGENERIC;
 }
 
-static int ExecuteLoad( vlm_t *p_vlm, const char *psz_url, vlm_message_t **pp_status )
+static int ExecuteLoad( vlm_t *p_vlm, const char *psz_path, vlm_message_t **pp_status )
 {
+    char *psz_url = make_URI( psz_path, NULL );
     stream_t *p_stream = stream_UrlNew( p_vlm, psz_url );
+    free( psz_url );
     uint64_t i_size;
     char *psz_buffer;
 

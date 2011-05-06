@@ -1,8 +1,8 @@
 /*****************************************************************************
 * simple_prefs.h: Simple Preferences for Mac OS X
 *****************************************************************************
-* Copyright (C) 2008 the VideoLAN team
-* $Id: 2c11578e6b4916fb0982b8963fe95b71e836a584 $
+* Copyright (C) 2008-2011 the VideoLAN team
+* $Id: f35723dfc21ac37911f9125ddf5197859110ba6b $
 *
 * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
 *
@@ -91,13 +91,13 @@
     IBOutlet id o_intf_fspanel_ckb;
 	IBOutlet id o_intf_appleremote_ckb;
 	IBOutlet id o_intf_mediakeys_ckb;
-    IBOutlet id o_intf_mediakeys_bg_ckb;
     IBOutlet id o_intf_lang_pop;
     IBOutlet id o_intf_lang_txt;
     IBOutlet id o_intf_network_box;
     IBOutlet id o_intf_view;
     IBOutlet id o_intf_update_ckb;
     IBOutlet id o_intf_last_update_lbl;
+    IBOutlet id o_intf_enableGrowl_ckb;
 
     IBOutlet id o_osd_encoding_pop;
     IBOutlet id o_osd_encoding_txt;
@@ -155,14 +155,15 @@
 
     NSOpenPanel *o_selectFolderPanel;
     NSArray *o_hotkeyDescriptions;
+    NSArray *o_hotkeyNames;
     NSArray *o_hotkeysNonUseableKeys;
     NSMutableArray *o_hotkeySettings;
-    NSNumber *o_keyInTransition;
+    NSString *o_keyInTransition;
 
     intf_thread_t *p_intf;
 }
 + (VLCSimplePrefs *)sharedInstance;
-- (NSString *)OSXKeyToString:(int)val;
+- (NSString *)OSXStringKeyToString:(NSString *)theString;
 
 /* toolbar */
 - (NSToolbarItem *) toolbar: (NSToolbar *)o_toolbar 
@@ -209,7 +210,7 @@
 - (void)showHotkeySettings;
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView;
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
-- (BOOL)changeHotkeyTo: (int)i_theNewKey;
+- (BOOL)changeHotkeyTo: (NSString *)theKey;
 
 @end
 

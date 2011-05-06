@@ -2,7 +2,7 @@
  * vlm.cpp : VLM Management
  ****************************************************************************
  * Copyright © 2008 the VideoLAN team
- * $Id: 3f11c0c5c22c1b2feabaf878a55b838442977fba $
+ * $Id: 44f3f77c439c1354b96096eaab827daf989d51fd $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Jean-François Massol <jf.massol -at- gmail.com>
@@ -50,7 +50,6 @@
 #include <QDateTimeEdit>
 #include <QDateTime>
 #include <QSpinBox>
-#include <QHeaderView>
 #include <QScrollArea>
 #include <QFileDialog>
 
@@ -391,7 +390,10 @@ void VLMDialog::selectOutput()
 {
     SoutDialog *s = new SoutDialog( this, p_intf );
     if( s->exec() == QDialog::Accepted )
-        ui.outputLedit->setText( s->getMrl() );
+    {
+        int i = s->getMrl().indexOf( " " );
+        ui.outputLedit->setText( s->getMrl().left( i ) );
+    }
 }
 
 /* Object Modification */
@@ -497,10 +499,12 @@ VLMAWidget::VLMAWidget( const QString& _name, const QString& _input,
 
     QToolButton *modifyButton = new QToolButton;
     modifyButton->setIcon( QIcon( ":/menu/settings" ) );
+    modifyButton->setToolTip( qtr("Change") );
     objLayout->addWidget( modifyButton, 0, 5 );
 
     QToolButton *deleteButton = new QToolButton;
     deleteButton->setIcon( QIcon( ":/menu/quit" ) );
+    deleteButton->setToolTip("Delete");
     objLayout->addWidget( deleteButton, 0, 6 );
 
     BUTTONACT( modifyButton, modify() );
@@ -539,14 +543,17 @@ VLMBroadcast::VLMBroadcast( const QString& _name, const QString& _input,
 
     playButton = new QToolButton;
     playButton->setIcon( QIcon( ":/menu/play" ) );
+    playButton->setToolTip( qtr("Play") );
     objLayout->addWidget( playButton, 1, 0 );
     b_playing = true;
 
     QToolButton *stopButton = new QToolButton;
     stopButton->setIcon( QIcon( ":/toolbar/stop_b" ) );
+    stopButton->setToolTip( qtr("Stop") );
     objLayout->addWidget( stopButton, 1, 1 );
 
     loopButton = new QToolButton;
+    loopButton->setToolTip( qtr("Repeat") );
     objLayout->addWidget( loopButton, 1, 2 );
 
     BUTTONACT( playButton, togglePlayPause() );

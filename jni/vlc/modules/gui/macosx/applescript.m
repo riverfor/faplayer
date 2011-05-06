@@ -2,7 +2,7 @@
  * applescript.m: MacOS X AppleScript support
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: f3e8c4cb140c47c0617123d4c78917f1148d9984 $
+ * $Id: 65cae704c661d9ae9c2cdab4badd3f6f576d618c $
  *
  * Authors: Derk-Jan Hartman <thedj@users.sourceforge.net>
  *
@@ -95,7 +95,7 @@
         return nil;
     }
  
-    VLCControls * o_controls = (VLCControls *)[[NSApp delegate] controls];
+    VLCControls * o_controls = [[VLCMain sharedInstance] controls];
  
     if ( o_controls )
     {
@@ -143,12 +143,10 @@
 @implementation NSApplication(ScriptSupport)
 
 - (BOOL) scriptFullscreenMode {    
-    VLCControls * o_controls = (VLCControls *)[[self delegate] controls];
-
-    return [o_controls isFullscreen];
+    return [[[VLCMain sharedInstance] controls] isFullscreen];
 }
 - (void) setScriptFullscreenMode: (BOOL) mode {
-    VLCControls * o_controls = (VLCControls *)[[self delegate] controls];
+    VLCControls * o_controls = [[VLCMain sharedInstance] controls];
     if (mode == [o_controls isFullscreen]) return;
     [o_controls toogleFullscreen: self];
 }

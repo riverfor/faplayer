@@ -6,6 +6,10 @@ LIBTOOL=@LIBTOOL@ --tag=CC
 SOURCES_macosx = \
 	AppleRemote.h \
 	AppleRemote.m \
+	SPInvocationGrabbing.h \
+	SPInvocationGrabbing.m \
+	SPMediaKeyTap.h \
+	SPMediaKeyTap.m \
 	about.h \
 	about.m \
 	applescript.h \
@@ -39,6 +43,8 @@ SOURCES_macosx = \
 	wizard.m \
 	extended.h \
 	extended.m \
+	AudioEffects.h \
+	AudioEffects.m \
 	bookmarks.h \
 	bookmarks.m \
 	embeddedwindow.h \

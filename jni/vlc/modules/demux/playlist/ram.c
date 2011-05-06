@@ -2,7 +2,7 @@
  * ram.c : RAM playlist format import
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 1f6e5277be7ff96dcec3f537cdad98c5b7410e5c $
+ * $Id: 91f2da9aa1abf68071eff62936ffb45fa934e3f3 $
  *
  * Authors: Srikanth Raju <srikiraju@gmail.com>
  *
@@ -287,7 +287,8 @@ static int Demux( demux_t *p_demux )
                         psz_author = decode_URI_duplicate(psz_value);
                         EnsureUTF8( psz_author );
                     }
-                    else if( !strcmp( psz_param, "start" ) )
+                    else if( !strcmp( psz_param, "start" )
+                            && strncmp( psz_mrl, "rtsp", 4 ) /* Our rtsp-real or our real demuxer is wrong */  )
                     {
                         i_start = ParseTime( psz_value, strlen( psz_value ) );
                         char *temp;

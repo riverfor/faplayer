@@ -2,7 +2,7 @@
  * extended_panels.cpp : Extended controls panels
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: afb66814ea75736fbde8f93c9d02591e77645df7 $
+ * $Id: 0ffb3813d1ea71bc6fa40b4028719e9836c06a25 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea .t videolan d@t org>
@@ -36,11 +36,13 @@
 #include <QSignalMapper>
 #include <QComboBox>
 #include <QTimer>
+#include <QFileDialog>
 
 #include "components/extended_panels.hpp"
 #include "dialogs/preferences.hpp"
 #include "qt4.hpp"
 #include "input_manager.hpp"
+#include "util/qt_dirs.hpp"
 
 #include "../../audio_filter/equalizer_presets.h"
 #include <vlc_aout.h>
@@ -204,6 +206,7 @@ ExtVideo::ExtVideo( intf_thread_t *_p_intf, QTabWidget *_parent ) :
     SETUP_VFILTER_OPTION( eraseMaskText, editingFinished() )
     SETUP_VFILTER_OPTION( eraseYSpin, valueChanged( int ) )
     SETUP_VFILTER_OPTION( eraseXSpin, valueChanged( int ) )
+    BUTTONACT( ui.eraseBrowseBtn, browseEraseFile() );
 
     SETUP_VFILTER( marq )
     SETUP_VFILTER_OPTION( marqMarqueeText, textChanged( const QString& ) )
@@ -214,6 +217,7 @@ ExtVideo::ExtVideo( intf_thread_t *_p_intf, QTabWidget *_parent ) :
     SETUP_VFILTER_OPTION( logoYSpin, valueChanged( int ) )
     SETUP_VFILTER_OPTION( logoXSpin, valueChanged( int ) )
     SETUP_VFILTER_OPTION( logoOpacitySlider, valueChanged( int ) )
+    BUTTONACT( ui.logoBrowseBtn, browseLogo() );
 
     SETUP_VFILTER( gradfun )
     SETUP_VFILTER_OPTION( gradfunRadiusSlider, valueChanged( int ) )
@@ -298,6 +302,10 @@ void ExtVideo::ChangeVFiltersString( const char *psz_name, bool b_add )
     else if( module_provides( p_obj, "video filter2" ) )
     {
         psz_filter_type = "video-filter";
+    }
+    else if( module_provides( p_obj, "sub source" ) )
+    {
+        psz_filter_type = "sub-source";
     }
     else if( module_provides( p_obj, "sub filter" ) )
     {
@@ -394,6 +402,20 @@ void ExtVideo::updateFilters()
     ChangeVFiltersString( qtu( module ),
                           checkbox ? checkbox->isChecked()
                                    : groupbox->isChecked() );
+}
+
+void ExtVideo::browseLogo()
+{
+    QString file = QFileDialog::getOpenFileName( NULL, qtr( "Logo filenames" ),
+                   p_intf->p_sys->filepath, "Images (*.png *.jpg);;All (*)" );
+    ui.logoFileText->setText( toNativeSeparators( file ) );
+}
+
+void ExtVideo::browseEraseFile()
+{
+    QString file = QFileDialog::getOpenFileName( NULL, qtr( "Image mask" ),
+                   p_intf->p_sys->filepath, "Images (*.png *.jpg);;All (*)" );
+    ui.eraseMaskText->setText( toNativeSeparators( file ) );
 }
 
 void ExtVideo::initComboBoxItems( QObject *widget )
@@ -702,14 +724,14 @@ void ExtV4l2::Refresh( void )
             {
                 case VLC_VAR_INTEGER:
                 {
-                    QLabel *label = new QLabel( psz_label, box );
+                    QLabel *label = new QLabel( qtr( psz_label ), box );
                     QHBoxLayout *hlayout = new QHBoxLayout();
                     hlayout->addWidget( label );
                     int i_val = var_GetInteger( p_obj, psz_var );
                     if( i_type & VLC_VAR_HASCHOICE )
                     {
                         QComboBox *combobox = new QComboBox( box );
-                        combobox->setObjectName( psz_var );
+                        combobox->setObjectName( qtr( psz_var ) );
 
                         vlc_value_t val2, text2;
                         var_Change( p_obj, psz_var, VLC_VAR_GETCHOICES,
@@ -731,7 +753,7 @@ void ExtV4l2::Refresh( void )
                     else
                     {
                         QSlider *slider = new QSlider( box );
-                        slider->setObjectName( psz_var );
+                        slider->setObjectName( qtr( psz_var ) );
                         slider->setOrientation( Qt::Horizontal );
                         vlc_value_t val2;
                         var_Change( p_obj, psz_var, VLC_VAR_GETMIN,
@@ -754,8 +776,8 @@ void ExtV4l2::Refresh( void )
                 }
                 case VLC_VAR_BOOL:
                 {
-                    QCheckBox *button = new QCheckBox( psz_label, box );
-                    button->setObjectName( psz_var );
+                    QCheckBox *button = new QCheckBox( qtr( psz_label ), box );
+                    button->setObjectName( qtr( psz_var ) );
                     button->setChecked( var_GetBool( p_obj, psz_var ) );
 
                     CONNECT( button, clicked( bool ), this,
@@ -767,8 +789,8 @@ void ExtV4l2::Refresh( void )
                 {
                     if( i_type & VLC_VAR_ISCOMMAND )
                     {
-                        QPushButton *button = new QPushButton( psz_label, box );
-                        button->setObjectName( psz_var );
+                        QPushButton *button = new QPushButton( qtr( psz_label ), box );
+                        button->setObjectName( qtr( psz_var ) );
 
                         CONNECT( button, clicked( bool ), this,
                                  ValueChange( bool ) );
@@ -776,7 +798,7 @@ void ExtV4l2::Refresh( void )
                     }
                     else
                     {
-                        QLabel *label = new QLabel( psz_label, box );
+                        QLabel *label = new QLabel( qtr( psz_label ), box );
                         layout->addWidget( label );
                     }
                     break;
@@ -1149,7 +1171,7 @@ Compressor::Compressor( intf_thread_t *_p_intf, QWidget *_parent )
            : QWidget( _parent ) , p_intf( _p_intf )
 {
     QFont smallFont = QApplication::font();
-    smallFont.setPointSize( smallFont.pointSize() - 3 );
+    smallFont.setPointSize( smallFont.pointSize() - 2 );
 
     QGridLayout *layout = new QGridLayout( this );
 
@@ -1303,7 +1325,7 @@ Spatializer::Spatializer( intf_thread_t *_p_intf, QWidget *_parent )
             : QWidget( _parent ) , p_intf( _p_intf )
 {
     QFont smallFont = QApplication::font();
-    smallFont.setPointSize( smallFont.pointSize() - 3 );
+    smallFont.setPointSize( smallFont.pointSize() - 2 );
 
     QGridLayout *layout = new QGridLayout( this );
 

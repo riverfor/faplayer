@@ -2,7 +2,7 @@
  * freetype.c : Put text on the video, using freetype2
  *****************************************************************************
  * Copyright (C) 2002 - 2011 the VideoLAN team
- * $Id: a6f407bb2a450f5271821acd8f10040d44add031 $
+ * $Id: ae450c03c3ea0f51e7b96856e1d54c73dc3a297d $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -356,14 +356,11 @@ static int Create( vlc_object_t *p_this )
 #ifdef HAVE_STYLES
         psz_fontfamily = strdup( DEFAULT_FAMILY );
 #else
-        psz_fontfamily = (char *)malloc( PATH_MAX + 1 );
-        if( !psz_fontfamily )
-            goto error;
 # ifdef WIN32
-        strcat( psz_fontfamily, p_sys->psz_win_fonts_path );
-        strcat( psz_fontfamily, DEFAULT_FONT );
+        if( asprintf( &psz_fontfamily, "%s%s", p_sys->psz_win_fonts_path, DEFAULT_FONT ) == -1 )
+            goto error;
 # else
-        strcpy( psz_fontfamily, DEFAULT_FONT );
+        psz_fontfamily = strdup( DEFAULT_FONT );
 # endif
         msg_Err( p_filter,"User specified an empty fontfile, using %s", psz_fontfamily );
 #endif
@@ -387,7 +384,7 @@ static int Create( vlc_object_t *p_this )
 
     /* If nothing is found, use the default family */
     if( !psz_fontfile )
-        psz_fontfile = psz_fontfamily;
+        psz_fontfile = strdup( psz_fontfamily );
 
 #else /* !HAVE_STYLES */
     /* Use the default file */
@@ -417,6 +414,9 @@ static int Create( vlc_object_t *p_this )
                  psz_fontfile ? psz_fontfile : "(null)" );
         goto error;
     }
+#ifdef HAVE_STYLES
+    free( psz_fontfile );
+#endif
 
     i_error = FT_Select_Charmap( p_sys->p_face, ft_encoding_unicode );
     if( i_error )
@@ -447,6 +447,9 @@ static int Create( vlc_object_t *p_this )
 error:
     if( p_sys->p_face ) FT_Done_Face( p_sys->p_face );
     if( p_sys->p_library ) FT_Done_FreeType( p_sys->p_library );
+#ifdef HAVE_STYLES
+    free( psz_fontfile );
+#endif
     free( psz_fontfamily );
     free( p_sys );
     return VLC_EGENERIC;
@@ -551,6 +554,8 @@ static int Render( filter_t *p_filter, subpicture_region_t *p_region,
     if( p_region->fmt.i_visible_height > 0 )
         fmt.i_visible_height = p_region->fmt.i_visible_height;
     fmt.i_x_offset = fmt.i_y_offset = 0;
+    fmt.i_sar_num = 1;
+    fmt.i_sar_den = 1;
 
     assert( !p_region->p_picture );
     p_region->p_picture = picture_NewFromFormat( &fmt );
@@ -816,6 +821,8 @@ static int RenderYUVA( filter_t *p_filter, subpicture_region_t *p_region,
     if( p_region->fmt.i_visible_height > 0 )
         fmt.i_visible_height = p_region->fmt.i_visible_height;
     fmt.i_x_offset = fmt.i_y_offset = 0;
+    fmt.i_sar_num = 1;
+    fmt.i_sar_den = 1;
 
     p_region->p_picture = picture_NewFromFormat( &fmt );
     if( !p_region->p_picture )
@@ -2370,7 +2377,10 @@ static char* FontConfig_Select( FcConfig* config, const char* family,
     {
         char *psz_fontsize;
         if( asprintf( &psz_fontsize, "%d", i_size ) != -1 )
+        {
             FcPatternAddString( pat, FC_SIZE, (const FcChar8 *)psz_fontsize );
+            free( psz_fontsize );
+        }
     }
 
     /* */

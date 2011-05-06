@@ -2,7 +2,7 @@
  * common.h: Windows video output header file
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: d905586dc19eb742668b7d546faa4e5bb651453f $
+ * $Id: 7bd3d1ea75745938c97f86d2d69394561b1403d3 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Damien Fouilleul <damienf@videolan.org>
@@ -176,17 +176,21 @@ struct vout_display_sys_t
     // core objects
     HINSTANCE               hd3d9_dll;       /* handle of the opened d3d9 dll */
     LPDIRECT3D9             d3dobj;
+    D3DCAPS9                d3dcaps;
     LPDIRECT3DDEVICE9       d3ddev;
     D3DPRESENT_PARAMETERS   d3dpp;
     // scene objects
     LPDIRECT3DTEXTURE9      d3dtex;
     LPDIRECT3DVERTEXBUFFER9 d3dvtc;
+    int                     d3dregion_count;
+    struct d3d_region_t     *d3dregion;
 
     picture_resource_t      resource;
 
     /* */
     bool                    reset_device;
     bool                    reopen_device;
+    bool                    clear_scene;
 
     /* It protects the following variables */
     vlc_mutex_t    lock;

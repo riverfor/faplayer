@@ -2,7 +2,7 @@
  * extended_panels.hpp : Exentended Panels
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: d38d138f6fa61c6037037d89b784b76f015a6f14 $
+ * $Id: 5e1d9cdda2100b7c7cfcf678909f6516bb3b5263 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -62,6 +62,8 @@ private slots:
     void updateFilters();
     void updateFilterOptions();
     void cropChange();
+    void browseLogo();
+    void browseEraseFile();
 };
 
 class ExtV4l2 : public QWidget

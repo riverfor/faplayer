@@ -5,8 +5,12 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: d4512eca10bb59862063faa387eecdbbcf96ef47 $
+ * $Id: b418ab15e0a55d4c8814a1421276e072e0078e97 $
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #define __STDC_FORMAT_MACROS 1
 

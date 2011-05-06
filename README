@@ -6,7 +6,8 @@ Build steps:
 1. Edit local.properties to fit your environment.
 2. Run build.sh. (for some reason, you have to install ruby-1.9.2 first.)
 
-If you want to disable NEON version of ffmpeg, open jni/Android.mk and change BUILD_WITH_NEON to 0.
+Currently you can only build the source with one ABI choice, armeabi or armeabi-v7a.
+If you want to disable NEON version of ffmpeg, open jni/Application.mk and change APP_ABI to armeabi.
 
 Current NDK related build issues and solutions:
 

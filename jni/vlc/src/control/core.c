@@ -2,7 +2,7 @@
  * core.c: Core libvlc new API functions : initialization
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id: ee80234fa62dfe6858bb23452f05e1e23e54db15 $
+ * $Id: dfa0bb55a358594fc2f3979945f7a4299e6a69f7 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *

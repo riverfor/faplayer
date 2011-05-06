@@ -2,7 +2,7 @@
  * open.cpp : Advanced open dialog
  *****************************************************************************
  * Copyright © 2006-2009 the VideoLAN team
- * $Id: 24d065307c548ddab236e54375c2823b60868e43 $
+ * $Id: 3db7109ef809c33f0829c5de2cba7f3fd28715f8 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -167,7 +167,7 @@ OpenDialog::OpenDialog( QWidget *parent,
     BUTTONACT( cancelButton, cancel() );
 
     /* Hide the advancedPanel */
-    if( !var_InheritBool( p_intf, "qt-adv-options" ) )
+    if( !getSettings()->value( "opendialog-advanced", false ).toBool())
     {
         ui.advancedFrame->hide();
         ui.advancedFrame->setEnabled( false );
@@ -181,7 +181,7 @@ OpenDialog::OpenDialog( QWidget *parent,
 
     setMinimumSize( sizeHint() );
     setMaximumWidth( 900 );
-    resize( getSettings()->value( "opendialog-size", QSize( 500, 490 ) ).toSize() );
+    resize( getSettings()->value( "opendialog-size", QSize( 500, 400 ) ).toSize() );
 }
 
 OpenDialog::~OpenDialog()
@@ -189,6 +189,7 @@ OpenDialog::~OpenDialog()
     getSettings()->setValue( "opendialog-size", size() -
                  ( ui.advancedFrame->isEnabled() ?
                    QSize(0, ui.advancedFrame->height()) : QSize(0, 0) ) );
+    getSettings()->setValue( "opendialog-advanced", ui.advancedFrame->isVisible() );
 }
 
 /* Used by VLM dialog and inputSlave selection */

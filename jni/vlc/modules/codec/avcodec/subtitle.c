@@ -2,7 +2,7 @@
  * subtitle.c: subtitle decoder using ffmpeg library
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: e5b9e6a89e80a87eff4f3ec9c6f20316e030c671 $
+ * $Id: c9ccce677bd772dc5a797df955470d295684ccab $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -76,8 +76,8 @@ int InitSubtitleDec(decoder_t *dec, AVCodecContext *context,
     if (!sys)
         return VLC_ENOMEM;
 
-    codec->type = CODEC_TYPE_SUBTITLE;
-    context->codec_type = CODEC_TYPE_SUBTITLE;
+    codec->type = AVMEDIA_TYPE_SUBTITLE;
+    context->codec_type = AVMEDIA_TYPE_SUBTITLE;
     context->codec_id = codec_id;
     sys->p_context = context;
     sys->p_codec = codec;

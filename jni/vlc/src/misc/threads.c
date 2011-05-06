@@ -42,30 +42,16 @@
 # include <sched.h>
 #endif
 
-#ifdef ANDROID
-#include <sys/time.h>
-#include <sys/resource.h>
-#endif
-
 struct vlc_thread_boot
 {
     void * (*entry) (vlc_object_t *);
     vlc_object_t *object;
-#ifdef ANDROID
-    int priority;
-#endif
 };
 
 static void *thread_entry (void *data)
 {
     vlc_object_t *obj = ((struct vlc_thread_boot *)data)->object;
     void *(*func) (vlc_object_t *) = ((struct vlc_thread_boot *)data)->entry;
-
-#ifdef ANDROID
-    int priority = ((struct vlc_thread_boot *)data)->priority;
-    priority = 19 - priority * (19 + 20) / (VLC_THREAD_PRIORITY_HIGHEST - VLC_THREAD_PRIORITY_LOW);
-    setpriority(PRIO_PROCESS, 0, priority);
-#endif
 
     free (data);
     msg_Dbg (obj, "thread started");
@@ -93,9 +79,6 @@ int vlc_thread_create( vlc_object_t *p_this, void *(*func) ( vlc_object_t * ),
         return errno;
     boot->entry = func;
     boot->object = p_this;
-#ifdef ANDROID
-    boot->priority = i_priority;
-#endif
 
     /* Make sure we don't re-create a thread if the object has already one */
     assert( !p_priv->b_thread );

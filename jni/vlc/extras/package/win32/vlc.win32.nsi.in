@@ -311,6 +311,7 @@ FunctionEnd
   !insertmacro ${_action} ".avi"
   !insertmacro ${_action} ".divx"
   !insertmacro ${_action} ".dv"
+  !insertmacro ${_action} ".f4v"
   !insertmacro ${_action} ".flv"
   !insertmacro ${_action} ".gxf"
   !insertmacro ${_action} ".m1v"
@@ -528,7 +529,6 @@ Section $Name_Section01 SEC01
   !insertmacro InstallFolder locale
 @BUILD_OSDMENU_TRUE@ !insertmacro InstallFolder osdmenu
 @BUILD_SKINS_TRUE@   !insertmacro InstallFolder skins
-@BUILD_HTTPD_TRUE@   !insertmacro InstallFolder http
 @BUILD_LUA_TRUE@     !insertmacro InstallFolder lua
 
   ; Generate the cache and add it to uninstall.log

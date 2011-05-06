@@ -1,8 +1,8 @@
 /*****************************************************************************
  * misc.m: code not specific to vlc
  *****************************************************************************
- * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: 05d078df53822b7c0f430dc2e7d4f216899546ad $
+ * Copyright (C) 2003-2011 the VideoLAN team
+ * $Id: a99f01a219553499febf10bf9c35fd6df0a25f47 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -703,7 +703,7 @@ void _drawFrameInRect(NSRect frameRect)
 
 @end
 
-/*****************************************************************************
+/*************************************************************************** **
  * ITSliderCell
  *****************************************************************************/
 @implementation ITSliderCell
@@ -712,22 +712,12 @@ void _drawFrameInRect(NSRect frameRect)
 {
     self = [super init];
     _knobOff = [NSImage imageNamed:@"volumeslider_normal"];
-    [self controlTintChanged];
-    [[NSNotificationCenter defaultCenter] addObserver: self
-                                             selector: @selector( controlTintChanged )
-                                                 name: NSControlTintDidChangeNotification
-                                               object: nil];
+	_knobOn = [NSImage imageNamed:@"volumeslider_graphite"];
     b_mouse_down = FALSE;
     return self;
 }
 
-- (void)controlTintChanged
-{
-    if( [NSColor currentControlTint] == NSGraphiteControlTint )
-        _knobOn = [NSImage imageNamed:@"volumeslider_graphite"];
-    else
-        _knobOn = [NSImage imageNamed:@"volumeslider_blue"];
-}
+
 
 - (void)dealloc
 {

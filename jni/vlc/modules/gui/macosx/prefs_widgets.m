@@ -2,7 +2,7 @@
  * prefs_widgets.m: Preferences controls
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: 186adf154d3987204d2b464caf6a64cc1e84111a $
+ * $Id: 085883b94a90880e0959c4083ff61f576cf08c7c $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan.org>
  *          Jérôme Decoodt <djc at videolan.org>
@@ -858,11 +858,14 @@ o_textfield = [[[NSSecureTextField alloc] initWithFrame: s_rc] retain];       \
                         withView: o_parent_view];
         }
         break;
+    /* don't display keys in the advanced settings, since the current controls 
+    are broken by design. The user is required to change hotkeys in the sprefs
+    and can only change really advanced stuff here..
     case CONFIG_ITEM_KEY:
         p_control = [[KeyConfigControl alloc]
                         initWithItem: _p_item
                         withView: o_parent_view];
-        break;
+        break; */
     case CONFIG_ITEM_MODULE_LIST:
     case CONFIG_ITEM_MODULE_LIST_CAT:
         p_control = [[ModuleListConfigControl alloc]
@@ -1255,7 +1258,7 @@ o_textfield = [[[NSSecureTextField alloc] initWithFrame: s_rc] retain];       \
 {
     if( i_return_code == NSOKButton )
     {
-        NSString *o_path = [[o_sheet filenames] objectAtIndex: 0];
+        NSString *o_path = [[[o_sheet URLs] objectAtIndex: 0] path];
         [o_textfield setStringValue: o_path];
     }
 }
@@ -1377,13 +1380,13 @@ o_textfield = [[[NSSecureTextField alloc] initWithFrame: s_rc] retain];       \
             if( module_is_main( p_parser) )
                 continue;
             unsigned int confsize, unused;
-            module_config_get( p_parser, &confsize );
+            module_config_t *p_config = module_config_get( p_parser, &confsize );
             for ( i = 0; i < confsize; i++ )
             {
-                module_config_t *p_config = module_config_get( p_parser, &unused ) + i;
+                module_config_t *p_item = p_config + i;
                 /* Hack: required subcategory is stored in i_min */
-                if( p_config->i_type == CONFIG_SUBCATEGORY &&
-                    p_config->value.i == p_item->min.i )
+                if( p_item->i_type == CONFIG_SUBCATEGORY &&
+                    p_item->value.i == p_item->min.i )
                 {
                     NSString *o_description = [[VLCMain sharedInstance]
                         localizedString: module_get_name( p_parser, TRUE )];
@@ -1394,6 +1397,7 @@ o_textfield = [[[NSSecureTextField alloc] initWithFrame: s_rc] retain];       \
                     }
                 }
             }
+            module_config_free( p_config );
         }
     }
     module_list_free( p_list );

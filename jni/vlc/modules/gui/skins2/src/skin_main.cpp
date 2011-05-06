@@ -2,7 +2,7 @@
  * skin_main.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 069935b73776bdf509bc212269c9b6bcdb40e15e $
+ * $Id: 9497303b1317b6502a0199cd77e2afc19f64e6d3 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -283,7 +283,7 @@ static void *Run( void * p_obj )
     }
 
     // save config file
-    config_SaveConfigFile( p_intf, NULL );
+    config_SaveConfigFile( p_intf );
 
 end:
     // Destroy "singleton" objects
@@ -482,10 +482,8 @@ vlc_module_begin ()
     set_subcategory( SUBCAT_INTERFACE_MAIN )
     add_loadfile( "skins2-last", "", SKINS2_LAST, SKINS2_LAST_LONG,
                   true )
-        change_autosave ()
     add_string( "skins2-config", "", SKINS2_CONFIG, SKINS2_CONFIG_LONG,
                 true )
-        change_autosave ()
         change_private ()
 #ifdef WIN32
     add_bool( "skins2-systray", true, SKINS2_SYSTRAY,

@@ -40,6 +40,7 @@ export PKG_CONFIG_PATH
 export PKG_CONFIG_LIBDIR = $(PREFIX)/lib/pkgconfig
 export MACOSX_DEPLOYMENT_TARGET = $(SDK_TARGET)
 export LIBRARY_PATH := $(PREFIX)/lib:$(LIBRARY_PATH)
+export LD_LIBRARY_PATH := $(PREFIX)/lib:$(LD_LIBRARY_PATH)
 export CFLAGS = -I$(PREFIX)/include $(EXTRA_CFLAGS) $(EXTRA_CPPFLAGS)
 export CPPFLAGS = -I$(PREFIX)/include $(EXTRA_CFLAGS) $(EXTRA_CPPFLAGS)
 export CXXFLAGS = -I$(PREFIX)/include $(EXTRA_CFLAGS) $(EXTRA_CPPFLAGS)
@@ -881,16 +882,17 @@ ifdef HAVE_WIN32
 CROSS=$(HOST)-
 endif
 
-VPX_TARGET-$(ENABLED)              = FIXME
-VPX_TARGET-$(HAVE_WIN32)           = x86-win32-gcc
-VPX_TARGET-$(HAVE_DARWIN_OS)       = ppc32-darwin9-gcc
-VPX_TARGET-$(HAVE_MACOSX_ON_INTEL) = x86-darwin9-gcc
-VPX_TARGET-$(HAVE_MACOSX64)        = x86_64-darwin9-gcc
+VPX_TARGET-$(ENABLED)              = --target=FIXME
+VPX_TARGET-$(HAVE_LINUX)           =
+VPX_TARGET-$(HAVE_WIN32)           = --target=x86-win32-gcc
+VPX_TARGET-$(HAVE_DARWIN_OS)       = --target=ppc32-darwin9-gcc
+VPX_TARGET-$(HAVE_MACOSX_ON_INTEL) = --target=x86-darwin9-gcc
+VPX_TARGET-$(HAVE_MACOSX64)        = --target=x86_64-darwin9-gcc
 VPX_DEPS-$(ENABLED)                =
 VPX_DEPS-$(HAVE_MACOSX_ON_INTEL) += .yasm
 
 .libvpx: libvpx $(VPX_DEPS-1)
-	(cd $<; CROSS=$(CROSS) ./configure --target=$(VPX_TARGET-1) --disable-install-bins --disable-install-srcs --disable-install-libs --disable-install-docs --disable-examples --disable-vp8-decoder && make && make install)
+	(cd $<; CROSS=$(CROSS) ./configure $(VPX_TARGET-1) --disable-install-bins --disable-install-srcs --disable-install-libs --disable-install-docs --disable-examples --disable-vp8-decoder && make && make install)
 	(rm -rf $(PREFIX)/include/vpx/ && mkdir -p $(PREFIX)/include/vpx/; cd $< && cp vpx/*.h vpx_ports/*.h $(PREFIX)/include/vpx/) # Of course, why the hell would one expect it to be listed or in make install?
 	rm $(PREFIX)/include/vpx/config.h
 	(cd $<; $(RANLIB) libvpx.a && mkdir -p $(PREFIX)/lib && cp libvpx.a $(PREFIX)/lib/) # Of course, why the hell would one expect it to be listed or in make install?
@@ -1276,10 +1278,10 @@ libdvbpsi-$(LIBDVBPSI_VERSION).tar.gz:
 
 libdvbpsi: libdvbpsi-$(LIBDVBPSI_VERSION).tar.gz
 	$(EXTRACT_GZ)
+	patch -p0 < Patches/libdvbpsi_example.patch
 
 .dvbpsi: libdvbpsi
-	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) && cd src && make && make install)
-	$(INSTALL_NAME)
+	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --enable-release && cd src && make && make install)
 	touch $@
 
 CLEAN_FILE += .dvbpsi
@@ -1370,6 +1372,7 @@ ifdef HAVE_MACOSX
 	patch -p0 < Patches/goom2k4-osx.patch
 endif
 	patch -p0 < Patches/goom2k4-noxmmx.patch
+	patch -p0 < Patches/goom2k4-xmmslibdir.patch
 	(cd $@; rm -f configure; autoreconf -ivf)
 
 .goom2k4: goom
@@ -1816,7 +1819,7 @@ libraw1394: libraw1394-$(LIBRAW1394_VERSION).tar.gz
 	$(EXTRACT_GZ)
 
 .raw1394: libraw1394
-	(cd $<; ./configure --prefix=$(PREFIX) && make && make DESTDIR=$(PREFIX) install)
+	(cd $<; ./configure --prefix=$(PREFIX) && make && make install)
 #	sed 's/^typedef u_int8_t  byte_t;/\/* typedef u_int8_t  byte_t;\*\//'
 	touch $@
 
@@ -1927,9 +1930,9 @@ endif
 
 .gnutls: gnutls .gcrypt .gpg-error
 ifdef HAVE_WIN32
-	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) CFLAGS="$(CFLAGS)" --target=i586-mingw32msvc --disable-cxx -disable-shared --enable-static --disable-nls --with-included-opencdk --with-included-libtasn1 &&  cd gl && make && cd ../lib && make && make install )
+	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) CFLAGS="$(CFLAGS)" --with-libgcrypt --target=i586-mingw32msvc --disable-cxx -disable-shared --enable-static --disable-nls --with-included-opencdk --with-included-libtasn1 &&  cd gl && make && cd ../lib && make && make install )
 else
-	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) CFLAGS="$(CFLAGS)" --disable-cxx --with-included-opencdk --disable-guile && make && make install)
+	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) CFLAGS="$(CFLAGS)" --with-libgcrypt  --disable-cxx --with-included-opencdk --disable-guile && make && make install)
 endif
 	$(INSTALL_NAME)
 	touch $@
@@ -2427,22 +2430,40 @@ CLEAN_PKG += Sparkle
 DISTCLEAN_PKG += Sparkle-$(SPARKLE_VERSION).zip
 
 # ***************************************************************************
-# BWToolKit
+# BGHUDAppKit
 # ***************************************************************************
 
-BWToolkit.zip:
-	$(WGET) $(BWTOOLKIT_URL)
+BGHUDAppKit-$(BGHUDAPPKIT_VERSION).zip:
+	$(WGET) $(BGHUDAPPKIT_URL)
 
-.BWToolKit: BWToolkit.zip
+.BGHUDAppKit: BGHUDAppKit-$(BGHUDAPPKIT_VERSION).zip
 	rm -rf $@ || true
-	(mkdir BWToolKit && cd BWToolKit && unzip ../$<)
-	rm -rf $(PREFIX)/BWToolkit
-	mv BWToolkit $(PREFIX)
+	(mkdir BGHUDAppKit && cd BGHUDAppKit && unzip ../$<)
+	rm -rf $(PREFIX)/BGHUDAppKit
+	mv BGHUDAppKit $(PREFIX)
 	touch $@
 
-CLEAN_FILE += .BWToolKit
-CLEAN_PKG += BWToolKit
-DISTCLEAN_PKG += BWToolkit.zip
+CLEAN_FILE += .BGHUDAppKit
+CLEAN_PKG += BGHUDAppKit
+DISTCLEAN_PKG += BGHUDAppKit-$(BGHUDAPPKIT_VERSION).zip
+
+# ***************************************************************************
+# Growl
+# ***************************************************************************
+
+Growl-$(GROWL_VERSION).zip:
+	$(WGET) $(GROWL_URL)
+
+.Growl: Growl-$(GROWL_VERSION).zip
+	rm -rf $@ || true
+	(mkdir Growl && cd Growl && unzip ../$<)
+	rm -rf $(PREFIX)/Growl
+	mv Growl $(PREFIX)
+	touch $@
+
+CLEAN_FILE += .Growl
+CLEAN_PKG += Growl
+DISTCLEAN_PKG += Growl-$(GROWL_VERSION).zip
 
 # ***************************************************************************
 # UPNP library

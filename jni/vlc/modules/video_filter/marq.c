@@ -2,7 +2,7 @@
  * marq.c : marquee display video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2003-2008 the VideoLAN team
- * $Id: c4e8e4b84f5059806d02fa438a11b23acc88a707 $
+ * $Id: 200bfcffebba694927eb24693cf2315b438260f5 $
  *
  * Authors: Mark Moriarty
  *          Sigmund Augdal Helberg <dnumgis@videolan.org>
@@ -144,7 +144,7 @@ static const char *const ppsz_pos_descriptions[] =
  * Module descriptor
  *****************************************************************************/
 vlc_module_begin ()
-    set_capability( "sub filter", 0 )
+    set_capability( "sub source", 0 )
     set_shortname( N_("Marquee" ))
     set_description( N_("Marquee display") )
     set_help(MARQUEE_HELP)
@@ -225,7 +225,7 @@ static int CreateFilter( vlc_object_t *p_this )
     CREATE_VAR( p_style->i_font_size, Integer, "marq-size" );
 
     /* Misc init */
-    p_filter->pf_sub_filter = Filter;
+    p_filter->pf_sub_source = Filter;
     p_sys->last_time = 0;
 
     return VLC_SUCCESS;

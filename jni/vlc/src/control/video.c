@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2005-2010 the VideoLAN team
  *
- * $Id: 24a4de9e1d9bfa951fe1697c33669a0c1c26163d $
+ * $Id: e6655b9bed74a7b2331cca744c316bdc6548f098 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Filippo Carone <littlejohn@videolan.org>
@@ -567,7 +567,7 @@ void libvlc_video_set_deinterlace( libvlc_media_player_t *p_mi,
      && strcmp (psz_mode, "discard")  && strcmp (psz_mode, "linear")
      && strcmp (psz_mode, "mean")     && strcmp (psz_mode, "x")
      && strcmp (psz_mode, "yadif")    && strcmp (psz_mode, "yadif2x")
-     && strcmp (psz_mode, "phosphor"))
+     && strcmp (psz_mode, "phosphor") && strcmp (psz_mode, "ivtc"))
         return;
 
     if (*psz_mode)

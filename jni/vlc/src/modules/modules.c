@@ -2,7 +2,7 @@
  * modules.c : Builtin and plugin modules management functions
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id: aa758d779d34e8b246eee9515303210fba025b8c $
+ * $Id: 2a4f66818bccfd025cd2ae85cdad1cbd7deb3865 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Ethan C. Baldridge <BaldridgeE@cadmus.com>
@@ -144,10 +144,6 @@ void module_EndBank( vlc_object_t *p_this, bool b_plugins )
     module_bank_t *p_bank = p_module_bank;
 
     assert (p_bank != NULL);
-
-    /* Save the configuration */
-    if( !var_InheritBool( p_this, "ignore-config" ) )
-        config_AutoSaveConfigFile( p_this );
 
     /* If plugins were _not_ loaded, then the caller still has the bank lock
      * from module_InitBank(). */

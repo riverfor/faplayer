@@ -5,8 +5,12 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: ac8aff880e894b4d207fd5279e097aea2817e05b $
-*/
+ * $Id: ff36d3b6fb4436a467cdccb3e6bceef425a0564a $
+ */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include "AtmoExternalCaptureInput.h"
 #include "AtmoTools.h"

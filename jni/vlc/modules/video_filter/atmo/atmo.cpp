@@ -2,7 +2,7 @@
 * atmo.cpp : "Atmo Light" video filter
 *****************************************************************************
 * Copyright (C) 2000-2006 the VideoLAN team
-* $Id: b8b6f7d8cdbd19b9507be44ee4a01cdfa3115100 $
+* $Id: 008c3e206ab3ed5cf4e14eb3db67e3734ebdba77 $
 *
 * Authors: André Weber (WeberAndre@gmx.de)
 *
@@ -21,6 +21,10 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
 *****************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 /*****************************************************************************
 * Preamble
 *****************************************************************************/
@@ -29,10 +33,6 @@
 #include <string.h>
 #include <math.h>                                            /* sin(), cos() */
 #include <assert.h>
-
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
 
 // #define __ATMO_DEBUG__
 

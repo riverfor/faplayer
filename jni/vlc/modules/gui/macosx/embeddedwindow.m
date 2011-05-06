@@ -1,8 +1,8 @@
 /*****************************************************************************
  * embeddedwindow.m: MacOS X interface module
  *****************************************************************************
- * Copyright (C) 2005-2008 the VideoLAN team
- * $Id: 88de796afac6ca553672ccacd46fbaace70a9a37 $
+ * Copyright (C) 2005-2011 the VideoLAN team
+ * $Id: 4c915c41a6a9959266ea5677052ca36e8487633c $
  *
  * Authors: Benjamin Pracht <bigben at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -77,12 +77,6 @@
 
     o_img_play = [NSImage imageNamed: @"play_embedded"];
     o_img_pause = [NSImage imageNamed: @"pause_embedded"];
-
-    [self controlTintChanged];
-    [[NSNotificationCenter defaultCenter] addObserver: self
-                                             selector: @selector( controlTintChanged )
-                                                 name: NSControlTintDidChangeNotification
-                                               object: nil];
 
     /* Set color of sidebar to Leopard's "Sidebar Blue" */
     [o_sidebar_list setBackgroundColor: [NSColor colorWithCalibratedRed:0.820
@@ -431,22 +425,24 @@
     vout_thread_t *p_vout = getVout();
     BOOL blackout_other_displays = config_GetInt( VLCIntf, "macosx-black" );
 
-    screen = [NSScreen screenWithDisplayID:(CGDirectDisplayID)var_GetInteger( p_vout, "video-device" )];
+    if( p_vout )
+        screen = [NSScreen screenWithDisplayID:(CGDirectDisplayID)var_GetInteger( p_vout, "video-device" )];
 
     [self lockFullscreenAnimation];
 
     if (!screen)
     {
-        msg_Dbg( p_vout, "chosen screen isn't present, using current screen for fullscreen mode" );
+        msg_Dbg( VLCIntf, "chosen screen isn't present, using current screen for fullscreen mode" );
         screen = [self screen];
     }
     if (!screen)
     {
-        msg_Dbg( p_vout, "Using deepest screen" );
+        msg_Dbg( VLCIntf, "Using deepest screen" );
         screen = [NSScreen deepestScreen];
     }
 
-    vlc_object_release( p_vout );
+    if( p_vout )
+        vlc_object_release( p_vout );
 
     screen_rect = [screen frame];
 

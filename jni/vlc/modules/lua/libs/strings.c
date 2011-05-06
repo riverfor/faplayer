@@ -2,7 +2,7 @@
  * strings.c
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: 7920025c6220968f208ff0ed42b3b6a26f7ea9a3 $
+ * $Id: d9aeaa5b71f32ae61e583f3d2fb955e94965d549 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -125,7 +125,7 @@ static int vlclua_convert_xml_special_chars( lua_State *L )
 
 static int vlclua_from_charset( lua_State *L )
 {
-    if( lua_gettop( L ) < 3 ) return vlclua_error( L );
+    if( lua_gettop( L ) < 2 ) return vlclua_error( L );
 
     size_t i_in_bytes;
     const char *psz_input = luaL_checklstring( L, 2, &i_in_bytes );

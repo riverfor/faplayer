@@ -2,7 +2,7 @@
  * ToolbarEdit.cpp : ToolbarEdit dialog
  ****************************************************************************
  * Copyright (C) 2008-2009 the VideoLAN team
- * $Id: 72cf40776d95eb5474e25412a1159e55be9aacc1 $
+ * $Id: f1c8302abdcc10a526cfeef28c6ac255abbaf430 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *
@@ -27,9 +27,13 @@
 
 #include "dialogs/toolbar.hpp"
 
+/* Widgets */
 #include "util/input_slider.hpp"
 #include "util/customwidgets.hpp"
 #include "components/interface_widgets.hpp"
+#include "util/buttons/DeckButtonsLayout.hpp"
+#include "util/buttons/BrowseButton.hpp"
+#include "util/buttons/RoundButton.hpp"
 
 #include <QScrollArea>
 #include <QGroupBox>
@@ -37,6 +41,7 @@
 #include <QComboBox>
 #include <QListWidget>
 #include <QSpinBox>
+#include <QRubberBand>
 
 #include <QDragEnterEvent>
 #include <QDialogButtonBox>
@@ -147,6 +152,7 @@ ToolbarEditDialog::ToolbarEditDialog( QWidget *_w, intf_thread_t *_p_intf)
 
     QToolButton *newButton = new QToolButton;
     newButton->setIcon( QIcon( ":/new" ) );
+    newButton->setToolTip( qtr("New profile") );
     QToolButton *deleteButton = new QToolButton;
     deleteButton->setIcon( QIcon( ":/toolbar/clear" ) );
     deleteButton->setToolTip( qtr( "Delete the current profile" ) );
@@ -333,7 +339,7 @@ WidgetListing::WidgetListing( intf_thread_t *p_intf, QWidget *_parent )
             break;
         case INPUT_SLIDER:
             {
-                InputSlider *slider = new InputSlider( Qt::Horizontal, this );
+                SeekSlider *slider = new SeekSlider( Qt::Horizontal, this );
                 widget = slider;
             }
             widgetItem->setText( qtr("Time Slider") );
@@ -371,14 +377,17 @@ WidgetListing::WidgetListing( intf_thread_t *p_intf, QWidget *_parent )
 
                 QToolButton *prevSectionButton = new QToolButton( discFrame );
                 prevSectionButton->setIcon( QIcon( ":/toolbar/dvd_prev" ) );
+                prevSectionButton->setToolTip( qtr("Previous chapter") );
                 discLayout->addWidget( prevSectionButton );
 
                 QToolButton *menuButton = new QToolButton( discFrame );
                 menuButton->setIcon( QIcon( ":/toolbar/dvd_menu" ) );
+                menuButton->setToolTip( qtr("Go to the DVD menu") );
                 discLayout->addWidget( menuButton );
 
                 QToolButton *nextButton = new QToolButton( discFrame );
                 nextButton->setIcon( QIcon( ":/toolbar/dvd_next" ) );
+                nextButton->setToolTip( qtr("Next chapter") );
                 discLayout->addWidget( nextButton );
 
                 widget = discFrame;
@@ -396,7 +405,8 @@ WidgetListing::WidgetListing( intf_thread_t *p_intf, QWidget *_parent )
                 telexLayout->addWidget( telexOn );
 
                 QToolButton *telexTransparent = new QToolButton;
-                telexOn->setIcon( QIcon( ":/toolbar/tvtelx" ) );
+                telexTransparent->setIcon( QIcon( ":/toolbar/tvtelx" ) );
+                telexTransparent->setToolTip( qtr("Teletext transparency") );
                 telexLayout->addWidget( telexTransparent );
 
                 QSpinBox *telexPage = new QSpinBox;
@@ -412,6 +422,18 @@ WidgetListing::WidgetListing( intf_thread_t *p_intf, QWidget *_parent )
                 widget = advControls;
             }
             widgetItem->setText( qtr("Advanced Buttons") );
+            break;
+        case PLAYBACK_BUTTONS:
+            {
+                widget = new QWidget;
+                DeckButtonsLayout *layout = new DeckButtonsLayout( widget );
+                BrowseButton *prev = new BrowseButton( widget, BrowseButton::Backward );
+                BrowseButton *next = new BrowseButton( widget );
+                RoundButton *play = new RoundButton( widget );
+                layout->setBackwardButton( prev );
+                layout->setForwardButton( next );
+                layout->setRoundButton( play );
+            }
             break;
         default:
             msg_Warn( p_intf, "This should not happen %i", i );
@@ -770,4 +792,3 @@ bool DroppingController::eventFilter( QObject *obj, QEvent *event )
             return false;
     }
 }
-

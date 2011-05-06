@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2007-2009 the VideoLAN team
  *
- * $Id: 3ebb4b731dcfa88038f362710d27bc11c1e8f1c9 $
+ * $Id: de135771722df41513181706ffb229bb7ec70866 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -67,6 +67,7 @@ SoutDialog::SoutDialog( QWidget *parent, intf_thread_t *_p_intf, const QString& 
     closeTabButton->hide();
     closeTabButton->setAutoRaise( true );
     closeTabButton->setIcon( QIcon( ":/toolbar/clear" ) );
+    closeTabButton->setToolTip( qtr("Clear") );
     BUTTONACT( closeTabButton, closeTab() );
 #endif
     CONNECT( ui.destTab, currentChanged( int ), this, tabChanged( int ) );

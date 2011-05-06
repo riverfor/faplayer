@@ -224,7 +224,7 @@ vlc_module_begin ()
                   "cable", "dvb-c", "satellite", "dvb-s", "dvb-s2",
                   "terrestrial", "dvb-t", "atsc", "cqam")
 
-    /* All options starting with dvb- can be overriden in the MRL, so they
+    /* All options starting with dvb- can be overridden in the MRL, so they
      * must all be "safe". Nevertheless, we do not mark as safe those that are
      * really specific to the local system (e.g. device ID...).
      * It wouldn't make sense to deliver those through a playlist. */
@@ -302,7 +302,7 @@ vlc_module_begin ()
                 POLARIZATION_TEXT, POLARIZATION_LONGTEXT, false)
         change_string_list (polarization_vlc, polarization_user, NULL)
         change_safe ()
-    add_integer ("dvb-voltage", 13, " ", " ", true)
+    add_integer ("dvb-voltage", 13, "", "", true)
         change_integer_range (0, 18)
         change_private ()
         change_safe ()
@@ -320,7 +320,7 @@ vlc_module_begin ()
                  LNB_SWITCH_TEXT, LNB_SWITCH_LONGTEXT, true)
         change_integer_range (0, 0x7fffffff)
         add_deprecated_alias ("dvb-lnb-slof")
-#ifdef __linux
+#ifdef __linux__
     add_integer ("dvb-satno", 0, SATNO_TEXT, SATNO_LONGTEXT, true)
         change_integer_list (satno_vlc, satno_user)
     add_integer ("dvb-tone", -1, TONE_TEXT, TONE_LONGTEXT, true)

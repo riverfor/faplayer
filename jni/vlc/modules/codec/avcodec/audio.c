@@ -2,7 +2,7 @@
  * audio.c: audio decoder using ffmpeg library
  *****************************************************************************
  * Copyright (C) 1999-2003 the VideoLAN team
- * $Id: 9cafc381c642a7ee5834f0a6cd451b9431984c02 $
+ * $Id: 33e7418bf85bd998ef90e1701da03365a207ee70 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -150,8 +150,8 @@ int InitAudioDec( decoder_t *p_dec, AVCodecContext *p_context,
         return VLC_ENOMEM;
     }
 
-    p_codec->type = CODEC_TYPE_AUDIO;
-    p_context->codec_type = CODEC_TYPE_AUDIO;
+    p_codec->type = AVMEDIA_TYPE_AUDIO;
+    p_context->codec_type = AVMEDIA_TYPE_AUDIO;
     p_context->codec_id = i_codec_id;
     p_sys->p_context = p_context;
     p_sys->p_codec = p_codec;
@@ -258,6 +258,7 @@ aout_buffer_t * DecodeAudio ( decoder_t *p_dec, block_t **pp_block )
     int i_used, i_output;
     aout_buffer_t *p_buffer;
     block_t *p_block;
+    AVPacket pkt;
 
     if( !pp_block || !*pp_block ) return NULL;
 
@@ -329,9 +330,12 @@ aout_buffer_t * DecodeAudio ( decoder_t *p_dec, block_t **pp_block )
             p_sys->p_output = av_realloc( p_sys->p_output, i_output );
         }
 
-        i_used = avcodec_decode_audio2( p_sys->p_context,
+        av_init_packet( &pkt );
+        pkt.data = p_block->p_buffer;
+        pkt.size = p_block->i_buffer;
+        i_used = avcodec_decode_audio3( p_sys->p_context,
                                        (int16_t*)p_sys->p_output, &i_output,
-                                       p_block->p_buffer, p_block->i_buffer );
+                                       &pkt );
 
         if( i_used < 0 || i_output < 0 )
         {

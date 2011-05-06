@@ -1,8 +1,8 @@
 /*****************************************************************************
  * playlist_model.hpp : Model for a playlist tree
  ****************************************************************************
- * Copyright (C) 2006 the VideoLAN team
- * $Id: 9d8db22da6c46d3198c9c4e136a4e2ecc3866314 $
+ * Copyright (C) 2006-2011 the VideoLAN team
+ * $Id: db3a29ba8f9ef3dfdd739eff5c0ada2e84e2c852 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jakob Leben <jleben@videolan.org>
@@ -92,8 +92,7 @@ public:
     void search( const QString& search_text, const QModelIndex & root, bool b_recursive );
     void sort( const int column, Qt::SortOrder order );
     void sort( const int i_root_id, const int column, Qt::SortOrder order );
-    void rebuild();
-    void rebuild( playlist_item_t * );
+    void rebuild( playlist_item_t * p = NULL );
 
     inline PLItem *getItem( QModelIndex index ) const
     {
@@ -174,7 +173,7 @@ class PlMimeData : public QMimeData
     Q_OBJECT
 
 public:
-    PlMimeData();
+    PlMimeData() {}
     ~PlMimeData();
     void appendItem( input_item_t *p_item );
     QList<input_item_t*> inputItems() const;

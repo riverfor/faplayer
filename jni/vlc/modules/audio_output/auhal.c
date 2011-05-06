@@ -2,7 +2,7 @@
  * auhal.c: AUHAL and Coreaudio output plugin
  *****************************************************************************
  * Copyright (C) 2005, 2011 the VideoLAN team
- * $Id: 19bcee046b64a98f1b443265cc56590940f1fc13 $
+ * $Id: 306515f9b0842e55f728a885883604761d97a0f3 $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -39,7 +39,6 @@
 #include <CoreAudio/CoreAudio.h>
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioFormat.h>
-#include <AudioUnit/AudioComponent.h>
 
 #include <CoreServices/CoreServices.h>
 

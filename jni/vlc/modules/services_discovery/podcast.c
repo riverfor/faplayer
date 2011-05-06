@@ -2,7 +2,7 @@
  * podcast.c:  Podcast services discovery module
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: b97c56b6b39b924f8c333beced584f55079c87c2 $
+ * $Id: 1b00a2babe073d3b0d3659e21d7fc6c225d98cca $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -66,7 +66,6 @@ vlc_module_begin ()
 
     add_string( "podcast-urls", NULL,
                 URLS_TEXT, URLS_LONGTEXT, false )
-        change_autosave ()
 
     set_capability( "services_discovery", 0 )
     set_callbacks( Open, Close )
@@ -427,7 +426,6 @@ static void SaveUrls( services_discovery_t *p_sd )
     }
 
     config_PutPsz( p_sd, "podcast-urls", psz_urls );
-    config_SaveConfigFile( p_sd, "podcast" );
 
     free( psz_urls );
 }

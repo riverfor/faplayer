@@ -2,7 +2,7 @@
  * file.c
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id: f104f59b0dd247200c30453a5f03f0351f108f3b $
+ * $Id: f89d93ef5e2dded5a8666fa29754235130131152 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Eric Petit <titer@videolan.org>
@@ -45,6 +45,8 @@
 #if defined( WIN32 ) && !defined( UNDER_CE )
 #   include <io.h>
 #   define lseek _lseeki64
+#elif defined( __OS2__ )
+#   include <io.h>
 #else
 #   include <unistd.h>
 #endif
@@ -99,11 +101,6 @@ static int Seek ( sout_access_out_t *, off_t  );
 static ssize_t Read ( sout_access_out_t *, block_t * );
 static int Control( sout_access_out_t *, int, va_list );
 
-struct sout_access_out_sys_t
-{
-    int i_handle;
-};
-
 /*****************************************************************************
  * Open: open the file
  *****************************************************************************/
@@ -144,7 +141,7 @@ static int Open( vlc_object_t *p_this )
     else
     if( !strcmp( p_access->psz_path, "-" ) )
     {
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
         setmode (fileno (stdout), O_BINARY);
 #endif
         fd = vlc_dup (fileno (stdout));

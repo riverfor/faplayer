@@ -2,7 +2,7 @@
  * transcode.c: transcoding stream output module
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: 32ffee64489990002b8ffbb88a2ba039499fb818 $
+ * $Id: 153aa6590f00e2d84e759d47231f0356f062c54a $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -433,7 +433,7 @@ static int Open( vlc_object_t *p_this )
     {
         p_sys->p_spu = spu_Create( p_stream );
         if( p_sys->p_spu )
-            spu_ChangeFilters( p_sys->p_spu, psz_string );
+            spu_ChangeSources( p_sys->p_spu, psz_string );
     }
     free( psz_string );
 
@@ -459,11 +459,11 @@ static int Open( vlc_object_t *p_this )
         {
             p_sys->p_spu = spu_Create( p_stream );
             if( p_sys->p_spu )
-                spu_ChangeFilters( p_sys->p_spu, "osdmenu" );
+                spu_ChangeSources( p_sys->p_spu, "osdmenu" );
         }
         else
         {
-            spu_ChangeFilters( p_sys->p_spu, "osdmenu" );
+            spu_ChangeSources( p_sys->p_spu, "osdmenu" );
         }
     }
 

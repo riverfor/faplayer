@@ -2,7 +2,7 @@
  * infopanels.hpp : Panels for the information dialogs
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: ec58f29cfb5acdd8c1c87bb1bd9342f230078fcb $
+ * $Id: 7be324e17ee94e6720592ec4732fb126b4831c15 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -49,6 +49,7 @@ class QTreeView;
 class QSpinBox;
 class QLineEdit;
 class CoverArtLabel;
+class QTextEdit;
 
 class MetaPanel: public QWidget
 {
@@ -71,14 +72,16 @@ private:
     QLineEdit *copyright_text;
     QLineEdit *collection_text;
     QLineEdit *seqnum_text;
-    QLineEdit *description_text;
+    QLineEdit *seqtot_text;
+
+    QTextEdit *description_text;
 //    QSpinBox *rating_text;
     QLineEdit *date_text;
 //    QLineEdit *setting_text;
     QLineEdit *language_text;
     QLineEdit *nowplaying_text;
     QLineEdit *publisher_text;
-//    QLineEdit *encodedby_text;
+    QLineEdit *encodedby_text;
     CoverArtLabel *art_cover;
 
 public slots:

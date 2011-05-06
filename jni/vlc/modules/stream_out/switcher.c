@@ -2,7 +2,7 @@
  * switcher.c: MPEG2 video switcher module
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id: 9ee852875b84503c6c65c160c849a3366a30bda9 $
+ * $Id: 18f281ea2d1fada2d04def8ec575b1155c6287cb $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -319,9 +319,7 @@ static sout_stream_id_t *Add( sout_stream_t *p_stream, es_format_t *p_fmt )
     if( !id )
         return NULL;
 
-    if( p_fmt->i_cat == VIDEO_ES &&
-        ( p_fmt->i_codec == VLC_CODEC_MPGV ||
-          p_fmt->i_codec == VLC_FOURCC('f', 'a', 'k', 'e') ) )
+    if( p_fmt->i_cat == VIDEO_ES && p_fmt->i_codec == VLC_CODEC_MPGV )
     {
         id->b_switcher_video = true;
         p_fmt->i_codec = VLC_CODEC_MPGV;

@@ -2,7 +2,7 @@
  * qvlcframe.hpp : A few helpers
  *****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: edaa08be96d10a89257974ef4b2a36fdc4b568e7 $
+ * $Id: 832a5bdcfb34e76ae75713e531e8b3d46c6fc0ac $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -188,9 +188,7 @@ protected:
 class QVLCMW : public QMainWindow
 {
 public:
-    QVLCMW( intf_thread_t *_p_intf ) : QMainWindow( NULL ), p_intf( _p_intf )
-    {    }
-    virtual ~QVLCMW() {};
+    QVLCMW( intf_thread_t *_p_intf ) : QMainWindow( NULL ), p_intf( _p_intf ){}
     void toggleVisible()
     {
         if( isVisible() ) hide();

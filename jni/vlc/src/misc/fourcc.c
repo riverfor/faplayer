@@ -2,7 +2,7 @@
  * fourcc.c: fourcc helpers functions
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: d942147c7221cdfc13772b9d15b991eaf6c03612 $
+ * $Id: 79453b1f33df1cb1df22cc1c46c51889021d51e4 $
  *
  * Authors: Laurent Aimar <fenrir@videolan.org>
  *
@@ -369,6 +369,7 @@ static const entry_t p_list_video[] = {
         E("cdvc", "Canopus DV Video"),
         E("CDVH", "Canopus DV Video"),
         E("cdvh", "Canopus DV Video"),
+        E("CDV5", "Canopus DV Video"),
 
     /* Windows Media Video */
     B(VLC_CODEC_WMV1, "Windows Media Video 7"),

@@ -2,7 +2,7 @@
  * cache.c: Plugins cache
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: 76de0b83766b805febe537b75d43e88a923d0707 $
+ * $Id: 4c4973bb7321299f1f8618cfc75326de8301b7b4 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Ethan C. Baldridge <BaldridgeE@cadmus.com>
@@ -368,15 +368,10 @@ static int CacheLoadConfig( module_t *p_module, FILE *file )
             p_module->p_config[i].value.psz =
                     (p_module->p_config[i].orig.psz != NULL)
                         ? strdup (p_module->p_config[i].orig.psz) : NULL;
-            p_module->p_config[i].saved.psz = NULL;
         }
         else
-        {
             memcpy (&p_module->p_config[i].value, &p_module->p_config[i].orig,
                     sizeof (p_module->p_config[i].value));
-            memcpy (&p_module->p_config[i].saved, &p_module->p_config[i].orig,
-                    sizeof (p_module->p_config[i].saved));
-        }
 
         p_module->p_config[i].b_dirty = false;
 
@@ -478,7 +473,7 @@ void CacheSave (vlc_object_t *p_this, const char *dir,
         goto out;
     }
 
-#ifndef WIN32
+#if !defined( WIN32 ) && !defined( __OS2__ )
     vlc_rename (tmpname, filename); /* atomically replace old cache */
     fclose (file);
 #else

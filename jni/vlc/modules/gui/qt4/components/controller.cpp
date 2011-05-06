@@ -2,7 +2,7 @@
  * Controller.cpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: abbe9bd526018f26f6fcbd69dc5ac9cbfe37acef $
+ * $Id: 3de111a2369d562b26ea788b3c2731faa9343d85 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -26,21 +26,22 @@
 # include "config.h"
 #endif
 
-#include <vlc_vout.h>
-#include <vlc_keys.h>
+#include <vlc_vout.h>                       /* vout_thread_t for FSC */
 
+/* Widgets */
 #include "components/controller.hpp"
 #include "components/controller_widget.hpp"
 #include "components/interface_widgets.hpp"
+#include "util/buttons/DeckButtonsLayout.hpp"
+#include "util/buttons/BrowseButton.hpp"
+#include "util/buttons/RoundButton.hpp"
 
-#include "dialogs_provider.hpp" /* Opening Dialogs */
-#include "input_manager.hpp"
-#include "actions_manager.hpp"
+#include "dialogs_provider.hpp"                     /* Opening Dialogs */
+#include "actions_manager.hpp"                             /* *_ACTION */
 
-#include "util/input_slider.hpp" /* InputSlider */
-#include "util/customwidgets.hpp" /* qEventToKey */
+#include "util/input_slider.hpp"                         /* SeekSlider */
+#include "util/customwidgets.hpp"                       /* qEventToKey */
 
-#include <QSpacerItem>
 #include <QToolButton>
 #include <QHBoxLayout>
 #include <QRegion>
@@ -63,6 +64,7 @@ AbstractController::AbstractController( intf_thread_t * _p_i, QWidget *_parent )
 {
     p_intf = _p_i;
     advControls = NULL;
+    buttonGroupLayout = NULL;
 
     /* Main action provider */
     toolbarActionsMapper = new QSignalMapper( this );
@@ -113,7 +115,7 @@ void AbstractController::parseAndCreate( const QString& config,
         QStringList list2 = list.at( i ).split( "-" );
         if( list2.size() < 1 )
         {
-            msg_Warn( p_intf, "Parsing error. Report this" );
+            msg_Warn( p_intf, "Parsing error 1. Please, report this." );
             continue;
         }
 
@@ -122,7 +124,7 @@ void AbstractController::parseAndCreate( const QString& config,
         buttonType_e i_type = (buttonType_e)list2.at( 0 ).toInt( &ok );
         if( !ok )
         {
-            msg_Warn( p_intf, "Parsing error 0. Please report this" );
+            msg_Warn( p_intf, "Parsing error 2. Please report this." );
             continue;
         }
 
@@ -131,12 +133,17 @@ void AbstractController::parseAndCreate( const QString& config,
             i_option = list2.at( 1 ).toInt( &ok );
             if( !ok )
             {
-                msg_Warn( p_intf, "Parsing error 1. Please report this" );
+                msg_Warn( p_intf, "Parsing error 3. Please, report this." );
                 continue;
-            }
-        }
+            }        }
 
         createAndAddWidget( controlLayout, -1, i_type, i_option );
+    }
+
+    if( buttonGroupLayout )
+    {
+        controlLayout->addLayout( buttonGroupLayout );
+        buttonGroupLayout = NULL;
     }
 }
 
@@ -145,23 +152,45 @@ void AbstractController::createAndAddWidget( QBoxLayout *controlLayout,
                                              buttonType_e i_type,
                                              int i_option )
 {
+    VLC_UNUSED( i_index ); // i_index should only be required for edition
+
+    /* Close the current buttonGroup if we have a special widget or a spacer */
+    if( buttonGroupLayout && i_type > BUTTON_MAX )
+    {
+        controlLayout->addLayout( buttonGroupLayout );
+        buttonGroupLayout = NULL;
+    }
+
     /* Special case for SPACERS, who aren't QWidgets */
     if( i_type == WIDGET_SPACER )
     {
-        controlLayout->insertSpacing( i_index, 12 );
-        return;
+        controlLayout->addSpacing( 12 );
     }
-
-    if(  i_type == WIDGET_SPACER_EXTEND )
+    else if(  i_type == WIDGET_SPACER_EXTEND )
     {
-        controlLayout->insertStretch( i_index, 12 );
-        return;
+        controlLayout->addStretch( 12 );
     }
+    else
+    {
+        /* Create the widget */
+        QWidget *widg = createWidget( i_type, i_option );
+        if( !widg ) return;
 
-    QWidget *widg = createWidget( i_type, i_option );
-    if( !widg ) return;
+        /* Buttons */
+        if( i_type < BUTTON_MAX )
+        {
+            if( !buttonGroupLayout )
+            {
+                buttonGroupLayout = new QHBoxLayout;
 
-    controlLayout->insertWidget( i_index, widg );
+            }
+            buttonGroupLayout->addWidget( widg );
+        }
+        else /* Special widgets */
+        {
+            controlLayout->addWidget( widg );
+        }
+    }
 }
 
 
@@ -194,7 +223,6 @@ void AbstractController::createAndAddWidget( QBoxLayout *controlLayout,
 
 QWidget *AbstractController::createWidget( buttonType_e button, int options )
 {
-
     bool b_flat  = options & WIDGET_FLAT;
     bool b_big   = options & WIDGET_BIG;
     bool b_shiny = options & WIDGET_SHINY;
@@ -209,7 +237,7 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
         BUTTON_SET_BAR(  playButton );
         CONNECT_MAP_SET( playButton, PLAY_ACTION );
         CONNECT( this, inputPlaying( bool ),
-                 playButton, updateButton( bool ));
+                 playButton, updateButtonIcons( bool ));
         widget = playButton;
         }
         break;
@@ -237,6 +265,24 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
     case FASTER_BUTTON:{
         NORMAL_BUTTON( FASTER );
         ENABLE_ON_INPUT( FASTERButton );
+        }
+        break;
+    case PREV_SLOW_BUTTON:{
+        QToolButtonExt *but = new QToolButtonExt;
+        setupButton( but );
+        BUTTON_SET_BAR( but );
+        CONNECT( but, shortClicked(), THEMIM, prev() );
+        CONNECT( but, longClicked(), THEAM, skipBackward() );
+        widget = but;
+        }
+        break;
+    case NEXT_FAST_BUTTON:{
+        QToolButtonExt *but = new QToolButtonExt;
+        setupButton( but );
+        BUTTON_SET_BAR( but );
+        CONNECT( but, shortClicked(), THEMIM, next() );
+        CONNECT( but, longClicked(), THEAM, skipForward() );
+        widget = but;
         }
         break;
     case FRAME_BUTTON: {
@@ -284,12 +330,12 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
         ENABLE_ON_INPUT( ABButton );
         CONNECT_MAP_SET( ABButton, ATOB_ACTION );
         CONNECT( THEMIM->getIM(), AtoBchanged( bool, bool),
-                 ABButton, setIcons( bool, bool ) );
+                 ABButton, updateButtonIcons( bool, bool ) );
         widget = ABButton;
         }
         break;
     case INPUT_SLIDER: {
-        InputSlider *slider = new InputSlider( Qt::Horizontal, NULL );
+        SeekSlider *slider = new SeekSlider( Qt::Horizontal, NULL );
 
         /* Update the position when the IM has changed */
         CONNECT( THEMIM->getIM(), positionUpdated( float, int64_t, int ),
@@ -378,14 +424,28 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
         setupButton( loopButton );
         loopButton->setToolTip( qtr( "Click to toggle between loop one, loop all" ) );
         loopButton->setCheckable( true );
-        loopButton->updateIcons( NORMAL );
-        CONNECT( THEMIM, repeatLoopChanged( int ), loopButton, updateIcons( int ) );
+        loopButton->updateButtonIcons( NORMAL );
+        CONNECT( THEMIM, repeatLoopChanged( int ), loopButton, updateButtonIcons( int ) );
         CONNECT( loopButton, clicked(), THEMIM, loopRepeatLoopStatus() );
         widget = loopButton;
         }
         break;
     case INFO_BUTTON: {
         NORMAL_BUTTON( INFO );
+        }
+        break;
+    case PLAYBACK_BUTTONS:{
+        widget = new QWidget;
+        DeckButtonsLayout *layout = new DeckButtonsLayout( widget );
+        BrowseButton *prev = new BrowseButton( widget, BrowseButton::Backward );
+        BrowseButton *next = new BrowseButton( widget );
+        RoundButton *play = new RoundButton( widget );
+        layout->setBackwardButton( prev );
+        layout->setForwardButton( next );
+        layout->setRoundButton( play );
+        CONNECT_MAP_SET( prev, PREVIOUS_ACTION );
+        CONNECT_MAP_SET( next, NEXT_ACTION );
+        CONNECT_MAP_SET( play, PLAY_ACTION );
         }
         break;
     default:
@@ -554,12 +614,12 @@ ControlsWidget::ControlsWidget( intf_thread_t *_p_i,
     /* advanced Controls handling */
     b_advancedVisible = b_advControls;
 #if DEBUG_LAYOUT
-    setStyleSheet( " background: red ");
+    setStyleSheet( "background: red ");
 #endif
 
     setAttribute( Qt::WA_MacBrushedMetal);
     QVBoxLayout *controlLayout = new QVBoxLayout( this );
-    controlLayout->setContentsMargins( 4, 1, 4, 0 );
+    controlLayout->setContentsMargins( 4, 1, 0, 0 );
     controlLayout->setSpacing( 0 );
     QHBoxLayout *controlLayout1 = new QHBoxLayout;
     controlLayout1->setSpacing( 0 ); controlLayout1->setMargin( 0 );
@@ -574,14 +634,14 @@ ControlsWidget::ControlsWidget( intf_thread_t *_p_i,
                                         .toString();
     parseAndCreate( line2, controlLayout2 );
 
+    grip = new QSizeGrip( this );
+    controlLayout2->addWidget( grip, 0, Qt::AlignBottom|Qt::AlignRight );
+
     if( !b_advancedVisible && advControls ) advControls->hide();
 
     controlLayout->addLayout( controlLayout1 );
     controlLayout->addLayout( controlLayout2 );
 }
-
-ControlsWidget::~ControlsWidget()
-{}
 
 void ControlsWidget::toggleAdvanced()
 {
@@ -607,7 +667,7 @@ AdvControlsWidget::AdvControlsWidget( intf_thread_t *_p_i, QWidget *_parent ) :
     controlLayout->setMargin( 0 );
     controlLayout->setSpacing( 0 );
 #if DEBUG_LAYOUT
-    setStyleSheet( " background: orange ");
+    setStyleSheet( "background: orange ");
 #endif
 
 
@@ -623,7 +683,7 @@ InputControlsWidget::InputControlsWidget( intf_thread_t *_p_i, QWidget *_parent 
     controlLayout->setMargin( 0 );
     controlLayout->setSpacing( 0 );
 #if DEBUG_LAYOUT
-    setStyleSheet( " background: green ");
+    setStyleSheet( "background: green ");
 #endif
 
     QString line = getSettings()->value( "InputToolbar", INPT_TB_DEFAULT ).toString();
@@ -650,12 +710,7 @@ FullscreenControllerWidget::FullscreenControllerWidget( intf_thread_t *_p_i, QWi
 
     vout.clear();
 
-#ifdef Q_WS_X11
-    setWindowFlags( Qt::Window | Qt::FramelessWindowHint );
-    setWindowModality( Qt::ApplicationModal );
-#else
     setWindowFlags( Qt::ToolTip );
-#endif
     setMinimumWidth( 600 );
 
     setFrameShape( QFrame::StyledPanel );
@@ -676,13 +731,14 @@ FullscreenControllerWidget::FullscreenControllerWidget( intf_thread_t *_p_i, QWi
 
     /* hiding timer */
     p_hideTimer = new QTimer( this );
-    CONNECT( p_hideTimer, timeout(), this, hideFSC() );
     p_hideTimer->setSingleShot( true );
+    CONNECT( p_hideTimer, timeout(), this, hideFSC() );
 
     /* slow hiding timer */
 #if HAVE_TRANSPARENCY
     p_slowHideTimer = new QTimer( this );
     CONNECT( p_slowHideTimer, timeout(), this, slowHideFSC() );
+    f_opacity = var_InheritFloat( p_intf, "qt-fs-opacity" );
 #endif
 
     vlc_mutex_init_recursive( &lock );
@@ -751,7 +807,7 @@ void FullscreenControllerWidget::showFSC()
     }
 
 #if HAVE_TRANSPARENCY
-    setWindowOpacity( var_InheritFloat( p_intf, "qt-fs-opacity" )  );
+    setWindowOpacity( f_opacity );
 #endif
 
 #ifdef Q_WS_X11
@@ -912,7 +968,7 @@ void FullscreenControllerWidget::enterEvent( QEvent *event )
     p_hideTimer->stop();
 #if HAVE_TRANSPARENCY
     p_slowHideTimer->stop();
-    setWindowOpacity( DEFAULT_OPACITY );
+    setWindowOpacity( f_opacity );
 #endif
     event->accept();
 }

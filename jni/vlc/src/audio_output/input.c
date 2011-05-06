@@ -2,7 +2,7 @@
  * input.c : internal management of input streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: 8fcd834838996c10352c303b1094cf7d01e2df51 $
+ * $Id: be83a6f5737be1adf7f372c187c92813756fed7e $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -395,10 +395,6 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
         }
     }
 
-    /* Prepare hints for the buffer allocator. */
-    p_input->input_alloc.b_alloc = true;
-    p_input->input_alloc.i_bytes_per_sec = -1;
-
     /* Create resamplers. */
     if ( !AOUT_FMT_NON_LINEAR( &p_aout->mixer_format ) )
     {
@@ -419,11 +415,6 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
             return -1;
         }
 
-        aout_FiltersHintBuffers( p_aout, p_input->pp_resamplers,
-                                 p_input->i_nb_resamplers,
-                                 &p_input->input_alloc );
-        p_input->input_alloc.b_alloc = true;
-
         /* Setup the initial rate of the resampler */
         p_input->pp_resamplers[0]->fmt_in.audio.i_rate = p_input->input.i_rate;
     }
@@ -433,18 +424,6 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
     {
         p_input->p_playback_rate_filter = p_input->pp_resamplers[0];
     }
-
-    aout_FiltersHintBuffers( p_aout, p_input->pp_filters,
-                             p_input->i_nb_filters,
-                             &p_input->input_alloc );
-    p_input->input_alloc.b_alloc = true;
-
-    /* i_bytes_per_sec is still == -1 if no filters */
-    p_input->input_alloc.i_bytes_per_sec = __MAX(
-                                    p_input->input_alloc.i_bytes_per_sec,
-                                    (int)(p_input->input.i_bytes_per_frame
-                                     * p_input->input.i_rate
-                                     / p_input->input.i_frame_length) );
 
     ReplayGainSelect( p_aout, p_input );
 

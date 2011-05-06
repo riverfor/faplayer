@@ -3,7 +3,7 @@
  * Collection of useful common types and macros definitions
  *****************************************************************************
  * Copyright (C) 1998-2005 the VideoLAN team
- * $Id: 9cfd1a3eb6f44145a872fb9e4a18a5e898e2db9b $
+ * $Id: a922430f022663d0216caf05de836aa3f4df34b5 $
  *
  * Authors: Samuel Hocevar <sam@via.ecp.fr>
  *          Vincent Seguin <seguin@via.ecp.fr>
@@ -533,12 +533,14 @@ typedef union
 #if defined( __GNUC__ ) && __GNUC__ > 3
 # ifndef __cplusplus
 #  define VLC_OBJECT( x ) \
-    __builtin_choose_expr(__builtin_offsetof(__typeof__(*x), psz_object_type), \
-                          (void)0 /* screw you */, (vlc_object_t *)(x))
+    __builtin_choose_expr( \
+        __builtin_offsetof(__typeof__(*(x)), psz_object_type), \
+        (void)0 /* screw you */, \
+        (vlc_object_t *)(x))
 # else
 #  define VLC_OBJECT( x ) \
     ((vlc_object_t *)(x) \
-      + 0 * __builtin_offsetof(__typeof__(*x), psz_object_type))
+      + 0 * __builtin_offsetof(__typeof__(*(x)), psz_object_type))
 # endif
 #else
 # define VLC_OBJECT( x ) ((vlc_object_t *)(x))

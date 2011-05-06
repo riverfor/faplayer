@@ -2,7 +2,7 @@
  * playlist.m: MacOS X interface module
  *****************************************************************************
 * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 01197cf0f57ec0dad2606e80aac8a90446135446 $
+ * $Id: b3272a04cd62fc924c8561a08bad3b1fbfc525de $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videola/n dot org>
@@ -750,7 +750,7 @@
     if( [o_save_panel runModalForDirectory: nil
             file: o_name] == NSOKButton )
     {
-        NSString *o_filename = [o_save_panel filename];
+        NSString *o_filename = [[o_save_panel URL] path];
 
         if( [o_save_accessory_popup indexOfSelectedItem] == 0 )
         {
@@ -891,7 +891,7 @@
     if(! p_item || !p_item->p_input )
         return;
     
-    char *psz_uri = input_item_GetURI( p_item->p_input );
+    char *psz_uri = decode_URI( input_item_GetURI( p_item->p_input ) );
     if( psz_uri )
         o_mrl = [NSMutableString stringWithUTF8String: psz_uri];
 
@@ -1586,11 +1586,8 @@
 
         /* Refuse to move items that are not in the General Node
            (Service Discovery) */
-        if( ![self isItem: [o_item pointerValue] inNode:
-                        p_playlist->p_local_category checkItemExistence: NO] &&
-            var_CreateGetBool( p_playlist, "media-library" ) &&
-            ![self isItem: [o_item pointerValue] inNode:
-                        p_playlist->p_ml_category checkItemExistence: NO] ||
+        if( (![self isItem: [o_item pointerValue] inNode: p_playlist->p_local_category checkItemExistence: NO] &&
+            var_CreateGetBool( p_playlist, "media-library" ) && ![self isItem: [o_item pointerValue] inNode: p_playlist->p_ml_category checkItemExistence: NO]) ||
             [o_item pointerValue] == p_playlist->p_local_category ||
             [o_item pointerValue] == p_playlist->p_ml_category )
         {

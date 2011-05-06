@@ -5,8 +5,12 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: b15eac22ae14612b233b3c66cb33dfd69e8d7194 $
+ * $Id: 99de31b77de15301e9d1131592fcc698de11d821 $
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include "AtmoDynData.h"
 

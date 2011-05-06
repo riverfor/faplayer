@@ -4,7 +4,7 @@
  * It includes functions allowing to declare, get or set configuration options.
  *****************************************************************************
  * Copyright (C) 1999-2006 the VideoLAN team
- * $Id: 31cd7615e0d2f03a580b65f64e0ed59ed81e5923 $
+ * $Id: 0fe8d161344eb89750b066d8969c33a7bcc4e60c $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -151,7 +151,6 @@ struct module_config_t
     char        *psz_longtext;   /* Long comment on the configuration option */
     module_value_t value;                                    /* Option value */
     module_value_t orig;
-    module_value_t saved;
     module_value_t min;
     module_value_t max;
 
@@ -180,7 +179,6 @@ struct module_config_t
     bool        b_restart;   /* Flag to indicate the option needs a restart */
                               /* to take effect */
     /* Option values loaded from config file */
-    bool        b_autosave;      /* Config will be auto-saved at exit time */
     bool        b_unsaveable;                /* Config should not be saved */
 
     bool        b_safe;
@@ -198,8 +196,9 @@ VLC_EXPORT( void,   config_PutFloat, (vlc_object_t *, const char *, float) );
 VLC_EXPORT( char *, config_GetPsz,   (vlc_object_t *, const char *) LIBVLC_USED LIBVLC_MALLOC );
 VLC_EXPORT( void,   config_PutPsz,   (vlc_object_t *, const char *, const char *) );
 
-VLC_EXPORT( int,    config_SaveConfigFile, ( vlc_object_t *, const char * ) );
-#define config_SaveConfigFile(a,b) config_SaveConfigFile(VLC_OBJECT(a),b)
+VLC_EXPORT( int,    config_SaveConfigFile, ( vlc_object_t * ) );
+#define config_SaveConfigFile(a) config_SaveConfigFile(VLC_OBJECT(a))
+
 VLC_EXPORT( void,   config_ResetAll, ( vlc_object_t * ) );
 #define config_ResetAll(a) config_ResetAll(VLC_OBJECT(a))
 

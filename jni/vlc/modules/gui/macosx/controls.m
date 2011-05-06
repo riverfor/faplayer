@@ -2,7 +2,7 @@
  * controls.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 9396667ca884209e8a5f3e662143eaec2f86669c $
+ * $Id: 89d09cbe0acf8eeba29d1c299f8a6e7e7350ee97 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -64,47 +64,8 @@
 
     o_repeat_off = [NSImage imageNamed:@"repeat_embedded"];
 
-    [self controlTintChanged];
-
-    [[NSNotificationCenter defaultCenter] addObserver: self
-                                             selector: @selector( controlTintChanged )
-                                                 name: NSControlTintDidChangeNotification
-                                               object: nil];
 }
 
-- (void)controlTintChanged
-{
-    int i_repeat = 0;
-    if( [o_btn_repeat image] == o_repeat_single )
-        i_repeat = 1;
-    else if( [o_btn_repeat image] == o_repeat_all )
-        i_repeat = 2;
-
-    if( [NSColor currentControlTint] == NSGraphiteControlTint )
-    {
-        o_repeat_single = [NSImage imageNamed:@"repeat_single_embedded_graphite"];
-        o_repeat_all = [NSImage imageNamed:@"repeat_embedded_graphite"];
-
-        [o_btn_shuffle setAlternateImage: [NSImage imageNamed: @"shuffle_embedded_graphite"]];
-        [o_btn_addNode setAlternateImage: [NSImage imageNamed: @"add_embedded_graphite"]];
-    }
-    else
-    {
-        o_repeat_single = [NSImage imageNamed:@"repeat_single_embedded_blue"];
-        o_repeat_all = [NSImage imageNamed:@"repeat_embedded_blue"];
-
-        [o_btn_shuffle setAlternateImage: [NSImage imageNamed: @"shuffle_embedded_blue"]];
-        [o_btn_addNode setAlternateImage: [NSImage imageNamed: @"add_embedded_blue"]];
-    }
-
-    /* update the repeat button, but keep its state */
-    if( i_repeat == 1 )
-        [self repeatOne];
-    else if( i_repeat == 2 )
-        [self repeatAll];
-    else
-        [self repeatOff];
-}
 
 - (void)dealloc
 {
@@ -584,7 +545,9 @@
     [openPanel setCanChooseFiles: YES];
     [openPanel setCanChooseDirectories: NO];
     [openPanel setAllowsMultipleSelection: YES];
-    i_returnValue = [openPanel runModalForDirectory: [NSString stringWithUTF8String: path] file: nil types: [NSArray arrayWithObjects: @"cdg",@"@idx",@"srt",@"sub",@"utf",@"ass",@"ssa",@"aqt",@"jss",@"psb",@"rt",@"smi",@"txt",@"smil", nil]];
+    [openPanel setAllowedFileTypes: [NSArray arrayWithObjects: @"cdg",@"@idx",@"srt",@"sub",@"utf",@"ass",@"ssa",@"aqt",@"jss",@"psb",@"rt",@"smi",@"txt",@"smil", nil]];
+    [openPanel setDirectoryURL:[NSURL fileURLWithPath:[[NSString stringWithUTF8String:path] stringByExpandingTildeInPath]]];
+    i_returnValue = [openPanel runModal];
     free( path );
 
     if( i_returnValue == NSOKButton )
@@ -592,14 +555,14 @@
         NSUInteger c = 0;
         if( !p_input ) return;
 
-        c = [[openPanel filenames] count];
+        c = [[openPanel URLs] count];
 
-        for (int i = 0; i < [[openPanel filenames] count] ; i++)
+        for (int i = 0; i < c ; i++)
         {
-            msg_Dbg( VLCIntf, "loading subs from %s", [[[openPanel filenames] objectAtIndex: i] UTF8String] );
-            if( input_AddSubtitle( p_input, [[[openPanel filenames] objectAtIndex: i] UTF8String], TRUE ) )
+            msg_Dbg( VLCIntf, "loading subs from %s", [[[[openPanel URLs] objectAtIndex: i] path] UTF8String] );
+            if( input_AddSubtitle( p_input, [[[[openPanel URLs] objectAtIndex: i] path] UTF8String], TRUE ) )
                 msg_Warn( VLCIntf, "unable to load subtitles from '%s'",
-                         [[[openPanel filenames] objectAtIndex: i] UTF8String] );
+                         [[[[openPanel URLs] objectAtIndex: i] path] UTF8String] );
         }
     }
 }

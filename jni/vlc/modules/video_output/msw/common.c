@@ -2,7 +2,7 @@
  * common.c:
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 414b93dd4c792f2d1b13c5faeb022a9badf0e6a8 $
+ * $Id: cb55e8f2dffa75c3b3ebeca11ddc9a8906e9b49d $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -403,10 +403,9 @@ void UpdateRects(vout_display_t *vd,
 
 #endif
 
-#if defined(MODULE_NAME_IS_directx) || defined(MODULE_NAME_IS_direct3d) || defined(MODULE_NAME_IS_direct2d)
+#if defined(MODULE_NAME_IS_directx)
     /* UpdateOverlay directdraw function doesn't automatically clip to the
-     * display size so we need to do it otherwise it will fail
-     * It is also needed for d3d to avoid exceding our surface size */
+     * display size so we need to do it otherwise it will fail */
 
     /* Clip the destination window */
     if (!IntersectRect(&rect_dest_clipped, &rect_dest,

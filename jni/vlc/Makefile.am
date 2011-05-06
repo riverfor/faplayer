@@ -161,33 +161,22 @@ EXTRA_DIST += \
 	extras/package/macosx/Resources/wma.icns \
 	extras/package/macosx/Resources/wmv.icns \
 	extras/package/macosx/Resources/pause.png \
-	extras/package/macosx/Resources/pause_blue.png \
 	extras/package/macosx/Resources/play.png \
-	extras/package/macosx/Resources/play_blue.png \
 	extras/package/macosx/Resources/stop.png \
-	extras/package/macosx/Resources/stop_blue.png \
 	extras/package/macosx/Resources/display_left.png \
 	extras/package/macosx/Resources/display_middle.png \
 	extras/package/macosx/Resources/display_right.png \
 	extras/package/macosx/Resources/display_slider.png \
 	extras/package/macosx/Resources/display_track.png \
 	extras/package/macosx/Resources/equalizerdrawer_active.png \
-	extras/package/macosx/Resources/equalizerdrawer_blue.png \
 	extras/package/macosx/Resources/fullscreen_active.png \
-	extras/package/macosx/Resources/fullscreen_blue.png \
 	extras/package/macosx/Resources/next_active.png \
-	extras/package/macosx/Resources/next_blue.png \
 	extras/package/macosx/Resources/playlistdrawer_active.png \
-	extras/package/macosx/Resources/playlistdrawer_blue.png \
 	extras/package/macosx/Resources/previous_active.png \
-	extras/package/macosx/Resources/previous_blue.png \
 	extras/package/macosx/Resources/skip_forward_active.png \
-	extras/package/macosx/Resources/skip_forward_blue.png \
 	extras/package/macosx/Resources/skip_previous_active.png \
-	extras/package/macosx/Resources/skip_previous_blue.png \
 	extras/package/macosx/Resources/volume_high.png \
 	extras/package/macosx/Resources/volume_low.png \
-	extras/package/macosx/Resources/volumeslider_blue.png \
 	extras/package/macosx/Resources/volumeslider_normal.png \
 	extras/package/macosx/Resources/volumetrack.png \
 	extras/package/macosx/Resources/about_bg.png \
@@ -195,20 +184,12 @@ EXTRA_DIST += \
 	extras/package/macosx/Resources/play_embedded.png \
 	extras/package/macosx/Resources/pause_embedded.png \
 	extras/package/macosx/Resources/skip_previous_active_embedded.png \
-	extras/package/macosx/Resources/pause_embedded_blue.png \
-	extras/package/macosx/Resources/play_embedded_blue.png \
-	extras/package/macosx/Resources/skip_forward_embedded_blue.png \
-	extras/package/macosx/Resources/skip_previous_embedded_blue.png \
 	extras/package/macosx/Resources/vlc.scriptSuite \
 	extras/package/macosx/Resources/vlc.scriptTerminology \
 	extras/package/macosx/Resources/README \
 	extras/package/macosx/Resources/add_embedded.png \
-	extras/package/macosx/Resources/add_embedded_blue.png \
 	extras/package/macosx/Resources/repeat_embedded.png \
-	extras/package/macosx/Resources/repeat_embedded_blue.png \
-	extras/package/macosx/Resources/repeat_single_embedded_blue.png \
 	extras/package/macosx/Resources/shuffle_embedded.png \
-	extras/package/macosx/Resources/shuffle_embedded_blue.png \
 	extras/package/macosx/Resources/fs_volume_slider_knob_highlight.png \
 	extras/package/macosx/Resources/fs_volume_slider_knob.png \
 	extras/package/macosx/Resources/fs_volume_slider_bar.png \
@@ -344,7 +325,7 @@ libcompat:
 libvlc: libcompat
 	cd src && $(MAKE) $(AM_MAKEFLAGS) libvlc.la
 
-core: libvlc vlc
+core: libvlc vlc$(EXEEXT)
 	cd bin && $(MAKE) $(AM_MAKEFLAGS) vlc$(EXEEXT) vlc-static$(EXEEXT)
 
 doc:
@@ -420,8 +401,10 @@ VLC-release.app: vlc
 	done
 	mkdir -p $(top_builddir)/tmp/extras/contrib/Sparkle
 	cp -R $(CONTRIB_DIR)/Sparkle/Sparkle.framework $(top_builddir)/tmp/extras/contrib/Sparkle
-	mkdir -p $(top_builddir)/tmp/extras/contrib/BWToolKit
-	cp -R $(CONTRIB_DIR)/BWToolKit/BWToolKitFramework.framework $(top_builddir)/tmp/extras/contrib/BWToolKit
+	mkdir -p $(top_builddir)/tmp/extras/contrib/BGHUDAppKit
+	cp -R $(CONTRIB_DIR)/BGHUDAppKit/BGHUDAppKit.framework $(top_builddir)/tmp/extras/contrib/BGHUDAppKit
+	mkdir -p $(top_builddir)/tmp/extras/contrib/Growl
+	cp -R $(CONTRIB_DIR)/Growl/Growl.framework $(top_builddir)/tmp/extras/contrib/Growl
 	mkdir -p $(top_builddir)/tmp/modules/audio_output
 	mkdir -p $(top_builddir)/tmp/modules/gui/macosx
 	for i in \
@@ -520,27 +503,7 @@ VLC-release.app: vlc
 	  $(INSTALL) -m 644 $${i} $(top_builddir)/VLC-release.app/Contents/MacOS/share/lua/http/requests/`basename $${i}` ; \
 	done
 	$(INSTALL) -m 644 $(srcdir)/share/lua/http/requests/README.txt $(top_builddir)/VLC-release.app/Contents/MacOS/share/lua/http/requests/README.txt
-	$(INSTALL) -d $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/dialogs
-	$(INSTALL) -d $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/js
-	$(INSTALL) -d $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/images
-	$(INSTALL) -d $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/requests
-	$(INSTALL) -m 644 $(srcdir)/share/http/.hosts $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/.hosts
-	for i in $(srcdir)/share/http/*.* ; do \
-	  $(INSTALL) -m 644 $${i} $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/`basename $${i}` ; \
-	done
-	for i in $(srcdir)/share/http/dialogs/* ; do \
-	  $(INSTALL) -m 644 $${i} $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/dialogs/`basename $${i}` ; \
-	done
-	for i in $(srcdir)/share/http/js/*.* ; do \
-	  $(INSTALL) -m 644 $${i} $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/js/`basename $${i}` ; \
-	done
-	for i in $(srcdir)/share/http/images/*.* ; do \
-	  $(INSTALL) -m 644 $${i} $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/images/`basename $${i}` ; \
-	done
-	for i in $(srcdir)/share/http/requests/*.* ; do \
-	  $(INSTALL) -m 644 $${i} $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/requests/`basename $${i}` ; \
-	done
-	$(INSTALL) -m 644 $(srcdir)/share/http/requests/README.txt $(top_builddir)/VLC-release.app/Contents/MacOS/share/http/requests/README.txt
+	$(INSTALL) -m 644 $(srcdir)/share/vlc512x512.png $(top_builddir)/VLC-release.app/Contents/MacOS/share/vlc512x512.png
 	$(INSTALL) -d $(top_builddir)/VLC-release.app/Contents/MacOS/share/locale
 	cat $(top_srcdir)/po/LINGUAS | while read i; do \
 	  $(INSTALL) -d $(top_builddir)/VLC-release.app/Contents/MacOS/share/locale/$${i}/LC_MESSAGES ; \
@@ -552,6 +515,7 @@ VLC-release.app: vlc
 	      $(top_builddir)/VLC-release.app/Contents/Resources/$${i}.lproj ; \
 	done
 	printf "APPLVLC#" >| $(top_builddir)/VLC-release.app/Contents/PkgInfo
+	rm -Rf $(top_builddir)/VLC-release.app/Contents/Frameworks/BGHUDAppKit.framework/Resources/
 	find $(top_builddir)/VLC-release.app/Contents/Resources/English.lproj -name designable.nib -delete;
 	find $(top_builddir)/VLC-release.app -type d -exec chmod ugo+rx '{}' \;
 	find $(top_builddir)/VLC-release.app -type f -exec chmod ugo+r '{}' \;
@@ -575,8 +539,10 @@ VLC.app: vlc $(top_builddir)/src/.libs/libvlccore.dylib $(top_builddir)/src/.lib
 	done
 	mkdir -p $(top_builddir)/tmp/extras/contrib/Sparkle
 	cp -R $(CONTRIB_DIR)/Sparkle/Sparkle.framework $(top_builddir)/tmp/extras/contrib/Sparkle
-	mkdir -p $(top_builddir)/tmp/extras/contrib/BWToolKit
-	cp -R $(CONTRIB_DIR)/BWToolKit/BWToolKitFramework.framework $(top_builddir)/tmp/extras/contrib/BWToolKit
+	mkdir -p $(top_builddir)/tmp/extras/contrib/BGHUDAppKit
+	cp -R $(CONTRIB_DIR)/BGHUDAppKit/BGHUDAppKit.framework $(top_builddir)/tmp/extras/contrib/BGHUDAppKit
+	mkdir -p $(top_builddir)/tmp/extras/contrib/Growl
+	cp -R $(CONTRIB_DIR)/Growl/Growl.framework $(top_builddir)/tmp/extras/contrib/Growl
 	mkdir -p $(top_builddir)/tmp/modules/audio_output
 	mkdir -p $(top_builddir)/tmp/modules/gui/macosx
 	for i in \
@@ -730,9 +696,6 @@ if BUILD_LUA
 	cp -r $(destdir)/share/vlc/lua/* $(win32_destdir)/lua
 endif
 
-if BUILD_HTTPD
-	cp -r $(destdir)/share/vlc/http $(win32_destdir)
-endif
 if BUILD_SKINS
 	cp -r $(destdir)/share/vlc/skins2 $(win32_destdir)/skins
 endif

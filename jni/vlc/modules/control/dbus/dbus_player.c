@@ -4,7 +4,7 @@
  * Copyright © 2006-2008 Rafaël Carré
  * Copyright © 2007-2010 Mirsal Ennaime
  * Copyright © 2009-2010 The VideoLAN team
- * $Id: 54d1af1a9292f1c2dcb5ad3666006d1646d6e8a1 $
+ * $Id: 359ccfe82a4dfe6280b57498f9b57d686a54e989 $
  *
  * Authors:    Mirsal Ennaime <mirsal at mirsal fr>
  *             Rafaël Carré <funman at videolanorg>
@@ -154,12 +154,10 @@ DBUS_METHOD( VolumeGet )
     REPLY_INIT;
     OUT_ARGUMENTS;
     dbus_int32_t i_dbus_vol;
-    audio_volume_t i_vol;
 
-    /* 2nd argument of aout_VolumeGet is int32 */
-    aout_VolumeGet( PL, &i_vol );
-
+    audio_volume_t i_vol = aout_VolumeGet( PL );
     double f_vol = 100. * i_vol / AOUT_VOLUME_MAX;
+
     i_dbus_vol = round( f_vol );
     ADD_INT32( &i_dbus_vol );
     REPLY_SEND;

@@ -2,7 +2,7 @@
  * yuv.c : yuv video output
  *****************************************************************************
  * Copyright (C) 2008, M2X BV
- * $Id: 7dc4526b5c2dbd6147b8b2b0c82915986a2a42bb $
+ * $Id: fbf4501808c26ae7b64bab7aa365d279d43c66e5 $
  *
  * Authors: Jean-Paul Saman <jpsaman@videolan.org>
  *
@@ -47,7 +47,7 @@
 
 #define YUV4MPEG2_TEXT N_("YUV4MPEG2 header (default disabled)")
 #define YUV4MPEG2_LONGTEXT N_("The YUV4MPEG2 header is compatible " \
-    "with mplayer yuv video ouput and requires YV12/I420 fourcc. By default "\
+    "with mplayer yuv video output and requires YV12/I420 fourcc. By default "\
     "vlc writes the fourcc of the picture frame into the output destination.")
 
 #define CFG_PREFIX "yuv-"

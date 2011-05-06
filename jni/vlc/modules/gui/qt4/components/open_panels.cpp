@@ -5,7 +5,7 @@
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
  *
- * $Id: 6d6af1c8bc82dda0168128c8be54a8a416d19cae $
+ * $Id: a70bd18e3afaab53ba6f68c8453fad8e86b8d154 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -106,11 +106,6 @@ FileOpenPanel::FileOpenPanel( QWidget *_parent, intf_thread_t *_p_intf ) :
     /* Subtitles */
     /* Deactivate the subtitles control by default. */
     ui.subFrame->setEnabled( false );
-    /* Build the subs size combo box */
-    setfillVLCConfigCombo( "freetype-rel-fontsize" , p_intf,
-                            ui.sizeSubComboBox );
-    /* Build the subs align combo box */
-    setfillVLCConfigCombo( "subsdec-align", p_intf, ui.alignSubComboBox );
 
     /* Connects  */
     BUTTONACT( ui.fileBrowseButton, browseFile() );
@@ -121,8 +116,6 @@ FileOpenPanel::FileOpenPanel( QWidget *_parent, intf_thread_t *_p_intf ) :
 
     CONNECT( ui.fileListWidg, itemChanged( QListWidgetItem * ), this, updateMRL() );
     CONNECT( ui.subInput, textChanged( const QString& ), this, updateMRL() );
-    CONNECT( ui.alignSubComboBox, currentIndexChanged( int ), this, updateMRL() );
-    CONNECT( ui.sizeSubComboBox, currentIndexChanged( int ), this, updateMRL() );
     updateButtons();
 }
 
@@ -294,12 +287,6 @@ void FileOpenPanel::updateMRL()
     /* Options */
     if( ui.subCheckBox->isChecked() &&  !ui.subInput->text().isEmpty() ) {
         mrl.append( " :sub-file=" + colon_escape( ui.subInput->text() ) );
-        int align = ui.alignSubComboBox->itemData(
-                    ui.alignSubComboBox->currentIndex() ).toInt();
-        mrl.append( " :subsdec-align=" + QString().setNum( align ) );
-        int size = ui.sizeSubComboBox->itemData(
-                   ui.sizeSubComboBox->currentIndex() ).toInt();
-        mrl.append( " :freetype-rel-fontsize=" + QString().setNum( size ) );
     }
 
     emit mrlUpdated( fileList, mrl );
@@ -1348,11 +1335,7 @@ void CaptureOpenPanel::advancedDialog()
         updateMRL();
         msg_Dbg( p_intf, "%s", qtu( advMRL ) );
     }
-    for( int i = 0; i < controls.size(); i++ )
-    {
-        ConfigControl *control = controls[i];
-        delete control ;
-    }
+    qDeleteAll( controls );
     delete adv;
     module_config_free( p_config );
     module_release (p_module);

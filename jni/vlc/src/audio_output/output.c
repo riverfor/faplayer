@@ -2,7 +2,7 @@
  * output.c : internal management of output streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id: 0642f19362fa84a47597d483312ef7a2130d35bf $
+ * $Id: 368d18566249521a54fc5eab4913213576b9ab19 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -154,7 +154,7 @@ int aout_OutputNew( aout_instance_t * p_aout,
         var_AddCallback( p_aout, "audio-channels", aout_ChannelsRestart,
                          NULL );
     }
-    var_SetBool( p_aout, "intf-change", true );
+    var_TriggerCallback( p_aout, "intf-change" );
 
     aout_FormatPrepare( &p_aout->output.output );
 
@@ -341,30 +341,27 @@ aout_buffer_t * aout_OutputNextBuffer( aout_instance_t * p_aout,
         p_aout->output.fifo.pp_last = &p_aout->output.fifo.p_first;
     }
 
-    if ( !b_can_sleek &&
-          ( (p_buffer->i_pts - start_date > AOUT_PTS_TOLERANCE)
-             || (start_date - p_buffer->i_pts > AOUT_PTS_TOLERANCE) ) )
+    if( !b_can_sleek )
     {
-        /* Try to compensate the drift by doing some resampling. */
-        int i;
         mtime_t difference = start_date - p_buffer->i_pts;
-        msg_Warn( p_aout, "output date isn't PTS date, requesting "
-                  "resampling (%"PRId64")", difference );
 
-        aout_FifoMoveDates( p_aout, &p_aout->output.fifo, difference );
-        aout_unlock_output_fifo( p_aout );
-
-        aout_lock_input_fifos( p_aout );
-        for ( i = 0; i < p_aout->i_nb_inputs; i++ )
+        if( difference > AOUT_PTS_TOLERANCE
+         || difference < -AOUT_PTS_TOLERANCE )
         {
-            aout_fifo_t * p_fifo = &p_aout->pp_inputs[i]->mixer.fifo;
+            /* Try to compensate the drift by doing some resampling. */
+            msg_Warn( p_aout, "output date isn't PTS date, requesting "
+                      "resampling (%"PRId64")", difference );
 
+            aout_FifoMoveDates( p_aout, &p_aout->output.fifo, difference );
+            aout_unlock_output_fifo( p_aout );
+
+            aout_lock_input_fifos( p_aout );
+            aout_fifo_t *p_fifo = &p_aout->pp_inputs[0]->mixer.fifo;
             aout_FifoMoveDates( p_aout, p_fifo, difference );
+            aout_unlock_input_fifos( p_aout );
+            return p_buffer;
         }
-        aout_unlock_input_fifos( p_aout );
     }
-    else
-        aout_unlock_output_fifo( p_aout );
-
+    aout_unlock_output_fifo( p_aout );
     return p_buffer;
 }

@@ -2,7 +2,7 @@
  * vlc_services_discovery.h : Services Discover functions
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 97a180ce74ba1002f979c77b64b7231a642d0852 $
+ * $Id: c509e5341f8d4edc02726effce2a4025d6fbef90 $
  *
  * Authors: Pierre d'Herbemont <pdherbemont # videolan.org>
  *
@@ -30,41 +30,50 @@
 
 /**
  * \file
- * This file functions and structures for service discovery in vlc
+ * This file lists functions and structures for service discovery (SD) in vlc
  */
 
 # ifdef __cplusplus
 extern "C" {
 # endif
 
-/*
+/**
  * @{
  */
 
+/**
+ * Main service discovery structure to build a SD module
+ */
 struct services_discovery_t
 {
     VLC_COMMON_MEMBERS
-    module_t *          p_module;
+    module_t *          p_module;             /**< Loaded module */
 
-    vlc_event_manager_t event_manager;      /* Accessed through Setters for non class function */
+    /**< Event manager
+     * You should access it through setters, outside of the core */
+    vlc_event_manager_t event_manager;
 
-    char *psz_name;
-    config_chain_t *p_cfg;
+    char *psz_name;                           /**< Main name of the SD */
+    config_chain_t *p_cfg;                    /**< Configuration for the SD */
 
+    /** Control function
+     * \see services_discovery_command_e
+     */
     int ( *pf_control ) ( services_discovery_t *, int, va_list );
 
-    services_discovery_sys_t *p_sys;
+    services_discovery_sys_t *p_sys;          /**< Custom private data */
 };
 
 /**
  * Service discovery categories
+ * \see vlc_sd_probe_Add
  */
 enum services_discovery_category_e
 {
-    SD_CAT_DEVICES = 1,
-    SD_CAT_LAN,
-    SD_CAT_INTERNET,
-    SD_CAT_MYCOMPUTER
+    SD_CAT_DEVICES = 1,           /**< Devices, like portable music players */
+    SD_CAT_LAN,                   /**< LAN/WAN services, like Upnp or SAP */
+    SD_CAT_INTERNET,              /**< Internet or Website channels services */
+    SD_CAT_MYCOMPUTER             /**< Computer services, like Discs or Apps */
 };
 
 /**
@@ -81,19 +90,21 @@ enum services_discovery_command_e
  */
 enum services_discovery_capability_e
 {
-    SD_CAP_SEARCH = 1
+    SD_CAP_SEARCH = 1           /**< One can search in the SD */
 };
 
 /**
  * Service discovery descriptor
+ * \see services_discovery_command_e
  */
 typedef struct
 {
-    char *psz_short_desc;
-    char *psz_icon_url;
-    char *psz_url;
-    int   i_capabilities;
+    char *psz_short_desc;       /**< The short description, human-readable */
+    char *psz_icon_url;         /**< URL to the icon that represents it */
+    char *psz_url;              /**< URL for the service */
+    int   i_capabilities;       /**< \see services_discovery_capability_e */
 } services_discovery_descriptor_t;
+
 
 /***********************************************************************
  * Service Discovery
@@ -126,6 +137,9 @@ VLC_EXPORT( bool, vlc_sd_Start, ( services_discovery_t * ) );
 VLC_EXPORT( void, vlc_sd_Stop, ( services_discovery_t * ) );
 VLC_EXPORT( void, vlc_sd_Destroy, ( services_discovery_t * ) );
 
+/**
+ * Helper to stop and destroy the Service Discovery
+ */
 static inline void vlc_sd_StopAndDestroy( services_discovery_t * p_this )
 {
     vlc_sd_Stop( p_this );

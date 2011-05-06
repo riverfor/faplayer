@@ -10,7 +10,16 @@ SOURCES_crop = crop.c
 SOURCES_motionblur = motionblur.c
 SOURCES_logo = logo.c
 SOURCES_audiobargraph_v = audiobargraph_v.c
-SOURCES_deinterlace = deinterlace.c yadif.h mmx.h
+SOURCES_deinterlace = deinterlace/deinterlace.c deinterlace/deinterlace.h \
+	deinterlace/mmx.h deinterlace/common.h \
+	deinterlace/merge.c deinterlace/merge.h \
+	deinterlace/helpers.c deinterlace/helpers.h \
+	deinterlace/algo_basic.c deinterlace/algo_basic.h \
+	deinterlace/algo_x.c deinterlace/algo_x.h \
+	deinterlace/algo_yadif.c deinterlace/algo_yadif.h \
+	deinterlace/yadif.h \
+	deinterlace/algo_phosphor.c deinterlace/algo_phosphor.h \
+	deinterlace/algo_ivtc.c deinterlace/algo_ivtc.h
 SOURCES_blend = blend.c
 SOURCES_scale = scale.c
 SOURCES_marq = marq.c
@@ -46,11 +55,6 @@ SOURCES_blendbench = blendbench.c
 SOURCES_chain = chain.c
 SOURCES_postproc = postproc.c
 SOURCES_swscale = swscale.c ../codec/avcodec/chroma.c
-SOURCES_swscale_omap = swscale_omap.c \
-	libswscale_nokia770/arm_jit_swscale.c \
-	libswscale_nokia770/arm_colorconv.S \
-	libswscale_nokia770/arm_jit_swscale.h \
-	libswscale_nokia770/arm_colorconv.h
 SOURCES_scene = scene.c
 SOURCES_sepia = sepia.c
 SOURCES_yuvp = yuvp.c
@@ -76,6 +80,7 @@ SOURCES_atmo = atmo/atmo.cpp \
 	atmo/FnordlichtConnection.cpp atmo/FnordlichtConnection.h \
 	atmo/AtmoPacketQueue.cpp atmo/AtmoPacketQueue.h
 SOURCES_gradfun = gradfun.c gradfun.h
+SOURCES_subsdelay = subsdelay.c
 noinst_HEADERS = filter_picture.h
 
 libvlc_LTLIBRARIES += \
@@ -117,6 +122,7 @@ libvlc_LTLIBRARIES += \
 	libscene_plugin.la \
 	libsepia_plugin.la \
 	libsharpen_plugin.la \
+	libsubsdelay_plugin.la \
 	libtransform_plugin.la \
 	libwall_plugin.la \
 	libwave_plugin.la \

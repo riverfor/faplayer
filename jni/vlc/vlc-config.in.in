@@ -5,9 +5,6 @@ exec_prefix="@exec_prefix@"
 exec_prefix_set=no
 datarootdir="@datarootdir@"
 
-debug="@debug@"
-gprof="@gprof@"
-cprof="@cprof@"
 optim="@optim@"
 
 plugins="@PLUGINS@ "
@@ -21,10 +18,6 @@ ldflags=""
 libs=""
 
 cflags_tuning="@CFLAGS_TUNING@"
-cflags_optim_size="@CFLAGS_OPTIM_SIZE@"
-cflags_optim_speed="@CFLAGS_OPTIM_SPEED@"
-cflags_optim_nodebug="@CFLAGS_OPTIM_NODEBUG@"
-cflags_nooptim="@CFLAGS_NOOPTIM@"
 
 #
 #  Do not touch below this place unless you really know what you are doing
@@ -37,7 +30,6 @@ Options:
         [--prefix[=DIR]]          set prefix
         [--exec-prefix[=DIR]]     set exec prefix
         [--version]               print version and exit
-        [--linkage]               print linkage mode (c, c++, objc)
         [--list]                  print modules names and exit
         [--libs]                  output linking flags
         [--cflags]                output C compilation flags
@@ -45,9 +37,6 @@ Options:
         [--objcflags]             output Objective C compilation flags
 Modules:
         vlc                       the main VLC object
-        plugin                    flags for plugin modules
-        builtin                   flags for built-in modules
-        pic                       flags for PIC code
         MODULE                    any available module (dummy, gtk, avi, etc.)
         libs                      flags for external libs
 BLAH
@@ -75,55 +64,14 @@ fi
 includes="${includes}"
 cppflags="${includes}"
 module=""
-linkage="c"
-
-#
-#  On Linux and Solaris, activate 64-bit off_t (by default under BSD)
-#
-cppflags="${cppflags} -D_FILE_OFFSET_BITS=64 -D__USE_UNIX98 -D_REENTRANT -D_THREAD_SAFE"
 
 #
 #  Various additional defines
 #
-if [ "${debug}" = yes ]; then
-  cflags="${cflags} -g"
-  cxxflags="${cxxflags} -g"
-  objcflags="${objcflags} -g"
-  ldflags="${ldflags} -g"
-fi
-if [ "${cprof}" = yes ]; then
-  cflags="${cflags} -finstrument-functions"
-  cxxflags="${cxxflags} -finstrument-functions"
-  objcflags="${objcflags} -finstrument-functions"
-fi
-if [ "${gprof}" = yes ]; then
-  cflags="${cflags} -pg"
-  cxxflags="${cxxflags} -pg"
-  objcflags="${objcflags} -pg"
-  ldflags="${ldflags} -pg"
-fi
-if [ "${optim}" = size ]; then
-  cflags="${cflags} ${cflags_optim_size} ${cflags_tuning}"
-  cxxflags="${cxxflags} ${cflags_optim_size} ${cflags_tuning}"
-  objcflags="${objcflags} ${cflags_optim_size} ${cflags_tuning}"
-  if [ "${debug}" != yes -a "${gprof}" != yes -a "${cprof}" != yes ]; then
-    cflags="${cflags} ${cflags_optim_nodebug}"
-    cxxflags="${cxxflags} ${cflags_optim_nodebug}"
-    objcflags="${objcflags} ${cflags_optim_nodebug}"
-  fi
-elif [ "${optim}" = speed ]; then
-  cflags="${cflags} ${cflags_optim_speed} ${cflags_tuning}"
-  cxxflags="${cxxflags} ${cflags_optim_speed} ${cflags_tuning}"
-  objcflags="${objcflags} ${cflags_optim_speed} ${cflags_tuning}"
-  if [ "${debug}" != yes -a "${gprof}" != yes -a "${cprof}" != yes ]; then
-    cflags="${cflags} ${cflags_optim_nodebug}"
-    cxxflags="${cxxflags} ${cflags_optim_nodebug}"
-    objcflags="${objcflags} ${cflags_optim_nodebug}"
-  fi
-else
-  cflags="${cflags} ${cflags_nooptim}"
-  cxxflags="${cxxflags} ${cflags_nooptim}"
-  objcflags="${objcflags} ${cflags_nooptim}"
+if [ "${optim}" = speed ]; then
+  cflags="${cflags} ${cflags_tuning}"
+  cxxflags="${cxxflags} ${cflags_tuning}"
+  objcflags="${objcflags} ${cflags_tuning}"
 fi
 
 #
@@ -173,9 +121,6 @@ while test $# -gt 0; do
       echo "@VERSION@"
       exit 0
       ;;
-    --linkage)
-      echo_linkage=yes
-      ;;
     --list)
       echo_list=yes
       ;;
@@ -201,17 +146,13 @@ while test $# -gt 0; do
       usage 1 1>&1
       ;;
     libvlccore)
-      cppflags="${cppflags} -D__LIBVLC__ -I${top_builddir}src/misc"
       ;;
     plugin)
       echo_plugin=yes
-      cppflags="${cppflags} -D__LIBVLC__ -D__PLUGIN__"
       ;;
     builtin)
       echo_builtin=yes
       cppflags="${cppflags} -D__LIBVLC__ -D__BUILTIN__"
-      ;;
-    pic)
       ;;
     *)
       module="$tgt"
@@ -234,11 +175,6 @@ fi
 #
 #  Output what we were asked
 #
-if test "${echo_linkage}" = yes; then
-  echo "${linkage}"
-  exit 0
-fi
-
 if test "${echo_list}" = yes; then
   if test "${echo_plugin}" = yes; then
     echo "${plugins}"

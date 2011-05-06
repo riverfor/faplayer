@@ -2,7 +2,7 @@
  * vlc.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: e209e6fd7e99da1767961ea543f40f1cf14aad1e $
+ * $Id: aeb7c8641314fe8af5d846ab56874938ba25fff2 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -98,7 +98,7 @@ vlc_module_begin ()
         set_description( N_("Interfaces implemented using lua scripts") )
         add_shortcut( "luaintf" )
         add_shortcut( "luahttp" )
-        /* add_shortcut( "http" ) */
+        add_shortcut( "http" )
         add_shortcut( "luatelnet" )
         add_shortcut( "telnet" )
         add_shortcut( "luahotkeys" )

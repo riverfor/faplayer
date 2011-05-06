@@ -2,7 +2,7 @@
  * mediainfo.cpp : Information about an item
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 5679175568082f580218095d1fd7c430fd2c4a1d $
+ * $Id: f5adf2b5d9bcb68187a7dbde06865318b1e8fe27 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -51,15 +51,17 @@ MediaInfoDialog::MediaInfoDialog( intf_thread_t *_p_intf,
     setWindowTitle( qtr( "Media Information" ) );
     setWindowRole( "vlc-media-info" );
 
+    setWindowFlags( Qt::Window | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
+
     /* TabWidgets and Tabs creation */
     infoTabW = new QTabWidget;
 
     MP = new MetaPanel( infoTabW, p_intf );
     infoTabW->addTab( MP, qtr( "&General" ) );
     EMP = new ExtraMetaPanel( infoTabW, p_intf );
-    infoTabW->addTab( EMP, qtr( "&Extra Metadata" ) );
+    infoTabW->addTab( EMP, qtr( "&Metadata" ) );
     IP = new InfoPanel( infoTabW, p_intf );
-    infoTabW->addTab( IP, qtr( "&Codec Details" ) );
+    infoTabW->addTab( IP, qtr( "&Codec" ) );
     if( isMainInputInfo )
     {
         ISP = new InputStatsPanel( infoTabW, p_intf );

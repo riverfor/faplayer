@@ -3,8 +3,13 @@
  *
  * See the README file for copyright information and how to reach the author.
  *
- * $Id: 66b0a2609e20ac48df81c08c18f5b9e607ed2908 $
+ * $Id: daba81692f0aa920269dcc8759c661214480f244 $
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

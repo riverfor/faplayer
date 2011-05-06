@@ -2,7 +2,7 @@
  r playlistinfo.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: e7cb6d889106a740df5f98fbe24dded937a0ceea $
+ * $Id: bf5eadf144b086d442ec232a281ea3c83146212a $
  *
  * Authors: Benjamin Pracht <bigben at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -256,8 +256,8 @@ static VLCInfo *_o_sharedInstance = nil;
         }
 
         /* fill uri info */
-        char * psz_url = input_item_GetURI( p_item );
-        [o_uri_txt setStringValue: [NSString stringWithUTF8String: psz_url ? psz_url : ""  ]];
+        char * psz_url = decode_URI( input_item_GetURI( p_item ) );
+        [o_uri_txt setStringValue: [NSString stringWithUTF8String: psz_url ? psz_url : ""]];
         free( psz_url );
 
         /* fill title info */

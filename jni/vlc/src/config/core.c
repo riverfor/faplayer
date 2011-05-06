@@ -2,7 +2,7 @@
  * core.c management of the modules configuration
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: 5a11a32bb082be2ae146b13a0f429f911c0287fe $
+ * $Id: 644be42dd4e74ba4a157fffb6e0795ef4b89ea87 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -473,7 +473,6 @@ void config_Free( module_t *p_module )
         {
             free (p_item->value.psz);
             free (p_item->orig.psz);
-            free (p_item->saved.psz);
         }
 
         if( p_item->ppsz_list )

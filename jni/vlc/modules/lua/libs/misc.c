@@ -2,7 +2,7 @@
  * misc.c
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: b0a66955a4478f74601b9eba0ac15349c64215fc $
+ * $Id: f98d28a8b4141628bdd5e7d1568dc183c65a5766 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -237,7 +237,7 @@ static int vlclua_intf_should_die( lua_State *L )
 
 static int vlclua_action_id( lua_State *L )
 {
-    vlc_key_t i_key = vlc_GetActionId( luaL_checkstring( L, 1 ) );
+    vlc_action_t i_key = vlc_GetActionId( luaL_checkstring( L, 1 ) );
     if (i_key == 0)
         return 0;
     lua_pushnumber( L, i_key );

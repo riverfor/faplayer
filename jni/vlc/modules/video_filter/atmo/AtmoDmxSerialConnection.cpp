@@ -6,8 +6,13 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: bc47035e81fe9e5f76786531dc2e4a21d5371b96 $
+ * $Id: b4d4627f3b826e3f9e3a47c013328b380670eaf5 $
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "AtmoDefs.h"
 #include "AtmoDmxSerialConnection.h"
 #include "DmxTools.h"

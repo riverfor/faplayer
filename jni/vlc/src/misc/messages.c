@@ -4,7 +4,7 @@
  * modules, especially intf modules. See vlc_config.h for output configuration.
  *****************************************************************************
  * Copyright (C) 1998-2005 the VideoLAN team
- * $Id: aa957d4eb775a91d6ad4d3370626a2e61ecc452f $
+ * $Id: 02ab2b387e6e1c479b20134720a97a15cf4e24ed $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -539,7 +539,7 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
                   p_item->psz_msg,
                   priv->b_color ? GRAY : "" );
 
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
     fflush( stderr );
 #endif
     vlc_restorecancel (canc);

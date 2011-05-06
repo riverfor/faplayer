@@ -2,7 +2,7 @@
  * common.c : audio output management of common data structures
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: 75f4c91f26aa4f2d1f42b8f81a94dbd8f97cdcbe $
+ * $Id: 1c3cb2711f1f84128f37172893a194d6f81d376e $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -98,8 +98,7 @@ aout_instance_t * __aout_New( vlc_object_t * p_parent )
     p_aout->output.b_error = 1;
     p_aout->output.b_starving = 1;
 
-    var_Create( p_aout, "intf-change", VLC_VAR_BOOL );
-    var_SetBool( p_aout, "intf-change", true );
+    var_Create( p_aout, "intf-change", VLC_VAR_VOID );
 
     vlc_object_set_destructor( p_aout, aout_Destructor );
 
@@ -178,25 +177,6 @@ void aout_unlock (unsigned i)
 /*
  * Formats management (internal and external)
  */
-
-/*****************************************************************************
- * aout_FormatNbChannels : return the number of channels
- *****************************************************************************/
-unsigned int aout_FormatNbChannels( const audio_sample_format_t * p_format )
-{
-    static const uint32_t pi_channels[] =
-        { AOUT_CHAN_CENTER, AOUT_CHAN_LEFT, AOUT_CHAN_RIGHT,
-          AOUT_CHAN_REARCENTER, AOUT_CHAN_REARLEFT, AOUT_CHAN_REARRIGHT,
-          AOUT_CHAN_MIDDLELEFT, AOUT_CHAN_MIDDLERIGHT, AOUT_CHAN_LFE };
-    unsigned int i_nb = 0, i;
-
-    for ( i = 0; i < sizeof(pi_channels)/sizeof(uint32_t); i++ )
-    {
-        if ( p_format->i_physical_channels & pi_channels[i] ) i_nb++;
-    }
-
-    return i_nb;
-}
 
 /*****************************************************************************
  * aout_BitsPerSample : get the number of bits per sample

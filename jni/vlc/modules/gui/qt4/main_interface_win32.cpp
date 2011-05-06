@@ -2,7 +2,7 @@
  * main_interface.cpp : Main interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: be670ce836ae0daf6e0dce7eb3ee72792397d9f2 $
+ * $Id: fb7821322fbfe5fafea74def75819334ccfac4dc $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -264,6 +264,7 @@ void MainInterface::changeThumbbarButtons( int i_status)
 
     switch( i_status )
     {
+        case OPENING_S:
         case PLAYING_S:
             {
                 thbButtons[0].dwFlags = THBF_ENABLED;
@@ -272,7 +273,9 @@ void MainInterface::changeThumbbarButtons( int i_status)
                 thbButtons[1].iBitmap = 1;
                 break;
             }
+        case END_S:
         case PAUSE_S:
+        case ERROR_S:
             {
                 thbButtons[0].dwFlags = THBF_ENABLED;
                 thbButtons[1].dwFlags = THBF_ENABLED;

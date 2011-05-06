@@ -2,7 +2,7 @@
  * volume.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 6aacfe677d73af4698bac6126bd524b9c47eb1f6 $
+ * $Id: d7654f33b82b033cc6c3ed8c618c9875146b6789 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -46,9 +46,7 @@ Volume::Volume( intf_thread_t *pIntf ): VarPercent( pIntf )
     }
 
     // Initial value
-    audio_volume_t val;
-
-    aout_VolumeGet( getIntf()->p_sys->p_playlist, &val );
+    audio_volume_t val = aout_VolumeGet( getIntf()->p_sys->p_playlist );
     set( val, false );
 }
 

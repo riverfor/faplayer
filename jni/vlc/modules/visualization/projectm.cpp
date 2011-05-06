@@ -2,7 +2,7 @@
  * projectm: visualization module based on libprojectM
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 064bde34eb249dc6fcccaf917b6fc2ba6bc2f345 $
+ * $Id: e76e9dd8303fbb9d21029546111f164136a1f45a $
  *
  * Authors: Rémi Duraffort <ivoire@videolan.org>
  *
@@ -358,7 +358,7 @@ static void *Thread( void *p_data )
     if ( psz_preset_path == NULL )
     {
         char *psz_data_path = config_GetDataDir( p_filter );
-        asprintf( &psz_preset_path, "%s" DIR_SEP "visualisation", psz_data_path );
+        asprintf( &psz_preset_path, "%s" DIR_SEP "visualization", psz_data_path );
         free( psz_data_path );
     }
 #endif

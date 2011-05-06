@@ -187,7 +187,6 @@ FF_COMMON_SRC := \
     libavcodec/interplayvideo.c \
     libavcodec/intrax8.c \
     libavcodec/intrax8dsp.c \
-    libavcodec/inverse.c \
     libavcodec/ituh263dec.c \
     libavcodec/ivi_common.c \
     libavcodec/ivi_dsp.c \

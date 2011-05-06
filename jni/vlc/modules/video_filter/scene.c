@@ -2,7 +2,7 @@
  * scene.c : scene video filter (based on modules/video_output/image.c)
  *****************************************************************************
  * Copyright (C) 2004-2008 the VideoLAN team
- * $Id: 577cc85401c4770b63ac9936dd26f5d4613e8bf9 $
+ * $Id: 86749936f68cd83bfeea1699397f7d600a05a269 $
  *
  * Authors: Jean-Paul Saman <jpsaman@videolan.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -319,7 +319,7 @@ static void SavePicture( filter_t *p_filter, picture_t *p_pic )
     else
     {
         /* switch to the final destination */
-#if defined (WIN32)
+#if defined (WIN32) || defined(__OS2__)
         vlc_unlink( psz_filename );
 #endif
         i_ret = vlc_rename( psz_temp, psz_filename );

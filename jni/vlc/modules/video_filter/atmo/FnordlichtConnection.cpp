@@ -19,9 +19,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: 4f026e5cd6d338f260b94458b5eb56a43c82402c $
+ * $Id: dfbe84dd59b27aece864730eedf09099f82bcb8e $
  */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include "AtmoDefs.h"
 #include "FnordlichtConnection.h"

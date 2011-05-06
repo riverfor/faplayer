@@ -2,7 +2,7 @@
  * mixer.c : audio output mixing operations
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id: 8b1fd3acdb82109b28c15f556525ac7d73d960f3 $
+ * $Id: b19e000c8e6d3636283d3e1e0aa8f5af6b915f31 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -53,10 +53,7 @@ int aout_MixerNew( aout_instance_t * p_aout )
     p_mixer->fmt = p_aout->mixer_format;
     p_mixer->allocation = p_aout->mixer_allocation;
     p_mixer->multiplier = p_aout->mixer_multiplier;
-    p_mixer->input_count = p_aout->i_nb_inputs;
-    p_mixer->input = calloc( p_mixer->input_count, sizeof(*p_mixer->input) );
-    for( int i = 0; i < p_aout->i_nb_inputs; i++ )
-        p_mixer->input[i] = &p_aout->pp_inputs[i]->mixer;
+    p_mixer->input = &p_aout->pp_inputs[0]->mixer;
     p_mixer->mix = NULL;
     p_mixer->sys = NULL;
 
@@ -88,7 +85,6 @@ void aout_MixerDelete( aout_instance_t * p_aout )
 
     module_unneed( p_aout->p_mixer, p_aout->p_mixer->module );
 
-    free( p_aout->p_mixer->input );
     vlc_object_release( p_aout->p_mixer );
 
     /* */
@@ -398,16 +394,3 @@ int aout_MixerMultiplierSet( aout_instance_t * p_aout, float f_multiplier )
 
     return 0;
 }
-
-/*****************************************************************************
- * aout_MixerMultiplierGet: get p_aout->mixer.f_multiplier
- *****************************************************************************
- * Please note that we assume that you own the mixer lock when entering this
- * function. This function returns -1 on error.
- *****************************************************************************/
-int aout_MixerMultiplierGet( aout_instance_t * p_aout, float * pf_multiplier )
-{
-    *pf_multiplier = p_aout->mixer_multiplier;
-    return 0;
-}
-

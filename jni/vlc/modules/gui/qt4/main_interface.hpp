@@ -2,7 +2,7 @@
  * main_interface.hpp : Main Interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: dd37e13229a70f9f8bc947db140e67d0c1e7156e $
+ * $Id: 2c24fb74a98978c4be429f387c0bf096da8b4c54 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -170,6 +170,7 @@ private:
     bool                 b_plDocked;            ///< Is the playlist docked ?
 
     bool                 b_hasPausedWhenMinimized;
+    bool                 b_statusbarVisible;
 
 #ifdef WIN32
     HIMAGELIST himl;

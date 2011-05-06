@@ -2,7 +2,7 @@
  * ncurses.c : NCurses interface for vlc
  *****************************************************************************
  * Copyright © 2001-2010 the VideoLAN team
- * $Id: 33087e013ece5205ef1986fa6d95e77ae5477e7e $
+ * $Id: b920f5b5c65328c3b720e0aa8d8b73051cadcce7 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -1132,7 +1132,7 @@ static int DrawStatus(intf_thread_t *p_intf)
 
             mvnprintw(y++, 0, COLS, _(" Position : %s/%s"), buf1, buf2);
 
-            aout_VolumeGet(p_playlist, &i_volume);
+            i_volume = aout_VolumeGet(p_playlist);
             mvnprintw(y++, 0, COLS, _(" Volume   : %i%%"),
                        i_volume*200/AOUT_VOLUME_MAX);
 

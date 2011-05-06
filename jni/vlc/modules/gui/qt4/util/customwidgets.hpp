@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2004 Daniel Molkentin <molkentin@kde.org>
- * $Id: f8416e4fe60a2585656b840a9617c8181512f73a $
+ * $Id: 82bef596f4ba3a8ab229cc60c6699c9875de60e4 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  * The "ClickLineEdit" control is based on code by  Daniel Molkentin
@@ -34,6 +34,8 @@
 #include <QSpinBox>
 #include <QList>
 #include <QTimer>
+#include <QToolButton>
+
 class QPixmap;
 
 class QFramelessButton : public QPushButton
@@ -46,6 +48,19 @@ protected:
     virtual void paintEvent( QPaintEvent * event );
 };
 
+class QToolButtonExt : public QToolButton
+{
+    Q_OBJECT
+public:
+    QToolButtonExt( QWidget *parent = 0, int ms = 0 );
+private:
+    bool longClick;
+private slots:
+    void releasedSlot();
+signals:
+    void shortClicked();
+    void longClicked();
+};
 
 class QElidingLabel : public QLabel
 {
@@ -166,4 +181,3 @@ int qtWheelEventToVLCKey( QWheelEvent *e );
 QString VLCKeyToString( unsigned val );
 
 #endif
-

@@ -2,7 +2,7 @@
  * media_player.c: Libvlc API Media Instance management functions
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: bca99ff8fe5b22cba08169dc53ea7a52db3ba50f $
+ * $Id: ba1215c0d41c1017db2968ff3b30547df9b0692e $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -43,9 +43,9 @@
 #include "media_player_internal.h"
 
 /*
- * mapping of libvlc_navigate_mode_t to vlc_key_t
+ * mapping of libvlc_navigate_mode_t to vlc_action_t
  */
-static const vlc_key_t libvlc_navigate_to_action[] =
+static const vlc_action_t libvlc_navigate_to_action[] =
   {
     ACTIONID_NAV_ACTIVATE,
     ACTIONID_NAV_UP,
@@ -404,7 +404,7 @@ libvlc_media_player_new( libvlc_instance_t *instance )
     var_Create (mp, "vmem-pitch", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT);
     var_Create (mp, "drawable-xid", VLC_VAR_INTEGER);
 #ifdef WIN32
-    var_Create (mp, "drawable-hwnd", VLC_VAR_ADDRESS);
+    var_Create (mp, "drawable-hwnd", VLC_VAR_INTEGER);
 #endif
 #ifdef __APPLE__
     var_Create (mp, "drawable-agl", VLC_VAR_INTEGER);
@@ -454,9 +454,8 @@ libvlc_media_player_new( libvlc_instance_t *instance )
 
      /* Audio */
     var_Create (mp, "aout", VLC_VAR_STRING | VLC_VAR_DOINHERIT);
-    var_Create (mp, "volume-muted", VLC_VAR_BOOL);
-    var_Create (mp, "saved-volume", VLC_VAR_INTEGER);
-    var_Create (mp, "volume-change", VLC_VAR_VOID);
+    var_Create (mp, "mute", VLC_VAR_BOOL);
+    var_Create (mp, "volume", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT);
     var_Create (mp, "find-input-callback", VLC_VAR_ADDRESS);
     var_SetAddress (mp, "find-input-callback", find_input);
 
@@ -915,7 +914,7 @@ void libvlc_media_player_set_hwnd( libvlc_media_player_t *p_mi,
 #ifdef WIN32
     var_SetString (p_mi, "window",
                    (drawable != NULL) ? "embed-hwnd,any" : "");
-    var_SetAddress (p_mi, "drawable-hwnd", drawable);
+    var_SetInteger (p_mi, "drawable-hwnd", (uintptr_t)drawable);
 #else
     (void) p_mi; (void) drawable;
 #endif
@@ -928,7 +927,7 @@ void *libvlc_media_player_get_hwnd( libvlc_media_player_t *p_mi )
 {
     assert (p_mi != NULL);
 #ifdef WIN32
-    return var_GetAddress (p_mi, "drawable-hwnd");
+    return (void *)(uintptr_t)var_GetInteger (p_mi, "drawable-hwnd");
 #else
     return NULL;
 #endif

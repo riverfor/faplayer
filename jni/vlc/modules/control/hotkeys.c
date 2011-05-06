@@ -2,7 +2,7 @@
  * hotkeys.c: Hotkey handling for vlc
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: 664d39cb5579c0e5a96ebaf266fb03826c2fff80 $
+ * $Id: 3871294f67ed908f8ae0855373f1d3645fb42a1c $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *          Jean-Paul Saman <jpsaman #_at_# m2x.nl>
@@ -75,8 +75,8 @@ static void DisplayRate ( vout_thread_t *, float );
 static float AdjustRateFine( input_thread_t *, const int );
 static void ClearChannels  ( intf_thread_t *, vout_thread_t * );
 
-#define DisplayMessage(vout, fmt, ...) \
-    do { if(vout) vout_OSDMessage(vout, fmt, __VA_ARGS__); } while(0)
+#define DisplayMessage(vout, ch, fmt, ...) \
+    do { if(vout) vout_OSDMessage(vout, ch, fmt, __VA_ARGS__); } while(0)
 #define DisplayIcon(vout, icon) \
     do { if(vout) vout_OSDIcon(vout, SPU_DEFAULT_CHANNEL, icon); } while(0)
 
@@ -714,8 +714,7 @@ static int PutAction( intf_thread_t *p_intf, int i_action )
             else if( i_action == ACTIONID_RATE_NORMAL )
             {
                 var_SetFloat( p_playlist, "rate", 1. );
-                DisplayMessage( p_vout, SPU_DEFAULT_CHANNEL,
-                                "%s", _("1.00x") );
+                DisplayRate( p_vout, var_GetFloat( p_input, "rate" ) );
             }
             else if( i_action == ACTIONID_FASTER )
             {
@@ -980,7 +979,6 @@ static void SetBookmark( intf_thread_t *p_intf, int i_num )
     {
         config_PutPsz( p_intf, psz_bookmark_name, psz_uri);
         msg_Info( p_intf, "setting playlist bookmark %i to %s", i_num, psz_uri);
-        config_SaveConfigFile( p_intf, "hotkeys" );
     }
 
     free( psz_uri );

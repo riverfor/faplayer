@@ -3,8 +3,12 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: e96bb32315190cff7bde02adf3da776730d4b988 $
+ * $Id: 2219a5e4ea6f076a6ac57aea71570e4034bc8592 $
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include "AtmoTools.h"
 #include "AtmoDynData.h"

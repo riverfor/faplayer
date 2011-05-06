@@ -2,7 +2,7 @@
  * file.c: configuration file handling
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: d7fe4be67796ed6fd477590578a30f65e657017d $
+ * $Id: 3872966cab395ece2759272b855efaa099d97aec $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -84,7 +84,7 @@ static FILE *config_OpenConfigFile( vlc_object_t *p_obj )
                  psz_filename );
 
     }
-#if !( defined(WIN32) || defined(__APPLE__) )
+#if !( defined(WIN32) || defined(__APPLE__) || defined(__OS2__) )
     else if( p_stream == NULL && errno == ENOENT )
     {
         /* This is the fallback for pre XDG Base Directory
@@ -228,7 +228,7 @@ int config_LoadConfigFile( vlc_object_t *p_this )
                     msg_Warn (p_this, "Integer value (%s) for %s: %m",
                               psz_option_value, psz_option_name);
                 else
-                    item->saved.i = item->value.i = l;
+                    item->value.i = l;
                 break;
             }
 
@@ -236,14 +236,11 @@ int config_LoadConfigFile( vlc_object_t *p_this )
                 if (!*psz_option_value)
                     break;                    /* ignore empty option */
                 item->value.f = (float)atof (psz_option_value);
-                item->saved.f = item->value.f;
                 break;
 
             default:
                 free ((char *)item->value.psz);
-                free ((char *)item->saved.psz);
                 item->value.psz = convert (psz_option_value);
-                item->saved.psz = strdupnull (item->value.psz);
                 break;
         }
     }
@@ -343,8 +340,6 @@ static int config_PrepareDir (vlc_object_t *obj)
 /*****************************************************************************
  * config_SaveConfigFile: Save a module's config options.
  *****************************************************************************
- * This will save the specified module's config options to the config file.
- * If psz_module_name is NULL then we save all the modules config options.
  * It's no use to save the config options that kept their default values, so
  * we'll try to be a bit clever here.
  *
@@ -359,8 +354,7 @@ static int config_PrepareDir (vlc_object_t *obj)
  * save.
  * Really stupid no ?
  *****************************************************************************/
-static int SaveConfigFile( vlc_object_t *p_this, const char *psz_module_name,
-                           bool b_autosave )
+static int SaveConfigFile (vlc_object_t *p_this)
 {
     module_t *p_parser;
     char *permanent = NULL, *temporary = NULL;
@@ -415,9 +409,7 @@ static int SaveConfigFile( vlc_object_t *p_this, const char *psz_module_name,
                 for (int i = 0; (p_parser = list[i]) != NULL; i++)
                 {
                     if (!strncmp (line + 1, p_parser->psz_object_name,
-                                  strlen (p_parser->psz_object_name))
-                     && ((psz_module_name == NULL)
-                      || !strcmp (psz_module_name, p_parser->psz_object_name)))
+                                  strlen (p_parser->psz_object_name)))
                     {
                         backup = false; /* no, we will rewrite it! */
                         break;
@@ -507,16 +499,8 @@ static int SaveConfigFile( vlc_object_t *p_this, const char *psz_module_name,
     {
         module_config_t *p_item, *p_end;
 
-        if( psz_module_name && strcmp( psz_module_name,
-                                       p_parser->psz_object_name ) )
-            continue;
-
         if( !p_parser->i_config_items )
             continue;
-
-        if( psz_module_name )
-            msg_Dbg( p_this, "saving config for module \"%s\"",
-                     p_parser->psz_object_name );
 
         fprintf( file, "[%s]", p_parser->psz_object_name );
         if( p_parser->psz_longname )
@@ -533,66 +517,37 @@ static int SaveConfigFile( vlc_object_t *p_this, const char *psz_module_name,
              || p_item->b_unsaveable)          /* ignore volatile option */
                 continue;
 
-            /* Do not save the new value in the configuration file
-             * if doing an autosave, and the item is not an "autosaved" one. */
-            bool b_retain = b_autosave && !p_item->b_autosave;
-
             if (IsConfigIntegerType (p_item->i_type))
             {
-                int64_t val = b_retain ? p_item->saved.i : p_item->value.i;
+                int64_t val = p_item->value.i;
                 config_Write (file, p_item->psz_text,
                               (p_item->i_type == CONFIG_ITEM_BOOL)
                                   ? N_("boolean") : N_("integer"),
                               val == p_item->orig.i,
                               p_item->psz_name, "%"PRId64, val);
-                p_item->saved.i = val;
             }
             else
             if (IsConfigFloatType (p_item->i_type))
             {
-                float val = b_retain ? p_item->saved.f : p_item->value.f;
+                float val = p_item->value.f;
                 config_Write (file, p_item->psz_text, N_("float"),
                               val == p_item->orig.f,
                               p_item->psz_name, "%f", val);
-                p_item->saved.f = val;
             }
             else
             {
-                const char *psz_value = b_retain ? p_item->saved.psz
-                                                 : p_item->value.psz;
+                const char *psz_value = p_item->value.psz;
                 bool modified;
 
                 assert (IsConfigStringType (p_item->i_type));
 
-                if (b_retain && (psz_value == NULL)) /* FIXME: hack */
-                    psz_value = p_item->orig.psz;
-
-                modified =
-                    (psz_value != NULL)
-                        ? ((p_item->orig.psz != NULL)
-                            ? (strcmp (psz_value, p_item->orig.psz) != 0)
-                            : true)
-                        : (p_item->orig.psz != NULL);
-
+                modified = !!strcmp (psz_value ? psz_value : "",
+                                     p_item->orig.psz ? p_item->orig.psz : "");
                 config_Write (file, p_item->psz_text, N_("string"),
                               !modified, p_item->psz_name, "%s",
                               psz_value ? psz_value : "");
-
-                if ( !b_retain )
-                {
-
-                    free ((char *)p_item->saved.psz);
-                    if( (psz_value && p_item->orig.psz &&
-                         strcmp( psz_value, p_item->orig.psz )) ||
-                        !psz_value || !p_item->orig.psz)
-                        p_item->saved.psz = strdupnull (psz_value);
-                    else
-                        p_item->saved.psz = NULL;
-                }
             }
-
-            if (!b_retain)
-                p_item->b_dirty = false;
+            p_item->b_dirty = false;
         }
     }
     vlc_rwlock_unlock (&config_lock);
@@ -622,7 +577,7 @@ static int SaveConfigFile( vlc_object_t *p_this, const char *psz_module_name,
         clearerr (file);
         goto error;
     }
-#ifndef WIN32
+#if !defined( WIN32 ) && !defined( __OS2__ )
 #ifdef __APPLE__
     fsync (fd); /* Flush from OS */
 #else
@@ -636,7 +591,7 @@ static int SaveConfigFile( vlc_object_t *p_this, const char *psz_module_name,
     vlc_mutex_unlock (&lock);
 #endif
     fclose (file);
-#ifdef WIN32
+#if defined( WIN32 ) || defined( __OS2__ )
     /* Windows cannot remove open files nor overwrite existing ones */
     vlc_unlink (permanent);
     if (vlc_rename (temporary, permanent))
@@ -679,13 +634,13 @@ int config_AutoSaveConfigFile( vlc_object_t *p_this )
              p_item < p_end && !save;
              p_item++ )
         {
-            save = p_item->b_autosave && p_item->b_dirty;
+            save = p_item->b_dirty;
         }
     }
 
     if (save)
         /* Note: this will get the read lock recursively. Ok. */
-        ret = SaveConfigFile (p_this, NULL, true);
+        ret = SaveConfigFile (p_this);
     vlc_rwlock_unlock (&config_lock);
 
     module_list_free (list);
@@ -693,7 +648,7 @@ int config_AutoSaveConfigFile( vlc_object_t *p_this )
 }
 
 #undef config_SaveConfigFile
-int config_SaveConfigFile( vlc_object_t *p_this, const char *psz_module_name )
+int config_SaveConfigFile( vlc_object_t *p_this )
 {
-    return SaveConfigFile( p_this, psz_module_name, false );
+    return SaveConfigFile (p_this);
 }

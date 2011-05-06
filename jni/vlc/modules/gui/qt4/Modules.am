@@ -66,10 +66,14 @@ nodist_SOURCES_qt4 = \
 		components/sout/profile_selector.moc.cpp \
 		components/sout/sout_widgets.moc.cpp \
 		util/input_slider.moc.cpp \
+		util/timetooltip.moc.cpp \
 		util/customwidgets.moc.cpp \
 		util/searchlineedit.moc.cpp \
 		util/qvlcapp.moc.cpp \
 		util/pictureflow.moc.cpp \
+		util/buttons/RoundButton.moc.cpp \
+		util/buttons/DeckButtonsLayout.moc.cpp \
+		util/buttons/BrowseButton.moc.cpp \
 		resources.cpp \
 		ui/equalizer.h \
 		ui/video_effects.h \
@@ -293,11 +297,15 @@ SOURCES_qt4 = 	qt4.cpp \
 		components/sout/profile_selector.cpp \
 		components/sout/sout_widgets.cpp \
 		util/input_slider.cpp \
+ 		util/timetooltip.cpp \
 		util/customwidgets.cpp \
 		util/searchlineedit.cpp \
 		util/registry.cpp \
 		util/qt_dirs.cpp \
-		util/pictureflow.cpp
+		util/pictureflow.cpp \
+		util/buttons/BrowseButton.cpp \
+		util/buttons/DeckButtonsLayout.cpp \
+		util/buttons/RoundButton.cpp
 
 if HAVE_DARWIN
 SOURCES_qt4 +=  util/searchlineedit_mac.mm
@@ -363,6 +371,7 @@ noinst_HEADERS = \
 	components/sout/sout_widgets.hpp \
 	components/sout/profiles.hpp \
 	util/input_slider.hpp \
+	util/timetooltip.hpp \
 	util/customwidgets.hpp \
 	util/searchlineedit.hpp \
 	util/qvlcframe.hpp \
@@ -370,7 +379,10 @@ noinst_HEADERS = \
 	util/qt_dirs.hpp \
 	util/registry.hpp \
 	util/pictureflow.hpp \
-	util/singleton.hpp
+	util/singleton.hpp \
+	util/buttons/RoundButton.hpp \
+	util/buttons/DeckButtonsLayout.hpp \
+	util/buttons/BrowseButton.hpp
 
 
 EXTRA_DIST += \

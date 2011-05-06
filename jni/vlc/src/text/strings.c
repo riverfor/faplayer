@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2008-2009 Rémi Denis-Courmont
- * $Id: 7a8fc87ee02d776d9fa415149405db3536798a89 $
+ * $Id: d438fd50fedf430f1b1b6361d2211ab42835eba0 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Daniel Stranger <vlc at schmaller dot de>
@@ -47,6 +47,8 @@
 #include <vlc_strings.h>
 #include <vlc_url.h>
 #include <vlc_charset.h>
+#include <libvlc.h>
+#include <errno.h>
 
 /**
  * Decode encoded URI component. See also decode_URI().
@@ -392,41 +394,51 @@ void resolve_xml_special_chars( char *psz_value )
 }
 
 /**
- * Converts '<', '>', '\"', '\'' and '&' to their html entities
- * \param psz_content simple element content that is to be converted
+ * XML-encode an UTF-8 string
+ * \param str nul-terminated UTF-8 byte sequence to XML-encode
+ * \return XML encoded string or NULL on error
+ * (errno is set to ENOMEM or EILSEQ as appropriate)
  */
-char *convert_xml_special_chars( const char *psz_content )
+char *convert_xml_special_chars (const char *str)
 {
-    assert( psz_content );
+    assert (str != NULL);
 
-    const size_t len = strlen( psz_content );
-    char *const psz_temp = malloc( 6 * len + 1 );
-    char *p_to   = psz_temp;
-
-    if( psz_temp == NULL )
+    const size_t len = strlen (str);
+    char *const buf = malloc (6 * len + 1), *ptr = buf;
+    if (unlikely(buf == NULL))
         return NULL;
-    for( size_t i = 0; i < len; i++ )
+
+    size_t n;
+    uint32_t cp;
+
+    while ((n = vlc_towc (str, &cp)) != 0)
     {
-        const char *str;
-        char c = psz_content[i];
-
-        switch ( c )
+        if (unlikely(n == (size_t)-1))
         {
-            case '\"': str = "quot"; break;
-            case '&':  str = "amp";  break;
-            case '\'': str = "#39";  break;
-            case '<':  str = "lt";   break;
-            case '>':  str = "gt";   break;
-            default:
-                *(p_to++) = c;
-                continue;
+            free (buf);
+            errno = EILSEQ;
+            return NULL;
         }
-        p_to += sprintf( p_to, "&%s;", str );
-    }
-    *(p_to++) = '\0';
 
-    p_to = realloc( psz_temp, p_to - psz_temp );
-    return p_to ? p_to : psz_temp; /* cannot fail */
+        if ((cp & ~0x0080) < 32 /* C0/C1 control codes */
+         && strchr ("\x09\x0A\x0D\x85", cp) == NULL)
+            ptr += sprintf (ptr, "&#%"PRIu32";", cp);
+        else
+        switch (cp)
+        {
+            case '\"': strcpy (ptr, "&quot;"); ptr += 6; break;
+            case '&':  strcpy (ptr, "&amp;");  ptr += 5; break;
+            case '\'': strcpy (ptr, "&#39;");  ptr += 5; break;
+            case '<':  strcpy (ptr, "&lt;");   ptr += 4; break;
+            case '>':  strcpy (ptr, "&gt;");   ptr += 4; break;
+            default:   memcpy (ptr, str, n);   ptr += n; break;
+        }
+        str += n;
+    }
+    *(ptr++) = '\0';
+
+    ptr = realloc (buf, ptr - buf);
+    return likely(ptr != NULL) ? ptr : buf; /* cannot fail */
 }
 
 /* Base64 encoding */
@@ -618,11 +630,6 @@ static void format_duration (char *buf, size_t len, int64_t duration)
                         d += len;                                   \
                         free( string );                             \
                     }                                               \
-                    else if( !b_empty_if_na )                       \
-                    {                                               \
-                        *(dst+d) = '-';                             \
-                        d++;                                        \
-                    }                                               \
 
 /* same than INSERT_STRING, except that string won't be freed */
 #define INSERT_STRING_NO_FREE( string )                             \
@@ -730,15 +737,15 @@ char *str_format_meta( vlc_object_t *p_object, const char *string )
                     }
                     break;
                 case 's':
-                {
-                    char *lang = NULL;
-                    if( p_input )
-                        lang = var_GetNonEmptyString( p_input, "sub-language" );
-                    if( lang == NULL )
-                        lang = strdup( b_empty_if_na ? "" : "-" );
-                    INSERT_STRING( lang );
-                    break;
-                }
+                    {
+                        char *lang = NULL;
+                        if( p_input )
+                            lang = var_GetNonEmptyString( p_input, "sub-language" );
+                        if( lang == NULL )
+                            lang = strdup( b_empty_if_na ? "" : "-" );
+                        INSERT_STRING( lang );
+                        break;
+                    }
                 case 't':
                     if( p_item )
                     {
@@ -822,16 +829,16 @@ char *str_format_meta( vlc_object_t *p_object, const char *string )
                     }
                     break;
                 case 'O':
-                {
-                    char *lang = NULL;
-                    if( p_input )
-                        lang = var_GetNonEmptyString( p_input,
-                                                      "audio-language" );
-                    if( lang == NULL )
-                        lang = strdup( b_empty_if_na ? "" : "-" );
-                    INSERT_STRING( lang );
-                    break;
-                }
+                    {
+                        char *lang = NULL;
+                        if( p_input )
+                            lang = var_GetNonEmptyString( p_input,
+                                                          "audio-language" );
+                        if( lang == NULL )
+                            lang = strdup( b_empty_if_na ? "" : "-" );
+                        INSERT_STRING( lang );
+                        break;
+                    }
                 case 'P':
                     if( p_input )
                     {
@@ -871,7 +878,7 @@ char *str_format_meta( vlc_object_t *p_object, const char *string )
                         format_duration( buf, sizeof(buf), i_time );
                     }
                     else
-                        strcpy( buf, b_empty_if_na ? "" :  "--:--:--" );
+                        strcpy( buf, b_empty_if_na ? "" : "--:--:--" );
                     INSERT_STRING_NO_FREE( buf );
                     break;
                 case 'U':
@@ -881,16 +888,33 @@ char *str_format_meta( vlc_object_t *p_object, const char *string )
                     }
                     break;
                 case 'V':
-                {
-                    audio_volume_t volume;
-                    aout_VolumeGet( p_object, &volume );
-                    snprintf( buf, 10, "%d", volume );
-                    INSERT_STRING_NO_FREE( buf );
-                    break;
-                }
+                    {
+                        audio_volume_t volume = aout_VolumeGet( p_object );
+                        snprintf( buf, 10, "%d", volume );
+                        INSERT_STRING_NO_FREE( buf );
+                        break;
+                    }
                 case '_':
                     *(dst+d) = '\n';
                     d++;
+                    break;
+                case 'Z':
+                    if( p_item )
+                    {
+                        char *now_playing = input_item_GetNowPlaying( p_item );
+                        if ( now_playing == NULL )
+                        {
+                            char *temp = input_item_GetTitle( p_item );
+                            if( !EMPTY_STR( temp ) )
+                            {
+                                INSERT_STRING( temp );
+                                INSERT_STRING_NO_FREE( " - " );
+                            }
+                            INSERT_STRING( input_item_GetArtist( p_item ) );
+                        }
+                        else
+                            INSERT_STRING( now_playing );
+                    }
                     break;
 
                 case ' ':

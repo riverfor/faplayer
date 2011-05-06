@@ -16,7 +16,6 @@ aout_EnableFilter
 aout_FifoFirstDate
 aout_FifoPop
 aout_filter_RequestVout
-aout_FormatNbChannels
 aout_FormatPrepare
 aout_FormatPrint
 aout_FormatPrintChannels
@@ -133,6 +132,7 @@ filter_chain_MouseFilter
 filter_chain_MouseEvent
 filter_chain_New
 filter_chain_Reset
+filter_chain_SubSource
 filter_chain_SubFilter
 filter_chain_VideoFilter
 filter_chain_VideoFlush
@@ -400,6 +400,7 @@ sout_StreamChainNew
 spu_Create
 spu_Destroy
 spu_PutSubpicture
+spu_ChangeSources
 spu_ChangeFilters
 spu_Render
 spu_RegisterChannel

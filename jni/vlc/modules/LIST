@@ -141,6 +141,7 @@ $Id$
  * headphone_channel_mixer:  headphone channel mixer with virtual spatialization effect
  * hildon: Maemo interface based on Hildon
  * hotkeys: hotkeys control module
+ * htcpcp: HTCPCP access module
  * i420_rgb: planar YUV to packed RGB conversion functions
  * i420_rgb_mmx: MMX accelerated version of i420_rgb
  * i420_rgb_sse2: sse2 accelerated version of i420_rgb
@@ -156,7 +157,6 @@ $Id$
  * image: Image file video output
  * inhibit: preventing the computer from suspending
  * invert: inverse video filter
- * invmem: module for VLC to display images from an external application
  * jack: jack server audio output
  * kate: kate text bitstream decoder
  * libass: Subtitle renderers using libass
@@ -217,7 +217,6 @@ $Id$
  * ntservice: run VLC as a NT service
  * nuv: NUV demuxer
  * ogg: input module for OGG decapsulation
- * oldhttp: old HTTP remote control webinterface
  * oldrc: old interface module using stdio
  * omxil: OpenMAX IL audio/video decoder
  * opencv_example: OpenCV example (face identification)
@@ -311,12 +310,12 @@ $Id$
  * stream_out_switcher: stream output module to display backgrounds
  * stream_out_transcode: audio & video transcoder using FFmpeg
  * subsdec: a codec to output textual subtitles
+ * subsdelay: subtitles delay filter
  * subsusf: a demuxer for USF subtitles
  * subtitle: a demuxer for subtitle files
  * svcdsub: SVCD subtitles decoder
  * svg: a svg renderer module
  * swscale: Video scaling filter
- * swscale_omap: Video scaling filter for maemo/omap platform
  * t140: T.140 text encoder
  * taglib: Taglib tags parser and writer
  * telepathy: Telepathy Presence information using MissionControl notification

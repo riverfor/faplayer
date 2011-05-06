@@ -2,7 +2,7 @@
  * rss.c : rss/atom feed display video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2003-2006 the VideoLAN team
- * $Id: 52cff8ad1a32341da901fa4b003546514acbe943 $
+ * $Id: 756f2a2ca200e84230106c0908b39b9cf44a257f $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *          Rémi Duraffort <ivoire -at- videolan -dot- org>
@@ -189,7 +189,7 @@ static const char *const ppsz_title_modes[] =
  * Module descriptor
  *****************************************************************************/
 vlc_module_begin ()
-    set_capability( "sub filter", 1 )
+    set_capability( "sub source", 1 )
     set_shortname( N_("RSS / Atom") )
     set_help(RSS_HELP)
     set_callbacks( CreateFilter, DestroyFilter )
@@ -302,7 +302,7 @@ static int CreateFilter( vlc_object_t *p_this )
 
     /* Misc init */
     vlc_mutex_init( &p_sys->lock );
-    p_filter->pf_sub_filter = Filter;
+    p_filter->pf_sub_source = Filter;
     p_sys->last_date = (mtime_t)0;
     p_sys->b_fetched = false;
 

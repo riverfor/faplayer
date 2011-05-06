@@ -3,8 +3,13 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: f916cba9c9253ebe8a1b8f70a492c6c7361e8bec $
+ * $Id: e8a6baf4ee42da37d60fc4a11ed4d4eeff73dbee $
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "AtmoThread.h"
 
 #if defined(_ATMO_VLC_PLUGIN_)

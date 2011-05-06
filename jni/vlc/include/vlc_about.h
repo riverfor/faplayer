@@ -640,6 +640,7 @@ static const char psz_authors[] =
 "Jörg\n"
 "Joseph S. Atkinson\n"
 "Joseph Tulou\n"
+"Juha Jeronen\n"
 "Julien Blache\n"
 "Julien Plissonneau Duquène\n"
 "Julien Robert\n"
@@ -768,5 +769,6 @@ static const char psz_authors[] =
 "Yannick Bréhon\n"
 "Ye zhang\n"
 "Yuehua Zhao\n"
+"Yuval Tze\n"
 "Yves Duret\n"
 ;

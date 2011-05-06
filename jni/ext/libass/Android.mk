@@ -13,10 +13,15 @@ LOCAL_MODULE := ass
 LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H
 
+LOCAL_CFLAGS += \
+    -DICONV_CONST=
+
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH)
+
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/iconv/include \
-    $(EXTROOT)/freetype/include \
-    $(LOCAL_PATH)
+    $(EXTROOT)/freetype/include
 
 LOCAL_SRC_FILES := \
     libass/ass.c \

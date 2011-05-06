@@ -53,8 +53,33 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
-    subsass.c \
     subsdec.c
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
+
+LOCAL_MODULE := subsusf_plugin
+
+LOCAL_CFLAGS += \
+    -std=c99 \
+    -DHAVE_CONFIG_H \
+    -DMODULE_STRING=\"subsusf\" \
+    -DMODULE_NAME=subsusf
+
+LOCAL_C_INCLUDES += \
+    $(VLCROOT)/compat \
+    $(VLCROOT) \
+    $(VLCROOT)/include \
+    $(VLCROOT)/src
+
+LOCAL_SRC_FILES := \
+    subsusf.c
 
 include $(BUILD_STATIC_LIBRARY)
 

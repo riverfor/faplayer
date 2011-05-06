@@ -8,16 +8,27 @@ Important changes for packagers:
    Non-UTF-8 file systems support will be removed in future versions.
  * The VLC plugins path can be overriden with the VLC_PLUGIN_PATH environment
    variable. The --plugin-path command line option was removed.
- * The default tarballs are now .tar.xz
+ * The default tarballs are now compressed with XZ/LZMA: .tar.xz
+ * OSS support is not compiled on Linux by default, pass --enable-oss to the
+   configure script if you use OSSv4 or really want to use OSS emulation.
 
  * The NPAPI webplugin has moved to git://git.videolan.org/npapi-vlc.git
  * The ActiveX webplugin has moved to git://git.videolan.org/activex-vlc.git
 
-Access
+
+Core:
+ * Major Video Core and Outputs rework and rewrite:
+   Subtitles, subpictures and OSD can now be sized and blent inside video outputs
+   x11 (Unix) and Direct3D (Windows) are such video outputs.
+ * Almost every video filter can now be transcoded
+ * Playback rate doesn't get resetted to 1 between items anymore
+ * Option --sub-filter was renamed --sub-source
+
+Access:
  * Multiple files are now supported inside RAR files
  * BDA: experimental support for ClearQam devices
- * DVB-S scanning support
- * DVB-C scanning scans correct modulation/symbolrate if needed
+ * DVB-S scanning support on Unix
+ * DVB-C scanning on Unix scans correct modulation/symbolrate if needed
  * DShow: support for freq and video standard selection
  * Support for VDR recordings (http://www.tvdr.de/) folders
  * Blu-Ray Discs integration using libbluray
@@ -26,27 +37,21 @@ Access
  * Linear Systems (HD-)SDI cards input support (Linux)
  * RTP: support for dynamic payload types by specifying the payload format
    in an option (no autodetection): only Theora supported for now
+ * Basic HTCPCP implementation for Coffee Pot control
 
-Codecs
+Codecs:
  * You can now use ffmpeg-mt in conjunction with vlc
  * Important fixes for RealVideo 3.0 and 4.0 playback, notably in MKV
  * Experimental Hardware decoding using Broadcom CrystalHD cards
  * New module for Dirac encoding, using the faster libschroedinger
    The Schroedinger module should be prefered to the Dirac one
 
-Core:
- * Playback rate doesn't get resetted to 1 between items anymore
- * Major Video Output and Video Core reworks and rewrites
- * Almost every video filter can now be transcoded
-
 Demuxers:
- * id3tag plugin is now removed (superseded by taglib)
  * new images demuxer supporting jpeg, png, targa, xcf, git, tiff, bmp, pcx, lbm
  * Ogg seeking improvements
  * C64 SID file playback support using sidplay2
 
-Interfaces
- * The telnet interface has been removed in the favour of the lua one
+Interfaces:
  * Skins2 / Qt: misc improvements and usability fixes
  * Qt: effects dialogs rework
  * Qt: new CoverFlow-like view of the playlist
@@ -54,6 +59,8 @@ Interfaces
  * Skins2: fullscreen controller support, relative placement support
    and important cleanups and optimisations
  * ncurses: heavy refactor of the complete interface
+ * Mac OS X: new Audio Effects panel adding Compressor and Spatializer filters
+ * The rc and telnet lua interfaces were merged into a new "cli" interface
 
 Video Output:
  * New video output based on Direct2D for Windows 7 and Vista (with Platform Update)
@@ -62,6 +69,9 @@ Video Output:
  * Adaptation of the OpenGL layer for OpenGL ES 1.1
  * Various vmem improvements
 
+Audio Output:
+ * New audio output based on AudioQueue API for iOS
+
 Video Filter:
  * New gradfun filter for debanding videos using dithering
  * Rewrite of the grain filter, faster and with better quality
@@ -69,9 +79,8 @@ Video Filter:
  * Atmo ambilight: improve Fnordlicht up to 254 channels
  * New sepia filter for creating sepia effect in videos
  * New deinterlacer mode Phosphor, a framerate doubling CRT TV simulator
-
-Audio Output:
- * New audio output based on AudioQueue API for iOS
+ * New deinterlacer mode IVTC, to do live inverse telecine for NTSC films
+ * New subsdelay filter to change subtitles delay
 
 Audio Filter:
  * New Compressor filter, a dynamic range compressor
@@ -97,6 +106,7 @@ Stream output:
 
 Services Discovery:
  * Search API to be able to query distant search APIs from the interfaces
+ * Upnp module was ported to Win32
 
 libVLC:
  * New capabilities for libVLC:
@@ -106,10 +116,41 @@ libVLC:
 
 Removed modules:
  * asademux: use libass only
- * fake: use the new image demuxers
+ * subsass: use libass
+ * fake, invmem: use the new image demuxers
  * hal, v4l, gapi, omapfb, hd1000a, hd1000v: obsolete unmaintained modules
  * id3tag: use taglib
  * upnp: use upnp_intel
+ * removal of old telnet interface in favor of the new lua CLI
+ * removal of http interface in favor of luahttp
+
+
+Changes between 1.1.8 and 1.1.9:
+--------------------------------
+
+Windows and Mac OS X:
+ * Update of external library modplug, to address a security issue
+
+Demuxers:
+ * mp4: Fix heap-based buffer overflow (VideoLAN-SA-1103)
+
+Mac OS X Interface:
+ * Miscellaneous interface look adjustments
+ * Improve Apple Remote handling
+ * Fixe bugs in the Streaming / Transcoding wizard
+ * Layout fixes in the Preferences and Controls windows
+ * Fix incomplete list of hotkeys in the Preferences dialog
+ * Fix quitting through Apple Events (Dock menu, App Switcher, AppleScript, etc.)
+
+Mac OS X Port:
+ * Fix Growl local notification plugin
+ * VLC bundle now includes the Growl framework
+ * Fixes for eyeTV
+
+Translations:
+ * Updates of Lithuanian, Estonian, Chinese, Japanese, Bengali, Dutch, Polish,
+   German, Galician, Traditional Chinese translations
+ * New Luganda Translation
 
 
 Changes between 1.1.7 and 1.1.8:

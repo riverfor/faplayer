@@ -2,7 +2,7 @@
  * postproc.c: video postprocessing using libpostproc
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id: 0a1b067570882f6afd3cd1a955e505e9b98155fd $
+ * $Id: 8b74a69a8505578826d731794be5f3783b393867 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@netcourrier.com>
@@ -102,10 +102,10 @@ static const char *const ppsz_filter_options[] = {
 struct filter_sys_t
 {
     /* Never changes after init */
-    pp_context_t *pp_context;
+    pp_context *pp_context;
 
     /* Set to NULL if post processing is disabled */
-    pp_mode_t    *pp_mode;
+    pp_mode *pp_mode;
 
     /* Set to true if previous pic had a quant matrix
        (used to prevent spamming warning messages) */
@@ -345,7 +345,7 @@ static void PPChangeMode( filter_t *p_filter, const char *psz_name,
     vlc_mutex_lock( &p_sys->lock );
     if( i_quality > 0 )
     {
-        pp_mode_t *pp_mode = pp_get_mode_by_name_and_quality( psz_name ?
+        pp_mode *pp_mode = pp_get_mode_by_name_and_quality( psz_name ?
                                                               psz_name :
                                                               "default",
                                                               i_quality );

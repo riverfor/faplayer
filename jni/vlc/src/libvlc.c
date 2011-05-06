@@ -2,7 +2,7 @@
  * libvlc.c: libvlc instances creation and deletion, interfaces handling
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: dabca3197ce7c20b4a6528a438f53d708e5376ba $
+ * $Id: 8bb298ec0f57843d1af1b10a9e605d282578a25c $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -461,16 +461,6 @@ int libvlc_InternalInit( libvlc_int_t *p_libvlc, int i_argc,
         i_ret = VLC_EEXITSUCCESS;
     }
 
-    /* Check for config file options */
-    if( !var_InheritBool( p_libvlc, "ignore-config" ) )
-    {
-        if( var_InheritBool( p_libvlc, "reset-config" ) )
-        {
-            config_ResetAll( p_libvlc );
-            config_SaveConfigFile( p_libvlc, NULL );
-        }
-    }
-
     if( module_count <= 1 )
     {
         msg_Err( p_libvlc, "No plugins found! Check your VLC installation.");
@@ -488,7 +478,15 @@ int libvlc_InternalInit( libvlc_int_t *p_libvlc, int i_argc,
      * Override default configuration with config file settings
      */
     if( !var_InheritBool( p_libvlc, "ignore-config" ) )
-        config_LoadConfigFile( p_libvlc );
+    {
+        if( var_InheritBool( p_libvlc, "reset-config" ) )
+        {
+            config_ResetAll( p_libvlc );
+            config_SaveConfigFile( p_libvlc );
+        }
+        else
+            config_LoadConfigFile( p_libvlc );
+    }
 
     /*
      * Override configuration with command line settings
@@ -924,25 +922,6 @@ int libvlc_InternalInit( libvlc_int_t *p_libvlc, int i_argc,
         intf_Create( p_libvlc, "netsync,none" );
     }
 
-#ifdef WIN32
-    if( var_InheritBool( p_libvlc, "prefer-system-codecs") )
-    {
-        char *psz_codecs = var_CreateGetNonEmptyString( p_libvlc, "codec" );
-        if( psz_codecs )
-        {
-            char *psz_morecodecs;
-            if( asprintf(&psz_morecodecs, "%s,dmo", psz_codecs) != -1 )
-            {
-                var_SetString( p_libvlc, "codec", psz_morecodecs);
-                free( psz_morecodecs );
-            }
-            free( psz_codecs );
-        }
-        else
-            var_SetString( p_libvlc, "codec", "dmo");
-    }
-#endif
-
 #ifdef __APPLE__
     var_Create( p_libvlc, "drawable-view-top", VLC_VAR_INTEGER );
     var_Create( p_libvlc, "drawable-view-left", VLC_VAR_INTEGER );
@@ -955,7 +934,7 @@ int libvlc_InternalInit( libvlc_int_t *p_libvlc, int i_argc,
     var_Create( p_libvlc, "drawable-nsobject", VLC_VAR_ADDRESS );
 #endif
 #ifdef WIN32
-    var_Create( p_libvlc, "drawable-hwnd", VLC_VAR_ADDRESS );
+    var_Create( p_libvlc, "drawable-hwnd", VLC_VAR_INTEGER );
 #endif
 
     /*
@@ -1050,6 +1029,10 @@ void libvlc_InternalCleanup( libvlc_int_t *p_libvlc )
         module_unneed( p_libvlc, priv->p_memcpy_module );
         priv->p_memcpy_module = NULL;
     }
+
+    /* Save the configuration */
+    if( !var_InheritBool( p_libvlc, "ignore-config" ) )
+        config_AutoSaveConfigFile( VLC_OBJECT(p_libvlc) );
 
     /* Free module bank. It is refcounted, so we call this each time  */
     module_EndBank( p_libvlc, true );
@@ -1663,6 +1646,7 @@ static void Usage( libvlc_int_t *p_this, char const *psz_search )
             i_cur_width = b_description && !b_description_hack
                           ? i_width_description
                           : i_width;
+            if( !*psz_text ) strcpy(psz_text, " ");
             while( *psz_text )
             {
                 char *psz_parser, *psz_word;

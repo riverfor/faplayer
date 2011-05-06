@@ -6,8 +6,12 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: b7d515638684da467af88ba67847b704f2eb42d0 $
+ * $Id: 77ba39915509c2432f3cd7aa902075a4aeec3ab7 $
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include "AtmoDefs.h"
 #include "AtmoPacketQueue.h"

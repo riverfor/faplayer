@@ -2,7 +2,7 @@
  * libavi.c : LibAVI
  *****************************************************************************
  * Copyright (C) 2001 the VideoLAN team
- * $Id: 328f504e74c46b50a02925ef600480fa1f41ff09 $
+ * $Id: 0031a167b86bb10e6e7981324217f5075c918aa2 $
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,9 @@
 
 #include "libavi.h"
 
+#ifndef NDEBUG
 #define AVI_DEBUG 1
+#endif
 
 #define __EVEN( x ) (((x) + 1) & ~1)
 

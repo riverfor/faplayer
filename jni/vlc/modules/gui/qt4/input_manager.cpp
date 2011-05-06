@@ -2,7 +2,7 @@
  * input_manager.cpp : Manage an input and interact with its GUI elements
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: c39b4bfb954fe756f4a08774b34f751c970a394b $
+ * $Id: d43c3634f082192fd0cf525455459581c5a75680 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakka  <ileoo@videolan.org>
@@ -32,6 +32,7 @@
 #include "input_manager.hpp"
 #include <vlc_keys.h>
 #include <vlc_url.h>
+#include <vlc_strings.h>
 
 #include <QApplication>
 
@@ -455,46 +456,36 @@ void InputManager::UpdateRate()
 void InputManager::UpdateName()
 {
     /* Update text, name and nowplaying */
-    QString text;
-
-    /* Try to get the Title, then the Name */
-    char *psz_name = input_item_GetTitleFbName( input_GetItem( p_input ) );
+    QString name;
 
     /* Try to get the nowplaying */
-    char *psz_nowplaying =
-        input_item_GetNowPlaying( input_GetItem( p_input ) );
-    if( !EMPTY_STR( psz_nowplaying ) )
-    {
-        text.sprintf( "%s - %s", psz_nowplaying, psz_name );
-    }
-    else  /* Do it ourself */
-    {
-        char *psz_artist = input_item_GetArtist( input_GetItem( p_input ) );
-
-        if( !EMPTY_STR( psz_artist ) )
-            text.sprintf( "%s - %s", psz_artist, psz_name );
-        else
-            text.sprintf( "%s", psz_name );
-
-        free( psz_artist );
-    }
-    /* Free everything */
-    free( psz_name );
-    free( psz_nowplaying );
+    char *format = var_InheritString( p_intf, "input-title-format" );
+    char *formated = str_format_meta( p_input, format );
+    free( format );
+    name = qfu(formated);
+    free( formated );
 
     /* If we have Nothing */
-    if( text.isEmpty() )
+    if( name.isEmpty() )
     {
-        psz_name = input_item_GetURI( input_GetItem( p_input ) );
-        text.sprintf( "%s", psz_name );
-        text = text.remove( 0, text.lastIndexOf( DIR_SEP ) + 1 );
-        free( psz_name );
+        char *uri = input_item_GetURI( input_GetItem( p_input ) );
+        char *file = uri ? strrchr( uri, '/' ) : NULL;
+        if( file != NULL )
+        {
+            decode_URI( ++file );
+            name = qfu(file);
+        }
+        else
+            name = qfu(uri);
+        free( uri );
     }
 
-    if( oldName != text )
+    name = name.trimmed();
+
+    if( oldName != name )
     {
-        emit nameChanged( text );
-        oldName = text;
+        emit nameChanged( name );
+        oldName = name;
     }
 }
 
@@ -956,8 +947,8 @@ MainInputManager::MainInputManager( intf_thread_t *_p_intf )
     var_AddCallback( THEPL, "repeat", RepeatChanged, this );
     var_AddCallback( THEPL, "loop", LoopChanged, this );
 
-    var_AddCallback( THEPL, "volume-change", VolumeChanged, this );
-    var_AddCallback( THEPL, "volume-muted", SoundMuteChanged, this );
+    var_AddCallback( THEPL, "volume", VolumeChanged, this );
+    var_AddCallback( THEPL, "mute", SoundMuteChanged, this );
 
     /* Warn our embedded IM about input changes */
     DCONNECT( this, inputChanged( input_thread_t * ),
@@ -987,8 +978,8 @@ MainInputManager::~MainInputManager()
        vlc_object_release( p_input );
     }
 
-    var_DelCallback( THEPL, "volume-change", VolumeChanged, this );
-    var_DelCallback( THEPL, "volume-muted", SoundMuteChanged, this );
+    var_DelCallback( THEPL, "volume", VolumeChanged, this );
+    var_DelCallback( THEPL, "mute", SoundMuteChanged, this );
 
     var_DelCallback( THEPL, "activity", PLItemChanged, this );
     var_DelCallback( THEPL, "item-change", ItemChanged, im );
@@ -1104,6 +1095,14 @@ void MainInputManager::next()
 void MainInputManager::prev()
 {
    playlist_Prev( THEPL );
+}
+
+void MainInputManager::prevOrReset()
+{
+    if( !p_input || var_GetTime(  p_input , "time") < 10000 )
+        playlist_Prev( THEPL );
+    else
+        getIM()->sliderUpdate( 0.0 );
 }
 
 void MainInputManager::togglePlayPause()

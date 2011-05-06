@@ -2,7 +2,7 @@
  * preferences.cpp : "Normal preferences"
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 9702c6f93f0306edadccf038e7dc5401e78f7ee5 $
+ * $Id: bd7d6ec822ad2c8e4932a4955b2caf499beabc93 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -35,7 +35,6 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QGridLayout>
-#include <QHeaderView>
 
 #include "components/complete_preferences.hpp"
 #include "components/preferences_widgets.hpp"
@@ -503,12 +502,8 @@ AdvPrefsPanel::AdvPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
 
 void AdvPrefsPanel::apply()
 {
-    QList<ConfigControl *>::Iterator i;
-    for( i = controls.begin() ; i != controls.end() ; i++ )
-    {
-        ConfigControl *c = qobject_cast<ConfigControl *>(*i);
-        c->doApply( p_intf );
-    }
+    foreach ( ConfigControl *cfg, controls )
+        cfg->doApply();
 }
 
 void AdvPrefsPanel::clean()

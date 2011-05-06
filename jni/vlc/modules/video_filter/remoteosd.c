@@ -2,7 +2,7 @@
  * remoteosd.c: remote osd over vnc filter module
  *****************************************************************************
  * Copyright (C) 2007-2008 Matthias Bauer
- * $Id: 488b3717efc7475b5a6163d1e7a15a92b2027f95 $
+ * $Id: 29270ab4b35ef53af4d9d9893e1a06866848d8f2 $
  *
  * Authors: Matthias Bauer <matthias dot bauer #_at_# gmx dot ch>
  *
@@ -115,7 +115,7 @@ static void DestroyFilter( vlc_object_t * );
 
 vlc_module_begin ()
     set_description( N_("Remote-OSD over VNC") )
-    set_capability( "sub filter", 100 )
+    set_capability( "sub source", 100 )
     set_shortname( N_("Remote-OSD") )
     set_category( CAT_VIDEO )
     set_subcategory( SUBCAT_VIDEO_SUBPIC )
@@ -149,7 +149,7 @@ vlc_module_end ()
 #define CHALLENGESIZE 16
 #define MAX_VNC_SERVER_NAME_LENGTH 255
 
-/* subfilter functions */
+/* subsource functions */
 static subpicture_t *Filter( filter_t *, mtime_t );
 
 static int MouseEvent( filter_t *,
@@ -194,7 +194,7 @@ static void vnc_encrypt_bytes( unsigned char *bytes, char *passwd );
 
 
 /*****************************************************************************
- * Sub filter code
+ * Sub source code
  *****************************************************************************/
 
 /*****************************************************************************
@@ -303,8 +303,8 @@ static int CreateFilter ( vlc_object_t *p_this )
     /* Keep track of OSD Events */
     p_sys->b_need_update  = false;
 
-    /* Attach subpicture filter callback */
-    p_filter->pf_sub_filter = Filter;
+    /* Attach subpicture source callback */
+    p_filter->pf_sub_source = Filter;
     p_filter->pf_sub_mouse  = MouseEvent;
 
     var_AddCallback( p_filter->p_libvlc, "key-pressed", KeyEvent, p_this );

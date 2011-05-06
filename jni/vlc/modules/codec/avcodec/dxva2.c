@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2009 Geoffroy Couprie
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 595f1d667b2d31beed2b96cfe074e5a60e423580 $
+ * $Id: b1f2bf1f5f8c000833f32b0247e24d05be654ff1 $
  *
  * Authors: Geoffroy Couprie <geal@videolan.org>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -649,7 +649,7 @@ static int D3dCreateDeviceManager(vlc_va_dxva2_t *va)
                              TEXT("DXVA2CreateDirect3DDeviceManager9"));
 
     if (!CreateDeviceManager9) {
-        msg_Err(va->log, "cannot load function\n");
+        msg_Err(va->log, "cannot load function");
         return VLC_EGENERIC;
     }
     msg_Dbg(va->log, "OurDirect3DCreateDeviceManager9 Success!");
@@ -693,7 +693,7 @@ static int DxCreateVideoService(vlc_va_dxva2_t *va)
                              TEXT("DXVA2CreateVideoService"));
 
     if (!CreateVideoService) {
-        msg_Err(va->log, "cannot load function\n");
+        msg_Err(va->log, "cannot load function");
         return 4;
     }
     msg_Info(va->log, "DXVA2CreateVideoService Success!");
@@ -850,7 +850,7 @@ static int DxCreateVideoDecoder(vlc_va_dxva2_t *va,
                                                          DXVA2_VideoDecoderRenderTarget,
                                                          surface_list,
                                                          NULL))) {
-        msg_Err(va->log, "IDirectXVideoAccelerationService_CreateSurface failed\n");
+        msg_Err(va->log, "IDirectXVideoAccelerationService_CreateSurface failed");
         va->surface_count = 0;
         return VLC_EGENERIC;
     }
@@ -899,7 +899,7 @@ static int DxCreateVideoDecoder(vlc_va_dxva2_t *va,
                                                                     NULL,
                                                                     &cfg_count,
                                                                     &cfg_list))) {
-        msg_Err(va->log, "IDirectXVideoDecoderService_GetDecoderConfigurations failed\n");
+        msg_Err(va->log, "IDirectXVideoDecoderService_GetDecoderConfigurations failed");
         return VLC_EGENERIC;
     }
     msg_Dbg(va->log, "we got %d decoder configurations", cfg_count);
@@ -944,7 +944,7 @@ static int DxCreateVideoDecoder(vlc_va_dxva2_t *va,
                                                               surface_list,
                                                               va->surface_count,
                                                               &decoder))) {
-        msg_Err(va->log, "IDirectXVideoDecoderService_CreateVideoDecoder failed\n");
+        msg_Err(va->log, "IDirectXVideoDecoderService_CreateVideoDecoder failed");
         return VLC_EGENERIC;
     }
     va->decoder = decoder;

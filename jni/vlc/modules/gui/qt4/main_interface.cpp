@@ -2,7 +2,7 @@
  * main_interface.cpp : Main interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: 72e05caa22a35736f16bee875f2d4b5885afdcc1 $
+ * $Id: 91489508a2aca95d75fb7daee0406477ad9209b1 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -132,11 +132,10 @@ MainInterface::MainInterface( intf_thread_t *_p_intf ) : QVLCMW( _p_intf )
 
     settings->endGroup( );
 
-    /**************
-     * Status Bar *
-     **************/
-    createStatusBar();
-    statusBar()->setVisible( getSettings()->value( "status-bar-visible", false ).toBool() );
+    /*********************************
+     * Create the Systray Management *
+     *********************************/
+    initSystray();
 
     /**************************
      *  UI and Widgets design
@@ -151,10 +150,12 @@ MainInterface::MainInterface( intf_thread_t *_p_intf ) : QVLCMW( _p_intf )
              this, destroyPopupMenu() );
 
     createMainWidget( settings );
-    /*********************************
-     * Create the Systray Management *
-     *********************************/
-    initSystray();
+
+    /**************
+     * Status Bar *
+     **************/
+    createStatusBar();
+    setStatusBarVisibility( getSettings()->value( "MainWindow/status-bar-visible", false ).toBool() );
 
     /********************
      * Input Manager    *
@@ -252,7 +253,7 @@ MainInterface::MainInterface( intf_thread_t *_p_intf ) : QVLCMW( _p_intf )
 
     /**** FINAL SIZING and placement of interface */
     settings->beginGroup( "MainWindow" );
-    QVLCTools::restoreWidgetPosition( settings, this, QSize(400, 100) );
+    QVLCTools::restoreWidgetPosition( settings, this, QSize(600, 420) );
     settings->endGroup();
 
     b_interfaceFullScreen = isFullScreen();
@@ -305,7 +306,7 @@ MainInterface::~MainInterface()
 
     settings->setValue( "adv-controls",
                         getControlsVisibilityStatus() & CONTROLS_ADVANCED );
-    settings->setValue( "status-bar-visible", statusBar()->isVisible() );
+    settings->setValue( "status-bar-visible", b_statusbarVisible );
 
     /* Save the stackCentralW sizes */
     settings->setValue( "bgSize", stackWidgetsSizes[bgWidget] );
@@ -397,7 +398,7 @@ void MainInterface::createMainWidget( QSettings *settings )
     mainLayout->insertWidget( 1, stackCentralW );
 
     settings->beginGroup( "MainWindow" );
-    stackWidgetsSizes[bgWidget] = settings->value( "bgSize", QSize( 400, 0 ) ).toSize();
+    stackWidgetsSizes[bgWidget] = settings->value( "bgSize", QSize( 600, 0 ) ).toSize();
     /* Resize even if no-auto-resize, because we are at creation */
     resizeStack( stackWidgetsSizes[bgWidget].width(), stackWidgetsSizes[bgWidget].height() );
 
@@ -738,7 +739,7 @@ void MainInterface::createPlaylist()
     if( b_plDocked )
     {
         stackCentralW->addWidget( playlistWidget );
-        stackWidgetsSizes[playlistWidget] = settings->value( "playlistSize", QSize( 500, 250 ) ).toSize();
+        stackWidgetsSizes[playlistWidget] = settings->value( "playlistSize", QSize( 600, 300 ) ).toSize();
     }
     else
     {
@@ -823,7 +824,7 @@ void MainInterface::setMinimalView( bool b_minimal )
 {
     menuBar()->setVisible( !b_minimal );
     controls->setVisible( !b_minimal );
-    statusBar()->setVisible( !b_minimal );
+    statusBar()->setVisible( !b_minimal && b_statusbarVisible );
     inputC->setVisible( !b_minimal );
 }
 
@@ -872,6 +873,8 @@ int MainInterface::getControlsVisibilityStatus()
 void MainInterface::setStatusBarVisibility( bool b_visible )
 {
     statusBar()->setVisible( b_visible );
+    b_statusbarVisible = b_visible;
+    if( controls ) controls->setGripVisible( !b_statusbarVisible );
 }
 
 #if 0
@@ -968,7 +971,7 @@ void MainInterface::createSystray()
     sysTray->show();
 
     CONNECT( sysTray, activated( QSystemTrayIcon::ActivationReason ),
-            this, handleSystrayClick( QSystemTrayIcon::ActivationReason ) );
+             this, handleSystrayClick( QSystemTrayIcon::ActivationReason ) );
 }
 
 /**

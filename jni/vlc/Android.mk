@@ -11,21 +11,22 @@ endif
 LOCAL_MODULE := vlccore
 
 LOCAL_CFLAGS += \
-    -D__arm__ \
-    -D__linux__ \
+    -DICONV_CONST=
+
+LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"main\" \
-    -D__LIBVLC__ \
     -DPACKAGENAME=\"org.stagex.danmaku\" \
     -DLOCALEDIR=\"/data/data/\"PACKAGENAME\"/cache/locale\" \
     -DSYSCONFDIR=\"/data/data/\"PACKAGENAME\"/cache/etc\" \
     -DDATA_PATH=\"/data/data/\"PACKAGENAME\"/cache/share\" \
-    -DPKGLIBDIR=\"/data/data/\"PACKAGENAME\"/cache/lib\" \
-    -DICONV_CONST=
+    -DPKGLIBDIR=\"/data/data/\"PACKAGENAME\"/cache/lib\"
 
 LOCAL_C_INCLUDES += \
-    $(EXTROOT)/iconv/include \
+    $(EXTROOT)/iconv/include
+
+LOCAL_C_INCLUDES += \
     $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
@@ -90,6 +91,7 @@ LOCAL_SRC_FILES := \
     src/input/var.c \
     src/interface/dialog.c \
     src/interface/interface.c \
+    src/interface/intf_eject.c \
     src/misc/atomic.c \
     src/misc/block.c \
     src/misc/cpu.c \
@@ -177,7 +179,7 @@ LOCAL_SRC_FILES := \
 LOCAL_LDLIBS += -ldl -llog -lz
 
 # modules begin
-LOCAL_STATIC_LIBRARIES += access_http_plugin access_mms_plugin aout_android_plugin audio_format_neon_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libass_plugin live555_plugin memcpy_neon_plugin packetizer_copy_plugin packetizer_dirac_plugin packetizer_flac_plugin packetizer_h264_plugin packetizer_mlp_plugin packetizer_mpeg4audio_plugin packetizer_mpeg4video_plugin packetizer_mpegvideo_plugin packetizer_vc1_plugin realrtsp_plugin reporter_plugin rtp_plugin simple_channel_mixer_plugin subsdec_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vout_android_plugin yuv2rgb_plugin
+LOCAL_STATIC_LIBRARIES += access_http_plugin aout_android_plugin audio_format_neon_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libass_plugin live555_plugin memcpy_neon_plugin packetizer_copy_plugin packetizer_dirac_plugin packetizer_flac_plugin packetizer_h264_plugin packetizer_mlp_plugin packetizer_mpeg4audio_plugin packetizer_mpeg4video_plugin packetizer_mpegvideo_plugin packetizer_vc1_plugin reporter_plugin simple_channel_mixer_plugin subsdec_plugin subsusf_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vout_android_plugin yuv2rgb_plugin
 # modules end
 
 LOCAL_STATIC_LIBRARIES += compat pthread-compat
@@ -186,7 +188,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_STATIC_LIBRARIES += arm_neon
 endif
 
-LOCAL_STATIC_LIBRARIES += iconv charset ass freetype ffmpeg pixman live555
+LOCAL_STATIC_LIBRARIES += ass freetype iconv charset live555 pixman ffmpeg
 
 include $(BUILD_SHARED_LIBRARY)
 

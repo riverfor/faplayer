@@ -2,7 +2,7 @@
  * rc.c : remote control stdin/stdout module for vlc
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: c6310b0d9356dea20c02104e59fa247272cb41bf $
+ * $Id: ce59f87e4d3034db0d3f7a25c351528a8708500e $
  *
  * Author: Peter Surda <shurdeek@panorama.sth.ac.at>
  *         Jean-Paul Saman <jpsaman #_at_# m2x _replaceWith#dot_ nl>
@@ -462,7 +462,7 @@ static void Run( intf_thread_t *p_intf )
 
     /* status callbacks */
     /* Listen to audio volume updates */
-    var_AddCallback( p_playlist, "volume-change", VolumeChanged, p_intf );
+    var_AddCallback( p_playlist, "volume", VolumeChanged, p_intf );
 
 #ifdef WIN32
     /* Get the file descriptor of the console input */
@@ -792,7 +792,7 @@ static void Run( intf_thread_t *p_intf )
         vlc_object_release( p_input );
     }
 
-    var_DelCallback( p_playlist, "volume-change", VolumeChanged, p_intf );
+    var_DelCallback( p_playlist, "volume", VolumeChanged, p_intf );
     vlc_restorecancel( canc );
 }
 
@@ -899,12 +899,12 @@ static void Help( intf_thread_t *p_intf, bool b_longhelp)
 static int VolumeChanged( vlc_object_t *p_this, char const *psz_cmd,
     vlc_value_t oldval, vlc_value_t newval, void *p_data )
 {
+    (void) p_this;
     VLC_UNUSED(psz_cmd); VLC_UNUSED(oldval); VLC_UNUSED(newval);
     intf_thread_t *p_intf = (intf_thread_t*)p_data;
 
     vlc_mutex_lock( &p_intf->p_sys->status_lock );
-    msg_rc( STATUS_CHANGE "( audio volume: %d )",
-            (int)config_GetInt( p_this, "volume") );
+    msg_rc( STATUS_CHANGE "( audio volume: %"PRId64" )", newval.i_int );
     vlc_mutex_unlock( &p_intf->p_sys->status_lock );
     return VLC_SUCCESS;
 }
@@ -1516,12 +1516,9 @@ static int Volume( vlc_object_t *p_this, char const *psz_cmd,
     else
     {
         /* Get. */
-        audio_volume_t i_volume;
-        if ( !aout_VolumeGet( p_playlist, &i_volume ) )
-        {
-            msg_rc( STATUS_CHANGE "( audio volume: %d )", i_volume );
-            i_error = VLC_SUCCESS;
-        }
+        audio_volume_t i_volume = aout_VolumeGet( p_playlist );
+        msg_rc( STATUS_CHANGE "( audio volume: %d )", i_volume );
+        i_error = VLC_SUCCESS;
     }
 
     return i_error;

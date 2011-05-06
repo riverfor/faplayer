@@ -2,7 +2,7 @@
  * audio_output.h : audio output interface
  *****************************************************************************
  * Copyright (C) 2002-2005 the VideoLAN team
- * $Id: 25c7e227a59eb6f64dd6aeee9a7ae60ee14340f8 $
+ * $Id: 181e76978be0782c5b1f2cd563707a4b663d2891 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -198,13 +198,8 @@ typedef struct aout_output_t
     struct module_t *       p_module;
     struct aout_sys_t *     p_sys;
     void                 (* pf_play)( aout_instance_t * );
-    int                  (* pf_volume_get )( aout_instance_t *, audio_volume_t * );
-    int                  (* pf_volume_set )( aout_instance_t *, audio_volume_t );
+    int                  (* pf_volume_set )( aout_instance_t *, audio_volume_t, bool );
     int                     i_nb_samples;
-
-    /* Current volume for the output - it's just a placeholder, the plug-in
-     * may or may not use it. */
-    audio_volume_t          i_volume;
 
     /* If b_error == 1, there is no audio output pipeline. */
     bool              b_error;
@@ -233,7 +228,7 @@ struct aout_instance_t
     vlc_mutex_t             volume_vars_lock;
 
     /* Input streams & pre-filters */
-    aout_input_t *          pp_inputs[AOUT_MAX_INPUTS];
+    aout_input_t *          pp_inputs[1];
     int                     i_nb_inputs;
 
     /* Mixer */
@@ -300,7 +295,11 @@ VLC_EXPORT( bool, aout_CheckChannelExtraction, ( int *pi_selection, uint32_t *pi
 VLC_EXPORT( void, aout_ChannelExtract, ( void *p_dst, int i_dst_channels, const void *p_src, int i_src_channels, int i_sample_count, const int *pi_selection, int i_bits_per_sample ) );
 
 /* */
-VLC_EXPORT( unsigned int, aout_FormatNbChannels, ( const audio_sample_format_t * p_format ) LIBVLC_USED );
+static inline unsigned aout_FormatNbChannels(const audio_sample_format_t *fmt)
+{
+    return popcount(fmt->i_physical_channels & AOUT_CHAN_PHYSMASK);
+}
+
 VLC_EXPORT( unsigned int, aout_BitsPerSample, ( vlc_fourcc_t i_format ) LIBVLC_USED );
 VLC_EXPORT( void, aout_FormatPrepare, ( audio_sample_format_t * p_format ) );
 VLC_EXPORT( void, aout_FormatPrint, ( aout_instance_t * p_aout, const char * psz_text, const audio_sample_format_t * p_format ) );
@@ -312,8 +311,8 @@ VLC_EXPORT( aout_buffer_t *, aout_FifoPop, ( aout_instance_t * p_aout, aout_fifo
 /* From intf.c : */
 VLC_EXPORT( void, aout_VolumeSoftInit, ( aout_instance_t * ) );
 VLC_EXPORT( void, aout_VolumeNoneInit, ( aout_instance_t * ) );
-VLC_EXPORT( int, aout_VolumeGet, ( vlc_object_t *, audio_volume_t * ) );
-#define aout_VolumeGet(a, b) aout_VolumeGet(VLC_OBJECT(a), b)
+VLC_EXPORT( audio_volume_t, aout_VolumeGet, ( vlc_object_t * ) );
+#define aout_VolumeGet(a) aout_VolumeGet(VLC_OBJECT(a))
 VLC_EXPORT( int, aout_VolumeSet, ( vlc_object_t *, audio_volume_t ) );
 #define aout_VolumeSet(a, b) aout_VolumeSet(VLC_OBJECT(a), b)
 VLC_EXPORT( int, aout_VolumeUp, ( vlc_object_t *, int, audio_volume_t * ) );

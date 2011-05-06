@@ -2,7 +2,7 @@
  * voutgl.m: MacOS X OpenGL provider
  *****************************************************************************
  * Copyright (C) 2001-2004, 2007-2009, 2011 the VideoLAN team
- * $Id: d169c1802d50895ab48d67d58de652dc6b52f621 $
+ * $Id: 33c84df0d6dfeb8c77cd2a6728aab63c26717194 $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Florian G. Pflug <fgp@phlo.org>
@@ -42,6 +42,8 @@
 
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
+
+#if 0
 
 /*****************************************************************************
  * VLCGLView interface
@@ -414,3 +416,4 @@ static void Unlock( vout_thread_t * p_vout )
 }
 
 @end
+#endif

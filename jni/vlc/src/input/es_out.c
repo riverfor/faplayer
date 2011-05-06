@@ -2,7 +2,7 @@
  * es_out.c: Es Out handler for input.
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: a6e3fef64be0291c738673ef4b9b2e5d8dcbf732 $
+ * $Id: fb9c289e47526f946a8764bdfd8675193fcdb5d9 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Jean-Paul Saman <jpsaman #_at_# m2x dot nl>
@@ -1195,6 +1195,8 @@ static void EsOutProgramMeta( es_out_t *out, int i_group, const vlc_meta_t *p_me
         return;
     }
     /* Find program */
+    if( !EsOutIsProgramVisible( out, i_group ) )
+        return;
     p_pgrm = EsOutProgramFind( out, i_group );
     if( !p_pgrm )
         return;
@@ -1231,7 +1233,7 @@ static void EsOutProgramMeta( es_out_t *out, int i_group, const vlc_meta_t *p_me
         }
 
         /* ugly but it works */
-        if( EsOutIsProgramVisible( out, i_group ) && psz_text )
+        if( psz_text )
         {
             input_SendEventProgramDel( p_input, i_group );
             input_SendEventProgramAdd( p_input, i_group, psz_text );
@@ -1286,6 +1288,8 @@ static void EsOutProgramEpg( es_out_t *out, int i_group, const vlc_epg_t *p_epg 
     char *psz_cat;
 
     /* Find program */
+    if( !EsOutIsProgramVisible( out, i_group ) )
+        return;
     p_pgrm = EsOutProgramFind( out, i_group );
     if( !p_pgrm )
         return;
