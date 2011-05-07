@@ -5,7 +5,7 @@ APP_OPTIM := release
 # default is -O2
 OPT_CFLAGS := -O3 -mlong-calls
 ifeq ($(APP_ABI),armeabi-v7a)
-OPT_CFLAGS += -mfpu=neon -mtune=cortex-a8 -ftree-vectorize
+OPT_CFLAGS += -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad
 else
 OPT_CFLAGS += -march=armv6j -mtune=arm1136j-s -msoft-float
 endif

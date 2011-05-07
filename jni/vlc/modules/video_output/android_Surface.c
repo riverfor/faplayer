@@ -46,6 +46,7 @@ typedef void (*Surface_unlockAndPost)(void *);
 struct vout_display_sys_t {
     picture_pool_t *pool;
     void *libsfc_or_ui;
+    int i_width, i_height;
 };
 
 typedef struct _SurfaceInfo {
@@ -139,10 +140,9 @@ static int Open(vlc_object_t *p_this) {
         msg_Err(vd, "Unknown chroma format %08x (vlc)", chroma);
         return VLC_EGENERIC;
     }
-    sys = (struct vout_display_sys_t*) malloc(sizeof(struct vout_display_sys_t));
+    sys = (struct vout_display_sys_t*) calloc(1, sizeof(struct vout_display_sys_t));
     if (!sys)
         return VLC_ENOMEM;
-    memset(sys, 0, sizeof(*sys));
     sys->pool = NULL;
     sys->libsfc_or_ui = p_library;
 
@@ -236,9 +236,12 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
         dry = (dh - drh) >> 1;
         // msg_Dbg(VLC_OBJECT(vd), "%dx%d %d %d,%d %dx%d => %dx%d %d %d,%d %dx%d", sw, sh, ss, srx, sry, srw, srh, dw, dh, ds, drx, dry, drw, drh);
         int pixel_format = info.s >= info.w ? info.b : info.a;
+        void *bits = (void *)(info.s >= info.w ? info.c : info.b);
+        int pixel_size = 0;
         switch (pixel_format) {
         case 4: {       // PIXEL_FORMAT_RGB_565
-            dst_image = pixman_image_create_bits(PIXMAN_r5g6b5, dw, dh, (uint32_t*)(info.s >= info.w ? info.c : info.b), ds << 1);
+            pixel_size = 2;
+            dst_image = pixman_image_create_bits(PIXMAN_r5g6b5, dw, dh, (uint32_t*) bits, ds << 1);
             if (!dst_image) {
                 goto bail;
             }
@@ -246,6 +249,12 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
             }
         default:
             goto bail;
+        }
+        // fill it when needed
+        if (sys->i_width != drw || sys->i_height != drh) {
+            sys->i_width = drw;
+            sys->i_height = drh;
+            memset(bits, 0, ds * dh * pixel_size);
         }
         pixman_image_composite(PIXMAN_OP_SRC, src_image, NULL, dst_image, srx, sry, 0, 0, drx, dry, srw , srh);
 bail:

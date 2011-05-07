@@ -199,6 +199,13 @@ static int Create( vlc_object_t *p_this )
     const char *psz_font = NULL; /* We don't ship a default font with VLC */
     const char *psz_family = "Arial"; /* Use Arial if we can't find anything more suitable */
 
+#ifdef ANDROID
+    /* is this useful? */
+    ass_set_fonts_dir( p_library, "/system/fonts" );
+    /* don't crash libass */
+    psz_font = "/system/fonts/DroidSansFallback.ttf";
+#endif
+
 #ifdef HAVE_FONTCONFIG
 #if defined(WIN32)
     dialog_progress_bar_t *p_dialog =
