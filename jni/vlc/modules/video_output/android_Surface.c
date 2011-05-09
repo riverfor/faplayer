@@ -46,6 +46,10 @@ typedef void (*Surface_unlockAndPost)(void *);
 struct vout_display_sys_t {
     picture_pool_t *pool;
     void *libsfc_or_ui;
+    vout_display_place_t place;
+    int i_surface_width, i_surface_height;
+    int i_virtual_width, i_virtual_height;
+    int i_x, i_y;
     int i_width, i_height;
 };
 
@@ -145,6 +149,8 @@ static int Open(vlc_object_t *p_this) {
         return VLC_ENOMEM;
     sys->pool = NULL;
     sys->libsfc_or_ui = p_library;
+    sys->i_surface_width = info.w;
+    sys->i_surface_height = info.h;
 
     vout_display_cfg_t cfg = *vd->cfg;
     cfg.display.width = info.w;
@@ -152,6 +158,7 @@ static int Open(vlc_object_t *p_this) {
     cfg.is_fullscreen = false;
 
     vout_display_SendEventDisplaySize(vd, info.w, info.h, false);
+    vout_display_PlacePicture(&sys->place, &vd->source, &cfg, true);
 
     vd->sys = sys;
     vd->fmt = fmt;
@@ -213,6 +220,8 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
     surf = GetSurface();
     if (surf) {
         s_lock(surf, &info, 1);
+        sys->i_surface_width = info.w;
+        sys->i_surface_height = info.h;
         dw = info.w;
         dh = info.h;
         ds = info.s >= info.w ? info.s : info.w;
@@ -251,7 +260,12 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
             goto bail;
         }
         // fill it when needed
-        if (sys->i_width != drw || sys->i_height != drh) {
+        if ( sys->i_x != drx ||
+                sys->i_y != dry ||
+                sys->i_width != drw ||
+                sys->i_height != drh ) {
+            sys->i_x = drx;
+            sys->i_y = dry;
             sys->i_width = drw;
             sys->i_height = drh;
             memset(bits, 0, ds * dh * pixel_size);
@@ -272,6 +286,25 @@ out:
 }
 
 static int Control(vout_display_t *vd, int query, va_list args) {
+    vout_display_sys_t *sys = vd->sys;
+
+    switch (query) {
+    case VOUT_DISPLAY_HIDE_MOUSE:
+        return VLC_SUCCESS;
+    case VOUT_DISPLAY_CHANGE_DISPLAY_SIZE: {
+        const vout_display_cfg_t *cfg = va_arg(args, const vout_display_cfg_t *);
+
+        if (cfg->display.width > sys->i_surface_width || cfg->display.height > sys->i_surface_height)
+            return VLC_EGENERIC;
+        sys->i_virtual_width = cfg->display.width;
+        sys->i_virtual_height = cfg->display.height;
+        vout_display_PlacePicture(&sys->place, &vd->source, cfg, false);
+        return VLC_SUCCESS;
+    }
+    default:
+        return VLC_EGENERIC;
+    }
+
     return VLC_EGENERIC;
 }
 

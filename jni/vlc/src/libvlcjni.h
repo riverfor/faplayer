@@ -12,7 +12,6 @@ vlc_declare_plugin(float32_mixer);
 vlc_declare_plugin(freetype);
 vlc_declare_plugin(libass);
 vlc_declare_plugin(live555);
-vlc_declare_plugin(memcpy_neon);
 vlc_declare_plugin(packetizer_copy);
 vlc_declare_plugin(packetizer_dirac);
 vlc_declare_plugin(packetizer_flac);
@@ -45,7 +44,6 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(freetype),
 	vlc_plugin(libass),
 	vlc_plugin(live555),
-	vlc_plugin(memcpy_neon),
 	vlc_plugin(packetizer_copy),
 	vlc_plugin(packetizer_dirac),
 	vlc_plugin(packetizer_flac),

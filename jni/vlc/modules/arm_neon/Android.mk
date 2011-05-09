@@ -29,31 +29,6 @@ LOCAL_SRC_FILES := \
 
 include $(BUILD_STATIC_LIBRARY)
 
-include $(CLEAR_VARS)
-
-LOCAL_ARM_MODE := arm
-LOCAL_ARM_NEON := true
-
-LOCAL_MODULE := memcpy_neon_plugin
-
-LOCAL_CFLAGS += \
-    -std=c99 \
-    -DHAVE_CONFIG_H \
-    -DMODULE_STRING=\"memcpy_neon\" \
-    -DMODULE_NAME=memcpy_neon
-
-LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
-    $(VLCROOT) \
-    $(VLCROOT)/include \
-    $(VLCROOT)/src
-
-LOCAL_SRC_FILES := \
-    memcpy.c \
-    memcpy_impl.S
-
-include $(BUILD_STATIC_LIBRARY)
-
 endif
 
 include $(CLEAR_VARS)

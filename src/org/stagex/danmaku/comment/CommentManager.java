@@ -97,7 +97,7 @@ public class CommentManager {
 				Log.d("faplayer", String.format("snapshot: %d", currentTime));
 				Bitmap bitmap = mPositionManager.snapshot();
 				if (bitmap != null && mCallbackHandler != null) {
-					mCallbackHandler.onSnapshotReady(bitmap);
+					mCallbackHandler.onCommentSnapshotReady(bitmap);
 				}
 				// done, and check whether we can sleep
 				long rendererEnd = System.currentTimeMillis();
@@ -130,6 +130,7 @@ public class CommentManager {
 		close();
 		ArrayList<Comment> yeah = CommentParserFactory.parse(uri);
 		if (yeah == null || yeah.size() == 0) {
+			mCallbackHandler.onCommentLoadComplete(false);
 			return;
 		}
 		mCommentList = yeah;
@@ -143,6 +144,7 @@ public class CommentManager {
 		// for (Comment c : mCommentList) {
 		// Log.d("faplayer", c.toString());
 		// }
+		mCallbackHandler.onCommentLoadComplete(true);
 		mRendererThread = new RendererThread();
 		mRendererThread.start();
 	}

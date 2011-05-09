@@ -26,6 +26,10 @@ static void Run(intf_thread_t *);
 static void Notify(intf_thread_t *, const char*, ...);
 
 static void ProcessCommandLine(intf_thread_t *, const char *);
+static int ParseCommandLine(char *p_string, char*** p_argv);
+
+static int GetCurrentChoice(vlc_object_t *p_object, const char *psz_name);
+static int SetCurrentChoice(vlc_object_t *p_object, const char *psz_name, int choice);
 
 static int InputEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t oldval, vlc_value_t newval, void *p_data);
 static int VoutEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t oldval, vlc_value_t newval, void *p_data);
@@ -257,6 +261,7 @@ static void Notify(intf_thread_t *p_intf, const char* psz_format, ...) {
     va_end(args);
     if (!psz_message)
         return;
+    msg_Dbg(VLC_OBJECT(p_intf), "%s", psz_message);
     vlc_mutex_lock(&p_sys->o_write_lock);
     if (p_sys->i_write_length + i_size < sizeof(p_sys->p_write_buffer)) {
         int i_first, i_second;
@@ -418,18 +423,47 @@ static void ProcessCommandLine(intf_thread_t *p_intf, const char *p_string) {
             input_item_t *p_item = input_item_New(p_intf, uri, name);
             if (name)
                 free(name);
-            int i_ret = playlist_AddInput(p_playlist, p_item, PLAYLIST_GO | PLAYLIST_APPEND, PLAYLIST_END, true, pl_Unlocked);
+            playlist_Clear(p_playlist, pl_Unlocked);
+            playlist_AddInput(p_playlist, p_item, PLAYLIST_GO | PLAYLIST_APPEND, PLAYLIST_END, true, pl_Unlocked);
             vlc_gc_decref(p_item);
         }
-        else if (!strcmp(p_argv[0], "seek")) {
+        else if (!strcmp(p_argv[0], "time")) {
             mtime_t time = (int64_t)(atoll(p_argv[1]));
             var_SetTime(p_input, "time", time);
+        }
+        else if (!strcmp(p_argv[0], "fullscreen")) {
+            int on = atoi(p_argv[1]);
+            vout_thread_t *p_vout = input_GetVout(p_input);
+
+            if (!p_vout)
+                goto out;
+            var_SetBool(p_vout, "fullscreen", on != 0);
+            Notify(p_intf, "vout fullscreen %d\n", var_GetBool(p_vout, "fullscreen") ? 1 : 0);
+        }
+        else if (!strcmp(p_argv[0], "aspect-ratio")) {
+
+        }
+        else if (!strcmp(p_argv[0], "audio-es")) {
+            int index = atoi(p_argv[1]);
+
+            if (!SetCurrentChoice(VLC_OBJECT(p_input), "audio-es", index)) {
+                int count = var_CountChoices(p_input, "audio-es");
+
+                Notify(p_intf, "input audio-es %d/%d\n", index, count);
+            }
+        }
+        else if (!strcmp(p_argv[0], "spu-es")) {
+            int index = atoi(p_argv[1]);
+
+            if (!SetCurrentChoice(VLC_OBJECT(p_input), "spu-es", index)) {
+                int count = var_CountChoices(p_input, "spu-es");
+
+                Notify(p_intf, "input spu-es %d/%d\n", index, count);
+            }
         }
         else
             goto msg;
     }
-    else
-        goto msg;
     goto out;
 msg:
     msg_Dbg(VLC_OBJECT(p_intf), "unable to process command `%s'", p_string);
@@ -439,6 +473,51 @@ out:
     if (p_line)
         free(p_line);
     return;
+}
+
+static int GetCurrentChoice(vlc_object_t *p_object, const char *psz_name) {
+    vlc_value_t val_list;
+    vlc_value_t val;
+    int i_choice = -1;
+
+    if (!p_object)
+        return -1;
+
+    if (var_Get(p_object, psz_name, &val ) < 0) {
+        vlc_object_release(p_object);
+        return -1;
+    }
+
+    var_Change(p_object, psz_name, VLC_VAR_GETCHOICES, &val_list, NULL);
+    for (int i = 0; i < val_list.p_list->i_count; i++) {
+        if (val_list.p_list->p_values[i].i_int == val.i_int) {
+            i_choice = i;
+            break;
+        }
+    }
+    var_FreeList(&val_list, NULL);
+    vlc_object_release(p_object);
+    return i_choice;
+}
+
+static int SetCurrentChoice(vlc_object_t *p_object, const char *psz_name, int i_choice) {
+    vlc_value_t val_list;
+    int i_ret = -1;
+
+    if (!p_object)
+        return -1;
+
+    var_Change(p_object, psz_name, VLC_VAR_GETCHOICES, &val_list, NULL);
+    for (int i = 0; i < val_list.p_list->i_count; i++) {
+        if(i_choice == val_list.p_list->p_values[i].i_int) {
+            if (!var_SetInteger(p_object, psz_name, i_choice))
+                i_ret = 0;
+            break;
+        }
+    }
+    var_FreeList(&val_list, NULL);
+    vlc_object_release(p_object);
+    return i_ret;
 }
 
 static int InputEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t oldval, vlc_value_t newval, void *p_data) {
@@ -453,39 +532,25 @@ static int InputEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t old
         Notify(p_intf, "input state %d\n", val.i_int);
         // XXX: Is this the right place to retrieve these?
         if (val.i_int == PLAYING_S) {
-            vlc_value_t list;
             int count = -1, index = -1;
 
             var_Get(p_input, "can-pause", &val);
             Notify(p_intf, "input can-pause %d\n", val.i_int);
             var_Get(p_input, "can-seek", &val);
             Notify(p_intf, "input can-seek %d\n", val.i_int);
+
             count = var_CountChoices(p_input, "audio-es");
             if (count > 0) {
-                var_Get(p_input, "audio-es", &val);
-                var_Change(p_input, "audio-es", VLC_VAR_GETCHOICES, &list, NULL);
-                for(int i = 0; i < list.p_list->i_count; i++ ) {
-                    if(val.i_int == list.p_list->p_values[i].i_int) {
-                        index = i;
-                        break;
-                    }
-                }
-                var_FreeList(&list, NULL);
+                index = GetCurrentChoice(VLC_OBJECT(p_input), "audio-es");
             }
             Notify(p_intf, "input audio-es %d/%d\n", index, count);
+
             count = var_CountChoices(p_input, "spu-es");
             if (count > 0) {
-                var_Get(p_input, "spu-es", &val);
-                var_Change(p_input, "spu-es", VLC_VAR_GETCHOICES, &list, NULL);
-                for(int i = 0; i < list.p_list->i_count; i++ ) {
-                    if(val.i_int == list.p_list->p_values[i].i_int) {
-                        index = i;
-                        break;
-                    }
-                }
-                var_FreeList(&list, NULL);
+                index = GetCurrentChoice(VLC_OBJECT(p_input), "spu-es");
             }
             Notify(p_intf, "input spu-es %d/%d\n", index, count);
+
             input_item_t *p_item = input_GetItem(p_input);
             vlc_mutex_lock(&p_item->lock);
             int i_es = p_item->i_es;
@@ -512,7 +577,7 @@ static int InputEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t old
         vlc_value_t val;
 
         var_Get(p_input, "time", &val);
-        Notify(p_intf, "input position %"PRIu64"\n", val.i_time);
+        Notify(p_intf, "input time %"PRIu64"\n", val.i_time);
         break;
     }
     case INPUT_EVENT_LENGTH: {
@@ -520,6 +585,16 @@ static int InputEvent(vlc_object_t *p_this, char const *psz_cmd, vlc_value_t old
 
         var_Get(p_input, "length", &val);
         Notify(p_intf, "input length %"PRIu64"\n", val.i_time);
+        break;
+    }
+    case INPUT_EVENT_VOUT: {
+        vout_thread_t *p_vout = input_GetVout(p_input);
+
+        if (p_vout) {
+
+            bool fs = var_GetBool(p_vout, "fullscreen");
+            Notify(p_intf, "vout fullscreen %d\n", fs ? 1 : 0);
+        }
         break;
     }
     default:

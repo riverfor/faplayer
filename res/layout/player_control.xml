@@ -47,9 +47,10 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
-        <ImageButton
-            android:id="@+id/player_button_audio"
-            android:background="@drawable/chat"
+		<ImageButton
+            android:id="@+id/player_button_toggle_message"
+            android:background="@drawable/btn_message_0"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dip"
@@ -58,8 +59,20 @@
             android:layout_marginBottom="4dip" />
 
         <ImageButton
-            android:id="@+id/player_button_subtitle"
-            android:background="@drawable/chat"
+            android:id="@+id/player_button_switch_audio"
+            android:visibility="gone"
+            android:background="@drawable/btn_switch_audio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dip"
+            android:layout_marginTop="4dip"
+            android:layout_marginRight="8dip"
+            android:layout_marginBottom="4dip" />
+
+        <ImageButton
+            android:id="@+id/player_button_switch_subtitle"
+            android:visibility="gone"
+            android:background="@drawable/btn_switch_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dip"
@@ -68,8 +81,8 @@
             android:layout_marginBottom="4dip" />
 
 		<ImageButton
-            android:id="@+id/player_button_prev"
-            android:background="@drawable/prev"
+            android:id="@+id/player_button_previous"
+            android:background="@drawable/btn_previous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dip"
@@ -78,8 +91,8 @@
             android:layout_marginBottom="4dip" />
 
 		<ImageButton
-            android:id="@+id/player_button_play"
-            android:background="@drawable/play"
+            android:id="@+id/player_button_toggle_play"
+            android:background="@drawable/btn_play_0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dip"
@@ -89,7 +102,7 @@
 
 		<ImageButton
             android:id="@+id/player_button_next"
-            android:background="@drawable/next"
+            android:background="@drawable/btn_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dip"
@@ -98,8 +111,18 @@
             android:layout_marginBottom="4dip" />
 
 		<ImageButton
-            android:id="@+id/player_button_chat"
-            android:background="@drawable/chat"
+            android:id="@+id/player_button_switch_aspect_ratio"
+            android:background="@drawable/btn_aspect_ratio_0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dip"
+            android:layout_marginTop="4dip"
+            android:layout_marginRight="8dip"
+            android:layout_marginBottom="4dip" />
+
+		<ImageButton
+            android:id="@+id/player_button_toggle_full_screen"
+            android:background="@drawable/btn_full_screen_0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dip"

@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+
+import org.stagex.danmaku.R;
 
 import android.os.Build;
 import android.os.Environment;
@@ -59,5 +62,17 @@ public class SystemUtility {
 			return Environment.getExternalStorageDirectory().getAbsolutePath();
 		else
 			return "/";
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static int getDrawableId(String name) {
+		int result = -1;
+		try {
+			Class clz = Class.forName(R.drawable.class.getName());
+			Field field = clz.getField(name);
+			result = field.getInt(new R.drawable());
+		} catch (Exception e) {
+		}
+		return result;
 	}
 }

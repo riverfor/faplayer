@@ -1,5 +1,6 @@
 package org.stagex.danmaku.activity;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -8,12 +9,20 @@ import org.stagex.danmaku.R;
 import org.stagex.danmaku.comment.CPI;
 import org.stagex.danmaku.comment.CommentDrawable;
 import org.stagex.danmaku.comment.CommentManager;
+import org.stagex.danmaku.helper.SystemUtility;
 import org.stagex.danmaku.wrapper.VLC;
 import org.stagex.danmaku.wrapper.VLI;
 import org.stagex.danmaku.wrapper.VLM;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Paint.Align;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -50,15 +59,17 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	private Thread mPrepairThread = null;
 
 	// player controls
-	private TextView mTextViewPosition;
+	private TextView mTextViewTime;
 	private SeekBar mSeekBarProgress;
 	private TextView mTextViewLength;
-	private ImageButton mImageButtonAudio;
-	private ImageButton mImageButtonSubtitle;
-	private ImageButton mImageButtonPrev;
-	private ImageButton mImageButtonPlay;
+	private ImageButton mImageButtonToggleMessage;
+	private ImageButton mImageButtonSwitchAudio;
+	private ImageButton mImageButtonSwitchSubtitle;
+	private ImageButton mImageButtonPrevious;
+	private ImageButton mImageButtonTogglePlay;
 	private ImageButton mImageButtonNext;
-	private ImageButton mImageButtonChat;
+	private ImageButton mImageButtonSwitchAspectRatio;
+	private ImageButton mImageButtonToggleFullScreen;
 
 	private LinearLayout mLinearLayoutControlBar;
 
@@ -86,10 +97,24 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	private int mCanPause = -1;
 	private int mCanSeek = -1;
 
-	private int mVideoOriginalWidth = -1;
-	private int mVideoOriginalHeight = -1;
+	private boolean mFullScreen = false;
+	private int mAspectRatio = 0;
+
+	private int mVideoWidth = -1;
+	private int mVideoHeight = -1;
+
 	private int mVideoSurfaceWidth = -1;
 	private int mVideoSurfaceHeight = -1;
+
+	private int mVideoPlaceX = 0;
+	private int mVideoPlaceY = 0;
+	private int mVideoPlaceW = 0;
+	private int mVideoPlaceH = 0;
+
+	private int mAudioTrackIndex = 0;
+	private int mAudioTrackCount = 0;
+	private int mSubtitleTrackIndex = 0;
+	private int mSubtitleTrackCount = 0;
 
 	protected void initializeEvents() {
 		mEventHandler = new Handler() {
@@ -105,37 +130,48 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 					mViewMessage.invalidate();
 					break;
 				}
+				case CPI.EVENT_COMMENT_LOADED: {
+					if (msg.arg1 != 0) {
+						mImageButtonToggleMessage.setVisibility(View.VISIBLE);
+					}
+					break;
+				}
 				case VLI.EVENT_INPUT_STATE: {
-					int state = msg.arg1;
-					switch (state) {
+					int id = -1;
+
+					mCurrentState = msg.arg1;
+					switch (mCurrentState) {
 					case VLI.INPUT_STATE_PLAY: {
 						mCommentManager.play();
-						mImageButtonPlay.setImageResource(R.drawable.pause);
+						id = R.drawable.btn_play_1;
 						break;
 					}
 					case VLI.INPUT_STATE_PAUSE: {
 						mCommentManager.pause();
-						mImageButtonPlay.setImageResource(R.drawable.play);
+						id = R.drawable.btn_play_0;
 						break;
 					}
 					case VLI.INPUT_STATE_END: {
 						mCommentManager.pause();
-						mImageButtonPlay.setImageResource(R.drawable.play);
+						id = R.drawable.btn_play_0;
 						break;
 					}
 					case VLI.INPUT_STATE_ERROR: {
+						id = R.drawable.btn_play_0;
 						break;
 					}
 					default:
 						break;
 					}
-					mCurrentState = msg.arg1;
+					if (id != -1) {
+						mImageButtonTogglePlay.setBackgroundResource(id);
+					}
 					break;
 				}
 				case VLI.EVENT_INPUT_DEAD: {
 					break;
 				}
-				case VLI.EVENT_INPUT_POSITION: {
+				case VLI.EVENT_INPUT_TIME: {
 					int val = msg.arg1 / 1000;
 					if (val != mCurrentTime) {
 						int hour = val / 3600;
@@ -145,7 +181,7 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 						int second = val;
 						String time = String.format("%02d:%02d:%02d", hour,
 								minute, second);
-						mTextViewPosition.setText(time);
+						mTextViewTime.setText(time);
 						mCurrentTime = msg.arg1;
 						if (mCurrentLength > 0) {
 							mSeekBarProgress.setProgress(mCurrentTime);
@@ -186,8 +222,48 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 					break;
 				}
 				case VLI.EVENT_VIDEO_SIZE: {
-					mVideoOriginalWidth = msg.arg1;
-					mVideoOriginalHeight = msg.arg2;
+					mVideoWidth = msg.arg1;
+					mVideoHeight = msg.arg2;
+					break;
+				}
+				case VLI.EVENT_VIDEO_PLACE: {
+					mVideoPlaceX = msg.arg1 >> 16;
+					mVideoPlaceY = msg.arg1 & 0xffff;
+					mVideoPlaceW = msg.arg2 >> 16;
+					mVideoPlaceH = msg.arg2 & 0xffff;
+					break;
+				}
+				case VLI.EVENT_FULL_SCREEN: {
+					mFullScreen = msg.arg1 != 0;
+					int id = mFullScreen ? R.drawable.btn_full_screen_1
+							: R.drawable.btn_full_screen_0;
+					mImageButtonToggleFullScreen.setBackgroundResource(id);
+					break;
+				}
+				case VLI.EVENT_ASPECT_RATIO: {
+					int id = SystemUtility.getDrawableId(String.format(
+							"btn_aspect_ratio_%d", msg.arg1));
+					mImageButtonSwitchAspectRatio.setBackgroundResource(id);
+					break;
+				}
+				case VLI.EVENT_AUDIO_ES: {
+					int index = msg.arg1;
+					int count = msg.arg2;
+					if (count < 2) {
+						mImageButtonSwitchAudio.setVisibility(View.GONE);
+					} else {
+						setAudioTrackImage(index, count);
+					}
+					break;
+				}
+				case VLI.EVENT_SPU_ES: {
+					int index = msg.arg1;
+					int count = msg.arg2;
+					if (count < 1) {
+						mImageButtonSwitchSubtitle.setVisibility(View.GONE);
+					} else {
+						setSubtitleTrackImage(index, count);
+					}
 					break;
 				}
 				case VLI.EVENT_PLAYER_PREPAIRING_BGN: {
@@ -266,22 +342,26 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 		mViewMessage.setBackgroundDrawable(new CommentDrawable());
 		mViewMessage.setOnTouchListener(this);
 
-		mTextViewPosition = (TextView) findViewById(R.id.player_text_position);
+		mTextViewTime = (TextView) findViewById(R.id.player_text_position);
 		mSeekBarProgress = (SeekBar) findViewById(R.id.player_seekbar_progress);
 		mSeekBarProgress.setOnSeekBarChangeListener(this);
 		mTextViewLength = (TextView) findViewById(R.id.player_text_length);
-		mImageButtonAudio = (ImageButton) findViewById(R.id.player_button_audio);
-		mImageButtonAudio.setOnClickListener(this);
-		mImageButtonSubtitle = (ImageButton) findViewById(R.id.player_button_subtitle);
-		mImageButtonSubtitle.setOnClickListener(this);
-		mImageButtonPrev = (ImageButton) findViewById(R.id.player_button_prev);
-		mImageButtonPrev.setOnClickListener(this);
-		mImageButtonPlay = (ImageButton) findViewById(R.id.player_button_play);
-		mImageButtonPlay.setOnClickListener(this);
+		mImageButtonToggleMessage = (ImageButton) findViewById(R.id.player_button_toggle_message);
+		mImageButtonToggleMessage.setOnClickListener(this);
+		mImageButtonSwitchAudio = (ImageButton) findViewById(R.id.player_button_switch_audio);
+		mImageButtonSwitchAudio.setOnClickListener(this);
+		mImageButtonSwitchSubtitle = (ImageButton) findViewById(R.id.player_button_switch_subtitle);
+		mImageButtonSwitchSubtitle.setOnClickListener(this);
+		mImageButtonPrevious = (ImageButton) findViewById(R.id.player_button_previous);
+		mImageButtonPrevious.setOnClickListener(this);
+		mImageButtonTogglePlay = (ImageButton) findViewById(R.id.player_button_toggle_play);
+		mImageButtonTogglePlay.setOnClickListener(this);
 		mImageButtonNext = (ImageButton) findViewById(R.id.player_button_next);
 		mImageButtonNext.setOnClickListener(this);
-		mImageButtonChat = (ImageButton) findViewById(R.id.player_button_chat);
-		mImageButtonChat.setOnClickListener(this);
+		mImageButtonSwitchAspectRatio = (ImageButton) findViewById(R.id.player_button_switch_aspect_ratio);
+		mImageButtonSwitchAspectRatio.setOnClickListener(this);
+		mImageButtonToggleFullScreen = (ImageButton) findViewById(R.id.player_button_toggle_full_screen);
+		mImageButtonToggleFullScreen.setOnClickListener(this);
 
 		mLinearLayoutControlBar = (LinearLayout) findViewById(R.id.player_control_bar);
 
@@ -317,8 +397,32 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 		mPrepairThread.start();
 	}
 
-	protected void setVideoMode(int mode) {
+	protected void setAudioTrackImage(int index, int count) {
+		String text = String.format("%01d/%01d", index, count);
+		Bitmap image = BitmapFactory.decodeResource(getResources(),
+				R.drawable.btn_switch_audio).copy(Config.ARGB_8888, true);
+		Canvas canvas = new Canvas(image);
+		Paint paint = new Paint();
+		paint.setTextSize(image.getWidth() / 3);
+		paint.setTextAlign(Align.CENTER);
+		canvas.drawText(text, 0, image.getHeight() / 2, paint);
+		mImageButtonSwitchAudio.setImageBitmap(image);
+		mImageButtonSwitchAudio.setVisibility(View.VISIBLE);
+		mImageButtonSwitchAudio.invalidate();
+	}
 
+	protected void setSubtitleTrackImage(int index, int count) {
+		String text = String.format("%01d/%01d", index, count);
+		Bitmap image = BitmapFactory.decodeResource(getResources(),
+				R.drawable.btn_switch_subtitle).copy(Config.ARGB_8888, true);
+		Canvas canvas = new Canvas(image);
+		Paint paint = new Paint();
+		paint.setTextSize(image.getWidth() / 3);
+		paint.setTextAlign(Align.CENTER);
+		canvas.drawText(text, 0, image.getHeight() / 2, paint);
+		mImageButtonSwitchSubtitle.setImageBitmap(image);
+		mImageButtonSwitchSubtitle.setVisibility(View.VISIBLE);
+		mImageButtonSwitchSubtitle.invalidate();
 	}
 
 	@Override
@@ -348,9 +452,9 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	}
 
 	@Override
-	public void onInputPositionChange(long position) {
+	public void onInputTimeChange(long position) {
 		Message msg = new Message();
-		msg.what = VLI.EVENT_INPUT_POSITION;
+		msg.what = VLI.EVENT_INPUT_TIME;
 		msg.arg1 = (int) (position / 1000);
 		mEventHandler.sendMessage(msg);
 	}
@@ -364,13 +468,21 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	}
 
 	@Override
-	public void onAudioStreamChange(int index, int count) {
-
+	public void onAudioEsChange(int index, int count) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_AUDIO_ES;
+		msg.arg1 = index;
+		msg.arg2 = count;
+		mEventHandler.sendMessage(msg);
 	}
 
 	@Override
-	public void onSubtitleStreamChange(int index, int count) {
-
+	public void onSpuEsChange(int index, int count) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_SPU_ES;
+		msg.arg1 = index;
+		msg.arg2 = count;
+		mEventHandler.sendMessage(msg);
 	}
 
 	@Override
@@ -383,7 +495,40 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	}
 
 	@Override
-	public void onSnapshotReady(Bitmap bitmap) {
+	public void onVideoPlaceChange(int x, int y, int width, int height) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_VIDEO_PLACE;
+		msg.arg1 = x << 16 | y;
+		msg.arg2 = width << 16 | height;
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onFullScreenChange(boolean on) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_FULL_SCREEN;
+		msg.arg1 = on ? 1 : 0;
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onAspectRatioChange(int selected) {
+		Message msg = new Message();
+		msg.what = VLI.EVENT_ASPECT_RATIO;
+		msg.arg1 = selected;
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onCommentLoadComplete(boolean success) {
+		Message msg = new Message();
+		msg.what = CPI.EVENT_COMMENT_LOADED;
+		msg.arg1 = success ? 1 : 0;
+		mEventHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onCommentSnapshotReady(Bitmap bitmap) {
 		Message msg = new Message();
 		msg.what = CPI.EVENT_COMMENT_SNAPSHOT;
 		msg.obj = bitmap;
@@ -458,13 +603,20 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 	public void onClick(View v) {
 		int id = v.getId();
 		switch (id) {
-		case R.id.player_button_audio: {
+		case R.id.player_button_toggle_message: {
+			int visibility = mViewMessage.getVisibility();
+			mViewMessage
+					.setVisibility(visibility == View.VISIBLE ? View.INVISIBLE
+							: View.VISIBLE);
 			break;
 		}
-		case R.id.player_button_subtitle: {
+		case R.id.player_button_switch_audio: {
 			break;
 		}
-		case R.id.player_button_prev: {
+		case R.id.player_button_switch_subtitle: {
+			break;
+		}
+		case R.id.player_button_previous: {
 			if (mCurrentIndex != -1 && mPlayList != null
 					&& mPlayList.size() > 1) {
 				mCurrentIndex--;
@@ -475,7 +627,7 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 			}
 			break;
 		}
-		case R.id.player_button_play: {
+		case R.id.player_button_toggle_play: {
 			if (mCanPause > 0) {
 				if (mCurrentState == VLI.INPUT_STATE_PLAY)
 					mVLM.pause();
@@ -495,11 +647,12 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 			}
 			break;
 		}
-		case R.id.player_button_chat: {
-			int visibility = mViewMessage.getVisibility();
-			mViewMessage
-					.setVisibility(visibility == View.VISIBLE ? View.INVISIBLE
-							: View.VISIBLE);
+		case R.id.player_button_switch_aspect_ratio: {
+
+			break;
+		}
+		case R.id.player_button_toggle_full_screen: {
+			mVLM.setFullScreen(!mFullScreen);
 			break;
 		}
 		default:

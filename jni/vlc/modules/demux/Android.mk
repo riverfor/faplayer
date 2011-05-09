@@ -24,10 +24,10 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src \
-    $(EXTROOT)/live/BasicUsageEnvironment/include \
-    $(EXTROOT)/live/UsageEnvironment/include \
-    $(EXTROOT)/live/groupsock/include \
-    $(EXTROOT)/live/liveMedia/include
+    $(EXTROOT)/live555/BasicUsageEnvironment/include \
+    $(EXTROOT)/live555/UsageEnvironment/include \
+    $(EXTROOT)/live555/groupsock/include \
+    $(EXTROOT)/live555/liveMedia/include
 
 LOCAL_SRC_FILES := \
     ../access/mms/asf.c \

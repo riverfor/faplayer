@@ -21,12 +21,13 @@ public class VLM {
 
 	private ByteBuffer mSendBuffer = ByteBuffer.allocate(512);
 	private ByteBuffer mRecvBuffer = ByteBuffer.allocate(512);
-	private Selector mSelector;
+	private Selector mSelector = null;
 	private SocketChannel mClientChannel = null;
 
-	private int mLineOffset = 0;
-	private int mLineLength = 0;
-	private byte[] mLineBuffer = new byte[512];
+	private byte[] mCharByte = new byte[4];
+	private int mCharIndex = 0;
+	private int mCharLength = 0;
+	private StringBuffer mLineBuffer = new StringBuffer();
 
 	protected VLM() {
 	}
@@ -44,9 +45,9 @@ public class VLM {
 		String key = temp[1];
 		String value = temp[2];
 		if (name.compareTo(VLI.MODULE_NAME_INPUT) == 0) {
-			if (key.compareTo(VLI.MODULE_INPUT_POSITION) == 0) {
+			if (key.compareTo(VLI.MODULE_INPUT_TIME) == 0) {
 				long val = Long.parseLong(value);
-				mCallbackHandler.onInputPositionChange(val);
+				mCallbackHandler.onInputTimeChange(val);
 			} else if (key.compareTo(VLI.MODULE_INPUT_STATE) == 0) {
 				int val = Integer.parseInt(value);
 				mCallbackHandler.onInputStateChange(val);
@@ -59,6 +60,20 @@ public class VLM {
 			} else if (key.compareTo(VLI.MODULE_INPUT_CAN_SEEK) == 0) {
 				boolean val = Integer.parseInt(value) > 0;
 				mCallbackHandler.onInputCanSeekChange(val);
+			} else if (key.compareTo(VLI.MODULE_INPUT_AUDIO_ES) == 0) {
+				String[] vals = value.split("/");
+				if (vals.length == 2) {
+					int index = Integer.parseInt(vals[0]);
+					int count = Integer.parseInt(vals[1]);
+					mCallbackHandler.onAudioEsChange(index, count);
+				}
+			} else if (key.compareTo(VLI.MODULE_INPUT_SPU_ES) == 0) {
+				String[] vals = value.split("/");
+				if (vals.length == 2) {
+					int index = Integer.parseInt(vals[0]);
+					int count = Integer.parseInt(vals[1]);
+					mCallbackHandler.onSpuEsChange(index, count);
+				}
 			}
 		} else if (name.compareTo(VLI.MODULE_NAME_VIDEO) == 0) {
 			if (key.compareTo(VLI.MODULE_VIDEO_SIZE) == 0) {
@@ -68,6 +83,13 @@ public class VLM {
 					int height = Integer.parseInt(vals[1]);
 					mCallbackHandler.onVideoSizeChange(width, height);
 				}
+			}
+		} else if (name.compareTo(VLI.MODULE_NAME_VOUT) == 0) {
+			if (key.compareTo(VLI.MODULE_VOUT_FULL_SCREEN) == 0) {
+				boolean on = Integer.parseInt(value) != 0;
+				mCallbackHandler.onFullScreenChange(on);
+			} else if (key.compareTo(VLI.MODULE_VOUT_ASPECT_RATIO) == 0) {
+
 			}
 		} else {
 			mCallbackHandler.onVlcEvent(name, key, value);
@@ -92,36 +114,33 @@ public class VLM {
 				return;
 			mRecvBuffer.flip();
 			while (mRecvBuffer.position() != mRecvBuffer.limit()) {
+				// utf-8
 				byte ch = mRecvBuffer.get();
-				mLineBuffer[(mLineOffset + mLineLength++) % mLineBuffer.length] = ch;
-				if ((ch == '\n' || ch == '\r' || ch == '\0')
-						|| (mLineLength == mLineBuffer.length)) {
-					if ((ch == '\n' || ch == '\r' || ch == '\0'))
-						mLineLength -= 1;
-					String line = null;
-					try {
-						if (mLineOffset + mLineLength <= mLineBuffer.length)
-							line = new String(mLineBuffer, mLineOffset,
-									mLineLength, "utf-8");
-						else {
-							byte[] temp = new byte[mLineLength];
-							int part1 = mLineBuffer.length - mLineOffset;
-							int part2 = (mLineOffset + mLineLength)
-									% mLineBuffer.length;
-							System.arraycopy(mLineBuffer, mLineOffset, temp, 0,
-									part1);
-							System.arraycopy(mLineBuffer, 0, temp, part1, part2);
-							line = new String(temp, 0, mLineLength, "utf-8");
+				if (mCharIndex == 0) {
+					if (ch == '\r' || ch == '\n' || ch == '\0') {
+						if (mLineBuffer.length() > 0) {
+							String line = mLineBuffer.toString();
+							mLineBuffer.setLength(0);
+							triggerCallback(line);
+							continue;
 						}
-					} catch (UnsupportedEncodingException e) {
 					}
-					if (line != null) {
-						// Log.d("faplayer-java", line);
-						triggerCallback(line);
+					mCharLength = 8;
+					int temp = (ch ^ 0xff);
+					while (temp != 0) {
+						temp = (temp >> 1);
+						mCharLength -= 1;
 					}
-					mLineOffset += mLineLength;
-					mLineOffset %= mLineBuffer.length;
-					mLineLength = 0;
+					if (mCharLength == 1 || mCharLength > 4) {
+						continue;
+					}
+				}
+				mCharByte[mCharIndex++] = ch;
+				if (mCharIndex >= mCharLength) {
+					String character = new String(mCharByte, 0,
+							mCharLength == 0 ? 1 : mCharLength, "utf-8");
+					mLineBuffer.append(character);
+					mCharIndex = 0;
 				}
 			}
 		}
@@ -178,8 +197,6 @@ public class VLM {
 			@Override
 			public void run() {
 				for (;;) {
-					mLineOffset = 0;
-					mLineLength = 0;
 					mRecvBuffer.clear();
 					mSendBuffer.clear();
 					try {
@@ -266,7 +283,7 @@ public class VLM {
 
 	public void seek(long position) {
 		String line;
-		line = String.format("seek %d", position);
+		line = String.format("time %d", position);
 		writeBytes(line);
 	}
 
@@ -279,6 +296,24 @@ public class VLM {
 	public void stop() {
 		String line;
 		line = String.format("stop");
+		writeBytes(line);
+	}
+
+	public void setFullScreen(boolean on) {
+		String line;
+		line = String.format("fullscreen %d", on ? 1 : 0);
+		writeBytes(line);
+	}
+
+	public void setAudioEs(int index) {
+		String line;
+		line = String.format("audio-es %d", index);
+		writeBytes(line);
+	}
+
+	public void setSpuEs(int index) {
+		String line;
+		line = String.format("spu-es %d", index);
 		writeBytes(line);
 	}
 }

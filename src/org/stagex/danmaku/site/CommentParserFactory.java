@@ -15,8 +15,8 @@ public class CommentParserFactory {
 		CommentParser parser = null;
 		try {
 			String cln = CommentParser.class.getName() + name;
-			Class cls = Class.forName(cln);
-			parser = (CommentParser) cls.newInstance();
+			Class clz = Class.forName(cln);
+			parser = (CommentParser) clz.newInstance();
 		} catch (Exception e) {
 		}
 		return parser;
