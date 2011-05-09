@@ -11,7 +11,8 @@ LOCAL_ARM_NEON := true
 LOCAL_MODULE := arm_neon
 
 LOCAL_SRC_FILES := \
-    memcpy.S
+    memcpy.S \
+    memset.S
 
 include $(BUILD_STATIC_LIBRARY)
 

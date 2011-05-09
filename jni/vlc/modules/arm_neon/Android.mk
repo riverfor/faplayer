@@ -73,6 +73,7 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=yuv2rgb
 
 LOCAL_C_INCLUDES += \
+    $(EXTROOR)/pixman/pixman \
     $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
@@ -87,7 +88,7 @@ LOCAL_SRC_FILES := \
 
 ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_CFLAGS += -DHAVE_NEON=1
-LOCAL_SRC_FILES += yuv2rgb.444.S yuv2rgb.422.S yuv2rgb.420.c
+LOCAL_SRC_FILES += yuv2rgb.444565.S yuv2rgb.422565.S yuv2rgb.420565.c
 endif
 
 include $(BUILD_STATIC_LIBRARY)
