@@ -24,7 +24,8 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT)/src \
     $(EXTROOT)/iconv/include \
     $(EXTROOT)/freetype/include \
-    $(EXTROOT)/libass/include
+    $(EXTROOT)/libass/include \
+    $(EXTROOT)/libass/libass
 
 LOCAL_SRC_FILES := \
     libass.c
