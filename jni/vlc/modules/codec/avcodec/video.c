@@ -96,15 +96,6 @@ struct decoder_sys_t
     vlc_va_t *p_va;
 
     vlc_sem_t sem_mt;
-
-#ifdef ANDROID
-    /* misc */
-    int i_decode_called_count;
-    mtime_t i_decode_time_average;
-    mtime_t i_decode_time_last;
-    mtime_t i_decode_time_total;
-    int i_late_threshold;
-#endif
 };
 
 #ifdef HAVE_AVCODEC_MT
@@ -476,7 +467,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         p_sys->i_late_frames = 0;
     }
 
-#ifndef ANDROID
     if( !p_dec->b_pace_control && (p_sys->i_late_frames > 0) &&
         (mdate() - p_sys->i_late_frames_start > INT64_C(5000000)) )
     {
@@ -490,23 +480,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         p_sys->i_late_frames--;
         return NULL;
     }
-#endif
 
-#ifdef ANDROID
-    int b_may_be_late = (p_sys->i_late_frames > 2) || ( p_sys->i_decode_time_last >= ( p_sys->i_decode_time_average << 1 ) ) || ( p_sys->i_late_threshold > 2 );
-    int b_may_be_not_needed_to = p_sys->i_decode_time_last * 10 < p_sys->i_decode_time_average;
-    if ( !p_dec->b_pace_control && p_sys->b_hurry_up &&
-         ( (p_sys->i_late_frames > 0 && !b_may_be_not_needed_to) ||  b_may_be_late) )
-    {
-        // XXX: broken pictures
-        b_drawpicture = 1;
-        if ( p_sys->i_late_frames > 0 ) {
-            p_context->skip_frame = 
-                    (p_sys->i_skip_frame <= AVDISCARD_NONREF) ?
-                   AVDISCARD_NONREF : p_sys->i_skip_frame;
-        }
-    }
-#else
     /* A good idea could be to decode all I pictures and see for the other */
     if( !p_dec->b_pace_control &&
         p_sys->b_hurry_up &&
@@ -528,7 +502,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
             return NULL;
         }
     }
-#endif
     else
     {
         if( p_sys->b_hurry_up )
@@ -594,10 +567,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         p_block->i_pts =
         p_block->i_dts = VLC_TS_INVALID;
 
-#ifdef ANDROID
-        mtime_t i_decode_time_begin = mdate();
-#endif
-
         post_mt( p_sys );
 
         av_init_packet( &pkt );
@@ -617,10 +586,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
                                            &b_gotpicture, &pkt );
         }
         wait_mt( p_sys );
-
-#ifdef ANDROID
-        mtime_t i_decode_time_end = mdate();
-#endif
 
         if( p_sys->b_flush )
             p_sys->b_first_frame = true;
@@ -645,20 +610,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         /* Consumed bytes */
         p_block->i_buffer -= i_used;
         p_block->p_buffer += i_used;
-
-#ifdef ANDROID
-        /* misc */
-        mtime_t i_decode_time_current = i_decode_time_end - i_decode_time_begin;
-        p_sys->i_decode_called_count += 1;
-        p_sys->i_decode_time_last = i_decode_time_current;
-        p_sys->i_decode_time_total += i_decode_time_current;
-        p_sys->i_decode_time_average = p_sys->i_decode_time_total / p_sys->i_decode_called_count;
-        if ( p_sys->i_decode_time_last > p_sys->i_decode_time_average )
-            p_sys->i_late_threshold += 1;
-        else
-            p_sys->i_late_threshold = 0;
-        // msg_Dbg(p_dec, "%06d a:%lld c:%lld t:%d l:%d", p_sys->i_decode_called_count, p_sys->i_decode_time_average, p_sys->i_decode_time_last, p_sys->i_late_threshold, p_sys->i_late_frames);
-#endif
 
         /* Nothing to display */
         if( !b_gotpicture )
