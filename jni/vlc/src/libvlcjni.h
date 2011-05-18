@@ -1,18 +1,32 @@
 /* auto generated */
 vlc_declare_plugin(access_http);
 vlc_declare_plugin(access_mms);
+vlc_declare_plugin(aiff);
 vlc_declare_plugin(aout_android);
+vlc_declare_plugin(au);
 vlc_declare_plugin(audio_format_neon);
 vlc_declare_plugin(avcodec);
 vlc_declare_plugin(avformat);
 vlc_declare_plugin(bandlimited_resampler);
 vlc_declare_plugin(blend);
+vlc_declare_plugin(cdg);
 vlc_declare_plugin(converter_fixed);
+vlc_declare_plugin(dirac);
 vlc_declare_plugin(filesystem);
+vlc_declare_plugin(flacsys);
 vlc_declare_plugin(float32_mixer);
 vlc_declare_plugin(freetype);
+vlc_declare_plugin(image);
+vlc_declare_plugin(libasf);
 vlc_declare_plugin(libass);
+vlc_declare_plugin(libavi);
+vlc_declare_plugin(libmp4);
+vlc_declare_plugin(libplaylist);
 vlc_declare_plugin(live555);
+vlc_declare_plugin(mjpeg);
+vlc_declare_plugin(mpgv);
+vlc_declare_plugin(nsc);
+vlc_declare_plugin(nuv);
 vlc_declare_plugin(packetizer_copy);
 vlc_declare_plugin(packetizer_dirac);
 vlc_declare_plugin(packetizer_flac);
@@ -22,31 +36,56 @@ vlc_declare_plugin(packetizer_mpeg4audio);
 vlc_declare_plugin(packetizer_mpeg4video);
 vlc_declare_plugin(packetizer_mpegvideo);
 vlc_declare_plugin(packetizer_vc1);
+vlc_declare_plugin(ps);
+vlc_declare_plugin(pva);
+vlc_declare_plugin(rawdv);
+vlc_declare_plugin(rawvid);
 vlc_declare_plugin(realrtsp);
 vlc_declare_plugin(reporter);
 vlc_declare_plugin(simple_channel_mixer);
+vlc_declare_plugin(smf);
 vlc_declare_plugin(subsdec);
 vlc_declare_plugin(subsusf);
 vlc_declare_plugin(swscale);
 vlc_declare_plugin(trivial_mixer);
+vlc_declare_plugin(tta);
+vlc_declare_plugin(ty);
 vlc_declare_plugin(ugly_resampler);
+vlc_declare_plugin(vobsub);
+vlc_declare_plugin(voc);
 vlc_declare_plugin(vout_android);
+vlc_declare_plugin(wav);
+vlc_declare_plugin(xa);
 vlc_declare_plugin(yuv2rgb);
 const void *vlc_builtins_modules[] = {
 	vlc_plugin(access_http),
 	vlc_plugin(access_mms),
+	vlc_plugin(aiff),
 	vlc_plugin(aout_android),
+	vlc_plugin(au),
 	vlc_plugin(audio_format_neon),
 	vlc_plugin(avcodec),
 	vlc_plugin(avformat),
 	vlc_plugin(bandlimited_resampler),
 	vlc_plugin(blend),
+	vlc_plugin(cdg),
 	vlc_plugin(converter_fixed),
+	vlc_plugin(dirac),
 	vlc_plugin(filesystem),
+	vlc_plugin(flacsys),
 	vlc_plugin(float32_mixer),
 	vlc_plugin(freetype),
+	vlc_plugin(image),
+	vlc_plugin(libasf),
 	vlc_plugin(libass),
+	vlc_plugin(libavi),
+	vlc_plugin(libmp4),
+	vlc_plugin(libplaylist),
 	vlc_plugin(live555),
+	vlc_plugin(mjpeg),
+	vlc_plugin(mpgv),
+	vlc_plugin(nsc),
+	vlc_plugin(nuv),
 	vlc_plugin(packetizer_copy),
 	vlc_plugin(packetizer_dirac),
 	vlc_plugin(packetizer_flac),
@@ -56,15 +95,26 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(packetizer_mpeg4video),
 	vlc_plugin(packetizer_mpegvideo),
 	vlc_plugin(packetizer_vc1),
+	vlc_plugin(ps),
+	vlc_plugin(pva),
+	vlc_plugin(rawdv),
+	vlc_plugin(rawvid),
 	vlc_plugin(realrtsp),
 	vlc_plugin(reporter),
 	vlc_plugin(simple_channel_mixer),
+	vlc_plugin(smf),
 	vlc_plugin(subsdec),
 	vlc_plugin(subsusf),
 	vlc_plugin(swscale),
 	vlc_plugin(trivial_mixer),
+	vlc_plugin(tta),
+	vlc_plugin(ty),
 	vlc_plugin(ugly_resampler),
+	vlc_plugin(vobsub),
+	vlc_plugin(voc),
 	vlc_plugin(vout_android),
+	vlc_plugin(wav),
+	vlc_plugin(xa),
 	vlc_plugin(yuv2rgb),
 	NULL
 };

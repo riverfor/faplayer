@@ -8,7 +8,6 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-# "^lib" is auto removed
 LOCAL_MODULE := liblibass_plugin
 
 LOCAL_CFLAGS += \
