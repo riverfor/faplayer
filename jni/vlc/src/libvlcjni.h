@@ -1,5 +1,6 @@
 /* auto generated */
 vlc_declare_plugin(access_http);
+vlc_declare_plugin(access_mms);
 vlc_declare_plugin(aout_android);
 vlc_declare_plugin(audio_format_neon);
 vlc_declare_plugin(avcodec);
@@ -21,6 +22,7 @@ vlc_declare_plugin(packetizer_mpeg4audio);
 vlc_declare_plugin(packetizer_mpeg4video);
 vlc_declare_plugin(packetizer_mpegvideo);
 vlc_declare_plugin(packetizer_vc1);
+vlc_declare_plugin(realrtsp);
 vlc_declare_plugin(reporter);
 vlc_declare_plugin(simple_channel_mixer);
 vlc_declare_plugin(subsdec);
@@ -32,6 +34,7 @@ vlc_declare_plugin(vout_android);
 vlc_declare_plugin(yuv2rgb);
 const void *vlc_builtins_modules[] = {
 	vlc_plugin(access_http),
+	vlc_plugin(access_mms),
 	vlc_plugin(aout_android),
 	vlc_plugin(audio_format_neon),
 	vlc_plugin(avcodec),
@@ -53,6 +56,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(packetizer_mpeg4video),
 	vlc_plugin(packetizer_mpegvideo),
 	vlc_plugin(packetizer_vc1),
+	vlc_plugin(realrtsp),
 	vlc_plugin(reporter),
 	vlc_plugin(simple_channel_mixer),
 	vlc_plugin(subsdec),
