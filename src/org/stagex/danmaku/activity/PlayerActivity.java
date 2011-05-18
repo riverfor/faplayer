@@ -249,21 +249,26 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 				case VLI.EVENT_AUDIO_ES: {
 					int index = msg.arg1;
 					int count = msg.arg2;
-					if (count < 2) {
+					if (count < 3) {
 						mImageButtonSwitchAudio.setVisibility(View.GONE);
 					} else {
 						setAudioTrackImage(index, count);
 					}
+					mAudioTrackIndex = index;
+					mAudioTrackCount = count;
 					break;
 				}
 				case VLI.EVENT_SPU_ES: {
 					int index = msg.arg1;
 					int count = msg.arg2;
-					if (count < 1) {
+					// a chance to disable subtitle
+					if (count < 2) {
 						mImageButtonSwitchSubtitle.setVisibility(View.GONE);
 					} else {
 						setSubtitleTrackImage(index, count);
 					}
+					mSubtitleTrackIndex = index;
+					mSubtitleTrackCount = count;
 					break;
 				}
 				case VLI.EVENT_PLAYER_PREPAIRING_BGN: {
@@ -445,6 +450,8 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 
 	@Override
 	public void onInputLengthChange(long length) {
+		if (length < 0)
+			return;
 		Message msg = new Message();
 		msg.what = VLI.EVENT_INPUT_LENGTH;
 		msg.arg1 = (int) (length / 1000);
@@ -611,9 +618,11 @@ public class PlayerActivity extends Activity implements VLI, CPI,
 			break;
 		}
 		case R.id.player_button_switch_audio: {
+			mVLM.setSpuEs((mAudioTrackIndex + 1) % mAudioTrackCount);
 			break;
 		}
 		case R.id.player_button_switch_subtitle: {
+			mVLM.setSpuEs((mSubtitleTrackIndex + 1) % mSubtitleTrackCount);
 			break;
 		}
 		case R.id.player_button_previous: {

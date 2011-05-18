@@ -211,7 +211,7 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
 
     VLC_UNUSED(subpicture);
 
-    msg_Dbg(VLC_OBJECT(vd), "video place %d,%d %dx%d", sys->place.x, sys->place.y, sys->place.width, sys->place.height);
+    // msg_Dbg(VLC_OBJECT(vd), "video place %d,%d %dx%d", sys->place.x, sys->place.y, sys->place.width, sys->place.height);
 
     sw = picture->p[0].i_visible_pitch / picture->p[0].i_pixel_pitch;
     sh = picture->p[0].i_visible_lines;

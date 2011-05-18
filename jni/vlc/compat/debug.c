@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <string.h>
 #ifdef ANDROID
 #include <android/log.h>
 #endif
@@ -11,8 +15,16 @@
 
 static int init = 0;
 static pthread_mutex_t mutex;
+static int sock = -1;
+static struct sockaddr_in addr = {
+    .sin_family = AF_INET,
+    .sin_port = 0x52ba,
+    .sin_addr.s_addr = 0x7f000001
+};
 
-void debug(const char* fmt, ...) {
+// TODO: fix leaks
+
+void faplayer_message(const char* fmt, ...) {
     va_list vlist;
     va_start(vlist, fmt);
     if (!init) {
@@ -21,46 +33,21 @@ void debug(const char* fmt, ...) {
     }
     pthread_mutex_lock(&mutex);
 #ifdef ANDROID
+    char *msg = NULL;
+    vasprintf(&msg, fmt, vlist);
+    if (sock < 0) {
+        sock = socket(AF_INET, SOCK_DGRAM, 0);
+    }
+    if (msg) {
+        if (sock >= 0)
+            sendto(sock, msg, strlen(msg), 0, (const struct sockaddr *) &addr, sizeof(addr));
+        free(msg);
+    }
     __android_log_vprint(ANDROID_LOG_DEBUG, "faplayer", fmt, vlist);
 #else
     vfprintf(stdout, fmt, vlist);
     fflush(stdout);
 #endif
     pthread_mutex_unlock(&mutex);
-}
-
-void dump(const void* addr, int size) {
-    int i, j;
-    unsigned char* p = (unsigned char*) addr;
-    char v, c;
-    char buffer[64];
-
-    if (!init) {
-        init = -1;
-        pthread_mutex_init(&mutex, 0);
-    }
-    j = 0;
-    for (i = 0; i < size; i++) {
-        v = *(p + i);
-        c = (v >> 4) | 0x30;
-        c += (c > '9') ? 7 : 0;
-        buffer[j++] = c;
-        c = (v & 0x0f) | 0x30;
-        c += (c > '9') ? 7 : 0;
-        buffer[j++] = c;
-        buffer[j++] = 0x20;
-        if ((i + 1) % 16 == 0 || i + 1 == size) {
-            buffer[j] = 0;
-            j = 0;
-            pthread_mutex_lock(&mutex);
-#ifdef ANDROID
-            __android_log_write(ANDROID_LOG_DEBUG, "faplayer", buffer);
-#else
-            vfprintf(stdout, fmt, vlist);
-            fflush(stdout);
-#endif
-            pthread_mutex_unlock(&mutex);
-        }
-    }
 }
 

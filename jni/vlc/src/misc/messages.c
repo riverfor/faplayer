@@ -479,7 +479,7 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
 #   define WHITE   COL(0,1)
 #   define GRAY    "\033[0m"
 
-    static const char ppsz_type[4][9] = { "", " error", " warning", " debug" };
+    static const char ppsz_type[5][9] = { "", " error", " warning", " debug" };
     static const char ppsz_color[4][8] = { WHITE, RED, YELLOW, GRAY };
     const char *psz_object;
     libvlc_priv_t *priv = libvlc_priv (p_this->p_libvlc);
@@ -524,10 +524,15 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
     int canc = vlc_savecancel ();
     /* Send the message to stderr */
 #ifdef ANDROID
-    debug( "[%s%p%s] %s%s%s %s%s: %s%s%s\n",
+    faplayer_message( "[%p] %s%s%s %s%s: %s\n",
+                  (void *)p_item->i_object_id,
+                  p_item->psz_header ? p_item->psz_header : "",
+                  p_item->psz_header ? " " : "",
+                  p_item->psz_module, psz_object,
+                  ppsz_type[i_type],
+                  p_item->psz_msg);
 #else
     utf8_fprintf( stderr, "[%s%p%s] %s%s%s %s%s: %s%s%s\n",
-#endif
                   priv->b_color ? GREEN : "",
                   (void *)p_item->i_object_id,
                   priv->b_color ? GRAY : "",
@@ -538,6 +543,7 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
                   priv->b_color ? ppsz_color[i_type] : "",
                   p_item->psz_msg,
                   priv->b_color ? GRAY : "" );
+#endif
 
 #if defined( WIN32 ) || defined( __OS2__ )
     fflush( stderr );

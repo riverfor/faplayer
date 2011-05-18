@@ -8,9 +8,7 @@
 extern "C" {
 #endif
 
-void debug(const char* fmt, ...);
-void dump(const void* addr, int size);
-int64_t gettime();
+void faplayer_message(const char* fmt, ...);
 
 #ifdef __cplusplus
 }
