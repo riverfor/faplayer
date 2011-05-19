@@ -46,6 +46,7 @@ vlc_declare_plugin(simple_channel_mixer);
 vlc_declare_plugin(smf);
 vlc_declare_plugin(subsdec);
 vlc_declare_plugin(subsusf);
+vlc_declare_plugin(subtitle);
 vlc_declare_plugin(swscale);
 vlc_declare_plugin(trivial_mixer);
 vlc_declare_plugin(tta);
@@ -105,6 +106,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(smf),
 	vlc_plugin(subsdec),
 	vlc_plugin(subsusf),
+	vlc_plugin(subtitle),
 	vlc_plugin(swscale),
 	vlc_plugin(trivial_mixer),
 	vlc_plugin(tta),
