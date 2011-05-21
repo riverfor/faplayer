@@ -52,6 +52,23 @@
 # include <mach/mach_init.h> /* mach_task_self in semaphores */
 #endif
 
+#ifdef ANDROID
+#include <android/api-level.h>
+#if __ANDROID_API__ < 8
+#define pthread_condattr_init(a) 1
+#define pthread_condattr_destroy(a)
+#endif
+#define PTHREAD_CANCEL_DISABLE 1
+int pthread_create_cancel(pthread_t *thread, pthread_attr_t const * attr,
+                   void *(*start_routine)(void *), void * arg);
+int pthread_cond_timedwait_cancel(pthread_cond_t *cond,
+                           pthread_mutex_t * mutex,
+                           const struct timespec *abstime);
+int pthread_cancel(pthread_t thread);
+void pthread_testcancel();
+int pthread_setcancelstate(int state, int *old);
+#endif
+
 /**
  * Print a backtrace to the standard error for debugging purpose.
  */
@@ -435,6 +452,14 @@ void vlc_sem_destroy (vlc_sem_t *sem)
     val = errno;
 #endif
 
+#if defined(ANDROID)
+    /* Bionic is so broken that it will return EBUSY on sem_destroy
+     * if the semaphore has never been used...
+     */
+    if (likely(val == EBUSY))
+        return; // It may be a real error, but there's no way to know
+#endif
+
     VLC_THREAD_ASSERT ("destroying semaphore");
 }
 
@@ -486,6 +511,82 @@ void vlc_sem_wait (vlc_sem_t *sem)
     VLC_THREAD_ASSERT ("locking semaphore");
 }
 
+#if defined(ANDROID)
+/* SRW (Slim Read Write) locks are available in Vista+ only */
+/**
+ * Initializes a read/write lock.
+ */
+void vlc_rwlock_init (vlc_rwlock_t *lock)
+{
+    vlc_mutex_init (&lock->mutex);
+    vlc_cond_init (&lock->read_wait);
+    vlc_cond_init (&lock->write_wait);
+    lock->readers = 0; /* active readers */
+    lock->writers = 0; /* waiting or active writers */
+    lock->writer = 0; /* ID of active writer */
+}
+
+/**
+ * Destroys an initialized unused read/write lock.
+ */
+void vlc_rwlock_destroy (vlc_rwlock_t *lock)
+{
+    vlc_cond_destroy (&lock->read_wait);
+    vlc_cond_destroy (&lock->write_wait);
+    vlc_mutex_destroy (&lock->mutex);
+}
+
+/**
+ * Acquires a read/write lock for reading. Recursion is allowed.
+ */
+void vlc_rwlock_rdlock (vlc_rwlock_t *lock)
+{
+    vlc_mutex_lock (&lock->mutex);
+    while (lock->writer != 0)
+        vlc_cond_wait (&lock->read_wait, &lock->mutex);
+    if (lock->readers == ULONG_MAX)
+        abort ();
+    lock->readers++;
+    vlc_mutex_unlock (&lock->mutex);
+}
+
+/**
+ * Acquires a read/write lock for writing. Recursion is not allowed.
+ */
+void vlc_rwlock_wrlock (vlc_rwlock_t *lock)
+{
+    vlc_mutex_lock (&lock->mutex);
+    if (lock->writers == ULONG_MAX)
+        abort ();
+    lock->writers++;
+    while ((lock->readers > 0) || (lock->writer != 0))
+        vlc_cond_wait (&lock->write_wait, &lock->mutex);
+    lock->writers--;
+    lock->writer = 1;//GetCurrentThreadId ();
+    vlc_mutex_unlock (&lock->mutex);
+}
+
+/**
+ * Releases a read/write lock.
+ */
+void vlc_rwlock_unlock (vlc_rwlock_t *lock)
+{
+    vlc_mutex_lock (&lock->mutex);
+    if (lock->readers > 0)
+        lock->readers--; /* Read unlock */
+    else
+        lock->writer = 0; /* Write unlock */
+
+    if (lock->writers > 0)
+    {
+        if (lock->readers == 0)
+            vlc_cond_signal (&lock->write_wait);
+    }
+    else
+        vlc_cond_broadcast (&lock->read_wait);
+    vlc_mutex_unlock (&lock->mutex);
+}
+#else
 /**
  * Initializes a read/write lock.
  */
@@ -530,6 +631,7 @@ void vlc_rwlock_unlock (vlc_rwlock_t *lock)
     int val = pthread_rwlock_unlock (lock);
     VLC_THREAD_ASSERT ("releasing R/W lock");
 }
+#endif
 
 /**
  * Allocates a thread-specific variable.

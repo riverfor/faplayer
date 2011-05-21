@@ -17,7 +17,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=bandlimited_resampler
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -43,7 +42,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=ugly_resampler
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

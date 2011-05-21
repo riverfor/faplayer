@@ -1,9 +1,9 @@
 ./configure \
 --disable-bsfs \
 --disable-devices \
---disable-encoders \
---disable-filters \
---disable-muxers \
+--enable-encoders \
+--enable-filters \
+--enable-muxers \
 --enable-cross-compile \
 --cross-prefix=arm-linux-androideabi- \
 --arch=armv6j \

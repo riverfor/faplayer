@@ -18,7 +18,6 @@ LOCAL_CFLAGS += \
 
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/pixman/pixman \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

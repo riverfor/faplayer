@@ -17,7 +17,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=blend
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -46,7 +45,6 @@ LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
 LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src \

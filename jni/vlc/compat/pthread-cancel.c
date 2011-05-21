@@ -14,8 +14,7 @@
 
 //#include <vlc_common.h>
 //#include <vlc_fixups.h>
-//#include <pthread.h>
-#include "pthread-compat.h"
+#include <pthread.h>
 #include <assert.h>
 
 // FIXME: Used for debugging purposes only. Remove once the code is stable
@@ -40,6 +39,9 @@
 #   define likely(p)   (!!(p))
 #   define unlikely(p) (!!(p))
 #endif
+
+#define PTHREAD_CANCEL_ENABLE 0
+#define PTHREAD_CANCEL_DISABLE 1
 
 /*
  * This file provide fixups for the following functions:
@@ -191,6 +193,21 @@ static void* thread_wrapper_routine (void *arg)
 }
 
 /**
+ * Create a cancellation point
+ **/
+void pthread_testcancel (void)
+{
+    cancel_t *canc = pthread_getspecific (cancel_key);
+    if (unlikely (!canc))
+        return; // Don't mess with the main thread
+
+    assert (canc->cond == NULL);
+
+    if (canc->cancelled) // Don't check PTHREAD_CANCEL_ENABLE
+        pthread_exit (NULL);
+}
+
+/**
  * Change thread's cancellation state (enable/disable)
  **/
 int pthread_setcancelstate (int state, int *oldstate)
@@ -213,21 +230,6 @@ int pthread_setcancelstate (int state, int *oldstate)
         pthread_testcancel ();
 
     return 0;
-}
-
-/**
- * Create a cancellation point
- **/
-void pthread_testcancel (void)
-{
-    cancel_t *canc = pthread_getspecific (cancel_key);
-    if (unlikely (!canc))
-        return; // Don't mess with the main thread
-
-    assert (canc->cond == NULL);
-
-    if (canc->cancelled) // Don't check PTHREAD_CANCEL_ENABLE
-        pthread_exit (NULL);
 }
 
 /**

@@ -17,7 +17,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=float32_mixer
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -43,7 +42,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=trivial_mixer
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

@@ -17,7 +17,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=converter_fixed
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

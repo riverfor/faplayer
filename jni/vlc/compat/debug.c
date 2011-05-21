@@ -11,7 +11,6 @@
 #ifdef ANDROID
 #include <android/log.h>
 #endif
-#include "debug.h"
 
 static int init = 0;
 static pthread_mutex_t mutex;

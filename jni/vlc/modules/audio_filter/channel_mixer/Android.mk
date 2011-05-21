@@ -17,7 +17,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=simple_channel_mixer
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

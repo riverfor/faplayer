@@ -17,7 +17,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=filesystem
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -45,7 +44,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=access_http
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

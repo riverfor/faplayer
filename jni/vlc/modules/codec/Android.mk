@@ -17,7 +17,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=libass
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src \
@@ -46,7 +45,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=subsdec
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -72,7 +70,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=subsusf
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

@@ -56,7 +56,7 @@
 #include "../libvlc.h"
 
 #ifdef ANDROID
-#include "debug.h"
+extern void faplayer_message(const char *fmt, ...);
 #endif
 
 /*****************************************************************************

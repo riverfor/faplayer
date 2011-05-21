@@ -18,7 +18,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=audio_format_neon
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -49,7 +48,6 @@ LOCAL_CFLAGS += \
 
 LOCAL_C_INCLUDES += \
     $(EXTROOR)/pixman/pixman \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

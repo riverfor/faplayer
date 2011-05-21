@@ -44,11 +44,7 @@
 #   define _APPLE_C_SOURCE    1 /* Proper pthread semantics on OSX */
 
 #   include <unistd.h> /* _POSIX_SPIN_LOCKS */
-#   ifdef ANDROID
-#       include "pthread-compat.h"
-#   else
-#       include <pthread.h>
-#   endif
+#   include <pthread.h>
 
 /* Unnamed POSIX semaphores not supported on Mac OS X, use Mach semaphores instead */
 #   if defined (__APPLE__)
@@ -118,7 +114,19 @@ typedef pthread_mutex_t vlc_mutex_t;
 #define VLC_STATIC_MUTEX PTHREAD_MUTEX_INITIALIZER
 typedef pthread_cond_t  vlc_cond_t;
 #define VLC_STATIC_COND  PTHREAD_COND_INITIALIZER
+#ifndef ANDROID
 typedef pthread_rwlock_t vlc_rwlock_t;
+#else
+typedef struct
+{
+    vlc_mutex_t   mutex;
+    vlc_cond_t    read_wait;
+    vlc_cond_t    write_wait;
+    unsigned long readers;
+    unsigned long writers;
+    unsigned long writer;
+} vlc_rwlock_t;
+#endif
 typedef pthread_key_t   vlc_threadvar_t;
 typedef struct vlc_timer *vlc_timer_t;
 

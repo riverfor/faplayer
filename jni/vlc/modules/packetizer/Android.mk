@@ -17,7 +17,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=packetizer_copy
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -42,11 +41,7 @@ LOCAL_CFLAGS += \
     -DMODULE_STRING=\"packetizer_dirac\" \
     -DMODULE_NAME=packetizer_dirac
 
-LOCAL_CFLAGS += $(COMMON_TUNE_CFLAGS)
-LOCAL_LDFLAGS += $(COMMON_TUNE_LDFLAGS)
-
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -72,7 +67,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=packetizer_flac
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -98,7 +92,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=packetizer_h264
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -124,7 +117,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=packetizer_mlp
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -150,7 +142,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=packetizer_mpeg4audio
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -176,7 +167,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=packetizer_mpeg4video
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -202,7 +192,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=packetizer_mpegvideo
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
@@ -228,7 +217,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=packetizer_vc1
 
 LOCAL_C_INCLUDES += \
-    $(VLCROOT)/compat \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
