@@ -55,7 +55,7 @@
 #ifdef ANDROID
 #include <android/api-level.h>
 #if __ANDROID_API__ < 8
-#define pthread_condattr_init(a) 1
+#define pthread_condattr_init(a) 0
 #define pthread_condattr_destroy(a)
 #endif
 #define PTHREAD_CANCEL_DISABLE 1
