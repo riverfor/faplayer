@@ -56,7 +56,8 @@
 #include "../libvlc.h"
 
 #ifdef ANDROID
-extern void faplayer_message(const char *fmt, ...);
+extern void faplayer_message_udp(const char *fmt, ...);
+extern void faplayer_message_logcat(const char *fmt, ...);
 #endif
 
 /*****************************************************************************
@@ -524,13 +525,15 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
     int canc = vlc_savecancel ();
     /* Send the message to stderr */
 #ifdef ANDROID
-    faplayer_message( "[%p] %s%s%s %s%s: %s\n",
+    faplayer_message_logcat( "[%p] %s%s%s %s%s: %s\n",
                   (void *)p_item->i_object_id,
                   p_item->psz_header ? p_item->psz_header : "",
                   p_item->psz_header ? " " : "",
                   p_item->psz_module, psz_object,
                   ppsz_type[i_type],
-                  p_item->psz_msg);
+                  p_item->psz_msg );
+    // if (i_type == VLC_MSG_INFO)
+        faplayer_message_udp( "%s\n", p_item->psz_msg );
 #else
     utf8_fprintf( stderr, "[%s%p%s] %s%s%s %s%s: %s%s%s\n",
                   priv->b_color ? GREEN : "",

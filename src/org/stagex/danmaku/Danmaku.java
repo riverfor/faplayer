@@ -9,9 +9,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-import org.stagex.danmaku.wrapper.VLC;
-import org.stagex.danmaku.wrapper.VLM;
-
 import android.app.Application;
 import android.content.res.AssetManager;
 
@@ -68,26 +65,27 @@ public class Danmaku extends Application {
 		}
 		// start VLC
 		String libd = String.format("%s/lib", root);
-		VLC.setenv("VLC_PLUGIN_PATH", libd, true);
+		// VLC.setenv("VLC_PLUGIN_PATH", libd, true);
 		String conf = String.format("%s/etc/vlcrc", root);
 		String aout = String.format("aout_android");
 		String vout = String.format("vout_android");
 		// XXX: --intf, --aout, --vout don't make sense here
-		VLC.getInstance().create(
-				new String[] { "--verbose", "3", "--no-ignore-config",
-						"--config", conf, "--no-plugins-cache", "--intf",
-						"reporter", "--aout", aout, "--vout", vout });
+		// VLC.getInstance().create(
+		// new String[] { "--verbose", "3", "--no-ignore-config",
+		// "--config", conf, "--no-plugins-cache", "--intf",
+		// "reporter", "--aout", aout, "--vout", vout });
 		// start VLM
-		VLM.getInstance().create(new String[] { "127.0.0.1", "21178" });
+		// VLM.getInstance()
+		// .create(new String[] { "127.0.0.1", "21178", "20001" });
 
 		return true;
 	}
 
 	protected void finalize() {
 		// stop VLM
-		VLM.getInstance().destroy();
+		// VLM.getInstance().destroy();
 		// stop VLC
-		VLC.getInstance().destroy();
+		// VLC.getInstance().destroy();
 	}
 
 	@Override

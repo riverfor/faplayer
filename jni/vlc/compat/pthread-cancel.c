@@ -16,6 +16,9 @@
 //#include <vlc_fixups.h>
 #include <pthread.h>
 #include <assert.h>
+#include <jni.h>
+
+extern JavaVM *gJVM;
 
 // FIXME: Used for debugging purposes only. Remove once the code is stable
 // and well tested
@@ -55,6 +58,7 @@
 static void* thread_wrapper_routine (void *arg);
 static void  thread_cancel_handler (int signal);
 static void  thread_cancel_destructor (void *data);
+static void  pthread_exit_wrapper (void *ret);
 
 // Functions used by LibVLC
 void pthread_cancel_initialize (void);
@@ -186,9 +190,12 @@ static void* thread_wrapper_routine (void *arg)
     if (unlikely (pthread_setspecific (cancel_key, canc) != 0))
         return NULL;
 
+    JNIEnv *env = NULL;
+    (*gJVM)->AttachCurrentThread(gJVM, &env, NULL);
     void *ret = wrapper_data->routine (wrapper_data->arg);
     // Don't free wrapper_data->cancel. It will be destroyed automatically.
     free (wrapper_data);
+    (*gJVM)->DetachCurrentThread(gJVM);
     return ret;
 }
 
@@ -204,7 +211,7 @@ void pthread_testcancel (void)
     assert (canc->cond == NULL);
 
     if (canc->cancelled) // Don't check PTHREAD_CANCEL_ENABLE
-        pthread_exit (NULL);
+        pthread_exit_wrapper (NULL);
 }
 
 /**
@@ -257,7 +264,7 @@ static void thread_cancel_handler (int signal)
         return;
     }
     if (canc->state == PTHREAD_CANCEL_ENABLE)
-        pthread_exit (NULL);
+        pthread_exit_wrapper (NULL);
 }
 
 /**
@@ -315,3 +322,9 @@ int pthread_cond_timedwait_cancel( pthread_cond_t *cond,
     pthread_setcancelstate (oldstate, NULL);
     return ret;
 }
+
+static void pthread_exit_wrapper(void *ret) {
+    (*gJVM)->DetachCurrentThread(gJVM);
+    pthread_exit(ret);
+}
+

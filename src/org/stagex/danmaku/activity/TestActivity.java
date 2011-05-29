@@ -31,12 +31,11 @@ public class TestActivity extends Activity {
 				if (uri.length() > 0) {
 					Intent intent = new Intent(TestActivity.this,
 							PlayerActivity.class);
-					ArrayList<String> list = new ArrayList<String>();
-					list.add(uri);
-					Bundle bundle = new Bundle();
-					bundle.putStringArrayList("list", list);
-					bundle.putInt("index", 0);
-					intent.putExtra("playlist", bundle);
+					ArrayList<String> playlist = new ArrayList<String>();
+					playlist.add(uri);
+					intent.setAction(Intent.ACTION_VIEW);
+					intent.putExtra("selected", 0);
+					intent.putExtra("playlist", playlist);
 					startActivity(intent);
 				}
 			}

@@ -13,7 +13,7 @@ import org.stagex.danmaku.helper.SystemUtility;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.net.Uri;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -117,16 +117,24 @@ public class FileBrowserAdapter extends BaseAdapter implements
 		if (file.isDirectory())
 			setDirectory(file.getAbsolutePath());
 		if (file.isFile()) {
+			int selected = position - mTop.size();
+			Uri selectedUri = null;
 			Intent intent = new Intent(mContext, PlayerActivity.class);
-			ArrayList<String> list = new ArrayList<String>();
+			ArrayList<Uri> playlist = new ArrayList<Uri>();
+			int n = 0;
 			for (String name : mBottom) {
-				String path = String.format("file://%s/%s", mCurrentPath, name);
-				list.add(path);
+				String path = String.format("/%s/%s", mCurrentPath, name);
+				File tempFile = new File(path);
+				Uri tempUri = Uri.fromFile(tempFile);
+				playlist.add(tempUri);
+				if (n == selected)
+					selectedUri = tempUri;
+				n++;
 			}
-			Bundle bundle = new Bundle();
-			bundle.putStringArrayList("list", list);
-			bundle.putInt("index", position - mTop.size());
-			intent.putExtra("playlist", bundle);
+			intent.putExtra("selected", selected);
+			intent.putExtra("playlist", playlist);
+			intent.setAction(Intent.ACTION_VIEW);
+			intent.setData(selectedUri);
 			mContext.startActivity(intent);
 		}
 	}

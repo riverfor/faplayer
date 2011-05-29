@@ -17,21 +17,15 @@ static pthread_mutex_t mutex;
 static int sock = -1;
 static struct sockaddr_in addr = {
     .sin_family = AF_INET,
-    .sin_port = 0x52ba,
+    .sin_port = 0x4e21,
     .sin_addr.s_addr = 0x7f000001
 };
 
 // TODO: fix leaks
 
-void faplayer_message(const char* fmt, ...) {
+void faplayer_message_udp(const char* fmt, ...) {
     va_list vlist;
     va_start(vlist, fmt);
-    if (!init) {
-        init = -1;
-        pthread_mutex_init(&mutex, 0);
-    }
-    pthread_mutex_lock(&mutex);
-#ifdef ANDROID
     char *msg = NULL;
     vasprintf(&msg, fmt, vlist);
     if (sock < 0) {
@@ -42,6 +36,17 @@ void faplayer_message(const char* fmt, ...) {
             sendto(sock, msg, strlen(msg), 0, (const struct sockaddr *) &addr, sizeof(addr));
         free(msg);
     }
+}
+
+void faplayer_message_logcat(const char* fmt, ...) {
+    va_list vlist;
+    va_start(vlist, fmt);
+    if (!init) {
+        init = -1;
+        pthread_mutex_init(&mutex, 0);
+    }
+    pthread_mutex_lock(&mutex);
+#ifdef ANDROID
     __android_log_vprint(ANDROID_LOG_DEBUG, "faplayer", fmt, vlist);
 #else
     vfprintf(stdout, fmt, vlist);

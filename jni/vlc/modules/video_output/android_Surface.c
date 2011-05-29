@@ -12,9 +12,9 @@
 #include <dlfcn.h>
 #include <pixman.h>
 
-void LockSurface();
-void UnlockSurface();
-void *GetSurface();
+extern void LockSurface();
+extern void UnlockSurface();
+extern void *GetSurface();
 
 static void *InitLibrary();
 

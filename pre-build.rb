@@ -1,6 +1,14 @@
 #!/usr/bin/env ruby
 
 abi = `cat jni/Application.mk | grep ^APP_ABI | cut -d' ' -f3`.strip!
+flag = `cat jni/Application.mk | grep "^OPT_CFLAGS +="`.split("\n")
+no_neon = abi != 'armeabi-v7a'
+if abi == 'armeabi-v7a'
+    flag = flag[0]
+    temp = flag.scan(/-mfpu=([^\s]+)/)
+    fpu = temp[0][0].to_s
+    no_neon = true if fpu != 'neon'
+end
 all = Array.new
 list = `find . -name Android.mk`.split("\n")
 list.each { |l|
@@ -15,7 +23,7 @@ list.each { |l|
             next if temp == nil || temp.size == 0
             name = temp[0][0].to_s
             name = name[3..-1] if (name =~ /^lib/) != nil
-            next if abi != 'armeabi-v7a' && (name =~ /_neon_plugin$/) != nil
+            next if no_neon && (name =~ /_neon_plugin$/) != nil
             all.push(name)
         end
     }

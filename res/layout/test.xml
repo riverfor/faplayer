@@ -5,7 +5,7 @@
 	android:orientation="vertical" >
 
 	<EditText android:id="@+id/test_uri"
-	    android:text="http://124.160.28.56/ipad_hnws/z.m3u8"
+	    android:text="http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"
         android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
 

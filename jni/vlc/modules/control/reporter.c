@@ -80,7 +80,7 @@ static int Activate(vlc_object_t *p_this)
     if (p_sys->pi_socket == NULL)
     {
         free(p_sys);
-        msg_Err(p_intf, "can't listen to %s port %i", psz_host, i_port);
+        msg_Err(p_intf, "Can't listen to %s port %i", psz_host, i_port);
         return VLC_EGENERIC;
     }
     p_sys->i_socket = -1;    
@@ -234,6 +234,7 @@ static void Run(intf_thread_t *p_intf)
                 if (b_line && strlen(p_sys->p_read_buffer))
                 {
                     p_sys->i_read_offset = 0;
+                    msg_Info(p_intf, "%s", p_sys->p_read_buffer);
                     ProcessCommandLine(p_intf, p_sys->p_read_buffer);
                 }
                 if(i_len == 0)
