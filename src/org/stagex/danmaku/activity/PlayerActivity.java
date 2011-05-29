@@ -11,6 +11,7 @@ import org.stagex.danmaku.comment.CommentDrawable;
 import org.stagex.danmaku.comment.CommentManager;
 import org.stagex.danmaku.helper.SystemUtility;
 import org.stagex.danmaku.player.AbsMediaPlayer;
+import org.stagex.danmaku.player.DefMediaPlayer;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -51,9 +52,12 @@ public class PlayerActivity extends Activity implements
 	static final String LOGTAG = "DANMAKU-PlayerActivity";
 
 	/* */
-	private static final int SURFACE_CREATED = 0x1001;
-	private static final int SURFACE_CHANGED = 0x1002;
-	private static final int SURFACE_DESTROYED = 0x1003;
+	private static final int DEF_SURFACE_CREATED = 0x1001;
+	private static final int DEF_SURFACE_CHANGED = 0x1002;
+	private static final int DEF_SURFACE_DESTROYED = 0x1003;
+	private static final int VLC_SURFACE_CREATED = 0x2001;
+	private static final int VLC_SURFACE_CHANGED = 0x2002;
+	private static final int VLC_SURFACE_DESTROYED = 0x2003;
 
 	private static final int MEDIA_PLAYER_BUFFERING_UPDATE = 0x4001;
 	private static final int MEDIA_PLAYER_COMPLETION = 0x4002;
@@ -92,8 +96,10 @@ public class PlayerActivity extends Activity implements
 
 	/* player video */
 	private View mViewMessage;
-	private SurfaceView mSurfaceViewVideo;
-	private SurfaceHolder mSurfaceHolderVideo;
+	private SurfaceView mSurfaceViewDef;
+	private SurfaceHolder mSurfaceHolderDef;
+	private SurfaceView mSurfaceViewVlc;
+	private SurfaceHolder mSurfaceHolderVlc;
 
 	private int mCanPause = -1;
 	private int mCanSeek = -1;
@@ -121,19 +127,36 @@ public class PlayerActivity extends Activity implements
 		mEventHandler = new Handler() {
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
-				case SURFACE_CREATED: {
-					Log.d(LOGTAG, "surface created ");
-					createMediaPlayer(mPlayListArray.get(mPlayListSelected),
-							mSurfaceHolderVideo);
+				case DEF_SURFACE_CREATED: {
+					Log.d(LOGTAG, "def surface created ");
+					createMediaPlayer(true,
+							mPlayListArray.get(mPlayListSelected),
+							mSurfaceHolderDef);
 					break;
 				}
-				case SURFACE_CHANGED: {
-					Log.d(LOGTAG, "surface changed");
+				case DEF_SURFACE_CHANGED: {
+					Log.d(LOGTAG, "def surface changed");
 					break;
 				}
-				case SURFACE_DESTROYED: {
-					Log.d(LOGTAG, "surface destroyed");
-					destroyMediaPlayer();
+				case DEF_SURFACE_DESTROYED: {
+					Log.d(LOGTAG, "def surface destroyed");
+					destroyMediaPlayer(true);
+					break;
+				}
+				case VLC_SURFACE_CREATED: {
+					Log.d(LOGTAG, "vlc surface created ");
+					createMediaPlayer(false,
+							mPlayListArray.get(mPlayListSelected),
+							mSurfaceHolderVlc);
+					break;
+				}
+				case VLC_SURFACE_CHANGED: {
+					Log.d(LOGTAG, "vlc surface changed");
+					break;
+				}
+				case VLC_SURFACE_DESTROYED: {
+					Log.d(LOGTAG, "vlc surface destroyed");
+					destroyMediaPlayer(false);
 					break;
 				}
 				case MEDIA_PLAYER_BUFFERING_UPDATE: {
@@ -176,13 +199,13 @@ public class PlayerActivity extends Activity implements
 	}
 
 	protected void initializeControls() {
-		mSurfaceViewVideo = (SurfaceView) findViewById(R.id.player_surface_video);
-		mSurfaceHolderVideo = mSurfaceViewVideo.getHolder();
-		mSurfaceHolderVideo.addCallback(new SurfaceHolder.Callback() {
+		mSurfaceViewVlc = (SurfaceView) findViewById(R.id.player_surface_vlc);
+		mSurfaceHolderVlc = mSurfaceViewVlc.getHolder();
+		mSurfaceHolderVlc.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
 				Message msg = new Message();
-				msg.what = SURFACE_CREATED;
+				msg.what = VLC_SURFACE_CREATED;
 				msg.obj = holder;
 				mEventHandler.dispatchMessage(msg);
 			}
@@ -191,7 +214,7 @@ public class PlayerActivity extends Activity implements
 			public void surfaceChanged(SurfaceHolder holder, int format,
 					int width, int height) {
 				Message msg = new Message();
-				msg.what = SURFACE_CHANGED;
+				msg.what = VLC_SURFACE_CHANGED;
 				msg.obj = holder;
 				msg.arg1 = width;
 				msg.arg2 = height;
@@ -201,12 +224,44 @@ public class PlayerActivity extends Activity implements
 			@Override
 			public void surfaceDestroyed(SurfaceHolder holder) {
 				Message msg = new Message();
-				msg.what = SURFACE_DESTROYED;
+				msg.what = VLC_SURFACE_DESTROYED;
 				msg.obj = holder;
 				mEventHandler.dispatchMessage(msg);
 			}
 		});
-		mSurfaceViewVideo.setOnTouchListener(this);
+		mSurfaceViewVlc.setOnTouchListener(this);
+		mSurfaceViewDef = (SurfaceView) findViewById(R.id.player_surface_def);
+		mSurfaceViewDef.setOnTouchListener(this);
+		mSurfaceHolderDef = mSurfaceViewDef.getHolder();
+		mSurfaceHolderDef.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		mSurfaceHolderDef.addCallback(new SurfaceHolder.Callback() {
+			@Override
+			public void surfaceCreated(SurfaceHolder holder) {
+				Message msg = new Message();
+				msg.what = DEF_SURFACE_CREATED;
+				msg.obj = holder;
+				mEventHandler.dispatchMessage(msg);
+			}
+
+			@Override
+			public void surfaceChanged(SurfaceHolder holder, int format,
+					int width, int height) {
+				Message msg = new Message();
+				msg.what = DEF_SURFACE_CHANGED;
+				msg.obj = holder;
+				msg.arg1 = width;
+				msg.arg2 = height;
+				mEventHandler.dispatchMessage(msg);
+			}
+
+			@Override
+			public void surfaceDestroyed(SurfaceHolder holder) {
+				Message msg = new Message();
+				msg.what = DEF_SURFACE_DESTROYED;
+				msg.obj = holder;
+				mEventHandler.dispatchMessage(msg);
+			}
+		});
 		mViewMessage = (View) findViewById(R.id.player_view_message);
 		mViewMessage.setBackgroundDrawable(new CommentDrawable());
 		mViewMessage.setOnTouchListener(this);
@@ -258,7 +313,8 @@ public class PlayerActivity extends Activity implements
 
 	protected void initializeInterface() {
 		/* */
-		mSurfaceViewVideo.setVisibility(View.VISIBLE);
+		mSurfaceViewVlc.setVisibility(View.GONE);
+		mSurfaceViewDef.setVisibility(View.GONE);
 		mViewMessage.setVisibility(View.GONE);
 		/* */
 		mImageButtonToggleMessage.setVisibility(View.GONE);
@@ -278,9 +334,30 @@ public class PlayerActivity extends Activity implements
 		mProgressBarPreparing.setVisibility(View.VISIBLE);
 	}
 
-	protected void createMediaPlayer(String uri, SurfaceHolder holder) {
+	protected void selectMediaPlayer(String uri, boolean forceVlc) {
+		boolean useDefault = true;
+		int indexOfDot = uri.lastIndexOf('.');
+		if (indexOfDot != -1) {
+			String extension = uri.substring(indexOfDot).toLowerCase();
+			if (extension.compareTo(".flv") == 0
+					|| extension.compareTo(".hlv") == 0
+					|| extension.compareTo(".mkv") == 0
+					|| extension.compareTo(".rm") == 0
+					|| extension.compareTo(".rmvb") == 0) {
+				useDefault = false;
+			}
+		}
+		if (forceVlc) {
+			useDefault = false;
+		}
+		mSurfaceViewDef.setVisibility(useDefault ? View.VISIBLE : View.GONE);
+		mSurfaceViewVlc.setVisibility(useDefault ? View.GONE : View.VISIBLE);
+	}
+
+	protected void createMediaPlayer(boolean useDefault, String uri,
+			SurfaceHolder holder) {
 		Log.d(LOGTAG, "createMediaPlayer() " + uri);
-		mMediaPlayer = AbsMediaPlayer.getMediaPlayer(uri, false);
+		mMediaPlayer = AbsMediaPlayer.getMediaPlayer(useDefault);
 		mMediaPlayer.setOnBufferingUpdateListener(this);
 		mMediaPlayer.setOnCompletionListener(this);
 		mMediaPlayer.setOnErrorListener(this);
@@ -293,13 +370,17 @@ public class PlayerActivity extends Activity implements
 		mMediaPlayer.prepareAsync();
 	}
 
-	protected void destroyMediaPlayer() {
-		Log.d(LOGTAG, "destroyMediaPlayer()");
+	protected void destroyMediaPlayer(boolean isDefault) {
 		if (mMediaPlayer == null) {
 			return;
 		}
-		mMediaPlayer.release();
-		mMediaPlayer = null;
+		boolean testDefault = mMediaPlayer.getClass().getName()
+				.equals(DefMediaPlayer.class.getName());
+		if (isDefault == testDefault) {
+			Log.d(LOGTAG, "destroyMediaPlayer()");
+			mMediaPlayer.release();
+			mMediaPlayer = null;
+		}
 	}
 
 	@Override
@@ -310,12 +391,16 @@ public class PlayerActivity extends Activity implements
 		initializeControls();
 		initializeData();
 		initializeInterface();
+		selectMediaPlayer(mPlayListArray.get(mPlayListSelected), false);
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		destroyMediaPlayer();
+		if (mMediaPlayer != null) {
+			mMediaPlayer.stop();
+			mMediaPlayer.release();
+		}
 	}
 
 	@Override

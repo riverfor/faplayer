@@ -202,7 +202,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 	public void setDisplay(SurfaceHolder holder) {
 		Log.d(LOGTAG, "DefMediaPlayer setDisplay() called");
 		try {
-			holder.setFormat(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 			mMediaPlayer.setDisplay(holder);
 		} catch (Exception e) {
 			Log.e(LOGTAG, "setDisplay()");

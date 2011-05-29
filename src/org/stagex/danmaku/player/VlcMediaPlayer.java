@@ -26,9 +26,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected int mLibVlcMediaPlayer = 0;
 	protected int mLibVlcMedia = 0;
 
-	/* re-check this */
-	protected SurfaceHolder mSurfaceHolder = null;
-
+	/*  */
 	protected native void nativeAttachSurface(Surface s);
 
 	protected native void nativeDetachSurface();
@@ -260,29 +258,25 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	@Override
 	public void setDisplay(SurfaceHolder holder) {
 		Log.d(LOGTAG, "VlcMediaPlayer setDisplay() called");
-		if (holder != mSurfaceHolder) {
-			mSurfaceHolder = holder;
-			mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
+		holder.addCallback(new SurfaceHolder.Callback() {
+			@Override
+			public void surfaceChanged(SurfaceHolder holder, int format,
+					int width, int height) {
+				nativeAttachSurface(holder.getSurface());
+			}
 
-				@Override
-				public void surfaceChanged(SurfaceHolder holder, int format,
-						int width, int height) {
-					nativeAttachSurface(holder.getSurface());
-				}
+			@Override
+			public void surfaceCreated(SurfaceHolder holder) {
+				nativeAttachSurface(holder.getSurface());
+			}
 
-				@Override
-				public void surfaceCreated(SurfaceHolder holder) {
-					nativeAttachSurface(holder.getSurface());
-				}
-
-				@Override
-				public void surfaceDestroyed(SurfaceHolder holder) {
-					nativeDetachSurface();
-				}
-			});
-			mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_NORMAL);
-			mSurfaceHolder.setFormat(PixelFormat.RGB_565);
-		}
+			@Override
+			public void surfaceDestroyed(SurfaceHolder holder) {
+				nativeDetachSurface();
+			}
+		});
+		holder.setType(SurfaceHolder.SURFACE_TYPE_NORMAL);
+		holder.setFormat(PixelFormat.RGB_565);
 	}
 
 	@Override

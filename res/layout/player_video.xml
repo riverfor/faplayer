@@ -5,12 +5,18 @@
     android:layout_height="fill_parent" >
 
     <SurfaceView
-        android:id="@+id/player_surface_video"
+        android:id="@+id/player_surface_vlc"
+        android:visibility="gone"
         android:keepScreenOn="true"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 
-    <!-- TODO: add VideoView for hardware decoding playing -->
+    <SurfaceView
+        android:id="@+id/player_surface_def"
+        android:visibility="gone"
+        android:keepScreenOn="true"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
 
     <View
         android:id="@+id/player_view_message"

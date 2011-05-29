@@ -114,23 +114,8 @@ public abstract class AbsMediaPlayer {
 		return sVlcMediaPlayer;
 	}
 
-	public static AbsMediaPlayer getMediaPlayer(String uri, boolean force) {
-		if (force)
-			return getVlcMediaPlayer();
-		if (uri == null)
-			return getDefMediaPlayer();
-		int indexOfDot = uri.lastIndexOf('.');
-		if (indexOfDot == -1)
-			return getVlcMediaPlayer();
-		String extension = uri.substring(indexOfDot).toLowerCase();
-		if (extension.compareTo(".flv") == 0
-				|| extension.compareTo(".hlv") == 0
-				|| extension.compareTo(".mkv") == 0
-				|| extension.compareTo(".rm") == 0
-				|| extension.compareTo(".rmvb") == 0) {
-			return getVlcMediaPlayer();
-		}
-		return getDefMediaPlayer();
+	public static AbsMediaPlayer getMediaPlayer(boolean useDefault) {
+		return useDefault ? getDefMediaPlayer() : getVlcMediaPlayer();
 	}
 
 }
