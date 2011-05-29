@@ -45,8 +45,7 @@ public class PlayerActivity extends Activity implements
 		AbsMediaPlayer.OnBufferingUpdateListener,
 		AbsMediaPlayer.OnCompletionListener, AbsMediaPlayer.OnErrorListener,
 		AbsMediaPlayer.OnInfoListener, AbsMediaPlayer.OnPreparedListener,
-		AbsMediaPlayer.OnProgressUpdateListener,
-		AbsMediaPlayer.OnVideoSizeChangedListener, OnTouchListener,
+		AbsMediaPlayer.OnProgressUpdateListener, OnTouchListener,
 		OnClickListener, OnSeekBarChangeListener {
 
 	static final String LOGTAG = "DANMAKU-PlayerActivity";
@@ -56,10 +55,12 @@ public class PlayerActivity extends Activity implements
 	private static final int SURFACE_CHANGED = 0x1002;
 	private static final int SURFACE_DESTROYED = 0x1003;
 
-	private static final int MEDIA_PLAYER_ERROR = 0x4001;
-	private static final int MEDIA_PLAYER_PREPARED = 0x4002;
-	private static final int MEDIA_PLAYER_PROGRESS_UPDATE = 0x4004;
-	private static final int MEDIA_PLAYER_VIDEO_SIZE_CHANGED = 0x4005;
+	private static final int MEDIA_PLAYER_BUFFERING_UPDATE = 0x4001;
+	private static final int MEDIA_PLAYER_COMPLETION = 0x4002;
+	private static final int MEDIA_PLAYER_ERROR = 0x4003;
+	private static final int MEDIA_PLAYER_INFO = 0x4004;
+	private static final int MEDIA_PLAYER_PREPARED = 0x4005;
+	private static final int MEDIA_PLAYER_PROGRESS_UPDATE = 0x4006;
 
 	/* the media player */
 	private AbsMediaPlayer mMediaPlayer = null;
@@ -72,7 +73,7 @@ public class PlayerActivity extends Activity implements
 	private Handler mEventHandler;
 
 	/* player misc */
-	private ProgressBar mProgressBarPrepairing;
+	private ProgressBar mProgressBarPreparing;
 
 	/* player controls */
 	private TextView mTextViewTime;
@@ -93,11 +94,6 @@ public class PlayerActivity extends Activity implements
 	private View mViewMessage;
 	private SurfaceView mSurfaceViewVideo;
 	private SurfaceHolder mSurfaceHolderVideo;
-
-	//
-	private int mCurrentState = -1;
-	private int mCurrentTime = -1;
-	private int mCurrentLength = -1;
 
 	private int mCanPause = -1;
 	private int mCanSeek = -1;
@@ -140,11 +136,22 @@ public class PlayerActivity extends Activity implements
 					destroyMediaPlayer();
 					break;
 				}
+				case MEDIA_PLAYER_BUFFERING_UPDATE: {
+					mProgressBarPreparing
+							.setVisibility(msg.arg1 < 100 ? View.VISIBLE
+									: View.GONE);
+					break;
+				}
+				case MEDIA_PLAYER_COMPLETION: {
+					break;
+				}
 				case MEDIA_PLAYER_ERROR: {
 					break;
 				}
+				case MEDIA_PLAYER_INFO: {
+					break;
+				}
 				case MEDIA_PLAYER_PREPARED: {
-					mProgressBarPrepairing.setVisibility(View.GONE);
 					mMediaPlayer.start();
 					break;
 				}
@@ -159,9 +166,6 @@ public class PlayerActivity extends Activity implements
 								.getTimeString(msg.arg1));
 						mSeekBarProgress.setProgress(msg.arg1);
 					}
-					break;
-				}
-				case MEDIA_PLAYER_VIDEO_SIZE_CHANGED: {
 					break;
 				}
 				default:
@@ -230,7 +234,7 @@ public class PlayerActivity extends Activity implements
 
 		mLinearLayoutControlBar = (LinearLayout) findViewById(R.id.player_control_bar);
 
-		mProgressBarPrepairing = (ProgressBar) findViewById(R.id.player_prepairing);
+		mProgressBarPreparing = (ProgressBar) findViewById(R.id.player_prepairing);
 	}
 
 	protected void initializeData() {
@@ -271,7 +275,7 @@ public class PlayerActivity extends Activity implements
 		/* */
 		mLinearLayoutControlBar.setVisibility(View.GONE);
 		/* */
-		mProgressBarPrepairing.setVisibility(View.VISIBLE);
+		mProgressBarPreparing.setVisibility(View.VISIBLE);
 	}
 
 	protected void createMediaPlayer(String uri, SurfaceHolder holder) {
@@ -283,7 +287,6 @@ public class PlayerActivity extends Activity implements
 		mMediaPlayer.setOnInfoListener(this);
 		mMediaPlayer.setOnPreparedListener(this);
 		mMediaPlayer.setOnProgressUpdateListener(this);
-		mMediaPlayer.setOnVideoSizeChangedListener(this);
 		mMediaPlayer.reset();
 		mMediaPlayer.setDisplay(holder);
 		mMediaPlayer.setDataSource(uri);
@@ -416,13 +419,17 @@ public class PlayerActivity extends Activity implements
 
 	@Override
 	public void onBufferingUpdate(AbsMediaPlayer mp, int percent) {
-
+		Message msg = new Message();
+		msg.what = MEDIA_PLAYER_BUFFERING_UPDATE;
+		msg.arg1 = percent;
+		mEventHandler.sendMessage(msg);
 	}
 
 	@Override
 	public void onCompletion(AbsMediaPlayer mp) {
-		// TODO Auto-generated method stub
-
+		Message msg = new Message();
+		msg.what = MEDIA_PLAYER_COMPLETION;
+		mEventHandler.sendMessage(msg);
 	}
 
 	@Override
@@ -437,10 +444,12 @@ public class PlayerActivity extends Activity implements
 
 	@Override
 	public boolean onInfo(AbsMediaPlayer mp, int what, int extra) {
-		switch (what) {
-
-		}
-		return false;
+		Message msg = new Message();
+		msg.what = MEDIA_PLAYER_INFO;
+		msg.arg1 = what;
+		msg.arg2 = extra;
+		mEventHandler.sendMessage(msg);
+		return true;
 	}
 
 	@Override
@@ -456,15 +465,6 @@ public class PlayerActivity extends Activity implements
 		msg.what = MEDIA_PLAYER_PROGRESS_UPDATE;
 		msg.arg1 = time;
 		msg.arg2 = length;
-		mEventHandler.sendMessage(msg);
-	}
-
-	@Override
-	public void onVideoSizeChanged(AbsMediaPlayer mp, int width, int height) {
-		Message msg = new Message();
-		msg.what = MEDIA_PLAYER_VIDEO_SIZE_CHANGED;
-		msg.arg1 = width;
-		msg.arg2 = height;
 		mEventHandler.sendMessage(msg);
 	}
 

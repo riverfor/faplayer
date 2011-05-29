@@ -159,7 +159,7 @@ static int Open(vlc_object_t *p_this)
     vout_display_cfg_t cfg = *vd->cfg;
     cfg.display.width = info.w;
     cfg.display.height = info.h;
-    cfg.is_fullscreen = true;
+    cfg.is_fullscreen = false;
 
     vout_display_SendEventDisplaySize(vd, cfg.display.width, cfg.display.height, cfg.is_fullscreen);
     vout_display_PlacePicture(&sys->place, &vd->source, &cfg, false);

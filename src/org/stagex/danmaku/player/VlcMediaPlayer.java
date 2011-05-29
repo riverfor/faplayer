@@ -12,25 +12,28 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 		System.loadLibrary("vlccore");
 	}
 
+	private static final String LOGTAG = "DANMAKU-VlcMediaPlayer";
+
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
 	protected AbsMediaPlayer.OnErrorListener mOnErrorListener = null;
 	protected AbsMediaPlayer.OnInfoListener mOnInfoListener = null;
 	protected AbsMediaPlayer.OnPreparedListener mOnPreparedListener = null;
 	protected AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
-	protected AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
 
 	/* used by the native side */
 	protected int mLibVlcInstance = 0;
 	protected int mLibVlcMediaPlayer = 0;
 	protected int mLibVlcMedia = 0;
 
+	/* re-check this */
 	protected SurfaceHolder mSurfaceHolder = null;
 
 	protected native void nativeAttachSurface(Surface s);
 
 	protected native void nativeDetachSurface();
 
+	/* */
 	protected native void nativeCreate();
 
 	protected native void nativeRelease();
@@ -57,7 +60,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	protected native void nativeSetDataSource(String path);
 
-	protected native void nativeSetDisplay(SurfaceHolder holder);
+	// protected native void nativeSetDisplay(SurfaceHolder holder);
 
 	protected native void nativeSetLooping(boolean looping);
 
@@ -106,8 +109,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 		Log.d(LOGTAG, String.format("received vlc event %d", ev.eventType));
 		switch (ev.eventType) {
 		case VlcEvent.MediaParsedChanged: {
-			Log.d(LOGTAG,
-					String.format("media parsed %d", ev.booleanValue ? 1 : 0));
 			if (!ev.booleanValue) {
 				if (mOnErrorListener != null) {
 					mOnErrorListener.onError(this,
@@ -130,6 +131,19 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 			if (mOnBufferingUpdateListener != null) {
 				int percent = (int) (ev.floatValue * 100);
 				mOnBufferingUpdateListener.onBufferingUpdate(this, percent);
+			}
+			break;
+		}
+		case VlcEvent.MediaPlayerEndReached: {
+			if (mOnCompletionListener != null) {
+				mOnCompletionListener.onCompletion(this);
+			}
+			break;
+		}
+		case VlcEvent.MediaPlayerEncounteredError: {
+			if (mOnErrorListener != null) {
+				mOnErrorListener.onError(this, MediaPlayer.MEDIA_ERROR_UNKNOWN,
+						0);
 			}
 			break;
 		}
@@ -308,12 +322,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	public void setOnProgressUpdateListener(
 			AbsMediaPlayer.OnProgressUpdateListener listener) {
 		mOnProgressUpdateListener = listener;
-	}
-
-	@Override
-	public void setOnVideoSizeChangedListener(
-			AbsMediaPlayer.OnVideoSizeChangedListener listener) {
-		mOnVideoSizeChangedListener = listener;
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import android.view.SurfaceHolder;
 
 public abstract class AbsMediaPlayer {
 
-	public static final String LOGTAG = "DANMAKU-AbsMediaPlayer";
+	private static final String LOGTAG = "DANMAKU-AbsMediaPlayer";
 
 	public interface OnBufferingUpdateListener {
 		public void onBufferingUpdate(AbsMediaPlayer mp, int percent);
@@ -29,10 +29,6 @@ public abstract class AbsMediaPlayer {
 
 	public interface OnProgressUpdateListener {
 		public void onProgressUpdate(AbsMediaPlayer mp, int time, int length);
-	}
-
-	public interface OnVideoSizeChangedListener {
-		public void onVideoSizeChanged(AbsMediaPlayer mp, int width, int height);
 	}
 
 	public abstract int getCurrentPosition();
@@ -82,9 +78,6 @@ public abstract class AbsMediaPlayer {
 
 	public abstract void setOnProgressUpdateListener(
 			AbsMediaPlayer.OnProgressUpdateListener listener);
-
-	public abstract void setOnVideoSizeChangedListener(
-			AbsMediaPlayer.OnVideoSizeChangedListener listener);
 
 	public abstract void start();
 

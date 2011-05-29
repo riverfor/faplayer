@@ -171,7 +171,7 @@ static void vlc_event_callback(const libvlc_event_t *ev, void *data)
         break;
     }
     (*env)->CallVoidMethod(env, obj_VlcMediaPlayer, m_VlcMediaPlayer_onVlcEvent, obj_VlcEvent);
-    (*env)->DeleteLocalRef(env, obj_VlcMediaPlayer);
+    (*env)->DeleteLocalRef(env, obj_VlcEvent);
     /* EXPLAIN: this is called in pthread wrapper routines */
     // (*gJVM)->DetachCurrentThread(gJVM);
 }

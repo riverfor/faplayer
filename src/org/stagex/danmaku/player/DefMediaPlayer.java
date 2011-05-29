@@ -39,8 +39,7 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 	private AbsMediaPlayer.OnErrorListener mOnErrorListener = null;
 	private AbsMediaPlayer.OnInfoListener mOnInfoListener = null;
 	private AbsMediaPlayer.OnPreparedListener mOnPreparedListener = null;
-	protected AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
-	private AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
+	private AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
 
 	protected DefMediaPlayer() {
 		mMediaPlayer = new MediaPlayer();
@@ -254,12 +253,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 	}
 
 	@Override
-	public void setOnVideoSizeChangedListener(
-			AbsMediaPlayer.OnVideoSizeChangedListener listener) {
-		mOnVideoSizeChangedListener = listener;
-	}
-
-	@Override
 	public void start() {
 		Log.d(LOGTAG, "DefMediaPlayer start() called");
 		try {
@@ -373,9 +366,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 	public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
 		Log.d(LOGTAG, String.format("MediaPlayer onVideoSizeChanged %d %d",
 				width, height));
-		if (mOnVideoSizeChangedListener != null) {
-			mOnVideoSizeChangedListener.onVideoSizeChanged(this, width, height);
-		}
 	}
 
 }
