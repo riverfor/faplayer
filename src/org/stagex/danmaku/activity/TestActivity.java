@@ -33,7 +33,6 @@ public class TestActivity extends Activity {
 							PlayerActivity.class);
 					ArrayList<String> playlist = new ArrayList<String>();
 					playlist.add(uri);
-					intent.setAction(Intent.ACTION_VIEW);
 					intent.putExtra("selected", 0);
 					intent.putExtra("playlist", playlist);
 					startActivity(intent);

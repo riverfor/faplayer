@@ -1,9 +1,9 @@
 TODO
 ( ) fix UI bugs and improve UI
 ( ) improve AOUT
-( ) rework control flow
+(X) rework control flow
 (X) fix armeabi build
-(?) fix SMP build, test it on Xoom or something else please
+(X) fix SMP build, test it on Xoom or something else please
 ( ) fix danmaku
 ( ) viewer for acfun/bilibili and so on(nicovideo needs login so do it later)
 ( ) download video & danmaku from acfun/bilibili(nicovideo needs login so do it later)

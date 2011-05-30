@@ -331,7 +331,7 @@ public class PlayerActivity extends Activity implements
 		/* */
 		mLinearLayoutControlBar.setVisibility(View.GONE);
 		/* */
-		mProgressBarPreparing.setVisibility(View.VISIBLE);
+		mProgressBarPreparing.setVisibility(View.GONE);
 	}
 
 	protected void selectMediaPlayer(String uri, boolean forceVlc) {
@@ -341,6 +341,7 @@ public class PlayerActivity extends Activity implements
 			String extension = uri.substring(indexOfDot).toLowerCase();
 			if (extension.compareTo(".flv") == 0
 					|| extension.compareTo(".hlv") == 0
+					|| extension.compareTo(".m3u8") == 0
 					|| extension.compareTo(".mkv") == 0
 					|| extension.compareTo(".rm") == 0
 					|| extension.compareTo(".rmvb") == 0) {

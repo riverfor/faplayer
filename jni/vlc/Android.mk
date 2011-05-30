@@ -187,7 +187,9 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_STATIC_LIBRARIES += arm_neon
 endif
 
-LOCAL_STATIC_LIBRARIES += ass freetype iconv charset live555 pixman ffmpeg
+LOCAL_STATIC_LIBRARIES += ass freetype iconv charset live555 pixman
+
+LOCAL_WHOLE_STATIC_LIBRARIES += avformat avfilter avcodec avdevice avutil swscale
 
 include $(BUILD_SHARED_LIBRARY)
 

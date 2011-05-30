@@ -1,21 +1,13 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-FF_INCLUDE := \
-    $(LOCAL_PATH) \
-    $(LOCAL_PATH)/libavcodec \
-    $(LOCAL_PATH)/libavdevice \
-    $(LOCAL_PATH)/libavfilter \
-    $(LOCAL_PATH)/libavformat \
-    $(LOCAL_PATH)/libavutil \
-    $(LOCAL_PATH)/libswscale
-
-FF_COMMON_SRC := \
+FF_AVCODEC_SRC := \
     libavcodec/4xm.c \
     libavcodec/8bps.c \
     libavcodec/8svx.c \
     libavcodec/a64multienc.c \
     libavcodec/aac_ac3_parser.c \
+    libavcodec/aac_adtstoasc_bsf.c \
     libavcodec/aac_parser.c \
     libavcodec/aacadtsdec.c \
     libavcodec/aaccoder.c \
@@ -108,6 +100,7 @@ FF_COMMON_SRC := \
     libavcodec/celp_filters.c \
     libavcodec/celp_math.c \
     libavcodec/cga_data.c \
+    libavcodec/chomp_bsf.c \
     libavcodec/cinepak.c \
     libavcodec/cljr.c \
     libavcodec/cook.c \
@@ -130,6 +123,7 @@ FF_COMMON_SRC := \
     libavcodec/dpxenc.c \
     libavcodec/dsicinav.c \
     libavcodec/dsputil.c \
+    libavcodec/dump_extradata_bsf.c \
     libavcodec/dv.c \
     libavcodec/dvbsub.c \
     libavcodec/dvbsub_parser.c \
@@ -191,6 +185,7 @@ FF_COMMON_SRC := \
     libavcodec/h264_direct.c \
     libavcodec/h264_hl_motion.c \
     libavcodec/h264_loopfilter.c \
+    libavcodec/h264_mp4toannexb_bsf.c \
     libavcodec/h264_parser.c \
     libavcodec/h264_ps.c \
     libavcodec/h264_refs.c \
@@ -205,6 +200,7 @@ FF_COMMON_SRC := \
     libavcodec/iirfilter.c \
     libavcodec/imc.c \
     libavcodec/imgconvert.c \
+    libavcodec/imx_dump_header_bsf.c \
     libavcodec/indeo2.c \
     libavcodec/indeo3.c \
     libavcodec/indeo5.c \
@@ -243,7 +239,9 @@ FF_COMMON_SRC := \
     libavcodec/mdec.c \
     libavcodec/mimic.c \
     libavcodec/mjpeg.c \
+    libavcodec/mjpeg2jpeg_bsf.c \
     libavcodec/mjpeg_parser.c \
+    libavcodec/mjpega_dump_header_bsf.c \
     libavcodec/mjpegbdec.c \
     libavcodec/mjpegdec.c \
     libavcodec/mjpegenc.c \
@@ -254,6 +252,9 @@ FF_COMMON_SRC := \
     libavcodec/mmvideo.c \
     libavcodec/motion_est.c \
     libavcodec/motionpixels.c \
+    libavcodec/movsub_bsf.c \
+    libavcodec/mp3_header_compress_bsf.c \
+    libavcodec/mp3_header_decompress_bsf.c \
     libavcodec/mpc.c \
     libavcodec/mpc7.c \
     libavcodec/mpc8.c \
@@ -286,6 +287,7 @@ FF_COMMON_SRC := \
     libavcodec/nellymoser.c \
     libavcodec/nellymoserdec.c \
     libavcodec/nellymoserenc.c \
+    libavcodec/noise_bsf.c \
     libavcodec/nuv.c \
     libavcodec/options.c \
     libavcodec/pamenc.c \
@@ -323,6 +325,7 @@ FF_COMMON_SRC := \
     libavcodec/rawdec.c \
     libavcodec/rawenc.c \
     libavcodec/rdft.c \
+    libavcodec/remove_extradata_bsf.c \
     libavcodec/resample.c \
     libavcodec/resample2.c \
     libavcodec/rl2.c \
@@ -426,7 +429,35 @@ FF_COMMON_SRC := \
     libavcodec/xxan.c \
     libavcodec/yop.c \
     libavcodec/zmbv.c \
-    libavcodec/zmbvenc.c \
+    libavcodec/zmbvenc.c
+
+FF_AVCODEC_NEON_SRC := \
+    libavcodec/arm/dsputil_init_neon.c \
+    libavcodec/arm/dsputil_neon.S \
+    libavcodec/arm/fmtconvert_neon.S \
+    libavcodec/arm/int_neon.S \
+    libavcodec/arm/mpegvideo_neon.S \
+    libavcodec/arm/simple_idct_neon.S \
+    libavcodec/arm/fft_neon.S \
+    libavcodec/arm/fft_fixed_neon.S \
+    libavcodec/arm/mdct_neon.S \
+    libavcodec/arm/mdct_fixed_neon.S \
+    libavcodec/arm/rdft_neon.S \
+    libavcodec/arm/h264dsp_neon.S \
+    libavcodec/arm/h264idct_neon.S \
+    libavcodec/arm/h264pred_neon.S \
+    libavcodec/arm/ac3dsp_neon.S \
+    libavcodec/arm/dcadsp_neon.S \
+    libavcodec/arm/synth_filter_neon.S \
+    libavcodec/arm/vp3dsp_neon.S \
+    libavcodec/arm/vp56dsp_neon.S \
+    libavcodec/arm/vp8dsp_neon.S
+
+FF_AVDEVICE_SRC := \
+    libavdevice/alldevices.c \
+    libavdevice/avdevice.c
+
+FF_AVFILTER_SRC := \
     libavfilter/af_anull.c \
     libavfilter/allfilters.c \
     libavfilter/asink_anullsink.c \
@@ -463,7 +494,9 @@ FF_COMMON_SRC := \
     libavfilter/vsrc_buffer.c \
     libavfilter/vsrc_color.c \
     libavfilter/vsrc_movie.c \
-    libavfilter/vsrc_nullsrc.c \
+    libavfilter/vsrc_nullsrc.c
+
+FF_AVFORMAT_SRC := \
     libavformat/4xm.c \
     libavformat/a64.c \
     libavformat/aacdec.c \
@@ -706,7 +739,9 @@ FF_COMMON_SRC := \
     libavformat/xa.c \
     libavformat/xwma.c \
     libavformat/yop.c \
-    libavformat/yuv4mpeg.c \
+    libavformat/yuv4mpeg.c
+
+FF_AVUTIL_SRC := \
     libavutil/adler32.c \
     libavutil/aes.c \
     libavutil/arm/cpu.c \
@@ -739,34 +774,14 @@ FF_COMMON_SRC := \
     libavutil/samplefmt.c \
     libavutil/sha.c \
     libavutil/tree.c \
-    libavutil/utils.c \
+    libavutil/utils.c
+
+FF_SWSCALE_SRC := \
     libswscale/options.c \
     libswscale/rgb2rgb.c \
     libswscale/swscale.c \
     libswscale/utils.c \
     libswscale/yuv2rgb.c
-
-FF_ARM_NEON_SRC := \
-    libavcodec/arm/dsputil_init_neon.c \
-    libavcodec/arm/dsputil_neon.S \
-    libavcodec/arm/fmtconvert_neon.S \
-    libavcodec/arm/int_neon.S \
-    libavcodec/arm/mpegvideo_neon.S \
-    libavcodec/arm/simple_idct_neon.S \
-    libavcodec/arm/fft_neon.S \
-    libavcodec/arm/fft_fixed_neon.S \
-    libavcodec/arm/mdct_neon.S \
-    libavcodec/arm/mdct_fixed_neon.S \
-    libavcodec/arm/rdft_neon.S \
-    libavcodec/arm/h264dsp_neon.S \
-    libavcodec/arm/h264idct_neon.S \
-    libavcodec/arm/h264pred_neon.S \
-    libavcodec/arm/ac3dsp_neon.S \
-    libavcodec/arm/dcadsp_neon.S \
-    libavcodec/arm/synth_filter_neon.S \
-    libavcodec/arm/vp3dsp_neon.S \
-    libavcodec/arm/vp56dsp_neon.S \
-    libavcodec/arm/vp8dsp_neon.S
 
 FF_CFLAGS := -std=c99
 FF_CFLAGS += -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
@@ -778,18 +793,20 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := ffmpeg
+LOCAL_MODULE := avcodec
 
-LOCAL_C_INCLUDES += $(FF_INCLUDE)
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH) \
+    $(LOCAL_PATH)/avcodec
 
 LOCAL_CFLAGS += $(FF_CFLAGS)
 
 LOCAL_SRC_FILES := \
-    $(FF_COMMON_SRC)
+    $(FF_AVCODEC_SRC)
 
 ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_CFLAGS += -DHAVE_NEON=1
-LOCAL_SRC_FILES += $(FF_ARM_NEON_SRC)
+LOCAL_SRC_FILES += $(FF_AVCODEC_NEON_SRC)
 else
 LOCAL_CFLAGS += -DHAVE_NEON=0
 endif
@@ -803,24 +820,108 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-#LOCAL_MODULE := ffmpeg_s
+LOCAL_MODULE := avdevice
 
-LOCAL_C_INCLUDES += $(FF_INCLUDE)
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH) \
+    $(LOCAL_PATH)/avdevice
 
 LOCAL_CFLAGS += $(FF_CFLAGS)
 
 LOCAL_SRC_FILES := \
-    ffmpeg.c \
-    cmdutils.c
+    $(FF_AVDEVICE_SRC)
 
+LOCAL_CFLAGS += -DHAVE_NEON=$(BUILD_WITH_NEON)
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_ARM_MODE := arm
 ifeq ($(BUILD_WITH_NEON),1)
-LOCAL_CFLAGS += -DHAVE_NEON=1
-LOCAL_SRC_FILES += $(FF_ARM_NEON_SRC)
-else
-LOCAL_CFLAGS += -DHAVE_NEON=0
+LOCAL_ARM_NEON := true
 endif
 
-LOCAL_SHARED_LIBRARIES += vlccore
+LOCAL_MODULE := avfilter
 
-#include $(BUILD_EXECUTABLE)
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH) \
+    $(LOCAL_PATH)/avfilter
+
+LOCAL_CFLAGS += $(FF_CFLAGS)
+
+LOCAL_SRC_FILES := \
+    $(FF_AVFILTER_SRC)
+
+LOCAL_CFLAGS += -DHAVE_NEON=$(BUILD_WITH_NEON)
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
+
+LOCAL_MODULE := avformat
+
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH) \
+    $(LOCAL_PATH)/avformat
+
+LOCAL_CFLAGS += $(FF_CFLAGS)
+
+LOCAL_SRC_FILES := \
+    $(FF_AVFORMAT_SRC)
+
+LOCAL_CFLAGS += -DHAVE_NEON=$(BUILD_WITH_NEON)
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
+
+LOCAL_MODULE := avutil
+
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH) \
+    $(LOCAL_PATH)/avutil
+
+LOCAL_CFLAGS += $(FF_CFLAGS)
+
+LOCAL_SRC_FILES := \
+    $(FF_AVUTIL_SRC)
+
+LOCAL_CFLAGS += -DHAVE_NEON=$(BUILD_WITH_NEON)
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
+
+LOCAL_MODULE := swscale
+
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH) \
+    $(LOCAL_PATH)/swscale
+
+LOCAL_CFLAGS += $(FF_CFLAGS)
+
+LOCAL_SRC_FILES := \
+    $(FF_SWSCALE_SRC)
+
+LOCAL_CFLAGS += -DHAVE_NEON=$(BUILD_WITH_NEON)
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(LOCAL_PATH)/Binary.mk
 

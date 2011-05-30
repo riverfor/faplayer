@@ -1,5 +1,6 @@
 ./configure \
---disable-bsfs \
+--enable-static \
+--enable-bsfs \
 --disable-devices \
 --enable-encoders \
 --enable-filters \
@@ -8,5 +9,4 @@
 --cross-prefix=arm-linux-androideabi- \
 --arch=armv6j \
 --cpu=arm1136j-s \
---target-os=linux \
---enable-pic
+--target-os=linux
