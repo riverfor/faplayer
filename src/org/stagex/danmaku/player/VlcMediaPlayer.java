@@ -20,6 +20,8 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected AbsMediaPlayer.OnInfoListener mOnInfoListener = null;
 	protected AbsMediaPlayer.OnPreparedListener mOnPreparedListener = null;
 	protected AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
+	/* double check this */
+	private AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
 
 	/* used by the native side */
 	protected int mLibVlcInstance = 0;
@@ -116,6 +118,12 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 				if (mOnPreparedListener != null) {
 					mOnPreparedListener.onPrepaired(this);
 				}
+				if (mOnVideoSizeChangedListener != null) {
+					int width = getVideoWidth();
+					int height = getVideoHeight();
+					mOnVideoSizeChangedListener.onVideoSizeChangedListener(
+							this, width, height);
+				}
 			}
 			break;
 		}
@@ -196,7 +204,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	@Override
 	public int getVideoWidth() {
 		Log.d(LOGTAG, "VlcMediaPlayer getVideoWidth() called");
-		return nativeGetVideoHeight();
+		return nativeGetVideoWidth();
 	}
 
 	@Override
@@ -315,6 +323,12 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	public void setOnProgressUpdateListener(
 			AbsMediaPlayer.OnProgressUpdateListener listener) {
 		mOnProgressUpdateListener = listener;
+	}
+
+	@Override
+	public void setOnVideoSizeChangedListener(
+			OnVideoSizeChangedListener listener) {
+		mOnVideoSizeChangedListener = listener;
 	}
 
 	@Override

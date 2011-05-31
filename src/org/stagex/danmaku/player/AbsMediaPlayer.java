@@ -31,6 +31,11 @@ public abstract class AbsMediaPlayer {
 		public void onProgressUpdate(AbsMediaPlayer mp, int time, int length);
 	}
 
+	public interface OnVideoSizeChangedListener {
+		public void onVideoSizeChangedListener(AbsMediaPlayer mp, int width,
+				int height);
+	}
+
 	public abstract int getCurrentPosition();
 
 	public abstract int getDuration();
@@ -78,6 +83,9 @@ public abstract class AbsMediaPlayer {
 
 	public abstract void setOnProgressUpdateListener(
 			AbsMediaPlayer.OnProgressUpdateListener listener);
+
+	public abstract void setOnVideoSizeChangedListener(
+			AbsMediaPlayer.OnVideoSizeChangedListener listener);
 
 	public abstract void start();
 

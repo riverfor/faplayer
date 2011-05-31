@@ -122,16 +122,6 @@
             android:layout_marginRight="8dip"
             android:layout_marginBottom="4dip" />
 
-		<ImageButton
-            android:id="@+id/player_button_toggle_full_screen"
-            android:background="@drawable/btn_full_screen_0"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dip"
-            android:layout_marginTop="4dip"
-            android:layout_marginRight="8dip"
-            android:layout_marginBottom="4dip" />
-
 	</LinearLayout>
 
 </LinearLayout>

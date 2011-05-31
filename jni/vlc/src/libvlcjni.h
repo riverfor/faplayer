@@ -28,7 +28,6 @@ vlc_declare_plugin(packetizer_mpeg4video);
 vlc_declare_plugin(packetizer_mpegvideo);
 vlc_declare_plugin(packetizer_vc1);
 vlc_declare_plugin(realrtsp);
-vlc_declare_plugin(reporter);
 vlc_declare_plugin(simple_channel_mixer);
 vlc_declare_plugin(subsdec);
 vlc_declare_plugin(subsusf);
@@ -68,7 +67,6 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(packetizer_mpegvideo),
 	vlc_plugin(packetizer_vc1),
 	vlc_plugin(realrtsp),
-	vlc_plugin(reporter),
 	vlc_plugin(simple_channel_mixer),
 	vlc_plugin(subsdec),
 	vlc_plugin(subsusf),

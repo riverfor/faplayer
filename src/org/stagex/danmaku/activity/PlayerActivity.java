@@ -1,9 +1,6 @@
 package org.stagex.danmaku.activity;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.stagex.danmaku.R;
 import org.stagex.danmaku.comment.CPI;
@@ -36,6 +33,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -47,7 +45,8 @@ public class PlayerActivity extends Activity implements
 		AbsMediaPlayer.OnBufferingUpdateListener,
 		AbsMediaPlayer.OnCompletionListener, AbsMediaPlayer.OnErrorListener,
 		AbsMediaPlayer.OnInfoListener, AbsMediaPlayer.OnPreparedListener,
-		AbsMediaPlayer.OnProgressUpdateListener, OnTouchListener,
+		AbsMediaPlayer.OnProgressUpdateListener,
+		AbsMediaPlayer.OnVideoSizeChangedListener, OnTouchListener,
 		OnClickListener, OnSeekBarChangeListener {
 
 	static final String LOGTAG = "DANMAKU-PlayerActivity";
@@ -60,12 +59,21 @@ public class PlayerActivity extends Activity implements
 	private static final int VLC_SURFACE_CHANGED = 0x2002;
 	private static final int VLC_SURFACE_DESTROYED = 0x2003;
 
+	private static final int SURFACE_NONE = 0;
+	private static final int SURFACE_FILL = 1;
+	private static final int SURFACE_ORIG = 2;
+	private static final int SURFACE_4_3 = 3;
+	private static final int SURFACE_16_9 = 4;
+	private static final int SURFACE_16_10 = 5;
+	private static final int SURFACE_MAX = 6;
+
 	private static final int MEDIA_PLAYER_BUFFERING_UPDATE = 0x4001;
 	private static final int MEDIA_PLAYER_COMPLETION = 0x4002;
 	private static final int MEDIA_PLAYER_ERROR = 0x4003;
 	private static final int MEDIA_PLAYER_INFO = 0x4004;
 	private static final int MEDIA_PLAYER_PREPARED = 0x4005;
 	private static final int MEDIA_PLAYER_PROGRESS_UPDATE = 0x4006;
+	private static final int MEDIA_PLAYER_VIDEO_SIZE_CHANGED = 0x4007;
 
 	/* the media player */
 	private AbsMediaPlayer mMediaPlayer = null;
@@ -91,7 +99,6 @@ public class PlayerActivity extends Activity implements
 	private ImageButton mImageButtonTogglePlay;
 	private ImageButton mImageButtonNext;
 	private ImageButton mImageButtonSwitchAspectRatio;
-	private ImageButton mImageButtonToggleFullScreen;
 
 	private LinearLayout mLinearLayoutControlBar;
 
@@ -102,24 +109,12 @@ public class PlayerActivity extends Activity implements
 	private SurfaceView mSurfaceViewVlc;
 	private SurfaceHolder mSurfaceHolderVlc;
 
+	/* misc */
+	private boolean mPrepared = false;
 	private int mTime = -1;
 	private int mLength = -1;
-	private boolean mCanPause = true;
 	private boolean mCanSeek = true;
-
-	private boolean mFullScreen = false;
 	private int mAspectRatio = 0;
-
-	private int mVideoWidth = -1;
-	private int mVideoHeight = -1;
-
-	private int mVideoSurfaceWidth = -1;
-	private int mVideoSurfaceHeight = -1;
-
-	private int mVideoPlaceX = 0;
-	private int mVideoPlaceY = 0;
-	private int mVideoPlaceW = 0;
-	private int mVideoPlaceH = 0;
 
 	private int mAudioTrackIndex = 0;
 	private int mAudioTrackCount = 0;
@@ -190,6 +185,7 @@ public class PlayerActivity extends Activity implements
 				}
 				case MEDIA_PLAYER_PREPARED: {
 					mMediaPlayer.start();
+					mPrepared = true;
 					break;
 				}
 				case MEDIA_PLAYER_PROGRESS_UPDATE: {
@@ -207,6 +203,10 @@ public class PlayerActivity extends Activity implements
 								.getTimeString(mTime));
 						mSeekBarProgress.setProgress(mTime);
 					}
+					break;
+				}
+				case MEDIA_PLAYER_VIDEO_SIZE_CHANGED: {
+					changeSurfaceSize();
 					break;
 				}
 				default:
@@ -302,8 +302,6 @@ public class PlayerActivity extends Activity implements
 		mImageButtonNext.setOnClickListener(this);
 		mImageButtonSwitchAspectRatio = (ImageButton) findViewById(R.id.player_button_switch_aspect_ratio);
 		mImageButtonSwitchAspectRatio.setOnClickListener(this);
-		mImageButtonToggleFullScreen = (ImageButton) findViewById(R.id.player_button_toggle_full_screen);
-		mImageButtonToggleFullScreen.setOnClickListener(this);
 
 		mLinearLayoutControlBar = (LinearLayout) findViewById(R.id.player_control_bar);
 
@@ -329,10 +327,15 @@ public class PlayerActivity extends Activity implements
 		}
 	}
 
-	protected void initializeInterface() {
+	protected void resetInterface() {
+		int resource = -1;
+		/* initial status */
+		mPrepared = false;
+		mTime = -1;
+		mLength = -1;
+		mCanSeek = true;
+		mAspectRatio = 0;
 		/* */
-		mSurfaceViewVlc.setVisibility(View.GONE);
-		mSurfaceViewDef.setVisibility(View.GONE);
 		mViewMessage.setVisibility(View.GONE);
 		/* */
 		mImageButtonToggleMessage.setVisibility(View.GONE);
@@ -342,11 +345,13 @@ public class PlayerActivity extends Activity implements
 				.setVisibility((mPlayListArray.size() == 1) ? View.GONE
 						: View.VISIBLE);
 		mImageButtonTogglePlay.setVisibility(View.VISIBLE);
+		resource = SystemUtility.getDrawableId("btn_play_0");
+		mImageButtonTogglePlay.setBackgroundResource(resource);
 		mImageButtonNext.setVisibility((mPlayListArray.size() == 1) ? View.GONE
 				: View.VISIBLE);
-		/* not implemented yet */
-		mImageButtonSwitchAspectRatio.setVisibility(View.GONE);
-		mImageButtonToggleFullScreen.setVisibility(View.GONE);
+		mImageButtonSwitchAspectRatio.setVisibility(View.VISIBLE);
+		resource = SystemUtility.getDrawableId("btn_aspect_ratio_0");
+		mImageButtonSwitchAspectRatio.setBackgroundResource(resource);
 		/* */
 		mLinearLayoutControlBar.setVisibility(View.GONE);
 		/* */
@@ -378,6 +383,9 @@ public class PlayerActivity extends Activity implements
 	protected void createMediaPlayer(boolean useDefault, String uri,
 			SurfaceHolder holder) {
 		Log.d(LOGTAG, "createMediaPlayer() " + uri);
+		/* */
+		resetInterface();
+		/* */
 		mMediaPlayer = AbsMediaPlayer.getMediaPlayer(useDefault);
 		mMediaPlayer.setOnBufferingUpdateListener(this);
 		mMediaPlayer.setOnCompletionListener(this);
@@ -385,6 +393,7 @@ public class PlayerActivity extends Activity implements
 		mMediaPlayer.setOnInfoListener(this);
 		mMediaPlayer.setOnPreparedListener(this);
 		mMediaPlayer.setOnProgressUpdateListener(this);
+		mMediaPlayer.setOnVideoSizeChangedListener(this);
 		mMediaPlayer.reset();
 		mMediaPlayer.setDisplay(holder);
 		mMediaPlayer.setDataSource(uri);
@@ -404,6 +413,75 @@ public class PlayerActivity extends Activity implements
 		}
 	}
 
+	protected void changeSurfaceSize() {
+		if (mMediaPlayer == null) {
+			return;
+		}
+		int videoWidth = mMediaPlayer.getVideoWidth();
+		int videoHeight = mMediaPlayer.getVideoHeight();
+		if (videoWidth <= 0 || videoHeight <= 0) {
+			return;
+		}
+		boolean isDefault = mMediaPlayer.getClass().getName()
+				.equals(DefMediaPlayer.class.getName());
+		SurfaceHolder holder = isDefault ? mSurfaceHolderDef
+				: mSurfaceHolderVlc;
+		holder.setFixedSize(videoWidth, videoHeight);
+		int displayWidth = getWindowManager().getDefaultDisplay().getWidth();
+		int displayHeight = getWindowManager().getDefaultDisplay().getHeight();
+		int targetWidth = -1;
+		int targetHeight = -1;
+		switch (mAspectRatio) {
+		case SURFACE_NONE: {
+			targetWidth = videoWidth;
+			targetHeight = videoHeight;
+			break;
+		}
+		case SURFACE_FILL: {
+			break;
+		}
+		case SURFACE_ORIG: {
+			displayWidth = videoWidth;
+			displayHeight = videoHeight;
+			break;
+		}
+		case SURFACE_4_3: {
+			targetWidth = 4;
+			targetHeight = 3;
+			break;
+		}
+		case SURFACE_16_9: {
+			targetWidth = 16;
+			targetHeight = 9;
+			break;
+		}
+		case SURFACE_16_10: {
+			targetWidth = 16;
+			targetHeight = 10;
+			break;
+		}
+		default:
+			break;
+		}
+		if (targetWidth > 0 && targetHeight > 0) {
+			double ard = (double) displayWidth / (double) displayHeight;
+			double art = (double) targetWidth / (double) targetHeight;
+			if (ard > art) {
+				displayWidth = displayHeight * targetWidth / targetHeight;
+			} else {
+				displayHeight = displayWidth * targetHeight / targetWidth;
+			}
+		}
+		Log.d(LOGTAG, String.format("set surfaceview size to %d %dx%d",
+				mAspectRatio, displayWidth, displayHeight));
+		SurfaceView surface = isDefault ? mSurfaceViewDef : mSurfaceViewVlc;
+		LayoutParams lp = surface.getLayoutParams();
+		lp.width = displayWidth;
+		lp.height = displayHeight;
+		surface.setLayoutParams(lp);
+		surface.invalidate();
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -411,7 +489,8 @@ public class PlayerActivity extends Activity implements
 		setContentView(R.layout.player);
 		initializeControls();
 		initializeData();
-		initializeInterface();
+		mSurfaceViewVlc.setVisibility(View.GONE);
+		mSurfaceViewDef.setVisibility(View.GONE);
 		selectMediaPlayer(mPlayListArray.get(mPlayListSelected), false);
 	}
 
@@ -439,7 +518,9 @@ public class PlayerActivity extends Activity implements
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		/* TODO: enable this after prepared */
+		if (!mPrepared) {
+			return true;
+		}
 		int action = event.getAction();
 		if (action == MotionEvent.ACTION_DOWN) {
 			int visibility = mLinearLayoutControlBar.getVisibility();
@@ -476,28 +557,26 @@ public class PlayerActivity extends Activity implements
 			break;
 		}
 		case R.id.player_button_toggle_play: {
-			if (mCanPause) {
-				boolean playing = mMediaPlayer.isPlaying();
-				if (playing) {
-					mMediaPlayer.pause();
-				} else {
-					mMediaPlayer.start();
-				}
-				String name = String.format("btn_play_%d", !playing ? 1 : 0);
-				int resouce = SystemUtility.getDrawableId(name);
-				mImageButtonTogglePlay.setBackgroundResource(resouce);
+			boolean playing = mMediaPlayer.isPlaying();
+			if (playing) {
+				mMediaPlayer.pause();
+			} else {
+				mMediaPlayer.start();
 			}
+			String name = String.format("btn_play_%d", !playing ? 1 : 0);
+			int resouce = SystemUtility.getDrawableId(name);
+			mImageButtonTogglePlay.setBackgroundResource(resouce);
 			break;
 		}
 		case R.id.player_button_next: {
 			break;
 		}
 		case R.id.player_button_switch_aspect_ratio: {
-
-			break;
-		}
-		case R.id.player_button_toggle_full_screen: {
-
+			mAspectRatio = (mAspectRatio + 1) % SURFACE_MAX;
+			changeSurfaceSize();
+			String name = String.format("btn_aspect_ratio_%d", mAspectRatio);
+			int resource = SystemUtility.getDrawableId(name);
+			mImageButtonSwitchAspectRatio.setBackgroundResource(resource);
 			break;
 		}
 		default:
@@ -583,4 +662,13 @@ public class PlayerActivity extends Activity implements
 		mEventHandler.sendMessage(msg);
 	}
 
+	@Override
+	public void onVideoSizeChangedListener(AbsMediaPlayer mp, int width,
+			int height) {
+		Message msg = new Message();
+		msg.what = MEDIA_PLAYER_VIDEO_SIZE_CHANGED;
+		msg.arg1 = width;
+		msg.arg2 = height;
+		mEventHandler.sendMessage(msg);
+	}
 }
