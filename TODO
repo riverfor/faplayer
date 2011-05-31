@@ -8,4 +8,4 @@ TODO
 ( ) viewer for acfun/bilibili and so on(nicovideo needs login so do it later)
 ( ) download video & danmaku from acfun/bilibili(nicovideo needs login so do it later)
 ( ) merge multiple flv files into one for sina/qq/? source
-
+( ) implement fullscreen/aspect ration control in both MediaPlayer and VLC

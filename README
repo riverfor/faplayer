@@ -10,3 +10,6 @@ Currently you can only build the source with one ABI choice, armeabi or armeabi-
 If you want to disable NEON version of ffmpeg, open jni/Application.mk and change APP_ABI to armeabi.
 Cortex-A9 targets like XOOM do NOT have NEON, so you should set vfpv3 instead of neon to -mfpu.
 
+NDK issues:
+At least in NDK-r5b LOCAL_WHOLE_STATIC_LIBRARY doesn't work. Please search google for solutions.
+

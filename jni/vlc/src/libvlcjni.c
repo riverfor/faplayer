@@ -239,6 +239,26 @@ JNIEXPORT void JNICALL NAME(nativeDetachSurface)(JNIEnv *env, jobject thiz)
     pthread_mutex_unlock(&s_surface_mutex);
 }
 
+static libvlc_event_type_t md_listening[] = {
+    libvlc_MediaDurationChanged,
+    libvlc_MediaParsedChanged,
+    libvlc_MediaStateChanged,
+};
+
+static libvlc_event_type_t mp_listening[] = {
+    libvlc_MediaPlayerOpening,
+    libvlc_MediaPlayerBuffering,
+    libvlc_MediaPlayerPlaying,
+    libvlc_MediaPlayerPaused,
+    libvlc_MediaPlayerStopped,
+    libvlc_MediaPlayerEndReached,
+    libvlc_MediaPlayerEncounteredError,
+    libvlc_MediaPlayerTimeChanged,
+    libvlc_MediaPlayerSeekableChanged,
+    libvlc_MediaPlayerPausableChanged,
+    libvlc_MediaPlayerLengthChanged,
+};
+
 JNIEXPORT void JNICALL NAME(nativeCreate)(JNIEnv *env, jobject thiz)
 {
     initClasses(env, thiz);
@@ -247,23 +267,10 @@ JNIEXPORT void JNICALL NAME(nativeCreate)(JNIEnv *env, jobject thiz)
     setIntValue(env, thiz, "mLibVlcInstance", (jint) instance);
     libvlc_media_player_t *mp = libvlc_media_player_new(instance);
     setIntValue(env, thiz, "mLibVlcMediaPlayer", (jint) mp);
-    libvlc_event_type_t listening[] = {
-        libvlc_MediaPlayerOpening,
-        libvlc_MediaPlayerBuffering,
-        libvlc_MediaPlayerPlaying,
-        libvlc_MediaPlayerPaused,
-        libvlc_MediaPlayerStopped,
-        libvlc_MediaPlayerEndReached,
-        libvlc_MediaPlayerEncounteredError,
-        libvlc_MediaPlayerTimeChanged,
-        libvlc_MediaPlayerSeekableChanged,
-        libvlc_MediaPlayerPausableChanged,
-        libvlc_MediaPlayerLengthChanged,
-    };
     libvlc_event_manager_t *em = libvlc_media_player_event_manager(mp);
-    for (int i = 0; i < sizeof(listening) / sizeof(*listening); i++)
+    for (int i = 0; i < sizeof(mp_listening) / sizeof(*mp_listening); i++)
     {
-        libvlc_event_attach(em, listening[i], vlc_event_callback, thiz);
+        libvlc_event_attach(em, mp_listening[i], vlc_event_callback, thiz);
     }
     jclass clz = (*env)->FindClass(env, PREFIX "VlcMediaPlayer$VlcEvent");
 }
@@ -273,7 +280,19 @@ JNIEXPORT void JNICALL NAME(nativeRelease)(JNIEnv *env, jobject thiz)
     jint mLibVlcMediaPlayer = getIntValue(env, thiz, "mLibVlcMediaPlayer");
     if (mLibVlcMediaPlayer != 0)
     {
+        libvlc_event_manager_t *em;
         libvlc_media_player_t *mp = (libvlc_media_player_t*) mLibVlcMediaPlayer;
+        libvlc_media_t *md = libvlc_media_player_get_media(mp);
+        em = libvlc_media_event_manager(md);
+        for (int i = 0; i < sizeof(md_listening) / sizeof(*md_listening); i++)
+        {
+            libvlc_event_detach(em, md_listening[i], vlc_event_callback, thiz);
+        }
+        em = libvlc_media_player_event_manager(mp);
+        for (int i = 0; i < sizeof(mp_listening) / sizeof(*mp_listening); i++)
+        {
+            libvlc_event_detach(em, mp_listening[i], vlc_event_callback, thiz);
+        }
         libvlc_media_player_stop(mp);
         libvlc_media_player_release(mp);
         setIntValue(env, thiz, "mLibVlcMediaPlayer", 0);
@@ -423,8 +442,7 @@ JNIEXPORT void JNICALL NAME(nativeSeekTo)(JNIEnv *env, jobject thiz, jint msec)
     {
         return;
     }
-    int64_t newPosition = msec * 1000;
-    libvlc_media_player_set_time(mp, newPosition);
+    libvlc_media_player_set_time(mp, msec);
 }
 
 JNIEXPORT void JNICALL NAME(nativeSetDataSource)(JNIEnv *env, jobject thiz, jstring path)
@@ -447,15 +465,10 @@ JNIEXPORT void JNICALL NAME(nativeSetDataSource)(JNIEnv *env, jobject thiz, jstr
     libvlc_media_t *media = (*str == '/') ? libvlc_media_new_path(instance, str) : libvlc_media_new_location(instance, str);
     if (media)
     {
-        libvlc_event_type_t listening[] = {
-            libvlc_MediaDurationChanged,
-            libvlc_MediaParsedChanged,
-            libvlc_MediaStateChanged,
-        };
         libvlc_event_manager_t *em = libvlc_media_event_manager(media);
-        for (int i = 0; i < sizeof(listening) / sizeof(*listening); i++)
+        for (int i = 0; i < sizeof(md_listening) / sizeof(*md_listening); i++)
         {
-            libvlc_event_attach(em, listening[i], vlc_event_callback, thiz);
+            libvlc_event_attach(em, md_listening[i], vlc_event_callback, thiz);
         }
         libvlc_media_player_set_media(mp, media);
     }

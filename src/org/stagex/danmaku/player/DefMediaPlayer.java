@@ -155,7 +155,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 	@Override
 	public void release() {
 		Log.d(LOGTAG, "DefMediaPlayer release() called");
-		stop();
 		try {
 			mMediaPlayer.release();
 		} catch (Exception e) {

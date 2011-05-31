@@ -23,6 +23,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -101,8 +102,10 @@ public class PlayerActivity extends Activity implements
 	private SurfaceView mSurfaceViewVlc;
 	private SurfaceHolder mSurfaceHolderVlc;
 
-	private int mCanPause = -1;
-	private int mCanSeek = -1;
+	private int mTime = -1;
+	private int mLength = -1;
+	private boolean mCanPause = true;
+	private boolean mCanSeek = true;
 
 	private boolean mFullScreen = false;
 	private int mAspectRatio = 0;
@@ -169,9 +172,20 @@ public class PlayerActivity extends Activity implements
 					break;
 				}
 				case MEDIA_PLAYER_ERROR: {
+					/* fallback to VlcMediaPlayer if possible */
+					if (mMediaPlayer.getClass().getName()
+							.equals(DefMediaPlayer.class.getName())) {
+						selectMediaPlayer(
+								mPlayListArray.get(mPlayListSelected), true);
+					} else {
+						/* really won't play */
+					}
 					break;
 				}
 				case MEDIA_PLAYER_INFO: {
+					if (msg.arg1 == MediaPlayer.MEDIA_INFO_NOT_SEEKABLE) {
+						mCanSeek = false;
+					}
 					break;
 				}
 				case MEDIA_PLAYER_PREPARED: {
@@ -179,15 +193,19 @@ public class PlayerActivity extends Activity implements
 					break;
 				}
 				case MEDIA_PLAYER_PROGRESS_UPDATE: {
-					if (msg.arg2 >= 0) {
+					int length = msg.arg2;
+					if (length >= 0) {
+						mLength = length;
 						mTextViewLength.setText(SystemUtility
-								.getTimeString(msg.arg2));
-						mSeekBarProgress.setMax(msg.arg2);
+								.getTimeString(mLength));
+						mSeekBarProgress.setMax(mLength);
 					}
-					if (msg.arg1 >= 0) {
+					int time = msg.arg1;
+					if (time >= 0) {
+						mTime = time;
 						mTextViewTime.setText(SystemUtility
-								.getTimeString(msg.arg1));
-						mSeekBarProgress.setProgress(msg.arg1);
+								.getTimeString(mTime));
+						mSeekBarProgress.setProgress(mTime);
 					}
 					break;
 				}
@@ -326,8 +344,9 @@ public class PlayerActivity extends Activity implements
 		mImageButtonTogglePlay.setVisibility(View.VISIBLE);
 		mImageButtonNext.setVisibility((mPlayListArray.size() == 1) ? View.GONE
 				: View.VISIBLE);
-		mImageButtonSwitchAspectRatio.setVisibility(View.VISIBLE);
-		mImageButtonToggleFullScreen.setVisibility(View.VISIBLE);
+		/* not implemented yet */
+		mImageButtonSwitchAspectRatio.setVisibility(View.GONE);
+		mImageButtonToggleFullScreen.setVisibility(View.GONE);
 		/* */
 		mLinearLayoutControlBar.setVisibility(View.GONE);
 		/* */
@@ -335,6 +354,7 @@ public class PlayerActivity extends Activity implements
 	}
 
 	protected void selectMediaPlayer(String uri, boolean forceVlc) {
+		/* TODO: do this through configuration */
 		boolean useDefault = true;
 		int indexOfDot = uri.lastIndexOf('.');
 		if (indexOfDot != -1) {
@@ -419,6 +439,7 @@ public class PlayerActivity extends Activity implements
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		/* TODO: enable this after prepared */
 		int action = event.getAction();
 		if (action == MotionEvent.ACTION_DOWN) {
 			int visibility = mLinearLayoutControlBar.getVisibility();
@@ -455,8 +476,16 @@ public class PlayerActivity extends Activity implements
 			break;
 		}
 		case R.id.player_button_toggle_play: {
-			if (mCanPause > 0) {
-
+			if (mCanPause) {
+				boolean playing = mMediaPlayer.isPlaying();
+				if (playing) {
+					mMediaPlayer.pause();
+				} else {
+					mMediaPlayer.start();
+				}
+				String name = String.format("btn_play_%d", !playing ? 1 : 0);
+				int resouce = SystemUtility.getDrawableId(name);
+				mImageButtonTogglePlay.setBackgroundResource(resouce);
 			}
 			break;
 		}
@@ -492,9 +521,9 @@ public class PlayerActivity extends Activity implements
 		int id = seekBar.getId();
 		switch (id) {
 		case R.id.player_seekbar_progress: {
-			if (mCanSeek > 0) {
-				long position = seekBar.getProgress();
-
+			if (mCanSeek && mLength > 0) {
+				int position = seekBar.getProgress();
+				mMediaPlayer.seekTo(position);
 			}
 			break;
 		}

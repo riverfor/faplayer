@@ -148,7 +148,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 		case VlcEvent.MediaPlayerTimeChanged: {
 			if (mOnProgressUpdateListener != null) {
 				mOnProgressUpdateListener.onProgressUpdate(this,
-						(int) ev.longValue / 1000, -1);
+						(int) ev.longValue, -1);
 			}
 			break;
 		}
@@ -164,7 +164,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 		case VlcEvent.MediaPlayerLengthChanged: {
 			if (mOnProgressUpdateListener != null) {
 				mOnProgressUpdateListener.onProgressUpdate(
-						(AbsMediaPlayer) this, -1, (int) ev.longValue / 1000);
+						(AbsMediaPlayer) this, -1, (int) ev.longValue);
 			}
 			break;
 		}
@@ -232,7 +232,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	@Override
 	public void release() {
 		Log.d(LOGTAG, "VlcMediaPlayer release() called");
-		stop();
 		nativeRelease();
 		sVlcMediaPlayer = null;
 	}
