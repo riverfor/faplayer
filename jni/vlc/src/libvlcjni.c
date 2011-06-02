@@ -423,6 +423,15 @@ JNIEXPORT void JNICALL NAME(nativePrepare)(JNIEnv *env, jobject thiz)
         return;
     }
     libvlc_media_parse(media);
+    /* vlc parses the media only if it's a file */
+    char *mrl = libvlc_media_get_mrl(media);
+    if (*mrl == '/' || strncmp(mrl, "file://", 7)) {
+        libvlc_event_t ev;
+
+        ev.type = libvlc_MediaParsedChanged;
+        ev.u.media_parsed_changed.new_status = 1;
+        vlc_event_callback(&ev, thiz);
+    }
 }
 
 JNIEXPORT void JNICALL NAME(nativePrepareAsync)(JNIEnv *env, jobject thiz)
@@ -433,6 +442,15 @@ JNIEXPORT void JNICALL NAME(nativePrepareAsync)(JNIEnv *env, jobject thiz)
         return;
     }
     libvlc_media_parse_async(media);
+    /* vlc parses the media only if it's a file */
+    char *mrl = libvlc_media_get_mrl(media);
+    if (*mrl == '/' || strncmp(mrl, "file://", 7)) {
+        libvlc_event_t ev;
+
+        ev.type = libvlc_MediaParsedChanged;
+        ev.u.media_parsed_changed.new_status = 1;
+        vlc_event_callback(&ev, thiz);
+    }
 }
 
 JNIEXPORT void JNICALL NAME(nativeSeekTo)(JNIEnv *env, jobject thiz, jint msec)

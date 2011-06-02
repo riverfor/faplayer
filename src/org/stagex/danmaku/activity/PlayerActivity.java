@@ -78,7 +78,7 @@ public class PlayerActivity extends Activity implements
 	/* the media player */
 	private AbsMediaPlayer mMediaPlayer = null;
 
-	/**/
+	/* */
 	private ArrayList<String> mPlayListArray = null;
 	private int mPlayListSelected = -1;
 
