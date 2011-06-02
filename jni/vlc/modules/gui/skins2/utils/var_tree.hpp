@@ -2,7 +2,7 @@
  * var_tree.hpp
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id: 0fadc1c82baf99f090f24dd0526eb02b97d634d0 $
+ * $Id: 5934c4fd1986daaf747cb3adf12b9bfa551bad76 $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -131,7 +131,7 @@ public:
     void removeChild( Iterator it ) { m_children.erase( it ); }
 
     /// Execute the action associated to this item
-    virtual void action( VarTree *pItem ) { }
+    virtual void action( VarTree *pItem ) { (void)pItem; }
 
     /// Get a reference on the position variable
     VarPercent &getPositionVar() const

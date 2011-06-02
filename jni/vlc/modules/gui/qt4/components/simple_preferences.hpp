@@ -2,7 +2,7 @@
  * simple_preferences.hpp : Simple prefs
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: a709f74e5bffd65e57e375b2badbf0b5e4718ed5 $
+ * $Id: 1765247aabf6a769a0811c332a7062d6a9ff1605 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -133,10 +133,11 @@ private slots:
     void lastfm_Changed( int );
     void updateAudioOptions( int );
     void updateAudioVolume( int );
-#ifdef SYS_MINGW32
+#ifdef WIN32
     void assoDialog();
     void saveAsso();
 #endif
+    void configML();
     void changeStyle( QString );
 };
 

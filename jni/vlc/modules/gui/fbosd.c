@@ -2,7 +2,7 @@
  * fbosd.c : framebuffer osd plugin for vlc
  *****************************************************************************
  * Copyright (C) 2007-2008, the VideoLAN team
- * $Id: d355818c77938b3a945dfda4c6fd5d84f455d49c $
+ * $Id: 35c139d34455e5bd42f0e1338b6f946e4573712c $
  *
  * Authors: Jean-Paul Saman
  * Copied from modules/video_output/fb.c by Samuel Hocevar <sam@zoy.org>
@@ -190,7 +190,7 @@ vlc_module_begin ()
     add_string( "fbosd-text", NULL, FBOSD_TEXT,
                 FBOSD_LONGTEXT, true )
 
-    add_integer_with_range( "fbosd-alpha", 255, 0, 255, NULL, ALPHA_TEXT,
+    add_integer_with_range( "fbosd-alpha", 255, 0, 255, ALPHA_TEXT,
                             ALPHA_LONGTEXT, true )
 
     set_section( N_("Position"), NULL )
@@ -202,7 +202,7 @@ vlc_module_begin ()
         change_integer_list( pi_pos_values, ppsz_pos_descriptions );
 
     set_section( N_("Font"), NULL )
-    add_integer_with_range( "fbosd-font-opacity", 255, 0, 255, NULL,
+    add_integer_with_range( "fbosd-font-opacity", 255, 0, 255,
         OPACITY_TEXT, OPACITY_LONGTEXT, false )
     add_integer( "fbosd-font-color", 0x00FFFFFF, COLOR_TEXT, COLOR_LONGTEXT,
                  false )
@@ -530,7 +530,6 @@ static int OpenBlending( intf_thread_t *p_intf )
 
     p_intf->p_sys->p_blend =
             vlc_object_create( p_intf, sizeof(filter_t) );
-    vlc_object_attach( p_intf->p_sys->p_blend, p_intf );
     p_intf->p_sys->p_blend->fmt_out.video.i_x_offset =
         p_intf->p_sys->p_blend->fmt_out.video.i_y_offset = 0;
     p_intf->p_sys->p_blend->fmt_out.video.i_sar_num =
@@ -576,7 +575,6 @@ static int OpenTextRenderer( intf_thread_t *p_intf )
 
     p_intf->p_sys->p_text =
             vlc_object_create( p_intf, sizeof(filter_t) );
-    vlc_object_attach( p_intf->p_sys->p_text, p_intf );
 
     p_intf->p_sys->p_text->fmt_out.video.i_width =
         p_intf->p_sys->p_text->fmt_out.video.i_visible_width =

@@ -2,7 +2,7 @@
  * ml_item.cpp: the media library's result item
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id: 89b58296adc4a6313b42ade87b6e6886b15d30f5 $
+ * $Id: 8e72f7e3982da7b236b5fc77df92bb7676ac803b $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -87,7 +87,7 @@ MLItem::MLItem( const MLModel *p_model,
                             intf_thread_t* _p_intf,
                             ml_media_t *p_media,
                             MLItem *p_parent )
-        : model( p_model ), children(), parentItem( p_parent ), p_intf( _p_intf )
+        : p_intf( _p_intf ), model( p_model ), children(), parentItem( p_parent )
 {
     if( p_media )
         ml_gc_incref( p_media );

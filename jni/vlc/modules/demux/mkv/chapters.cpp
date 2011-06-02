@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: 1e8025bbbf1f15e5a68b1af759aa11a572aefed9 $
+ * $Id: 6e5e091f449b49d53f71f96533eee52383cca538 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -316,7 +316,7 @@ bool chapter_item_c::EnterAndLeave( chapter_item_c *p_item, bool b_final_enter )
     {
         if ( !p_common_parent->b_is_leaving && p_common_parent->Leave( false ) )
             return true;
-        p_common_parent = p_common_parent->psz_parent;
+        p_common_parent = p_common_parent->p_parent;
     }
 
     // enter from the parent to <this>

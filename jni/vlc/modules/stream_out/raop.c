@@ -2,7 +2,7 @@
  * raop.c: Remote Audio Output Protocol streaming support
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id: 17c74839d4d042a231e908eaecb74a6e17b9ffc3 $
+ * $Id: a9e51fafce4cbcea07907ae27ec929ce231b9b91 $
  *
  * Author: Michael Hanselmann
  *
@@ -170,7 +170,7 @@ vlc_module_begin();
                   PASSWORD_TEXT, PASSWORD_LONGTEXT, false )
     add_loadfile( SOUT_CFG_PREFIX "password-file", NULL,
               PASSWORD_FILE_TEXT, PASSWORD_FILE_LONGTEXT, false )
-    add_integer_with_range( SOUT_CFG_PREFIX "volume", 100, 0, 255, NULL,
+    add_integer_with_range( SOUT_CFG_PREFIX "volume", 100, 0, 255,
                             VOLUME_TEXT, VOLUME_LONGTEXT, false )
     set_callbacks( Open, Close )
 vlc_module_end()

@@ -2,7 +2,7 @@
  * fluidsynth.c: Software MIDI synthetizer using libfluidsynth
  *****************************************************************************
  * Copyright © 2007 Rémi Denis-Courmont
- * $Id: 6d1e3562f68f9fe0778eb58e07eaefa53a0cb939 $
+ * $Id: 79ed0da3b30ecf05530cced6b69e284f1e72f6a9 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,7 +93,8 @@ static int Open (vlc_object_t *p_this)
         dialog_Fatal (p_this, _("MIDI synthesis not set up"),
             _("A sound font file (.SF2) is required for MIDI synthesis.\n"
               "Please install a sound font and configure it "
-              "from the VLC preferences (Codecs / Audio / FluidSynth).\n"));
+              "from the VLC preferences "
+              "(Input / Codecs > Audio codecs > FluidSynth).\n"));
         return VLC_EGENERIC;
     }
 

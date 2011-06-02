@@ -2,7 +2,7 @@
  * media_player.c: Libvlc API Media Instance management functions
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: ba1215c0d41c1017db2968ff3b30547df9b0692e $
+ * $Id: f0c221a9235f503db8ef032e19c3cd7ba4b16109 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -129,6 +129,7 @@ static void release_input_thread( libvlc_media_player_t *p_mi, bool b_input_abor
     input_thread_t *p_input_thread = p_mi->input.p_thread;
     if( !p_input_thread )
         return;
+    p_mi->input.p_thread = NULL;
 
     var_DelCallback( p_input_thread, "can-seek",
                      input_seekable_changed, p_mi );
@@ -139,13 +140,7 @@ static void release_input_thread( libvlc_media_player_t *p_mi, bool b_input_abor
 
     /* We owned this one */
     input_Stop( p_input_thread, b_input_abort );
-
-    vlc_thread_join( p_input_thread );
-
-    assert( p_input_thread->b_dead );
-
-    p_mi->input.p_thread = NULL;
-    vlc_object_release( p_input_thread );
+    input_Close( p_input_thread );
 }
 
 /*
@@ -384,7 +379,6 @@ libvlc_media_player_new( libvlc_instance_t *instance )
         libvlc_printerr("Not enough memory");
         return NULL;
     }
-    vlc_object_attach (mp, mp->p_libvlc);
 
     /* Input */
     var_Create (mp, "rate", VLC_VAR_FLOAT|VLC_VAR_DOINHERIT);
@@ -458,6 +452,14 @@ libvlc_media_player_new( libvlc_instance_t *instance )
     var_Create (mp, "volume", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT);
     var_Create (mp, "find-input-callback", VLC_VAR_ADDRESS);
     var_SetAddress (mp, "find-input-callback", find_input);
+    var_Create (mp, "amem-data", VLC_VAR_ADDRESS);
+    var_Create (mp, "amem-setup", VLC_VAR_ADDRESS);
+    var_Create (mp, "amem-close", VLC_VAR_ADDRESS);
+    var_Create (mp, "amem-play", VLC_VAR_ADDRESS);
+    var_Create (mp, "amem-set-volume", VLC_VAR_ADDRESS);
+    var_Create (mp, "amem-format", VLC_VAR_STRING | VLC_VAR_DOINHERIT);
+    var_Create (mp, "amem-rate", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT);
+    var_Create (mp, "amem-channels", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT);
 
     mp->p_md = NULL;
     mp->state = libvlc_NothingSpecial;
@@ -932,6 +934,34 @@ void *libvlc_media_player_get_hwnd( libvlc_media_player_t *p_mi )
     return NULL;
 #endif
 }
+
+void libvlc_audio_set_callbacks( libvlc_media_player_t *mp,
+                                 libvlc_audio_play_cb play_cb,
+                                 libvlc_audio_set_volume_cb set_volume_cb,
+                                 void *opaque )
+{
+    var_SetAddress( mp, "amem-play", play_cb );
+    var_SetAddress( mp, "amem-set-volume", set_volume_cb );
+    var_SetAddress( mp, "amem-data", opaque );
+    var_SetString( mp, "aout", "amem" );
+}
+
+void libvlc_audio_set_format_callbacks( libvlc_media_player_t *mp,
+                                        libvlc_audio_setup_cb setup,
+                                        libvlc_audio_cleanup_cb cleanup )
+{
+    var_SetAddress( mp, "amem-setup", setup );
+    var_SetAddress( mp, "amem-cleanup", cleanup );
+}
+
+void libvlc_audio_set_format( libvlc_media_player_t *mp, const char *format,
+                              unsigned rate, unsigned channels )
+{
+    var_SetString( mp, "amem-format", format );
+    var_SetInteger( mp, "amem-rate", rate );
+    var_SetInteger( mp, "amem-channels", channels );
+}
+
 
 /**************************************************************************
  * Getters for stream information

@@ -45,7 +45,7 @@ static void vlc_module_destruct (gc_object_t *obj)
 
 static const char default_name[] = "unnamed";
 
-module_t *vlc_module_create (vlc_object_t *obj)
+module_t *vlc_module_create (void)
 {
     module_t *module = malloc (sizeof (*module));
     if (module == NULL)
@@ -66,7 +66,6 @@ module_t *vlc_module_create (vlc_object_t *obj)
     module->psz_capability = (char*)"";
     module->i_score = 1;
     module->b_unloadable = true;
-    module->b_submodule = false;
     module->pf_activate = NULL;
     module->pf_deactivate = NULL;
     module->p_config = NULL;
@@ -78,8 +77,6 @@ module_t *vlc_module_create (vlc_object_t *obj)
     module->domain = NULL;
     module->b_builtin = false;
     module->b_loaded = false;
-
-    (void)obj;
     return module;
 }
 
@@ -117,7 +114,6 @@ module_t *vlc_submodule_create (module_t *module)
     submodule->psz_longname = module->psz_longname;
     submodule->psz_capability = module->psz_capability;
     submodule->i_score = module->i_score;
-    submodule->b_submodule = true;
     submodule->domain = module->domain;
     return submodule;
 }
@@ -310,10 +306,6 @@ int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
 
         case VLC_CONFIG_VOLATILE:
             item->b_unsaveable = true;
-            break;
-
-        case VLC_CONFIG_RESTART:
-            item->b_restart = true;
             break;
 
         case VLC_CONFIG_PRIVATE:

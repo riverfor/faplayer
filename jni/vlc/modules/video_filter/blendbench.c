@@ -2,7 +2,7 @@
  * blendbench.c : blending benchmark plugin for vlc
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: 9edb24248dc34a213e405d3139bfffd755922a70 $
+ * $Id: 6665f016a8c65f7ae48e6b953d4717a2ff4a07db $
  *
  * Author: Søren Bøg <avacore@videolan.org>
  *
@@ -80,7 +80,7 @@ vlc_module_begin ()
     set_section( N_("Benchmarking"), NULL )
     add_integer( CFG_PREFIX "loops", 1000, LOOPS_TEXT,
               LOOPS_LONGTEXT, false )
-    add_integer_with_range( CFG_PREFIX "alpha", 128, 0, 255, NULL, ALPHA_TEXT,
+    add_integer_with_range( CFG_PREFIX "alpha", 128, 0, 255, ALPHA_TEXT,
               ALPHA_LONGTEXT, false )
 
     set_section( N_("Base image"), NULL )
@@ -225,7 +225,6 @@ static picture_t *Filter( filter_t *p_filter, picture_t *p_pic )
         picture_Release( p_pic );
         return NULL;
     }
-    vlc_object_attach( p_blend, p_filter );
     p_blend->fmt_out.video = p_sys->p_base_image->format;
     p_blend->fmt_in.video = p_sys->p_blend_image->format;
     p_blend->p_module = module_need( p_blend, "video blending", NULL, false );

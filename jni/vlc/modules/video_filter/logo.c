@@ -2,7 +2,7 @@
  * logo.c : logo video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2003-2006 the VideoLAN team
- * $Id: 2b90c78ccd8790b09f1ae39dfeb1ed44a2f9b81b $
+ * $Id: 9174e5f2a3aae7f05dc8cb69daaee3f47d88a492 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Simon Latapie <garf@videolan.org>
@@ -99,7 +99,7 @@ vlc_module_begin ()
     /* default to 1000 ms per image, continuously cycle through them */
     add_integer( CFG_PREFIX "delay", 1000, DELAY_TEXT, DELAY_LONGTEXT, true )
     add_integer( CFG_PREFIX "repeat", -1, REPEAT_TEXT, REPEAT_LONGTEXT, true )
-    add_integer_with_range( CFG_PREFIX "opacity", 255, 0, 255, NULL,
+    add_integer_with_range( CFG_PREFIX "opacity", 255, 0, 255,
         OPACITY_TEXT, OPACITY_LONGTEXT, false )
     add_integer( CFG_PREFIX "position", -1, POS_TEXT, POS_LONGTEXT, false )
         change_integer_list( pi_pos_values, ppsz_pos_descriptions )

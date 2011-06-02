@@ -2,7 +2,7 @@
  * marq.c : marquee display video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2003-2008 the VideoLAN team
- * $Id: 200bfcffebba694927eb24693cf2315b438260f5 $
+ * $Id: b11de2551266bc96f34b40f35bd8f70ea473acfb $
  *
  * Authors: Mark Moriarty
  *          Sigmund Augdal Helberg <dnumgis@videolan.org>
@@ -162,7 +162,7 @@ vlc_module_begin ()
 
     set_section( N_("Font"), NULL )
     /* 5 sets the default to top [1] left [4] */
-    add_integer_with_range( CFG_PREFIX "opacity", 255, 0, 255, NULL,
+    add_integer_with_range( CFG_PREFIX "opacity", 255, 0, 255,
         OPACITY_TEXT, OPACITY_LONGTEXT, false )
     add_integer( CFG_PREFIX "color", 0xFFFFFF, COLOR_TEXT, COLOR_LONGTEXT,
                  false )

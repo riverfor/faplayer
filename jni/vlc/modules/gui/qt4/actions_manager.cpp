@@ -2,7 +2,7 @@
  * Controller.cpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: cc4e535af99add8325db3f5c0099826835494384 $
+ * $Id: 7773ea4eb9a519c1fa03d2c0e90f6d20fa7597b4 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -91,6 +91,8 @@ void ActionsManager::doAction( int id_action )
             THEMIM->toggleRandom(); break;
         case INFO_ACTION:
             THEDP->mediaInfoDialog(); break;
+        case OPEN_SUB_ACTION:
+            THEDP->loadSubtitlesFile(); break;
         default:
             msg_Dbg( p_intf, "Action: %i", id_action );
             break;

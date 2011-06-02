@@ -2,7 +2,7 @@
  * spdif.c : dummy mixer for S/PDIF output (1 input only)
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: 0bd545f728c5865f7ff127d2dba4381849376381 $
+ * $Id: 22f3782961190193f0dd45b96738692087f63fbf $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -34,13 +34,14 @@
 #include <vlc_common.h>
 #include <vlc_plugin.h>
 #include <vlc_aout.h>
+#include <vlc_aout_mixer.h>
 
 /*****************************************************************************
  * Local prototypes
  *****************************************************************************/
 static int  Create    ( vlc_object_t * );
 
-static void DoWork    ( aout_mixer_t *, aout_buffer_t * );
+static aout_buffer_t *DoWork( aout_mixer_t *, unsigned, float );
 
 /*****************************************************************************
  * Module descriptor
@@ -61,31 +62,21 @@ static int Create( vlc_object_t *p_this )
     aout_mixer_t *p_mixer = (aout_mixer_t *)p_this;
 
     if ( !AOUT_FMT_NON_LINEAR(&p_mixer->fmt) )
-    {
         return -1;
-    }
 
     p_mixer->mix = DoWork;
-    /* This is a bit kludgy - do not ask for a new buffer, since the one
-     * provided by the first input will be good enough. */
-    p_mixer->allocation.b_alloc = false;
-
     return 0;
 }
 
 /*****************************************************************************
  * DoWork: mix a new output buffer - this does nothing, indeed
  *****************************************************************************/
-static void DoWork( aout_mixer_t * p_mixer, aout_buffer_t * p_buffer )
+static aout_buffer_t *DoWork( aout_mixer_t * p_mixer, unsigned samples,
+                              float multiplier )
 {
-    VLC_UNUSED( p_buffer );
-
     aout_mixer_input_t * p_input = p_mixer->input;
-
     aout_buffer_t * p_old_buffer = aout_FifoPop( NULL, &p_input->fifo );
-    /* We don't free the old buffer because,
-     * The aout core use a hack to avoid useless memcpy: the buffer in which
-     * to mix is the same as the one in the first active input fifo.
-     * So the ownership of that buffer belongs to our caller */
-    assert( p_old_buffer == p_buffer );
+
+    (void) samples; (void) multiplier;
+    return p_old_buffer;
 }

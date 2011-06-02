@@ -2,7 +2,7 @@
  * embeddedwindow.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2005-2011 the VideoLAN team
- * $Id: 4c915c41a6a9959266ea5677052ca36e8487633c $
+ * $Id: 56d4d5f5147eaf7a227d8f6ee15b7d20b1c175ef $
  *
  * Authors: Benjamin Pracht <bigben at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -135,6 +135,10 @@
                                      view_rect.size.width,
                                      view_rect.size.height )];
     }
+
+    /* we don't want this window to be restored on relaunch */
+    if ([self respondsToSelector:@selector(setRestorable:)])
+        [self setRestorable:NO];
 }
 
 - (void)controlTintChanged

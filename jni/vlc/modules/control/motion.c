@@ -2,7 +2,7 @@
  * motion.c: control VLC with laptop built-in motion sensors
  *****************************************************************************
  * Copyright (C) 2006 - 2007 the VideoLAN team
- * $Id: e97fb49322262fae2c7579ec4f7cb12f68bac826 $
+ * $Id: 6b620f3844ecc3115ba765229612ca5613347ece $
  *
  * Author: Sam Hocevar <sam@zoy.org>
  *         Jérôme Decoodt <djc@videolan.org> (unimotion integration)
@@ -206,7 +206,7 @@ static void RunIntf( intf_thread_t *p_intf )
             {
                 /* TODO: cache object pointer */
                 vlc_object_t *p_obj =
-                vlc_object_find_name( p_intf->p_libvlc, "rotate", FIND_CHILD );
+                vlc_object_find_name( p_intf->p_libvlc, "rotate" );
                 if( p_obj )
                 {
                     var_SetInteger( p_obj, "rotate-deciangle",

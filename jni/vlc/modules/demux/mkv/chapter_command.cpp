@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: 293c5021c38a0f054c3e4956335fc66d2759fe71 $
+ * $Id: d74f4eeb4b15bdb175e928dc88e529178f5a2493 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -587,12 +587,12 @@ bool dvd_command_interpretor_c::Interpret( const binary * p_command, size_t i_si
 
 
 
-bool dvd_command_interpretor_c::MatchIsDomain( const chapter_codec_cmds_c &data, const void *p_cookie, size_t i_cookie_size )
+bool dvd_command_interpretor_c::MatchIsDomain( const chapter_codec_cmds_c &data, const void *, size_t )
 {
     return ( data.p_private_data != NULL && data.p_private_data->GetBuffer()[0] == MATROSKA_DVD_LEVEL_SS );
 }
 
-bool dvd_command_interpretor_c::MatchIsVMG( const chapter_codec_cmds_c &data, const void *p_cookie, size_t i_cookie_size )
+bool dvd_command_interpretor_c::MatchIsVMG( const chapter_codec_cmds_c &data, const void *, size_t )
 {
     if ( data.p_private_data == NULL || data.p_private_data->GetSize() < 2 )
         return false;

@@ -2,7 +2,7 @@
  * window_manager.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: e9efb22d563305b5e26b60c156d4d5bea9593669 $
+ * $Id: b611e15cfa3e9f34acbb80734d01c843454833df $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -32,9 +32,9 @@
 
 
 WindowManager::WindowManager( intf_thread_t *pIntf ):
-    SkinObject( pIntf ), m_magnet( 0 ), m_direction( kNone ),
-    m_maximizeRect(0, 0, 50, 50), m_pTooltip( NULL ), m_pPopup( NULL ),
-    m_alpha( 255 ), m_moveAlpha( 255 ), m_opacityEnabled( false )
+    SkinObject( pIntf ), m_magnet( 0 ), m_alpha( 255 ), m_moveAlpha( 255 ),
+    m_opacityEnabled( false ), m_opacity( 255 ), m_direction( kNone ),
+    m_maximizeRect(0, 0, 50, 50), m_pTooltip( NULL ), m_pPopup( NULL )
 {
     // Create and register a variable for the "on top" status
     VarManager *pVarManager = VarManager::instance( getIntf() );
@@ -492,6 +492,7 @@ void WindowManager::buildDependSet( WinSet_t &rWinSet,
 void WindowManager::checkAnchors( TopWindow *pWindow,
                                   int &xOffset, int &yOffset ) const
 {
+    (void)pWindow;
     WinSet_t::const_iterator itMov, itSta;
     AncList_t::const_iterator itAncMov, itAncSta;
 

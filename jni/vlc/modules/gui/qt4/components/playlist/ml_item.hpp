@@ -2,7 +2,7 @@
  * ml_item.hpp: the media library's result item
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id: 0a9257f58d4e649be20c1e54821d0d5cc4d05efe $
+ * $Id: 6c781f425156e19d27b01a95c8f70e231abd25b6 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -74,10 +74,10 @@ public:
 private:
     ml_media_t* media;
     intf_thread_t* p_intf;
+    const MLModel *model;
     media_library_t* p_ml;
     QList< MLItem* > children;
     MLItem *parentItem;
-    const MLModel *model;
 };
 
 #endif

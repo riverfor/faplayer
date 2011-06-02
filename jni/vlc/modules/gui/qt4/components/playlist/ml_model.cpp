@@ -2,7 +2,7 @@
  * ml_model.cpp: the media library's model
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id: 623fdbfc7c72a161096f74e19733c2efd712e9b2 $
+ * $Id: 2bcf59f5f48c6d43818dd8bd0a5e613eb0f0dd9a $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -106,7 +106,7 @@ QModelIndex MLModel::index( int row, int column,
     }
 }
 
-QModelIndex MLModel::parent(const QModelIndex &index) const
+QModelIndex MLModel::parent(const QModelIndex & ) const
 {
     return QModelIndex();
 }
@@ -193,8 +193,9 @@ bool MLModel::isEditable( const QModelIndex &index ) const
     case ML_VOTE:
     case ML_YEAR:
         return true;
+    default:
+        return false;
     }
-    return false;
 }
 
 QMimeData* MLModel::mimeData( const QModelIndexList &indexes ) const
@@ -214,7 +215,7 @@ QMimeData* MLModel::mimeData( const QModelIndexList &indexes ) const
     return data;
 }
 
-int MLModel::columnCount( const QModelIndex & parent ) const
+int MLModel::columnCount( const QModelIndex & ) const
 {
     return columnFromMeta( COLUMN_END );
 }
@@ -261,6 +262,7 @@ int MLModel::getId( QModelIndex index ) const
 QVariant MLModel::data( const QModelIndex &index, int role ) const
 {
     if( index.isValid() )
+    {
         if( role == Qt::DisplayRole || role == Qt::EditRole )
         {
             MLItem *it = static_cast<MLItem*>( index.internalPointer() );
@@ -272,6 +274,7 @@ QVariant MLModel::data( const QModelIndex &index, int role ) const
             return QVariant( true );
         else if( role == VLCModel::IsCurrentsParentNodeRole )
             return QVariant( false );
+    }
     return QVariant();
 }
 
@@ -587,6 +590,8 @@ static int mediaAdded( vlc_object_t *p_this, char const *psz_var,
                                   vlc_value_t oldval, vlc_value_t newval,
                                   void *data )
 {
+    VLC_UNUSED( psz_var ); VLC_UNUSED( oldval );
+
     int ret = VLC_SUCCESS;
     media_library_t *p_ml = ( media_library_t* )p_this;
     MLModel* p_model = ( MLModel* )data;
@@ -606,6 +611,8 @@ static int mediaDeleted( vlc_object_t *p_this, char const *psz_var,
                                   vlc_value_t oldval, vlc_value_t newval,
                                   void *data )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_var ); VLC_UNUSED( oldval );
+
     MLModel* p_model = ( MLModel* )data;
     QModelIndex remove_idx = QModelIndex();
     for( int i = 0; i < p_model->rowCount( ); i++ )
@@ -627,6 +634,9 @@ static int mediaUpdated( vlc_object_t *p_this, char const *psz_var,
                                   vlc_value_t oldval, vlc_value_t newval,
                                   void *data )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_var ); VLC_UNUSED( oldval );
+    VLC_UNUSED( newval ); VLC_UNUSED( data );
+
     return VLC_SUCCESS;
 }
 

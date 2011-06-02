@@ -2,7 +2,7 @@
  * Upnp.cpp :  UPnP discovery module (libupnp)
  *****************************************************************************
  * Copyright (C) 2004-2011 the VideoLAN team
- * $Id: 05d79ae4596eb893e804a7800bc1e7d6601faa24 $
+ * $Id: 7e6311e9e6635c18640abd186bd84decddb5e979 $
  *
  * Authors: Rémi Denis-Courmont <rem # videolan.org> (original plugin)
  *          Christian Henz <henz # c-lab.de>
@@ -1071,7 +1071,7 @@ const char* Item::getResource() const
     return _resource.c_str();
 }
 
-const mtime_t Item::getDuration() const
+mtime_t Item::getDuration() const
 {
     return _duration;
 }

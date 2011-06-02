@@ -2,7 +2,7 @@
  * vlc_text_style.h: text_style_t definition and helpers.
  *****************************************************************************
  * Copyright (C) 1999-2010 the VideoLAN team
- * $Id: c7a4d270cef07919d3ff03cb101e21cba0c4b527 $
+ * $Id: 011b8f34962d4f916a8f36eaf2e244ef2881cde5 $
  *
  * Authors: Derk-Jan Hartman <hartman _AT_ videolan _DOT_ org>
  *          basOS G <noxelia 4t gmail , com>
@@ -79,22 +79,22 @@ typedef struct
 /**
  * Create a default text style
  */
-VLC_EXPORT( text_style_t *, text_style_New, ( void ) );
+VLC_API text_style_t * text_style_New( void );
 
 /**
  * Copy a text style into another
  */
-VLC_EXPORT( text_style_t *, text_style_Copy, ( text_style_t *, const text_style_t * ) );
+VLC_API text_style_t * text_style_Copy( text_style_t *, const text_style_t * );
 
 /**
  * Duplicate a text style
  */
-VLC_EXPORT( text_style_t *, text_style_Duplicate, ( const text_style_t * ) );
+VLC_API text_style_t * text_style_Duplicate( const text_style_t * );
 
 /**
  * Delete a text style created by text_style_New or text_style_Duplicate
  */
-VLC_EXPORT( void, text_style_Delete, ( text_style_t * ) );
+VLC_API void text_style_Delete( text_style_t * );
 
 #ifdef __cplusplus
 }

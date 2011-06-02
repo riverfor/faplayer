@@ -2,7 +2,7 @@
  * equalizer.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 38649d101c7e03db1b18aa7dc38a4688de0c38b9 $
+ * $Id: 40449e272649b6ec1fb5f33a7e0d3ad66d1109e0 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *
@@ -83,6 +83,7 @@ VariablePtr EqualizerBands::getBand( int band )
 
 void EqualizerBands::onUpdate( Subject<VarPercent> &rBand, void *arg )
 {
+    (void)rBand; (void)arg;
     aout_instance_t *pAout = NULL;
 
     playlist_t *pPlaylist = getIntf()->p_sys->p_playlist;

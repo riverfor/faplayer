@@ -2,7 +2,7 @@
  * filter.c : filter_t helpers.
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: adc7ad7a6d62bf209d8ef2b6e3b244ef7ad02982 $
+ * $Id: f01fa6666fde4a9e7a54089768d460893ff473be $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -57,9 +57,6 @@ filter_t *filter_NewBlend( vlc_object_t *p_this,
     /* The blend module will be loaded when needed with the real
     * input format */
     p_blend->p_module = NULL;
-
-    /* */
-    vlc_object_attach( p_blend, p_this );
 
     return p_blend;
 }
@@ -130,8 +127,6 @@ video_splitter_t *video_splitter_New( vlc_object_t *p_this,
     video_format_Copy( &p_splitter->fmt, p_fmt );
 
     /* */
-    vlc_object_attach( p_splitter, p_this );
-
     p_splitter->p_module = module_need( p_splitter, "video splitter", psz_name, true );
     if( ! p_splitter->p_module )
     {

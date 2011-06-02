@@ -25,6 +25,10 @@
 #include <assert.h>
 #include <vlc/libvlc.h>
 
+#ifdef ANDROID
+void pthread_cancel_initialize(void);
+void pthread_cancel_deinitialize(void);
+#endif
 
 static const char oom[] = "Out of memory";
 /* TODO: use only one thread-specific key for whole libvlc */
@@ -50,7 +54,6 @@ static void libvlc_setup_threads (bool init)
     }
     else
     {
-        assert (refs > 0);
 #ifdef ANDROID
         if (--refs == 0) {
             vlc_threadvar_delete (&context);

@@ -4,7 +4,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: ace817271cd11d54ae2dd202da7fa0b73fac18f5 $
+ * $Id: a7719a0133149529f19c0d15cf2546b22dc6d9ed $
  */
 
 #ifndef _AtmoDefs_h_
@@ -78,7 +78,7 @@ typedef struct
 
 
 
-// maximal Anzahl Kan‰le... original 5!
+// maximal Anzahl Kan√§le... original 5!
 #define CAP_MAX_NUM_ZONES  64
 // only for classic to avoid changing too much code!
 // #define ATMO_MAX_NUM_CHANNELS 5
@@ -116,7 +116,7 @@ enum AtmoConnectionType
       actMoMoLight = 6,
       actFnordlicht = 7
 };
-static const char *AtmoDeviceTypes[] = {
+static const char AtmoDeviceTypes[8][16] = {
       "Atmo-Classic",
       "Dummy",
       "DMX",

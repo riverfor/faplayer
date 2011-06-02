@@ -28,6 +28,9 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected int mLibVlcMediaPlayer = 0;
 	protected int mLibVlcMedia = 0;
 
+	/* */
+	private int mTime = -1;
+
 	/*  */
 	protected native void nativeAttachSurface(Surface s);
 
@@ -158,6 +161,15 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 				mOnProgressUpdateListener.onProgressUpdate(this,
 						(int) ev.longValue, -1);
 			}
+			if (mTime < 0) {
+				if (mOnVideoSizeChangedListener != null) {
+					int width = getVideoWidth();
+					int height = getVideoHeight();
+					mOnVideoSizeChangedListener.onVideoSizeChangedListener(
+							this, width, height);
+				}
+			}
+			mTime = (int) ev.longValue;
 			break;
 		}
 		case VlcEvent.MediaPlayerSeekableChanged: {

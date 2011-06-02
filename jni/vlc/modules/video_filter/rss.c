@@ -2,7 +2,7 @@
  * rss.c : rss/atom feed display video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2003-2006 the VideoLAN team
- * $Id: 756f2a2ca200e84230106c0908b39b9cf44a257f $
+ * $Id: 5d394a86c8ba149919a5bbe067ab3abfd0c3646c $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *          Rémi Duraffort <ivoire -at- videolan -dot- org>
@@ -205,7 +205,7 @@ vlc_module_begin ()
 
     set_section( N_("Font"), NULL )
     /* 5 sets the default to top [1] left [4] */
-    add_integer_with_range( CFG_PREFIX "opacity", 255, 0, 255, NULL,
+    add_integer_with_range( CFG_PREFIX "opacity", 255, 0, 255,
         OPACITY_TEXT, OPACITY_LONGTEXT, false )
     add_integer( CFG_PREFIX "color", 0xFFFFFF, COLOR_TEXT, COLOR_LONGTEXT,
                   false )

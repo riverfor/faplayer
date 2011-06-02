@@ -2,7 +2,7 @@
  * direct2d.c : Direct2D video output plugin for vlc (Win7/Vista SP2 PF Update)
  *****************************************************************************
  * Copyright (C) 2010 VideoLAN and AUTHORS
- * $Id: 13e45b234c0505320def43d48d4d0d907497068c $
+ * $Id: 115a6d5ecade8d186adc5b0b1b9e6a1148b59c33 $
  *
  * Author: David Kaplan <david@2of1.org>
  *
@@ -254,7 +254,7 @@ static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
         HRESULT hr = ID2D1HwndRenderTarget_EndDraw(sys->d2_render_target,
                                                    NULL,
                                                    NULL);
-        if (hr ==  D2DERR_RECREATE_TARGET) {
+        if (hr == D2DERR_RECREATE_TARGET) {
             D2D_DestroyRenderTarget(vd);
             D2D_CreateRenderTarget(vd);
         }

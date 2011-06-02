@@ -2,7 +2,7 @@
  * input.c : internal management of input streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: be83a6f5737be1adf7f372c187c92813756fed7e $
+ * $Id: ab0fe61436c5974af9b784cbcdb80ba978ace1dd $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -278,8 +278,6 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
                 continue;
             }
 
-            vlc_object_attach( p_filter , p_aout );
-
             p_filter->p_owner = malloc( sizeof(*p_filter->p_owner) );
             p_filter->p_owner->p_aout  = p_aout;
             p_filter->p_owner->p_input = p_input;
@@ -346,24 +344,20 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
             }
 
             /* complete the filter chain if necessary */
-            if ( !AOUT_FMTS_IDENTICAL( &chain_input_format,
-                                       &p_filter->fmt_in.audio ) )
+            if ( aout_FiltersCreatePipeline( p_aout, p_input->pp_filters,
+                                             &p_input->i_nb_filters,
+                                             &chain_input_format,
+                                             &p_filter->fmt_in.audio ) < 0 )
             {
-                if ( aout_FiltersCreatePipeline( p_aout, p_input->pp_filters,
-                                                 &p_input->i_nb_filters,
-                                                 &chain_input_format,
-                                                 &p_filter->fmt_in.audio ) < 0 )
-                {
-                    msg_Err( p_aout, "cannot add user filter %s (skipped)",
-                             psz_parser );
+                msg_Err( p_aout, "cannot add user filter %s (skipped)",
+                         psz_parser );
 
-                    module_unneed( p_filter, p_filter->p_module );
-                    free( p_filter->p_owner );
-                    vlc_object_release( p_filter );
+                module_unneed( p_filter, p_filter->p_module );
+                free( p_filter->p_owner );
+                vlc_object_release( p_filter );
 
-                    psz_parser = psz_next;
-                    continue;
-                }
+                psz_parser = psz_next;
+                continue;
             }
 
             /* success */
@@ -383,16 +377,13 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
     free( psz_scaletempo );
 
     /* complete the filter chain if necessary */
-    if ( !AOUT_FMTS_IDENTICAL( &chain_input_format, &chain_output_format ) )
+    if ( aout_FiltersCreatePipeline( p_aout, p_input->pp_filters,
+                                     &p_input->i_nb_filters,
+                                     &chain_input_format,
+                                     &chain_output_format ) < 0 )
     {
-        if ( aout_FiltersCreatePipeline( p_aout, p_input->pp_filters,
-                                         &p_input->i_nb_filters,
-                                         &chain_input_format,
-                                         &chain_output_format ) < 0 )
-        {
-            inputFailure( p_aout, p_input, "couldn't set an input pipeline" );
-            return -1;
-        }
+        inputFailure( p_aout, p_input, "couldn't set an input pipeline" );
+        return -1;
     }
 
     /* Create resamplers. */
@@ -453,10 +444,9 @@ int aout_InputDelete( aout_instance_t * p_aout, aout_input_t * p_input )
     p_input->b_recycle_vout = psz_visual && *psz_visual;
     free( psz_visual );
 
-    aout_FiltersDestroyPipeline( p_aout, p_input->pp_filters,
-                                 p_input->i_nb_filters );
+    aout_FiltersDestroyPipeline( p_input->pp_filters, p_input->i_nb_filters );
     p_input->i_nb_filters = 0;
-    aout_FiltersDestroyPipeline( p_aout, p_input->pp_resamplers,
+    aout_FiltersDestroyPipeline( p_input->pp_resamplers,
                                  p_input->i_nb_resamplers );
     p_input->i_nb_resamplers = 0;
     aout_FifoDestroy( p_aout, &p_input->mixer.fifo );
@@ -755,9 +745,8 @@ static void inputFailure( aout_instance_t * p_aout, aout_input_t * p_input,
     msg_Err( p_aout, "%s", psz_error_message );
 
     /* clean up */
-    aout_FiltersDestroyPipeline( p_aout, p_input->pp_filters,
-                                 p_input->i_nb_filters );
-    aout_FiltersDestroyPipeline( p_aout, p_input->pp_resamplers,
+    aout_FiltersDestroyPipeline( p_input->pp_filters, p_input->i_nb_filters );
+    aout_FiltersDestroyPipeline( p_input->pp_resamplers,
                                  p_input->i_nb_resamplers );
     aout_FifoDestroy( p_aout, &p_input->mixer.fifo );
     var_Destroy( p_aout, "visual" );
@@ -907,15 +896,10 @@ static int ReplayGainCallback( vlc_object_t *p_this, char const *psz_cmd,
     VLC_UNUSED(psz_cmd); VLC_UNUSED(oldval);
     VLC_UNUSED(newval); VLC_UNUSED(p_data);
     aout_instance_t *p_aout = (aout_instance_t *)p_this;
-    int i;
 
     aout_lock_mixer( p_aout );
-    for( i = 0; i < p_aout->i_nb_inputs; i++ )
-        ReplayGainSelect( p_aout, p_aout->pp_inputs[i] );
-
-    /* Restart the mixer (a trivial mixer may be in use) */
-    if( p_aout->p_mixer )
-        aout_MixerMultiplierSet( p_aout, p_aout->mixer_multiplier );
+    if( p_aout->p_input != NULL )
+        ReplayGainSelect( p_aout, p_aout->p_input );
     aout_unlock_mixer( p_aout );
 
     return VLC_SUCCESS;
@@ -972,4 +956,3 @@ static void ReplayGainSelect( aout_instance_t *p_aout, aout_input_t *p_input )
 
     free( psz_replay_gain );
 }
-

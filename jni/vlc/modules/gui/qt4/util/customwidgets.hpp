@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2004 Daniel Molkentin <molkentin@kde.org>
- * $Id: 82bef596f4ba3a8ab229cc60c6699c9875de60e4 $
+ * $Id: 0814ca050eda1eb2a573fb0a57397432b22e9e1e $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  * The "ClickLineEdit" control is based on code by  Daniel Molkentin
@@ -166,7 +166,6 @@ class SpinningIcon : public AnimatedIcon
 
 public:
     SpinningIcon( QWidget *parent, bool noIdleFrame = false );
-    virtual ~SpinningIcon();
 };
 
 /* VLC Key/Wheel hotkeys interactions */

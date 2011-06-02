@@ -2,7 +2,7 @@
  * Controller.cpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: 3de111a2369d562b26ea788b3c2731faa9343d85 $
+ * $Id: 0696bf7b812bb88b216e1a232fe61794579fe7b7 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -247,6 +247,10 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
         break;
     case OPEN_BUTTON:{
         NORMAL_BUTTON( OPEN );
+        }
+        break;
+    case OPEN_SUB_BUTTON:{
+        NORMAL_BUTTON( OPEN_SUB );
         }
         break;
     case PREVIOUS_BUTTON:{
@@ -997,6 +1001,8 @@ static int FullscreenControllerWidgetFullscreenChanged( vlc_object_t *vlc_object
                 const char *variable, vlc_value_t old_val,
                 vlc_value_t new_val,  void *data )
 {
+    VLC_UNUSED( variable ); VLC_UNUSED( old_val );
+
     vout_thread_t *p_vout = (vout_thread_t *) vlc_object;
 
     msg_Dbg( p_vout, "Qt4: Fullscreen state changed" );
@@ -1011,6 +1017,8 @@ static int FullscreenControllerWidgetMouseMoved( vlc_object_t *vlc_object, const
                                                  vlc_value_t old_val, vlc_value_t new_val,
                                                  void *data )
 {
+    VLC_UNUSED( variable ); VLC_UNUSED( old_val );
+
     vout_thread_t *p_vout = (vout_thread_t *)vlc_object;
     FullscreenControllerWidget *p_fs = (FullscreenControllerWidget *)data;
 
@@ -1115,7 +1123,7 @@ void FullscreenControllerWidget::fullscreenChanged( vout_thread_t *p_vout,
 /**
  * Mouse change callback (show/hide the controller on mouse movement)
  */
-void FullscreenControllerWidget::mouseChanged( vout_thread_t *p_vout, int i_mousex, int i_mousey )
+void FullscreenControllerWidget::mouseChanged( vout_thread_t *, int i_mousex, int i_mousey )
 {
     bool b_toShow;
 

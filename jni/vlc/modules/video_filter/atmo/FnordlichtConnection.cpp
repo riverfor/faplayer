@@ -19,7 +19,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: dfbe84dd59b27aece864730eedf09099f82bcb8e $
+ * $Id: 73a6ff09311196a8e944641570c13843291109a9 $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -84,7 +84,7 @@ ATMO_BOOL CFnordlichtConnection::OpenConnection()
         return ATMO_FALSE;
     }
     /* change serial settings (Speed, stopbits etc.) */
-    DCB dcb; // für comport-parameter
+    DCB dcb; // fÃ¼r comport-parameter
     dcb.DCBlength = sizeof(DCB);
     GetCommState(m_hComport, &dcb); // ger current serialport settings
     dcb.BaudRate = 19200;       // set speed
@@ -144,19 +144,6 @@ void CFnordlichtConnection::CloseConnection()
 ATMO_BOOL CFnordlichtConnection::isOpen(void)
 {
     return (m_hComport != INVALID_HANDLE_VALUE);
-}
-
-ATMO_BOOL CFnordlichtConnection::HardwareWhiteAdjust(int global_gamma,
-                                           int global_contrast,
-                                           int contrast_red,
-                                           int contrast_green,
-                                           int contrast_blue,
-                                           int gamma_red,
-                                           int gamma_green,
-                                           int gamma_blue,
-                                           ATMO_BOOL storeToEeprom)
-{
-    return ATMO_FALSE; //no hardware adjust required
 }
 
 /*

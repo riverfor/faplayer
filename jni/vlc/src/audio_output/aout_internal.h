@@ -2,7 +2,7 @@
  * aout_internal.h : internal defines for audio output
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: fb87f523dbaa7ebd4308b3175f3a8a12daf4368d $
+ * $Id: 3e66f0d1858fb08d03356df8c159a722205264b1 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -24,8 +24,7 @@
 #ifndef LIBVLC_AOUT_INTERNAL_H
 # define LIBVLC_AOUT_INTERNAL_H 1
 
-aout_buffer_t *aout_BufferAlloc(aout_alloc_t *allocation, mtime_t microseconds,
-        aout_buffer_t *old_buffer);
+# include <vlc_aout_mixer.h>
 
 typedef struct
 {
@@ -104,16 +103,15 @@ void aout_InputCheckAndRestart( aout_instance_t * p_aout, aout_input_t * p_input
 bool aout_InputIsEmpty( aout_instance_t * p_aout, aout_input_t * p_input );
 
 /* From filters.c : */
-int aout_FiltersCreatePipeline ( aout_instance_t * p_aout, filter_t ** pp_filters, int * pi_nb_filters, const audio_sample_format_t * p_input_format, const audio_sample_format_t * p_output_format );
-void aout_FiltersDestroyPipeline ( aout_instance_t * p_aout, filter_t ** pp_filters, int i_nb_filters );
-void  aout_FiltersPlay ( filter_t ** pp_filters, unsigned i_nb_filters, aout_buffer_t ** pp_input_buffer );
-void aout_FiltersHintBuffers( aout_instance_t * p_aout, filter_t ** pp_filters, int i_nb_filters, aout_alloc_t * p_first_alloc );
+int aout_FiltersCreatePipeline( aout_instance_t *, filter_t **, int *,
+    const audio_sample_format_t *, const audio_sample_format_t * );
+void aout_FiltersDestroyPipeline( filter_t *const *, unsigned );
+void aout_FiltersPlay( filter_t *const *, unsigned, aout_buffer_t ** );
 
 /* From mixer.c : */
 int aout_MixerNew( aout_instance_t * p_aout );
 void aout_MixerDelete( aout_instance_t * p_aout );
-void aout_MixerRun( aout_instance_t * p_aout );
-int aout_MixerMultiplierSet( aout_instance_t * p_aout, float f_multiplier );
+void aout_MixerRun( aout_instance_t * p_aout, float );
 
 /* From output.c : */
 int aout_OutputNew( aout_instance_t * p_aout,
@@ -241,10 +239,9 @@ static inline void aout_unlock_volume( aout_instance_t *p_aout )
  * possible to take configuration changes into account */
 static inline void AoutInputsMarkToRestart( aout_instance_t *p_aout )
 {
-    int i;
     aout_lock_mixer( p_aout );
-    for( i = 0; i < p_aout->i_nb_inputs; i++ )
-        p_aout->pp_inputs[i]->b_restart = true;
+    if( p_aout->p_input != NULL )
+        p_aout->p_input->b_restart = true;
     aout_unlock_mixer( p_aout );
 }
 

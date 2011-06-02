@@ -2,7 +2,7 @@
  * anim_bitmap.cpp
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id: 32880183edd42f4af9224387e140b9df9bacb572 $
+ * $Id: 92a844f640ea6b0a0e0f3981d17ebbcb090f7ce4 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *
@@ -29,8 +29,8 @@
 
 
 AnimBitmap::AnimBitmap( intf_thread_t *pIntf, const GenericBitmap &rBitmap ):
-    SkinObject( pIntf ), m_pImage( NULL ), m_curFrame( 0 ), m_curLoop( 0 ),
-    m_pTimer( NULL ), m_cmdNextFrame( this ), m_rBitmap( rBitmap )
+    SkinObject( pIntf ), m_rBitmap( rBitmap ), m_pImage( NULL ),
+    m_curFrame( 0 ), m_curLoop( 0 ), m_pTimer( NULL ), m_cmdNextFrame( this )
 {
     // Build the graphics
     OSFactory *pOsFactory = OSFactory::instance( pIntf );

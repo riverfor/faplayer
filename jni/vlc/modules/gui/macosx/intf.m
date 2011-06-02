@@ -2,7 +2,7 @@
  * intf.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: f75bb1764c62400573ed18906b1b99d2550efada $
+ * $Id: e36d2f833d3a11865376d0aa5e300591cbbd1aae $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -55,6 +55,7 @@
 #import "eyetv.h"
 #import "simple_prefs.h"
 #import "AudioEffects.h"
+#import "TrackSynchronization.h"
 
 #import <AddressBook/AddressBook.h>         /* for crashlog send mechanism */
 #import <Sparkle/Sparkle.h>                 /* we're the update delegate */
@@ -70,7 +71,7 @@ static void updateProgressPanel (void *, const char *, float);
 static bool checkProgressPanel (void *);
 static void destroyProgressPanel (void *);
 
-static void MsgCallback( msg_cb_data_t *, msg_item_t *, unsigned );
+static void MsgCallback( msg_cb_data_t *, const msg_item_t * );
 
 #pragma mark -
 #pragma mark VLC Interface Object Callbacks
@@ -116,11 +117,6 @@ static void Run( intf_thread_t *p_intf )
 {
     sigset_t set;
 
-    /* Do it again - for some unknown reason, vlc_thread_create() often
-     * fails to go to real-time priority with the first launched thread
-     * (???) --Meuuh */
-    vlc_thread_set_priority( p_intf, VLC_THREAD_PRIORITY_LOW );
-
     /* Make sure the "force quit" menu item does quit instantly.
      * VLC overrides SIGTERM which is sent by the "force quit"
      * menu item to make sure deamon mode quits gracefully, so
@@ -152,7 +148,7 @@ static void Run( intf_thread_t *p_intf )
  * ready to be displayed. We store everything in a NSArray in our Cocoa part
  * of this file, so we are forwarding everything through notifications.
  *****************************************************************************/
-static void MsgCallback( msg_cb_data_t *data, msg_item_t *item, unsigned int i )
+static void MsgCallback( msg_cb_data_t *data, const msg_item_t *item )
 {
     int canc = vlc_savecancel();
     NSAutoreleasePool * o_pool = [[NSAutoreleasePool alloc] init];
@@ -546,16 +542,6 @@ static VLCMain *_o_sharedMainInstance = nil;
     [o_remote setClickCountEnabledButtons: kRemoteButtonPlay];
     [o_remote setDelegate: _o_sharedMainInstance];
 
-    /* init media key support */
-    o_mediaKeyController = [[SPMediaKeyTap alloc] initWithDelegate:self];
-    b_mediaKeySupport = config_GetInt( VLCIntf, "macosx-mediakeys" );
-    [o_mediaKeyController startWatchingMediaKeys];
-    [o_mediaKeyController setShouldInterceptMediaKeyEvents:b_mediaKeySupport];
-    [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(coreChangedMediaKeySupportSetting:) name: @"VLCMediaKeySupportSettingChanged" object: nil];
-    [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                             [SPMediaKeyTap defaultMediaKeyUserBundleIdentifiers], kMediaKeyUsingBundleIdentifiersDefaultsKey,
-                                                             nil]];
-
     /* yeah, we are done */
     nib_main_loaded = TRUE;
 }
@@ -574,13 +560,21 @@ static VLCMain *_o_sharedMainInstance = nil;
 
     [o_controls setupVarMenuItem: o_mi_add_intf target: (vlc_object_t *)p_intf
         var: "intf-add" selector: @selector(toggleVar:)];
-
-    vlc_thread_set_priority( p_intf, VLC_THREAD_PRIORITY_LOW );
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     if( !p_intf ) return;
+
+    /* init media key support */
+    o_mediaKeyController = [[SPMediaKeyTap alloc] initWithDelegate:self];
+    b_mediaKeySupport = config_GetInt( VLCIntf, "macosx-mediakeys" );
+    [o_mediaKeyController startWatchingMediaKeys];
+    [o_mediaKeyController setShouldInterceptMediaKeyEvents:b_mediaKeySupport];
+    [[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(coreChangedMediaKeySupportSetting:) name: @"VLCMediaKeySupportSettingChanged" object: nil];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                             [SPMediaKeyTap defaultMediaKeyUserBundleIdentifiers], kMediaKeyUsingBundleIdentifiersDefaultsKey,
+                                                             nil]];
 
     [self _removeOldPreferences];
 
@@ -651,6 +645,7 @@ static VLCMain *_o_sharedMainInstance = nil;
     [o_mi_faster setTitle: _NS("Faster")];
     [o_mi_slower setTitle: _NS("Slower")];
     [o_mi_normalSpeed setTitle: _NS("Normal rate")];
+    [o_mi_trackSynchronization setTitle: _NS("Track Synchronization")];
     [o_mi_previous setTitle: _NS("Previous")];
     [o_mi_next setTitle: _NS("Next")];
     [o_mi_random setTitle: _NS("Random")];
@@ -848,6 +843,9 @@ static VLCMain *_o_sharedMainInstance = nil;
 
     if (nib_audioeffects_loaded)
         [o_audioeffects release];
+
+    if (nib_tracksynchro_loaded)
+        [o_trackSynchronization release];
 
     if( nib_bookmarks_loaded )
         [o_bookmarks release];
@@ -1608,8 +1606,6 @@ static void manage_cleanup( void * args )
 
     /* new thread requires a new pool */
 
-    vlc_thread_set_priority( p_intf, VLC_THREAD_PRIORITY_LOW );
-
     p_playlist = pl_Get( p_intf );
 
     var_AddCallback( p_playlist, "item-current", PlaylistChanged, self );
@@ -2248,6 +2244,17 @@ end:
         nib_extended_loaded = [NSBundle loadNibNamed:@"Extended" owner: NSApp];
 
     [o_extended showPanel];
+}
+
+- (IBAction)showTrackSynchronization:(id)sender
+{
+    if (!o_trackSynchronization)
+        o_trackSynchronization = [[VLCTrackSynchronization alloc] init];
+
+    if (!nib_tracksynchro_loaded)
+        nib_tracksynchro_loaded = [NSBundle loadNibNamed:@"SyncTracks" owner:NSApp];
+
+    [o_trackSynchronization toggleWindow:sender];
 }
 
 - (IBAction)showAudioEffects:(id)sender

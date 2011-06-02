@@ -2,7 +2,7 @@
  * objects.c: Generic lua<->vlc object wrapper
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: b4128502ac427a722c0833d4ba5444cef8d0245c $
+ * $Id: 32c2bd2f77721edc848b5aea8de2dfb43098a3f4 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -82,58 +82,9 @@ int vlclua_gc_release( lua_State *L )
     return 0;
 }
 
-static int vlc_object_search_mode_from_string( const char *psz_name )
-{
-    static const struct
-    {
-        int i_mode;
-        const char *psz_name;
-    } pp_modes[] =
-        { { FIND_PARENT, "parent" },
-          { FIND_CHILD, "child" },
-          { FIND_ANYWHERE, "anywhere" },
-          { 0, "" } };
-    int i;
-    for( i = 0; pp_modes[i].i_mode; i++ )
-    {
-        if( !strcmp( psz_name, pp_modes[i].psz_name ) )
-            return pp_modes[i].i_mode;
-    }
-    return 0;
-}
-
 static int vlclua_object_find( lua_State *L )
 {
     lua_pushnil( L );
-    return 1;
-}
-
-static int vlclua_object_find_name( lua_State *L )
-{
-    const char *psz_name = luaL_checkstring( L, 2 );
-    const char *psz_mode = luaL_checkstring( L, 3 );
-
-    vlc_object_t *p_this;
-    int i_mode = vlc_object_search_mode_from_string( psz_mode );
-    vlc_object_t *p_result;
-
-    if( !i_mode )
-        return luaL_error( L, "\"%s\" is not a valid search mode.",
-                           psz_mode );
-
-    if( lua_type( L, 1 ) == LUA_TNIL )
-        p_this = vlclua_get_this( L );
-    else
-    {
-        vlc_object_t **p_obj = luaL_checkudata( L, 1, "vlc_object" );
-        p_this = *p_obj;
-    }
-
-    p_result = vlc_object_find_name( p_this, psz_name, i_mode );
-    if( !p_result )
-        lua_pushnil( L );
-    else
-        vlclua_push_vlc_object( L, p_result, vlclua_gc_release );
     return 1;
 }
 
@@ -175,7 +126,6 @@ static const luaL_Reg vlclua_object_reg[] = {
     { "playlist", vlclua_get_playlist },
     { "libvlc", vlclua_get_libvlc },
     { "find", vlclua_object_find },
-    { "find_name", vlclua_object_find_name },
     { NULL, NULL }
 };
 

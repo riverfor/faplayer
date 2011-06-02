@@ -2,7 +2,7 @@
  * stream.c
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 4e7d08cd3ceae1c6327e18c87978a96eec8a92b4 $
+ * $Id: a2ebd08873732b8e49ad40e5dc90ab67d770cd52 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -295,9 +295,6 @@ stream_t *stream_AccessNew( access_t *p_access, char **ppsz_list )
         stream_CommonDelete( s );
         return NULL;
     }
-
-    /* Attach it now, needed for b_die */
-    vlc_object_attach( s, p_access );
 
     s->pf_read   = NULL;    /* Set up later */
     s->pf_peek   = NULL;

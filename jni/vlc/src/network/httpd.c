@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2004-2006 the VideoLAN team
  * Copyright © 2004-2007 Rémi Denis-Courmont
- * $Id: e0f7f1ce8641e0f1cb4ff2a26c716ccdd1baa7f6 $
+ * $Id: 381a3d898bc16f9200fe15dcefa4e484e373f564 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Rémi Denis-Courmont <rem # videolan.org>
@@ -1015,7 +1015,6 @@ httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
         httpd->host   = NULL;
 
         libvlc_priv (p_this->p_libvlc)->p_httpd = httpd;
-        vlc_object_attach( httpd, p_this->p_libvlc );
     }
 
     /* verify if it already exist */
@@ -1079,8 +1078,6 @@ httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
     vlc_mutex_init( &host->lock );
     vlc_cond_init( &host->wait );
     host->i_ref = 1;
-
-    vlc_object_attach( host, p_this );
 
     host->fds = net_ListenTCP( p_this, psz_host, i_port );
     if( host->fds == NULL )

@@ -2,7 +2,7 @@
  * infopanels.hpp : Panels for the information dialogs
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 7be324e17ee94e6720592ec4732fb126b4831c15 $
+ * $Id: 7784043d07502f0ac474c9bf83b922aca98a720a $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -50,6 +50,7 @@ class QSpinBox;
 class QLineEdit;
 class CoverArtLabel;
 class QTextEdit;
+class QLabel;
 
 class MetaPanel: public QWidget
 {
@@ -83,6 +84,9 @@ private:
     QLineEdit *publisher_text;
     QLineEdit *encodedby_text;
     CoverArtLabel *art_cover;
+
+    QLabel   *lblURL;
+    char     *currentURL;
 
 public slots:
     void update( input_item_t * );

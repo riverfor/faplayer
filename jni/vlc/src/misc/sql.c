@@ -2,7 +2,7 @@
  * sql.c: SQL Connection: Creators and destructors
  *****************************************************************************
  * Copyright (C) 2008-2009 the VideoLAN team
- * $Id: 2b81ef7f0392aea447c007ead61f133b5c94ea75 $
+ * $Id: a22665a99e7a708947e953ba04e0a5cbc97c127b $
  *
  * Authors: Srikanth Raju <srikiraju at gmail dot com>
  *
@@ -45,7 +45,6 @@ sql_t *sql_Create( vlc_object_t *p_this, const char *psz_name,
         msg_Err( p_this, "unable to create sql object" );
         return NULL;
     }
-    vlc_object_attach( p_sql, p_this );
 
     p_sql->psz_host = strdup( psz_host );
     p_sql->psz_user = strdup( psz_user );

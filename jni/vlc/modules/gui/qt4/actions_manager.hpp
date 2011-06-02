@@ -2,7 +2,7 @@
  * Controller.hpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 866be09edde5c74ea9692349ae8cf88aca82f9f8 $
+ * $Id: d73c81111ad5a1d20996962a2675b31d654614ed $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -54,6 +54,7 @@ typedef enum actionType_e
     RANDOM_ACTION,
     LOOP_ACTION,
     INFO_ACTION,
+    OPEN_SUB_ACTION,
 } actionType_e;
 
 class ActionsManager : public QObject

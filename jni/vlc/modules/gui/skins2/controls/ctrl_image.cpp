@@ -2,7 +2,7 @@
  * ctrl_image.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 9709de7e9ff9284d7fcecba4db9885d01abd3c06 $
+ * $Id: cb60e3f095707397f2ee92e5e739c0fdff1dab5a $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -240,6 +240,7 @@ void CtrlImage::draw( OSGraphics &rImage, int xDest, int yDest, int w, int h )
 
 void CtrlImage::onUpdate( Subject<VarString> &rVariable, void* arg )
 {
+    (void)arg;
     VlcProc *pVlcProc = VlcProc::instance( getIntf() );
 
     if( &rVariable == &pVlcProc->getStreamArtVar() )

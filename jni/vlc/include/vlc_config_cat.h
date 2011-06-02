@@ -2,7 +2,7 @@
  * vlc_config_cat.h : Definition of configuration categories
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 87cd0c6959a24c0874711b1dcf4cc09e433ef315 $
+ * $Id: d998892f1b1b35bb89efaca61f02aeb9d7abfcf0 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Anil Daoud <anil@videolan.org>
@@ -280,10 +280,10 @@ static const struct config_category_t categories_array[] =
     { -1, NULL, NULL }
 };
 
-LIBVLC_USED
+VLC_USED
 static inline const char *config_CategoryNameGet( int i_value )
 {
-    int i = 0 ;
+    int i = 0;
     while( categories_array[i].psz_name != NULL )
     {
         if( categories_array[i].i_id == i_value )
@@ -295,10 +295,10 @@ static inline const char *config_CategoryNameGet( int i_value )
     return NULL;
 }
 
-LIBVLC_USED
+VLC_USED
 static inline const char *config_CategoryHelpGet( int i_value )
 {
-    int i = 0 ;
+    int i = 0;
     while( categories_array[i].psz_help != NULL )
     {
         if( categories_array[i].i_id == i_value )

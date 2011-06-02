@@ -2,7 +2,7 @@
  * playlist.cpp : Custom widgets for the playlist
  ****************************************************************************
  * Copyright © 2007-2010 the VideoLAN team
- * $Id: c2d6334ddbdce23eb43b89df7931e676d2c35f4c $
+ * $Id: 6fe4bb970e0cefd6580dd55158667179fbd6f37c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -30,6 +30,7 @@
 #include "components/playlist/standardpanel.hpp"  /* MainView */
 #include "components/playlist/selector.hpp"       /* PLSelector */
 #include "components/playlist/playlist_model.hpp" /* PLModel */
+#include "components/playlist/ml_model.hpp"       /* MLModel */
 #include "components/interface_widgets.hpp"       /* CoverArtLabel */
 
 #include "util/searchlineedit.hpp"
@@ -93,7 +94,12 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
     setMinimumWidth( 400 );
 
     PLModel *model = new PLModel( p_playlist, p_intf, p_root, this );
-    mainView = new StandardPLPanel( this, p_intf, p_root, selector, model );
+#ifdef MEDIA_LIBRARY
+    MLModel *mlmodel = new MLModel( p_intf, this );
+    mainView = new StandardPLPanel( this, p_intf, p_root, selector, model, mlmodel );
+#else
+    mainView = new StandardPLPanel( this, p_intf, p_root, selector, model, NULL );
+#endif
 
     /* Location Bar */
     locationBar = new LocationBar( model );
@@ -144,9 +150,9 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
     layout->setColumnStretch( 3, 3 );
 
     /* Connect the activation of the selector to a redefining of the PL */
-    DCONNECT( selector, activated( playlist_item_t * ),
-              mainView, setRoot( playlist_item_t * ) );
-    mainView->setRoot( p_root );
+    DCONNECT( selector, categoryActivated( playlist_item_t *, bool ),
+              mainView, setRoot( playlist_item_t *, bool ) );
+    mainView->setRoot( p_root, false );
 
     /* */
     split = new PlaylistSplitter( this );
@@ -371,7 +377,7 @@ QSize LocationBar::sizeHint() const
 
 LocationButton::LocationButton( const QString &text, bool bold,
                                 bool arrow, QWidget * parent )
-  : b_arrow( arrow ), QPushButton( parent )
+  : QPushButton( parent ), b_arrow( arrow )
 {
     QFont font;
     font.setBold( bold );
@@ -381,7 +387,7 @@ LocationButton::LocationButton( const QString &text, bool bold,
 
 #define PADDING 4
 
-void LocationButton::paintEvent ( QPaintEvent * event )
+void LocationButton::paintEvent ( QPaintEvent * )
 {
     QStyleOptionButton option;
     option.initFrom( this );

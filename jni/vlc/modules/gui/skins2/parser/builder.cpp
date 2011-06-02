@@ -2,7 +2,7 @@
  * builder.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 686005581c1f51502559f5909ef98bbe7ccd631d $
+ * $Id: 1de4e2021805f7d9aa1163c86cdf27ba1982b296 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -1193,13 +1193,13 @@ string Builder::getFilePath( const string &rFileName ) const
         // For skins to be valid on both Linux and Win32,
         // slash should be used as path separator for both OSs.
         msg_Warn( getIntf(), "use of '/' is preferred to '\\' for paths" );
-        int pos;
+        string::size_type pos;
         while( ( pos = file.find( "\\" ) ) != string::npos )
            file[pos] = '/';
     }
 
 #ifdef WIN32
-    int pos;
+    string::size_type pos;
     while( ( pos = file.find( "/" ) ) != string::npos )
        file.replace( pos, 1, sep );
 #endif

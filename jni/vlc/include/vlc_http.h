@@ -2,7 +2,7 @@
  * vlc_http.h: Shared code for HTTP clients
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id: ff4971864878d9a174cb086007ad2002cd762a3f $
+ * $Id: ce612794aefdbe9ef4a8240bb2507a4ff966d4c5 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -49,19 +49,19 @@ typedef struct http_auth_t
 } http_auth_t;
 
 
-VLC_EXPORT( void, http_auth_Init, ( http_auth_t * ) );
-VLC_EXPORT( void, http_auth_Reset, ( http_auth_t * ) );
-VLC_EXPORT( void, http_auth_ParseWwwAuthenticateHeader,
+VLC_API void http_auth_Init( http_auth_t * );
+VLC_API void http_auth_Reset( http_auth_t * );
+VLC_API void http_auth_ParseWwwAuthenticateHeader
             ( vlc_object_t *, http_auth_t * ,
-              const char * ) );
-VLC_EXPORT( int, http_auth_ParseAuthenticationInfoHeader,
+              const char * );
+VLC_API int http_auth_ParseAuthenticationInfoHeader
             ( vlc_object_t *, http_auth_t *,
               const char *, const char *,
               const char *, const char *,
-              const char * ) );
-VLC_EXPORT( char *, http_auth_FormatAuthorizationHeader,
+              const char * );
+VLC_API char *http_auth_FormatAuthorizationHeader
             ( vlc_object_t *, http_auth_t *,
               const char *, const char *,
-              const char *, const char * ) LIBVLC_USED );
+              const char *, const char * ) VLC_USED;
 
 #endif /* VLC_HTTP_H */

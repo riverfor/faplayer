@@ -2,7 +2,7 @@
  * cmd_callbacks.hpp
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 76cf23decdff4ee23478d6faf3f4a4f40bf4972e $
+ * $Id: e3f3cfb0395c9dbbe3b1e509ad83d47951202d1d $
  *
  * Author: Erwan Tulou      <erwan10 aT videolan doT org >
  *         JP Dinger        <jpd (at) videolan (dot) org>
@@ -36,7 +36,7 @@ public:
                  void (VlcProc::*func)(vlc_object_t *,vlc_value_t),
                  string label )
         : CmdGeneric( pIntf ), m_pObj( pObj ), m_newVal( newVal ),
-          m_pfExecute( func ), m_label( label )
+          m_label( label ), m_pfExecute( func )
     {
         if( m_pObj )
             vlc_object_hold( m_pObj );

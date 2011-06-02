@@ -2,7 +2,7 @@
  * extended_panels.hpp : Exentended Panels
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: 5e1d9cdda2100b7c7cfcf678909f6516bb3b5263 $
+ * $Id: 68837614ae5b3abd159f28536eef94051b8d4296 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -53,10 +53,8 @@ private:
     Ui::ExtVideoWidget ui;
     QSignalMapper* filterMapper;
     intf_thread_t *p_intf;
-    vout_thread_t *p_vout;
     void initComboBoxItems( QObject* );
     void setWidgetValue( QObject* );
-    void ChangeVFiltersString( const char *psz_name, bool b_add );
     void clean();
 private slots:
     void updateFilters();
@@ -135,7 +133,7 @@ private:
     void addCallbacks( aout_instance_t * );
 
     void updateSliders(float *);
-    void setValues(float *);
+    void setValues();
 
 private slots:
     void enable(bool);
@@ -162,7 +160,7 @@ private:
     void addCallbacks( aout_instance_t * );
     intf_thread_t *p_intf;
 
-    void setValues(float *);
+    void setValues();
 
 private slots:
     void enable(bool);
@@ -176,22 +174,28 @@ class SyncControls : public QWidget
     friend class ExtendedDialog;
 public:
     SyncControls( intf_thread_t *, QWidget * );
-    virtual ~SyncControls() {};
+    virtual ~SyncControls();
 private:
     intf_thread_t *p_intf;
     QDoubleSpinBox *AVSpin;
     QDoubleSpinBox *subsSpin;
     QDoubleSpinBox *subSpeedSpin;
+    QDoubleSpinBox *subDurationSpin;
 
     bool b_userAction;
 
     void clean();
+
+    void updateSubsDuration();
+    void subsdelayClean();
+    void subsdelaySetFactor( double );
 public slots:
     void update();
 private slots:
     void advanceAudio( double );
     void advanceSubs( double );
     void adjustSubsSpeed( double );
+    void adjustSubsDuration( double );
 };
 
 #endif

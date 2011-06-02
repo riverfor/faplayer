@@ -226,6 +226,7 @@ input_SplitMRL
 input_Start
 input_Stop
 input_vaControl
+input_Close
 intf_Create
 intf_Eject
 IsUTF8
@@ -557,7 +558,6 @@ vlc_join
 vlc_list_children
 vlc_list_release
 vlc_memcpy
-vlc_memset
 vlc_memalign
 vlc_meta_AddExtra
 vlc_meta_CopyExtraNames
@@ -578,7 +578,6 @@ vlc_mutex_lock
 vlc_mutex_trylock
 vlc_mutex_unlock
 vlc_global_mutex
-vlc_object_attach
 vlc_object_create
 vlc_object_find_name
 vlc_object_hold
@@ -608,9 +607,6 @@ vlc_sd_Start
 vlc_sd_Stop
 vlc_tdestroy
 vlc_testcancel
-vlc_thread_create
-vlc_thread_join
-vlc_thread_set_priority
 vlc_threadvar_create
 vlc_threadvar_delete
 vlc_threadvar_get

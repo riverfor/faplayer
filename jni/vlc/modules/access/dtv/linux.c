@@ -37,6 +37,9 @@
 #include <linux/dvb/dmx.h>
 
 #include "dtv/dtv.h"
+#ifdef HAVE_DVBPSI
+# include "dtv/en50221.h"
+#endif
 
 #ifndef O_SEARCH
 # define O_SEARCH O_RDONLY
@@ -59,13 +62,13 @@ static int dvb_open_adapter (uint8_t adapter)
 }
 
 /** Opens the DVB device node of the specified type */
-static int dvb_open_node (int dirfd, uint8_t dev, const char *type, int flags)
+static int dvb_open_node (int dir, const char *type, unsigned dev, int flags)
 {
     int fd;
     char path[strlen (type) + 4];
 
     snprintf (path, sizeof (path), "%s%"PRIu8, type, dev);
-    fd = openat (dirfd, path, flags|O_CLOEXEC);
+    fd = openat (dir, path, flags|O_CLOEXEC);
     if (fd != -1)
         fcntl (fd, F_SETFL, fcntl (fd, F_GETFL) | O_NONBLOCK);
     return fd;
@@ -167,19 +170,20 @@ static int dvb_parse_fec (uint32_t fec)
 struct dvb_device
 {
     vlc_object_t *obj;
-    int frontend;
+    int dir;
     int demux;
+    int frontend;
 #ifndef USE_DMX
 # define MAX_PIDS 256
-    int dir;
-    uint8_t dev_id;
     struct
     {
         int fd;
         uint16_t pid;
     } pids[MAX_PIDS];
 #endif
-    int ca;
+#ifdef HAVE_DVBPSI
+    cam_t *cam;
+#endif
     struct dvb_frontend_info info;
     bool budget;
     //size_t buffer_size;
@@ -188,40 +192,39 @@ struct dvb_device
 /**
  * Opens the DVB tuner
  */
-dvb_device_t *dvb_open (vlc_object_t *obj, bool tune)
+dvb_device_t *dvb_open (vlc_object_t *obj)
 {
-    uint8_t adapter = var_InheritInteger (obj, "dvb-adapter");
-    uint8_t device  = var_InheritInteger (obj, "dvb-device");
-
-    int dirfd = dvb_open_adapter (adapter);
-    if (dirfd == -1)
-    {
-        msg_Err (obj, "cannot access adapter %"PRIu8": %m", adapter);
-        return NULL;
-    }
-
     dvb_device_t *d = malloc (sizeof (*d));
     if (unlikely(d == NULL))
-    {
-        close (dirfd);
         return NULL;
-    }
 
     d->obj = obj;
+
+    uint8_t adapter = var_InheritInteger (obj, "dvb-adapter");
+
+    d->dir = dvb_open_adapter (adapter);
+    if (d->dir == -1)
+    {
+        msg_Err (obj, "cannot access adapter %"PRIu8": %m", adapter);
+        free (d);
+        return NULL;
+    }
     d->frontend = -1;
-    d->ca = -1;
+#ifdef HAVE_DVBPSI
+    d->cam = NULL;
+#endif
     d->budget = var_InheritBool (obj, "dvb-budget-mode");
 
 #ifndef USE_DMX
     if (d->budget)
 #endif
     {
-       d->demux = dvb_open_node (dirfd, device, "demux", O_RDONLY);
+       d->demux = dvb_open_node (d->dir, "demux", 0, O_RDONLY);
        if (d->demux == -1)
        {
            msg_Err (obj, "cannot access demultiplexer: %m");
+           close (d->dir);
            free (d);
-           close (dirfd);
            return NULL;
        }
 
@@ -246,60 +249,33 @@ dvb_device_t *dvb_open (vlc_object_t *obj, bool tune)
     }
     else
     {
-        d->dir = fcntl (dirfd, F_DUPFD_CLOEXEC);
-        d->dev_id = device;
-
         for (size_t i = 0; i < MAX_PIDS; i++)
             d->pids[i].pid = d->pids[i].fd = -1;
-        d->demux = dvb_open_node (d->dir, device, "dvr", O_RDONLY);
+        d->demux = dvb_open_node (d->dir, "dvr", 0, O_RDONLY);
         if (d->demux == -1)
         {
             msg_Err (obj, "cannot access DVR: %m");
+            close (d->dir);
             free (d);
-            close (dirfd);
             return NULL;
         }
 #endif
     }
 
-    if (tune)
+#ifdef HAVE_DVBPSI
+    int ca = dvb_open_node (d->dir, "ca", 0, O_RDWR);
+    if (ca != -1)
     {
-        d->frontend = dvb_open_node (dirfd, device, "frontend", O_RDWR);
-        if (d->frontend == -1)
-        {
-            msg_Err (obj, "cannot access frontend %"PRIu8
-                     " of adapter %"PRIu8": %m", device, adapter);
-            goto error;
-        }
-
-        if (ioctl (d->frontend, FE_GET_INFO, &d->info) < 0)
-        {
-            msg_Err (obj, "cannot get frontend info: %m");
-            goto error;
-        }
-
-        msg_Dbg (obj, "using frontend: %s", d->info.name);
-        msg_Dbg (obj, " type %u, capabilities 0x%08X", d->info.type,
-                 d->info.caps);
-        msg_Dbg (obj, " frequencies %10"PRIu32" to %10"PRIu32,
-                 d->info.frequency_min, d->info.frequency_max);
-        msg_Dbg (obj, " (%"PRIu32" tolerance, %"PRIu32" per step)",
-                 d->info.frequency_tolerance, d->info.frequency_stepsize);
-        msg_Dbg (obj, " bauds rates %10"PRIu32" to %10"PRIu32,
-                 d->info.symbol_rate_min, d->info.symbol_rate_max);
-        msg_Dbg (obj, " (%"PRIu32" tolerance)",
-                 d->info.symbol_rate_tolerance);
-
-        d->ca = dvb_open_node (dirfd, device, "ca", O_RDWR);
-        if (d->ca == -1)
-            msg_Dbg (obj, "conditional access module not available (%m)");
-
+        d->cam = en50221_Init (obj, ca);
+        if (d->cam == NULL)
+            close (ca);
     }
-    close (dirfd);
+    else
+        msg_Dbg (obj, "conditional access module not available (%m)");
+#endif
     return d;
 
 error:
-    close (dirfd);
     dvb_close (d);
     return NULL;
 }
@@ -309,17 +285,19 @@ void dvb_close (dvb_device_t *d)
 #ifndef USE_DMX
     if (!d->budget)
     {
-        close (d->dir);
         for (size_t i = 0; i < MAX_PIDS; i++)
             if (d->pids[i].fd != -1)
                 close (d->pids[i].fd);
     }
 #endif
-    if (d->ca != -1)
-        close (d->ca);
+#ifdef HAVE_DVBPSI
+    if (d->cam != NULL)
+        en50221_End (d->cam);
+#endif
     if (d->frontend != -1)
         close (d->frontend);
     close (d->demux);
+    close (d->dir);
     free (d);
 }
 
@@ -331,6 +309,11 @@ ssize_t dvb_read (dvb_device_t *d, void *buf, size_t len)
 {
     struct pollfd ufd[2];
     int n;
+
+#ifdef HAVE_DVBPSI
+    if (d->cam != NULL)
+        en50221_Poll (d->cam);
+#endif
 
     ufd[0].fd = d->demux;
     ufd[0].events = POLLIN;
@@ -398,7 +381,7 @@ int dvb_add_pid (dvb_device_t *d, uint16_t pid)
         if (d->pids[i].fd != -1)
             continue;
 
-        int fd = dvb_open_node (d->dir, d->dev_id, "demux", O_RDONLY);
+        int fd = dvb_open_node (d->dir, "demux", 0, O_RDONLY);
         if (fd == -1)
             goto error;
 
@@ -447,17 +430,91 @@ void dvb_remove_pid (dvb_device_t *d, uint16_t pid)
 #endif
 }
 
+/** Finds a frontend of the correct type */
+static int dvb_find_frontend (dvb_device_t *d, fe_type_t type, fe_caps_t caps)
+{
+    if (d->frontend != -1)
+    {
+        if (d->info.type == type || (d->info.caps & caps) == caps)
+            return 0; /* already got an adequate frontend */
+
+        close (d->frontend);
+        d->frontend = -1;
+    }
+
+    for (unsigned n = 0; n < 256; n++)
+    {
+        int fd = dvb_open_node (d->dir, "frontend", n, O_RDWR);
+        if (fd == -1)
+        {
+            if (errno == ENOENT)
+                break; /* all frontends already enumerated */
+            msg_Err (d->obj, "cannot access frontend %u; %m", n);
+            continue;
+        }
+
+        if (ioctl (fd, FE_GET_INFO, &d->info) < 0)
+        {
+            msg_Err (d->obj, "cannot get frontend %u info: %m", n);
+            goto skip;
+        }
+
+        msg_Dbg (d->obj, "probing frontend %u: %s", n, d->info.name);
+        msg_Dbg (d->obj, " type %u, capabilities 0x%08X", d->info.type,
+                 d->info.caps);
+        msg_Dbg (d->obj, " frequencies %10"PRIu32" to %10"PRIu32,
+                 d->info.frequency_min, d->info.frequency_max);
+        msg_Dbg (d->obj, " (%"PRIu32" tolerance, %"PRIu32" per step)",
+                 d->info.frequency_tolerance, d->info.frequency_stepsize);
+        msg_Dbg (d->obj, " bauds rates %10"PRIu32" to %10"PRIu32,
+                 d->info.symbol_rate_min, d->info.symbol_rate_max);
+        msg_Dbg (d->obj, " (%"PRIu32" tolerance)",
+                 d->info.symbol_rate_tolerance);
+
+        if (d->info.type != type || (d->info.caps & caps) != caps)
+        {
+            msg_Dbg (d->obj, "skipping frontend %u: wrong type", n);
+            goto skip;
+        }
+
+        msg_Dbg (d->obj, "selected frontend %u", n);
+        d->frontend = fd;
+        return 0;
+
+    skip:
+        close (fd);
+    }
+
+    msg_Err (d->obj, "no suitable frontend found");
+    return -1;
+}
+
 const delsys_t *dvb_guess_system (dvb_device_t *d)
 {
-    assert (d->frontend != -1);
+    if (d->frontend == -1)
+    {
+        d->frontend = dvb_open_node (d->dir, "frontend", 0, O_RDWR);
+        if (d->frontend == -1)
+        {
+            msg_Err (d->obj, "cannot access frontend %u; %m", 0);
+            return NULL;
+        }
+
+        if (ioctl (d->frontend, FE_GET_INFO, &d->info) < 0)
+        {
+            msg_Err (d->obj, "cannot get frontend %u info: %m", 0);
+            close (d->frontend);
+            d->frontend = -1;
+            return NULL;
+        }
+    }
 
     //bool v2 = d->info.caps & FE_CAN_2G_MODULATION;
-
     switch (d->info.type)
     {
         case FE_QPSK: return /*v2 ? &dvbs2 :*/ &dvbs;
         case FE_QAM:  return &dvbc;
-        case FE_OFDM: return &dvbt;
+        case FE_OFDM: return /*v2 ? &dvbt2 :*/ &dvbt;
         case FE_ATSC: return &atsc;
     }
     return NULL;
@@ -480,6 +537,14 @@ float dvb_get_snr (dvb_device_t *d)
         return 0.;
     return snr / 65535.;
 }
+
+#ifdef HAVE_DVBPSI
+void dvb_set_ca_pmt (dvb_device_t *d, struct dvbpsi_pmt_s *pmt)
+{
+    if (d->cam != NULL)
+        en50221_SetCAPMT (d->cam, pmt);
+}
+#endif
 
 static int dvb_vset_props (dvb_device_t *d, size_t n, va_list ap)
 {
@@ -546,6 +611,8 @@ int dvb_set_dvbc (dvb_device_t *d, uint32_t freq, const char *modstr,
     unsigned mod = dvb_parse_modulation (modstr, QAM_AUTO);
     fec = dvb_parse_fec (fec);
 
+    if (dvb_find_frontend (d, FE_QAM, FE_IS_STUPID))
+        return -1;
     return dvb_set_props (d, 6, DTV_CLEAR, 0,
                           DTV_DELIVERY_SYSTEM, SYS_DVBC_ANNEX_AC,
                           DTV_FREQUENCY, freq * 1000, DTV_MODULATION, mod,
@@ -669,6 +736,8 @@ int dvb_set_dvbs (dvb_device_t *d, uint32_t freq, uint32_t srate, uint32_t fec)
 {
     fec = dvb_parse_fec (fec);
 
+    if (dvb_find_frontend (d, FE_QPSK, FE_IS_STUPID))
+        return -1;
     return dvb_set_props (d, 5, DTV_CLEAR, 0, DTV_DELIVERY_SYSTEM, SYS_DVBS,
                           DTV_FREQUENCY, freq, DTV_SYMBOL_RATE, srate,
                           DTV_INNER_FEC, fec);
@@ -695,6 +764,8 @@ int dvb_set_dvbs2 (dvb_device_t *d, uint32_t freq, const char *modstr,
         default: rolloff = PILOT_AUTO; break;
     }
 
+    if (dvb_find_frontend (d, FE_QPSK, FE_CAN_2G_MODULATION))
+        return -1;
     return dvb_set_props (d, 8, DTV_CLEAR, 0, DTV_DELIVERY_SYSTEM, SYS_DVBS2,
                           DTV_FREQUENCY, freq, DTV_MODULATION, mod,
                           DTV_SYMBOL_RATE, srate, DTV_INNER_FEC, fec,
@@ -707,12 +778,15 @@ static int dvb_parse_transmit_mode (int i)
 {
     static const dvb_int_map_t tab[] = {
         { -1, TRANSMISSION_MODE_AUTO },
+#if DVBv5(3)
+        {  1, TRANSMISSION_MODE_1K   },
+#endif
         {  2, TRANSMISSION_MODE_2K   },
 #if DVBv5(1)
         {  4, TRANSMISSION_MODE_4K   },
 #endif
         {  8, TRANSMISSION_MODE_8K   },
-#if 0
+#if DVBv5(3)
         { 16, TRANSMISSION_MODE_16K  },
         { 32, TRANSMISSION_MODE_32K  },
 #endif
@@ -724,13 +798,15 @@ static int dvb_parse_transmit_mode (int i)
 static int dvb_parse_guard (uint32_t guard)
 {
     static const dvb_int_map_t tab[] = {
-      /*{ VLC_GUARD(1,128),  GUARD_INTERVAL_1_128 },*/
-        { VLC_GUARD(1,16),   GUARD_INTERVAL_1_16 },
-        { VLC_GUARD(1,32),   GUARD_INTERVAL_1_32 },
         { VLC_GUARD(1,4),    GUARD_INTERVAL_1_4 },
         { VLC_GUARD(1,8),    GUARD_INTERVAL_1_8 },
-      /*{ VLC_GUARD(19,128), GUARD_INTERVAL_19_128 },*/
-      /*{ VLC_GUARD(9,256),  GUARD_INTERVAL_9_256 },*/
+        { VLC_GUARD(1,16),   GUARD_INTERVAL_1_16 },
+        { VLC_GUARD(1,32),   GUARD_INTERVAL_1_32 },
+#if DVBv5(3)
+        { VLC_GUARD(1,128),  GUARD_INTERVAL_1_128 },
+        { VLC_GUARD(19,128), GUARD_INTERVAL_19_128 },
+        { VLC_GUARD(19,256), GUARD_INTERVAL_19_256 },
+#endif
         { VLC_GUARD_AUTO,    GUARD_INTERVAL_AUTO },
     };
     return dvb_parse_int (guard, tab, sizeof (tab) / sizeof (*tab),
@@ -762,6 +838,8 @@ int dvb_set_dvbt (dvb_device_t *d, uint32_t freq, const char *modstr,
     guard = dvb_parse_guard (guard);
     hierarchy = dvb_parse_hierarchy (hierarchy);
 
+    if (dvb_find_frontend (d, FE_OFDM, FE_IS_STUPID))
+        return -1;
     return dvb_set_props (d, 10, DTV_CLEAR, 0, DTV_DELIVERY_SYSTEM, SYS_DVBT,
                           DTV_FREQUENCY, freq * 1000, DTV_MODULATION, mod,
                           DTV_CODE_RATE_HP, fec_hp, DTV_CODE_RATE_LP, fec_lp,
@@ -771,12 +849,41 @@ int dvb_set_dvbt (dvb_device_t *d, uint32_t freq, const char *modstr,
                           DTV_HIERARCHY, hierarchy);
 }
 
+int dvb_set_dvbt2 (dvb_device_t *d, uint32_t freq, const char *modstr,
+                   uint32_t fec, uint32_t bandwidth,
+                   int transmit_mode, uint32_t guard)
+{
+#if DVBv5(3)
+    uint32_t mod = dvb_parse_modulation (modstr, QAM_AUTO);
+    fec = dvb_parse_fec (fec);
+    bandwidth *= 1000000;
+    transmit_mode = dvb_parse_transmit_mode (transmit_mode);
+    guard = dvb_parse_guard (guard);
+
+    if (dvb_find_frontend (d, FE_OFDM, FE_CAN_2G_MODULATION))
+        return -1;
+    return dvb_set_props (d, 8, DTV_CLEAR, 0, DTV_DELIVERY_SYSTEM, SYS_DVBT2,
+                          DTV_FREQUENCY, freq * 1000, DTV_MODULATION, mod,
+                          DTV_INNER_FEC, fec, DTV_BANDWIDTH_HZ, bandwidth,
+                          DTV_TRANSMISSION_MODE, transmit_mode,
+                          DTV_GUARD_INTERVAL, guard);
+#else
+# warning DVB-T2 needs Linux DVB version 5.3 or later.
+    msg_Err (d->obj, "DVB-T2 support not compiled-in");
+    (void) freq; (void) modstr; (void) fec; (void) bandwidth;
+    (void) transmit_mode; (void) guard;
+    return -1;
+#endif
+}
+
 
 /*** ATSC ***/
 int dvb_set_atsc (dvb_device_t *d, uint32_t freq, const char *modstr)
 {
     unsigned mod = dvb_parse_modulation (modstr, VSB_8);
 
+    if (dvb_find_frontend (d, FE_ATSC, FE_IS_STUPID))
+        return -1;
     return dvb_set_props (d, 4, DTV_CLEAR, 0, DTV_DELIVERY_SYSTEM, SYS_ATSC,
                           DTV_FREQUENCY, freq * 1000, DTV_MODULATION, mod);
 }
@@ -785,6 +892,8 @@ int dvb_set_cqam (dvb_device_t *d, uint32_t freq, const char *modstr)
 {
     unsigned mod = dvb_parse_modulation (modstr, QAM_AUTO);
 
+    if (dvb_find_frontend (d, FE_QAM, FE_IS_STUPID))
+        return -1;
     return dvb_set_props (d, 4, DTV_CLEAR, 0,
                           DTV_DELIVERY_SYSTEM, SYS_DVBC_ANNEX_B,
                           DTV_FREQUENCY, freq * 1000, DTV_MODULATION, mod);

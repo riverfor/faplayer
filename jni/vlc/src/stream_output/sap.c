@@ -2,7 +2,7 @@
  * sap.c : SAP announce handler
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: e07233372fb5cfbf0f70fe2f7b8cb84b68e8e1fe $
+ * $Id: feee1d0df914978f66efbe01533d56fc3cdad7d2 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Rémi Denis-Courmont <rem # videolan.org>
@@ -108,7 +108,6 @@ sap_handler_t *SAP_Create (vlc_object_t *p_announce)
     if (p_sap == NULL)
         return NULL;
 
-    vlc_object_attach( p_sap, p_announce );
     vlc_mutex_init (&p_sap->lock);
     p_sap->first = NULL;
     return p_sap;

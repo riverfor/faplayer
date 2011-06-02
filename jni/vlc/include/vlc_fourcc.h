@@ -2,7 +2,7 @@
  * vlc_fourcc.h: Definition of various FOURCC and helpers
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 7e06368949f3c3e43d1b0df934d6c0d3b58bc41c $
+ * $Id: d6d50a1e7a81a6738436d453e31bbfa704e92dd5 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ com>
  *
@@ -150,19 +150,21 @@
 #define VLC_CODEC_RGBP      VLC_FOURCC('R','G','B','P')
 /* 8 bits RGB */
 #define VLC_CODEC_RGB8      VLC_FOURCC('R','G','B','8')
-/* 12 bits RGB stored on 16 bits */
+/* 12 bits RGB padded to 16 bits */
 #define VLC_CODEC_RGB12     VLC_FOURCC('R','V','1','2')
-/* 16 bits VLC RGBA */
+/* 16 bits RGBA (12 bits RGB + 4 bits alpha) */
 #define VLC_CODEC_RGBA16    VLC_FOURCC('A','V','1','6')
-/* 15 bits RGB stored on 16 bits */
+/* 15 bits RGB padded to 16 bits */
 #define VLC_CODEC_RGB15     VLC_FOURCC('R','V','1','5')
-/* 16 bits RGB store on a 16 bits */
+/* 16 bits RGBA (15 bits RGB + 1 bit alpha)  */
+#define VLC_CODEC_RGBT      VLC_FOURCC('R','G','B','T')
+/* 16 bits RGB */
 #define VLC_CODEC_RGB16     VLC_FOURCC('R','V','1','6')
 /* 24 bits RGB */
 #define VLC_CODEC_RGB24     VLC_FOURCC('R','V','2','4')
-/* 32 bits RGB */
+/* 24 bits RGB padded to 32 bits */
 #define VLC_CODEC_RGB32     VLC_FOURCC('R','V','3','2')
-/* 32 bits VLC RGBA */
+/* 32 bits RGBA */
 #define VLC_CODEC_RGBA      VLC_FOURCC('R','G','B','A')
 /* 8 bits grey */
 #define VLC_CODEC_GREY      VLC_FOURCC('G','R','E','Y')
@@ -354,7 +356,7 @@
  *
  * You may use UNKNOWN_ES for the ES category if you don't have the information.
  */
-VLC_EXPORT( vlc_fourcc_t, vlc_fourcc_GetCodec, ( int i_cat, vlc_fourcc_t i_fourcc ) );
+VLC_API vlc_fourcc_t vlc_fourcc_GetCodec( int i_cat, vlc_fourcc_t i_fourcc );
 
 /**
  * It returns the codec associated to a fourcc store in a zero terminated
@@ -365,7 +367,7 @@ VLC_EXPORT( vlc_fourcc_t, vlc_fourcc_GetCodec, ( int i_cat, vlc_fourcc_t i_fourc
  *
  * Provided for convenience.
  */
-VLC_EXPORT( vlc_fourcc_t, vlc_fourcc_GetCodecFromString, ( int i_cat, const char * ) );
+VLC_API vlc_fourcc_t vlc_fourcc_GetCodecFromString( int i_cat, const char * );
 
 /**
  * It convert the gives fourcc to an audio codec when possible.
@@ -374,14 +376,14 @@ VLC_EXPORT( vlc_fourcc_t, vlc_fourcc_GetCodecFromString, ( int i_cat, const char
  * is detected, 0 is returned.
  * The other fourcc goes through vlc_fourcc_GetCodec and i_bits is not checked.
  */
-VLC_EXPORT( vlc_fourcc_t, vlc_fourcc_GetCodecAudio, ( vlc_fourcc_t i_fourcc, int i_bits ) );
+VLC_API vlc_fourcc_t vlc_fourcc_GetCodecAudio( vlc_fourcc_t i_fourcc, int i_bits );
 
 /**
  * It returns the description of the given fourcc or NULL if not found.
  *
  * You may use UNKNOWN_ES for the ES category if you don't have the information.
  */
-VLC_EXPORT( const char *, vlc_fourcc_GetDescription, ( int i_cat, vlc_fourcc_t i_fourcc ) );
+VLC_API const char * vlc_fourcc_GetDescription( int i_cat, vlc_fourcc_t i_fourcc );
 
 /**
  * It returns a list (terminated with the value 0) of YUV fourccs in
@@ -389,7 +391,7 @@ VLC_EXPORT( const char *, vlc_fourcc_GetDescription, ( int i_cat, vlc_fourcc_t i
  *
  * It will always return a non NULL pointer that must not be freed.
  */
-VLC_EXPORT( const vlc_fourcc_t *, vlc_fourcc_GetYUVFallback, ( vlc_fourcc_t ) );
+VLC_API const vlc_fourcc_t * vlc_fourcc_GetYUVFallback( vlc_fourcc_t );
 
 /**
  * It returns a list (terminated with the value 0) of RGB fourccs in
@@ -397,18 +399,18 @@ VLC_EXPORT( const vlc_fourcc_t *, vlc_fourcc_GetYUVFallback, ( vlc_fourcc_t ) );
  *
  * It will always return a non NULL pointer that must not be freed.
  */
-VLC_EXPORT( const vlc_fourcc_t *, vlc_fourcc_GetRGBFallback, ( vlc_fourcc_t ) );
+VLC_API const vlc_fourcc_t * vlc_fourcc_GetRGBFallback( vlc_fourcc_t );
 
 /**
  * It returns true if the given fourcc is YUV and false otherwise.
  */
-VLC_EXPORT( bool, vlc_fourcc_IsYUV, ( vlc_fourcc_t ) );
+VLC_API bool vlc_fourcc_IsYUV( vlc_fourcc_t );
 
 /**
  * It returns true if the two fourccs are equivalent if their U&V planes are
  * swapped.
  */
-VLC_EXPORT( bool, vlc_fourcc_AreUVPlanesSwapped, (vlc_fourcc_t , vlc_fourcc_t ) );
+VLC_API bool vlc_fourcc_AreUVPlanesSwapped(vlc_fourcc_t , vlc_fourcc_t );
 
 /**
  * Chroma related information.
@@ -432,7 +434,7 @@ typedef struct {
  * It returns a vlc_chroma_description_t describing the request fourcc or NULL
  * if not found.
  */
-VLC_EXPORT( const vlc_chroma_description_t *, vlc_fourcc_GetChromaDescription, ( vlc_fourcc_t fourcc ) );
+VLC_API const vlc_chroma_description_t * vlc_fourcc_GetChromaDescription( vlc_fourcc_t fourcc );
 
 #endif /* _VLC_FOURCC_H */
 

@@ -2,7 +2,7 @@
  * libvlc.h:  libvlc external API
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 76b5b161e6853479324ff23e86fa3b4a39f0036b $
+ * $Id: 9650fb23bac8f2d72827cc32d7acb63aa1f3c474 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -48,7 +48,7 @@ typedef struct libvlc_media_library_t libvlc_media_library_t;
  * \param p_instance the libvlc instance
  * \return a new object or NULL on error
  */
-VLC_PUBLIC_API libvlc_media_library_t *
+LIBVLC_API libvlc_media_library_t *
     libvlc_media_library_new( libvlc_instance_t * p_instance );
 
 /**
@@ -58,7 +58,7 @@ VLC_PUBLIC_API libvlc_media_library_t *
  *
  * \param p_mlib media library object
  */
-VLC_PUBLIC_API void
+LIBVLC_API void
     libvlc_media_library_release( libvlc_media_library_t * p_mlib );
 
 /**
@@ -68,7 +68,7 @@ VLC_PUBLIC_API void
  *
  * \param p_mlib media library object
  */
-VLC_PUBLIC_API void
+LIBVLC_API void
     libvlc_media_library_retain( libvlc_media_library_t * p_mlib );
 
 /**
@@ -77,7 +77,7 @@ VLC_PUBLIC_API void
  * \param p_mlib media library object
  * \return 0 on success, -1 on error
  */
-VLC_PUBLIC_API int
+LIBVLC_API int
     libvlc_media_library_load( libvlc_media_library_t * p_mlib );
 
 /**
@@ -86,7 +86,7 @@ VLC_PUBLIC_API int
  * \param p_mlib media library object
  * \return media list subitems
  */
-VLC_PUBLIC_API libvlc_media_list_t *
+LIBVLC_API libvlc_media_list_t *
     libvlc_media_library_media_list( libvlc_media_library_t * p_mlib );
 
 

@@ -4,7 +4,7 @@
  * modules, especially intf modules. See vlc_config.h for output configuration.
  *****************************************************************************
  * Copyright (C) 1998-2005 the VideoLAN team
- * $Id: 02ab2b387e6e1c479b20134720a97a15cf4e24ed $
+ * $Id: 188d7632bbab8e9168b0d18fd10f002bb732ac70 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -55,11 +55,6 @@
 #include <vlc_charset.h>
 #include "../libvlc.h"
 
-#ifdef ANDROID
-extern void faplayer_message_udp(const char *fmt, ...);
-extern void faplayer_message_logcat(const char *fmt, ...);
-#endif
-
 /*****************************************************************************
  * Local macros
  *****************************************************************************/
@@ -79,7 +74,7 @@ static inline msg_bank_t *libvlc_bank (libvlc_int_t *inst)
 /*****************************************************************************
  * Local prototypes
  *****************************************************************************/
-static void PrintMsg ( vlc_object_t *, msg_item_t * );
+static void PrintMsg ( vlc_object_t *, const msg_item_t * );
 
 /**
  * Store all data required by messages interfaces.
@@ -253,19 +248,6 @@ void msg_Generic( vlc_object_t *p_this, int i_type, const char *psz_module,
     va_end( args );
 }
 
-/**
- * Destroys a message.
- */
-static void msg_Free (gc_object_t *gc)
-{
-    msg_item_t *msg = vlc_priv (gc, msg_item_t);
-
-    free (msg->psz_module);
-    free (msg->psz_msg);
-    free (msg->psz_header);
-    free (msg);
-}
-
 #undef msg_GenericVa
 /**
  * Add a message to a queue
@@ -279,10 +261,7 @@ void msg_GenericVa (vlc_object_t *p_this, int i_type,
                            const char *psz_module,
                            const char *psz_format, va_list _args)
 {
-    size_t      i_header_size;             /* Size of the additionnal header */
-    vlc_object_t *p_obj;
     char *       psz_str = NULL;                 /* formatted message string */
-    char *       psz_header = NULL;
     va_list      args;
 
     assert (p_this);
@@ -384,50 +363,24 @@ void msg_GenericVa (vlc_object_t *p_this, int i_type,
     }
     uselocale (locale);
 
-    msg_item_t * p_item = malloc (sizeof (*p_item));
-    if (p_item == NULL)
-        return; /* Uho! */
-
-    vlc_gc_init (p_item, msg_Free);
-    p_item->psz_module = p_item->psz_msg = p_item->psz_header = NULL;
-
-
-
-    i_header_size = 0;
-    p_obj = p_this;
-    while( p_obj != NULL )
-    {
-        char *psz_old = NULL;
-        if( p_obj->psz_header )
-        {
-            i_header_size += strlen( p_obj->psz_header ) + 4;
-            if( psz_header )
-            {
-                psz_old = strdup( psz_header );
-                psz_header = xrealloc( psz_header, i_header_size );
-                snprintf( psz_header, i_header_size , "[%s] %s",
-                          p_obj->psz_header, psz_old );
-            }
-            else
-            {
-                psz_header = xmalloc( i_header_size );
-                snprintf( psz_header, i_header_size, "[%s]",
-                          p_obj->psz_header );
-            }
-        }
-        free( psz_old );
-        p_obj = p_obj->p_parent;
-    }
-
     /* Fill message information fields */
-    p_item->i_type =        i_type;
-    p_item->i_object_id =   (uintptr_t)p_this;
-    p_item->psz_object_type = p_this->psz_object_type;
-    p_item->psz_module =    strdup( psz_module );
-    p_item->psz_msg =       psz_str;
-    p_item->psz_header =    psz_header;
+    msg_item_t msg;
 
-    PrintMsg( p_this, p_item );
+    msg.i_type = i_type;
+    msg.i_object_id = (uintptr_t)p_this;
+    msg.psz_object_type = p_this->psz_object_type;
+    msg.psz_module = psz_module;
+    msg.psz_msg = psz_str;
+    msg.psz_header = NULL;
+
+    for (vlc_object_t *o = p_this; o != NULL; o = o->p_parent)
+        if (o->psz_header != NULL)
+        {
+            msg.psz_header = o->psz_header;
+            break;
+        }
+
+    PrintMsg( p_this, &msg );
 
     vlc_rwlock_rdlock (&bank->lock);
     for (int i = 0; i < bank->i_sub; i++)
@@ -436,17 +389,17 @@ void msg_GenericVa (vlc_object_t *p_this, int i_type,
         libvlc_priv_t *priv = libvlc_priv( sub->instance );
         msg_bank_t *bank = priv->msg_bank;
         void *val = vlc_dictionary_value_for_key( &bank->enabled_objects,
-                                                  p_item->psz_module );
+                                                  msg.psz_module );
         if( val == kObjectPrintingDisabled ) continue;
         if( val != kObjectPrintingEnabled  ) /*if not allowed */
         {
             val = vlc_dictionary_value_for_key( &bank->enabled_objects,
-                                                 p_item->psz_object_type );
+                                                msg.psz_object_type );
             if( val == kObjectPrintingDisabled ) continue;
             if( val == kObjectPrintingEnabled  ); /* Allowed */
             else if( !bank->all_objects_enabled ) continue;
         }
-        switch( p_item->i_type )
+        switch( msg.i_type )
         {
             case VLC_MSG_INFO:
             case VLC_MSG_ERR:
@@ -460,10 +413,10 @@ void msg_GenericVa (vlc_object_t *p_this, int i_type,
                 break;
         }
 
-        sub->func (sub->opaque, p_item, 0);
+        sub->func (sub->opaque, &msg);
     }
     vlc_rwlock_unlock (&bank->lock);
-    msg_Release (p_item);
+    free (msg.psz_msg);
 }
 
 /*****************************************************************************
@@ -471,7 +424,7 @@ void msg_GenericVa (vlc_object_t *p_this, int i_type,
  *****************************************************************************
  * Print a message to stderr, with colour formatting if needed.
  *****************************************************************************/
-static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
+static void PrintMsg ( vlc_object_t *p_this, const msg_item_t *p_item )
 {
 #   define COL(x,y)  "\033[" #x ";" #y "m"
 #   define RED     COL(31,1)
@@ -479,31 +432,17 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
 #   define YELLOW  COL(0,33)
 #   define WHITE   COL(0,1)
 #   define GRAY    "\033[0m"
+    static const char msgtype[4][9] = { "", " error", " warning", " debug" };
+    static const char msgcolor[4][8] = { WHITE, RED, YELLOW, GRAY };
 
-    static const char ppsz_type[5][9] = { "", " error", " warning", " debug" };
-    static const char ppsz_color[4][8] = { WHITE, RED, YELLOW, GRAY };
-    const char *psz_object;
     libvlc_priv_t *priv = libvlc_priv (p_this->p_libvlc);
+    int type = p_item->i_type;
+
+    if (priv->i_verbose < 0 || priv->i_verbose < (type - VLC_MSG_ERR))
+        return;
+
+    const char *objtype = p_item->psz_object_type;
     msg_bank_t *bank = priv->msg_bank;
-    int i_type = p_item->i_type;
-
-    switch( i_type )
-    {
-        case VLC_MSG_ERR:
-            if( priv->i_verbose < 0 ) return;
-            break;
-        case VLC_MSG_INFO:
-            if( priv->i_verbose < 0 ) return;
-            break;
-        case VLC_MSG_WARN:
-            if( priv->i_verbose < 1 ) return;
-            break;
-        case VLC_MSG_DBG:
-            if( priv->i_verbose < 2 ) return;
-            break;
-    }
-
-    psz_object = p_item->psz_object_type;
     void * val = vlc_dictionary_value_for_key (&bank->enabled_objects,
                                                p_item->psz_module);
     if( val == kObjectPrintingDisabled )
@@ -513,7 +452,7 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
     else
     {
         val = vlc_dictionary_value_for_key (&bank->enabled_objects,
-                                            psz_object);
+                                            objtype);
         if( val == kObjectPrintingDisabled )
             return;
         if( val == kObjectPrintingEnabled )
@@ -522,34 +461,26 @@ static void PrintMsg ( vlc_object_t * p_this, msg_item_t * p_item )
             return;
     }
 
-    int canc = vlc_savecancel ();
     /* Send the message to stderr */
-#ifdef ANDROID
-    faplayer_message_logcat( "[%p] %s%s%s %s%s: %s\n",
-                  (void *)p_item->i_object_id,
-                  p_item->psz_header ? p_item->psz_header : "",
-                  p_item->psz_header ? " " : "",
-                  p_item->psz_module, psz_object,
-                  ppsz_type[i_type],
-                  p_item->psz_msg );
-    // if (i_type == VLC_MSG_INFO)
-        faplayer_message_udp( "%s\n", p_item->psz_msg );
-#else
-    utf8_fprintf( stderr, "[%s%p%s] %s%s%s %s%s: %s%s%s\n",
-                  priv->b_color ? GREEN : "",
-                  (void *)p_item->i_object_id,
-                  priv->b_color ? GRAY : "",
-                  p_item->psz_header ? p_item->psz_header : "",
-                  p_item->psz_header ? " " : "",
-                  p_item->psz_module, psz_object,
-                  ppsz_type[i_type],
-                  priv->b_color ? ppsz_color[i_type] : "",
-                  p_item->psz_msg,
-                  priv->b_color ? GRAY : "" );
-#endif
+    FILE *stream = stderr;
+    int canc = vlc_savecancel ();
 
-#if defined( WIN32 ) || defined( __OS2__ )
-    fflush( stderr );
+    flockfile (stream);
+    fprintf (stream, priv->b_color ? "["GREEN"%p"GRAY"] " : "[%p] ",
+            (void *)p_item->i_object_id);
+    if (p_item->psz_header != NULL)
+        utf8_fprintf (stream, "[%s] ", p_item->psz_header);
+    utf8_fprintf (stream, "%s %s%s: ", p_item->psz_module, objtype,
+                  msgtype[type]);
+    if (priv->b_color)
+        fputs (msgcolor[type], stream);
+    fputs (p_item->psz_msg, stream);
+    if (priv->b_color)
+        fputs (GRAY, stream);
+    putc_unlocked ('\n', stream);
+#if defined (WIN32) || defined (__OS2__)
+    fflush (stream);
 #endif
+    funlockfile (stream);
     vlc_restorecancel (canc);
 }

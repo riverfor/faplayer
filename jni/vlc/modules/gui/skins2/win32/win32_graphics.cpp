@@ -2,7 +2,7 @@
  * win32_graphics.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 141863c45b76a40bb925e2fa61ac53d68188e82b $
+ * $Id: 8b856bfc04ed9f16563917c1cebd00d6531d428c $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -81,6 +81,7 @@ void Win32Graphics::drawBitmap( const GenericBitmap &rBitmap,
                                 int xSrc, int ySrc, int xDest, int yDest,
                                 int width, int height, bool blend )
 {
+    (void)blend;
     // Get the bitmap size if necessary
     if( width == -1 )
     {

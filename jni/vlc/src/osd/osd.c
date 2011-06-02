@@ -2,7 +2,7 @@
  * osd.c - The OSD Menu core code.
  *****************************************************************************
  * Copyright (C) 2005-2008 M2X
- * $Id: 21bd762a8083f0c3bfd8e0d53634015ad3db8bdb $
+ * $Id: e5fe18c1aa3dabaed4c62707d3199b4c1d73fa78 $
  *
  * Authors: Jean-Paul Saman <jpsaman #_at_# m2x dot nl>
  *
@@ -160,13 +160,12 @@ osd_menu_t *osd_MenuCreate( vlc_object_t *p_this, const char *psz_file )
     {
         static const char osdmenu_name[] = "osd menu";
 
-        p_osd = vlc_custom_create( p_this, sizeof( *p_osd ),
+        p_osd = vlc_custom_create( p_this->p_libvlc, sizeof( *p_osd ),
                                    VLC_OBJECT_GENERIC, osdmenu_name );
         if( !p_osd )
             return NULL;
 
         p_osd->p_parser = NULL;
-        vlc_object_attach( p_osd, p_this->p_libvlc );
 
         /* Parse configuration file */
         if ( !osd_ParserLoad( p_osd, psz_file ) )

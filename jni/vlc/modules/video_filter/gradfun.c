@@ -2,7 +2,7 @@
  * gradfun.c: wrapper for the gradfun filter from mplayer
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id: 761f69ba4db1d39de49fa22c14dc26da93ecb10b $
+ * $Id: 118d4698841ee6c32b383019ca0136938d91bdbe $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -60,9 +60,9 @@ vlc_module_begin()
     set_category(CAT_VIDEO)
     set_subcategory(SUBCAT_VIDEO_VFILTER)
     add_integer_with_range(CFG_PREFIX "radius", 16, RADIUS_MIN, RADIUS_MAX,
-                           NULL, RADIUS_TEXT, RADIUS_LONGTEXT, false)
+                           RADIUS_TEXT, RADIUS_LONGTEXT, false)
     add_float_with_range(CFG_PREFIX "strength", 1.2, STRENGTH_MIN, STRENGTH_MAX,
-                         NULL, STRENGTH_TEXT, STRENGTH_LONGTEXT, false)
+                         STRENGTH_TEXT, STRENGTH_LONGTEXT, false)
 
     set_callbacks(Open, Close)
 vlc_module_end()

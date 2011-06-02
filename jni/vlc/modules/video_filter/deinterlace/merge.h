@@ -2,7 +2,7 @@
  * merge.h : Merge (line blending) routines for the VLC deinterlacer
  *****************************************************************************
  * Copyright (C) 2011 the VideoLAN team
- * $Id: 6526b983be7871e1800ea78e4b9fa1c838cc1a22 $
+ * $Id: 999d8429849703c5046e371967f2c0aab91a5b1e $
  *
  * Author: Sam Hocevar <sam@zoy.org>                      (generic C routine)
  *         Sigmund Augdal Helberg <sigmunau@videolan.org> (MMXEXT, 3DNow, SSE2)
@@ -31,10 +31,6 @@
  * \file
  * Merge (line blending) routines for the VLC deinterlacer.
  */
-
-#ifdef HAVE_CONFIG_H
-#   include "config.h"
-#endif
 
 /*****************************************************************************
  * Macros

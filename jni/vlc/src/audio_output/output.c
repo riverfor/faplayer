@@ -2,7 +2,7 @@
  * output.c : internal management of output streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id: 368d18566249521a54fc5eab4913213576b9ab19 $
+ * $Id: 38f3b84c8084621df2a36ef43119dce8fdb46b0a $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -43,14 +43,11 @@
 int aout_OutputNew( aout_instance_t * p_aout,
                     audio_sample_format_t * p_format )
 {
+    p_aout->output.output = *p_format;
+
     /* Retrieve user defaults. */
     int i_rate = var_InheritInteger( p_aout, "aout-rate" );
-    vlc_value_t val, text;
-    /* kludge to avoid a fpu error when rate is 0... */
-    if( i_rate == 0 ) i_rate = -1;
-
-    memcpy( &p_aout->output.output, p_format, sizeof(audio_sample_format_t) );
-    if ( i_rate != -1 )
+    if ( i_rate != 0 )
         p_aout->output.output.i_rate = i_rate;
     aout_FormatPrepare( &p_aout->output.output );
 
@@ -66,36 +63,34 @@ int aout_OutputNew( aout_instance_t * p_aout,
              (VLC_VAR_INTEGER | VLC_VAR_HASCHOICE) )
     {
         /* The user may have selected a different channels configuration. */
-        var_Get( p_aout, "audio-channels", &val );
-
-        if ( val.i_int == AOUT_VAR_CHAN_RSTEREO )
+        switch( var_InheritInteger( p_aout, "audio-channels" ) )
         {
-            p_aout->output.output.i_original_channels |=
-                                        AOUT_CHAN_REVERSESTEREO;
-        }
-        else if ( val.i_int == AOUT_VAR_CHAN_STEREO )
-        {
-            p_aout->output.output.i_original_channels =
-                AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT;
-        }
-        else if ( val.i_int == AOUT_VAR_CHAN_LEFT )
-        {
-            p_aout->output.output.i_original_channels = AOUT_CHAN_LEFT;
-        }
-        else if ( val.i_int == AOUT_VAR_CHAN_RIGHT )
-        {
-            p_aout->output.output.i_original_channels = AOUT_CHAN_RIGHT;
-        }
-        else if ( val.i_int == AOUT_VAR_CHAN_DOLBYS )
-        {
-            p_aout->output.output.i_original_channels
-                = AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT | AOUT_CHAN_DOLBYSTEREO;
+            case AOUT_VAR_CHAN_RSTEREO:
+                p_aout->output.output.i_original_channels |=
+                                                       AOUT_CHAN_REVERSESTEREO;
+                break;
+            case AOUT_VAR_CHAN_STEREO:
+                p_aout->output.output.i_original_channels =
+                                              AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT;
+                break;
+            case AOUT_VAR_CHAN_LEFT:
+                p_aout->output.output.i_original_channels = AOUT_CHAN_LEFT;
+                break;
+            case AOUT_VAR_CHAN_RIGHT:
+                p_aout->output.output.i_original_channels = AOUT_CHAN_RIGHT;
+                break;
+            case AOUT_VAR_CHAN_DOLBYS:
+                p_aout->output.output.i_original_channels =
+                      AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT | AOUT_CHAN_DOLBYSTEREO;
+                break;
         }
     }
     else if ( p_aout->output.output.i_physical_channels == AOUT_CHAN_CENTER
               && (p_aout->output.output.i_original_channels
                    & AOUT_CHAN_PHYSMASK) == (AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT) )
     {
+        vlc_value_t val, text;
+
         /* Mono - create the audio-channels variable. */
         var_Create( p_aout, "audio-channels",
                     VLC_VAR_INTEGER | VLC_VAR_HASCHOICE );
@@ -122,6 +117,8 @@ int aout_OutputNew( aout_instance_t * p_aout,
                 && (p_aout->output.output.i_original_channels &
                      (AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT)) )
     {
+        vlc_value_t val, text;
+
         /* Stereo - create the audio-channels variable. */
         var_Create( p_aout, "audio-channels",
                     VLC_VAR_INTEGER | VLC_VAR_HASCHOICE );
@@ -193,21 +190,9 @@ int aout_OutputNew( aout_instance_t * p_aout,
     {
         msg_Err( p_aout, "couldn't create audio output pipeline" );
         module_unneed( p_aout, p_aout->output.p_module );
+        p_aout->output.p_module = NULL;
         return -1;
     }
-
-    /* Prepare hints for the buffer allocator. */
-    p_aout->mixer_allocation.b_alloc = true;
-    p_aout->mixer_allocation.i_bytes_per_sec
-                        = p_aout->mixer_format.i_bytes_per_frame
-                           * p_aout->mixer_format.i_rate
-                           / p_aout->mixer_format.i_frame_length;
-
-    aout_FiltersHintBuffers( p_aout, p_aout->output.pp_filters,
-                             p_aout->output.i_nb_filters,
-                             &p_aout->mixer_allocation );
-
-    p_aout->output.b_error = 0;
     return 0;
 }
 
@@ -218,21 +203,17 @@ int aout_OutputNew( aout_instance_t * p_aout,
  *****************************************************************************/
 void aout_OutputDelete( aout_instance_t * p_aout )
 {
-    if ( p_aout->output.b_error )
-    {
+    if( p_aout->output.p_module == NULL )
         return;
-    }
-
     module_unneed( p_aout, p_aout->output.p_module );
+    p_aout->output.p_module = NULL;
 
-    aout_FiltersDestroyPipeline( p_aout, p_aout->output.pp_filters,
+    aout_FiltersDestroyPipeline( p_aout->output.pp_filters,
                                  p_aout->output.i_nb_filters );
 
     aout_lock_output_fifo( p_aout );
     aout_FifoDestroy( p_aout, &p_aout->output.fifo );
     aout_unlock_output_fifo( p_aout );
-
-    p_aout->output.b_error = true;
 }
 
 /*****************************************************************************
@@ -356,7 +337,7 @@ aout_buffer_t * aout_OutputNextBuffer( aout_instance_t * p_aout,
             aout_unlock_output_fifo( p_aout );
 
             aout_lock_input_fifos( p_aout );
-            aout_fifo_t *p_fifo = &p_aout->pp_inputs[0]->mixer.fifo;
+            aout_fifo_t *p_fifo = &p_aout->p_input->mixer.fifo;
             aout_FifoMoveDates( p_aout, p_fifo, difference );
             aout_unlock_input_fifos( p_aout );
             return p_buffer;

@@ -2,7 +2,7 @@
  * access.c
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id: b8a2f031e3652a1df4503113de9c17744052c3dc $
+ * $Id: 01c67e3669fdf7d5cda4e5a198e489c77006e310 $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -82,9 +82,6 @@ access_t *__access_New( vlc_object_t *p_obj, input_thread_t *p_parent_input,
     p_access->p_sys      = NULL;
 
     access_InitFields( p_access );
-
-    /* Before module_need (for var_Create...) */
-    vlc_object_attach( p_access, p_obj );
 
     p_access->p_module = module_need( p_access, "access", psz_access, true );
     if( p_access->p_module == NULL )

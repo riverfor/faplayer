@@ -2,7 +2,7 @@
  * ctrl_video.cpp
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id: 2130e68a76c115554076251214e39af809aaa707 $
+ * $Id: 2ed026bdee14a3055fe3a546d56e209c02564d91 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *
@@ -36,8 +36,8 @@ CtrlVideo::CtrlVideo( intf_thread_t *pIntf, GenericLayout &rLayout,
                       bool autoResize, const UString &rHelp,
                       VarBool *pVisible ):
     CtrlGeneric( pIntf, rHelp, pVisible ), m_rLayout( rLayout ),
-    m_xShift( 0 ), m_yShift( 0 ), m_bAutoResize( autoResize ),
-    m_pVoutWindow( NULL ), m_bIsUseable( false )
+    m_bAutoResize( autoResize), m_xShift( 0 ), m_yShift( 0 ),
+    m_bIsUseable( false), m_pVoutWindow( NULL )
 {
     VarBool &rFullscreen = VlcProc::instance( getIntf() )->getFullscreenVar();
     rFullscreen.addObserver( this );
@@ -57,11 +57,13 @@ CtrlVideo::~CtrlVideo()
 
 void CtrlVideo::handleEvent( EvtGeneric &rEvent )
 {
+    (void)rEvent;
 }
 
 
 bool CtrlVideo::mouseOver( int x, int y ) const
 {
+    (void)x; (void)y;
     return false;
 }
 
@@ -161,6 +163,8 @@ void CtrlVideo::resizeControl( int width, int height )
 
 void CtrlVideo::onUpdate( Subject<VarBool> &rVariable, void *arg  )
 {
+    (void)arg;
+
     // Visibility changed
     if( &rVariable == m_pVisible )
     {

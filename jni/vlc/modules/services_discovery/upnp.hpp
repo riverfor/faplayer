@@ -2,7 +2,7 @@
  * Upnp.hpp :  UPnP discovery module (libupnp) header
  *****************************************************************************
  * Copyright (C) 2004-2010 the VideoLAN team
- * $Id: 9469c0293d8efe9aff50c5f5f3a317c2e51e71df $
+ * $Id: 47782160a74859708ea61a9138b866686243a1cf $
  *
  * Authors: Rémi Denis-Courmont <rem # videolan.org> (original plugin)
  *          Christian Henz <henz # c-lab.de>
@@ -126,7 +126,7 @@ public:
     const char* getObjectID() const;
     const char* getTitle() const;
     const char* getResource() const;
-    const mtime_t getDuration() const;
+    mtime_t getDuration() const;
 
     void setInputItem( input_item_t* p_input_item );
 

@@ -2,7 +2,7 @@
  * vlc_keys.h: keycode defines
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: c3a79daa7fb69d7f1cf672109fb7bbaae4800a3b $
+ * $Id: ca394fda571e73410e2ada001ef3b82f11ff71d9 $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *
@@ -86,8 +86,8 @@
 #define KEY_MOUSEWHEELLEFT   0x00F20000
 #define KEY_MOUSEWHEELRIGHT  0x00F30000
 
-VLC_EXPORT( char *, vlc_keycode2str, (uint_fast32_t i_key) ) LIBVLC_USED;
-VLC_EXPORT( uint_fast32_t, vlc_str2keycode, (const char *str) ) LIBVLC_USED;
+VLC_API char *vlc_keycode2str(uint_fast32_t i_key) VLC_USED;
+VLC_API uint_fast32_t vlc_str2keycode(const char *str) VLC_USED;
 
 typedef enum vlc_action {
     ACTIONID_NONE = 0,
@@ -202,7 +202,7 @@ typedef enum vlc_action {
 
 } vlc_action_t;
 
-VLC_EXPORT( vlc_action_t, vlc_GetActionId, (const char *psz_key) ) LIBVLC_USED;
+VLC_API vlc_action_t vlc_GetActionId(const char *psz_key) VLC_USED;
 
 struct hotkey
 {

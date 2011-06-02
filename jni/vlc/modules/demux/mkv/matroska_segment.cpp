@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2010 the VideoLAN team
- * $Id: 5c558e9c566271bf3f132638702a146c762beec7 $
+ * $Id: fd63c8eaa39a7a253a343612b095ba1eaf27e38c $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -41,7 +41,43 @@ static vlc_fourcc_t __GetFOURCC( uint8_t *p )
     return VLC_FOURCC( p[0], p[1], p[2], p[3] );
 }
 
-/* Destructor */
+matroska_segment_c::matroska_segment_c( demux_sys_t & demuxer, EbmlStream & estream )
+    :segment(NULL)
+    ,es(estream)
+    ,i_timescale(MKVD_TIMECODESCALE)
+    ,i_duration(-1)
+    ,i_start_time(0)
+    ,i_seekhead_count(0)
+    ,i_seekhead_position(-1)
+    ,i_cues_position(-1)
+    ,i_tracks_position(-1)
+    ,i_info_position(-1)
+    ,i_chapters_position(-1)
+    ,i_tags_position(-1)
+    ,i_attachments_position(-1)
+    ,cluster(NULL)
+    ,i_block_pos(0)
+    ,i_cluster_pos(0)
+    ,i_start_pos(0)
+    ,p_segment_uid(NULL)
+    ,p_prev_segment_uid(NULL)
+    ,p_next_segment_uid(NULL)
+    ,b_cues(false)
+    ,i_index(0)
+    ,i_index_max(1024)
+    ,psz_muxing_application(NULL)
+    ,psz_writing_application(NULL)
+    ,psz_segment_filename(NULL)
+    ,psz_title(NULL)
+    ,psz_date_utc(NULL)
+    ,i_default_edition(0)
+    ,sys(demuxer)
+    ,ep(NULL)
+    ,b_preloaded(false)
+{
+    p_indexes = (mkv_index_t*)malloc( sizeof( mkv_index_t ) * i_index_max );
+}
+
 matroska_segment_c::~matroska_segment_c()
 {
     for( size_t i_track = 0; i_track < tracks.size(); i_track++ )
@@ -807,7 +843,6 @@ bool matroska_segment_c::Select( mtime_t i_start_time )
 {
     /* add all es */
     msg_Dbg( &sys.demuxer, "found %d es", (int)tracks.size() );
-    sys.b_pci_packet_set = false;
 
     for( size_t i_track = 0; i_track < tracks.size(); i_track++ )
     {
@@ -1126,12 +1161,8 @@ bool matroska_segment_c::Select( mtime_t i_start_time )
             p_fmt->audio.i_rate = 8000;
             p_fmt->audio.i_blockalign = 0x14;
         }
-        /* disabled due to the potential "S_KATE" namespace issue */
         else if( !strcmp( p_tk->psz_codec, "S_KATE" ) )
         {
-            int i, i_offset = 1, i_extra, num_headers, size_so_far;
-            uint8_t *p_extra;
-
             p_tk->fmt.i_codec = VLC_CODEC_KATE;
             p_tk->fmt.subs.psz_encoding = strdup( "UTF-8" );
 
@@ -1253,6 +1284,7 @@ bool matroska_segment_c::Select( mtime_t i_start_time )
 
 void matroska_segment_c::UnSelect( )
 {
+    sys.p_ev->ResetPci();
     for( size_t i_track = 0; i_track < tracks.size(); i_track++ )
     {
         if ( tracks[i_track]->p_es != NULL )

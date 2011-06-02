@@ -35,7 +35,11 @@ include ./packages.mak
 # Set a clean environment
 # ***************************************************************************
 
+#ifdef HAVE_DARWIN_OS
+export PATH := $(PREFIX)/bin:$(EXTRA_PATH):/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:
+#else
 export PATH := $(PREFIX)/bin:$(EXTRA_PATH):$(PATH)
+#endif
 export PKG_CONFIG_PATH
 export PKG_CONFIG_LIBDIR = $(PREFIX)/lib/pkgconfig
 export MACOSX_DEPLOYMENT_TARGET = $(SDK_TARGET)
@@ -305,7 +309,7 @@ ifdef HAVE_MACOSX
 	patch -p0 < Patches/gettext-macosx.patch
 endif
 
-.intl: gettext
+.intl: gettext .iconv
 ifdef HAVE_WIN32
 	( cd $< && $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-relocatable --disable-java --disable-native-java)
 else
@@ -419,7 +423,7 @@ FONTCONFIG_ENV-$(HAVE_WIN32)      = $(HOSTCC)
 FONTCONFIG_ENV-$(HAVE_CYGWIN)     =
 
 FONTCONFIG_INSTALL-$(ENABLED)     = make install
-FONTCONFIG_INSTALL-$(HAVE_MACOSX) = make install-exec && (cd fontconfig ; make install-data) && cp fontconfig.pc $(PKG_CONFIG_LIBDIR)
+FONTCONFIG_INSTALL-$(HAVE_MACOSX) = make install-exec && (cd fontconfig ; make install-data) && cp fontconfig.pc $(PKG_CONFIG_LIBDIR) && sed -e 's%/usr/lib/libiconv.la%%' -i.orig $(PREFIX)/lib/libfontconfig.la
 
 .fontconfig: fontconfig .xml .freetype
 	(cd $<; $(FONTCONFIG_ENV-1) ./configure $(FONTCONFIG_CONF-1) && make && $(FONTCONFIG_INSTALL-1))
@@ -520,24 +524,6 @@ CLEAN_PKG += libmpeg2
 DISTCLEAN_PKG += libmpeg2-$(LIBMPEG2_VERSION).tar.gz
 
 # ***************************************************************************
-# pcre
-# ***************************************************************************
-
-pcre-$(PCRE_VERSION).tar.bz2:
-	$(WGET) $(PCRE_URL)
-
-pcre: pcre-$(PCRE_VERSION).tar.bz2
-	$(EXTRACT_BZ2)
-
-.pcre: pcre
-	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-shared && make && make install )
-	touch $@
-
-CLEAN_FILE += .pcre
-CLEAN_PKG += pcre
-DISTCLEAN_PKG += pcre-$(PCRE_VERSION).tar.bz2
-
-# ***************************************************************************
 # lua
 # ***************************************************************************
 
@@ -558,7 +544,7 @@ endif
 
 .lua: lua
 ifdef HAVE_WIN32
-	( cd $< && sed -i.orig 's/lua luac/lua.exe/' Makefile && cd src && sed -i.orig 's/CC=/#CC=/' Makefile && sed -i 's/strip/$(STRIP)/' Makefile && cd ../..)
+	( cd $< && sed -i.orig 's/lua luac/lua.exe/' Makefile && cd src && sed -i.orig 's/CC=/#CC=/' Makefile && sed -i 's/=strip/=$(STRIP)/;s/= ranlib/= $(RANLIB)/' Makefile && cd ../..)
 	(cd $<&& $(HOSTCC) make $(LUA_MAKEPLATEFORM-1)&& cd src&& $(HOSTCC) make liblua.a&& cd ..&&$(HOSTCC) make install INSTALL_TOP=$(PREFIX)&& $(RANLIB) $(PREFIX)/lib/liblua.a)
 	(cd $<&& sed -i.orig 's@prefix= /usr/local@prefix= $(PREFIX)@' etc/lua.pc&& mkdir -p $(PREFIX)/lib/pkgconfig&& cp etc/lua.pc $(PREFIX)/lib/pkgconfig)
 else
@@ -1537,14 +1523,22 @@ endif
 ifdef HAVE_WIN32
 	(cd $@; patch -p0 < ../Patches/libcddb-win32.patch )
 endif
+ifdef HAVE_DARWIN_OS
+	(cd $@; patch -p0 < ../Patches/libcddb-darwin.patch )
+endif
 	patch -p0 < Patches/libcddb-getenv-crash.patch
 
 ifdef HAVE_WIN32
 .cddb: libcddb .regex
 	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-shared --enable-static --without-iconv CFLAGS="$(CFLAGS) -D_BSD_SOCKLEN_T_=int" && make && make install)
 else
+ifdef HAVE_DARWIN_OS
+.cddb: libcddb
+	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-shared --enable-static --without-iconv CFLAGS="$(CFLAGS) -D_BSD_SOCKLEN_T_=int" LDFLAGS="$(LDFLAGS)" && make && make install)
+else
 .cddb: libcddb
 	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-shared --enable-static CFLAGS="$(CFLAGS) -D_BSD_SOCKLEN_T_=int" LDFLAGS="$(LDFLAGS) -liconv" && make && make install)
+endif
 endif
 	touch $@
 
@@ -1589,7 +1583,11 @@ ifdef HAVE_MACOSX
 endif
 
 .cdio: libcdio
+ifdef HAVE_DARWIN_OS
+	(cd $<; ./configure --prefix=$(PREFIX) --without-vcdinfo --disable-shared && make && make install && sed -e 's%/usr/lib/libiconv.la%%' -i.orig $(PREFIX)/lib/libcdio.la && sed -e 's%/usr/lib/libiconv.la%%' -i.orig $(PREFIX)/lib/libiso9660.la)
+else
 	(cd $<; sed -e 's%@ENABLE_CPP_TRUE@SUBDIRS = C++%@ENABLE_CPP_TRUE@SUBDIRS = %' -i.orig example/Makefile.in && autoreconf -fisv && ./configure --prefix=$(PREFIX) --without-vcdinfo --disable-shared && make && make install)
+endif
 	touch $@
 
 CLEAN_FILE += .cdio
@@ -1663,10 +1661,10 @@ DISTCLEAN_PKG += zlib-$(ZLIB_VERSION).tar.gz
 # PortAudio
 # ***************************************************************************
 
-pa_snapshot_v$(PORTAUDIO_VERSION).tar.gz:
+pa_stable_v$(PORTAUDIO_VERSION).tgz:
 	$(WGET) $(PORTAUDIO_URL)
 
-portaudio: pa_snapshot_v$(PORTAUDIO_VERSION).tar.gz
+portaudio: pa_stable_v$(PORTAUDIO_VERSION).tgz
 	$(EXTRACT_GZ)
 ifneq ($(HOST),$(BUILD))
 	(patch -p0 < Patches/portaudio-cross.patch;cd $@;  autoconf)
@@ -1683,7 +1681,7 @@ endif
 
 CLEAN_FILE += .portaudio
 CLEAN_PKG += portaudio
-DISTCLEAN_PKG += pa_snapshot_v$(PORTAUDIO_VERSION).tar.gz
+DISTCLEAN_PKG += pa_stable_v$(PORTAUDIO_VERSION).tgz
 
 # ***************************************************************************
 # xml
@@ -2038,7 +2036,7 @@ SDL:
 endif
 
 .SDL: SDL
-	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-audio --disable-video-x11 --disable-video-aalib --disable-video-dga --disable-video-fbcon --disable-video-directfb --disable-video-ggi --disable-video-svga --disable-directx --enable-joystick --disable-cdrom --disable-threads --disable-sdl-dlopen CFLAGS="$(CFLAGS)" && make && make install)
+	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-video-x11 --disable-video-aalib --disable-video-dga --disable-video-fbcon --disable-video-directfb --disable-video-ggi --disable-video-svga --disable-directx --disable-joystick --disable-cdrom --disable-threads --disable-sdl-dlopen CFLAGS="$(CFLAGS)" && make && make install)
 	$(INSTALL_NAME)
 	touch $@
 
@@ -2160,7 +2158,7 @@ d2d_headers.tar.gz:
 
 .dshow_headers: dshow-headers-oss.tar.bz2 dxva2api.h d2d_headers.tar.gz
 	mkdir -p $(PREFIX)/include
-	tar xjf $< -C $(PREFIX)/include
+	tar xjf $< -C $(PREFIX)/include --wildcards --no-anchored '*.h' --strip-components=1
 	tar xzf d2d_headers.tar.gz -C $(PREFIX)/include --wildcards --no-anchored '*.h' --strip-components=1
 	cp dxva2api.h $(PREFIX)/include
 	touch $@
@@ -2287,7 +2285,7 @@ ifdef HAVE_WIN64
 endif
 
 .pthreads: pthreads
-	(cd $<; $(HOSTCC) $(PTHREADSCONF) make MAKEFLAGS=-j1 GC GC-static && mkdir -p $(PREFIX)/include && cp -v pthread.h sched.h semaphore.h $(PREFIX)/include/ && mkdir -p $(PREFIX)/lib && cp -v *.a *.dll $(PREFIX)/lib/)
+	(cd $<; $(HOSTCC) $(PTHREADSCONF) make MAKEFLAGS=-j1 GC GC-static && mkdir -p $(PREFIX)/include && cp -v pthread.h sched.h semaphore.h $(PREFIX)/include/ && sed -i 's/#if HAVE_CONFIG_H/#if 0 \&\& HAVE_CONFIG_H/' $(PREFIX)/include/pthread.h && mkdir -p $(PREFIX)/lib && cp -v *.a *.dll $(PREFIX)/lib/)
 	$(INSTALL_NAME)
 	touch $@
 
@@ -2358,6 +2356,7 @@ orc-$(ORC_VERSION).tar.gz:
 
 orc: orc-$(ORC_VERSION).tar.gz
 	$(EXTRACT_GZ)
+	patch -p0 < Patches/orc-stdint.patch
 
 .orc: orc
 ifdef HAVE_MACOSX
@@ -2512,6 +2511,7 @@ endif
 ifdef HAVE_MACOSX
 	(cd $@; sed -e 's%-O2%-O2\ $(EXTRA_CFLAGS)\ $(EXTRA_LDFLAGS)%' -e 's%# LDFLAGS 	=%LDFLAGS 	= $(EXTRA_LDFLAGS)%' -e 's%gcc%$(CC)%' -i.orig  Makefile)
 endif
+	(cd $@; sed -i -e 's%-O2%-O2 -fPIC%' Makefile)
 
 .gsm: gsm
 	(cd $<; $(HOSTCC) make && mkdir -p $(PREFIX)/include/gsm && cp inc/gsm.h $(PREFIX)/include/gsm && cp lib/libgsm.a  $(PREFIX)/lib)
@@ -2741,7 +2741,7 @@ clean-src: clean
 	rm -rf $(DISTCLEAN_PKG)
 
 clean-svn:
-	rm -rf ffmpeg tremor x264 libdca pa_snapshot_v$(PORTAUDIO_VERSION).tar.gz portaudio live555-$(LIVEDOTCOM_VERSION).tar.gz live libass
+	rm -rf ffmpeg tremor x264 libdca pa_stable_v$(PORTAUDIO_VERSION).tar.gz portaudio live555-$(LIVEDOTCOM_VERSION).tar.gz live libass
 
 distclean: clean-src
 

@@ -2,7 +2,7 @@
 * atmo.cpp : "Atmo Light" video filter
 *****************************************************************************
 * Copyright (C) 2000-2006 the VideoLAN team
-* $Id: 008c3e206ab3ed5cf4e14eb3db67e3734ebdba77 $
+* $Id: 381928c8d0487de635cc45bbf7ca49acf30f3a72 $
 *
 * Authors: André Weber (WeberAndre@gmx.de)
 *
@@ -43,6 +43,7 @@
 
 #include <vlc_playlist.h>
 #include <vlc_filter.h>
+#include <vlc_atomic.h>
 
 #include "filter_picture.h"
 
@@ -397,13 +398,13 @@ add_string(CFG_PREFIX "serialdev", "/dev/ttyUSB0",
 set_section( N_("Illuminate the room with this color on pause" ), 0 )
 add_bool(CFG_PREFIX "usepausecolor", false,
          PCOLOR_TEXT, PCOLOR_LONGTEXT, false)
-add_integer_with_range(CFG_PREFIX "pcolor-red",   0, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "pcolor-red",   0, 0, 255,
                        PCOLOR_RED_TEXT, PCOLOR_RED_LONGTEXT, false)
-add_integer_with_range(CFG_PREFIX "pcolor-green", 0, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "pcolor-green", 0, 0, 255,
                        PCOLOR_GREEN_TEXT, PCOLOR_GREEN_LONGTEXT, false)
-add_integer_with_range(CFG_PREFIX "pcolor-blue",  192, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "pcolor-blue",  192, 0, 255,
                        PCOLOR_BLUE_TEXT, PCOLOR_BLUE_LONGTEXT, false)
-add_integer_with_range(CFG_PREFIX "fadesteps", 50, 1, 250, NULL,
+add_integer_with_range(CFG_PREFIX "fadesteps", 50, 1, 250,
                        FADESTEPS_TEXT, FADESTEPS_LONGTEXT, false)
 
 /*
@@ -411,31 +412,31 @@ add_integer_with_range(CFG_PREFIX "fadesteps", 50, 1, 250, NULL,
     used for both buildin / external
 */
 set_section( N_("Illuminate the room with this color on shutdown" ), 0 )
-add_integer_with_range(CFG_PREFIX "ecolor-red",   192, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "ecolor-red",   192, 0, 255,
                        ECOLOR_RED_TEXT,   ECOLOR_RED_LONGTEXT,   false)
-add_integer_with_range(CFG_PREFIX "ecolor-green", 192, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "ecolor-green", 192, 0, 255,
                        ECOLOR_GREEN_TEXT, ECOLOR_GREEN_LONGTEXT, false)
-add_integer_with_range(CFG_PREFIX "ecolor-blue",  192, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "ecolor-blue",  192, 0, 255,
                        ECOLOR_BLUE_TEXT,  ECOLOR_BLUE_LONGTEXT,  false)
-add_integer_with_range(CFG_PREFIX "efadesteps",    50, 1, 250, NULL,
+add_integer_with_range(CFG_PREFIX "efadesteps",    50, 1, 250,
                        EFADESTEPS_TEXT,   EFADESTEPS_LONGTEXT,    false)
 
 
 set_section( N_("DMX options" ), 0 )
-add_integer_with_range(CFG_PREFIX "dmx-channels",   5, 1, 64, NULL,
+add_integer_with_range(CFG_PREFIX "dmx-channels",   5, 1, 64,
                        DMX_CHANNELS_TEXT, DMX_CHANNELS_LONGTEXT, false)
 add_string(CFG_PREFIX "dmx-chbase", "0,3,6,9,12",
                        DMX_CHBASE_TEXT, DMX_CHBASE_LONGTEXT, false )
 
 set_section( N_("MoMoLight options" ), 0 )
-add_integer_with_range(CFG_PREFIX "momo-channels",   3, 3, 4, NULL,
+add_integer_with_range(CFG_PREFIX "momo-channels",   3, 3, 4,
                        MOMO_CHANNELS_TEXT, MOMO_CHANNELS_LONGTEXT, false)
 
 /* 2,2,4 means 2 is the default value, 1 minimum amount,
    4 maximum amount
 */
 set_section( N_("fnordlicht options" ), 0 )
-add_integer_with_range(CFG_PREFIX "fnordlicht-amount",   2, 1, 254, NULL,
+add_integer_with_range(CFG_PREFIX "fnordlicht-amount",   2, 1, 254,
                        FNORDLICHT_AMOUNT_TEXT,
                        FNORDLICHT_AMOUNT_LONGTEXT, false)
 
@@ -477,11 +478,11 @@ add_integer_with_range(CFG_PREFIX "fnordlicht-amount",   2, 1, 254, NULL,
 */
 
 set_section( N_("Zone Layout for the build-in Atmo" ), 0 )
-add_integer_with_range(CFG_PREFIX "zones-top",   1, 0, 16, NULL,
+add_integer_with_range(CFG_PREFIX "zones-top",   1, 0, 16,
                        ZONE_TOP_TEXT, ZONE_TOP_LONGTEXT, false)
-add_integer_with_range(CFG_PREFIX "zones-bottom",   1, 0, 16, NULL,
+add_integer_with_range(CFG_PREFIX "zones-bottom",   1, 0, 16,
                        ZONE_BOTTOM_TEXT, ZONE_BOTTOM_LONGTEXT, false)
-add_integer_with_range(CFG_PREFIX "zones-lr",   1, 0, 16, NULL,
+add_integer_with_range(CFG_PREFIX "zones-lr",   1, 0, 16,
                        ZONE_LR_TEXT, ZONE_LR_LONGTEXT, false)
 add_bool(CFG_PREFIX "zone-summary", false,
          ZONE_SUMMARY_TEXT, ZONE_SUMMARY_LONGTEXT, false)
@@ -494,19 +495,19 @@ add_bool(CFG_PREFIX "zone-summary", false,
 */
 set_section( N_("Settings for the built-in Live Video Processor only" ), 0 )
 
-add_integer_with_range(CFG_PREFIX "edgeweightning",   3, 1, 30, NULL,
+add_integer_with_range(CFG_PREFIX "edgeweightning",   3, 1, 30,
                        EDGE_TEXT, EDGE_LONGTEXT, false)
 
-add_integer_with_range(CFG_PREFIX "brightness",   100, 50, 300, NULL,
+add_integer_with_range(CFG_PREFIX "brightness",   100, 50, 300,
                        BRIGHTNESS_TEXT, BRIGHTNESS_LONGTEXT, false)
 
-add_integer_with_range(CFG_PREFIX "darknesslimit",   3, 0, 10, NULL,
+add_integer_with_range(CFG_PREFIX "darknesslimit",   3, 0, 10,
                        DARKNESS_TEXT, DARKNESS_LONGTEXT, false)
 
-add_integer_with_range(CFG_PREFIX "huewinsize",   3, 0, 5, NULL,
+add_integer_with_range(CFG_PREFIX "huewinsize",   3, 0, 5,
                        HUEWINSIZE_TEXT, HUEWINSIZE_LONGTEXT, false)
 
-add_integer_with_range(CFG_PREFIX "satwinsize",   3, 0, 5, NULL,
+add_integer_with_range(CFG_PREFIX "satwinsize",   3, 0, 5,
                        SATWINSIZE_TEXT, SATWINSIZE_LONGTEXT, false)
 
 add_integer(CFG_PREFIX "filtermode", (int)afmCombined,
@@ -514,16 +515,16 @@ add_integer(CFG_PREFIX "filtermode", (int)afmCombined,
 
 change_integer_list(pi_filtermode_values, ppsz_filtermode_descriptions )
 
-add_integer_with_range(CFG_PREFIX "meanlength",    300, 300, 5000, NULL,
+add_integer_with_range(CFG_PREFIX "meanlength",    300, 300, 5000,
                        MEANLENGTH_TEXT, MEANLENGTH_LONGTEXT, false)
 
-add_integer_with_range(CFG_PREFIX "meanthreshold",  40, 1, 100, NULL,
+add_integer_with_range(CFG_PREFIX "meanthreshold",  40, 1, 100,
                        MEANTHRESHOLD_TEXT, MEANTHRESHOLD_LONGTEXT, false)
 
-add_integer_with_range(CFG_PREFIX "percentnew", 50, 1, 100, NULL,
+add_integer_with_range(CFG_PREFIX "percentnew", 50, 1, 100,
                       MEANPERCENTNEW_TEXT, MEANPERCENTNEW_LONGTEXT, false)
 
-add_integer_with_range(CFG_PREFIX "framedelay", 18, 0, 200, NULL,
+add_integer_with_range(CFG_PREFIX "framedelay", 18, 0, 200,
                        FRAMEDELAY_TEXT, FRAMEDELAY_LONGTEXT, false)
 
 /*
@@ -565,13 +566,13 @@ add_string(CFG_PREFIX "channels", "",
 set_section( N_("Adjust the white light to your LED stripes" ), 0 )
 add_bool(CFG_PREFIX "whiteadj", true,
          USEWHITEADJ_TEXT, USEWHITEADJ_LONGTEXT, false)
-add_integer_with_range(CFG_PREFIX "white-red",   255, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "white-red",   255, 0, 255,
                        WHITE_RED_TEXT,   WHITE_RED_LONGTEXT,   false)
 
-add_integer_with_range(CFG_PREFIX "white-green", 255, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "white-green", 255, 0, 255,
                        WHITE_GREEN_TEXT, WHITE_GREEN_LONGTEXT, false)
 
-add_integer_with_range(CFG_PREFIX "white-blue",  255, 0, 255, NULL,
+add_integer_with_range(CFG_PREFIX "white-blue",  255, 0, 255,
                        WHITE_BLUE_TEXT,  WHITE_BLUE_LONGTEXT,  false)
 /* end of definition of parameter for the buildin filter ... part 1 */
 
@@ -608,9 +609,9 @@ add_string(CFG_PREFIX "framepath", "",
    may be later if computers gets more power ;-) than now we increase
    the samplesize from which we do the stats for output color calculation
 */
-add_integer_with_range(CFG_PREFIX "width",  64, 64, 512, NULL,
+add_integer_with_range(CFG_PREFIX "width",  64, 64, 512,
                        WIDTH_TEXT,  WIDTH_LONGTEXT, true)
-add_integer_with_range(CFG_PREFIX "height", 48, 48, 384, NULL,
+add_integer_with_range(CFG_PREFIX "height", 48, 48, 384,
                        HEIGHT_TEXT,  HEIGHT_LONGTEXT, true)
 add_bool(CFG_PREFIX "showdots", false,
                    SHOW_DOTS_TEXT, SHOW_DOTS_LONGTEXT, false)
@@ -699,8 +700,10 @@ static const char *const ppsz_filter_options[] = {
 */
 typedef struct
 {
-    VLC_COMMON_MEMBERS
-        filter_t *p_filter;
+    filter_t *p_filter;
+    vlc_thread_t thread;
+    vlc_atomic_t abort;
+
     /* tell the thread which color should be the target of fading */
     uint8_t ui_red;
     uint8_t ui_green;
@@ -710,7 +713,7 @@ typedef struct
 
 } fadethread_t;
 
-static void *FadeToColorThread(vlc_object_t *);
+static void *FadeToColorThread(void *);
 
 
 /*****************************************************************************
@@ -731,6 +734,8 @@ struct filter_sys_t
     bool b_pause_live;
     bool b_show_dots;
     int32_t i_device_type;
+
+    bool b_swap_uv;
 
     int32_t i_atmo_width;
     int32_t i_atmo_height;
@@ -1105,9 +1110,7 @@ static void Atmo_Shutdown(filter_t *p_filter)
         p_sys->b_pause_live = true;
 
 
-        p_sys->p_fadethread = (fadethread_t *)vlc_object_create( p_filter,
-                                                    sizeof(fadethread_t) );
-
+        p_sys->p_fadethread = (fadethread_t *)calloc( 1, sizeof(fadethread_t) );
         p_sys->p_fadethread->p_filter = p_filter;
         p_sys->p_fadethread->ui_red   = p_sys->ui_endcolor_red;
         p_sys->p_fadethread->ui_green = p_sys->ui_endcolor_green;
@@ -1116,13 +1119,15 @@ static void Atmo_Shutdown(filter_t *p_filter)
           p_sys->p_fadethread->i_steps  = 1;
         else
           p_sys->p_fadethread->i_steps  = p_sys->i_endfadesteps;
+        vlc_atomic_set(&p_sys->p_fadethread->abort, 0);
 
-        if( vlc_thread_create( p_sys->p_fadethread,
-            FadeToColorThread,
-            VLC_THREAD_PRIORITY_LOW ) )
+        if( vlc_clone( &p_sys->p_fadethread->thread,
+                       FadeToColorThread,
+                       p_sys->p_fadethread,
+                       VLC_THREAD_PRIORITY_LOW ) )
         {
             msg_Err( p_filter, "cannot create FadeToColorThread" );
-            vlc_object_release( p_sys->p_fadethread );
+            free( p_sys->p_fadethread );
             p_sys->p_fadethread = NULL;
             vlc_mutex_unlock( &p_sys->filter_lock );
 
@@ -1131,9 +1136,9 @@ static void Atmo_Shutdown(filter_t *p_filter)
             vlc_mutex_unlock( &p_sys->filter_lock );
 
             /* wait for the thread... */
-            vlc_thread_join(p_sys->p_fadethread);
+            vlc_join(p_sys->p_fadethread->thread, NULL);
 
-            vlc_object_release(p_sys->p_fadethread);
+            free(p_sys->p_fadethread);
 
             p_sys->p_fadethread = NULL;
         }
@@ -1558,7 +1563,6 @@ if this fails fallback to the buildin software
 */
 static void Atmo_SetupParameters(filter_t *p_filter)
 {
-    char *psz_path;
     filter_sys_t *p_sys =  p_filter->p_sys;
 
 
@@ -1734,8 +1738,12 @@ static void Atmo_SetupParameters(filter_t *p_filter)
     switch( p_filter->fmt_in.video.i_chroma )
     {
     case VLC_CODEC_I420:
+        p_sys->pf_extract_mini_image = ExtractMiniImage_YUV;
+        p_sys->b_swap_uv = false;
+        break;
     case VLC_CODEC_YV12:
         p_sys->pf_extract_mini_image = ExtractMiniImage_YUV;
+        p_sys->b_swap_uv = true;
         break;
     default:
         msg_Warn( p_filter, "InitFilter-unsupported chroma: %4.4s",
@@ -1839,7 +1847,7 @@ static void Atmo_SetupParameters(filter_t *p_filter)
           COM Server for AtmoLight not running ?
           if the exe path is configured try to start the "userspace" driver
         */
-        psz_path = var_CreateGetStringCommand( p_filter,
+        char *psz_path = var_CreateGetStringCommand( p_filter,
                                                CFG_PREFIX "atmowinexe" );
         if(psz_path != NULL)
         {
@@ -2103,6 +2111,16 @@ static void ExtractMiniImage_YUV(filter_sys_t *p_sys,
         p_src_v = p_inpic->p[V_PLANE].p_pixels +
             p_inpic->p[V_PLANE].i_pitch * i_v_row;
 
+        if(p_sys->b_swap_uv)
+        {
+          /*
+           swap u and v plane for YV12 images
+          */
+          uint8_t *p_temp_plane = p_src_u;
+          p_src_u = p_src_v;
+          p_src_v = p_temp_plane;
+        }
+
         for(i_col = 1; i_col < i_col_count; i_col++)
         {
             i_pixel_col = (i_col * p_sys->i_crop_width) / i_col_count +
@@ -2290,7 +2308,7 @@ static picture_t * Filter( filter_t *p_filter, picture_t *p_pic )
 {
     filter_sys_t *p_sys = p_filter->p_sys;
     if( !p_pic ) return NULL;
-    
+
     picture_t *p_outpic = filter_NewPicture( p_filter );
     if( !p_outpic )
     {
@@ -2298,7 +2316,7 @@ static picture_t * Filter( filter_t *p_filter, picture_t *p_pic )
         return NULL;
     }
     picture_CopyPixels( p_outpic, p_pic );
-    
+
     vlc_mutex_lock( &p_sys->filter_lock );
 
     if(p_sys->b_enabled && p_sys->pf_extract_mini_image &&
@@ -2324,7 +2342,7 @@ static picture_t * Filter( filter_t *p_filter, picture_t *p_pic )
 * to a target color defined in p_fadethread struct
 * use for: Fade to Pause Color,  and Fade to End Color
 *****************************************************************************/
-static void *FadeToColorThread(vlc_object_t *obj)
+static void *FadeToColorThread(void *obj)
 {
     fadethread_t *p_fadethread = (fadethread_t *)obj;
     filter_sys_t *p_sys = (filter_sys_t *)p_fadethread->p_filter->p_sys;
@@ -2367,7 +2385,7 @@ static void *FadeToColorThread(vlc_object_t *obj)
             /* send the same pixel data again... to unlock the buffer! */
             AtmoSendPixelData( p_fadethread->p_filter );
 
-            while( (vlc_object_alive (p_fadethread)) &&
+            while( (!vlc_atomic_get (&p_fadethread->abort)) &&
                 (i_steps_done < p_fadethread->i_steps))
             {
                 p_transfer = AtmoLockTransferBuffer( p_fadethread->p_filter );
@@ -2380,7 +2398,7 @@ static void *FadeToColorThread(vlc_object_t *obj)
                 thread improvements wellcome!
                 */
                 for(i_index = 0;
-                    (i_index < i_size) && (vlc_object_alive (p_fadethread));
+                    (i_index < i_size) && (!vlc_atomic_get (&p_fadethread->abort));
                     i_index+=4)
                 {
                     i_src_blue  = p_source[i_index+0];
@@ -2436,11 +2454,10 @@ static void CheckAndStopFadeThread(filter_t *p_filter)
     {
         msg_Dbg(p_filter, "kill still running fadeing thread...");
 
-        p_sys->p_fadethread->b_die = true;
+        vlc_atomic_set(&p_sys->p_fadethread->abort, 1);
 
-        vlc_thread_join(p_sys->p_fadethread);
-
-        vlc_object_release(p_sys->p_fadethread);
+        vlc_join(p_sys->p_fadethread->thread, NULL);
+        free(p_sys->p_fadethread);
         p_sys->p_fadethread = NULL;
     }
     vlc_mutex_unlock( &p_sys->filter_lock );
@@ -2450,7 +2467,7 @@ static void CheckAndStopFadeThread(filter_t *p_filter)
 * StateCallback: Callback for the inputs variable "State" to get notified
 * about Pause and Continue Playback events.
 *****************************************************************************/
-static int StateCallback( vlc_object_t *p_this, char const *psz_cmd,
+static int StateCallback( vlc_object_t *, char const *,
                          vlc_value_t oldval, vlc_value_t newval,
                          void *p_data )
 {
@@ -2479,22 +2496,21 @@ static int StateCallback( vlc_object_t *p_this, char const *psz_cmd,
             */
             if(p_sys->p_fadethread == NULL)
             {
-                p_sys->p_fadethread = (fadethread_t *)vlc_object_create(
-                     p_filter,
-                     sizeof(fadethread_t) );
-
+                p_sys->p_fadethread = (fadethread_t *)calloc( 1, sizeof(fadethread_t) );
                 p_sys->p_fadethread->p_filter = p_filter;
                 p_sys->p_fadethread->ui_red   = p_sys->ui_pausecolor_red;
                 p_sys->p_fadethread->ui_green = p_sys->ui_pausecolor_green;
                 p_sys->p_fadethread->ui_blue  = p_sys->ui_pausecolor_blue;
                 p_sys->p_fadethread->i_steps  = p_sys->i_fadesteps;
+                vlc_atomic_set(&p_sys->p_fadethread->abort, 0);
 
-                if( vlc_thread_create( p_sys->p_fadethread,
-                    FadeToColorThread,
-                    VLC_THREAD_PRIORITY_LOW ) )
+                if( vlc_clone( &p_sys->p_fadethread->thread,
+                               FadeToColorThread,
+                               p_sys->p_fadethread,
+                               VLC_THREAD_PRIORITY_LOW ) )
                 {
                     msg_Err( p_filter, "cannot create FadeToColorThread" );
-                    vlc_object_release( p_sys->p_fadethread );
+                    free( p_sys->p_fadethread );
                     p_sys->p_fadethread = NULL;
                 }
             }
@@ -2551,7 +2567,7 @@ static void DelStateVariableCallback( filter_t *p_filter )
 * StateCallback: Callback for the inputs variable "State" to get notified
 * about Pause and Continue Playback events.
 *****************************************************************************/
-static int AtmoSettingsCallback( vlc_object_t *p_this, char const *psz_var,
+static int AtmoSettingsCallback( vlc_object_t *, char const *psz_var,
                                  vlc_value_t oldval, vlc_value_t newval,
                                  void *p_data )
 {

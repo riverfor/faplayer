@@ -2,7 +2,7 @@
  * stream_memory.c: stream_t wrapper around memory buffer
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id: f8700dfe0a18bca5ca51c66cc96896330e8225f8 $
+ * $Id: 4565828f3fd1e4fefb5f040b482870937918f95b $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *
@@ -78,7 +78,6 @@ stream_t *stream_MemoryNew( vlc_object_t *p_this, uint8_t *p_buffer,
     s->pf_destroy = Delete;
     s->p_input = NULL;
 
-    vlc_object_attach( s, p_this );
     return s;
 }
 

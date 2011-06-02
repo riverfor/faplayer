@@ -2,7 +2,7 @@
  * window.c: "vout window" managment
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: fd21bec95ac2b9254cec3e8b4b8f1578a1c0c4b6 $
+ * $Id: 8d4cb7ea0516c85e97969e05c49d47ea84311bda $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -62,8 +62,6 @@ vout_window_t *vout_window_New(vlc_object_t *obj,
     memset(&window->handle, 0, sizeof(window->handle));
     window->control = NULL;
     window->sys = NULL;
-
-    vlc_object_attach(window, obj);
 
     const char *type;
     switch (cfg->type) {

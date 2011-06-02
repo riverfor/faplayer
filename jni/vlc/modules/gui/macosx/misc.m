@@ -2,7 +2,7 @@
  * misc.m: code not specific to vlc
  *****************************************************************************
  * Copyright (C) 2003-2011 the VideoLAN team
- * $Id: a99f01a219553499febf10bf9c35fd6df0a25f47 $
+ * $Id: c20f835decbc6e48cf8f004840f31bedba919676 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -227,7 +227,12 @@ static NSMutableArray *blackoutWindows = NULL;
 {
     self = [super initWithContentRect:contentRect styleMask:styleMask backing:backingType defer:flag];
     if( self )
+    {
         b_isset_canBecomeKeyWindow = NO;
+        /* we don't want this window to be restored on relaunch */
+        if ([self respondsToSelector:@selector(setRestorable:)])
+            [self setRestorable:NO];
+    }
     return self;
 }
 - (void)setCanBecomeKeyWindow: (BOOL)canBecomeKey
@@ -427,6 +432,11 @@ static NSMutableArray *blackoutWindows = NULL;
         [self setContentBorderThickness:28.0 forEdge:NSMinYEdge];
     }
     */
+
+    /* we don't want this window to be restored on relaunch */
+    if ([self respondsToSelector:@selector(setRestorable:)])
+        [self setRestorable:NO];
+
     return self;
 }
 

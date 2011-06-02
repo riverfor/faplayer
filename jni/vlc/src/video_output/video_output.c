@@ -6,7 +6,7 @@
  * thread, and destroy a previously oppened video output thread.
  *****************************************************************************
  * Copyright (C) 2000-2007 the VideoLAN team
- * $Id: 430876185cbef148db8f099ef817d60c05df592e $
+ * $Id: 48aad9013b86d83cd7ec853e586c5f08be0ffc70 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -143,9 +143,6 @@ static vout_thread_t *VoutCreate(vlc_object_t *object,
     vlc_mutex_init(&vout->p->picture_lock);
     vlc_mutex_init(&vout->p->filter.lock);
     vlc_mutex_init(&vout->p->spu_lock);
-
-    /* Attach the new object now so we can use var inheritance below */
-    vlc_object_attach(vout, object);
 
     /* Initialize subpicture unit */
     vout->p->spu = spu_Create(vout);

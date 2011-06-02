@@ -2,7 +2,7 @@
  * infopanels.cpp : Panels for the information dialogs
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 0c66e7806792292ef5328a71149ce187720c32de $
+ * $Id: 7f2da223f7d9da2c0f03e923c800d6964ed7e70d $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -132,21 +132,28 @@ MetaPanel::MetaPanel( QWidget *parent,
 
     /* Language on the same line */
     ADD_META( VLC_META_LANGUAGE, language_text, 7, -1 ); line++;
+    ADD_META( VLC_META_PUBLISHER, publisher_text, 0, 7 ); line++;
+
+    lblURL = new QLabel;
+    lblURL->setOpenExternalLinks( true );
+    lblURL->setTextFormat( Qt::RichText );
+    metaLayout->addWidget( lblURL, line -1, 7, 1, -1 );
+
+    ADD_META( VLC_META_COPYRIGHT, copyright_text, 0,  7 ); line++;
 
     /* ART_URL */
     art_cover = new CoverArtLabel( this, p_intf );
-    metaLayout->addWidget( art_cover, line + 1, 7, 6, 3, Qt::AlignLeft );
+    metaLayout->addWidget( art_cover, line, 7, 6, 3, Qt::AlignLeft );
 
-    ADD_META( VLC_META_PUBLISHER, publisher_text, 0, 7 ); line++;
-    ADD_META( VLC_META_COPYRIGHT, copyright_text, 0,  7 ); line++;
     ADD_META( VLC_META_ENCODED_BY, encodedby_text, 0, 7 ); line++;
 
     label = new QLabel( qtr( N_("Comments") ) ); label->setFont( smallFont );
     label->setContentsMargins( 3, 2, 0, 0 );
     metaLayout->addWidget( label, line++, 0, 1, 7 );
     description_text = new QTextEdit;
+    description_text->setAcceptRichText( false );
     metaLayout->addWidget( description_text, line, 0, 1, 7 );
-    CONNECT( description_text, textEdited( QString ), this, enterEditMode() );
+    // CONNECT( description_text, textChanged(), this, enterEditMode() ); //FIXME
     line++;
 
     /* VLC_META_SETTING: Useless */
@@ -206,16 +213,9 @@ void MetaPanel::update( input_item_t *p_item )
         title_text->setText( "" );
 
     /* URL / URI */
-    psz_meta = input_item_GetURL( p_item );
+    psz_meta = input_item_GetURI( p_item );
     if( !EMPTY_STR( psz_meta ) )
-        emit uriSet( qfu( psz_meta ) );
-    else
-    {
-        free( psz_meta );
-        psz_meta = input_item_GetURI( p_item );
-        if( !EMPTY_STR( psz_meta ) )
-            emit uriSet( qfu( psz_meta ) );
-    }
+         emit uriSet( qfu( psz_meta ) );
     free( psz_meta );
 
     /* Other classic though */
@@ -234,6 +234,16 @@ void MetaPanel::update( input_item_t *p_item )
 //    UPDATE_META( Setting, setting_text );
 //    UPDATE_META_INT( Rating, rating_text );
 
+    /* URL */
+    psz_meta = input_item_GetURL( p_item );
+    if( !EMPTY_STR( psz_meta ) && strcmp( psz_meta, currentURL ) )
+    {
+        free( currentURL ); currentURL = strdup( psz_meta );
+
+        lblURL->setText( "<a href='" + qfu( psz_meta ) + "'>" +
+                        qfu( psz_meta ).remove( QRegExp( ".*://") ) + "</a>" );
+        free( psz_meta );
+    }
 #undef UPDATE_META_INT
 #undef UPDATE_META
 
@@ -250,7 +260,6 @@ void MetaPanel::update( input_item_t *p_item )
     }
 
     art_cover->showArtUpdate( file );
-
 }
 
 /**
@@ -289,7 +298,6 @@ bool MetaPanel::isInEditMode()
 
 void MetaPanel::enterEditMode()
 {
-    msg_Dbg( p_intf, "Entering Edit MetaData Mode" );
     setEditMode( true );
 }
 
@@ -561,32 +569,36 @@ void InputStatsPanel::update( input_item_t *p_item )
     assert( p_item );
     vlc_mutex_lock( &p_item->p_stats->lock );
 
-#define UPDATE( widget, format, calc... ) \
+#define UPDATE_INT( widget, calc... ) \
+    { widget->setText( 1, QString::number( (qulonglong)calc ) ); }
+
+#define UPDATE_FLOAT( widget, format, calc... ) \
     { QString str; widget->setText( 1 , str.sprintf( format, ## calc ) );  }
 
-    UPDATE( read_media_stat,     "%"PRIu64, (p_item->p_stats->i_read_bytes / 1024 ) );
-    UPDATE( input_bitrate_stat,  "%6.0f", (float)(p_item->p_stats->f_input_bitrate *  8000  ));
-    UPDATE( demuxed_stat,        "%"PRIu64, (p_item->p_stats->i_demux_read_bytes / 1024 ) );
-    UPDATE( stream_bitrate_stat, "%6.0f", (float)(p_item->p_stats->f_demux_bitrate *  8000  ));
-    UPDATE( corrupted_stat,      "%"PRIu64, p_item->p_stats->i_demux_corrupted );
-    UPDATE( discontinuity_stat,  "%"PRIu64, p_item->p_stats->i_demux_discontinuity );
+    UPDATE_INT( read_media_stat, (p_item->p_stats->i_read_bytes / 1024 ) );
+    UPDATE_FLOAT( input_bitrate_stat,  "%6.0f", (float)(p_item->p_stats->f_input_bitrate *  8000  ));
+    UPDATE_INT( demuxed_stat,    (p_item->p_stats->i_demux_read_bytes / 1024 ) );
+    UPDATE_FLOAT( stream_bitrate_stat, "%6.0f", (float)(p_item->p_stats->f_demux_bitrate *  8000  ));
+    UPDATE_INT( corrupted_stat,      p_item->p_stats->i_demux_corrupted );
+    UPDATE_INT( discontinuity_stat,  p_item->p_stats->i_demux_discontinuity );
 
     /* Video */
-    UPDATE( vdecoded_stat,     "%"PRIu64, p_item->p_stats->i_decoded_video );
-    UPDATE( vdisplayed_stat,   "%"PRIu64, p_item->p_stats->i_displayed_pictures );
-    UPDATE( vlost_frames_stat, "%"PRIu64, p_item->p_stats->i_lost_pictures );
+    UPDATE_INT( vdecoded_stat,     p_item->p_stats->i_decoded_video );
+    UPDATE_INT( vdisplayed_stat,   p_item->p_stats->i_displayed_pictures );
+    UPDATE_INT( vlost_frames_stat, p_item->p_stats->i_lost_pictures );
 
     /* Sout */
-    UPDATE( send_stat,        "%"PRIu64, p_item->p_stats->i_sent_packets );
-    UPDATE( send_bytes_stat,  "%"PRIu64, (p_item->p_stats->i_sent_bytes)/ 1024 );
-    UPDATE( send_bitrate_stat, "%6.0f", (float)(p_item->p_stats->f_send_bitrate * 8000 ) );
+    UPDATE_INT( send_stat,        p_item->p_stats->i_sent_packets );
+    UPDATE_INT( send_bytes_stat,  (p_item->p_stats->i_sent_bytes)/ 1024 );
+    UPDATE_FLOAT( send_bitrate_stat, "%6.0f", (float)(p_item->p_stats->f_send_bitrate * 8000 ) );
 
     /* Audio*/
-    UPDATE( adecoded_stat, "%"PRIu64, p_item->p_stats->i_decoded_audio );
-    UPDATE( aplayed_stat,  "%"PRIu64, p_item->p_stats->i_played_abuffers );
-    UPDATE( alost_stat,    "%"PRIu64, p_item->p_stats->i_lost_abuffers );
+    UPDATE_INT( adecoded_stat, p_item->p_stats->i_decoded_audio );
+    UPDATE_INT( aplayed_stat,  p_item->p_stats->i_played_abuffers );
+    UPDATE_INT( alost_stat,    p_item->p_stats->i_lost_abuffers );
 
-#undef UPDATE
+#undef UPDATE_INT
+#undef UPDATE_FLOAT
 
     vlc_mutex_unlock(& p_item->p_stats->lock );
 }

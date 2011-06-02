@@ -2,7 +2,7 @@
  * x11_factory.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: b53ae233717f3cc3e6e6698765d6c91571c4379f $
+ * $Id: e6d98c90b8cabba8732e1be3909a158c3e62e87b $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -134,7 +134,8 @@ public:
     virtual void getMousePos( int &rXPos, int &rYPos ) const;
 
     /// Change the cursor
-    virtual void changeCursor( CursorType_t type ) const { /*TODO*/ }
+    virtual void changeCursor( CursorType_t type ) const
+        { /*TODO*/ (void)type; }
 
     /// Delete a directory recursively
     virtual void rmDir( const string &rPath );

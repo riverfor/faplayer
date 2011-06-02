@@ -2,7 +2,7 @@
  * puzzle.c : Puzzle game
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: c57775387e7a390ce20a77630493b93156cf1bda $
+ * $Id: b9b6bf8742ca8b6040d4867335e60df17e3aa8c1 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -59,9 +59,9 @@ vlc_module_begin()
     set_category( CAT_VIDEO )
     set_subcategory( SUBCAT_VIDEO_VFILTER )
 
-    add_integer_with_range( CFG_PREFIX "rows", 4, 2, 16, NULL,
+    add_integer_with_range( CFG_PREFIX "rows", 4, 2, 16,
                             ROWS_TEXT, ROWS_LONGTEXT, false )
-    add_integer_with_range( CFG_PREFIX "cols", 4, 2, 16, NULL,
+    add_integer_with_range( CFG_PREFIX "cols", 4, 2, 16,
                             COLS_TEXT, COLS_LONGTEXT, false )
     add_bool( CFG_PREFIX "black-slot", false,
               BLACKSLOT_TEXT, BLACKSLOT_LONGTEXT, false )

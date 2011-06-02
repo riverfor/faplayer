@@ -2,7 +2,7 @@
  * mediainfo.cpp : Information about an item
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: f5adf2b5d9bcb68187a7dbde06865318b1e8fe27 $
+ * $Id: d5a015b047c7bc33795789091524430483840cb5 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -65,7 +65,7 @@ MediaInfoDialog::MediaInfoDialog( intf_thread_t *_p_intf,
     if( isMainInputInfo )
     {
         ISP = new InputStatsPanel( infoTabW, p_intf );
-        infoTabW->addTab( ISP, qtr( "&Statistics" ) );
+        infoTabW->addTab( ISP, qtr( "S&tatistics" ) );
     }
 
     QGridLayout *layout = new QGridLayout( this );

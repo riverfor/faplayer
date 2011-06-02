@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2004 Daniel Molkentin <molkentin@kde.org>
- * $Id: 90c779194be7a85557e61537774adb086f851f24 $
+ * $Id: 12f99319257ec6f0fade5c1e7f5538982a667735 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  * The "ClickLineEdit" control is based on code by  Daniel Molkentin
@@ -54,7 +54,7 @@ void QFramelessButton::paintEvent( QPaintEvent * )
 }
 
 QElidingLabel::QElidingLabel( const QString &s, Qt::TextElideMode mode, QWidget * parent )
-                 : elideMode( mode ), QLabel( s, parent )
+                 : QLabel( s, parent ), elideMode( mode )
 { }
 
 void QElidingLabel::setElideMode( Qt::TextElideMode mode )
@@ -63,7 +63,7 @@ void QElidingLabel::setElideMode( Qt::TextElideMode mode )
     repaint();
 }
 
-void QElidingLabel::paintEvent( QPaintEvent * event )
+void QElidingLabel::paintEvent( QPaintEvent * )
 {
     QPainter p( this );
     int space = frameWidth() + margin();
@@ -302,7 +302,7 @@ QString VLCKeyToString( unsigned val )
 /* Animated Icon implementation */
 
 AnimatedIcon::AnimatedIcon( QWidget *parent )
-    : mTimer( this ), mIdleFrame( NULL )
+    : QLabel( parent ), mTimer( this ), mIdleFrame( NULL )
 {
     mCurrentFrame = mRemainingLoops = 0;
     connect( &mTimer, SIGNAL( timeout() ), this, SLOT( onTimerTick() ) );
@@ -344,7 +344,7 @@ void AnimatedIcon::play( int loops, int interval )
         interval = 20;
     }
 
-    if( !mIdleFrame && ( mFrames.empty() | loops != 0 ) )
+    if( !mIdleFrame && (mFrames.empty() || loops != 0 ) )
     {
 #ifndef NDEBUG
         printf( "AnimatedIcon::play(): no frames to display" );
@@ -409,11 +409,8 @@ SpinningIcon::SpinningIcon( QWidget *parent, bool noIdleFrame )
     setFixedSize( 16, 16 );
 }
 
-SpinningIcon::~SpinningIcon()
-{
-}
-
-QToolButtonExt::QToolButtonExt(QWidget *parent, int ms ): longClick( false )
+QToolButtonExt::QToolButtonExt(QWidget *parent, int ms )
+               :QToolButton( parent ), longClick( false )
 {
     setAutoRepeat( true );
     /* default to twice the doubleclick delay */

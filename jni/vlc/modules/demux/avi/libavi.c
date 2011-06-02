@@ -2,7 +2,7 @@
  * libavi.c : LibAVI
  *****************************************************************************
  * Copyright (C) 2001 the VideoLAN team
- * $Id: 0031a167b86bb10e6e7981324217f5075c918aa2 $
+ * $Id: d5d46ef81c33f020ee69f38f01e3690f2c266e64 $
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -342,10 +342,12 @@ static int AVI_ChunkRead_strf( stream_t *s, avi_chunk_t *p_chk )
             AVI_READ4BYTES( p_chk->strf.auds.p_wf->nAvgBytesPerSec );
             AVI_READ2BYTES( p_chk->strf.auds.p_wf->nBlockAlign );
             AVI_READ2BYTES( p_chk->strf.auds.p_wf->wBitsPerSample );
+
             if( p_chk->strf.auds.p_wf->wFormatTag != WAVE_FORMAT_PCM
                  && p_chk->common.i_chunk_size > sizeof( WAVEFORMATEX ) )
             {
                 AVI_READ2BYTES( p_chk->strf.auds.p_wf->cbSize );
+
                 /* prevent segfault */
                 if( p_chk->strf.auds.p_wf->cbSize >
                         p_chk->common.i_chunk_size - sizeof( WAVEFORMATEX ) )
@@ -353,11 +355,10 @@ static int AVI_ChunkRead_strf( stream_t *s, avi_chunk_t *p_chk )
                     p_chk->strf.auds.p_wf->cbSize =
                         p_chk->common.i_chunk_size - sizeof( WAVEFORMATEX );
                 }
+
                 if( p_chk->strf.auds.p_wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE )
                 {
-                    /* Found an extensible header atm almost nothing uses that. */
-                    msg_Warn( (vlc_object_t*)s, "WAVE_FORMAT_EXTENSIBLE or "
-                              "vorbis audio dectected: not supported" );
+                    msg_Dbg( s, "Extended header found" );
                 }
             }
             else
@@ -625,13 +626,13 @@ static int AVI_ChunkRead_strz( stream_t *s, avi_chunk_t *p_chk )
         }
     }
     p_strz->p_type = strdup( AVI_strz_type[i_index].psz_type );
-    p_strz->p_str = malloc( i_read + 1);
+    p_strz->p_str = malloc( p_strz->i_chunk_size + 1);
 
     if( p_strz->i_chunk_size )
     {
-        memcpy( p_strz->p_str, p_read, i_read );
+        memcpy( p_strz->p_str, p_read, p_strz->i_chunk_size );
     }
-    p_strz->p_str[i_read] = 0;
+    p_strz->p_str[p_strz->i_chunk_size] = 0;
 
 #ifdef AVI_DEBUG
     msg_Dbg( (vlc_object_t*)s, "%4.4s: %s : %s",

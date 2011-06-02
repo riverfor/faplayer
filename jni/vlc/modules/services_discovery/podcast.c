@@ -2,7 +2,7 @@
  * podcast.c:  Podcast services discovery module
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: 1b00a2babe073d3b0d3659e21d7fc6c225d98cca $
+ * $Id: 74c4a011f3bf46d58e07dcfc762c901c5c816528 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -184,8 +184,7 @@ static void Close( vlc_object_t *p_this )
             continue;
 
         input_Stop( p_input, true );
-        vlc_thread_join( p_input );
-        vlc_object_release( p_input );
+        input_Close( p_input );
 
         p_sd->p_sys->pp_input[i] = NULL;
     }
@@ -236,8 +235,7 @@ static void *Run( void *data )
             if( p_input->b_eof || p_input->b_error )
             {
                 input_Stop( p_input, false );
-                vlc_thread_join( p_input );
-                vlc_object_release( p_input );
+                input_Close( p_input );
 
                 p_sd->p_sys->pp_input[i] = NULL;
                 REMOVE_ELEM( p_sys->pp_input, p_sys->i_input, i );

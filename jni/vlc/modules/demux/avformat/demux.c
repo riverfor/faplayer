@@ -2,7 +2,7 @@
  * demux.c: demuxer using ffmpeg (libavformat).
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: 52a17afeb3fd66b79c4020e4ccc0f4b668812923 $
+ * $Id: b09cf503f2d70eddb2b70dd000327bf4ad3f7044 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -368,7 +368,7 @@ int OpenDemux( vlc_object_t *p_this )
                                 p_attachment );
                     }
                 }
-                else msg_Warn( p_demux, "unsupported attachment type in ffmpeg demux" );
+                else msg_Warn( p_demux, "unsupported attachment type (%u) in ffmpeg demux", cc->codec_id );
             }
             break;
 #endif
@@ -450,15 +450,15 @@ int OpenDemux( vlc_object_t *p_this )
                     memcpy( fmt.p_extra, p_extra, i_extra );
                 }
             }
-        }
-        es = es_out_Add( p_demux->out, &fmt );
-        if( s->disposition & AV_DISPOSITION_DEFAULT )
-            es_out_Control( p_demux->out, ES_OUT_SET_ES_DEFAULT, es );
-        es_format_Clean( &fmt );
+            es = es_out_Add( p_demux->out, &fmt );
+            if( s->disposition & AV_DISPOSITION_DEFAULT )
+                es_out_Control( p_demux->out, ES_OUT_SET_ES_DEFAULT, es );
+            es_format_Clean( &fmt );
 
-        msg_Dbg( p_demux, "adding es: %s codec = %4.4s",
-                 psz_type, (char*)&fcc );
-        TAB_APPEND( p_sys->i_tk, p_sys->tk, es );
+            msg_Dbg( p_demux, "adding es: %s codec = %4.4s",
+                     psz_type, (char*)&fcc );
+            TAB_APPEND( p_sys->i_tk, p_sys->tk, es );
+        }
     }
     if( p_sys->ic->start_time != (int64_t)AV_NOPTS_VALUE )
         i_start_time = p_sys->ic->start_time * 1000000 / AV_TIME_BASE;
@@ -638,7 +638,7 @@ static block_t *BuildSsaFrame( const AVPacket *p_pkt, unsigned i_order )
         return NULL;
 
     char buffer[256];
-    const size_t i_buffer_size = __MIN( sizeof(buffer) - 1, p_pkt->size );
+    const size_t i_buffer_size = __MIN( (int)sizeof(buffer) - 1, p_pkt->size );
     memcpy( buffer, p_pkt->data, i_buffer_size );
     buffer[i_buffer_size] = '\0';
 
@@ -650,7 +650,7 @@ static block_t *BuildSsaFrame( const AVPacket *p_pkt, unsigned i_order )
     if( sscanf( buffer, "Dialogue: %d,%d:%d:%d.%d,%d:%d:%d.%d,%n", &i_layer,
                 &h0, &m0, &s0, &c0, &h1, &m1, &s1, &c1, &i_position ) < 9 )
         return NULL;
-    if( i_position <= 0 || i_position >= i_buffer_size )
+    if( i_position <= 0 || (unsigned)i_position >= i_buffer_size )
         return NULL;
 
     char *p;

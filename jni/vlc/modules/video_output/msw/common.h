@@ -2,7 +2,7 @@
  * common.h: Windows video output header file
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 7bd3d1ea75745938c97f86d2d69394561b1403d3 $
+ * $Id: 0a8fbaedf3b5d37012391d09b9aa04760d1e52c8 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Damien Fouilleul <damienf@videolan.org>
@@ -152,7 +152,7 @@ struct vout_display_sys_t
     HDC                   hGLDC;
     HGLRC                 hGLRC;
     vlc_gl_t              gl;
-    vout_display_opengl_t vgl;
+    vout_display_opengl_t *vgl;
 #endif
 
 #ifdef MODULE_NAME_IS_direct2d

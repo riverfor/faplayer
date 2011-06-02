@@ -4,7 +4,7 @@
  * interface, such as message output.
  *****************************************************************************
  * Copyright (C) 1999, 2000 the VideoLAN team
- * $Id: d803a08fdf650d73f8727810e0e97272f170b5b4 $
+ * $Id: 4978f0ab04229bd9dbc5aeb1d1665d64f1d265de $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -52,6 +52,7 @@ typedef struct intf_thread_t
     VLC_COMMON_MEMBERS
 
     struct intf_thread_t *p_next; /** LibVLC interfaces book keeping */
+    vlc_thread_t thread; /** LibVLC thread */
     /* Thread properties and locks */
 #if defined( __APPLE__ )
     bool          b_should_run_on_first_thread;
@@ -99,13 +100,13 @@ struct intf_dialog_args_t
 /*****************************************************************************
  * Prototypes
  *****************************************************************************/
-VLC_EXPORT( int, intf_Create, ( vlc_object_t *, const char * ) );
+VLC_API int intf_Create( vlc_object_t *, const char * );
 #define intf_Create(a,b) intf_Create(VLC_OBJECT(a),b)
 
-VLC_EXPORT( int, intf_Eject, ( vlc_object_t *, const char * ) );
+VLC_API int intf_Eject( vlc_object_t *, const char * );
 #define intf_Eject(a,b) intf_Eject(VLC_OBJECT(a),b)
 
-VLC_EXPORT( void, libvlc_Quit, ( libvlc_int_t * ) );
+VLC_API void libvlc_Quit( libvlc_int_t * );
 
 /*@}*/
 
@@ -222,13 +223,13 @@ typedef enum vlc_dialog {
     "*.xa;"  \
     "*.xm"
 
-#define EXTENSIONS_VIDEO "*.3g2;*.3gp;*.3gp2;*.3gpp;*.amv;*.asf;*.avi;*.bin;*.cue;*.divx;*.dv;*f4v;*.flv;*.gxf;*.iso;*.m1v;*.m2v;" \
+#define EXTENSIONS_VIDEO "*.3g2;*.3gp;*.3gp2;*.3gpp;*.amv;*.asf;*.avi;*.bin;*.divx;*.dv;*f4v;*.flv;*.gxf;*.iso;*.m1v;*.m2v;" \
                          "*.m2t;*.m2ts;*.m4v;*.mkv;*.mov;*.mp2;*.mp2v;*.mp4;*.mp4v;*.mpa;*.mpe;*.mpeg;*.mpeg1;" \
                          "*.mpeg2;*.mpeg4;*.mpg;*.mpv2;*.mts;*.mxf;*.nsv;*.nuv;" \
                          "*.ogg;*.ogm;*.ogv;*.ogx;*.ps;" \
                          "*.rec;*.rm;*.rmvb;*.tod;*.ts;*.tts;*.vob;*.vro;*.webm;*.wmv"
 
-#define EXTENSIONS_PLAYLIST "*.asx;*.b4s;*.ifo;*.m3u;*.m3u8;*.pls;*.ram;*.rar;*.sdp;*.vlc;*.xspf;*.zip"
+#define EXTENSIONS_PLAYLIST "*.asx;*.b4s;*.cue;*.ifo;*.m3u;*.m3u8;*.pls;*.ram;*.rar;*.sdp;*.vlc;*.xspf;*.zip"
 
 #define EXTENSIONS_MEDIA EXTENSIONS_VIDEO ";" EXTENSIONS_AUDIO ";" \
                           EXTENSIONS_PLAYLIST

@@ -2,7 +2,7 @@
  * libvlc-module.c: Options for the main (libvlc itself) module
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 73d61d8a542b7d77f0ff6e0539af1cca25700251 $
+ * $Id: 7ea88ba32107e33fedf6be70d82f710d7d522a0d $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -278,7 +278,7 @@ static const char *const ppsz_snap_formats[] =
 #define AOUT_RATE_TEXT N_("Audio output frequency (Hz)")
 #define AOUT_RATE_LONGTEXT N_( \
     "You can force the audio output frequency here. Common values are " \
-    "-1 (default), 48000, 44100, 32000, 22050, 16000, 11025, 8000.")
+    "0 (undefined), 48000, 44100, 32000, 22050, 16000, 11025, 8000.")
 
 #if !defined( __APPLE__ )
 #define AOUT_RESAMP_TEXT N_("High quality audio resampling")
@@ -1579,7 +1579,7 @@ const char vlc_usage[] = N_(
                b_advanced_option )
  * add_loadfile( option_name, psz_value, N_(text), N_(longtext) )
  * add_savefile( option_name, psz_value, N_(text), N_(longtext) )
- * add_module( option_name, psz_value, i_capability, p_callback,
+ * add_module( option_name, psz_value, i_capability,
  *             N_(text), N_(longtext) )
  * add_integer( option_name, i_value, N_(text), N_(longtext),
  *              b_advanced_option )
@@ -1596,12 +1596,12 @@ vlc_module_begin ()
     add_bool( "audio", 1, AUDIO_TEXT, AUDIO_LONGTEXT, false )
         change_safe ()
     add_integer_with_range( "volume", AOUT_VOLUME_DEFAULT, AOUT_VOLUME_MIN,
-                            AOUT_VOLUME_MAX, NULL, VOLUME_TEXT,
+                            AOUT_VOLUME_MAX, VOLUME_TEXT,
                             VOLUME_LONGTEXT, false )
     add_integer_with_range( "volume-step", AOUT_VOLUME_STEP, AOUT_VOLUME_MIN,
-                            AOUT_VOLUME_MAX, NULL, VOLUME_STEP_TEXT,
+                            AOUT_VOLUME_MAX, VOLUME_STEP_TEXT,
                             VOLUME_STEP_LONGTEXT, true )
-    add_integer( "aout-rate", -1, AOUT_RATE_TEXT,
+    add_integer( "aout-rate", 0, AOUT_RATE_TEXT,
                  AOUT_RATE_LONGTEXT, true )
 #if HAVE_FPU && !defined( __APPLE__ )
     add_bool( "hq-resampling", 1, AOUT_RESAMP_TEXT,
@@ -1630,15 +1630,14 @@ vlc_module_begin ()
               AUDIO_TIME_STRETCH_TEXT, AUDIO_TIME_STRETCH_LONGTEXT, false )
 
     set_subcategory( SUBCAT_AUDIO_AOUT )
-    add_module( "aout", "audio output", NULL, NULL, AOUT_TEXT, AOUT_LONGTEXT,
+    add_module( "aout", "audio output", NULL, AOUT_TEXT, AOUT_LONGTEXT,
                 true )
         change_short('A')
     set_subcategory( SUBCAT_AUDIO_AFILTER )
-    add_module_list_cat( "audio-filter", SUBCAT_AUDIO_AFILTER, 0,
-                         NULL, AUDIO_FILTER_TEXT,
-                         AUDIO_FILTER_LONGTEXT, false )
+    add_module_list_cat( "audio-filter", SUBCAT_AUDIO_AFILTER, NULL,
+                         AUDIO_FILTER_TEXT, AUDIO_FILTER_LONGTEXT, false )
     set_subcategory( SUBCAT_AUDIO_VISUAL )
-    add_module( "audio-visual", "visualization2",NULL, NULL,AUDIO_VISUAL_TEXT,
+    add_module( "audio-visual", "visualization2", NULL,AUDIO_VISUAL_TEXT,
                 AUDIO_VISUAL_LONGTEXT, false )
 
 /* Video options */
@@ -1765,14 +1764,13 @@ vlc_module_begin ()
         change_safe()
 
     set_subcategory( SUBCAT_VIDEO_VOUT )
-    add_module( "vout", "vout display", NULL, NULL, VOUT_TEXT, VOUT_LONGTEXT,
-                true )
+    add_module( "vout", "vout display", NULL, VOUT_TEXT, VOUT_LONGTEXT, true )
         change_short('V')
 
     set_subcategory( SUBCAT_VIDEO_VFILTER )
-    add_module_list_cat( "video-filter", SUBCAT_VIDEO_VFILTER, NULL, NULL,
+    add_module_list_cat( "video-filter", SUBCAT_VIDEO_VFILTER, NULL,
                 VIDEO_FILTER_TEXT, VIDEO_FILTER_LONGTEXT, false )
-    add_module_list_cat( "video-splitter", SUBCAT_VIDEO_VFILTER, NULL, NULL,
+    add_module_list_cat( "video-splitter", SUBCAT_VIDEO_VFILTER, NULL,
                         VIDEO_SPLITTER_TEXT, VIDEO_SPLITTER_LONGTEXT, false )
     add_deprecated_alias( "vout-filter" )
 #if 0
@@ -1787,7 +1785,7 @@ vlc_module_begin ()
     add_bool( "spu", 1, SPU_TEXT, SPU_LONGTEXT, true )
         change_safe ()
     add_bool( "osd", 1, OSD_TEXT, OSD_LONGTEXT, false )
-    add_module( "text-renderer", "text renderer", NULL, NULL, TEXTRENDERER_TEXT,
+    add_module( "text-renderer", "text renderer", NULL, TEXTRENDERER_TEXT,
                 TEXTRENDERER_LONGTEXT, true )
 
     set_section( N_("Subtitles") , NULL )
@@ -1808,9 +1806,9 @@ vlc_module_begin ()
     add_integer( "sub-margin", 0, SUB_MARGIN_TEXT,
                  SUB_MARGIN_LONGTEXT, true )
     set_section( N_( "Overlays" ) , NULL )
-    add_module_list_cat( "sub-source", SUBCAT_VIDEO_SUBPIC, NULL, NULL,
+    add_module_list_cat( "sub-source", SUBCAT_VIDEO_SUBPIC, NULL,
                 SUB_SOURCE_TEXT, SUB_SOURCE_LONGTEXT, false )
-    add_module_list_cat( "sub-filter", SUBCAT_VIDEO_SUBPIC, NULL, NULL,
+    add_module_list_cat( "sub-filter", SUBCAT_VIDEO_SUBPIC, NULL,
                 SUB_FILTER_TEXT, SUB_FILTER_LONGTEXT, false )
 
 /* Input options */
@@ -1964,19 +1962,17 @@ vlc_module_begin ()
 
     set_subcategory( SUBCAT_INPUT_ACCESS )
     add_category_hint( N_("Input"), INPUT_CAT_LONGTEXT , false )
-    add_module( "access", "access", NULL, NULL, ACCESS_TEXT,
-                ACCESS_LONGTEXT, true )
+    add_module( "access", "access", NULL, ACCESS_TEXT, ACCESS_LONGTEXT, true )
 
     set_subcategory( SUBCAT_INPUT_DEMUX )
-    add_module( "demux", "demux", NULL, NULL, DEMUX_TEXT,
-                DEMUX_LONGTEXT, true )
+    add_module( "demux", "demux", NULL, DEMUX_TEXT, DEMUX_LONGTEXT, true )
     set_subcategory( SUBCAT_INPUT_VCODEC )
     set_subcategory( SUBCAT_INPUT_ACODEC )
     set_subcategory( SUBCAT_INPUT_SCODEC )
     add_obsolete_bool( "prefer-system-codecs" )
 
     set_subcategory( SUBCAT_INPUT_STREAM_FILTER )
-    add_module_list_cat( "stream-filter", SUBCAT_INPUT_STREAM_FILTER, NULL, NULL,
+    add_module_list_cat( "stream-filter", SUBCAT_INPUT_STREAM_FILTER, NULL,
                 STREAM_FILTER_TEXT, STREAM_FILTER_LONGTEXT, false )
 
 
@@ -2009,10 +2005,9 @@ vlc_module_begin ()
 
     set_subcategory( SUBCAT_SOUT_STREAM )
     set_subcategory( SUBCAT_SOUT_MUX )
-    add_module( "mux", "sout mux", NULL, NULL, MUX_TEXT,
-                                MUX_LONGTEXT, true )
+    add_module( "mux", "sout mux", NULL, MUX_TEXT, MUX_LONGTEXT, true )
     set_subcategory( SUBCAT_SOUT_ACO )
-    add_module( "access_output", "sout access", NULL, NULL,
+    add_module( "access_output", "sout access", NULL,
                 ACCESS_OUTPUT_TEXT, ACCESS_OUTPUT_LONGTEXT, true )
     add_integer( "ttl", -1, TTL_TEXT, TTL_LONGTEXT, true )
     add_string( "miface", NULL, MIFACE_TEXT, MIFACE_LONGTEXT, true )
@@ -2020,7 +2015,7 @@ vlc_module_begin ()
     add_integer( "dscp", 0, DSCP_TEXT, DSCP_LONGTEXT, true )
 
     set_subcategory( SUBCAT_SOUT_PACKETIZER )
-    add_module( "packetizer","packetizer", NULL, NULL,
+    add_module( "packetizer", "packetizer", NULL,
                 PACKETIZER_TEXT, PACKETIZER_LONGTEXT, true )
 
     set_subcategory( SUBCAT_SOUT_SAP )
@@ -2036,48 +2031,33 @@ vlc_module_begin ()
     add_obsolete_bool( "fpu" )
 #if defined( __i386__ ) || defined( __x86_64__ )
     add_bool( "mmx", 1, MMX_TEXT, MMX_LONGTEXT, true )
-        change_need_restart ()
     add_bool( "3dn", 1, THREE_DN_TEXT, THREE_DN_LONGTEXT, true )
-        change_need_restart ()
     add_bool( "mmxext", 1, MMXEXT_TEXT, MMXEXT_LONGTEXT, true )
-        change_need_restart ()
     add_bool( "sse", 1, SSE_TEXT, SSE_LONGTEXT, true )
-        change_need_restart ()
     add_bool( "sse2", 1, SSE2_TEXT, SSE2_LONGTEXT, true )
-        change_need_restart ()
     add_bool( "sse3", 1, SSE3_TEXT, SSE3_LONGTEXT, true )
-        change_need_restart ()
     add_bool( "ssse3", 1, SSSE3_TEXT, SSSE3_LONGTEXT, true )
-        change_need_restart ()
     add_bool( "sse41", 1, SSE4_1_TEXT, SSE4_1_LONGTEXT, true )
-        change_need_restart ()
     add_bool( "sse42", 1, SSE4_2_TEXT, SSE4_2_LONGTEXT, true )
-        change_need_restart ()
 #endif
 #if defined( __powerpc__ ) || defined( __ppc__ ) || defined( __ppc64__ )
     add_bool( "altivec", 1, ALTIVEC_TEXT, ALTIVEC_LONGTEXT, true )
-        change_need_restart ()
 #endif
 
 /* Misc options */
     set_subcategory( SUBCAT_ADVANCED_MISC )
     set_section( N_("Special modules"), NULL )
     add_category_hint( N_("Miscellaneous"), MISC_CAT_LONGTEXT, true )
-    add_module( "memcpy", "memcpy", NULL, NULL, MEMCPY_TEXT,
-                MEMCPY_LONGTEXT, true )
-        change_need_restart ()
-    add_module( "vod-server", "vod server", NULL, NULL, VOD_SERVER_TEXT,
+    add_module( "memcpy", "memcpy", NULL, MEMCPY_TEXT, MEMCPY_LONGTEXT, true )
+    add_module( "vod-server", "vod server", NULL, VOD_SERVER_TEXT,
                 VOD_SERVER_LONGTEXT, true )
-        change_need_restart ()
 
     set_section( N_("Plugins" ), NULL )
     add_bool( "plugins-cache", true, PLUGINS_CACHE_TEXT,
               PLUGINS_CACHE_LONGTEXT, true )
-        change_need_restart ()
     add_obsolete_string( "plugin-path" )
     add_directory( "data-path", NULL, DATA_PATH_TEXT,
                    DATA_PATH_LONGTEXT, true )
-        change_need_restart ()
 
     set_section( N_("Performance options"), NULL )
 
@@ -2085,11 +2065,9 @@ vlc_module_begin ()
 # ifndef __APPLE__
     add_bool( "rt-priority", false, RT_PRIORITY_TEXT,
               RT_PRIORITY_LONGTEXT, true )
-        change_need_restart ()
 # endif
     add_integer( "rt-offset", 0, RT_OFFSET_TEXT,
                  RT_OFFSET_LONGTEXT, true )
-        change_need_restart ()
 #endif
 
 #if defined(HAVE_DBUS)
@@ -2113,7 +2091,6 @@ vlc_module_begin ()
 #if defined(WIN32)
     add_bool( "high-priority", 0, HPRIORITY_TEXT,
               HPRIORITY_LONGTEXT, false )
-        change_need_restart ()
 #endif
 
 /* Playlist options */
@@ -2142,7 +2119,6 @@ vlc_module_begin ()
     add_bool( "playlist-tree", 0, PLTREE_TEXT, PLTREE_LONGTEXT, false )
 
     add_string( "open", "", OPEN_TEXT, OPEN_LONGTEXT, false )
-        change_need_restart ()
 
     add_bool( "auto-preparse", true, PREPARSE_TEXT,
               PREPARSE_LONGTEXT, false )
@@ -2154,9 +2130,8 @@ vlc_module_begin ()
 
     set_subcategory( SUBCAT_PLAYLIST_SD )
     add_module_list_cat( "services-discovery", SUBCAT_PLAYLIST_SD, NULL,
-                          NULL, SD_TEXT, SD_LONGTEXT, false )
+                         SD_TEXT, SD_LONGTEXT, false )
         change_short('S')
-        change_need_restart ()
 
 /* Interface options */
     set_category( CAT_INTERFACE )
@@ -2172,54 +2147,43 @@ vlc_module_begin ()
 #if !defined(WIN32)
     add_bool( "daemon", 0, DAEMON_TEXT, DAEMON_LONGTEXT, true )
         change_short('d')
-        change_need_restart ()
 
     add_string( "pidfile", NULL, PIDFILE_TEXT, PIDFILE_LONGTEXT,
                                        false )
-        change_need_restart ()
 #endif
 
     add_bool( "file-logging", false, FILE_LOG_TEXT, FILE_LOG_LONGTEXT,
               true )
-        change_need_restart ()
 #ifdef HAVE_SYSLOG_H
     add_bool ( "syslog", false, SYSLOG_TEXT, SYSLOG_LONGTEXT,
                true )
-        change_need_restart ()
 #endif
 
 #if defined (WIN32) || defined (__APPLE__)
     add_string( "language", "auto", LANGUAGE_TEXT, LANGUAGE_LONGTEXT,
                 false )
         change_string_list( ppsz_language, ppsz_language_text, 0 )
-        change_need_restart ()
 #endif
 
     add_bool( "color", true, COLOR_TEXT, COLOR_LONGTEXT, true )
     add_bool( "advanced", false, ADVANCED_TEXT, ADVANCED_LONGTEXT,
                     false )
-        change_need_restart ()
     add_bool( "interact", true, INTERACTION_TEXT,
               INTERACTION_LONGTEXT, false )
 
     add_bool ( "stats", true, STATS_TEXT, STATS_LONGTEXT, true )
-        change_need_restart ()
 
     set_subcategory( SUBCAT_INTERFACE_MAIN )
-    add_module_cat( "intf", SUBCAT_INTERFACE_MAIN, NULL, NULL, INTF_TEXT,
+    add_module_cat( "intf", SUBCAT_INTERFACE_MAIN, NULL, INTF_TEXT,
                 INTF_LONGTEXT, false )
         change_short('I')
-        change_need_restart ()
-    add_module_list_cat( "extraintf", SUBCAT_INTERFACE_MAIN,
-                         NULL, NULL, EXTRAINTF_TEXT,
-                         EXTRAINTF_LONGTEXT, false )
-        change_need_restart ()
+    add_module_list_cat( "extraintf", SUBCAT_INTERFACE_MAIN, NULL,
+                         EXTRAINTF_TEXT, EXTRAINTF_LONGTEXT, false )
 
 
     set_subcategory( SUBCAT_INTERFACE_CONTROL )
-    add_module_list_cat( "control", SUBCAT_INTERFACE_CONTROL, NULL, NULL,
+    add_module_list_cat( "control", SUBCAT_INTERFACE_CONTROL, NULL,
                          CONTROL_TEXT, CONTROL_LONGTEXT, false )
-        change_need_restart ()
 
 /* Hotkey options*/
     set_subcategory( SUBCAT_INTERFACE_HOTKEYS )

@@ -4,7 +4,7 @@
  * interface, such as message output.
  *****************************************************************************
  * Copyright (C) 1999, 2000, 2001, 2002 the VideoLAN team
- * $Id: 6bfd5dada59612929362cab58d6cc87e235d4d70 $
+ * $Id: a8782ab46131c48c63bf1afb65fac3633f3dab0e $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -50,12 +50,9 @@ typedef struct
     int     i_type;                             /**< message type, see below */
     uintptr_t   i_object_id;
     const char *psz_object_type;
-    char *  psz_module;
+    const char *psz_module;
+    const char *psz_header;                     /**< Additional header */
     char *  psz_msg;                            /**< the message itself */
-    char *  psz_header;                         /**< Additional header */
-
-    mtime_t date;                               /**< Message date */
-    gc_object_t vlc_gc_data;
 } msg_item_t;
 
 /* Message types */
@@ -68,15 +65,25 @@ typedef struct
 /** debug messages */
 #define VLC_MSG_DBG   3
 
-static inline msg_item_t *msg_Hold (msg_item_t *msg)
+VLC_MALLOC VLC_USED
+static inline msg_item_t *msg_Copy (const msg_item_t *msg)
 {
-    vlc_hold (&msg->vlc_gc_data);
-    return msg;
+    msg_item_t *copy = (msg_item_t *)xmalloc (sizeof (*copy));
+    copy->i_type = msg->i_type;
+    copy->i_object_id = msg->i_object_id;
+    copy->psz_object_type = msg->psz_object_type;
+    copy->psz_module = strdup (msg->psz_module);
+    copy->psz_msg = strdup (msg->psz_msg);
+    copy->psz_header = msg->psz_header ? strdup (msg->psz_header) : NULL;
+    return copy;
 }
 
-static inline void msg_Release (msg_item_t *msg)
+static inline void msg_Free (msg_item_t *msg)
 {
-    vlc_release (&msg->vlc_gc_data);
+    free ((char *)msg->psz_module);
+    free ((char *)msg->psz_header);
+    free (msg->psz_msg);
+    free (msg);
 }
 
 /**
@@ -87,8 +94,8 @@ typedef struct msg_subscription_t msg_subscription_t;
 /*****************************************************************************
  * Prototypes
  *****************************************************************************/
-VLC_EXPORT( void, msg_Generic, ( vlc_object_t *, int, const char *, const char *, ... ) LIBVLC_FORMAT( 4, 5 ) );
-VLC_EXPORT( void, msg_GenericVa, ( vlc_object_t *, int, const char *, const char *, va_list args ) );
+VLC_API void msg_Generic( vlc_object_t *, int, const char *, const char *, ... ) VLC_FORMAT( 4, 5 );
+VLC_API void msg_GenericVa( vlc_object_t *, int, const char *, const char *, va_list args );
 #define msg_GenericVa(a, b, c, d, e) msg_GenericVa(VLC_OBJECT(a), b, c, d, e)
 
 #define msg_Info( p_this, ... ) \
@@ -110,16 +117,16 @@ typedef struct msg_cb_data_t msg_cb_data_t;
  * Message logging callback signature.
  * Accepts one private data pointer, the message, and an overrun counter.
  */
-typedef void (*msg_callback_t) (msg_cb_data_t *, msg_item_t *, unsigned);
+typedef void (*msg_callback_t) (msg_cb_data_t *, const msg_item_t *);
 
-VLC_EXPORT( msg_subscription_t*, msg_Subscribe, ( libvlc_int_t *, msg_callback_t, msg_cb_data_t * ) LIBVLC_USED );
-VLC_EXPORT( void, msg_Unsubscribe, ( msg_subscription_t * ) );
-VLC_EXPORT( void, msg_SubscriptionSetVerbosity, ( msg_subscription_t *, const int) );
+VLC_API msg_subscription_t* msg_Subscribe( libvlc_int_t *, msg_callback_t, msg_cb_data_t * ) VLC_USED;
+VLC_API void msg_Unsubscribe( msg_subscription_t * );
+VLC_API void msg_SubscriptionSetVerbosity( msg_subscription_t *, const int);
 
 /* Enable or disable a certain object debug messages */
-VLC_EXPORT( void, msg_EnableObjectPrinting, ( vlc_object_t *, const char * psz_object ) );
+VLC_API void msg_EnableObjectPrinting( vlc_object_t *, const char * psz_object );
 #define msg_EnableObjectPrinting(a,b) msg_EnableObjectPrinting(VLC_OBJECT(a),b)
-VLC_EXPORT( void, msg_DisableObjectPrinting, ( vlc_object_t *, const char * psz_object ) );
+VLC_API void msg_DisableObjectPrinting( vlc_object_t *, const char * psz_object );
 #define msg_DisableObjectPrinting(a,b) msg_DisableObjectPrinting(VLC_OBJECT(a),b)
 
 
@@ -204,19 +211,19 @@ enum
 /*********
  * Timing
  ********/
-VLC_EXPORT( void, stats_TimerStart, (vlc_object_t*, const char *, unsigned int ) );
-VLC_EXPORT( void, stats_TimerStop, (vlc_object_t*, unsigned int) );
-VLC_EXPORT( void, stats_TimerDump, (vlc_object_t*, unsigned int) );
-VLC_EXPORT( void, stats_TimersDumpAll, (vlc_object_t*) );
+VLC_API void stats_TimerStart(vlc_object_t*, const char *, unsigned int );
+VLC_API void stats_TimerStop(vlc_object_t*, unsigned int);
+VLC_API void stats_TimerDump(vlc_object_t*, unsigned int);
+VLC_API void stats_TimersDumpAll(vlc_object_t*);
 #define stats_TimerStart(a,b,c) stats_TimerStart( VLC_OBJECT(a), b,c )
 #define stats_TimerStop(a,b) stats_TimerStop( VLC_OBJECT(a), b )
 #define stats_TimerDump(a,b) stats_TimerDump( VLC_OBJECT(a), b )
 #define stats_TimersDumpAll(a) stats_TimersDumpAll( VLC_OBJECT(a) )
 
-VLC_EXPORT( void, stats_TimersCleanAll, (vlc_object_t * ) );
+VLC_API void stats_TimersCleanAll(vlc_object_t * );
 #define stats_TimersCleanAll(a) stats_TimersCleanAll( VLC_OBJECT(a) )
 
-VLC_EXPORT( void, stats_TimerClean, (vlc_object_t *, unsigned int ) );
+VLC_API void stats_TimerClean(vlc_object_t *, unsigned int );
 #define stats_TimerClean(a,b) stats_TimerClean( VLC_OBJECT(a), b )
 
 /**

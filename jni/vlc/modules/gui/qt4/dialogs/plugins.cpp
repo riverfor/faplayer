@@ -2,7 +2,7 @@
  * plugins.hpp : Plug-ins and extensions listing
  ****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team
- * $Id: 4c5f9f76e08050640db355856c3aff8c40a7dc6b $
+ * $Id: effda5451b7aedbe7ec8f8f964ec2bc738963099 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *          Jean-Philippe André <jpeg (at) videolan.org>
@@ -334,7 +334,7 @@ void ExtensionListModel::updateList()
     emit dataChanged( index( 0 ), index( rowCount() - 1 ) );
 }
 
-int ExtensionListModel::rowCount( const QModelIndex& parent ) const
+int ExtensionListModel::rowCount( const QModelIndex& ) const
 {
     int count = 0;
     ExtensionsManager *EM = ExtensionsManager::getInstance( p_intf );
@@ -363,7 +363,7 @@ QVariant ExtensionListModel::data( const QModelIndex& index, int role ) const
 }
 
 QModelIndex ExtensionListModel::index( int row, int column,
-                                       const QModelIndex& parent ) const
+                                       const QModelIndex& ) const
 {
     if( column != 0 )
         return QModelIndex();
@@ -393,7 +393,6 @@ void ExtensionItemDelegate::paint( QPainter *painter,
     assert( ext != NULL );
 
     int width = option.rect.width();
-    int height = option.rect.height();
 
     // Pixmap: buffer where to draw
     QPixmap pix(option.rect.size());

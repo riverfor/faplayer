@@ -2,7 +2,7 @@
  * extensions.cpp: Extensions manager for Qt: dialogs manager
  ****************************************************************************
  * Copyright (C) 2009-2010 VideoLAN and authors
- * $Id: 0d3655f9afc4e11875a67fcfa9dd1e00483c0cb3 $
+ * $Id: 006e8587f01404ae86a6ac9d93b0517aab0b1f7c $
  *
  * Authors: Jean-Philippe André < jpeg # videolan.org >
  *
@@ -674,7 +674,7 @@ void ExtensionDialog::DestroyWidget( extension_widget_t *p_widget,
 }
 
 /** Implement closeEvent() in order to intercept the event */
-void ExtensionDialog::closeEvent( QCloseEvent *event )
+void ExtensionDialog::closeEvent( QCloseEvent * )
 {
     assert( p_dialog != NULL );
     msg_Dbg( p_intf, "Dialog '%s' received a closeEvent",

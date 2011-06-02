@@ -2,7 +2,7 @@
  * loadsave.c : Playlist loading / saving functions
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 44a8257a15e17cd40a123a155c112ce282a874a8 $
+ * $Id: 97d75a197d2f9a6b0aa3ede9c72d41ba42196063 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -48,7 +48,6 @@ int playlist_Export( playlist_t * p_playlist, const char *psz_filename,
     if( !p_export )
         return VLC_ENOMEM;
 
-    vlc_object_attach( p_export, p_playlist );
     msg_Dbg( p_export, "saving %s to file %s",
              p_export_root->p_input->psz_name, psz_filename );
 

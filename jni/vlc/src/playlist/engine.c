@@ -164,7 +164,6 @@ playlist_t * playlist_Create( vlc_object_t *p_parent )
 
     assert( offsetof( playlist_private_t, public_data ) == 0 );
     p_playlist = &p->public_data;
-    vlc_object_attach( p_playlist, p_parent );
     TAB_INIT( pl_priv(p_playlist)->i_sds, pl_priv(p_playlist)->pp_sds );
 
     libvlc_priv(p_parent->p_libvlc)->p_playlist = p_playlist;
@@ -384,7 +383,7 @@ static void VariablesInit( playlist_t *p_playlist )
     var_SetBool( p_playlist, "intf-change", true );
 
     var_Create( p_playlist, "item-change", VLC_VAR_ADDRESS );
-    var_Create( p_playlist, "leaf-to-parent", VLC_VAR_ADDRESS );
+    var_Create( p_playlist, "leaf-to-parent", VLC_VAR_INTEGER );
 
     var_Create( p_playlist, "playlist-item-deleted", VLC_VAR_INTEGER );
     var_SetInteger( p_playlist, "playlist-item-deleted", -1 );

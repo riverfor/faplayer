@@ -2,7 +2,7 @@
  * image.c: Image demuxer
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id: 1b74c248aa779a5d837ab3682c4a057862c4e23f $
+ * $Id: 4d899ad38aa6c89fe100533d6b2f90a8cfe9d20d $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -73,6 +73,7 @@ static void Close(vlc_object_t *);
 
 vlc_module_begin()
     set_description(N_("Image demuxer"))
+    set_shortname(N_("Image"))
     set_category(CAT_INPUT)
     set_subcategory(SUBCAT_INPUT_DEMUX)
     add_integer("image-id", -1, ID_TEXT, ID_LONGTEXT, true)

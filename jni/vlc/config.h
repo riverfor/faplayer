@@ -50,7 +50,7 @@
 /* #undef CAN_COMPILE_SSSE3 */
 
 /* The ./configure command line */
-#define CONFIGURE_LINE "./configure  '--host=arm-linux-androideabi' '--disable-mad' '--disable-a52' '--disable-libgcrypt' '--disable-sout' '--disable-httpd' '--disable-vlm' 'host_alias=arm-linux-androideabi'"
+#define CONFIGURE_LINE "extras/package/android/../../../configure  '--host=arm-eabi-linux' '--build=x86_64-unknown-linux' '--disable-vlc' '--disable-debug' '--enable-swscale' '--enable-avcodec' '--enable-avformat' '--disable-postproc' '--disable-a52' '--disable-dbus' '--disable-lua' '--disable-mad' '--without-x' '--disable-xcb' '--disable-xvideo' '--disable-glx' '--disable-alsa' '--disable-skins2' '--disable-libgcrypt' 'build_alias=x86_64-unknown-linux' 'host_alias=arm-eabi-linux' 'CC=/opt/android/android-ndk-r5b//toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-gcc' 'CFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2' 'LDFLAGS=-Wl,-rpath-link=/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/lib,-Bdynamic,-dynamic-linker=/system/bin/linker -Wl,--no-undefined -Wl,-shared -L/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/lib -Wl,--fix-cortex-a8' 'LIBS=-lc -ldl -lgcc' 'CPPFLAGS=-I/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/include' 'CXX=/opt/android/android-ndk-r5b//toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-g++' 'CXXFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2'"
 
 /* Copyright string */
 #define COPYRIGHT_MESSAGE "Copyright © 1996-2011 the VideoLAN team"
@@ -65,17 +65,17 @@
 /* #undef DISTRO_VERSION */
 
 /* Define if you want the HTTP dameon support */
-/* #undef ENABLE_HTTPD */
+#define ENABLE_HTTPD 1
 
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 /* #undef ENABLE_NLS */
 
 /* Define to 1 for stream output support. */
-/* #undef ENABLE_SOUT */
+#define ENABLE_SOUT 1
 
 /* Define if you want the VideoLAN manager support */
-/* #undef ENABLE_VLM */
+#define ENABLE_VLM 1
 
 /* Define to 1 if you have the <a52dec/a52.h> header file. */
 /* #undef HAVE_A52DEC_A52_H */
@@ -168,12 +168,6 @@
 /* Define if you have the dlopen API */
 #define HAVE_DL_DLOPEN 1
 
-/* Define to 1 if you have the <dl.h> header file. */
-/* #undef HAVE_DL_H */
-
-/* Define if you have the shl_load API */
-/* #undef HAVE_DL_SHL_LOAD */
-
 /* Define if you have Windows' LoadLibrary */
 /* #undef HAVE_DL_WINDOWS */
 
@@ -216,6 +210,9 @@
 /* Define to 1 if you have the `fdopendir' function. */
 #define HAVE_FDOPENDIR 1
 
+/* Define to 1 if you have the `flockfile' function. */
+#define HAVE_FLOCKFILE 1
+
 /* Define to 1 if you have the <fontconfig/fontconfig.h> header file. */
 /* #undef HAVE_FONTCONFIG_FONTCONFIG_H */
 
@@ -254,9 +251,6 @@
 
 /* Define to 1 if you have the `gmtime_r' function. */
 #define HAVE_GMTIME_R 1
-
-/* Define to 1 if you have the <Growl/GrowlDefines.h> header file. */
-/* #undef HAVE_GROWL_GROWLDEFINES_H */
 
 /* Define if you have the iconv() function and it works. */
 #define HAVE_ICONV 1
@@ -328,13 +322,13 @@
 /* #undef HAVE_LIBSSH2_H */
 
 /* Define to 1 if you have the <libswscale/swscale.h> header file. */
-/* #undef HAVE_LIBSWSCALE_SWSCALE_H */
+#define HAVE_LIBSWSCALE_SWSCALE_H 1
 
 /* Define to 1 if you have the <libtar.h> header file. */
 /* #undef HAVE_LIBTAR_H */
 
 /* Define if libv4l2 is available */
-#define HAVE_LIBV4L2 1
+/* #undef HAVE_LIBV4L2 */
 
 /* Define to 1 if you have the <linux/dccp.h> header file. */
 #define HAVE_LINUX_DCCP_H 1
@@ -592,6 +586,9 @@
 /* Define to 1 if you have the <sys/videoio.h> header file. */
 /* #undef HAVE_SYS_VIDEOIO_H */
 
+/* Define to 1 if you have the <taglib/apefile.h> header file. */
+/* #undef HAVE_TAGLIB_APEFILE_H */
+
 /* Define to 1 if you have the <taglib/mp4coverart.h> header file. */
 /* #undef HAVE_TAGLIB_MP4COVERART_H */
 
@@ -760,10 +757,10 @@
 #endif
 
 /* Define to 1 if the X Window System is missing or not being used. */
-/* #undef X_DISPLAY_MISSING */
+#define X_DISPLAY_MISSING 1
 
 /* Define if the zvbi module is built */
-#define ZVBI_COMPILED 1
+/* #undef ZVBI_COMPILED */
 
 /* Define to 64 for large files support. */
 #define _FILE_OFFSET_BITS 64

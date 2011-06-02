@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: a7a5d987f6b11395e12abe0675ad6f15ff6f955b $
+ * $Id: 750b34186b345c1dfbc7c1b4a8ea38366518044d $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -79,7 +79,7 @@ public:
     /// \return wether the codec has seeked in the files or not
     virtual bool Enter() { return false; }
     virtual bool Leave() { return false; }
-    virtual std::string GetCodecName( bool f_for_title = false ) const { return ""; }
+    virtual std::string GetCodecName( bool ) const { return ""; }
     virtual int16 GetTitleNumber() { return -1; }
 
     KaxChapterProcessPrivate *p_private_data;

@@ -2,7 +2,7 @@
  * motion_blur.c : motion blur filter for vlc
  *****************************************************************************
  * Copyright (C) 2000, 2001, 2002, 2003 the VideoLAN team
- * $Id: 6cca33932d749529caf11e196fd6b3b01f74a358 $
+ * $Id: 8cec59b10e9d6e6c12ab29e176dbcd515102244c $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *          Antoine Cellerier <dionoea &t videolan d.t org>
@@ -61,7 +61,7 @@ vlc_module_begin ()
     set_category( CAT_VIDEO )
     set_subcategory( SUBCAT_VIDEO_VFILTER )
 
-    add_integer_with_range( FILTER_PREFIX "factor", 80, 1, 127, NULL,
+    add_integer_with_range( FILTER_PREFIX "factor", 80, 1, 127,
                             FACTOR_TEXT, FACTOR_LONGTEXT, false )
 
     add_shortcut( "blur" )

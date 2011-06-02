@@ -4,7 +4,7 @@
  * Copyright (C) 2006-2009 the VideoLAN team
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
- * $Id: 627e5bc6b99fd4e4f9a61eab965ff36d1f75c7ea $
+ * $Id: c95e49bd205fb28ba015046a0f4fa874bf27d4ba $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -104,7 +104,7 @@ public:
     virtual void clear() ;
     virtual void accept() ;
 protected:
-    bool eventFilter(QObject *obj, QEvent *event)
+    bool eventFilter(QObject *, QEvent *event)
     {
         if( event->type() == QEvent::Hide ||
             event->type() == QEvent::HideToParent )
@@ -211,10 +211,10 @@ private:
     QCheckBox *jackPace, *jackConnect;
     QLineEdit *jackPortsSelected;
 #endif
-    QRadioButton *dvbc, *dvbs, *dvbs2, *dvbt, *atsc, *cqam;
+    QRadioButton *dvbc, *dvbs, *dvbs2, *dvbt, *dvbt2, *atsc, *cqam;
     QLabel *dvbBandLabel, *dvbSrateLabel, *dvbModLabel;
     QComboBox *dvbQamBox, *dvbPskBox, *dvbBandBox;
-    QSpinBox *dvbCard, *dvbFE, *dvbFreq, *dvbSrate;
+    QSpinBox *dvbCard, *dvbFreq, *dvbSrate;
     QDoubleSpinBox *screenFPS;
 
 public slots:

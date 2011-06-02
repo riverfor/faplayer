@@ -4,7 +4,7 @@
  * Copyright © 2006-2008 Rafaël Carré
  * Copyright © 2007-2010 Mirsal Ennaime
  * Copyright © 2009-2010 The VideoLAN team
- * $Id: d8d5576fc9933f58eeb968014a36fee6d7f0b0ed $
+ * $Id: c6cb5996a388cd37992eb5b9e6d82a692ebb32d2 $
  *
  * Authors:    Mirsal Ennaime <mirsal at mirsal fr>
  *             Rafaël Carré <funman at videolanorg>
@@ -31,8 +31,8 @@
 #include <vlc_interface.h>
 #include "dbus_common.h"
 
-#define DBUS_MPRIS_TRACKLIST_INTERFACE    "org.freedesktop.MediaPlayer"
-#define DBUS_MPRIS_TRACKLIST_PATH         "/TrackList"
+#define DBUS_MPRIS_TRACKLIST_INTERFACE    "org.mpris.MediaPlayer2.TrackList"
+#define DBUS_MPRIS_TRACKLIST_PATH         "/org/mpris/MediaPlayer2/TrackList"
 
 /* Handle incoming dbus messages */
 DBusHandlerResult handle_tracklist ( DBusConnection *p_conn,

@@ -2,7 +2,7 @@
  * extensions_manager.cpp: Extensions manager for Qt
  ****************************************************************************
  * Copyright (C) 2009-2010 VideoLAN and authors
- * $Id: 84594abaf9cb21744835886d541b25c87d1f475e $
+ * $Id: 0b6f0570abff0fee61f81ea7e39602e5dfa3bb8f $
  *
  * Authors: Jean-Philippe André < jpeg # videolan.org >
  *
@@ -78,7 +78,6 @@ bool ExtensionsManager::loadExtensions()
             emit extensionsUpdated();
             return false;
         }
-        vlc_object_attach( p_extensions_manager, p_intf );
 
         p_extensions_manager->p_module =
                 module_need( p_extensions_manager, "extension", NULL, false );

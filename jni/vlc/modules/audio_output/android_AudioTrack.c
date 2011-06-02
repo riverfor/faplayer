@@ -216,9 +216,6 @@ static void Close(vlc_object_t *p_this) {
     at_flush(p_sys->AudioTrack);
     at_dtor(p_sys->AudioTrack);
     free(p_sys->AudioTrack);
-    vlc_object_kill(p_aout);
-    vlc_thread_join(p_aout);
-    p_aout->b_die = false;
     free(p_sys);
 }
 

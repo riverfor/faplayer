@@ -2,7 +2,7 @@
  * filter_chain.c : Handle chains of filter_t objects.
  *****************************************************************************
  * Copyright (C) 2008 the VideoLAN team
- * $Id: 859d4ad4c256e3119c4f8542ba4af59d4de0d973 $
+ * $Id: 468d1e301faee2f06f7d6597ac47c50331e25ec5 $
  *
  * Author: Antoine Cellerier <dionoea at videolan dot org>
  *
@@ -378,7 +378,6 @@ static filter_t *filter_chain_AppendFilterInternal( filter_chain_t *p_chain,
     filter_t *p_filter = &p_chained->filter;
     if( !p_filter )
         return NULL;
-    vlc_object_attach( p_filter, p_chain->p_this );
 
     if( !p_fmt_in )
     {

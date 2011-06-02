@@ -2,7 +2,7 @@
  * var_text.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 3be733f5993805cb339896fc8f2a08c6410bdb3f $
+ * $Id: 18ff625da1873ced0a7b7f6343e0bd8be6112fcf $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -188,6 +188,7 @@ void VarText::set( const UString &rText )
 
 void VarText::onUpdate( Subject<VarPercent> &rVariable, void *arg )
 {
+    (void)rVariable; (void)arg;
     UString newText = get();
     // If the text has changed, notify the observers
     if( newText != m_lastText )
@@ -200,6 +201,7 @@ void VarText::onUpdate( Subject<VarPercent> &rVariable, void *arg )
 
 void VarText::onUpdate( Subject<VarText> &rVariable, void *arg )
 {
+    (void)rVariable; (void)arg;
     UString newText = get();
     // If the text has changed, notify the observers
     if( newText != m_lastText )

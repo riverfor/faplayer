@@ -24,7 +24,8 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES := \
     avformat.c \
-    demux.c
+    demux.c \
+    mux.c
 
 include $(BUILD_STATIC_LIBRARY)
 

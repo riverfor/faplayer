@@ -2,7 +2,7 @@
  * sharpen.c: Sharpen video filter
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id: 28f98623c52bfe349ee7e5ca28ca2c67d4087efa $
+ * $Id: f9445a14a3905fac459cd1ff40c11cf8c70ab0a8 $
  *
  * Author: Jérémy DEMEULE <dj_mulder at djduron dot no-ip dot org>
  *         Jean-Baptiste Kempf <jb at videolan dot org>
@@ -69,7 +69,7 @@ vlc_module_begin ()
     set_category( CAT_VIDEO )
     set_subcategory( SUBCAT_VIDEO_VFILTER )
     set_capability( "video filter2", 0 )
-    add_float_with_range( "sharpen-sigma", 0.05, 0.0, 2.0, NULL,
+    add_float_with_range( "sharpen-sigma", 0.05, 0.0, 2.0,
         SIG_TEXT, SIG_LONGTEXT, false )
     add_shortcut( "sharpen" )
     set_callbacks( Create, Destroy )

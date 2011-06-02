@@ -6,7 +6,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: b4d4627f3b826e3f9e3a47c013328b380670eaf5 $
+ * $Id: 51156a25febe471e8bcffe59d9e47e1fa8599c22 $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -76,7 +76,7 @@ ATMO_BOOL CAtmoDmxSerialConnection::OpenConnection() {
 	    return ATMO_FALSE;
      }
      /* change serial settings (Speed, stopbits etc.) */
-     DCB dcb; // für comport-parameter
+     DCB dcb; // fÃ¼r comport-parameter
      dcb.DCBlength = sizeof(DCB);
      GetCommState (m_hComport, &dcb); // ger current serialport settings
      dcb.BaudRate  = 115200;        // set speed
@@ -127,19 +127,6 @@ void CAtmoDmxSerialConnection::CloseConnection() {
 ATMO_BOOL CAtmoDmxSerialConnection::isOpen(void) {
 	 return (m_hComport != INVALID_HANDLE_VALUE);
 }
-
-ATMO_BOOL CAtmoDmxSerialConnection::HardwareWhiteAdjust(int global_gamma,
-                                                     int global_contrast,
-                                                     int contrast_red,
-                                                     int contrast_green,
-                                                     int contrast_blue,
-                                                     int gamma_red,
-                                                     int gamma_green,
-                                                     int gamma_blue,
-                                                     ATMO_BOOL storeToEeprom) {
-   	    return ATMO_FALSE;
-}
-
 
 ATMO_BOOL CAtmoDmxSerialConnection::SendData(pColorPacket data) {
    if(m_hComport == INVALID_HANDLE_VALUE)

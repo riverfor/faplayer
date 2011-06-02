@@ -3,7 +3,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: 2219a5e4ea6f076a6ac57aea71570e4034bc8592 $
+ * $Id: 45dfca6a1929a43f6514eceda43096061a929399 $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -128,6 +128,8 @@ EffectMode CAtmoTools::SwitchEffect(CAtmoDynData *pDynData, EffectMode newEffect
         // neuen EffectThread nur mit aktiver Connection starten...
 
         switch(newEffectMode) {
+            case emUndefined: // do nothing also in that case (avoid compiler warning)
+                break;
             case emDisabled:
                 break;
 
@@ -223,6 +225,8 @@ LivePictureSource CAtmoTools::SwitchLiveSource(CAtmoDynData *pDynData, LivePictu
         }
 
         switch(pDynData->getLivePictureSource()) {
+               case lpsDisabled: // do nothing in that case - avoid compiler warning
+               break;
 #if !defined(_ATMO_VLC_PLUGIN_)
                case lpsScreenCapture:
                     input = new CAtmoGdiDisplayCaptureInput( pDynData );

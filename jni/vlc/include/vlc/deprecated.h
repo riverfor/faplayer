@@ -2,7 +2,7 @@
  * deprecated.h:  libvlc deprecated API
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: 216b1caba458403370a2aad252bcd63a6f5ca33d $
+ * $Id: de925ba4fc2b97f118e741899447ba50506120ad $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -56,7 +56,7 @@ extern "C" {
  * \param i_options the number of options to add to the item
  * \param ppsz_options the options to add to the item
  */
-VLC_DEPRECATED_API void libvlc_playlist_play( libvlc_instance_t *p_instance,
+LIBVLC_DEPRECATED void libvlc_playlist_play( libvlc_instance_t *p_instance,
                                               int i_id, int i_options,
                                               char **ppsz_options );
 

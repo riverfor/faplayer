@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2008-2009 Rémi Denis-Courmont
- * $Id: d438fd50fedf430f1b1b6361d2211ab42835eba0 $
+ * $Id: 3bc335b629655de2f36d6092bc468a8644d80f3b $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Daniel Stranger <vlc at schmaller dot de>
@@ -629,7 +629,7 @@ static void format_duration (char *buf, size_t len, int64_t duration)
                         memcpy( (dst+d), string, len );             \
                         d += len;                                   \
                         free( string );                             \
-                    }                                               \
+                    }
 
 /* same than INSERT_STRING, except that string won't be freed */
 #define INSERT_STRING_NO_FREE( string )                             \
@@ -904,7 +904,7 @@ char *str_format_meta( vlc_object_t *p_object, const char *string )
                         char *now_playing = input_item_GetNowPlaying( p_item );
                         if ( now_playing == NULL )
                         {
-                            char *temp = input_item_GetTitle( p_item );
+                            char *temp = input_item_GetTitleFbName( p_item );
                             if( !EMPTY_STR( temp ) )
                             {
                                 INSERT_STRING( temp );

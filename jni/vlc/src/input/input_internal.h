@@ -2,7 +2,7 @@
  * input_internal.h: Internal input structures
  *****************************************************************************
  * Copyright (C) 1998-2006 the VideoLAN team
- * $Id: beaa8568d8b76204e7953be278c596aa9cddea54 $
+ * $Id: fc787cd3ac961b5ca2d707cdf54e8f52e8b09954 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -164,6 +164,8 @@ struct input_thread_private_t
     input_control_t control[INPUT_CONTROL_FIFO_SIZE];
 
     bool b_abort;
+    bool is_running;
+    vlc_thread_t thread;
 };
 
 /***************************************************************************

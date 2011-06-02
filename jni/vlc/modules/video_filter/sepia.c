@@ -2,7 +2,7 @@
  * sepia.c : Sepia video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: 249d10feb9b8f5d2135898de8882b37fbdbd580d $
+ * $Id: 4d49cbc2b1049825de42efaaf9ff56b17f09c193 $
  *
  * Authors: Branko Kokanovic <branko.kokanovic@gmail.com>
  *
@@ -68,7 +68,7 @@ vlc_module_begin ()
     set_category( CAT_VIDEO )
     set_subcategory( SUBCAT_VIDEO_VFILTER )
     set_capability( "video filter2", 0 )
-    add_integer_with_range( CFG_PREFIX "intensity", 100, 0, 255, NULL,
+    add_integer_with_range( CFG_PREFIX "intensity", 100, 0, 255,
                            SEPIA_INTENSITY_TEXT, SEPIA_INTENSITY_LONGTEXT,
                            false )
     set_callbacks( Create, Destroy )

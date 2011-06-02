@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2005, 2008, 2010 the VideoLAN team
- * $Id: 83266f069108bf135e0b2a2d91672bc5771161ad $
+ * $Id: 0963c679dfcbd72b6eca39692e6bd8fa393e7ac4 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -76,7 +76,7 @@ class demux_sys_t;
 
 static int  Demux  ( demux_t * );
 static int  Control( demux_t *, int, va_list );
-static void Seek   ( demux_t *, mtime_t i_date, double f_percent, chapter_item_c *psz_chapter );
+static void Seek   ( demux_t *, mtime_t i_date, double f_percent, chapter_item_c *p_chapter );
 
 /*****************************************************************************
  * Open: initializes matroska demux structures
@@ -123,8 +123,8 @@ static int Open( vlc_object_t * p_this )
     }
     p_sys->streams.push_back( p_stream );
 
-    p_stream->p_in = p_io_callback;
-    p_stream->p_es = p_io_stream;
+    p_stream->p_io_callback = p_io_callback;
+    p_stream->p_estream = p_io_stream;
 
     for (size_t i=0; i<p_stream->segments.size(); i++)
     {
@@ -214,8 +214,8 @@ static int Open( vlc_object_t * p_this )
                                 }
                                 else
                                 {
-                                    p_stream->p_in = p_file_io;
-                                    p_stream->p_es = p_estream;
+                                    p_stream->p_io_callback = p_file_io;
+                                    p_stream->p_estream = p_estream;
                                     p_sys->streams.push_back( p_stream );
                                 }
                             }
@@ -245,8 +245,8 @@ static int Open( vlc_object_t * p_this )
         goto error;
     }
 
-    p_sys->StartUiThread();
- 
+    p_sys->InitUi();
+
     return VLC_SUCCESS;
 
 error:
@@ -297,8 +297,8 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
             for( size_t i = 0; i < p_sys->stored_attachments.size(); i++ )
             {
                 attachment_c *a = p_sys->stored_attachments[i];
-                (*ppp_attach)[i] = vlc_input_attachment_New( a->psz_file_name.c_str(), a->psz_mime_type.c_str(), NULL,
-                                                             a->p_data, a->i_size );
+                (*ppp_attach)[i] = vlc_input_attachment_New( a->fileName(), a->mimeType(), NULL,
+                                                             a->p_data, a->size() );
             }
             return VLC_SUCCESS;
 
@@ -375,9 +375,9 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
         case DEMUX_GET_FPS:
             pf = (double *)va_arg( args, double * );
             *pf = 0.0;
-            if( p_sys->p_current_segment && p_sys->p_current_segment->Segment() )
+            if( p_sys->p_current_segment && p_sys->p_current_segment->CurrentSegment() )
             {
-                const matroska_segment_c *p_segment = p_sys->p_current_segment->Segment();
+                const matroska_segment_c *p_segment = p_sys->p_current_segment->CurrentSegment();
                 for( size_t i = 0; i < p_segment->tracks.size(); i++ )
                 {
                     mkv_track_t *tk = p_segment->tracks[i];
@@ -397,11 +397,11 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 }
 
 /* Seek */
-static void Seek( demux_t *p_demux, mtime_t i_date, double f_percent, chapter_item_c *psz_chapter )
+static void Seek( demux_t *p_demux, mtime_t i_date, double f_percent, chapter_item_c *p_chapter )
 {
     demux_sys_t        *p_sys = p_demux->p_sys;
     virtual_segment_c  *p_vsegment = p_sys->p_current_segment;
-    matroska_segment_c *p_segment = p_vsegment->Segment();
+    matroska_segment_c *p_segment = p_vsegment->CurrentSegment();
     mtime_t            i_time_offset = 0;
     int64_t            i_global_position = -1;
 
@@ -453,7 +453,7 @@ static void Seek( demux_t *p_demux, mtime_t i_date, double f_percent, chapter_it
         }
     }
 
-    p_vsegment->Seek( *p_demux, i_date, i_time_offset, psz_chapter, i_global_position );
+    p_vsegment->Seek( *p_demux, i_date, i_time_offset, p_chapter, i_global_position );
 }
 
 /* Utility function for BlockDecode */
@@ -471,7 +471,7 @@ void BlockDecode( demux_t *p_demux, KaxBlock *block, KaxSimpleBlock *simpleblock
                          mtime_t i_pts, mtime_t i_duration, bool f_mandatory )
 {
     demux_sys_t        *p_sys = p_demux->p_sys;
-    matroska_segment_c *p_segment = p_sys->p_current_segment->Segment();
+    matroska_segment_c *p_segment = p_sys->p_current_segment->CurrentSegment();
 
     if( !p_segment ) return;
 
@@ -565,15 +565,8 @@ void BlockDecode( demux_t *p_demux, KaxBlock *block, KaxSimpleBlock *simpleblock
         if ( tk->fmt.i_cat == NAV_ES )
         {
             // TODO handle the start/stop times of this packet
-            if ( p_sys->b_ui_hooked )
-            {
-                vlc_mutex_lock( &p_sys->p_ev->lock );
-                memcpy( &p_sys->pci_packet, &p_block->p_buffer[1], sizeof(pci_t) );
-                p_sys->SwapButtons();
-                p_sys->b_pci_packet_set = true;
-                vlc_mutex_unlock( &p_sys->p_ev->lock );
-                block_Release( p_block );
-            }
+            p_sys->p_ev->SetPci( (const pci_t *)&p_block->p_buffer[1]);
+            block_Release( p_block );
             return;
         }
         // correct timestamping when B frames are used
@@ -637,7 +630,7 @@ static int Demux( demux_t *p_demux)
     vlc_mutex_lock( &p_sys->lock_demuxer );
 
     virtual_segment_c  *p_vsegment = p_sys->p_current_segment;
-    matroska_segment_c *p_segment = p_vsegment->Segment();
+    matroska_segment_c *p_segment = p_vsegment->CurrentSegment();
     if ( p_segment == NULL ) return 0;
     int                i_block_count = 0;
     int                i_return = 0;
@@ -653,18 +646,18 @@ static int Demux( demux_t *p_demux)
                 i_return = 1;
                 break;
             }
- 
-        if ( p_vsegment->Edition() && p_vsegment->Edition()->b_ordered && p_vsegment->CurrentChapter() == NULL )
+
+        if ( p_vsegment->CurrentEdition() && p_vsegment->CurrentEdition()->b_ordered && p_vsegment->CurrentChapter() == NULL )
         {
             /* nothing left to read in this ordered edition */
             if ( !p_vsegment->SelectNext() )
                 break;
             p_segment->UnSelect( );
- 
+
             es_out_Control( p_demux->out, ES_OUT_RESET_PCR );
 
             /* switch to the next segment */
-            p_segment = p_vsegment->Segment();
+            p_segment = p_vsegment->CurrentSegment();
             if ( !p_segment->Select( 0 ) )
             {
                 msg_Err( p_demux, "Failed to select new segment" );
@@ -680,7 +673,7 @@ static int Demux( demux_t *p_demux)
         bool b_discardable_picture;
         if( p_segment->BlockGet( block, simpleblock, &b_key_picture, &b_discardable_picture, &i_block_duration ) )
         {
-            if ( p_vsegment->Edition() && p_vsegment->Edition()->b_ordered )
+            if ( p_vsegment->CurrentEdition() && p_vsegment->CurrentEdition()->b_ordered )
             {
                 const chapter_item_c *p_chap = p_vsegment->CurrentChapter();
                 // check if there are more chapters to read
@@ -702,14 +695,14 @@ static int Demux( demux_t *p_demux)
             {
                 msg_Warn( p_demux, "cannot get block EOF?" );
                 p_segment->UnSelect( );
- 
+
                 es_out_Control( p_demux->out, ES_OUT_RESET_PCR );
 
                 /* switch to the next segment */
                 if ( !p_vsegment->SelectNext() )
                     // no more segments in this stream
                     break;
-                p_segment = p_vsegment->Segment();
+                p_segment = p_vsegment->CurrentSegment();
                 if ( !p_segment->Select( 0 ) )
                 {
                     msg_Err( p_demux, "Failed to select new segment" );
@@ -737,8 +730,8 @@ static int Demux( demux_t *p_demux)
                 break;
             }
         }
- 
-        if ( p_vsegment->Edition() && p_vsegment->Edition()->b_ordered && p_vsegment->CurrentChapter() == NULL )
+
+        if ( p_vsegment->CurrentEdition() && p_vsegment->CurrentEdition()->b_ordered && p_vsegment->CurrentChapter() == NULL )
         {
             /* nothing left to read in this ordered edition */
             if ( !p_vsegment->SelectNext() )
@@ -747,11 +740,11 @@ static int Demux( demux_t *p_demux)
                 break;
             }
             p_segment->UnSelect( );
- 
+
             es_out_Control( p_demux->out, ES_OUT_RESET_PCR );
 
             /* switch to the next segment */
-            p_segment = p_vsegment->Segment();
+            p_segment = p_vsegment->CurrentSegment();
             if ( !p_segment->Select( 0 ) )
             {
                 msg_Err( p_demux, "Failed to select new segment" );

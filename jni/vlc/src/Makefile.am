@@ -278,6 +278,7 @@ SOURCES_libvlc_darwin = \
 	posix/darwin_dirs.c \
 	misc/atomic.c \
 	posix/filesystem.c \
+	posix/plugin.c \
 	posix/thread.c \
 	posix/darwin_specific.c \
 	$(NULL)
@@ -286,6 +287,7 @@ SOURCES_libvlc_linux = \
 	posix/dirs.c \
 	misc/atomic.c \
 	posix/filesystem.c \
+	posix/plugin.c \
 	posix/thread.c \
 	posix/linux_specific.c \
 	$(NULL)
@@ -294,6 +296,7 @@ SOURCES_libvlc_win32 = \
 	win32/dirs.c \
 	win32/atomic.c \
 	win32/filesystem.c \
+	win32/plugin.c \
 	win32/thread.c \
 	win32/specific.c \
 	win32/winsock.c \
@@ -303,12 +306,14 @@ SOURCES_libvlc_symbian = \
 	symbian/path.cpp \
 	symbian/dirs.c \
 	misc/atomic.c \
+	win32/plugin.c \
 	$(NULL)
 
 SOURCES_libvlc_other = \
 	posix/dirs.c \
 	misc/atomic.c \
 	posix/filesystem.c \
+	posix/thread.c \
 	posix/thread.c \
 	posix/specific.c \
 	$(NULL)
@@ -436,7 +441,6 @@ SOURCES_libvlc_common = \
 	modules/modules.c \
 	modules/cache.c \
 	modules/entry.c \
-	modules/os.c \
 	modules/textdomain.c \
 	misc/threads.c \
 	misc/stats.c \
@@ -553,24 +557,7 @@ stamp-revision:
 # Unit/regression test
 ###############################################################################
 
-dist_check_SCRIPTS = check_symbols check_headers
-TESTS = check_symbols
-
-check_DATA = libvlc-headers.sym libvlc-sorted.sym
-CLEANFILES += $(check_DATA)
-
-libvlc-sorted.sym: libvlccore.sym
-	rm -f libvlc-sorted.sym
-	sort -fdu < "$(srcdir)/libvlccore.sym" > libvlc-sorted.sym
-
-libvlc-headers.sym:
-	rm -f libvlc-headers.sym
-	cat ${srcdir}/../include/vlc_*.h ${srcdir}/control/*.h | \
-	sed -n -e 's/^[ ]*VLC_EXPORT[ ]*([^,]*,\([^,]*\),.*/\1/p' | \
-	sed -e 's/[^a-zA-Z0-9_]*//' | \
-	sort -fdu > libvlc-headers.sym
-
-.PHONY: libvlc-headers.sym
+dist_check_SCRIPTS = check_headers
 
 check-local:
 	for h in `echo $(pkginclude_HEADERS) | sed -e s,\.\./include/,,g`; \

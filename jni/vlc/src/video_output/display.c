@@ -2,7 +2,7 @@
  * display.c: "vout display" managment
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 67092cd089014d4985997ddfad663ab0bf67eb65 $
+ * $Id: 0d36a3890ebb2cfb9e5ef536accff876eff0f1bb $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -126,8 +126,6 @@ static vout_display_t *vout_display_New(vlc_object_t *obj,
     vd->sys = NULL;
 
     vd->owner = *owner;
-
-    vlc_object_attach(vd, obj);
 
     if (load_module) {
         vd->module = module_need(vd, "vout display", module, module && *module != '\0');

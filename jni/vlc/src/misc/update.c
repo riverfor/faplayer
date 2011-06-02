@@ -2,7 +2,7 @@
  * update.c: VLC update checking and downloading
  *****************************************************************************
  * Copyright © 2005-2008 the VideoLAN team
- * $Id: 02adb3ac3a0458bca9be67cd63d4978cb4bb67e8 $
+ * $Id: 3b699be3d9ac6855a72971f2bf64a4851f8c1f23 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *          Rémi Duraffort <ivoire at via.ecp.fr>
@@ -130,15 +130,14 @@ void update_Delete( update_t *p_update )
 
     if( p_update->p_check )
     {
-        vlc_object_kill( p_update->p_check );
-        vlc_thread_join( p_update->p_check );
-        vlc_object_release( p_update->p_check );
+        vlc_join( p_update->p_check->thread, NULL );
+        free( p_update->p_check );
     }
 
     if( p_update->p_download )
     {
         vlc_object_kill( p_update->p_download );
-        vlc_thread_join( p_update->p_download );
+        vlc_join( p_update->p_download->thread, NULL );
         vlc_object_release( p_update->p_download );
     }
 
@@ -373,7 +372,7 @@ error:
     return false;
 }
 
-static void* update_CheckReal( vlc_object_t *p_this );
+static void* update_CheckReal( void * );
 
 /**
  * Check for updates
@@ -390,14 +389,11 @@ void update_Check( update_t *p_update, void (*pf_callback)( void*, bool ), void 
     // If the object already exist, destroy it
     if( p_update->p_check )
     {
-        vlc_object_kill( p_update->p_check );
-        vlc_thread_join( p_update->p_check );
-        vlc_object_release( p_update->p_check );
+        vlc_join( p_update->p_check->thread, NULL );
+        free( p_update->p_check );
     }
 
-    update_check_thread_t *p_uct =
-        vlc_custom_create( p_update->p_libvlc, sizeof( *p_uct ),
-                           VLC_OBJECT_GENERIC, "update check" );
+    update_check_thread_t *p_uct = calloc( 1, sizeof( *p_uct ) );
     if( !p_uct ) return;
 
     p_uct->p_update = p_update;
@@ -405,12 +401,12 @@ void update_Check( update_t *p_update, void (*pf_callback)( void*, bool ), void 
     p_uct->pf_callback = pf_callback;
     p_uct->p_data = p_data;
 
-    vlc_thread_create( p_uct, update_CheckReal, VLC_THREAD_PRIORITY_LOW );
+    vlc_clone( &p_uct->thread, update_CheckReal, p_uct, VLC_THREAD_PRIORITY_LOW );
 }
 
-void* update_CheckReal( vlc_object_t* p_this )
+void* update_CheckReal( void *obj )
 {
-    update_check_thread_t *p_uct = (update_check_thread_t *)p_this;
+    update_check_thread_t *p_uct = (update_check_thread_t *)obj;
     bool b_ret;
     int canc;
 
@@ -486,7 +482,7 @@ static char *size_str( long int l_size )
     return i_retval == -1 ? NULL : psz_tmp;
 }
 
-static void* update_DownloadReal( vlc_object_t *p_this );
+static void* update_DownloadReal( void * );
 
 /**
  * Download the file given in the update_t
@@ -503,7 +499,7 @@ void update_Download( update_t *p_update, const char *psz_destdir )
     if( p_update->p_download )
     {
         vlc_object_kill( p_update->p_download );
-        vlc_thread_join( p_update->p_download );
+        vlc_join( p_update->p_download->thread, NULL );
         vlc_object_release( p_update->p_download );
     }
 
@@ -517,12 +513,12 @@ void update_Download( update_t *p_update, const char *psz_destdir )
     p_update->p_download = p_udt;
     p_udt->psz_destdir = psz_destdir ? strdup( psz_destdir ) : NULL;
 
-    vlc_thread_create( p_udt, update_DownloadReal, VLC_THREAD_PRIORITY_LOW );
+    vlc_clone( &p_udt->thread, update_DownloadReal, p_udt, VLC_THREAD_PRIORITY_LOW );
 }
 
-static void* update_DownloadReal( vlc_object_t *p_this )
+static void* update_DownloadReal( void *obj )
 {
-    update_download_thread_t *p_udt = (update_download_thread_t *)p_this;
+    update_download_thread_t *p_udt = (update_download_thread_t *)obj;
     dialog_progress_bar_t *p_progress = NULL;
     long int l_size;
     long int l_downloaded = 0;
@@ -726,7 +722,7 @@ static void* update_DownloadReal( vlc_object_t *p_this )
         MultiByteToWideChar( CP_UTF8, 0, psz_destfile, -1, psz_wdestfile, MAX_PATH );
         answer = (int)ShellExecuteW( NULL, L"open", psz_wdestfile, NULL, NULL, SW_SHOW);
         if(answer > 32)
-            libvlc_Quit(p_this->p_libvlc);
+            libvlc_Quit(p_udt->p_libvlc);
     }
 #endif
 end:

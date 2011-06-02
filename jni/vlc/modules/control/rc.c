@@ -2,7 +2,7 @@
  * rc.c : remote control stdin/stdout module for vlc
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: ce59f87e4d3034db0d3f7a25c351528a8708500e $
+ * $Id: d91433c0b11b684bebb32e484af5a0afdb14831a $
  *
  * Author: Peter Surda <shurdeek@panorama.sth.ac.at>
  *         Jean-Paul Saman <jpsaman #_at_# m2x _replaceWith#dot_ nl>
@@ -138,7 +138,7 @@ struct intf_sys_t
 
 #define msg_rc( ... ) __msg_rc( p_intf, __VA_ARGS__ )
 
-LIBVLC_FORMAT(2, 3)
+VLC_FORMAT(2, 3)
 static void __msg_rc( intf_thread_t *p_intf, const char *psz_fmt, ... )
 {
     va_list args;

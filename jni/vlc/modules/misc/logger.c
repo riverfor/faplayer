@@ -2,7 +2,7 @@
  * logger.c : file logging plugin for vlc
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: a275498c803564f6b4af19457332360d3d9ef2e0 $
+ * $Id: 0fe5459a0cf6871cc02099eaf2a3ca126950475c $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -94,7 +94,7 @@ struct intf_sys_t
 static int  Open    ( vlc_object_t * );
 static void Close   ( vlc_object_t * );
 
-static void Overflow (msg_cb_data_t *p_sys, msg_item_t *p_item, unsigned overruns);
+static void Overflow (msg_cb_data_t *p_sys, const msg_item_t *p_item);
 static void TextPrint         ( const msg_item_t *, FILE * );
 static void HtmlPrint         ( const msg_item_t *, FILE * );
 #ifdef HAVE_SYSLOG_H
@@ -366,9 +366,8 @@ static void Close( vlc_object_t *p_this )
 /**
  * Log a message
  */
-static void Overflow (msg_cb_data_t *p_sys, msg_item_t *p_item, unsigned overruns)
+static void Overflow (msg_cb_data_t *p_sys, const msg_item_t *p_item)
 {
-    VLC_UNUSED(overruns);
     int verbosity = var_InheritInteger( p_sys->p_intf, "log-verbose" );
     if (verbosity == -1)
         verbosity = var_InheritInteger( p_sys->p_intf, "verbose" );
@@ -429,11 +428,11 @@ static void SyslogPrint( const msg_item_t *p_msg )
     int i_priority = i_prio[p_msg->i_type];
 
     if( p_msg->psz_header )
-        syslog( i_priority, "%s %s%s%s", p_msg->psz_header, p_msg->psz_module,
-                ppsz_type[p_msg->i_type], p_msg->psz_msg );
+        syslog( i_priority, "[%s] %s%s%s", p_msg->psz_header,
+                p_msg->psz_module, ppsz_type[p_msg->i_type], p_msg->psz_msg );
     else
-        syslog( i_priority, "%s%s%s", p_msg->psz_module, 
-                ppsz_type[p_msg->i_type], p_msg->psz_msg );
+        syslog( i_priority, "%s%s%s",
+                p_msg->psz_module, ppsz_type[p_msg->i_type], p_msg->psz_msg );
  
 }
 #endif

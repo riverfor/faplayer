@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2005, 2008 the VideoLAN team
- * $Id: c7b6194be37353eed3a39d5482e6b4cb87e340be $
+ * $Id: c299ae3a64e264f9be7f2687597be4c345308726 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -127,44 +127,48 @@ void BlockDecode( demux_t *p_demux, KaxBlock *block, KaxSimpleBlock *simpleblock
 class attachment_c
 {
 public:
-    attachment_c()
-        :p_data(NULL)
-        ,i_size(0)
-    {}
-    virtual ~attachment_c()
+    attachment_c( std::string _psz_file_name, std::string _psz_mime_type, int _i_size )
+        :i_size(_i_size)
+        ,psz_file_name( _psz_file_name)
+        ,psz_mime_type( _psz_mime_type)
     {
-        free( p_data );
+        p_data = NULL;
+    }
+    virtual ~attachment_c() { free( p_data ); }
+
+    /* Allocs the data space. Returns true if allocation went ok */
+    bool init()
+    {
+        p_data = malloc( i_size );
+        return (p_data != NULL);
     }
 
+    const char* fileName() { return psz_file_name.c_str(); }
+    const char* mimeType() { return psz_mime_type.c_str(); }
+    int         size()     { return i_size; }
+
+    void          *p_data;
+private:
+    int            i_size;
     std::string    psz_file_name;
     std::string    psz_mime_type;
-    void          *p_data;
-    int            i_size;
 };
 
 class matroska_segment_c;
-
 class matroska_stream_c
 {
 public:
-    matroska_stream_c( demux_sys_t & demuxer )
-        :p_in(NULL)
-        ,p_es(NULL)
-        ,sys(demuxer)
-    {}
-
+    matroska_stream_c() :p_io_callback(NULL) ,p_estream(NULL) {}
     virtual ~matroska_stream_c()
     {
-        delete p_in;
-        delete p_es;
+        delete p_io_callback;
+        delete p_estream;
     }
 
-    IOCallback         *p_in;
-    EbmlStream         *p_es;
+    IOCallback         *p_io_callback;
+    EbmlStream         *p_estream;
 
     std::vector<matroska_segment_c*> segments;
-
-    demux_sys_t                      & sys;
 };
 
 
@@ -179,7 +183,7 @@ typedef struct
     bool         b_enabled;
     unsigned int i_number;
 
-    int          i_extra_data;
+    unsigned int i_extra_data;
     uint8_t      *p_extra_data;
 
     char         *psz_codec;

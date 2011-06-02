@@ -2,7 +2,7 @@
  * glwin32.c: Windows OpenGL provider
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 7a76f3187fa038b4905f8b7a22505e64631b60a6 $
+ * $Id: fb7ec3046fc0670ed168dc75391a8cb1b3e275ba $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -67,6 +67,7 @@ static int            Control(vout_display_t *, int, va_list);
 static void           Manage (vout_display_t *);
 
 static void           Swap   (vlc_gl_t *);
+static void          *OurGetProcAddress(vlc_gl_t *, const char *);
 
 /**
  * It creates an OpenGL vout display.
@@ -111,17 +112,20 @@ static int Open(vlc_object_t *object)
     sys->gl.lock = NULL;
     sys->gl.unlock = NULL;
     sys->gl.swap = Swap;
+    sys->gl.getProcAddress = OurGetProcAddress;
     sys->gl.sys = vd;
 
     video_format_t fmt = vd->fmt;
-    if (vout_display_opengl_Init(&sys->vgl, &fmt, &sys->gl))
+    const vlc_fourcc_t *subpicture_chromas;
+    sys->vgl = vout_display_opengl_New(&fmt, &subpicture_chromas, &sys->gl);
+    if (!sys->vgl)
         goto error;
 
     vout_display_info_t info = vd->info;
     info.has_double_click = true;
     info.has_hide_mouse = false;
-    info.has_pictures_invalid = true;
     info.has_event_thread = true;
+    info.subpicture_chromas = subpicture_chromas;
 
    /* Setup vout_display now that everything is fine */
     vd->fmt  = fmt;
@@ -148,8 +152,8 @@ static void Close(vlc_object_t *object)
     vout_display_t *vd = (vout_display_t *)object;
     vout_display_sys_t *sys = vd->sys;
 
-    if (sys->vgl.gl)
-        vout_display_opengl_Clean(&sys->vgl);
+    if (sys->vgl)
+        vout_display_opengl_Delete(sys->vgl);
 
     if (sys->hGLDC && sys->hGLRC)
         wglMakeCurrent(NULL, NULL);
@@ -167,10 +171,9 @@ static void Close(vlc_object_t *object)
 static picture_pool_t *Pool(vout_display_t *vd, unsigned count)
 {
     vout_display_sys_t *sys = vd->sys;
-    VLC_UNUSED(count);
 
     if (!sys->pool)
-        sys->pool = vout_display_opengl_GetPool(&sys->vgl);
+        sys->pool = vout_display_opengl_GetPool(sys->vgl, count);
     return sys->pool;
 }
 
@@ -178,18 +181,18 @@ static void Prepare(vout_display_t *vd, picture_t *picture, subpicture_t *subpic
 {
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Prepare(&sys->vgl, picture);
-    VLC_UNUSED(subpicture);
+    vout_display_opengl_Prepare(sys->vgl, picture, subpicture);
 }
 
 static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture)
 {
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Display(&sys->vgl, &vd->source);
+    vout_display_opengl_Display(sys->vgl, &vd->source);
 
     picture_Release(picture);
-    VLC_UNUSED(subpicture);
+    if (subpicture)
+        subpicture_Delete(subpicture);
 
     CommonDisplay(vd);
 }
@@ -225,5 +228,11 @@ static void Swap(vlc_gl_t *gl)
     vout_display_t *vd = gl->sys;
 
     SwapBuffers(vd->sys->hGLDC);
+}
+
+static void *OurGetProcAddress(vlc_gl_t *gl, const char *name)
+{
+    VLC_UNUSED(gl);
+    return wglGetProcAddress(name);
 }
 

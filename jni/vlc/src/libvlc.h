@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1999, 2000, 2001, 2002 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: 6eeedc15862026717fa4172a5b3d890b28848d07 $
+ * $Id: 99fc643f4f1975324651ad3f1405824994e69831 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -48,9 +48,9 @@ void system_End       ( libvlc_int_t * );
 /* This cannot be used as is from plugins yet: */
 int vlc_clone_detach (vlc_thread_t *, void *(*)(void *), void *, int);
 
-/* Hopefully, no need to export this. There is a new thread API instead. */
-void vlc_thread_cancel (vlc_object_t *);
 int vlc_object_waitpipe (vlc_object_t *obj);
+
+int vlc_set_priority( vlc_thread_t, int );
 
 void vlc_threads_setup (libvlc_int_t *);
 
@@ -68,7 +68,6 @@ void vlc_assert_locked (vlc_mutex_t *);
  */
 extern uint32_t cpu_flags;
 uint32_t CPUCapabilities( void );
-bool vlc_CPU_CheckPluginDir (const char *name);
 
 /*
  * Message/logging stuff
@@ -150,10 +149,6 @@ struct vlc_object_internals
     void           *var_root;
     vlc_mutex_t     var_lock;
     vlc_cond_t      var_wait;
-
-    /* Thread properties, if any */
-    vlc_thread_t    thread_id;
-    bool            b_thread;
 
     /* Objects thread synchronization */
     int             pipes[2];
@@ -311,8 +306,8 @@ static inline int stats_UpdateFloat( vlc_object_t *p_obj, counter_t *p_co,
 }
 #define stats_UpdateFloat(a,b,c,d) stats_UpdateFloat( VLC_OBJECT(a),b,c,d )
 
-VLC_EXPORT( void, stats_ComputeInputStats, (input_thread_t*, input_stats_t*) );
-VLC_EXPORT( void, stats_ReinitInputStats, (input_stats_t *) );
-VLC_EXPORT( void, stats_DumpInputStats, (input_stats_t *) );
+void stats_ComputeInputStats(input_thread_t*, input_stats_t*);
+void stats_ReinitInputStats(input_stats_t *);
+void stats_DumpInputStats(input_stats_t *);
 
 #endif

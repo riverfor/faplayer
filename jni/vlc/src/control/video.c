@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2005-2010 the VideoLAN team
  *
- * $Id: e6655b9bed74a7b2331cca744c316bdc6548f098 $
+ * $Id: ff0697956c79c1c426de424b9e035ba5f55a8490 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Filippo Carone <littlejohn@videolan.org>
@@ -609,7 +609,7 @@ static vlc_object_t *get_object( libvlc_media_player_t * p_mi,
 
     if( vout )
     {
-        object = vlc_object_find_name( vout, name, FIND_CHILD );
+        object = vlc_object_find_name( vout, name );
         vlc_object_release(vout);
     }
     else

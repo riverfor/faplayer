@@ -2,7 +2,7 @@
  * extract.c : Extract RGB components
  *****************************************************************************
  * Copyright (C) 2000-2006 the VideoLAN team
- * $Id: b5cbc4cc214bea321bc85b4d9cb0478350abda70 $
+ * $Id: d317a7011b65abfd653b2a5e9f5ab1e4e7dd042b $
  *
  * Authors: Antoine Cellerier <dionoea .t videolan d@t org>
  *
@@ -79,7 +79,7 @@ vlc_module_begin ()
     add_shortcut( "extract" )
 
     add_integer_with_range( FILTER_PREFIX "component", 0xFF0000, 1, 0xFFFFFF,
-                 NULL, COMPONENT_TEXT, COMPONENT_LONGTEXT, false )
+                            COMPONENT_TEXT, COMPONENT_LONGTEXT, false )
         change_integer_list( pi_component_values, ppsz_component_descriptions )
 
     set_callbacks( Create, Destroy )

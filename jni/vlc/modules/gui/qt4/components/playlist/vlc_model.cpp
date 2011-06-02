@@ -2,7 +2,7 @@
  * vlc_model.cpp : base for playlist and ml model
  ****************************************************************************
  * Copyright (C) 2010 the VideoLAN team and AUTHORS
- * $Id: 5103fcf9e2fe480da79c3bd06c75b49460dfd780 $
+ * $Id: cd1ec1dc041e19cd16c441138eb63e8c2c740d07 $
  *
  * Authors: Srikanth Raju <srikiraju#gmail#com>
  *
@@ -24,7 +24,7 @@
 #include "vlc_model.hpp"
 
 VLCModel::VLCModel( intf_thread_t *_p_intf, QObject *parent )
-        : p_intf(_p_intf), QAbstractItemModel( parent )
+        : QAbstractItemModel( parent ), p_intf(_p_intf)
 {
 }
 

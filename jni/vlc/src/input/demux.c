@@ -2,7 +2,7 @@
  * demux.c
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: b0d7dae35e11704d09ac68a55ee524000c3899da $
+ * $Id: 635b675490639dce1b364047a82d0cd896095ecf $
  *
  * Author: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -178,9 +178,6 @@ demux_t *__demux_New( vlc_object_t *p_obj, input_thread_t *p_parent_input,
         }
     }
 
-    /* Before module_need (for var_Create...) */
-    vlc_object_attach( p_demux, p_obj );
-
     if( s )
     {
         /* ID3/APE tags will mess-up demuxer probing so we skip it here.
@@ -353,7 +350,6 @@ decoder_t *demux_PacketizerNew( demux_t *p_demux, es_format_t *p_fmt, const char
     p_packetizer->fmt_in = *p_fmt;
     es_format_Init( &p_packetizer->fmt_out, UNKNOWN_ES, 0 );
 
-    vlc_object_attach( p_packetizer, p_demux );
     p_packetizer->p_module = module_need( p_packetizer, "packetizer", NULL, false );
     if( !p_packetizer->p_module )
     {

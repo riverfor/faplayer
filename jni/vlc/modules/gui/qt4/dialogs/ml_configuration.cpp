@@ -2,7 +2,7 @@
  * ml_configuration.cpp: ML's configuration dialog (folder view)
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN Team and AUTHORS
- * $Id: 7fa9d384fc5de220d9ee09a1f57b607425adf668 $
+ * $Id: 191f4707a17f9077d91f26a4ee337f405910d8b9 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -148,7 +148,7 @@ bool MLDirModel::setData( const QModelIndex &index, const QVariant &value,
     return QDirModel::setData( index, value, role );
 }
 
-int MLDirModel::columnCount( const QModelIndex &parent ) const
+int MLDirModel::columnCount( const QModelIndex & ) const
 {
     return 1;
 }
@@ -242,10 +242,6 @@ MLConfDialog::MLConfDialog( QWidget *parent, intf_thread_t *_p_intf )
     BUTTONACT( cancel, cancel() );
     BUTTONACT( reset, reset() );
     CONNECT( recursivity, toggled( bool ), model, setRecursivity( bool ) );
-}
-
-MLConfDialog::~MLConfDialog()
-{
 }
 
 void MLConfDialog::init()

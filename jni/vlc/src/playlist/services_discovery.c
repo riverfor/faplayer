@@ -2,7 +2,7 @@
  * services_discovery.c : Manage playlist services_discovery modules
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 5b5f608de9d3aac5f2d4f5980035391b3aadb641 $
+ * $Id: fd9cc75bd3a056cf135fc336621f7193e8a3d17d $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -125,8 +125,6 @@ services_discovery_t *vlc_sd_Create( vlc_object_t *p_super,
     vlc_event_manager_register_event_type(em, vlc_ServicesDiscoveryEnded);
 
     vlc_object_set_destructor( p_sd, services_discovery_Destructor );
-    vlc_object_attach( p_sd, p_super );
-
     return p_sd;
 }
 

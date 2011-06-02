@@ -2,7 +2,7 @@
  * playlist_model.cpp : Manage playlist model
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: 51ded195799d7ebfe8232ecbf8b0e934c30903e8 $
+ * $Id: ebec0bb5eff9485e010307a6060df89283c3fa47 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakkka <ileoo (at) videolan dot org>
@@ -186,7 +186,7 @@ QMimeData *PLModel::mimeData( const QModelIndexList &indexes ) const
 
 /* Drop operation */
 bool PLModel::dropMimeData( const QMimeData *data, Qt::DropAction action,
-        int row, int column, const QModelIndex &parent )
+        int row, int, const QModelIndex &parent )
 {
     bool copy = action == Qt::CopyAction;
     if( !copy && action != Qt::MoveAction )
@@ -493,7 +493,7 @@ QModelIndex PLModel::parent( const QModelIndex &index ) const
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-int PLModel::columnCount( const QModelIndex &i) const
+int PLModel::columnCount( const QModelIndex &) const
 {
     return columnFromMeta( COLUMN_END );
 }
@@ -650,8 +650,6 @@ void PLModel::processItemAppend( int i_item, int i_parent )
 
 void PLModel::rebuild( playlist_item_t *p_root )
 {
-    playlist_item_t* p_item;
-
     /* Invalidate cache */
     i_cached_id = i_cached_input_id = -1;
 
@@ -946,6 +944,8 @@ bool PLModel::popup( const QModelIndex & index, const QPoint &point, const QMode
     }
     if( i_popup_item > -1 )
     {
+        if( rootItem->id() != THEPL->p_playing->i_id )
+            menu.addAction( qtr( "Add to playlist"), this, SLOT( popupAddToPlaylist() ) );
         menu.addAction( QIcon( ":/buttons/playlist/playlist_remove" ),
                         qtr(I_POP_DEL), this, SLOT( popupDel() ) );
         menu.addSeparator();
@@ -992,6 +992,22 @@ void PLModel::popupPlay()
     PL_UNLOCK;
 }
 
+void PLModel::popupAddToPlaylist()
+{
+    playlist_Lock( THEPL );
+
+    foreach( QModelIndex currentIndex, current_selection )
+    {
+        playlist_item_t *p_item = playlist_ItemGetById( THEPL, getId( currentIndex ) );
+        if( !p_item ) continue;
+
+        playlist_NodeAddCopy( THEPL, p_item,
+                              THEPL->p_playing,
+                              PLAYLIST_END );
+    }
+    playlist_Unlock( THEPL );
+}
+
 void PLModel::popupInfo()
 {
     PL_LOCK;
@@ -1016,7 +1032,6 @@ void PLModel::popupStream()
     QStringList mrls = selectedURIs();
     if( !mrls.isEmpty() )
         THEDP->streamingDialog( NULL, mrls[0], false );
-
 }
 
 void PLModel::popupSave()
@@ -1029,8 +1044,7 @@ void PLModel::popupSave()
 void PLModel::popupExplore()
 {
     PL_LOCK;
-    playlist_item_t *p_item = playlist_ItemGetById( p_playlist,
-            i_popup_item );
+    playlist_item_t *p_item = playlist_ItemGetById( p_playlist, i_popup_item );
     if( p_item )
     {
         input_item_t *p_input = p_item->p_input;

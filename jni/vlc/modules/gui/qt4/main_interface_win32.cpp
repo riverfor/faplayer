@@ -2,7 +2,7 @@
  * main_interface.cpp : Main interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: fb7821322fbfe5fafea74def75819334ccfac4dc $
+ * $Id: d57730b0f1495efcd23a6b26505d1c0454321fe0 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -87,12 +87,12 @@ void MainInterface::createTaskBarButtons()
     {
         p_taskbl->vt->HrInit(p_taskbl);
 
-        if(himl = ImageList_Create( 20, //cx
+        if( (himl = ImageList_Create( 20, //cx
                         20, //cy
                         ILC_COLOR32,//flags
                         4,//initial nb of images
                         0//nb of images that can be added
-                        ))
+                        ) ) != NULL )
         {
             QPixmap img   = QPixmap(":/win7/prev");
             QPixmap img2  = QPixmap(":/win7/pause");
@@ -135,12 +135,12 @@ void MainInterface::createTaskBarButtons()
 
         HRESULT hr = p_taskbl->vt->ThumbBarSetImageList(p_taskbl, winId(), himl );
         if(S_OK != hr)
-            msg_Err( p_intf, "ThumbBarSetImageList failed with error %08x", hr );
+            msg_Err( p_intf, "ThumbBarSetImageList failed with error %08lx", hr );
         else
         {
             hr = p_taskbl->vt->ThumbBarAddButtons(p_taskbl, winId(), 3, thbButtons);
             if(S_OK != hr)
-                msg_Err( p_intf, "ThumbBarAddButtons failed with error %08x", hr );
+                msg_Err( p_intf, "ThumbBarAddButtons failed with error %08lx", hr );
         }
         CONNECT( THEMIM->getIM(), playingStatusChanged( int ), this, changeThumbbarButtons( int ) );
     }
@@ -288,7 +288,7 @@ void MainInterface::changeThumbbarButtons( int i_status)
     }
     HRESULT hr =  p_taskbl->vt->ThumbBarUpdateButtons(p_taskbl, this->winId(), 3, thbButtons);
     if(S_OK != hr)
-        msg_Err( p_intf, "ThumbBarUpdateButtons failed with error %08x", hr );
+        msg_Err( p_intf, "ThumbBarUpdateButtons failed with error %08lx", hr );
 #endif
 }
 

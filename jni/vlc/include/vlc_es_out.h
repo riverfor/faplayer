@@ -2,7 +2,7 @@
  * vlc_es_out.h: es_out (demuxer output) descriptor, queries and methods
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 57fc5c003ad3d319f75c6dcbae650c1f45e50d28 $
+ * $Id: 2aae59553528ea6788325488ec6b76dcc9abc126 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -104,7 +104,7 @@ struct es_out_t
     es_out_sys_t    *p_sys;
 };
 
-LIBVLC_USED
+VLC_USED
 static inline es_out_id_t * es_out_Add( es_out_t *out, const es_format_t *fmt )
 {
     return out->pf_add( out, fmt );

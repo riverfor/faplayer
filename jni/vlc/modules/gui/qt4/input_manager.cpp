@@ -2,7 +2,7 @@
  * input_manager.cpp : Manage an input and interact with its GUI elements
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: d43c3634f082192fd0cf525455459581c5a75680 $
+ * $Id: 2500bb4e46af603a140654e03aa9987f2bae511b $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakka  <ileoo@videolan.org>
@@ -33,6 +33,7 @@
 #include <vlc_keys.h>
 #include <vlc_url.h>
 #include <vlc_strings.h>
+#include <vlc_aout.h>
 
 #include <QApplication>
 
@@ -285,6 +286,8 @@ inline void InputManager::delCallbacks()
 static int ItemChanged( vlc_object_t *p_this, const char *psz_var,
                         vlc_value_t oldval, vlc_value_t newval, void *param )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_var ); VLC_UNUSED( oldval );
+
     InputManager *im = (InputManager*)param;
     input_item_t *p_item = static_cast<input_item_t *>(newval.p_address);
 
@@ -296,6 +299,8 @@ static int ItemChanged( vlc_object_t *p_this, const char *psz_var,
 static int InputEvent( vlc_object_t *p_this, const char *,
                        vlc_value_t, vlc_value_t newval, void *param )
 {
+    VLC_UNUSED( p_this );
+
     InputManager *im = (InputManager*)param;
     IMEvent *event;
 
@@ -603,7 +608,7 @@ void InputManager::UpdateVout()
             emit voutChanged( b_video );
 
         /* Release the vout list */
-        for( int i = 0; i < i_vout; i++ )
+        for( size_t i = 0; i < i_vout; i++ )
             vlc_object_release( (vlc_object_t*)pp_vout[i] );
         free( pp_vout );
     }
@@ -954,19 +959,6 @@ MainInputManager::MainInputManager( intf_thread_t *_p_intf )
     DCONNECT( this, inputChanged( input_thread_t * ),
               im, setInput( input_thread_t * ) );
 
-    /* emit check if playlist has already started playing */
-    input_thread_t *p_input = playlist_CurrentInput( THEPL );
-    if( p_input )
-    {
-        input_item_t *p_item = input_GetItem( p_input );
-        if( p_item )
-        {
-            IMEvent *event = new IMEvent( ItemChanged_Type, p_item );
-            customEvent( event );
-            delete event;
-        }
-        vlc_object_release( p_input );
-    }
 }
 
 MainInputManager::~MainInputManager()
@@ -1009,7 +1001,6 @@ void MainInputManager::customEvent( QEvent *event )
     int type = event->type();
 
     PLEvent *plEv;
-    IMEvent *imEv;
 
     // msg_Dbg( p_intf, "New MainIM Event of type: %i", type );
     switch( type )
@@ -1036,8 +1027,9 @@ void MainInputManager::customEvent( QEvent *event )
         notifyRepeatLoop();
         return;
     case LeafToParent_Type:
-        imEv = static_cast<IMEvent*>( event );
-        emit leafBecameParent( imEv->p_item );
+        plEv = static_cast<PLEvent*>( event );
+        emit leafBecameParent( plEv->i_item );
+        return;
     default:
         if( type != ItemChanged_Type ) return;
     }
@@ -1179,6 +1171,8 @@ bool MainInputManager::getPlayExitState()
 static int PLItemChanged( vlc_object_t *p_this, const char *psz_var,
                         vlc_value_t oldval, vlc_value_t, void *param )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_var ); VLC_UNUSED( oldval );
+
     MainInputManager *mim = (MainInputManager*)param;
 
     IMEvent *event = new IMEvent( ItemChanged_Type );
@@ -1189,10 +1183,11 @@ static int PLItemChanged( vlc_object_t *p_this, const char *psz_var,
 static int LeafToParent( vlc_object_t *p_this, const char *psz_var,
                         vlc_value_t oldval, vlc_value_t newval, void *param )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_var ); VLC_UNUSED( oldval );
     MainInputManager *mim = (MainInputManager*)param;
 
-    IMEvent *event = new IMEvent( LeafToParent_Type,
-                                  static_cast<input_item_t*>( newval.p_address ) );
+    PLEvent *event = new PLEvent( LeafToParent_Type, newval.i_int );
+
     QApplication::postEvent( mim, event );
     return VLC_SUCCESS;
 }
@@ -1200,6 +1195,8 @@ static int LeafToParent( vlc_object_t *p_this, const char *psz_var,
 static int VolumeChanged( vlc_object_t *p_this, const char *psz_var,
                         vlc_value_t oldval, vlc_value_t newval, void *param )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_var ); VLC_UNUSED( oldval ); VLC_UNUSED( newval );
+
     MainInputManager *mim = (MainInputManager*)param;
 
     IMEvent *event = new IMEvent( VolumeChanged_Type );
@@ -1210,6 +1207,8 @@ static int VolumeChanged( vlc_object_t *p_this, const char *psz_var,
 static int SoundMuteChanged( vlc_object_t *p_this, const char *psz_var,
                         vlc_value_t oldval, vlc_value_t newval, void *param )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_var ); VLC_UNUSED( oldval ); VLC_UNUSED( newval );
+
     MainInputManager *mim = (MainInputManager*)param;
 
     IMEvent *event = new IMEvent( SoundMuteChanged_Type );
@@ -1220,6 +1219,8 @@ static int SoundMuteChanged( vlc_object_t *p_this, const char *psz_var,
 static int PLItemAppended
 ( vlc_object_t * obj, const char *var, vlc_value_t old, vlc_value_t cur, void *data )
 {
+    VLC_UNUSED( obj ); VLC_UNUSED( var ); VLC_UNUSED( old );
+
     MainInputManager *mim = static_cast<MainInputManager*>(data);
     playlist_add_t *p_add = static_cast<playlist_add_t*>( cur.p_address );
 
@@ -1230,6 +1231,8 @@ static int PLItemAppended
 static int PLItemRemoved
 ( vlc_object_t * obj, const char *var, vlc_value_t old, vlc_value_t cur, void *data )
 {
+    VLC_UNUSED( obj ); VLC_UNUSED( var ); VLC_UNUSED( old );
+
     MainInputManager *mim = static_cast<MainInputManager*>(data);
 
     PLEvent *event = new PLEvent( PLItemRemoved_Type, cur.i_int, 0  );
@@ -1240,6 +1243,8 @@ static int PLItemRemoved
 static int RandomChanged
 ( vlc_object_t * obj, const char *var, vlc_value_t old, vlc_value_t cur, void *data )
 {
+    VLC_UNUSED( obj ); VLC_UNUSED( var ); VLC_UNUSED( old ); VLC_UNUSED( cur );
+
     MainInputManager *mim = static_cast<MainInputManager*>(data);
 
     IMEvent *event = new IMEvent( RandomChanged_Type );
@@ -1251,6 +1256,8 @@ static int RandomChanged
 static int LoopChanged
 ( vlc_object_t * obj, const char *var, vlc_value_t old, vlc_value_t cur, void *data )
 {
+    VLC_UNUSED( obj ); VLC_UNUSED( var ); VLC_UNUSED( old ); VLC_UNUSED( cur );
+
     MainInputManager *mim = static_cast<MainInputManager*>(data);
 
     IMEvent *event = new IMEvent( LoopChanged_Type );
@@ -1261,6 +1268,8 @@ static int LoopChanged
 static int RepeatChanged
 ( vlc_object_t * obj, const char *var, vlc_value_t old, vlc_value_t cur, void *data )
 {
+    VLC_UNUSED( obj ); VLC_UNUSED( var ); VLC_UNUSED( old ); VLC_UNUSED( cur );
+
     MainInputManager *mim = static_cast<MainInputManager*>(data);
 
     IMEvent *event = new IMEvent( RepeatChanged_Type );

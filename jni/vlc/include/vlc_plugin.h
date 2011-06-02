@@ -29,7 +29,7 @@
  * This file implements plugin (module) macros used to define a vlc module.
  */
 
-VLC_EXPORT( int, vlc_plugin_set, (module_t *, module_config_t *, int, ...) );
+VLC_API int vlc_plugin_set(module_t *, module_config_t *, int, ...);
 
 #define vlc_module_set( mod, ... ) vlc_plugin_set ((mod), NULL, __VA_ARGS__)
 #define vlc_config_set( cfg, ... ) vlc_plugin_set (NULL, (cfg), __VA_ARGS__)
@@ -75,9 +75,6 @@ enum vlc_module_properties
     VLC_CONFIG_PERSISTENT_OBSOLETE,
     /* unused (ignored) */
 
-    VLC_CONFIG_RESTART,
-    /* restart required to apply value change (args=none) */
-
     VLC_CONFIG_PRIVATE,
     /* hide from user (args=none) */
 
@@ -113,8 +110,8 @@ enum vlc_module_properties
 /**
  * Current plugin ABI version
  */
-# define MODULE_SYMBOL 1_2_0g
-# define MODULE_SUFFIX "__1_2_0g"
+# define MODULE_SYMBOL 1_2_0h
+# define MODULE_SUFFIX "__1_2_0h"
 
 /*****************************************************************************
  * Add a few defines. You do not want to read this section. Really.
@@ -140,12 +137,19 @@ enum vlc_module_properties
 #   define __VLC_SYMBOL( symbol )  CONCATENATE( symbol, MODULE_NAME )
 #endif
 
-#if defined( __PLUGIN__ ) && ( defined( WIN32 ) || defined( UNDER_CE ) )
+#define CDECL_SYMBOL
+#if defined (__PLUGIN__)
+# if defined (WIN32)
 #   define DLL_SYMBOL              __declspec(dllexport)
+#   undef CDECL_SYMBOL
 #   define CDECL_SYMBOL            __cdecl
+# elif defined (__GNUC__) && (__GNUC__ >= 4)
+#   define DLL_SYMBOL              __attribute__((visibility("default")))
+# else
+#  define DLL_SYMBOL
+# endif
 #else
-#   define DLL_SYMBOL
-#   define CDECL_SYMBOL
+# define DLL_SYMBOL
 #endif
 
 #if defined( __cplusplus )
@@ -316,23 +320,23 @@ enum vlc_module_properties
     add_string_inner( CONFIG_ITEM_FONT, name, text, longtext, advc, \
                       value )
 
-#define add_module( name, psz_caps, value, p_callback, text, longtext, advc ) \
+#define add_module( name, psz_caps, value, text, longtext, advc ) \
     add_string_inner( CONFIG_ITEM_MODULE, name, text, longtext, advc, \
                       value ) \
     vlc_config_set (p_config, VLC_CONFIG_CAPABILITY, (const char *)(psz_caps));
 
-#define add_module_list( name, psz_caps, value, p_callback, text, longtext, advc ) \
+#define add_module_list( name, psz_caps, value, text, longtext, advc ) \
     add_string_inner( CONFIG_ITEM_MODULE_LIST, name, text, longtext, advc, \
                       value ) \
     vlc_config_set (p_config, VLC_CONFIG_CAPABILITY, (const char *)(psz_caps));
 
 #ifndef __PLUGIN__
-#define add_module_cat( name, i_subcategory, value, p_callback, text, longtext, advc ) \
+#define add_module_cat( name, i_subcategory, value, text, longtext, advc ) \
     add_string_inner( CONFIG_ITEM_MODULE_CAT, name, text, longtext, advc, \
                       value ) \
     change_integer_range (i_subcategory /* gruik */, 0);
 
-#define add_module_list_cat( name, i_subcategory, value, p_callback, text, longtext, advc ) \
+#define add_module_list_cat( name, i_subcategory, value, text, longtext, advc ) \
     add_string_inner( CONFIG_ITEM_MODULE_LIST_CAT, name, text, longtext, \
                       advc, value ) \
     change_integer_range (i_subcategory /* gruik */, 0);
@@ -344,10 +348,9 @@ enum vlc_module_properties
 #define add_key( name, value, text, longtext, advc ) \
     add_string_inner( CONFIG_ITEM_KEY, "global-" name, text, longtext, advc, \
                    KEY_UNSET ) \
-        change_need_restart() \
     add_string_inner( CONFIG_ITEM_KEY, name, text, longtext, advc, value )
 
-#define add_integer_with_range( name, value, i_min, i_max, p_callback, text, longtext, advc ) \
+#define add_integer_with_range( name, value, i_min, i_max, text, longtext, advc ) \
     add_integer( name, value, text, longtext, advc ) \
     change_integer_range( i_min, i_max )
 
@@ -355,7 +358,7 @@ enum vlc_module_properties
     add_typename_inner( CONFIG_ITEM_FLOAT, name, text, longtext, advc ) \
     vlc_config_set (p_config, VLC_CONFIG_VALUE, (double)(v));
 
-#define add_float_with_range( name, value, f_min, f_max, p_callback, text, longtext, advc ) \
+#define add_float_with_range( name, value, f_min, f_max, text, longtext, advc ) \
     add_float( name, value, text, longtext, advc ) \
     change_float_range( f_min, f_max )
 
@@ -415,9 +418,6 @@ enum vlc_module_properties
 #define change_action_add( pf_action, text ) \
     vlc_config_set (p_config, VLC_CONFIG_ADD_ACTION, \
                     (vlc_callback_t)(pf_action), (const char *)(text));
-
-#define change_need_restart() \
-    vlc_config_set (p_config, VLC_CONFIG_RESTART);
 
 /* For options that are saved but hidden from the preferences panel */
 #define change_private() \

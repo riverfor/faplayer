@@ -2,7 +2,7 @@
  * mosaic_bridge.c:
  *****************************************************************************
  * Copyright (C) 2004-2007 the VideoLAN team
- * $Id: 76569c8fafac1d03cc38b8502af8a3ca5081ef57 $
+ * $Id: 9c807b119983ca1565638ec8e2b98cd2b480e882 $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -158,9 +158,9 @@ vlc_module_begin ()
                 false )
 
     add_module_list( CFG_PREFIX "vfilter", "video filter2",
-                     NULL, NULL, VFILTER_TEXT, VFILTER_LONGTEXT, false )
+                     NULL, VFILTER_TEXT, VFILTER_LONGTEXT, false )
 
-    add_integer_with_range( CFG_PREFIX "alpha", 255, 0, 255, NULL,
+    add_integer_with_range( CFG_PREFIX "alpha", 255, 0, 255,
                             ALPHA_TEXT, ALPHA_LONGTEXT, false )
     add_integer( CFG_PREFIX "x", -1, X_TEXT, X_LONGTEXT, false )
     add_integer( CFG_PREFIX "y", -1, Y_TEXT, Y_LONGTEXT, false )
@@ -306,7 +306,6 @@ static sout_stream_id_t * Add( sout_stream_t *p_stream, es_format_t *p_fmt )
     p_sys->p_decoder = vlc_object_create( p_stream, sizeof( decoder_t ) );
     if( !p_sys->p_decoder )
         return NULL;
-    vlc_object_attach( p_sys->p_decoder, p_stream );
     p_sys->p_decoder->p_module = NULL;
     p_sys->p_decoder->fmt_in = *p_fmt;
     p_sys->p_decoder->b_pace_control = false;

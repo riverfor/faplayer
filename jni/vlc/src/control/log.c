@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
  *
- * $Id: 5442870b06d6364ee484669115986bf3f6a48731 $
+ * $Id: 1caf9d05926c5fa8024aa2fec1c36090564cd233 $
  *
  * Authors: Damien Fouilleul <damienf@videolan.org>
  *
@@ -48,19 +48,17 @@ struct msg_cb_data_t
     int         verbosity;
 };
 
-static void handler( msg_cb_data_t *d, msg_item_t *p_item, unsigned i_drop )
+static void handler( msg_cb_data_t *d, const msg_item_t *p_item )
 {
     if (p_item->i_type > d->verbosity)
         return;
 
+    msg_item_t *msg = msg_Copy (p_item);
+
     vlc_spin_lock (&d->lock);
     if (d->count < VLC_MSG_QSIZE)
-    {
-        d->items[d->count++] = p_item;
-        msg_Hold (p_item);
-    }
+        d->items[d->count++] = msg;
     vlc_spin_unlock (&d->lock);
-    (void)i_drop;
 }
 
 struct libvlc_log_t
@@ -156,7 +154,7 @@ void libvlc_log_clear( libvlc_log_t *p_log )
     vlc_spin_unlock (&p_log->data.lock);
 
     for (unsigned i = 0; i < sizeof (tab) / sizeof (tab[0]); i++)
-         msg_Release (tab[i]);
+         msg_Free (tab[i]);
 }
 
 libvlc_log_iterator_t *libvlc_log_get_iterator( const libvlc_log_t *p_log )

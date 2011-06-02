@@ -29,9 +29,9 @@ all.each { |k, a|
     }
 }
 `rm -f assets/index.txt`
-`rm -rf assets/bin`
-`test -f libs/armeabi/s_ffmpeg && mkdir -p assets/bin && cp -f libs/armeabi/s_ffmpeg assets/bin/ffmpeg`
-`test -f libs/armeabi-v7a/s_ffmpeg && mkdir -p assets/bin  && cp -f libs/armeabi-v7a/s_ffmpeg assets/bin/ffmpeg`
+`rm -rf assets/bin && mkdir -p assets/bin && touch assets/bin/.gitkeep`
+`test -f libs/armeabi/s_ffmpeg && cp -f libs/armeabi/s_ffmpeg assets/bin/ffmpeg`
+`test -f libs/armeabi-v7a/s_ffmpeg && cp -f libs/armeabi-v7a/s_ffmpeg assets/bin/ffmpeg`
 list = `cd assets && find . -type f`.split("\n")
 File.open('assets/index.txt', 'w') { |f|
    list.each { |l|

@@ -2,7 +2,7 @@
  * macosx.m: Mac OS X module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id: f718531fe059c8c5ad02a4eeb2aeb417815012a1 $
+ * $Id: 72854ecf68ff3f3d47d7d7bc91b20bd79c6a3d17 $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Eugenio Jarosiewicz <ej0@cise.ufl.edu>
@@ -127,7 +127,7 @@ vlc_module_begin ()
                      false )
         add_bool( "macosx-stretch", false, STRETCH_TEXT, STRETCH_LONGTEXT,
                   false )
-        add_float_with_range( "macosx-opaqueness", 1, 0, 1, NULL,
+        add_float_with_range( "macosx-opaqueness", 1, 0, 1,
                               OPAQUENESS_TEXT, OPAQUENESS_LONGTEXT, true );
         add_bool( "macosx-black", true, BLACK_TEXT, BLACK_LONGTEXT,
                   false )

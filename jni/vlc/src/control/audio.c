@@ -2,7 +2,7 @@
  * libvlc_audio.c: New libvlc audio control API
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: 0d5aa1b2c074dab8730973f9573d431a656fe20a $
+ * $Id: d39de60ad75c1b339e7ad2d87473efe16fa1f91b $
  *
  * Authors: Filippo Carone <filippo@carone.org>
  *          Jean-Paul Saman <jpsaman _at_ m2x _dot_ nl>
@@ -313,7 +313,7 @@ void libvlc_audio_toggle_mute( libvlc_media_player_t *mp )
 
 int libvlc_audio_get_mute( libvlc_media_player_t *mp )
 {
-    return (libvlc_audio_get_volume(mp) == 0);
+    return aout_IsMuted( VLC_OBJECT(mp) );
 }
 
 void libvlc_audio_set_mute( libvlc_media_player_t *mp, int mute )

@@ -2,7 +2,7 @@
  * ctrl_checkbox.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: bd56de02e7774e2b5b796cb21f2cbfb2313fff8a $
+ * $Id: 31f35feec59ebdcd720e58215cb9021d089cbc5d $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -246,12 +246,14 @@ void CtrlCheckbox::CmdHiddenUp::execute()
 
 void CtrlCheckbox::onVarBoolUpdate( VarBool &rVariable )
 {
+    (void)rVariable;
     changeButton();
 }
 
 
 void CtrlCheckbox::onUpdate( Subject<AnimBitmap> &rBitmap, void *arg )
 {
+    (void)rBitmap;(void)arg;
     notifyLayout( m_pImgCurrent->getWidth(), m_pImgCurrent->getHeight() );
 }
 

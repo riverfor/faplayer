@@ -2,7 +2,7 @@
  * sql_media_library.h : Media Library Interface
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team and AUTHORS
- * $Id: 312eee80462bc161a125645ae15de78a5be6adb9 $
+ * $Id: 287737ce9683c7d0e9ae2da1f6201a384cf4f2a5 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -118,8 +118,8 @@ struct monitoring_thread_t
 /* Media status Watching thread */
 struct watch_thread_t
 {
-    VLC_COMMON_MEMBERS;
     media_library_t *p_ml;
+    vlc_thread_t thread;
     vlc_cond_t cond;
     vlc_mutex_t lock;
 

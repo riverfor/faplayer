@@ -2,7 +2,7 @@
  * x11_dragdrop.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: e8111191475927b7b0df7fc55046f35d5123c7ef $
+ * $Id: a0062448caec706ab3a08bbde64c04481758bfca $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -136,6 +136,7 @@ void X11DragDrop::dndPosition( ldata_t data )
 
 void X11DragDrop::dndLeave( ldata_t data )
 {
+    (void)data;
 }
 
 

@@ -2,7 +2,7 @@
  * chorus_flanger.c
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: de0a3edd105be858d7ae90ee98ce1a89359b7378 $
+ * $Id: efeade622393588cea595eb05e35dd21a5499953 $
  *
  * Author: Srikanth Raju < srikiraju at gmail dot com >
  *
@@ -88,11 +88,11 @@ vlc_module_begin ()
     add_float( "sweep-rate", 6, N_("Sweep Rate"),
         N_("Rate of change of sweep depth in milliseconds shift per second "
            "of play"), true )
-    add_float_with_range( "feedback-gain", 0.5, -0.9, 0.9, NULL,
+    add_float_with_range( "feedback-gain", 0.5, -0.9, 0.9,
         N_("Feedback Gain"), N_("Gain on Feedback loop"), true )
-    add_float_with_range( "wet-mix", 0.4, -0.999, 0.999, NULL,
+    add_float_with_range( "wet-mix", 0.4, -0.999, 0.999,
         N_("Wet mix"), N_("Level of delayed signal"), true )
-    add_float_with_range( "dry-mix", 0.4, -0.999, 0.999, NULL,
+    add_float_with_range( "dry-mix", 0.4, -0.999, 0.999,
         N_("Dry Mix"), N_("Level of input signal"), true )
     set_capability( "audio filter", 0 )
     set_callbacks( Open, Close )

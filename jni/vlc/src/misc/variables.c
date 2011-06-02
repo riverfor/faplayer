@@ -2,7 +2,7 @@
  * variables.c: routines for object variables handling
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: e2b6f14eb07f4ebe4d527e2eaefb0594a6a56e3d $
+ * $Id: f2f8c2762cc662cfce3bbe55740b61d1262bc6da $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -1373,7 +1373,7 @@ int var_Command( vlc_object_t *p_this, const char *psz_name,
                  const char *psz_cmd, const char *psz_arg, char **psz_msg )
 {
     vlc_object_t *p_obj = vlc_object_find_name( p_this->p_libvlc,
-                                                psz_name, FIND_CHILD );
+                                                psz_name );
     int i_type, i_ret;
 
     if( !p_obj )

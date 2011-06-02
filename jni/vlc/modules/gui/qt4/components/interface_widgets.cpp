@@ -2,7 +2,7 @@
  * interface_widgets.cpp : Custom widgets for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id: 2f346c39a454972f83e4aeb9522b6cd8999c09b8 $
+ * $Id: 1d855325a184a1f976d1df8b0ef834c126cbb2cc $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -163,7 +163,7 @@ void VideoWidget::SetSizing( unsigned int w, unsigned int h )
        This cause a small flicker.
        See #3621
      */
-    if( size().width() == w && size().height() == h )
+    if( (unsigned)size().width() == w && (unsigned)size().height() == h )
         updateGeometry();
     sync();
 }

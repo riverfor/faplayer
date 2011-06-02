@@ -2,7 +2,7 @@
  * osdmenu.c: osd filter module
  *****************************************************************************
  * Copyright (C) 2004-2007 M2X
- * $Id: 2aa2a1e8a36dd21eeec0ef1dc117f990875cb750 $
+ * $Id: 5eaa96c3064db5e0e2f2a164f15559aad42d89bd $
  *
  * Authors: Jean-Paul Saman <jpsaman #_at_# m2x dot nl>
  *
@@ -136,9 +136,9 @@ vlc_module_begin ()
     add_integer( OSD_CFG "timeout", 15, TIMEOUT_TEXT,
         TIMEOUT_LONGTEXT, false )
     add_integer_with_range( OSD_CFG "update", OSD_UPDATE_DEFAULT,
-        OSD_UPDATE_MIN, OSD_UPDATE_MAX, NULL, OSD_UPDATE_TEXT,
+        OSD_UPDATE_MIN, OSD_UPDATE_MAX, OSD_UPDATE_TEXT,
         OSD_UPDATE_LONGTEXT, true )
-    add_integer_with_range( OSD_CFG "alpha", 255, 0, 255, NULL,
+    add_integer_with_range( OSD_CFG "alpha", 255, 0, 255,
         OSD_ALPHA_TEXT, OSD_ALPHA_LONGTEXT, true )
 
 vlc_module_end ()

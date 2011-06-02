@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2010 the VideoLAN team
- * $Id: d669c5cbd4aaa627fb5c2dcfac4a1cf5a841c5aa $
+ * $Id: 1a024ea06f434b88af6f6df526836eed9f7ee95b $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -549,7 +549,7 @@ void matroska_segment_c::ParseTrackEntry( KaxTrackEntry *m )
 
                     i_display_unit = uint8( vdmode );
                     msg_Dbg( &sys.demuxer, "|   |   |   |   + Track Video Display Unit=%s",
-                             uint8( vdmode ) == 0 ? "pixels" : ( uint8( vdmode ) == 1 ? "centimeters": "inches" ) );
+                             i_display_unit == 0 ? "pixels" : ( i_display_unit == 1 ? "centimeters": "inches" ) );
                 }
                 else if( MKV_IS_ID( l, KaxVideoAspectRatio ) ) // UNUSED
                 {
@@ -952,7 +952,7 @@ void matroska_segment_c::ParseChapterAtom( int i_level, KaxChapterAtom *ca, chap
         {
             chapter_item_c *new_sub_chapter = new chapter_item_c();
             ParseChapterAtom( i_level+1, static_cast<KaxChapterAtom *>(l), *new_sub_chapter );
-            new_sub_chapter->psz_parent = &chapters;
+            new_sub_chapter->p_parent = &chapters;
             chapters.sub_chapters.push_back( new_sub_chapter );
         }
     }
@@ -972,28 +972,19 @@ void matroska_segment_c::ParseAttachments( KaxAttachments *attachments )
 
     while( attachedFile && ( attachedFile->GetSize() > 0 ) )
     {
-        std::string psz_mime_type  = GetChild<KaxMimeType>( *attachedFile );
-        KaxFileName  &file_name    = GetChild<KaxFileName>( *attachedFile );
         KaxFileData  &img_data     = GetChild<KaxFileData>( *attachedFile );
+        attachment_c *new_attachment = new attachment_c( ToUTF8( UTFstring( GetChild<KaxFileName>( *attachedFile ) ) ),
+                                                        GetChild<KaxMimeType>( *attachedFile ),
+                                                        img_data.GetSize() );
 
-        attachment_c *new_attachment = new attachment_c();
-
-        if( new_attachment )
+        if( new_attachment->init() )
         {
-            new_attachment->psz_file_name  = ToUTF8( UTFstring( file_name ) );
-            new_attachment->psz_mime_type  = psz_mime_type;
-            new_attachment->i_size         = img_data.GetSize();
-            new_attachment->p_data         = malloc( img_data.GetSize() );
-
-            if( new_attachment->p_data )
-            {
-                memcpy( new_attachment->p_data, img_data.GetBuffer(), img_data.GetSize() );
-                sys.stored_attachments.push_back( new_attachment );
-            }
-            else
-            {
-                delete new_attachment;
-            }
+             memcpy( new_attachment->p_data, img_data.GetBuffer(), img_data.GetSize() );
+             sys.stored_attachments.push_back( new_attachment );
+        }
+        else
+        {
+            delete new_attachment;
         }
 
         attachedFile = &GetNextChild<KaxAttached>( *attachments, *attachedFile );

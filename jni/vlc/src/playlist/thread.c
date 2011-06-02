@@ -2,7 +2,7 @@
  * thread.c : Playlist management functions
  *****************************************************************************
  * Copyright © 1999-2008 the VideoLAN team
- * $Id: d0b2a9f631d17b4588280ab3f67fe75b564a2bd4 $
+ * $Id: 992d0828a53ecc12447620ee5d5a61402aee03fa $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -481,8 +481,7 @@ static int LoopInput( playlist_t *p_playlist )
         PL_LOCK;
 
         p_sys->p_input = NULL;
-        vlc_thread_join( p_input );
-        vlc_object_release( p_input );
+        input_Close( p_input );
 
         UpdateActivity( p_playlist, -DEFAULT_INPUT_ACTIVITY );
 

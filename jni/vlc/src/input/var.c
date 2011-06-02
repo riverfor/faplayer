@@ -2,7 +2,7 @@
  * var.c: object variables for input thread
  *****************************************************************************
  * Copyright (C) 2004-2007 the VideoLAN team
- * $Id: b516ffb53b526c053f79c7f433f89587fe690a40 $
+ * $Id: 83510c8c3cfb99b88e8793e94ffe049b477c2e1f $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -633,6 +633,11 @@ static int TimeCallback( vlc_object_t *p_this, char const *psz_cmd,
 
             val.f_float = (double)newval.i_time/(double)i_length;
             var_Change( p_input, "position", VLC_VAR_SETVALUE, &val, NULL );
+            /*
+             * Notify the intf that a new event has been occurred.
+             * XXX this is a bit hackish but it's the only way to do it now.
+             */
+            var_SetInteger( p_input, "intf-event", INPUT_EVENT_POSITION );
         }
 
         /* */

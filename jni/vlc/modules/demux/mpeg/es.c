@@ -2,7 +2,7 @@
  * es.c : Generic audio ES input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id: 627fc7c3c8c2f4254caf7f3d14611b757a317f0f $
+ * $Id: a66f9f672fe263d18a0c5681da427bb4e5e461b8 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -54,6 +54,7 @@ vlc_module_begin ()
     set_category( CAT_INPUT )
     set_subcategory( SUBCAT_INPUT_DEMUX )
     set_description( N_("MPEG-I/II/4 / A52 / DTS / MLP audio" ) )
+    set_shortname( N_("Audio ES") )
     set_capability( "demux", 155 )
     set_callbacks( OpenAudio, Close )
 

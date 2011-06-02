@@ -86,9 +86,16 @@ void vlc_trace (const char *fn, const char *file, unsigned line)
 
 static inline unsigned long vlc_threadid (void)
 {
+#if defined (__linux__)
+     /* glibc does not provide a call for this */
+     return syscall (SYS_gettid);
+
+#else
      union { pthread_t th; unsigned long int i; } v = { };
      v.th = pthread_self ();
      return v.i;
+
+#endif
 }
 
 #ifndef NDEBUG
@@ -363,8 +370,6 @@ void vlc_cond_broadcast (vlc_cond_t *p_condvar)
  * @param p_mutex mutex which is unlocked while waiting,
  *                then locked again when waking up.
  * @param deadline <b>absolute</b> timeout
- *
- * @return 0 if the condition was signaled, an error code in case of timeout.
  */
 void vlc_cond_wait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex)
 {
@@ -452,14 +457,6 @@ void vlc_sem_destroy (vlc_sem_t *sem)
     val = errno;
 #endif
 
-#if defined(ANDROID)
-    /* Bionic is so broken that it will return EBUSY on sem_destroy
-     * if the semaphore has never been used...
-     */
-    if (likely(val == EBUSY))
-        return; // It may be a real error, but there's no way to know
-#endif
-
     VLC_THREAD_ASSERT ("destroying semaphore");
 }
 
@@ -481,6 +478,14 @@ int vlc_sem_post (vlc_sem_t *sem)
         return 0;
 
     val = errno;
+#endif
+
+#ifdef ANDROID
+    /* Bionic is so broken that it will return EBUSY on sem_destroy
+     * if the semaphore has never been used...
+     */
+    if (likely(val == EBUSY))
+        return; // It may be a real error, but there's no way to know
 #endif
 
     if (unlikely(val != EOVERFLOW))
@@ -511,7 +516,7 @@ void vlc_sem_wait (vlc_sem_t *sem)
     VLC_THREAD_ASSERT ("locking semaphore");
 }
 
-#if defined(ANDROID)
+#ifdef ANDROID
 /* SRW (Slim Read Write) locks are available in Vista+ only */
 /**
  * Initializes a read/write lock.
@@ -858,6 +863,30 @@ int vlc_clone_detach (vlc_thread_t *th, void *(*entry) (void *), void *data,
     pthread_attr_init (&attr);
     pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
     return vlc_clone_attr (th, &attr, entry, data, priority);
+}
+
+int vlc_set_priority (vlc_thread_t th, int priority)
+{
+#if defined (_POSIX_PRIORITY_SCHEDULING) && (_POSIX_PRIORITY_SCHEDULING >= 0) \
+ && defined (_POSIX_THREAD_PRIORITY_SCHEDULING) \
+ && (_POSIX_THREAD_PRIORITY_SCHEDULING >= 0)
+    if (rt_priorities)
+    {
+        struct sched_param sp = { .sched_priority = priority + rt_offset, };
+        int policy;
+
+        if (sp.sched_priority <= 0)
+            sp.sched_priority += sched_get_priority_max (policy = SCHED_OTHER);
+        else
+            sp.sched_priority += sched_get_priority_min (policy = SCHED_RR);
+
+        if (pthread_setschedparam (th, policy, &sp))
+            return VLC_EGENERIC;
+    }
+#else
+    (void) priority;
+#endif
+    return VLC_SUCCESS;
 }
 
 /**

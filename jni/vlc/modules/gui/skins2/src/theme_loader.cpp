@@ -2,7 +2,7 @@
  * theme_loader.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: b976ff745d9be5cce331265c4e3162f1265a82cb $
+ * $Id: b6553fe5bdfdb1a5211cfa60cc16fe9f153dd095 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -493,6 +493,8 @@ union tar_buffer {
 
 int tar_open( TAR **t, char *pathname, int oflags )
 {
+    (void)oflags;
+
     gzFile f = gzopen( pathname, "rb" );
     if( f == NULL )
     {
@@ -713,6 +715,8 @@ static void * currentGzVp = NULL;
 
 int gzopen_frontend( const char *pathname, int oflags, int mode )
 {
+    (void)mode;
+
     const char *gzflags;
     gzFile gzf;
 

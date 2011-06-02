@@ -2,7 +2,7 @@
  * rotate.c : video rotation filter
  *****************************************************************************
  * Copyright (C) 2000-2008 the VideoLAN team
- * $Id: 52bc735ad08cdec172d2cd72245a7ae8321d267a $
+ * $Id: c1b13e4bf5447decc33b548b7f2f7f94a8e9e568 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -69,7 +69,7 @@ vlc_module_begin ()
     set_category( CAT_VIDEO )
     set_subcategory( SUBCAT_VIDEO_VFILTER )
 
-    add_integer_with_range( FILTER_PREFIX "angle", 30, 0, 359, NULL,
+    add_integer_with_range( FILTER_PREFIX "angle", 30, 0, 359,
         ANGLE_TEXT, ANGLE_LONGTEXT, false )
 
     add_shortcut( "rotate" )

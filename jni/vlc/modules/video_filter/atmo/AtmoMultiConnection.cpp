@@ -4,7 +4,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: 8ea3eac6282d5a125a313929240069a83570f3e6 $
+ * $Id: 01d1552397c6f04357f7d9e6024c21efa6b9edd4 $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -58,7 +58,7 @@ HANDLE CAtmoMultiConnection::OpenDevice(char *devName)
 	    return INVALID_HANDLE_VALUE;
      }
      /* change serial settings (Speed, stopbits etc.) */
-     DCB dcb; // für comport-parameter
+     DCB dcb; // fÃ¼r comport-parameter
      dcb.DCBlength = sizeof(DCB);
      GetCommState (hComport, &dcb); // ger current serialport settings
      dcb.BaudRate  = 38400;        // set speed
@@ -381,9 +381,9 @@ ATMO_BOOL CAtmoMultiConnection::setChannelValues(int numValues,unsigned char *ch
 
 
   Lock();
-  int Index = 0;
+  size_t Index = 0;
   for (int i = 0; i < numValues; i+=2) {
-       Index = (int)channel_values[i];
+       Index = (size_t)channel_values[i];
        if(Index < sizeof(m_output))
           m_output[Index] = channel_values[i + 1];
   }

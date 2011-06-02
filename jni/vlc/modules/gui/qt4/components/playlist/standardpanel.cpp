@@ -2,7 +2,7 @@
  * standardpanel.cpp : The "standard" playlist panel : just a treeview
  ****************************************************************************
  * Copyright © 2000-2010 VideoLAN
- * $Id: ae19f712880d59631a62f29c5ffc0629d09b413e $
+ * $Id: 8f9e6dbb44de025d4c82aaeb681e103cc76acb28 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -28,7 +28,9 @@
 
 #include "components/playlist/standardpanel.hpp"
 
+#include "components/playlist/vlc_model.hpp"      /* VLCModel */
 #include "components/playlist/playlist_model.hpp" /* PLModel */
+#include "components/playlist/ml_model.hpp"       /* MLModel */
 #include "components/playlist/views.hpp"          /* 3 views */
 #include "components/playlist/selector.hpp"       /* PLSelector */
 #include "menus.hpp"                              /* Popup */
@@ -53,9 +55,13 @@ StandardPLPanel::StandardPLPanel( PlaylistWidget *_parent,
                                   intf_thread_t *_p_intf,
                                   playlist_item_t *p_root,
                                   PLSelector *_p_selector,
-                                  PLModel *_p_model )
-                : QWidget( _parent ), p_intf( _p_intf ),
-                  p_selector( _p_selector ), model( _p_model )
+                                  PLModel *_p_model,
+                                  MLModel *_p_plmodel)
+                : QWidget( _parent ),
+                  model( _p_model ),
+                  mlmodel( _p_plmodel),
+                  p_intf( _p_intf ),
+                  p_selector( _p_selector )
 {
     viewStack = new QStackedLayout( this );
     viewStack->setSpacing( 0 ); viewStack->setMargin( 0 );
@@ -70,23 +76,17 @@ StandardPLPanel::StandardPLPanel( PlaylistWidget *_parent,
     lastActivatedId     = -1;
 
     /* Saved Settings */
-    getSettings()->beginGroup("Playlist");
-    int i_savedViewMode = getSettings()->value( "view-mode", TREE_VIEW ).toInt();
-    getSettings()->endGroup();
-    /* Limit the saved value to a possible one inside [0, VIEW_COUNT[ */
-    if(i_savedViewMode < 0 || i_savedViewMode >= VIEW_COUNT)
-        i_savedViewMode = 0;
-
+    int i_savedViewMode = getSettings()->value( "Playlist/view-mode", TREE_VIEW ).toInt();
     showView( i_savedViewMode );
 
-    DCONNECT( THEMIM, leafBecameParent( input_item_t *),
-              this, browseInto( input_item_t * ) );
+    DCONNECT( THEMIM, leafBecameParent( int ),
+              this, browseInto( int ) );
 
     CONNECT( model, currentChanged( const QModelIndex& ),
              this, handleExpansion( const QModelIndex& ) );
-    CONNECT( model, rootChanged(), this, handleRootChange() );
+    CONNECT( model, rootChanged(), this, browseInto() );
 
-    setRoot( p_root );
+    setRoot( p_root, false );
 }
 
 StandardPLPanel::~StandardPLPanel()
@@ -119,11 +119,6 @@ void StandardPLPanel::handleExpansion( const QModelIndex& index )
     currentView->scrollTo( index );
 }
 
-void StandardPLPanel::handleRootChange()
-{
-    browseInto();
-}
-
 void StandardPLPanel::popupPlView( const QPoint &point )
 {
     QModelIndex index = currentView->indexAt( point );
@@ -135,15 +130,14 @@ void StandardPLPanel::popupPlView( const QPoint &point )
         QVLCMenu::PopupMenu( p_intf, true );
 }
 
-void StandardPLPanel::popupSelectColumn( QPoint pos )
+void StandardPLPanel::popupSelectColumn( QPoint )
 {
     QMenu menu;
     assert( treeView );
 
     /* We do not offer the option to hide index 0 column, or
-    * QTreeView will behave weird */
-    int i, j;
-    for( i = 1 << 1, j = 1; i < COLUMN_END; i <<= 1, j++ )
+     * QTreeView will behave weird */
+    for( int i = 1 << 1, j = 1; i < COLUMN_END; i <<= 1, j++ )
     {
         QAction* option = menu.addAction( qfu( psz_column_title( i ) ) );
         option->setCheckable( true );
@@ -167,7 +161,9 @@ void StandardPLPanel::search( const QString& searchText )
     p_selector->getCurrentSelectedItem( &type, &name );
     if( type != SD_TYPE )
     {
-        bool flat = currentView == iconView || currentView == listView || currentView == picFlowView;
+        bool flat = ( currentView == iconView ||
+                      currentView == listView ||
+                      currentView == picFlowView );
         model->search( searchText,
                        flat ? currentView->rootIndex() : QModelIndex(),
                        !flat );
@@ -183,15 +179,29 @@ void StandardPLPanel::searchDelayed( const QString& searchText )
     if( type == SD_TYPE )
     {
         if( !name.isEmpty() && !searchText.isEmpty() )
-            playlist_ServicesDiscoveryControl( THEPL, qtu( name ), SD_CMD_SEARCH, qtu( searchText ) );
+            playlist_ServicesDiscoveryControl( THEPL, qtu( name ), SD_CMD_SEARCH,
+                                              qtu( searchText ) );
     }
 }
 
 /* Set the root of the new Playlist */
 /* This activated by the selector selection */
-void StandardPLPanel::setRoot( playlist_item_t *p_item )
+void StandardPLPanel::setRoot( playlist_item_t *p_item, bool b )
 {
-    model->rebuild( p_item );
+#ifdef MEDIA_LIBRARY
+    if( b )
+    {
+        msg_Dbg( p_intf, "Setting the SQL ML" );
+        currentView->setModel( mlmodel );
+    }
+    else
+#endif
+    {
+        msg_Dbg( p_intf, "Normal PL/ML or SD" );
+        if( currentView->model() != model )
+            currentView->setModel( model );
+        model->rebuild( p_item );
+    }
 }
 
 void StandardPLPanel::browseInto( const QModelIndex &index )
@@ -205,11 +215,11 @@ void StandardPLPanel::browseInto( const QModelIndex &index )
     emit viewChanged( index );
 }
 
-void StandardPLPanel::browseInto( )
+void StandardPLPanel::browseInto()
 {
-    browseInto( currentRootIndexId != -1 && currentView != treeView ?
-                model->index( currentRootIndexId, 0 ) :
-                QModelIndex() );
+    browseInto( (currentRootIndexId != -1 && currentView != treeView) ?
+                 model->index( currentRootIndexId, 0 ) :
+                 QModelIndex() );
 }
 
 void StandardPLPanel::wheelEvent( QWheelEvent *e )
@@ -218,7 +228,7 @@ void StandardPLPanel::wheelEvent( QWheelEvent *e )
     e->accept();
 }
 
-bool StandardPLPanel::eventFilter ( QObject * watched, QEvent * event )
+bool StandardPLPanel::eventFilter ( QObject *, QEvent * event )
 {
     if (event->type() == QEvent::KeyPress)
     {
@@ -300,7 +310,6 @@ void StandardPLPanel::createTreeView()
     treeView->setContextMenuPolicy( Qt::CustomContextMenu );
 
     /* setModel after setSortingEnabled(true), or the model will sort immediately! */
-    treeView->setModel( model );
 
     getSettings()->beginGroup("Playlist");
 
@@ -338,17 +347,24 @@ void StandardPLPanel::createTreeView()
     viewStack->addWidget( treeView );
 }
 
+void StandardPLPanel::changeModel( bool b_ml )
+{
+#ifdef MEDIA_LIBRARY
+    VLCModel *mod;
+    if( b_ml )
+        mod = mlmodel;
+    else
+        mod = model;
+    if( currentView->model() != mod )
+        currentView->setModel( mod );
+#endif
+}
+
 void StandardPLPanel::showView( int i_view )
 {
+
     switch( i_view )
     {
-    case TREE_VIEW:
-    {
-        if( treeView == NULL )
-            createTreeView();
-        currentView = treeView;
-        break;
-    }
     case ICON_VIEW:
     {
         if( iconView == NULL )
@@ -370,15 +386,24 @@ void StandardPLPanel::showView( int i_view )
         currentView = picFlowView;
         break;
     }
-    default: return;
+    default:
+    case TREE_VIEW:
+    {
+        if( treeView == NULL )
+            createTreeView();
+        currentView = treeView;
+        break;
     }
+    }
+
+    changeModel( false );
 
     viewStack->setCurrentWidget( currentView );
     browseInto();
     gotoPlayingItem();
 }
 
-const int StandardPLPanel::currentViewIndex()
+int StandardPLPanel::currentViewIndex() const
 {
     if( currentView == treeView )
         return TREE_VIEW;
@@ -406,37 +431,31 @@ void StandardPLPanel::cycleViews()
 
 void StandardPLPanel::activate( const QModelIndex &index )
 {
-    /* If we are not a leaf node */
-    if( !index.data( PLModel::IsLeafNodeRole ).toBool() )
+    if( currentView->model() == model )
     {
-        if( currentView != treeView )
-            browseInto( index );
-    }
-    else
-    {
-        playlist_Lock( THEPL );
-        playlist_item_t *p_item = playlist_ItemGetById( THEPL, model->itemId( index ) );
-        p_item->i_flags |= PLAYLIST_SUBITEM_STOP_FLAG;
-        lastActivatedId = p_item->p_input->i_id;
-        playlist_Unlock( THEPL );
-        model->activateItem( index );
+        /* If we are not a leaf node */
+        if( !index.data( PLModel::IsLeafNodeRole ).toBool() )
+        {
+            if( currentView != treeView )
+                browseInto( index );
+        }
+        else
+        {
+            playlist_Lock( THEPL );
+            playlist_item_t *p_item = playlist_ItemGetById( THEPL, model->itemId( index ) );
+            p_item->i_flags |= PLAYLIST_SUBITEM_STOP_FLAG;
+            lastActivatedId = p_item->p_input->i_id;
+            playlist_Unlock( THEPL );
+            model->activateItem( index );
+        }
     }
 }
 
-void StandardPLPanel::browseInto( input_item_t *p_input )
+void StandardPLPanel::browseInto( int i_id )
 {
-    if( p_input->i_id != lastActivatedId ) return;
+    if( i_id != lastActivatedId ) return;
 
-    playlist_Lock( THEPL );
-
-    playlist_item_t *p_item = playlist_ItemGetByInput( THEPL, p_input );
-    if( !p_item )
-    {
-        playlist_Unlock( THEPL );
-        return;
-    }
-
-    QModelIndex index = model->index( p_item->i_id, 0 );
+    QModelIndex index = model->index( i_id, 0 );
     playlist_Unlock( THEPL );
 
     if( currentView == treeView )

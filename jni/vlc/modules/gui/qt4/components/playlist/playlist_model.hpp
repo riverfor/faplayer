@@ -2,7 +2,7 @@
  * playlist_model.hpp : Model for a playlist tree
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: db3a29ba8f9ef3dfdd739eff5c0ada2e84e2c852 $
+ * $Id: 925b129852a96e40a851bfba7ac8c554174f1b6d $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jakob Leben <jleben@videolan.org>
@@ -161,6 +161,7 @@ private slots:
     void popupSave();
     void popupExplore();
     void popupAddNode();
+    void popupAddToPlaylist();
     void popupSort( int column );
     void processInputItemUpdate( input_item_t *);
     void processInputItemUpdate( input_thread_t* p_input );

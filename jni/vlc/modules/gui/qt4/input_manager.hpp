@@ -2,7 +2,7 @@
  * input_manager.hpp : Manage an input and interact with its GUI elements
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: db9db7e646bec6154f5b77506ffcf38853048253 $
+ * $Id: f7533d948beb6080c8ab10ed9630d0534ba2552c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste <jb@videolan.org>
@@ -107,9 +107,13 @@ enum PLEventTypes
 class PLEvent : public QEvent
 {
 public:
-    PLEvent( PLEventTypes t, int i, int p )
-        : QEvent( (QEvent::Type)t ), i_item(i), i_parent(p) {}
+    PLEvent( int t, int i, int p = 0 )
+        : QEvent( (QEvent::Type)(t) ), i_item(i), i_parent(p) {}
+
+    /* Needed for "playlist-item*" and "leaf-to-parent" callbacks
+     * !! Can be a input_item_t->i_id or a playlist_item_t->i_id */
     int i_item;
+    // Needed for "playlist-item-append" callback, notably
     int i_parent;
 };
 
@@ -290,7 +294,7 @@ signals:
     void playlistItemRemoved( int itemId );
     void randomChanged( bool );
     void repeatLoopChanged( int );
-    void leafBecameParent( input_item_t * );
+    void leafBecameParent( int );
 };
 
 #endif

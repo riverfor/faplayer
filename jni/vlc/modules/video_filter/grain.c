@@ -2,7 +2,7 @@
  * grain.c: add film grain
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id: 651df6a13c3bf8dfbc62092c749651b350635ce0 $
+ * $Id: a948046fd649d7ac6df174b3a6cee001c7863086 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -68,11 +68,11 @@ vlc_module_begin()
     set_category(CAT_VIDEO)
     set_subcategory(SUBCAT_VIDEO_VFILTER)
     add_float_with_range(CFG_PREFIX "variance", 2.0, VARIANCE_MIN, VARIANCE_MAX,
-                         NULL, VARIANCE_TEXT, VARIANCE_LONGTEXT, false)
+                         VARIANCE_TEXT, VARIANCE_LONGTEXT, false)
     add_integer_with_range(CFG_PREFIX "period-min", 1, PERIOD_MIN, PERIOD_MAX,
-                           NULL, PERIOD_MIN_TEXT, PERIOD_MIN_LONGTEXT, false)
+                           PERIOD_MIN_TEXT, PERIOD_MIN_LONGTEXT, false)
     add_integer_with_range(CFG_PREFIX "period-max", 3*PERIOD_MAX/4, PERIOD_MIN, PERIOD_MAX,
-                           NULL, PERIOD_MAX_TEXT, PERIOD_MAX_LONGTEXT, false)
+                           PERIOD_MAX_TEXT, PERIOD_MAX_LONGTEXT, false)
     set_callbacks(Open, Close)
 vlc_module_end()
 

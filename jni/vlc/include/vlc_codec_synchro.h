@@ -2,7 +2,7 @@
  * vlc_codec_synchro.h: frame-dropping structures
  *****************************************************************************
  * Copyright (C) 1999-2005 the VideoLAN team
- * $Id: fefab4e173d93393b4787bf0d1a596712b7afd19 $
+ * $Id: 2c48432d11d994de9d7d112a7ee4817ef2faac0f $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Jean-Marc Dressler <polux@via.ecp.fr>
@@ -37,13 +37,13 @@
 /*****************************************************************************
  * Prototypes
  *****************************************************************************/
-VLC_EXPORT( decoder_synchro_t *, decoder_SynchroInit, ( decoder_t *, int ) LIBVLC_USED );
-VLC_EXPORT( void, decoder_SynchroRelease,        ( decoder_synchro_t * ) );
-VLC_EXPORT( void, decoder_SynchroReset,          ( decoder_synchro_t * ) );
-VLC_EXPORT( bool, decoder_SynchroChoose,   ( decoder_synchro_t *, int, int, bool ) );
-VLC_EXPORT( void, decoder_SynchroTrash,          ( decoder_synchro_t * ) );
-VLC_EXPORT( void, decoder_SynchroDecode,         ( decoder_synchro_t * ) );
-VLC_EXPORT( void, decoder_SynchroEnd,            ( decoder_synchro_t *, int, bool ) );
-VLC_EXPORT( mtime_t, decoder_SynchroDate,        ( decoder_synchro_t * ) LIBVLC_USED );
-VLC_EXPORT( void, decoder_SynchroNewPicture,     ( decoder_synchro_t *, int, int, mtime_t, mtime_t, bool ) );
+VLC_API decoder_synchro_t * decoder_SynchroInit( decoder_t *, int ) VLC_USED;
+VLC_API void decoder_SynchroRelease( decoder_synchro_t * );
+VLC_API void decoder_SynchroReset( decoder_synchro_t * );
+VLC_API bool decoder_SynchroChoose( decoder_synchro_t *, int, int, bool );
+VLC_API void decoder_SynchroTrash( decoder_synchro_t * );
+VLC_API void decoder_SynchroDecode( decoder_synchro_t * );
+VLC_API void decoder_SynchroEnd( decoder_synchro_t *, int, bool );
+VLC_API mtime_t decoder_SynchroDate( decoder_synchro_t * ) VLC_USED;
+VLC_API void decoder_SynchroNewPicture( decoder_synchro_t *, int, int, mtime_t, mtime_t, bool );
 

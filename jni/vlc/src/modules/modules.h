@@ -2,7 +2,7 @@
  * modules.h : Module management functions.
  *****************************************************************************
  * Copyright (C) 2001 the VideoLAN team
- * $Id: d450409d1e54a68f5eff38a555a4c795f6589de5 $
+ * $Id: fd2e31ded6d5be9c3b16826dcff1cbc412a00be6 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -36,9 +36,6 @@ typedef struct module_bank_t
     unsigned         i_usage;
 
     /* Plugins cache */
-    bool             b_cache;
-    bool             b_cache_dirty;
-
     int            i_cache;
     module_cache_t **pp_cache;
 
@@ -54,9 +51,9 @@ typedef struct module_bank_t
 struct module_cache_t
 {
     /* Mandatory cache entry header */
-    char       *psz_file;
-    int64_t    i_time;
-    int64_t    i_size;
+    char  *path;
+    time_t mtime;
+    off_t  size;
 
     /* Optional extra data */
     module_t *p_module;
@@ -77,8 +74,6 @@ typedef int module_handle_t;
 typedef void * module_handle_t;
 #elif defined(HAVE_DL_DLOPEN)
 typedef void * module_handle_t;
-#elif defined(HAVE_DL_SHL_LOAD)
-typedef shl_t module_handle_t;
 #endif
 
 /**
@@ -111,7 +106,6 @@ struct module_t
     bool          b_builtin;  /* Set to true if the module is built in */
     bool          b_loaded;        /* Set to true if the dll is loaded */
     bool b_unloadable;                        /**< Can we be dlclosed? */
-    bool b_submodule;                        /**< Is this a submodule? */
 
     /* Callbacks */
     void *pf_activate;
@@ -134,28 +128,28 @@ struct module_t
     char *              domain;                            /* gettext domain */
 };
 
-module_t *vlc_module_create (vlc_object_t *);
+module_t *vlc_module_create (void);
 module_t *vlc_submodule_create (module_t *module);
 
-void  module_InitBank( vlc_object_t *);
+void  module_InitBank( vlc_object_t * );
 #define module_InitBank(a) module_InitBank(VLC_OBJECT(a))
 void module_LoadPlugins( vlc_object_t *, const void ** );
-#define module_LoadPlugins(a, b) module_LoadPlugins(VLC_OBJECT(a), b)
+#define module_LoadPlugins(a,b) module_LoadPlugins(VLC_OBJECT(a),b)
 void module_EndBank( vlc_object_t *, bool );
 #define module_EndBank(a,b) module_EndBank(VLC_OBJECT(a), b)
 
 int vlc_bindtextdomain (const char *);
 
 /* Low-level OS-dependent handler */
-int  module_Load   (vlc_object_t *, const char *, module_handle_t *);
-int  module_Call   (vlc_object_t *obj, module_t *);
+int module_Load (vlc_object_t *, const char *, module_handle_t *, bool);
+void *module_Lookup (module_handle_t, const char *);
 void module_Unload (module_handle_t);
 
 /* Plugins cache */
 void   CacheMerge (vlc_object_t *, module_t *, module_t *);
 void   CacheDelete(vlc_object_t *, const char *);
-void   CacheLoad  (vlc_object_t *, module_bank_t *, const char *);
+size_t CacheLoad  (vlc_object_t *, const char *, module_cache_t ***);
 void   CacheSave  (vlc_object_t *, const char *, module_cache_t *const *, size_t);
-module_cache_t * CacheFind (module_bank_t *, const char *, int64_t, int64_t);
+module_t * CacheFind (module_bank_t *, const char *, time_t, off_t);
 
 #endif /* !LIBVLC_MODULES_H */

@@ -2,7 +2,7 @@
  * zsh.cpp: create zsh completion rule for vlc
  *****************************************************************************
  * Copyright © 2005-2008 the VideoLAN team
- * $Id: 6b5dd133761f625ad74e19d07c9e246740c1a6ee $
+ * $Id: e152b42bd512ed3493bca7bf1a55423a49010592 $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *
@@ -43,7 +43,6 @@ typedef std::pair<int, std::string> mcpair;
 
 /* evil hack */
 #undef __PLUGIN__
-#undef __BUILTIN__
 #include <../src/modules/modules.h>
 
 void ParseModules( mumap &mods, mcmap &mods2 );
@@ -124,7 +123,7 @@ void ParseModules( mumap &mods, mcmap &mods2 )
 
         /* Exclude empty plugins (submodules don't have config options, they
          * are stored in the parent module) */
-        if( p_module->b_submodule )
+        if( p_module->parent )
               continue;
 //            p_item = ((module_t *)p_module->p_parent)->p_config;
         else
@@ -187,7 +186,7 @@ void PrintModuleList( mumap &mods, mcmap &mods2 )
                                           p_module->psz_object_name ) );
                 }
             } while( i_items++ < p_module->i_config_items && p_config++ );
-            if( p_module->b_submodule )
+            if( p_module->parent )
                 continue;
             printf( "%s ", p_module->psz_object_name );
         }
@@ -416,11 +415,13 @@ void PrintOption( char *psz_option, char i_short, char *psz_exclusive,
     {
         while( (foo = strchr( psz_text, ':' ))) *foo=';';
         while( (foo = strchr( psz_text, '"' ))) *foo='\'';
+        while( (foo = strchr( psz_text, '`' ))) *foo='\'';
     }
     if( psz_longtext )
     {
         while( (foo = strchr( psz_longtext, ':' ))) *foo=';';
         while( (foo = strchr( psz_longtext, '"' ))) *foo='\'';
+        while( (foo = strchr( psz_longtext, '`' ))) *foo='\'';
     }
     if( !psz_longtext ||
         strchr( psz_longtext, '\n' ) ||

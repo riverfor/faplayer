@@ -2,7 +2,7 @@
  * vout_window.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 7ee460dfee07e22ef68c08156face587b20acd33 $
+ * $Id: e2093633994f7ed1a6694914bfc31c467e300482 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *
@@ -38,7 +38,7 @@ VoutWindow::VoutWindow( intf_thread_t *pIntf, vout_window_t* pWnd,
       GenericWindow( pIntf, 0, 0, false, false, pParent,
                      GenericWindow::VoutWindow ),
       m_pWnd( pWnd ), original_width( width ), original_height( height ),
-      m_pParentWindow( pParent ), m_pCtrlVideo( NULL )
+      m_pCtrlVideo( NULL ), m_pParentWindow( pParent )
 {
     if( m_pWnd )
     {
@@ -51,7 +51,6 @@ VoutWindow::VoutWindow( intf_thread_t *pIntf, vout_window_t* pWnd,
         m_pWnd->handle.hwnd = getOSHandle();
 #endif
     }
-
 }
 
 

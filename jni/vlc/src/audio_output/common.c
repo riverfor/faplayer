@@ -2,7 +2,7 @@
  * common.c : audio output management of common data structures
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: 1c3cb2711f1f84128f37172893a194d6f81d376e $
+ * $Id: 45ef3b32ee7313ed12f1e1ace71c8ba33d99dc47 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -50,19 +50,11 @@ static inline void aout_assert_fifo_locked( aout_instance_t * p_aout, aout_fifo_
     if( p_fifo == &p_aout->output.fifo )
         vlc_assert_locked( &p_aout->output_fifo_lock );
     else
-    {
-        int i;
-        for( i = 0; i < p_aout->i_nb_inputs; i++ )
-        {
-            if( p_fifo == &p_aout->pp_inputs[i]->mixer.fifo)
-            {
-                vlc_assert_locked( &p_aout->input_fifos_lock );
-                break;
-            }
-        }
-        if( i == p_aout->i_nb_inputs )
-            vlc_assert_locked( &p_aout->mixer_lock );
-    }
+    if( p_aout->p_input != NULL
+     && p_fifo == &p_aout->p_input->mixer.fifo )
+        vlc_assert_locked( &p_aout->input_fifos_lock );
+    else
+        vlc_assert_locked( &p_aout->mixer_lock );
 #else
     (void)p_aout;
     (void)p_fifo;
@@ -92,17 +84,15 @@ aout_instance_t * __aout_New( vlc_object_t * p_parent )
     vlc_mutex_init( &p_aout->mixer_lock );
     vlc_mutex_init( &p_aout->volume_vars_lock );
     vlc_mutex_init( &p_aout->output_fifo_lock );
-    p_aout->i_nb_inputs = 0;
+    p_aout->p_input = NULL;
     p_aout->mixer_multiplier = 1.0;
     p_aout->p_mixer = NULL;
-    p_aout->output.b_error = 1;
     p_aout->output.b_starving = 1;
+    p_aout->output.p_module = NULL;
 
     var_Create( p_aout, "intf-change", VLC_VAR_VOID );
 
     vlc_object_set_destructor( p_aout, aout_Destructor );
-
-    vlc_object_attach( p_aout, p_parent );
 
     return p_aout;
 }
@@ -736,24 +726,6 @@ bool aout_CheckChannelExtraction( int *pi_selection,
             return true;
     }
     return i_out == i_channels;
-}
-
-/*****************************************************************************
- * aout_BufferAlloc:
- *****************************************************************************/
-
-aout_buffer_t *aout_BufferAlloc(aout_alloc_t *allocation, mtime_t microseconds,
-        aout_buffer_t *old_buffer)
-{
-    if ( !allocation->b_alloc )
-    {
-        return old_buffer;
-    }
-
-    size_t i_alloc_size = (int)( (uint64_t)allocation->i_bytes_per_sec
-                                        * (microseconds) / 1000000 + 1 );
-
-    return block_Alloc( i_alloc_size );
 }
 
 /* Return the order in which filters should be inserted */

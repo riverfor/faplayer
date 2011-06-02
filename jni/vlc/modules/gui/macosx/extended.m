@@ -2,7 +2,7 @@
  * extended.m: MacOS X Extended interface panel
  *****************************************************************************
  * Copyright (C) 2005-2008 the VideoLAN team
- * $Id: 919fa80247b140d8245e86ddaf3706ac3085e807 $
+ * $Id: 9d097d1f85be26d6fc9b7b937133dec75e3e06dc $
  *
  * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
  *
@@ -352,7 +352,7 @@ static VLCExtended *_o_sharedInstance = nil;
     else
     {
         msg_Dbg( p_intf, "we found a vout to adjust, let's look for the filter" );
-        p_filter = vlc_object_find_name( p_intf, "adjust", FIND_ANYWHERE );
+        p_filter = vlc_object_find_name( pl_Get(p_intf), "adjust" );
 
         if(! p_filter )
         {

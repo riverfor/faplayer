@@ -2,7 +2,7 @@
  * core.c management of the modules configuration
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: 644be42dd4e74ba4a157fffb6e0795ef4b89ea87 $
+ * $Id: 0faebe2db578a6baf8ee99470bc99ab04b5b803f $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -512,9 +512,6 @@ void config_ResetAll( vlc_object_t *p_this )
 
     vlc_rwlock_wrlock (&config_lock);
     for (size_t j = 0; (p_module = list[j]) != NULL; j++)
-    {
-        if( p_module->b_submodule ) continue;
-
         for (size_t i = 0; i < p_module->confsize; i++ )
         {
             module_config_t *p_config = p_module->p_config + i;
@@ -532,7 +529,6 @@ void config_ResetAll( vlc_object_t *p_this )
                         strdupnull (p_config->orig.psz);
             }
         }
-    }
     vlc_rwlock_unlock (&config_lock);
 
     module_list_free (list);

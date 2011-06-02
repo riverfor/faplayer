@@ -392,13 +392,10 @@ void vlc_rwlock_init (vlc_rwlock_t *lock)
     vlc_cond_init (&lock->read_wait);
     vlc_cond_init (&lock->write_wait);
     lock->readers = 0; /* active readers */
-    lock->writers = 0; /* waiting or active writers */
+    lock->writers = 0; /* waiting writers */
     lock->writer = 0; /* ID of active writer */
 }
 
-/**
- * Destroys an initialized unused read/write lock.
- */
 void vlc_rwlock_destroy (vlc_rwlock_t *lock)
 {
     vlc_cond_destroy (&lock->read_wait);
@@ -406,55 +403,76 @@ void vlc_rwlock_destroy (vlc_rwlock_t *lock)
     vlc_mutex_destroy (&lock->mutex);
 }
 
-/**
- * Acquires a read/write lock for reading. Recursion is allowed.
- */
 void vlc_rwlock_rdlock (vlc_rwlock_t *lock)
 {
     vlc_mutex_lock (&lock->mutex);
+    /* Recursive read-locking is allowed. With the infos available:
+     *  - the loosest possible condition (no active writer) is:
+     *     (lock->writer != 0)
+     *  - the strictest possible condition is:
+     *     (lock->writer != 0 || (lock->readers == 0 && lock->writers > 0))
+     *  or (lock->readers == 0 && (lock->writer != 0 || lock->writers > 0))
+     */
     while (lock->writer != 0)
+    {
+        assert (lock->readers == 0);
         vlc_cond_wait (&lock->read_wait, &lock->mutex);
-    if (lock->readers == ULONG_MAX)
+    }
+    if (unlikely(lock->readers == ULONG_MAX))
         abort ();
     lock->readers++;
     vlc_mutex_unlock (&lock->mutex);
 }
 
-/**
- * Acquires a read/write lock for writing. Recursion is not allowed.
- */
+static void vlc_rwlock_rdunlock (vlc_rwlock_t *lock)
+{
+    vlc_mutex_lock (&lock->mutex);
+    assert (lock->readers > 0);
+
+    /* If there are no readers left, wake up a writer. */
+    if (--lock->readers == 0 && lock->writers > 0)
+        vlc_cond_signal (&lock->write_wait);
+    vlc_mutex_unlock (&lock->mutex);
+}
+
 void vlc_rwlock_wrlock (vlc_rwlock_t *lock)
 {
     vlc_mutex_lock (&lock->mutex);
-    if (lock->writers == ULONG_MAX)
+    if (unlikely(lock->writers == ULONG_MAX))
         abort ();
     lock->writers++;
+    /* Wait until nobody owns the lock in either way. */
     while ((lock->readers > 0) || (lock->writer != 0))
         vlc_cond_wait (&lock->write_wait, &lock->mutex);
     lock->writers--;
+    assert (lock->writer == 0);
     lock->writer = GetCurrentThreadId ();
     vlc_mutex_unlock (&lock->mutex);
 }
 
-/**
- * Releases a read/write lock.
- */
-void vlc_rwlock_unlock (vlc_rwlock_t *lock)
+static void vlc_rwlock_wrunlock (vlc_rwlock_t *lock)
 {
     vlc_mutex_lock (&lock->mutex);
-    if (lock->readers > 0)
-        lock->readers--; /* Read unlock */
-    else
-        lock->writer = 0; /* Write unlock */
+    assert (lock->writer == GetCurrentThreadId ());
+    assert (lock->readers == 0);
+    lock->writer = 0; /* Write unlock */
 
+    /* Let reader and writer compete. Scheduler decides who wins. */
     if (lock->writers > 0)
-    {
-        if (lock->readers == 0)
-            vlc_cond_signal (&lock->write_wait);
-    }
-    else
-        vlc_cond_broadcast (&lock->read_wait);
+        vlc_cond_signal (&lock->write_wait);
+    vlc_cond_broadcast (&lock->read_wait);
     vlc_mutex_unlock (&lock->mutex);
+}
+
+void vlc_rwlock_unlock (vlc_rwlock_t *lock)
+{
+    /* Note: If the lock is held for reading, lock->writer is nul.
+     * If the lock is held for writing, only this thread can store a value to
+     * lock->writer. Either way, lock->writer is safe to fetch here. */
+    if (lock->writer != 0)
+        vlc_rwlock_wrunlock (lock);
+    else
+        vlc_rwlock_rdunlock (lock);
 }
 
 /*** Thread-specific variables (TLS) ***/
@@ -616,9 +634,10 @@ static int vlc_clone_attr (vlc_thread_t *p_handle, bool detached,
     if (p_handle != NULL)
         *p_handle = th;
 
-    ResumeThread (hThread);
     if (priority)
         SetThreadPriority (hThread, priority);
+
+    ResumeThread (hThread);
 
     return 0;
 }
@@ -653,6 +672,13 @@ int vlc_clone_detach (vlc_thread_t *p_handle, void *(*entry) (void *),
         p_handle = &th;
 
     return vlc_clone_attr (p_handle, true, entry, data, priority);
+}
+
+int vlc_set_priority (vlc_thread_t th, int priority)
+{
+    if (!SetThreadPriority (th->id, priority))
+        return VLC_EGENERIC;
+    return VLC_SUCCESS;
 }
 
 /*** Thread cancellation ***/

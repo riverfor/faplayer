@@ -2,7 +2,7 @@
  * voutgl.m: iOS X OpenGLES provider
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: b4e04475e11eaa62bbdd82cb4532ae31648dbdeb $
+ * $Id: d49aed2f094a9b1e7ed82f3bff66464efd9aff97 $
  *
  * Authors: Romain Goyet <romain.goyet at likid dot org>
  *
@@ -94,7 +94,7 @@ struct vout_display_sys_t
     UIView * container;
 
     vlc_gl_t gl;
-    vout_display_opengl_t vgl;
+    vout_display_opengl_t *vgl;
 
     picture_pool_t *pool;
     picture_t *current;
@@ -148,9 +148,11 @@ static int Open(vlc_object_t *this)
     sys->gl.lock = OpenglClean; // We don't do locking, but sometimes we need to cleanup the framebuffer
     sys->gl.unlock = NULL;
     sys->gl.swap = OpenglSwap;
+	sys->gl.getProcAddress = NULL;
     sys->gl.sys = sys;
 
-    if (vout_display_opengl_Init(&sys->vgl, &vd->fmt, &sys->gl))
+	sys->vgl = vout_display_opengl_New(&vd->fmt, NULL, &sys->gl);
+	if (!sys->vgl)
     {
         sys->gl.sys = NULL;
         goto error;
@@ -196,7 +198,7 @@ void Close(vlc_object_t *this)
     [sys->glView release];
 
     if (sys->gl.sys != NULL)
-        vout_display_opengl_Clean(&sys->vgl);
+        vout_display_opengl_Delete(sys->vgl);
 
     free (sys);
 }
@@ -208,10 +210,9 @@ void Close(vlc_object_t *this)
 static picture_pool_t *Pool(vout_display_t *vd, unsigned requested_count)
 {
     vout_display_sys_t *sys = vd->sys;
-    VLC_UNUSED(requested_count);
 
     if (!sys->pool)
-        sys->pool = vout_display_opengl_GetPool (&sys->vgl);
+        sys->pool = vout_display_opengl_GetPool (sys->vgl, requested_count);
     assert(sys->pool);
     return sys->pool;
 }
@@ -220,14 +221,13 @@ static void PictureRender(vout_display_t *vd, picture_t *pic, subpicture_t *subp
 {
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Prepare( &sys->vgl, pic );
-	(void)subpicture;
+    vout_display_opengl_Prepare( sys->vgl, pic, subpicture );
 }
 
 static void PictureDisplay(vout_display_t *vd, picture_t *pic, subpicture_t *subpicture)
 {
     vout_display_sys_t *sys = vd->sys;
-    vout_display_opengl_Display(&sys->vgl, &vd->fmt );
+    vout_display_opengl_Display(sys->vgl, &vd->fmt );
     picture_Release (pic);
     sys->has_first_frame = true;
 	(void)subpicture;

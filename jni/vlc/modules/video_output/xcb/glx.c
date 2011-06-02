@@ -71,7 +71,7 @@ struct vout_display_sys_t
 
     GLXContext ctx;
     vlc_gl_t gl;
-    vout_display_opengl_t vgl;
+    vout_display_opengl_t *vgl;
     picture_pool_t *pool; /* picture pool */
 };
 
@@ -82,6 +82,7 @@ static int Control (vout_display_t *, int, va_list);
 static void Manage (vout_display_t *);
 
 static void SwapBuffers (vlc_gl_t *gl);
+static void *GetProcAddress (vlc_gl_t *gl, const char *);
 
 static vout_window_t *MakeWindow (vout_display_t *vd)
 {
@@ -362,9 +363,12 @@ static int Open (vlc_object_t *obj)
     sys->gl.lock = NULL;
     sys->gl.unlock = NULL;
     sys->gl.swap = SwapBuffers;
+    sys->gl.getProcAddress = GetProcAddress;
     sys->gl.sys = sys;
 
-    if (vout_display_opengl_Init (&sys->vgl, &vd->fmt, &sys->gl))
+    const vlc_fourcc_t *subpicture_chromas;
+    sys->vgl = vout_display_opengl_New (&vd->fmt, &subpicture_chromas, &sys->gl);
+    if (!sys->vgl)
     {
         sys->gl.sys = NULL;
         goto error;
@@ -377,6 +381,7 @@ static int Open (vlc_object_t *obj)
     vout_display_info_t info = vd->info;
     info.has_pictures_invalid = false;
     info.has_event_thread = true;
+    info.subpicture_chromas = subpicture_chromas;
 
     /* Setup vout_display_t once everything is fine */
     vd->info = info;
@@ -412,7 +417,7 @@ static void Close (vlc_object_t *obj)
     Display *dpy = sys->display;
 
     if (sys->gl.sys != NULL)
-        vout_display_opengl_Clean (&sys->vgl);
+        vout_display_opengl_Delete (sys->vgl);
 
     if (sys->ctx != NULL)
     {
@@ -443,16 +448,21 @@ static void SwapBuffers (vlc_gl_t *gl)
     glXSwapBuffers (sys->display, sys->glwin);
 }
 
+static void *GetProcAddress (vlc_gl_t *gl, const char *name)
+{
+    (void)gl;
+    return glXGetProcAddress ((const GLubyte *)name);
+}
+
 /**
  * Return a direct buffer
  */
 static picture_pool_t *Pool (vout_display_t *vd, unsigned requested_count)
 {
     vout_display_sys_t *sys = vd->sys;
-    (void)requested_count;
 
     if (!sys->pool)
-        sys->pool = vout_display_opengl_GetPool (&sys->vgl);
+        sys->pool = vout_display_opengl_GetPool (sys->vgl, requested_count);
     return sys->pool;
 }
 
@@ -460,17 +470,17 @@ static void PictureRender (vout_display_t *vd, picture_t *pic, subpicture_t *sub
 {
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Prepare (&sys->vgl, pic);
-    (void)subpicture;
+    vout_display_opengl_Prepare (sys->vgl, pic, subpicture);
 }
 
 static void PictureDisplay (vout_display_t *vd, picture_t *pic, subpicture_t *subpicture)
 {
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Display (&sys->vgl, &vd->source);
+    vout_display_opengl_Display (sys->vgl, &vd->source);
     picture_Release (pic);
-    (void)subpicture;
+    if (subpicture)
+        subpicture_Delete(subpicture);
 }
 
 static int Control (vout_display_t *vd, int query, va_list ap)
@@ -546,10 +556,14 @@ static int Control (vout_display_t *vd, int query, va_list ap)
     /* Hide the mouse. It will be send when
      * vout_display_t::info.b_hide_mouse is false */
     case VOUT_DISPLAY_HIDE_MOUSE:
-        xcb_change_window_attributes (XGetXCBConnection (sys->display),
-                                      sys->embed->handle.xid,
+    {
+        xcb_connection_t *conn = XGetXCBConnection (sys->display);
+
+        xcb_change_window_attributes (conn, sys->embed->handle.xid,
                                     XCB_CW_CURSOR, &(uint32_t){ sys->cursor });
+        xcb_flush (conn);
         return VLC_SUCCESS;
+    }
 
     case VOUT_DISPLAY_GET_OPENGL:
     {

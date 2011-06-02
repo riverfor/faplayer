@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: a0bf2893b3067066f139a564ffcaf7f58c560fda $
+ * $Id: 836f18de98d5d05489896b3ca939379c222733ed $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -54,50 +54,50 @@ void virtual_segment_c::PrepareChapters( )
 bool virtual_segment_c::UpdateCurrentToChapter( demux_t & demux )
 {
     demux_sys_t & sys = *demux.p_sys;
-    chapter_item_c *psz_curr_chapter;
+    chapter_item_c *p_curr_chapter;
     bool b_has_seeked = false;
 
     /* update current chapter/seekpoint */
     if ( p_editions->size() )
     {
         /* 1st, we need to know in which chapter we are */
-        psz_curr_chapter = (*p_editions)[i_current_edition]->FindTimecode( sys.i_pts, psz_current_chapter );
+        p_curr_chapter = (*p_editions)[i_current_edition]->FindTimecode( sys.i_pts, p_current_chapter );
 
         /* we have moved to a new chapter */
-        if (psz_curr_chapter != NULL && psz_current_chapter != psz_curr_chapter)
+        if (p_curr_chapter != NULL && p_current_chapter != p_curr_chapter)
         {
             if ( (*p_editions)[i_current_edition]->b_ordered )
             {
                 // Leave/Enter up to the link point
-                b_has_seeked = psz_curr_chapter->EnterAndLeave( psz_current_chapter );
+                b_has_seeked = p_curr_chapter->EnterAndLeave( p_current_chapter );
                 if ( !b_has_seeked )
                 {
                     // only physically seek if necessary
-                    if ( psz_current_chapter == NULL || (psz_current_chapter->i_end_time != psz_curr_chapter->i_start_time) )
-                        Seek( demux, sys.i_pts, 0, psz_curr_chapter, -1 );
+                    if ( p_current_chapter == NULL || (p_current_chapter->i_end_time != p_curr_chapter->i_start_time) )
+                        Seek( demux, sys.i_pts, 0, p_curr_chapter, -1 );
                 }
             }
- 
+
             if ( !b_has_seeked )
             {
-                psz_current_chapter = psz_curr_chapter;
-                if ( psz_curr_chapter->i_seekpoint_num > 0 )
+                p_current_chapter = p_curr_chapter;
+                if ( p_curr_chapter->i_seekpoint_num > 0 )
                 {
                     demux.info.i_update |= INPUT_UPDATE_TITLE | INPUT_UPDATE_SEEKPOINT;
                     demux.info.i_title = sys.i_current_title = i_sys_title;
-                    demux.info.i_seekpoint = psz_curr_chapter->i_seekpoint_num - 1;
+                    demux.info.i_seekpoint = p_curr_chapter->i_seekpoint_num - 1;
                 }
             }
 
             return true;
         }
-        else if (psz_curr_chapter == NULL)
+        else if (p_curr_chapter == NULL)
         {
             // out of the scope of the data described by chapters, leave the edition
-            if ( (*p_editions)[i_current_edition]->b_ordered && psz_current_chapter != NULL )
+            if ( (*p_editions)[i_current_edition]->b_ordered && p_current_chapter != NULL )
             {
-                if ( !(*p_editions)[i_current_edition]->EnterAndLeave( psz_current_chapter, false ) )
-                    psz_current_chapter = NULL;
+                if ( !(*p_editions)[i_current_edition]->EnterAndLeave( p_current_chapter, false ) )
+                    p_current_chapter = NULL;
                 else
                     return true;
             }
@@ -203,30 +203,30 @@ void virtual_segment_c::AppendUID( const EbmlBinary * p_UID )
     linked_uids.push_back( *(KaxSegmentUID*)(p_UID) );
 }
 
-void virtual_segment_c::Seek( demux_t & demuxer, mtime_t i_date, mtime_t i_time_offset, chapter_item_c *psz_chapter, int64_t i_global_position )
+void virtual_segment_c::Seek( demux_t & demuxer, mtime_t i_date, mtime_t i_time_offset, chapter_item_c *p_chapter, int64_t i_global_position )
 {
     demux_sys_t *p_sys = demuxer.p_sys;
     size_t i;
 
     // find the actual time for an ordered edition
-    if ( psz_chapter == NULL )
+    if ( p_chapter == NULL )
     {
-        if ( Edition() && Edition()->b_ordered )
+        if ( CurrentEdition() && CurrentEdition()->b_ordered )
         {
             /* 1st, we need to know in which chapter we are */
-            psz_chapter = (*p_editions)[i_current_edition]->FindTimecode( i_date, psz_current_chapter );
+            p_chapter = (*p_editions)[i_current_edition]->FindTimecode( i_date, p_current_chapter );
         }
     }
 
-    if ( psz_chapter != NULL )
+    if ( p_chapter != NULL )
     {
-        psz_current_chapter = psz_chapter;
-        p_sys->i_chapter_time = i_time_offset = psz_chapter->i_user_start_time - psz_chapter->i_start_time;
-        if ( psz_chapter->i_seekpoint_num > 0 )
+        p_current_chapter = p_chapter;
+        p_sys->i_chapter_time = i_time_offset = p_chapter->i_user_start_time - p_chapter->i_start_time;
+        if ( p_chapter->i_seekpoint_num > 0 )
         {
             demuxer.info.i_update |= INPUT_UPDATE_TITLE | INPUT_UPDATE_SEEKPOINT;
             demuxer.info.i_title = p_sys->i_current_title = i_sys_title;
-            demuxer.info.i_seekpoint = psz_chapter->i_seekpoint_num - 1;
+            demuxer.info.i_seekpoint = p_chapter->i_seekpoint_num - 1;
         }
     }
 
@@ -261,4 +261,21 @@ chapter_item_c *virtual_segment_c::FindChapter( int64_t i_find_uid )
             return p_result;
     }
     return NULL;
+}
+
+void virtual_segment_c::AddSegments(std::vector<matroska_segment_c *> segments)
+{
+    // fill our current virtual segment with all hard linked segments
+    size_t i_preloaded;
+    do {
+        i_preloaded = 0;
+        for ( size_t i=0; i < segments.size(); i++ )
+        {
+            i_preloaded += AddSegment( segments[i] );
+        }
+    } while ( i_preloaded ); // worst case: will stop when all segments are found as linked
+
+    Sort();
+    PreloadLinked( );
+    PrepareChapters( );
 }

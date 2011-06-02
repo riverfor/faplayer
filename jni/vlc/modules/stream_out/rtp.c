@@ -1425,31 +1425,20 @@ static void* ThreadSend( void *data )
 #endif
                 SendRTCP( id->sinkv[i].rtcp, out );
 
-            if( send( id->sinkv[i].rtp_fd, out->p_buffer, len, 0 ) >= 0 )
-                continue;
-            switch( net_errno )
+            if( send( id->sinkv[i].rtp_fd, out->p_buffer, len, 0 ) == -1
+             && net_errno != EAGAIN && net_errno != EWOULDBLOCK
+             && net_errno != ENOBUFS && net_errno != ENOMEM )
             {
-                /* Soft errors (e.g. ICMP): */
-                case ECONNREFUSED: /* Port unreachable */
-                case ENOPROTOOPT:
-#ifdef EPROTO
-                case EPROTO:       /* Protocol unreachable */
-#endif
-                case EHOSTUNREACH: /* Host unreachable */
-                case ENETUNREACH:  /* Network unreachable */
-                case ENETDOWN:     /* Entire network down */
+                int type;
+                getsockopt( id->sinkv[i].rtp_fd, SOL_SOCKET, SO_TYPE,
+                            &type, &(socklen_t){ sizeof(type) });
+                if( type == SOCK_DGRAM )
+                    /* ICMP soft error: ignore and retry */
                     send( id->sinkv[i].rtp_fd, out->p_buffer, len, 0 );
-                /* Transient congestion: */
-                case ENOMEM: /* out of socket buffers */
-                case ENOBUFS:
-                case EAGAIN:
-#if (EAGAIN != EWOULDBLOCK)
-                case EWOULDBLOCK:
-#endif
-                    continue;
+                else
+                    /* Broken connection */
+                    deadv[deadc++] = id->sinkv[i].rtp_fd;
             }
-
-            deadv[deadc++] = id->sinkv[i].rtp_fd;
         }
         id->i_seq_sent_next = ntohs(((uint16_t *) out->p_buffer)[1]) + 1;
         vlc_mutex_unlock( &id->lock_sink );
@@ -1551,7 +1540,7 @@ static int64_t rtp_init_ts( const vod_media_t *p_media,
     uint64_t i_ts_init;
     /* As per RFC 2326, session identifiers are at least 8 bytes long */
     strncpy((char *)&i_ts_init, psz_vod_session, sizeof(uint64_t));
-    i_ts_init ^= (uint64_t) p_media;
+    i_ts_init ^= (uintptr_t)p_media;
     /* Limit the timestamp to 48 bytes, this is enough and allows us
      * to stay away from overflows */
     i_ts_init &= 0xFFFFFFFFFFFF;
@@ -1771,7 +1760,7 @@ static sout_access_out_t *GrabberCreate( sout_stream_t *p_stream )
 {
     sout_access_out_t *p_grab;
 
-    p_grab = vlc_object_create( p_stream->p_sout, sizeof( *p_grab ) );
+    p_grab = vlc_object_create( p_stream, sizeof( *p_grab ) );
     if( p_grab == NULL )
         return NULL;
 
@@ -1782,6 +1771,5 @@ static sout_access_out_t *GrabberCreate( sout_stream_t *p_stream )
     p_grab->p_sys       = (sout_access_out_sys_t *)p_stream;
     p_grab->pf_seek     = NULL;
     p_grab->pf_write    = AccessOutGrabberWrite;
-    vlc_object_attach( p_grab, p_stream );
     return p_grab;
 }

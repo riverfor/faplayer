@@ -2,7 +2,7 @@
  * sepia.c : Sepia video plugin for vlc
  *****************************************************************************
  * Copyright © 2011 VideoLAN
- * $Id: f286980ef366e7b02126896c4a41a325c4d455b0 $
+ * $Id: 18c05c495f49984ff2f234f6b7b947652fe54be0 $
  *
  * Authors: Yuval Tze <yuvaltze@gmail.com>
  *
@@ -283,11 +283,11 @@ vlc_module_begin()
         add_integer( CFG_MODE, 1, MODE_TEXT, MODE_LONGTEXT, false )
         change_integer_list( pi_mode_values, ppsz_mode_descriptions )
 
-        add_float_with_range( CFG_FACTOR, 2, 0, 20, NULL, FACTOR_TEXT, FACTOR_LONGTEXT, false )
+        add_float_with_range( CFG_FACTOR, 2, 0, 20, FACTOR_TEXT, FACTOR_LONGTEXT, false )
 
-        add_integer_with_range( CFG_OVERLAP, 3, 1, 4, NULL, OVERLAP_TEXT, OVERLAP_LONGTEXT, false )
+        add_integer_with_range( CFG_OVERLAP, 3, 1, 4, OVERLAP_TEXT, OVERLAP_LONGTEXT, false )
 
-        add_integer_with_range( CFG_MIN_ALPHA, 125, 0, 255, NULL, MIN_ALPHA_TEXT, MIN_ALPHA_LONGTEXT, false )
+        add_integer_with_range( CFG_MIN_ALPHA, 125, 0, 255, MIN_ALPHA_TEXT, MIN_ALPHA_LONGTEXT, false )
 
         set_section( N_("Overlap fix"), NULL )
 

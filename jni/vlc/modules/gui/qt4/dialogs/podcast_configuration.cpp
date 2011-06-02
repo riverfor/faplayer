@@ -2,7 +2,7 @@
  * podcast_configuration.cpp: Podcast configuration dialog
  ****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: 3b970e6fe729a361ef54b8f422399a056727eb26 $
+ * $Id: 7562319685f9df334897cd652be41fe2716d43ce $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *
@@ -72,8 +72,7 @@ void PodcastConfigDialog::accept()
     }
     config_PutPsz( p_intf, "podcast-urls", qtu( urls ) );
     vlc_object_t *p_obj = (vlc_object_t*)
-                          vlc_object_find_name( p_intf->p_libvlc,
-                                                "podcast", FIND_CHILD );
+                          vlc_object_find_name( p_intf->p_libvlc, "podcast" );
     if( p_obj )
     {
         var_SetString( p_obj, "podcast-urls", qtu( urls ) );

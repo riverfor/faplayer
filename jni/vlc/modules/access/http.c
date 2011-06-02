@@ -2,7 +2,7 @@
  * http.c: HTTP input module
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id: 39a587839ae5d30f79449c0226a8d21972acd155 $
+ * $Id: 72f544dccbccb197ab50fd9a2c039eaf079efbd5 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -97,14 +97,6 @@ static void Close( vlc_object_t * );
 #define FORWARD_COOKIES_TEXT N_("Forward Cookies")
 #define FORWARD_COOKIES_LONGTEXT N_("Forward Cookies across http redirections.")
 
-#define MAX_REDIRECT_TEXT N_("Max number of redirection")
-#define MAX_REDIRECT_LONGTEXT N_("Limit the number of redirection to follow.")
-
-#define USE_IE_PROXY_TEXT N_("Use Internet Explorer entered HTTP proxy server")
-#define USE_IE_PROXY_LONGTEXT N_("Use Internet Explorer entered HTTP proxy " \
-    "server for all URL. Don't take into account bypasses settings and auto " \
-    "configuration scripts.")
-
 #define REFERER_TEXT N_("HTTP referer value")
 #define REFERER_LONGTEXT N_("Customize the HTTP referer, simulating a previous document")
 
@@ -137,12 +129,6 @@ vlc_module_begin ()
         change_safe()
     add_bool( "http-forward-cookies", true, FORWARD_COOKIES_TEXT,
               FORWARD_COOKIES_LONGTEXT, true )
-    add_integer( "http-max-redirect", 5, MAX_REDIRECT_TEXT,
-                 MAX_REDIRECT_LONGTEXT, true )
-#ifdef WIN32
-    add_bool( "http-use-IE-proxy", false, USE_IE_PROXY_TEXT,
-              USE_IE_PROXY_LONGTEXT, true )
-#endif
     /* 'itpc' = iTunes Podcast */
     add_shortcut( "http", "https", "unsv", "itpc", "icyx" )
     set_callbacks( Open, Close )
@@ -214,8 +200,7 @@ struct access_sys_t
 
 /* */
 static int OpenWithCookies( vlc_object_t *p_this, const char *psz_access,
-                            int i_nb_redirect, int i_max_redirect,
-                            vlc_array_t *cookies );
+                            unsigned i_redirect, vlc_array_t *cookies );
 
 /* */
 static ssize_t Read( access_t *, uint8_t *, size_t );
@@ -246,8 +231,7 @@ static int AuthCheckReply( access_t *p_access, const char *psz_header,
 static int Open( vlc_object_t *p_this )
 {
     access_t *p_access = (access_t*)p_this;
-    return OpenWithCookies( p_this, p_access->psz_access, 0,
-                var_InheritInteger( p_access, "http-max-redirect" ), NULL );
+    return OpenWithCookies( p_this, p_access->psz_access, 5, NULL );
 }
 
 /**
@@ -255,14 +239,12 @@ static int Open( vlc_object_t *p_this )
  * @param p_this: the vlc object
  * @psz_access: the acces to use (http, https, ...) (this value must be used
  *              instead of p_access->psz_access)
- * @i_nb_redirect: the number of redirection already done
- * @i_max_redirect: limit to the number of redirection to follow
+ * @i_redirect: number of redirections remaining
  * @cookies: the available cookies
  * @return vlc error codes
  */
 static int OpenWithCookies( vlc_object_t *p_this, const char *psz_access,
-                            int i_nb_redirect, int i_max_redirect,
-                            vlc_array_t *cookies )
+                            unsigned i_redirect, vlc_array_t *cookies )
 {
     access_t     *p_access = (access_t*)p_this;
     access_sys_t *p_sys;
@@ -405,62 +387,51 @@ static int OpenWithCookies( vlc_object_t *p_this, const char *psz_access,
 #elif defined( WIN32 )
     else
     {
-        if( var_InheritBool( p_access, "http-use-IE-proxy" ) )
+        /* Try to get the proxy server address from Windows internet settings using registry. */
+        HKEY h_key;
+        /* Open the key */
+        if( RegOpenKeyEx( HKEY_CURRENT_USER, "Software\\Microsoft"
+                          "\\Windows\\CurrentVersion\\Internet Settings",
+                          0, KEY_READ, &h_key ) == ERROR_SUCCESS )
         {
-            /* Try to get the proxy server address from Windows internet settings using registry. */
-            HKEY h_key;
-            /* Open the key */
-            if( RegOpenKeyEx( HKEY_CURRENT_USER, "Software\\Microsoft" \
-                              "\\Windows\\CurrentVersion\\Internet Settings",
-                              0, KEY_READ, &h_key ) == ERROR_SUCCESS )
+            DWORD len = sizeof( DWORD );
+            BYTE proxyEnable;
+
+            /* Get the proxy enable value */
+            if( RegQueryValueEx( h_key, "ProxyEnable", NULL, NULL,
+                                 &proxyEnable, &len ) == ERROR_SUCCESS
+             && proxyEnable )
             {
-                DWORD i_dataReadSize = 4; /* sizeof( DWORD ); */
-                BYTE proxyEnable = 0;
-                /* Get the proxy enable value */
-                if( RegQueryValueEx( h_key, "ProxyEnable", NULL, NULL,
-                                     &proxyEnable, &i_dataReadSize )
-                                     == ERROR_SUCCESS )
+                /* Proxy is enabled */
+                /* Get the proxy URL :
+                   Proxy server value in the registry can be something like "address:port"
+                   or "ftp=address1:port1;http=address2:port2 ..." depending of the
+                   confirguration. */
+                unsigned char key[256];
+
+                len = sizeof( key );
+                if( RegQueryValueEx( h_key, "ProxyServer", NULL, NULL,
+                                     key, &len ) == ERROR_SUCCESS )
                 {
-                    if( proxyEnable )
+                    /* FIXME: This is lame. The string should be tokenized. */
+#warning FIXME.
+                    char *psz_proxy = strstr( (char *)key, "http=" );
+                    if( psz_proxy != NULL )
                     {
-                        /* Proxy is enable */
-                        char psz_key[256];
-                        i_dataReadSize = 256;
-                        if( RegQueryValueEx( h_key, "ProxyServer",
-                                             NULL, NULL, (unsigned char *)psz_key,
-                                             &i_dataReadSize )
-                                             == ERROR_SUCCESS )
-                        {
-                            /* Get the proxy URL :
-                            Proxy server value in the registry can be something like "address:port"
-                            or "ftp=address1:port1;http=address2:port2 ..." depending of the
-                            confirguration. */
-                            char *psz_proxy;
-                            psz_proxy = strstr( psz_key, "http=" );
-                            if( psz_proxy != NULL )
-                            {
-                                psz_proxy += strlen( "http=" );
-                                char *psz_endUrl = strchr( psz_proxy, ';' );
-                                if( psz_endUrl != NULL )
-                                    *psz_endUrl = '\0';
-                            }
-                            else
-                                psz_proxy = psz_key;
-                            /* Set proxy enable for this connection. */
-                            p_sys->b_proxy = true;
-                            vlc_UrlParse( &p_sys->proxy, psz_proxy, 0 );
-                        }
-                        msg_Warn( p_access, "Couldn't read in registry " \
-                                  "the proxy server address." );
+                        psz_proxy += 5;
+                        char *end = strchr( psz_proxy, ';' );
+                        if( end != NULL )
+                            *end = '\0';
                     }
+                    else
+                        psz_proxy = (char *)key;
+                    /* Set proxy enable for this connection. */
+                    p_sys->b_proxy = true;
+                    vlc_UrlParse( &p_sys->proxy, psz_proxy, 0 );
                 }
-                else
-                    msg_Warn( p_access, "Couldn't read in registry if the " \
-                              "proxy is enable or not." );
             }
             else
-                msg_Warn( p_access, "Couldn't open internet settings key " \
-                          "in registry." );
+                msg_Dbg( p_access, "HTTP proxy disabled (MSIE)" );
         }
     }
 #else
@@ -576,7 +547,7 @@ connect:
         msg_Dbg( p_access, "redirection to %s", p_sys->psz_location );
 
         /* Check the number of redirection already done */
-        if( i_nb_redirect >= i_max_redirect )
+        if( i_redirect == 0 )
         {
             msg_Err( p_access, "Too many redirection: break potential infinite"
                      "loop" );
@@ -617,8 +588,8 @@ connect:
         free( p_sys );
 
         /* Do new Open() run with new data */
-        return OpenWithCookies( p_this, psz_protocol, i_nb_redirect + 1,
-                                i_max_redirect, cookies );
+        return OpenWithCookies( p_this, psz_protocol, i_redirect - 1,
+                                cookies );
     }
 
     if( p_sys->b_mms )

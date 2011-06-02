@@ -98,26 +98,6 @@ AS_IF([test -n "${with_binary_version}"],[
          [Binary specific version])
 ])
 
-dnl Check how we are asked to build
-AS_IF([test "${enable_shared}" = "no" -a "${enable_vlc}" != "no"], [
-  AC_MSG_ERROR([VLC is based on plugins. Shared libraries cannot be disabled.])
-])
-
-AC_ARG_ENABLE(static-modules,
-  [AS_HELP_STRING([--enable-static-modules],
-    [link modules statically - VLC will not work])])
-AS_IF([test "${enable_static_modules}" = yes], [
-   enable_shared="no"
-   enable_static="yes"
-   VLC_DEFAULT_PLUGIN_TYPE="builtin"
-   AS_IF([test "${enable_vlc}" != "no"],
-     [AC_MSG_WARN([Building modules as static. VLC will not work.])])
-], [
-   VLC_DEFAULT_PLUGIN_TYPE="plugin"
-])
-
-AC_SUBST(VLC_DEFAULT_PLUGIN_TYPE)
-
 dnl
 dnl  Check for the contrib directory
 dnl
@@ -448,6 +428,10 @@ m4_defun([AC_DEPLIBS_CHECK_METHOD],[])
 
 lt_cv_deplibs_check_method=pass_all
 
+AS_IF([test "${enable_shared}" = "no"], [
+  AC_MSG_ERROR([VLC is based on plugins. Shared libraries cannot be disabled.])
+])
+
 dnl
 dnl Gettext stuff
 dnl
@@ -567,7 +551,7 @@ need_libc=false
 
 dnl Check for usual libc functions
 AC_CHECK_FUNCS([daemon fcntl fdopendir fstatvfs fork getenv getpwuid_r gettimeofday isatty lstat memalign mmap openat pread posix_fadvise posix_madvise posix_memalign setlocale stricmp strnicmp uselocale])
-AC_REPLACE_FUNCS([asprintf atof atoll dirfd getcwd getdelim getpid gmtime_r lldiv localtime_r nrand48 rewind setenv strcasecmp strcasestr strdup strlcpy strncasecmp strndup strnlen strsep strtof strtok_r strtoll swab tdestroy vasprintf])
+AC_REPLACE_FUNCS([asprintf atof atoll dirfd flockfile getcwd getdelim getpid gmtime_r lldiv localtime_r nrand48 rewind setenv strcasecmp strcasestr strdup strlcpy strncasecmp strndup strnlen strsep strtof strtok_r strtoll swab tdestroy vasprintf])
 AC_CHECK_FUNCS(fdatasync,,
   [AC_DEFINE(fdatasync, fsync, [Alias fdatasync() to fsync() if missing.])
 ])
@@ -706,21 +690,6 @@ AC_CHECK_LIB(m,lrintf, [
 
 dnl Check for dynamic plugins
 ac_cv_have_plugins=no
-
-# HP-UX style
-if test "${ac_cv_have_plugins}" = "no"; then
-  AC_CHECK_HEADERS(dl.h)
-  ac_cv_my_have_shl_load=no
-  AC_CHECK_FUNC(shl_load,
-   [ac_cv_my_have_shl_load=yes,
-    AC_CHECK_LIB(dld, shl_load,
-     [ac_cv_my_have_shl_load=yes
-      VLC_ADD_LIBS([libvlccore],[-ldld])])])
-  if test "${ac_cv_my_have_shl_load}" = "yes"; then
-    AC_DEFINE(HAVE_DL_SHL_LOAD, 1, [Define if you have the shl_load API])
-    ac_cv_have_plugins=yes
-  fi
-fi
 
 # Win32 style
 if test "${ac_cv_have_plugins}" = "no"; then
@@ -993,6 +962,9 @@ dnl
 
 RDC_PROG_CC_WFLAGS([all extra sign-compare undef pointer-arith bad-function-cast write-strings missing-prototypes volatile-register-var error-implicit-function-declaration])
 RDC_PROG_CC_FLAGS([-pipe])
+AC_LANG_PUSH([C++])
+RDC_PROG_CXX_WFLAGS([all extra sign-compare undef pointer-arith volatile-register-var])
+AC_LANG_POP([C++])
 
 dnl
 dnl  Debugging mode
@@ -1047,12 +1019,29 @@ AS_IF([test "${enable_coverage}" != "no"], [
   CFLAGS="-fprofile-arcs -ftest-coverage ${CFLAGS}"
   CXXFLAGS="-fprofile-arcs -ftest-coverage ${CXXFLAGS}"
   LDFLAGS="-lgcov ${LDFLAGS}"
-  CFLAGS_save="${CFLAGS}"
-  CXXFLAGS_save="${CXXFLAGS}"
-  LDFLAGS_save="${LDFLAGS}"
 ])
 
 VLC_SAVE_FLAGS
+
+AS_IF([test "${SYS}" != "mingw32" -a "${SYS}" != "mingwce"], [
+  AC_CACHE_CHECK([if $CC accepts -fvisibility=hidden],
+                 [ac_cv_c_visibility_hidden], [
+    CFLAGS="${CFLAGS_save} -fvisibility=hidden"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [
+      ac_cv_c_visibility_hidden=yes
+    ], [
+      ac_cv_c_visibility_hidden=no
+    ])
+  ])
+  AS_IF([test "${ac_cv_c_visibility_hidden}" != "no"], [
+    VLC_RESTORE_FLAGS
+    CFLAGS="${CFLAGS} -fvisibility=hidden"
+    CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
+    OBJCFLAGS="${OBJCFLAGS} -fvisibility=hidden"
+    VLC_SAVE_FLAGS
+  ])
+])
+
 
 dnl
 dnl  Enable/disable optimizations
@@ -1310,7 +1299,6 @@ AS_IF([test "${enable_mmx}" != "no"], [
   AS_IF([test "${ac_cv_c_mmx_intrinsics}" != "no"], [
     AC_DEFINE(HAVE_MMX_INTRINSICS, 1,
               [Define to 1 if MMX intrinsics are available.])
-    MMX_CFLAGS="-mmmx"
   ])
 
   AC_CACHE_CHECK([if $CC groks MMX inline assembly],
@@ -1335,7 +1323,6 @@ AS_IF([test "${enable_mmx}" != "no"], [
     have_mmxext="yes"
   ])
 ])
-AC_SUBST(MMX_CFLAGS)
 AM_CONDITIONAL([HAVE_MMX], [test "${have_mmx}" = "yes"])
 AM_CONDITIONAL([HAVE_MMXEXT], [test "${have_mmxext}" = "yes"])
 
@@ -1346,7 +1333,7 @@ AC_ARG_ENABLE(sse,
   [AS_HELP_STRING([--disable-sse],
     [disable SSE (1-4) optimizations (default auto)])],, [
   case "${host_cpu}" in
-    i686|x86_64)
+    i?86|x86_64)
       enable_sse=yes
       ;;
     *)
@@ -1378,7 +1365,6 @@ AS_IF([test "${enable_sse}" != "no"], [
   AS_IF([test "${ac_cv_c_sse2_intrinsics}" != "no"], [
     AC_DEFINE(HAVE_SSE2_INTRINSICS, 1,
               [Define to 1 if SSE2 intrinsics are available.])
-    SSE2_CFLAGS="-msse2"
   ])
 
   AC_CACHE_CHECK([if $CC groks SSE inline assembly],
@@ -1451,7 +1437,6 @@ AS_IF([test "${enable_sse}" != "no"], [
     AC_DEFINE(CAN_COMPILE_SSE4A, 1,
               [Define to 1 if SSE4A inline assembly is available.]) ])
 ])
-AC_SUBST(SSE2_CFLAGS)
 AM_CONDITIONAL([HAVE_SSE2], [test "$have_sse2" = "yes"])
 
 have_3dnow="no"
@@ -1745,14 +1730,14 @@ dnl
 dnl Growl notification plugin
 dnl
 AC_ARG_ENABLE(growl,
-  [AS_HELP_STRING([--enable-growl],
-    [enable growl notifications (default disabled)])],,
-  [enable_growl="no"])
+  [  --enable-growl          growl notification plugin (default disabled)],,
+  [enable_growl=no])
 AS_IF([test "${enable_growl}" != "no"], [
     VLC_ADD_PLUGIN([growl_udp])
-    AC_CHECK_HEADERS(Growl/GrowlDefines.h, [
+    AC_CHECK_HEADERS(${CONTRIB_DIR}/Growl/Growl.framework/Versions/A/Headers/GrowlDefines.h, [
       VLC_ADD_PLUGIN([growl])
-      VLC_ADD_LDFLAGS([growl], [-Wl,-framework,Growl,-framework,AppKit])
+      VLC_ADD_LDFLAGS([growl], [-F${CONTRIB_DIR}/Growl -Wl,-framework,Growl,-framework,CoreFoundation])
+      VLC_ADD_OBJCFLAGS([growl], [-F${CONTRIB_DIR}/Growl])
       VLC_ADD_OBJCFLAGS([growl], [-fobjc-exceptions] )
     ])
   ]
@@ -1776,6 +1761,7 @@ AS_IF([test "${enable_taglib}" != "no"], [
     VLC_ADD_CXXFLAGS([taglib],[$TAGLIB_CFLAGS])
     AC_LANG_PUSH(C++)
     AC_CHECK_HEADERS(taglib/mp4coverart.h)
+    AC_CHECK_HEADERS(taglib/apefile.h)
     AC_LANG_POP(C++)
   ], [
     AC_MSG_WARN(TagLib library not found)])
@@ -2006,7 +1992,7 @@ fi
 dnl
 dnl  Blu-ray Disc Support with libbluray
 dnl
-PKG_ENABLE_MODULES_VLC([BLURAY], [libbluray], [libbluray >= 0.2 ], (libbluray for Blu-ray disc support ) )
+PKG_ENABLE_MODULES_VLC([BLURAY], [libbluray], [libbluray >= 0.2 libxml-2.0 >= 2.6 ], (libbluray for Blu-ray disc support ) )
 
 dnl
 dnl  OpenCV wrapper and example filters
@@ -2206,14 +2192,9 @@ fi
 dnl
 dnl  libdvbpsi check for ts mux/demux
 dnl
-PKG_WITH_MODULES([DVBPSI], [libdvbpsi],
-    VLC_ADD_PLUGIN([ts])
-    VLC_ADD_LIBS([ts],[-ldvbpsi])
-if test "${enable_sout}" != "no"; then
-    VLC_ADD_PLUGIN([mux_ts])
-    VLC_ADD_LIBS([mux_ts],[-ldvbpsi])
-fi
-)
+have_dvbpsi="no"
+PKG_WITH_MODULES([DVBPSI], [libdvbpsi], [have_dvbpsi="yes"])
+AM_CONDITIONAL(HAVE_DVBPSI, [test "${have_dvbpsi}" = "yes"])
 
 dnl
 dnl  Screen capture module
@@ -3170,9 +3151,10 @@ AC_ARG_ENABLE(xvideo,
 have_xcb="no"
 AS_IF([test "${enable_xcb}" != "no"], [
   dnl libxcb
-  PKG_CHECK_MODULES(XCB, [xcb])
+  PKG_CHECK_MODULES(XCB, [xcb >= 1.6])
   have_xcb="yes"
   PKG_CHECK_MODULES(XCB_SHM, [xcb-shm])
+  PKG_CHECK_MODULES(XCB_COMPOSITE, [xcb-composite])
 
   AS_IF([test "${enable_xvideo}" != "no"], [
     PKG_CHECK_MODULES(XCB_XV, [xcb-xv >= 1.1.90.1], [
@@ -3267,51 +3249,51 @@ dnl
 dnl  freetype module
 dnl
 AC_ARG_ENABLE(freetype,
-  [  --enable-freetype       freetype support (default enabled)])
+  [  --enable-freetype       freetype support   (default auto)])
 AC_ARG_ENABLE(fribidi,
-  [  --enable-fribidi        fribidi support (default enabled)])
+  [  --enable-fribidi        fribidi support    (default auto)])
 AC_ARG_ENABLE(fontconfig,
-  [  --enable-fontconfig     fontconfig support (default enabled)])
+  [  --enable-fontconfig     fontconfig support (default auto)])
+
 if test "${enable_freetype}" != "no"; then
-   PKG_CHECK_MODULES(FREETYPE, freetype2,[
-      VLC_ADD_PLUGIN([freetype])
+   PKG_CHECK_MODULES(FREETYPE, freetype2, [
       have_freetype=yes
+      VLC_ADD_PLUGIN([freetype])
       VLC_ADD_CPPFLAGS([freetype skins2],[${FREETYPE_CFLAGS}])
       if test "${SYS}" = "mingw32"; then
         VLC_ADD_LIBS([freetype],[-liconv -lz])
       fi
       VLC_ADD_LIBS([freetype skins2],[${FREETYPE_LIBS}])
 
+      AC_CHECK_HEADERS(Carbon/Carbon.h,
+                       [VLC_ADD_LDFLAGS([freetype],[-Wl,-framework,Carbon])])
+
+      dnl fontconfig support
       if test "${SYS}" != "mingw32"; then
           if test "${enable_fontconfig}" != "no"; then
-            AC_CHECK_HEADERS(fontconfig/fontconfig.h,
-              [VLC_ADD_CPPFLAGS([freetype],[-DHAVE_FONTCONFIG])
-               VLC_ADD_LIBS([freetype],[-lfontconfig])])
-            AC_CHECK_HEADERS(Carbon/Carbon.h,
-              [VLC_ADD_LDFLAGS([freetype],[-Wl,-framework,Carbon])])
+            AC_CHECK_HEADERS(fontconfig/fontconfig.h, [
+              VLC_ADD_CPPFLAGS([freetype],[-DHAVE_FONTCONFIG])
+              VLC_ADD_LIBS([freetype],[-lfontconfig])
+            ],[AC_MSG_WARN([library fontconfig not found. Styles will be disabled in freetype])])
           fi
       else
           VLC_ADD_LIBS([freetype],[-lgdi32])
       fi
 
       dnl fribidi support
-      if test "${enable_fribidi}" != "no"
-      then
+      if test "${enable_fribidi}" != "no"; then
         PKG_CHECK_MODULES(FRIBIDI, fribidi, [
           VLC_ADD_CPPFLAGS([freetype skins2], [${FRIBIDI_CFLAGS} -DHAVE_FRIBIDI])
           VLC_ADD_LIBS([freetype skins2], [${FRIBIDI_LIBS}])
-        ])
+        ],[AC_MSG_WARN([library fribidi not found. Bidirectional support will be disabled in freetype])])
       fi
 
   ],[
   have_freetype=no
-  AS_IF([ test "${enable_freetype}" =  "yes"],[
-    AC_MSG_ERROR([I couldn't find the freetype package. You can download libfreetype2
-from http://www.freetype.org/, or configure with --disable-freetype. Have a nice day.
-      ])
+  AS_IF([ test "${enable_freetype}" = "yes"],[
+    AC_MSG_ERROR([Freetype2 package cannot be detected. Install Freetype2 development or configure with --disable-freetype.])
     ])
   ])
-
 fi
 
 dnl
@@ -3795,6 +3777,7 @@ then
   VLC_ADD_LDFLAGS([macosx minimal_macosx],            [-Wl,-framework,Carbon])
   VLC_ADD_LDFLAGS([macosx minimal_macosx],            [-Wl,-framework,CoreServices])
   VLC_ADD_LDFLAGS([macosx minimal_macosx],            [-Wl,-framework,AGL])
+  VLC_ADD_LDFLAGS([macosx],                           [-Wl,-framework,QTKit])
   VLC_ADD_LDFLAGS([macosx],                           [-Wl,-framework,IOKit])
   VLC_ADD_LDFLAGS([macosx],                           [-F${CONTRIB_DIR}/Sparkle -Wl,-framework,Sparkle])
   VLC_ADD_OBJCFLAGS([macosx],                         [-F${CONTRIB_DIR}/Sparkle])
@@ -4029,7 +4012,7 @@ dnl
 dnl TLS/SSL
 dnl
 AC_ARG_ENABLE(gnutls,
-  [  --enable-gnutls         gnutls TLS/SSL support (default enabled)])
+  [  --enable-gnutls         GNU TLS TLS/SSL support (default enabled)])
 
 AS_IF([test "${have_libgcrypt}" != "yes"], [
   AS_IF([test "${enable_gnutls}" = "yes"], [
@@ -4038,7 +4021,7 @@ AS_IF([test "${have_libgcrypt}" != "yes"], [
   enable_gnutls="no"
 ])
 AS_IF([test "${enable_gnutls}" != "no"], [
-  PKG_CHECK_MODULES(GNUTLS, [gnutls >= 1.7.4], [
+  PKG_CHECK_MODULES(GNUTLS, [gnutls >= 2.0.0], [
     VLC_ADD_PLUGIN([gnutls])
     VLC_ADD_CFLAGS([gnutls], [$GNUTLS_CFLAGS])
     AS_IF([test "${SYS}" = "mingw32"], [
@@ -4050,7 +4033,7 @@ AS_IF([test "${enable_gnutls}" != "no"], [
     VLC_ADD_LIBS([gnutls], [$GNUTLS_LIBS])
   ], [
     AS_IF([test "${enable_gnutls}" = "yes"], [
-      AC_MSG_ERROR([gnutls not present or too old (version 1.7.4 required)])
+      AC_MSG_ERROR([GNU TLS not present or too old (version 2.0.0 required)])
     ])
   ])
 ])
@@ -4149,7 +4132,7 @@ dnl
 dnl media library
 dnl
 AC_ARG_ENABLE(media-library, [--enable-media-library media library (default disabled)])
-if test "${enable_media_library}" == "yes"; then
+if test "${enable_media_library}" = "yes"; then
     if test "${enable_sqlite}" != "yes"; then
        AC_MSG_ERROR([SQLite module is required for the media library])
     else

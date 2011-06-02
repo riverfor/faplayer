@@ -2,7 +2,7 @@
  * avi.c : AVI file Stream input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: df525ad225683c638516aee38c7294a72f67172b $
+ * $Id: 4a1d49108aeecc3765b9477e057e642da177d9fa $
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -401,8 +401,16 @@ static int Open( vlc_object_t * p_this )
         {
             case( AVIFOURCC_auds ):
                 tk->i_cat   = AUDIO_ES;
-                tk->i_codec = AVI_FourccGetCodec( AUDIO_ES,
-                                                  p_auds->p_wf->wFormatTag );
+                if( p_auds->p_wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE &&
+                    p_auds->p_wf->cbSize >= sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX) )
+                {
+                    WAVEFORMATEXTENSIBLE *p_wfe = (WAVEFORMATEXTENSIBLE *)p_auds->p_wf;
+                    tk->i_codec = AVI_FourccGetCodec( AUDIO_ES,
+                                                      p_wfe->SubFormat.Data1 );
+                }
+                else
+                    tk->i_codec = AVI_FourccGetCodec( AUDIO_ES,
+                                                      p_auds->p_wf->wFormatTag );
 
                 tk->i_blocksize = p_auds->p_wf->nBlockAlign;
                 if( tk->i_blocksize == 0 )
@@ -435,8 +443,9 @@ static int Open( vlc_object_t * p_this )
                 fmt.b_packetized            = !tk->i_blocksize;
 
                 msg_Dbg( p_demux,
-                    "stream[%d] audio(0x%x) %d channels %dHz %dbits",
-                    i, p_auds->p_wf->wFormatTag, p_auds->p_wf->nChannels,
+                    "stream[%d] audio(0x%x - %s) %d channels %dHz %dbits",
+                    i, p_auds->p_wf->wFormatTag,vlc_fourcc_GetDescription(AUDIO_ES,tk->i_codec),
+                    p_auds->p_wf->nChannels,
                     p_auds->p_wf->nSamplesPerSec,
                     p_auds->p_wf->wBitsPerSample );
 

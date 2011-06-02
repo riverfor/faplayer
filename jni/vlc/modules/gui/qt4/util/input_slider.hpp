@@ -2,7 +2,7 @@
  * input_slider.hpp : VolumeSlider and SeekSlider
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: 13be40046fc28b06762f76e94718269d09b45835 $
+ * $Id: 49dcc3d34159dbc96cf71392bb77a0a566724eb5 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -71,7 +71,7 @@ public slots:
     void setPosition( float, int64_t, int );
 
 private slots:
-    void startSeekTimer( int );
+    void startSeekTimer();
     void updatePos();
 
 signals:

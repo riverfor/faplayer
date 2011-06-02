@@ -81,7 +81,7 @@ vlc_module_begin ()
     set_capability( "video filter", 0 )
     add_shortcut( "opencv_wrapper" )
     set_callbacks( Create, Destroy )
-    add_float_with_range( "opencv-scale", 1.0, 0.1, 2.0, NULL,
+    add_float_with_range( "opencv-scale", 1.0, 0.1, 2.0,
                           N_("Scale factor (0.1-2.0)"),
                           N_("Ammount by which to scale the picture before sending it to the internal OpenCV filter"),
                           false )
@@ -326,7 +326,6 @@ static int Init( vout_thread_t *p_vout )
     /* Load the internal opencv filter */
     /* We don't need to set up video formats for this filter as it not actually using a picture_t */
     p_sys->p_opencv = vlc_object_create( p_vout, sizeof(filter_t) );
-    vlc_object_attach( p_sys->p_opencv, p_vout );
 
     if (p_vout->p_sys->psz_inner_name)
         p_sys->p_opencv->p_module =

@@ -2,7 +2,7 @@
  * core.c: Core libvlc new API functions : initialization
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id: dfa0bb55a358594fc2f3979945f7a4299e6a69f7 $
+ * $Id: 2fb408494e6b856b7546341b4856ff26fa176bb4 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -244,4 +244,9 @@ libvlc_module_description_t *libvlc_audio_filter_list_get( libvlc_instance_t *p_
 libvlc_module_description_t *libvlc_video_filter_list_get( libvlc_instance_t *p_instance )
 {
     return libvlc_module_description_list_get( p_instance, "video filter2" );
+}
+
+int64_t libvlc_clock(void)
+{
+    return mdate();
 }

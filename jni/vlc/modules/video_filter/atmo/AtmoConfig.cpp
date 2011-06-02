@@ -4,7 +4,7 @@
  *
  * See the README.txt file for copyright information and how to reach the author(s).
  *
- * $Id: 84bb008af7589dd94ac59e46c3cb4fd4d627d2b9 $
+ * $Id: 167dc80967ce34b9c93529883761afe8e0f4d3bc $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -386,7 +386,7 @@ void CAtmoConfig::UpdateZoneDefinitionCount()
 {
    if( getZoneCount() != m_AtmoZoneDefCount)
    {
-      // okay zonen anzahl hat sich geändert - wir müssen neu rechnen
+      // okay zonen anzahl hat sich geÃ¤ndert - wir mÃ¼ssen neu rechnen
       // und allokieren!
       if(m_ZoneDefinitions)
       {

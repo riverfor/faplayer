@@ -52,7 +52,7 @@ vlc_module_begin ()
     set_capability ("vout display", /*165*/0)
     set_callbacks (Open, Close)
     add_shortcut ("opengles2", "gles2")
-    add_module ("gles2", "opengl es2", NULL, NULL,
+    add_module ("gles2", "opengl es2", NULL,
                 GLES2_TEXT, PROVIDER_LONGTEXT, true)
 
 #elif USE_OPENGL_ES == 1
@@ -63,7 +63,7 @@ vlc_module_begin ()
     set_capability ("vout display", /*160*/0)
     set_callbacks (Open, Close)
     add_shortcut ("opengles", "gles")
-    add_module ("gles", "opengl es", NULL, NULL,
+    add_module ("gles", "opengl es", NULL,
                 GLES_TEXT, PROVIDER_LONGTEXT, true)
 #else
 # define API VLC_OPENGL
@@ -75,14 +75,14 @@ vlc_module_begin ()
     set_capability ("vout display", /*170*/0)
     set_callbacks (Open, Close)
     add_shortcut ("opengl", "gl")
-    add_module ("gl", "opengl", NULL, NULL,
+    add_module ("gl", "opengl", NULL,
                 GL_TEXT, PROVIDER_LONGTEXT, true)
 #endif
 vlc_module_end ()
 
 struct vout_display_sys_t
 {
-    vout_display_opengl_t vgl;
+    vout_display_opengl_t *vgl;
 
     vout_window_t *window;
     vlc_gl_t *gl;
@@ -137,7 +137,8 @@ static int Open (vlc_object_t *obj)
         goto error;
 
     /* Initialize video display */
-    if (vout_display_opengl_Init (&sys->vgl, &vd->fmt, sys->gl))
+    sys->vgl = vout_display_opengl_New (&vd->fmt, NULL, sys->gl);
+    if (!sys->vgl)
         goto error;
 
     vd->sys = sys;
@@ -167,7 +168,7 @@ static void Close (vlc_object_t *obj)
     vout_display_t *vd = (vout_display_t *)obj;
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Clean (&sys->vgl);
+    vout_display_opengl_Delete (sys->vgl);
     vlc_gl_Destroy (sys->gl);
     vout_display_DeleteWindow (vd, sys->window);
     free (sys);
@@ -181,8 +182,7 @@ static picture_pool_t *Pool (vout_display_t *vd, unsigned count)
     vout_display_sys_t *sys = vd->sys;
 
     if (!sys->pool)
-        sys->pool = vout_display_opengl_GetPool (&sys->vgl);
-    (void) count;
+        sys->pool = vout_display_opengl_GetPool (sys->vgl, count);
     return sys->pool;
 }
 
@@ -190,15 +190,14 @@ static void PictureRender (vout_display_t *vd, picture_t *pic, subpicture_t *sub
 {
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Prepare (&sys->vgl, pic);
-    (void)subpicture;
+    vout_display_opengl_Prepare (sys->vgl, pic, subpicture);
 }
 
 static void PictureDisplay (vout_display_t *vd, picture_t *pic, subpicture_t *subpicture)
 {
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Display (&sys->vgl, &vd->source);
+    vout_display_opengl_Display (sys->vgl, &vd->source);
     picture_Release (pic);
     (void)subpicture;
 }

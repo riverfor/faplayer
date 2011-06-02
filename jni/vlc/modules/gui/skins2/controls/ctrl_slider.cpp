@@ -2,7 +2,7 @@
  * ctrl_slider.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 33b672cf7f04f514ed85ab1b67272bd1c2674e27 $
+ * $Id: caa97f9cf42c56537b013e079dcefa2a053a5613 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -205,9 +205,9 @@ void CtrlSliderCursor::notifyLayout( int width, int height, int xOffSet, int yOf
 }
 
 
-void CtrlSliderCursor::onUpdate( Subject<VarPercent> &rVariable,
-                                 void *arg  )
+void CtrlSliderCursor::onUpdate( Subject<VarPercent> &rVariable, void *arg  )
 {
+    (void)rVariable; (void)arg;
     // The position has changed
     refreshLayout( false );
 }
@@ -368,9 +368,9 @@ CtrlSliderBg::CtrlSliderBg( intf_thread_t *pIntf,
     CtrlGeneric( pIntf, rHelp, pVisible ), m_pCursor( NULL ),
     m_rVariable( rVariable ), m_thickness( thickness ), m_rCurve( rCurve ),
     m_width( rCurve.getWidth() ), m_height( rCurve.getHeight() ),
-    m_pImgSeq( pBackground ), m_nbHoriz( nbHoriz ), m_nbVert( nbVert ),
-    m_padHoriz( padHoriz ), m_padVert( padVert ), m_bgWidth( 0 ),
-    m_bgHeight( 0 ), m_position( 0 ), m_pScaledBmp( NULL )
+    m_pImgSeq( pBackground ), m_pScaledBmp( NULL ), m_nbHoriz( nbHoriz ),
+    m_nbVert( nbVert ), m_padHoriz( padHoriz ), m_padVert( padVert ),
+    m_bgWidth( 0 ), m_bgHeight( 0 ), m_position( 0 )
 {
     if( m_pImgSeq )
     {
@@ -518,6 +518,7 @@ void CtrlSliderBg::associateCursor( CtrlSliderCursor &rCursor )
 
 void CtrlSliderBg::onUpdate( Subject<VarPercent> &rVariable, void*arg )
 {
+    (void)rVariable; (void)arg;
     int position = (int)( m_rVariable.get() * (m_nbHoriz * m_nbVert - 1) );
     if( position == m_position )
         return;

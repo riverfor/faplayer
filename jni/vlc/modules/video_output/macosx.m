@@ -2,7 +2,7 @@
  * voutgl.m: MacOS X OpenGL provider
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 07c50e85294552bb4bcd2efd77b76eeb4968b397 $
+ * $Id: 920f1ed47391de526a77d61df5e03da0c44c2a12 $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Florian G. Pflug <fgp@phlo.org>
@@ -100,7 +100,7 @@ struct vout_display_sys_t
 
     vout_window_t *embed;
     vlc_gl_t gl;
-    vout_display_opengl_t vgl;
+    vout_display_opengl_t *vgl;
 
     picture_pool_t *pool;
     picture_t *current;
@@ -187,9 +187,11 @@ static int Open(vlc_object_t *this)
     sys->gl.lock = OpenglLock;
     sys->gl.unlock = OpenglUnlock;
     sys->gl.swap = OpenglSwap;
+    sys->gl.getProcAddress = NULL;
     sys->gl.sys = sys;
 
-    if (vout_display_opengl_Init(&sys->vgl, &vd->fmt, &sys->gl))
+	sys->vgl = vout_display_opengl_New(&vd->fmt, NULL, &sys->gl);
+	if (!sys->vgl)
     {
         sys->gl.sys = NULL;
         goto error;
@@ -239,7 +241,7 @@ void Close(vlc_object_t *this)
     [sys->glView release];
 
     if (sys->gl.sys != NULL)
-        vout_display_opengl_Clean(&sys->vgl);
+        vout_display_opengl_Delete(sys->vgl);
 
     if (sys->embed)
         vout_display_DeleteWindow(vd, sys->embed);
@@ -253,10 +255,9 @@ void Close(vlc_object_t *this)
 static picture_pool_t *Pool(vout_display_t *vd, unsigned requested_count)
 {
     vout_display_sys_t *sys = vd->sys;
-    VLC_UNUSED(requested_count);
 
     if (!sys->pool)
-        sys->pool = vout_display_opengl_GetPool (&sys->vgl);
+        sys->pool = vout_display_opengl_GetPool (sys->vgl, requested_count);
     assert(sys->pool);
     return sys->pool;
 }
@@ -266,15 +267,14 @@ static void PictureRender(vout_display_t *vd, picture_t *pic, subpicture_t *subp
 
     vout_display_sys_t *sys = vd->sys;
 
-    vout_display_opengl_Prepare( &sys->vgl, pic );
-	(void)subpicture;
+    vout_display_opengl_Prepare( sys->vgl, pic, subpicture );
 }
 
 static void PictureDisplay(vout_display_t *vd, picture_t *pic, subpicture_t *subpicture)
 {
     vout_display_sys_t *sys = vd->sys;
     [sys->glView setVoutFlushing:YES];
-    vout_display_opengl_Display(&sys->vgl, &vd->fmt );
+    vout_display_opengl_Display(sys->vgl, &vd->fmt );
     [sys->glView setVoutFlushing:NO];
     picture_Release (pic);
     sys->has_first_frame = true;
@@ -488,7 +488,7 @@ static void OpenglSwap(vlc_gl_t *gl)
 
     if (hasFirstFrame) {
         // This will lock gl.
-        vout_display_opengl_Display( &vd->sys->vgl, &vd->source );
+        vout_display_opengl_Display( vd->sys->vgl, &vd->source );
     }
     else
         glClear(GL_COLOR_BUFFER_BIT);

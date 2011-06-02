@@ -2,7 +2,7 @@
  * preferences_widgets.hpp : Widgets for preferences panels
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: e0dc46f86b9f51933d33073ba4636e6668f21cb2 $
+ * $Id: 99a7957a311fc239e26ed369820a00135a232ae5 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -185,7 +185,7 @@ public:
     virtual void hide() { combo->hide(); if( label ) label->hide(); }
     virtual void show() { combo->show(); if( label ) label->show(); }
 private:
-    void finish(module_config_t *, bool );
+    void finish(module_config_t * );
     QLabel *label;
     QComboBox *combo;
 private slots:
@@ -199,7 +199,7 @@ public:
     BoolConfigControl( vlc_object_t *, module_config_t *, QWidget *,
                        QGridLayout *, int );
     BoolConfigControl( vlc_object_t *, module_config_t *,
-                       QLabel *, QAbstractButton*, bool );
+                       QLabel *, QAbstractButton* );
     virtual int getValue() const;
     virtual void show() { checkbox->show(); }
     virtual void hide() { checkbox->hide(); }
@@ -384,7 +384,7 @@ class StringListConfigControl : public VStringConfigControl
     Q_OBJECT
 public:
     StringListConfigControl( vlc_object_t *, module_config_t *, QWidget *,
-                             bool, QGridLayout*, int );
+                             QGridLayout*, int );
     StringListConfigControl( vlc_object_t *, module_config_t *, QLabel *,
                              QComboBox*, bool );
     virtual QString getValue() const;
@@ -392,7 +392,7 @@ public:
     virtual void show() { combo->show(); if( label ) label->show(); }
     QComboBox *combo;
 private:
-    void finish(module_config_t *, bool );
+    void finish(module_config_t * );
     QLabel *label;
 private slots:
     void actionRequested( int );

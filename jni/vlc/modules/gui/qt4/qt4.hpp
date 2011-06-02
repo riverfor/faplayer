@@ -2,7 +2,7 @@
  * qt4.hpp : QT4 interface
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: 366115da8e4902dc9c5bab58a5e0d20bd8e8d652 $
+ * $Id: d587657fd6cf9e1e7002e3a1d3aaa478eca5f0c8 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -32,7 +32,6 @@
 #include <vlc_common.h>    /* VLC_COMMON_MEMBERS for vlc_interface.h */
 #include <vlc_interface.h> /* intf_thread_t */
 #include <vlc_playlist.h>  /* playlist_t */
-#include <vlc_aout.h>      /* AOUT_VOLUME_ */
 
 #define QT_NO_CAST_TO_ASCII
 #include <QString>

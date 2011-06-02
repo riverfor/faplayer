@@ -2,7 +2,7 @@
  * Messages.hpp : Information about a stream
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 24ba1950ac2f53e3edab1d10bbb6cb429c4f61d9 $
+ * $Id: 3b9f66cd754df8e2d5bc315b3f40a17195ed3d57 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *
@@ -37,6 +37,7 @@ class QTextEdit;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QLineEdit;
+class MsgEvent;
 
 class MessagesDialog : public QVLCFrame, public Singleton<MessagesDialog>
 {
@@ -50,7 +51,7 @@ private:
     msg_cb_data_t *cbData;
     static void sinkMessage( msg_cb_data_t *, msg_item_t *, unsigned );
     void customEvent( QEvent * );
-    void sinkMessage( msg_item_t *item );
+    void sinkMessage( MsgEvent * );
 
 private slots:
     bool save();

@@ -2,7 +2,7 @@
  * vlc_extension.h: Extensions (meta data, web information, ...)
  *****************************************************************************
  * Copyright (C) 2009-2010 VideoLAN and authors
- * $Id: 95068b6a1ef6ebfa6c46e4eac050c9a4cc4bb0bf $
+ * $Id: e20108352434257289b60c152c6686b16e077324 $
  *
  * Authors: Jean-Philippe André < jpeg # videolan.org >
  *
@@ -304,7 +304,7 @@ struct extension_widget_t
     extension_dialog_t *p_dialog; ///< Parent dialog
 };
 
-VLC_EXPORT(int, dialog_ExtensionUpdate, (vlc_object_t*, extension_dialog_t *));
+VLC_API int dialog_ExtensionUpdate(vlc_object_t*, extension_dialog_t *);
 #define dialog_ExtensionUpdate(o, d) dialog_ExtensionUpdate(VLC_OBJECT(o), d)
 
 #endif /* VLC_EXTENSIONS_H */

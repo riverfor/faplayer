@@ -2,7 +2,7 @@
  * tls.c: Transport Layer Security API
  *****************************************************************************
  * Copyright (C) 2004-2007 the VideoLAN team
- * $Id: 84d59538b615b50667463da4978f50f58b165588 $
+ * $Id: cff6b6f3cd71a769fc0a0695e5be0f0ae3baa84b $
  *
  * Authors: Rémi Denis-Courmont <rem # videolan.org>
  *
@@ -72,8 +72,8 @@ int tls_ServerSessionHandshake (tls_session_t *, int fd);
 int tls_SessionContinueHandshake (tls_session_t *);
 void tls_ServerSessionClose (tls_session_t *);
 
-VLC_EXPORT( tls_session_t *, tls_ClientCreate, ( vlc_object_t *, int, const char * ) );
-VLC_EXPORT( void, tls_ClientDelete, ( tls_session_t * ) );
+VLC_API tls_session_t * tls_ClientCreate( vlc_object_t *, int, const char * );
+VLC_API void tls_ClientDelete( tls_session_t * );
 
 /* NOTE: It is assumed that a->sock.p_sys = a */
 # define tls_Send( a, b, c ) (((tls_session_t *)a)->sock.pf_send (a, b, c ))

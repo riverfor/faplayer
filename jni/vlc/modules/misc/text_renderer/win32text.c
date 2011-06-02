@@ -2,7 +2,7 @@
  * win32text.c : Text drawing routines using the TextOut win32 API
  *****************************************************************************
  * Copyright (C) 2002 - 2009 the VideoLAN team
- * $Id: 6e88c37cc5975cbd740105e392ce7cdf8eb790f3 $
+ * $Id: 6eb988cd1d5edbe369f81a3ed132bfc458e594ef $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Pierre Ynard
@@ -99,7 +99,7 @@ vlc_module_begin ()
                  FONTSIZE_LONGTEXT, true )
 
     /* opacity valid on 0..255, with default 255 = fully opaque */
-    add_integer_with_range( "win32-opacity", 255, 0, 255, NULL,
+    add_integer_with_range( "win32-opacity", 255, 0, 255,
         OPACITY_TEXT, OPACITY_LONGTEXT, false )
 
     /* hook to the color values list, with default 0x00ffffff = white */

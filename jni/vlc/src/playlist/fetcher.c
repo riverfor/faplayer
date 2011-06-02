@@ -2,7 +2,7 @@
  * fetcher.c: Art fetcher thread.
  *****************************************************************************
  * Copyright © 1999-2009 the VideoLAN team
- * $Id: 1a643b05d85341736c120e7ba001262ebac75951 $
+ * $Id: 95af63c4521ab9b17e079c5ec7480750a9857f9f $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -224,7 +224,6 @@ static int FindArt( playlist_fetcher_t *p_fetcher, input_item_t *p_item )
     {
         module_t *p_module;
 
-        vlc_object_attach( p_finder, p_parent );
         p_finder->p_item = p_item;
 
         p_module = module_need( p_finder, "art finder", NULL, false );
@@ -339,7 +338,6 @@ static void FetchMeta( playlist_fetcher_t *p_fetcher, input_item_t *p_item )
     if( !p_demux_meta )
         return;
 
-    vlc_object_attach( p_demux_meta, p_fetcher->p_playlist );
     p_demux_meta->p_demux = NULL;
     p_demux_meta->p_item = p_item;
 

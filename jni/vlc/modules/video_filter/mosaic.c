@@ -2,7 +2,7 @@
  * mosaic.c : Mosaic video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2004-2008 the VideoLAN team
- * $Id: 31f2a12c5819b0f66445e5a2343c97d979ed8738 $
+ * $Id: ae33d26de0d3433bcb8d01f1b6536483139b09af $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -181,7 +181,7 @@ vlc_module_begin ()
     set_capability( "sub source", 0 )
     set_callbacks( CreateFilter, DestroyFilter )
 
-    add_integer_with_range( CFG_PREFIX "alpha", 255, 0, 255, NULL,
+    add_integer_with_range( CFG_PREFIX "alpha", 255, 0, 255,
                             ALPHA_TEXT, ALPHA_LONGTEXT, false )
 
     add_integer( CFG_PREFIX "height", 100,

@@ -2,7 +2,7 @@
  * float32.c : precise float32 audio mixer implementation
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: b68048491bfc2ac7a2f48ff5ae013e2c2383eb80 $
+ * $Id: 7ede585cee2c14e51b9734d36bee9e358ac62a18 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -33,13 +33,13 @@
 #include <vlc_common.h>
 #include <vlc_plugin.h>
 #include <vlc_aout.h>
+#include <vlc_aout_mixer.h>
 
 /*****************************************************************************
  * Local prototypes
  *****************************************************************************/
 static int  Create    ( vlc_object_t * );
-
-static void DoWork    ( aout_mixer_t *, aout_buffer_t * );
+static aout_buffer_t *DoWork( aout_mixer_t *, unsigned, float );
 
 /*****************************************************************************
  * Module descriptor
@@ -62,10 +62,6 @@ static int Create( vlc_object_t *p_this )
     if ( p_mixer->fmt.i_format != VLC_CODEC_FL32 )
         return -1;
 
-    /* Use the trivial mixer when we can */
-    if( p_mixer->multiplier == 1.0 && p_mixer->input->multiplier == 1.0 )
-        return -1;
-
     p_mixer->mix = DoWork;
     return 0;
 }
@@ -76,7 +72,13 @@ static int Create( vlc_object_t *p_this )
 static void ScaleWords( float * p_out, const float * p_in, size_t i_nb_words,
                         float f_multiplier )
 {
-    for( size_t i = i_nb_words; i--; )
+    if( f_multiplier == 1.0 )
+    {
+        vlc_memcpy( p_out, p_in, i_nb_words * sizeof(float) );
+        return;
+    }
+
+    for( size_t i = 0; i < i_nb_words; i++ )
         *p_out++ = *p_in++ * f_multiplier;
 }
 
@@ -86,17 +88,22 @@ static void ScaleWords( float * p_out, const float * p_in, size_t i_nb_words,
  * Terminology : in this function a word designates a single float32, eg.
  * a stereo sample is consituted of two words.
  *****************************************************************************/
-static void DoWork( aout_mixer_t * p_mixer, aout_buffer_t * p_buffer )
+static aout_buffer_t *DoWork( aout_mixer_t * p_mixer, unsigned samples,
+                              float f_multiplier )
 {
-    const float f_multiplier_global = p_mixer->multiplier;
-    const int i_nb_channels = aout_FormatNbChannels( &p_mixer->fmt );
-
-    int i_nb_words = p_buffer->i_nb_samples * i_nb_channels;
     aout_mixer_input_t * p_input = p_mixer->input;
-    float f_multiplier = f_multiplier_global * p_input->multiplier;
+    const int i_nb_channels = aout_FormatNbChannels( &p_mixer->fmt );
+    int i_nb_words = samples * i_nb_channels;
+
+    block_t *p_buffer = block_Alloc( i_nb_words * sizeof(float) );
+    if( unlikely( p_buffer == NULL ) )
+        return NULL;
+    p_buffer->i_nb_samples = samples;
 
     float * p_out = (float *)p_buffer->p_buffer;
     float * p_in = (float *)p_input->begin;
+
+    f_multiplier *= p_input->multiplier;
 
     for( ; ; )
     {
@@ -109,9 +116,7 @@ static void DoWork( aout_mixer_t * p_mixer, aout_buffer_t * p_buffer )
         {
             aout_buffer_t * p_old_buffer;
 
-            if( i_available_words > 0 )
-                ScaleWords( p_out, p_in, i_available_words, f_multiplier );
-
+            ScaleWords( p_out, p_in, i_available_words, f_multiplier );
             i_nb_words -= i_available_words;
             p_out += i_available_words;
 
@@ -121,17 +126,16 @@ static void DoWork( aout_mixer_t * p_mixer, aout_buffer_t * p_buffer )
             if( p_input->fifo.p_first == NULL )
             {
                 msg_Err( p_mixer, "internal amix error" );
-                return;
+                break;
             }
             p_in = (float *)p_input->fifo.p_first->p_buffer;
         }
         else
         {
-            if( i_nb_words > 0 )
-                ScaleWords( p_out, p_in, i_nb_words, f_multiplier );
+            ScaleWords( p_out, p_in, i_nb_words, f_multiplier );
             p_input->begin = (void *)(p_in + i_nb_words);
             break;
         }
     }
+    return p_buffer;
 }
-

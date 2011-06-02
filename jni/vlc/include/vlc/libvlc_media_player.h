@@ -2,7 +2,7 @@
  * libvlc_media_player.h:  libvlc_media_player external API
  *****************************************************************************
  * Copyright (C) 1998-2010 the VideoLAN team
- * $Id: 67ad363e8e6f7ebe33700e5bfe8c2eb728fb9376 $
+ * $Id: ad866768471646b631e365c697028a67c697a1dc $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -33,6 +33,8 @@
 
 # ifdef __cplusplus
 extern "C" {
+# else
+#  include <stdbool.h>
 # endif
 
 /*****************************************************************************
@@ -84,7 +86,7 @@ typedef struct libvlc_rectangle_t
  */
 typedef enum libvlc_video_marquee_option_t {
     libvlc_marquee_Enable = 0,
-    libvlc_marquee_Text,		/** string argument */
+    libvlc_marquee_Text,                  /** string argument */
     libvlc_marquee_Color,
     libvlc_marquee_Opacity,
     libvlc_marquee_Position,
@@ -114,7 +116,7 @@ typedef enum libvlc_navigate_mode_t
  *        should be created.
  * \return a new media player object, or NULL on error.
  */
-VLC_PUBLIC_API libvlc_media_player_t * libvlc_media_player_new( libvlc_instance_t *p_libvlc_instance );
+LIBVLC_API libvlc_media_player_t * libvlc_media_player_new( libvlc_instance_t *p_libvlc_instance );
 
 /**
  * Create a Media Player object from a Media
@@ -123,7 +125,7 @@ VLC_PUBLIC_API libvlc_media_player_t * libvlc_media_player_new( libvlc_instance_
  *        destroyed.
  * \return a new media player object, or NULL on error.
  */
-VLC_PUBLIC_API libvlc_media_player_t * libvlc_media_player_new_from_media( libvlc_media_t *p_md );
+LIBVLC_API libvlc_media_player_t * libvlc_media_player_new_from_media( libvlc_media_t *p_md );
 
 /**
  * Release a media_player after use
@@ -134,7 +136,7 @@ VLC_PUBLIC_API libvlc_media_player_t * libvlc_media_player_new_from_media( libvl
  *
  * \param p_mi the Media Player to free
  */
-VLC_PUBLIC_API void libvlc_media_player_release( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_media_player_release( libvlc_media_player_t *p_mi );
 
 /**
  * Retain a reference to a media player object. Use
@@ -142,7 +144,7 @@ VLC_PUBLIC_API void libvlc_media_player_release( libvlc_media_player_t *p_mi );
  *
  * \param p_mi media player object
  */
-VLC_PUBLIC_API void libvlc_media_player_retain( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_media_player_retain( libvlc_media_player_t *p_mi );
 
 /**
  * Set the media that will be used by the media_player. If any,
@@ -152,7 +154,7 @@ VLC_PUBLIC_API void libvlc_media_player_retain( libvlc_media_player_t *p_mi );
  * \param p_md the Media. Afterwards the p_md can be safely
  *        destroyed.
  */
-VLC_PUBLIC_API void libvlc_media_player_set_media( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_media_player_set_media( libvlc_media_player_t *p_mi,
                                                    libvlc_media_t *p_md );
 
 /**
@@ -162,7 +164,7 @@ VLC_PUBLIC_API void libvlc_media_player_set_media( libvlc_media_player_t *p_mi,
  * \return the media associated with p_mi, or NULL if no
  *         media is associated
  */
-VLC_PUBLIC_API libvlc_media_t * libvlc_media_player_get_media( libvlc_media_player_t *p_mi );
+LIBVLC_API libvlc_media_t * libvlc_media_player_get_media( libvlc_media_player_t *p_mi );
 
 /**
  * Get the Event Manager from which the media player send event.
@@ -170,7 +172,7 @@ VLC_PUBLIC_API libvlc_media_t * libvlc_media_player_get_media( libvlc_media_play
  * \param p_mi the Media Player
  * \return the event manager associated with p_mi
  */
-VLC_PUBLIC_API libvlc_event_manager_t * libvlc_media_player_event_manager ( libvlc_media_player_t *p_mi );
+LIBVLC_API libvlc_event_manager_t * libvlc_media_player_event_manager ( libvlc_media_player_t *p_mi );
 
 /**
  * is_playing
@@ -178,7 +180,7 @@ VLC_PUBLIC_API libvlc_event_manager_t * libvlc_media_player_event_manager ( libv
  * \param p_mi the Media Player
  * \return 1 if the media player is playing, 0 otherwise
  */
-VLC_PUBLIC_API int libvlc_media_player_is_playing ( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_is_playing ( libvlc_media_player_t *p_mi );
 
 /**
  * Play
@@ -186,7 +188,7 @@ VLC_PUBLIC_API int libvlc_media_player_is_playing ( libvlc_media_player_t *p_mi 
  * \param p_mi the Media Player
  * \return 0 if playback started (and was already started), or -1 on error.
  */
-VLC_PUBLIC_API int libvlc_media_player_play ( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_play ( libvlc_media_player_t *p_mi );
 
 /**
  * Pause or resume (no effect if there is no media)
@@ -195,7 +197,7 @@ VLC_PUBLIC_API int libvlc_media_player_play ( libvlc_media_player_t *p_mi );
  * \param do_pause play/resume if zero, pause if non-zero
  * \version LibVLC 1.1.1 or later
  */
-VLC_PUBLIC_API void libvlc_media_player_set_pause ( libvlc_media_player_t *mp,
+LIBVLC_API void libvlc_media_player_set_pause ( libvlc_media_player_t *mp,
                                                     int do_pause );
 
 /**
@@ -203,14 +205,14 @@ VLC_PUBLIC_API void libvlc_media_player_set_pause ( libvlc_media_player_t *mp,
  *
  * \param p_mi the Media Player
  */
-VLC_PUBLIC_API void libvlc_media_player_pause ( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_media_player_pause ( libvlc_media_player_t *p_mi );
 
 /**
  * Stop (no effect if there is no media)
  *
  * \param p_mi the Media Player
  */
-VLC_PUBLIC_API void libvlc_media_player_stop ( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_media_player_stop ( libvlc_media_player_t *p_mi );
 
 /**
  * Callback prototype to allocate and lock a picture buffer.
@@ -312,7 +314,7 @@ typedef void (*libvlc_video_cleanup_cb)(void *opaque);
  * \param opaque private pointer for the three callbacks (as first parameter)
  * \version LibVLC 1.1.1 or later
  */
-VLC_PUBLIC_API
+LIBVLC_API
 void libvlc_video_set_callbacks( libvlc_media_player_t *mp,
                                  libvlc_video_lock_cb lock,
                                  libvlc_video_unlock_cb unlock,
@@ -335,7 +337,7 @@ void libvlc_video_set_callbacks( libvlc_media_player_t *mp,
  * To use the YCbCr color space with chrominance subsampling,
  * consider using libvlc_video_set_format_callbacks() instead.
  */
-VLC_PUBLIC_API
+LIBVLC_API
 void libvlc_video_set_format( libvlc_media_player_t *mp, const char *chroma,
                               unsigned width, unsigned height,
                               unsigned pitch );
@@ -349,7 +351,7 @@ void libvlc_video_set_format( libvlc_media_player_t *mp, const char *chroma,
  * \param cleanup callback to release any allocated resources (or NULL)
  * \version LibVLC 1.2.0 or later
  */
-VLC_PUBLIC_API
+LIBVLC_API
 void libvlc_video_set_format_callbacks( libvlc_media_player_t *mp,
                                         libvlc_video_format_cb setup,
                                         libvlc_video_cleanup_cb cleanup );
@@ -388,7 +390,7 @@ void libvlc_video_set_format_callbacks( libvlc_media_player_t *mp,
  * \param drawable the drawable that is either an NSView or an object following
  * the VLCOpenGLVideoViewEmbedding protocol.
  */
-VLC_PUBLIC_API void libvlc_media_player_set_nsobject ( libvlc_media_player_t *p_mi, void * drawable );
+LIBVLC_API void libvlc_media_player_set_nsobject ( libvlc_media_player_t *p_mi, void * drawable );
 
 /**
  * Get the NSView handler previously set with libvlc_media_player_set_nsobject().
@@ -396,7 +398,7 @@ VLC_PUBLIC_API void libvlc_media_player_set_nsobject ( libvlc_media_player_t *p_
  * \param p_mi the Media Player
  * \return the NSView handler or 0 if none where set
  */
-VLC_PUBLIC_API void * libvlc_media_player_get_nsobject ( libvlc_media_player_t *p_mi );
+LIBVLC_API void * libvlc_media_player_get_nsobject ( libvlc_media_player_t *p_mi );
 
 /**
  * Set the agl handler where the media player should render its video output.
@@ -404,7 +406,7 @@ VLC_PUBLIC_API void * libvlc_media_player_get_nsobject ( libvlc_media_player_t *
  * \param p_mi the Media Player
  * \param drawable the agl handler
  */
-VLC_PUBLIC_API void libvlc_media_player_set_agl ( libvlc_media_player_t *p_mi, uint32_t drawable );
+LIBVLC_API void libvlc_media_player_set_agl ( libvlc_media_player_t *p_mi, uint32_t drawable );
 
 /**
  * Get the agl handler previously set with libvlc_media_player_set_agl().
@@ -412,7 +414,7 @@ VLC_PUBLIC_API void libvlc_media_player_set_agl ( libvlc_media_player_t *p_mi, u
  * \param p_mi the Media Player
  * \return the agl handler or 0 if none where set
  */
-VLC_PUBLIC_API uint32_t libvlc_media_player_get_agl ( libvlc_media_player_t *p_mi );
+LIBVLC_API uint32_t libvlc_media_player_get_agl ( libvlc_media_player_t *p_mi );
 
 /**
  * Set an X Window System drawable where the media player should render its
@@ -428,7 +430,7 @@ VLC_PUBLIC_API uint32_t libvlc_media_player_get_agl ( libvlc_media_player_t *p_m
  * \param p_mi the Media Player
  * \param drawable the ID of the X window
  */
-VLC_PUBLIC_API void libvlc_media_player_set_xwindow ( libvlc_media_player_t *p_mi, uint32_t drawable );
+LIBVLC_API void libvlc_media_player_set_xwindow ( libvlc_media_player_t *p_mi, uint32_t drawable );
 
 /**
  * Get the X Window System window identifier previously set with
@@ -439,7 +441,7 @@ VLC_PUBLIC_API void libvlc_media_player_set_xwindow ( libvlc_media_player_t *p_m
  * \param p_mi the Media Player
  * \return an X window ID, or 0 if none where set.
  */
-VLC_PUBLIC_API uint32_t libvlc_media_player_get_xwindow ( libvlc_media_player_t *p_mi );
+LIBVLC_API uint32_t libvlc_media_player_get_xwindow ( libvlc_media_player_t *p_mi );
 
 /**
  * Set a Win32/Win64 API window handle (HWND) where the media player should
@@ -449,7 +451,7 @@ VLC_PUBLIC_API uint32_t libvlc_media_player_get_xwindow ( libvlc_media_player_t 
  * \param p_mi the Media Player
  * \param drawable windows handle of the drawable
  */
-VLC_PUBLIC_API void libvlc_media_player_set_hwnd ( libvlc_media_player_t *p_mi, void *drawable );
+LIBVLC_API void libvlc_media_player_set_hwnd ( libvlc_media_player_t *p_mi, void *drawable );
 
 /**
  * Get the Windows API window handle (HWND) previously set with
@@ -459,9 +461,93 @@ VLC_PUBLIC_API void libvlc_media_player_set_hwnd ( libvlc_media_player_t *p_mi, 
  * \param p_mi the Media Player
  * \return a window handle or NULL if there are none.
  */
-VLC_PUBLIC_API void *libvlc_media_player_get_hwnd ( libvlc_media_player_t *p_mi );
+LIBVLC_API void *libvlc_media_player_get_hwnd ( libvlc_media_player_t *p_mi );
 
+/**
+ * Callback prototype for audio playback.
+ * \param data data pointer as passed to libvlc_audio_set_callbacks() [IN]
+ * \param samples pointer to the first audio sample to play back [IN]
+ * \param count number of audio samples to play back
+ * \param pts expected play time stamp (see libvlc_delay())
+ */
+typedef void (*libvlc_audio_play_cb)(void *data, const void *samples,
+                                     unsigned count, int64_t pts);
 
+/**
+ * Callback prototype for audio volume change.
+ * \param data data pointer as passed to libvlc_audio_set_callbacks() [IN]
+ * \param volume linear volume (1. = nominal, 0. = mute)
+ * \param mute muted flag
+ */
+typedef void (*libvlc_audio_set_volume_cb)(void *data,
+                                           float volume, bool mute);
+
+/**
+ * Set callbacks and private data for decoded audio.
+ * Use libvlc_audio_set_format() or libvlc_audio_set_format_callbacks()
+ * to configure the decoded audio format.
+ *
+ * \param mp the media player
+ * \param play callback to play audio samples (must not be NULL)
+ * \param set_volume callback to set audio volume, or NULL for software volume
+ * \param opaque private pointer for the two callbacks (as first parameter)
+ * \version LibVLC 1.2.0 or later
+ */
+LIBVLC_API
+void libvlc_audio_set_callbacks( libvlc_media_player_t *mp,
+                                 libvlc_audio_play_cb play,
+                                 libvlc_audio_set_volume_cb set_volume,
+                                 void *opaque );
+
+/**
+ * Callback prototype to setup the audio playback.
+ * This is called when the media player needs to create a new audio output.
+ * \param opaque pointer to the data pointer passed to
+ *               libvlc_audio_set_callbacks() [IN/OUT]
+ * \param format 4 bytes sample format [IN/OUT]
+ * \param rate sample rate [IN/OUT]
+ * \param channels channels count [IN/OUT]
+ * \return 0 on success, anything else to skip audio playback
+ */
+typedef int (*libvlc_audio_setup_cb)(void **data, char *format, unsigned *rate,
+                                     unsigned *channels);
+
+/**
+ * Callback prototype for audio playback cleanup.
+ * This is called when the media player no longer needs an audio output.
+ * \param opaque data pointer as passed to libvlc_audio_set_callbacks() [IN]
+ */
+typedef void (*libvlc_audio_cleanup_cb)(void *data);
+
+/**
+ * Set decoded audio format. This only works in combination with
+ * libvlc_audio_set_callbacks().
+ *
+ * \param mp the media player
+ * \param setup callback to select the audio format (cannot be NULL)
+ * \param cleanup callback to release any allocated resources (or NULL)
+ * \version LibVLC 1.2.0 or later
+ */
+LIBVLC_API
+void libvlc_audio_set_format_callbacks( libvlc_media_player_t *mp,
+                                        libvlc_audio_setup_cb setup,
+                                        libvlc_audio_cleanup_cb cleanup );
+
+/**
+ * Set decoded audio format.
+ * This only works in combination with libvlc_audio_set_callbacks(),
+ * and is mutually exclusive with libvlc_audio_set_format_callbacks().
+ *
+ * \param mp the media player
+ * \param fourcc a four-characters string identifying the sample format
+ *               (e.g. "S16N" or "FL32")
+ * \param rate sample rate (expressed in Hz)
+ * \param channels channels count
+ * \version LibVLC 1.2.0 or later
+ */
+LIBVLC_API
+void libvlc_audio_set_format( libvlc_media_player_t *mp, const char *format,
+                              unsigned rate, unsigned channels );
 
 /** \bug This might go away ... to be replaced by a broader system */
 
@@ -471,7 +557,7 @@ VLC_PUBLIC_API void *libvlc_media_player_get_hwnd ( libvlc_media_player_t *p_mi 
  * \param p_mi the Media Player
  * \return the movie length (in ms), or -1 if there is no media.
  */
-VLC_PUBLIC_API libvlc_time_t libvlc_media_player_get_length( libvlc_media_player_t *p_mi );
+LIBVLC_API libvlc_time_t libvlc_media_player_get_length( libvlc_media_player_t *p_mi );
 
 /**
  * Get the current movie time (in ms).
@@ -479,7 +565,7 @@ VLC_PUBLIC_API libvlc_time_t libvlc_media_player_get_length( libvlc_media_player
  * \param p_mi the Media Player
  * \return the movie time (in ms), or -1 if there is no media.
  */
-VLC_PUBLIC_API libvlc_time_t libvlc_media_player_get_time( libvlc_media_player_t *p_mi );
+LIBVLC_API libvlc_time_t libvlc_media_player_get_time( libvlc_media_player_t *p_mi );
 
 /**
  * Set the movie time (in ms). This has no effect if no media is being played.
@@ -488,7 +574,7 @@ VLC_PUBLIC_API libvlc_time_t libvlc_media_player_get_time( libvlc_media_player_t
  * \param p_mi the Media Player
  * \param i_time the movie time (in ms).
  */
-VLC_PUBLIC_API void libvlc_media_player_set_time( libvlc_media_player_t *p_mi, libvlc_time_t i_time );
+LIBVLC_API void libvlc_media_player_set_time( libvlc_media_player_t *p_mi, libvlc_time_t i_time );
 
 /**
  * Get movie position.
@@ -496,7 +582,7 @@ VLC_PUBLIC_API void libvlc_media_player_set_time( libvlc_media_player_t *p_mi, l
  * \param p_mi the Media Player
  * \return movie position, or -1. in case of error
  */
-VLC_PUBLIC_API float libvlc_media_player_get_position( libvlc_media_player_t *p_mi );
+LIBVLC_API float libvlc_media_player_get_position( libvlc_media_player_t *p_mi );
 
 /**
  * Set movie position. This has no effect if playback is not enabled.
@@ -505,7 +591,7 @@ VLC_PUBLIC_API float libvlc_media_player_get_position( libvlc_media_player_t *p_
  * \param p_mi the Media Player
  * \param f_pos the position
  */
-VLC_PUBLIC_API void libvlc_media_player_set_position( libvlc_media_player_t *p_mi, float f_pos );
+LIBVLC_API void libvlc_media_player_set_position( libvlc_media_player_t *p_mi, float f_pos );
 
 /**
  * Set movie chapter (if applicable).
@@ -513,7 +599,7 @@ VLC_PUBLIC_API void libvlc_media_player_set_position( libvlc_media_player_t *p_m
  * \param p_mi the Media Player
  * \param i_chapter chapter number to play
  */
-VLC_PUBLIC_API void libvlc_media_player_set_chapter( libvlc_media_player_t *p_mi, int i_chapter );
+LIBVLC_API void libvlc_media_player_set_chapter( libvlc_media_player_t *p_mi, int i_chapter );
 
 /**
  * Get movie chapter.
@@ -521,7 +607,7 @@ VLC_PUBLIC_API void libvlc_media_player_set_chapter( libvlc_media_player_t *p_mi
  * \param p_mi the Media Player
  * \return chapter number currently playing, or -1 if there is no media.
  */
-VLC_PUBLIC_API int libvlc_media_player_get_chapter( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_get_chapter( libvlc_media_player_t *p_mi );
 
 /**
  * Get movie chapter count
@@ -529,7 +615,7 @@ VLC_PUBLIC_API int libvlc_media_player_get_chapter( libvlc_media_player_t *p_mi 
  * \param p_mi the Media Player
  * \return number of chapters in movie, or -1.
  */
-VLC_PUBLIC_API int libvlc_media_player_get_chapter_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_get_chapter_count( libvlc_media_player_t *p_mi );
 
 /**
  * Is the player able to play
@@ -537,7 +623,7 @@ VLC_PUBLIC_API int libvlc_media_player_get_chapter_count( libvlc_media_player_t 
  * \param p_mi the Media Player
  * \return boolean
  */
-VLC_PUBLIC_API int libvlc_media_player_will_play( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_will_play( libvlc_media_player_t *p_mi );
 
 /**
  * Get title chapter count
@@ -546,7 +632,7 @@ VLC_PUBLIC_API int libvlc_media_player_will_play( libvlc_media_player_t *p_mi );
  * \param i_title title
  * \return number of chapters in title, or -1
  */
-VLC_PUBLIC_API int libvlc_media_player_get_chapter_count_for_title(
+LIBVLC_API int libvlc_media_player_get_chapter_count_for_title(
                        libvlc_media_player_t *p_mi, int i_title );
 
 /**
@@ -555,7 +641,7 @@ VLC_PUBLIC_API int libvlc_media_player_get_chapter_count_for_title(
  * \param p_mi the Media Player
  * \param i_title title number to play
  */
-VLC_PUBLIC_API void libvlc_media_player_set_title( libvlc_media_player_t *p_mi, int i_title );
+LIBVLC_API void libvlc_media_player_set_title( libvlc_media_player_t *p_mi, int i_title );
 
 /**
  * Get movie title
@@ -563,7 +649,7 @@ VLC_PUBLIC_API void libvlc_media_player_set_title( libvlc_media_player_t *p_mi, 
  * \param p_mi the Media Player
  * \return title number currently playing, or -1
  */
-VLC_PUBLIC_API int libvlc_media_player_get_title( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_get_title( libvlc_media_player_t *p_mi );
 
 /**
  * Get movie title count
@@ -571,21 +657,21 @@ VLC_PUBLIC_API int libvlc_media_player_get_title( libvlc_media_player_t *p_mi );
  * \param p_mi the Media Player
  * \return title number count, or -1
  */
-VLC_PUBLIC_API int libvlc_media_player_get_title_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_get_title_count( libvlc_media_player_t *p_mi );
 
 /**
  * Set previous chapter (if applicable)
  *
  * \param p_mi the Media Player
  */
-VLC_PUBLIC_API void libvlc_media_player_previous_chapter( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_media_player_previous_chapter( libvlc_media_player_t *p_mi );
 
 /**
  * Set next chapter (if applicable)
  *
  * \param p_mi the Media Player
  */
-VLC_PUBLIC_API void libvlc_media_player_next_chapter( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_media_player_next_chapter( libvlc_media_player_t *p_mi );
 
 /**
  * Get the requested movie play rate.
@@ -595,7 +681,7 @@ VLC_PUBLIC_API void libvlc_media_player_next_chapter( libvlc_media_player_t *p_m
  * \param p_mi the Media Player
  * \return movie play rate
  */
-VLC_PUBLIC_API float libvlc_media_player_get_rate( libvlc_media_player_t *p_mi );
+LIBVLC_API float libvlc_media_player_get_rate( libvlc_media_player_t *p_mi );
 
 /**
  * Set movie play rate
@@ -605,7 +691,7 @@ VLC_PUBLIC_API float libvlc_media_player_get_rate( libvlc_media_player_t *p_mi )
  * \return -1 if an error was detected, 0 otherwise (but even then, it might
  * not actually work depending on the underlying media protocol)
  */
-VLC_PUBLIC_API int libvlc_media_player_set_rate( libvlc_media_player_t *p_mi, float rate );
+LIBVLC_API int libvlc_media_player_set_rate( libvlc_media_player_t *p_mi, float rate );
 
 /**
  * Get current movie state
@@ -613,7 +699,7 @@ VLC_PUBLIC_API int libvlc_media_player_set_rate( libvlc_media_player_t *p_mi, fl
  * \param p_mi the Media Player
  * \return the current state of the media player (playing, paused, ...) \see libvlc_state_t
  */
-VLC_PUBLIC_API libvlc_state_t libvlc_media_player_get_state( libvlc_media_player_t *p_mi );
+LIBVLC_API libvlc_state_t libvlc_media_player_get_state( libvlc_media_player_t *p_mi );
 
 /**
  * Get movie fps rate
@@ -621,7 +707,7 @@ VLC_PUBLIC_API libvlc_state_t libvlc_media_player_get_state( libvlc_media_player
  * \param p_mi the Media Player
  * \return frames per second (fps) for this playing movie, or 0 if unspecified
  */
-VLC_PUBLIC_API float libvlc_media_player_get_fps( libvlc_media_player_t *p_mi );
+LIBVLC_API float libvlc_media_player_get_fps( libvlc_media_player_t *p_mi );
 
 /** end bug */
 
@@ -631,7 +717,7 @@ VLC_PUBLIC_API float libvlc_media_player_get_fps( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \return the number of video outputs
  */
-VLC_PUBLIC_API unsigned libvlc_media_player_has_vout( libvlc_media_player_t *p_mi );
+LIBVLC_API unsigned libvlc_media_player_has_vout( libvlc_media_player_t *p_mi );
 
 /**
  * Is this media player seekable?
@@ -639,7 +725,7 @@ VLC_PUBLIC_API unsigned libvlc_media_player_has_vout( libvlc_media_player_t *p_m
  * \param p_mi the media player
  * \return true if the media player can seek
  */
-VLC_PUBLIC_API int libvlc_media_player_is_seekable( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_is_seekable( libvlc_media_player_t *p_mi );
 
 /**
  * Can this media player be paused?
@@ -647,7 +733,7 @@ VLC_PUBLIC_API int libvlc_media_player_is_seekable( libvlc_media_player_t *p_mi 
  * \param p_mi the media player
  * \return true if the media player can pause
  */
-VLC_PUBLIC_API int libvlc_media_player_can_pause( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_can_pause( libvlc_media_player_t *p_mi );
 
 
 /**
@@ -655,7 +741,7 @@ VLC_PUBLIC_API int libvlc_media_player_can_pause( libvlc_media_player_t *p_mi );
  *
  * \param p_mi the media player
  */
-VLC_PUBLIC_API void libvlc_media_player_next_frame( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_media_player_next_frame( libvlc_media_player_t *p_mi );
 
 /**
  * Navigate through DVD Menu
@@ -664,15 +750,15 @@ VLC_PUBLIC_API void libvlc_media_player_next_frame( libvlc_media_player_t *p_mi 
  * \param navigate the Navigation mode
  * \version libVLC 1.2.0 or later
  */
-VLC_PUBLIC_API void libvlc_media_player_navigate( libvlc_media_player_t* p_mi,
-						  unsigned navigate );
+LIBVLC_API void libvlc_media_player_navigate( libvlc_media_player_t* p_mi,
+                                              unsigned navigate );
 
 /**
  * Release (free) libvlc_track_description_t
  *
  * \param p_track_description the structure to release
  */
-VLC_PUBLIC_API void libvlc_track_description_release( libvlc_track_description_t *p_track_description );
+LIBVLC_API void libvlc_track_description_release( libvlc_track_description_t *p_track_description );
 
 /** \defgroup libvlc_video LibVLC video controls
  * @{
@@ -686,7 +772,7 @@ VLC_PUBLIC_API void libvlc_track_description_release( libvlc_track_description_t
  *
  * \param p_mi the media player
  */
-VLC_PUBLIC_API void libvlc_toggle_fullscreen( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_toggle_fullscreen( libvlc_media_player_t *p_mi );
 
 /**
  * Enable or disable fullscreen.
@@ -701,7 +787,7 @@ VLC_PUBLIC_API void libvlc_toggle_fullscreen( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \param b_fullscreen boolean for fullscreen status
  */
-VLC_PUBLIC_API void libvlc_set_fullscreen( libvlc_media_player_t *p_mi, int b_fullscreen );
+LIBVLC_API void libvlc_set_fullscreen( libvlc_media_player_t *p_mi, int b_fullscreen );
 
 /**
  * Get current fullscreen status.
@@ -709,7 +795,7 @@ VLC_PUBLIC_API void libvlc_set_fullscreen( libvlc_media_player_t *p_mi, int b_fu
  * \param p_mi the media player
  * \return the fullscreen status (boolean)
  */
-VLC_PUBLIC_API int libvlc_get_fullscreen( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_get_fullscreen( libvlc_media_player_t *p_mi );
 
 /**
  * Enable or disable key press events handling, according to the LibVLC hotkeys
@@ -726,7 +812,7 @@ VLC_PUBLIC_API int libvlc_get_fullscreen( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \param on true to handle key press events, false to ignore them.
  */
-VLC_PUBLIC_API
+LIBVLC_API
 void libvlc_video_set_key_input( libvlc_media_player_t *p_mi, unsigned on );
 
 /**
@@ -741,7 +827,7 @@ void libvlc_video_set_key_input( libvlc_media_player_t *p_mi, unsigned on );
  * \param p_mi the media player
  * \param on true to handle mouse click events, false to ignore them.
  */
-VLC_PUBLIC_API
+LIBVLC_API
 void libvlc_video_set_mouse_input( libvlc_media_player_t *p_mi, unsigned on );
 
 /**
@@ -753,7 +839,7 @@ void libvlc_video_set_mouse_input( libvlc_media_player_t *p_mi, unsigned on );
  * \param py pointer to get the pixel height [OUT]
  * \return 0 on success, -1 if the specified video does not exist
  */
-VLC_PUBLIC_API
+LIBVLC_API
 int libvlc_video_get_size( libvlc_media_player_t *p_mi, unsigned num,
                            unsigned *px, unsigned *py );
 
@@ -764,7 +850,7 @@ int libvlc_video_get_size( libvlc_media_player_t *p_mi, unsigned num,
  * \param p_mi the media player
  * \return the video pixel height or 0 if not applicable
  */
-VLC_DEPRECATED_API
+LIBVLC_DEPRECATED
 int libvlc_video_get_height( libvlc_media_player_t *p_mi );
 
 /**
@@ -774,7 +860,7 @@ int libvlc_video_get_height( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \return the video pixel width or 0 if not applicable
  */
-VLC_DEPRECATED_API
+LIBVLC_DEPRECATED
 int libvlc_video_get_width( libvlc_media_player_t *p_mi );
 
 /**
@@ -799,7 +885,7 @@ int libvlc_video_get_width( libvlc_media_player_t *p_mi );
  * \param py pointer to get the ordinate [OUT]
  * \return 0 on success, -1 if the specified video does not exist
  */
-VLC_PUBLIC_API
+LIBVLC_API
 int libvlc_video_get_cursor( libvlc_media_player_t *p_mi, unsigned num,
                              int *px, int *py );
 
@@ -811,7 +897,7 @@ int libvlc_video_get_cursor( libvlc_media_player_t *p_mi, unsigned num,
  * \return the currently configured zoom factor, or 0. if the video is set
  * to fit to the output window/drawable automatically.
  */
-VLC_PUBLIC_API float libvlc_video_get_scale( libvlc_media_player_t *p_mi );
+LIBVLC_API float libvlc_video_get_scale( libvlc_media_player_t *p_mi );
 
 /**
  * Set the video scaling factor. That is the ratio of the number of pixels on
@@ -824,7 +910,7 @@ VLC_PUBLIC_API float libvlc_video_get_scale( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \param f_factor the scaling factor, or zero
  */
-VLC_PUBLIC_API void libvlc_video_set_scale( libvlc_media_player_t *p_mi, float f_factor );
+LIBVLC_API void libvlc_video_set_scale( libvlc_media_player_t *p_mi, float f_factor );
 
 /**
  * Get current video aspect ratio.
@@ -833,7 +919,7 @@ VLC_PUBLIC_API void libvlc_video_set_scale( libvlc_media_player_t *p_mi, float f
  * \return the video aspect ratio or NULL if unspecified
  * (the result must be released with free() or libvlc_free()).
  */
-VLC_PUBLIC_API char *libvlc_video_get_aspect_ratio( libvlc_media_player_t *p_mi );
+LIBVLC_API char *libvlc_video_get_aspect_ratio( libvlc_media_player_t *p_mi );
 
 /**
  * Set new video aspect ratio.
@@ -842,7 +928,7 @@ VLC_PUBLIC_API char *libvlc_video_get_aspect_ratio( libvlc_media_player_t *p_mi 
  * \param psz_aspect new video aspect-ratio or NULL to reset to default
  * \note Invalid aspect ratios are ignored.
  */
-VLC_PUBLIC_API void libvlc_video_set_aspect_ratio( libvlc_media_player_t *p_mi, const char *psz_aspect );
+LIBVLC_API void libvlc_video_set_aspect_ratio( libvlc_media_player_t *p_mi, const char *psz_aspect );
 
 /**
  * Get current video subtitle.
@@ -850,7 +936,7 @@ VLC_PUBLIC_API void libvlc_video_set_aspect_ratio( libvlc_media_player_t *p_mi, 
  * \param p_mi the media player
  * \return the video subtitle selected, or -1 if none
  */
-VLC_PUBLIC_API int libvlc_video_get_spu( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_video_get_spu( libvlc_media_player_t *p_mi );
 
 /**
  * Get the number of available video subtitles.
@@ -858,7 +944,7 @@ VLC_PUBLIC_API int libvlc_video_get_spu( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \return the number of available video subtitles
  */
-VLC_PUBLIC_API int libvlc_video_get_spu_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_video_get_spu_count( libvlc_media_player_t *p_mi );
 
 /**
  * Get the description of available video subtitles.
@@ -866,7 +952,7 @@ VLC_PUBLIC_API int libvlc_video_get_spu_count( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \return list containing description of available video subtitles
  */
-VLC_PUBLIC_API libvlc_track_description_t *
+LIBVLC_API libvlc_track_description_t *
         libvlc_video_get_spu_description( libvlc_media_player_t *p_mi );
 
 /**
@@ -876,7 +962,7 @@ VLC_PUBLIC_API libvlc_track_description_t *
  * \param i_spu new video subtitle to select
  * \return 0 on success, -1 if out of range
  */
-VLC_PUBLIC_API int libvlc_video_set_spu( libvlc_media_player_t *p_mi, unsigned i_spu );
+LIBVLC_API int libvlc_video_set_spu( libvlc_media_player_t *p_mi, unsigned i_spu );
 
 /**
  * Set new video subtitle file.
@@ -885,7 +971,7 @@ VLC_PUBLIC_API int libvlc_video_set_spu( libvlc_media_player_t *p_mi, unsigned i
  * \param psz_subtitle new video subtitle file
  * \return the success status (boolean)
  */
-VLC_PUBLIC_API int libvlc_video_set_subtitle_file( libvlc_media_player_t *p_mi, const char *psz_subtitle );
+LIBVLC_API int libvlc_video_set_subtitle_file( libvlc_media_player_t *p_mi, const char *psz_subtitle );
 
 /**
  * Get the description of available titles.
@@ -893,7 +979,7 @@ VLC_PUBLIC_API int libvlc_video_set_subtitle_file( libvlc_media_player_t *p_mi, 
  * \param p_mi the media player
  * \return list containing description of available titles
  */
-VLC_PUBLIC_API libvlc_track_description_t *
+LIBVLC_API libvlc_track_description_t *
         libvlc_video_get_title_description( libvlc_media_player_t *p_mi );
 
 /**
@@ -903,7 +989,7 @@ VLC_PUBLIC_API libvlc_track_description_t *
  * \param i_title selected title
  * \return list containing description of available chapter for title i_title
  */
-VLC_PUBLIC_API libvlc_track_description_t *
+LIBVLC_API libvlc_track_description_t *
         libvlc_video_get_chapter_description( libvlc_media_player_t *p_mi, int i_title );
 
 /**
@@ -912,7 +998,7 @@ VLC_PUBLIC_API libvlc_track_description_t *
  * \param p_mi the media player
  * \return the crop filter geometry or NULL if unset
  */
-VLC_PUBLIC_API char *libvlc_video_get_crop_geometry( libvlc_media_player_t *p_mi );
+LIBVLC_API char *libvlc_video_get_crop_geometry( libvlc_media_player_t *p_mi );
 
 /**
  * Set new crop filter geometry.
@@ -920,7 +1006,7 @@ VLC_PUBLIC_API char *libvlc_video_get_crop_geometry( libvlc_media_player_t *p_mi
  * \param p_mi the media player
  * \param psz_geometry new crop filter geometry (NULL to unset)
  */
-VLC_PUBLIC_API
+LIBVLC_API
 void libvlc_video_set_crop_geometry( libvlc_media_player_t *p_mi, const char *psz_geometry );
 
 /**
@@ -929,7 +1015,7 @@ void libvlc_video_set_crop_geometry( libvlc_media_player_t *p_mi, const char *ps
  * \param p_mi the media player
  * \return the current teletext page requested.
  */
-VLC_PUBLIC_API int libvlc_video_get_teletext( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_video_get_teletext( libvlc_media_player_t *p_mi );
 
 /**
  * Set new teletext page to retrieve.
@@ -937,14 +1023,14 @@ VLC_PUBLIC_API int libvlc_video_get_teletext( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \param i_page teletex page number requested
  */
-VLC_PUBLIC_API void libvlc_video_set_teletext( libvlc_media_player_t *p_mi, int i_page );
+LIBVLC_API void libvlc_video_set_teletext( libvlc_media_player_t *p_mi, int i_page );
 
 /**
  * Toggle teletext transparent status on video output.
  *
  * \param p_mi the media player
  */
-VLC_PUBLIC_API void libvlc_toggle_teletext( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_toggle_teletext( libvlc_media_player_t *p_mi );
 
 /**
  * Get number of available video tracks.
@@ -952,7 +1038,7 @@ VLC_PUBLIC_API void libvlc_toggle_teletext( libvlc_media_player_t *p_mi );
  * \param p_mi media player
  * \return the number of available video tracks (int)
  */
-VLC_PUBLIC_API int libvlc_video_get_track_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_video_get_track_count( libvlc_media_player_t *p_mi );
 
 /**
  * Get the description of available video tracks.
@@ -960,7 +1046,7 @@ VLC_PUBLIC_API int libvlc_video_get_track_count( libvlc_media_player_t *p_mi );
  * \param p_mi media player
  * \return list with description of available video tracks, or NULL on error
  */
-VLC_PUBLIC_API libvlc_track_description_t *
+LIBVLC_API libvlc_track_description_t *
         libvlc_video_get_track_description( libvlc_media_player_t *p_mi );
 
 /**
@@ -969,7 +1055,7 @@ VLC_PUBLIC_API libvlc_track_description_t *
  * \param p_mi media player
  * \return the video track (int) or -1 if none
  */
-VLC_PUBLIC_API int libvlc_video_get_track( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_video_get_track( libvlc_media_player_t *p_mi );
 
 /**
  * Set video track.
@@ -978,7 +1064,7 @@ VLC_PUBLIC_API int libvlc_video_get_track( libvlc_media_player_t *p_mi );
  * \param i_track the track (int)
  * \return 0 on success, -1 if out of range
  */
-VLC_PUBLIC_API
+LIBVLC_API
 int libvlc_video_set_track( libvlc_media_player_t *p_mi, int i_track );
 
 /**
@@ -994,7 +1080,7 @@ int libvlc_video_set_track( libvlc_media_player_t *p_mi, int i_track );
  * \param i_height the snapshot's height
  * \return 0 on success, -1 if the video was not found
  */
-VLC_PUBLIC_API
+LIBVLC_API
 int libvlc_video_take_snapshot( libvlc_media_player_t *p_mi, unsigned num,
                                 const char *psz_filepath, unsigned int i_width,
                                 unsigned int i_height );
@@ -1005,7 +1091,7 @@ int libvlc_video_take_snapshot( libvlc_media_player_t *p_mi, unsigned num,
  * \param p_mi libvlc media player
  * \param psz_mode type of deinterlace filter, NULL to disable
  */
-VLC_PUBLIC_API void libvlc_video_set_deinterlace( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_video_set_deinterlace( libvlc_media_player_t *p_mi,
                                                   const char *psz_mode );
 
 /**
@@ -1014,7 +1100,7 @@ VLC_PUBLIC_API void libvlc_video_set_deinterlace( libvlc_media_player_t *p_mi,
  * \param p_mi libvlc media player
  * \param option marq option to get \see libvlc_video_marquee_int_option_t
  */
-VLC_PUBLIC_API int libvlc_video_get_marquee_int( libvlc_media_player_t *p_mi,
+LIBVLC_API int libvlc_video_get_marquee_int( libvlc_media_player_t *p_mi,
                                                  unsigned option );
 
 /**
@@ -1023,7 +1109,7 @@ VLC_PUBLIC_API int libvlc_video_get_marquee_int( libvlc_media_player_t *p_mi,
  * \param p_mi libvlc media player
  * \param option marq option to get \see libvlc_video_marquee_string_option_t
  */
-VLC_PUBLIC_API char *libvlc_video_get_marquee_string( libvlc_media_player_t *p_mi,
+LIBVLC_API char *libvlc_video_get_marquee_string( libvlc_media_player_t *p_mi,
                                                       unsigned option );
 
 /**
@@ -1036,7 +1122,7 @@ VLC_PUBLIC_API char *libvlc_video_get_marquee_string( libvlc_media_player_t *p_m
  * \param option marq option to set \see libvlc_video_marquee_int_option_t
  * \param i_val marq option value
  */
-VLC_PUBLIC_API void libvlc_video_set_marquee_int( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_video_set_marquee_int( libvlc_media_player_t *p_mi,
                                                   unsigned option, int i_val );
 
 /**
@@ -1046,7 +1132,7 @@ VLC_PUBLIC_API void libvlc_video_set_marquee_int( libvlc_media_player_t *p_mi,
  * \param option marq option to set \see libvlc_video_marquee_string_option_t
  * \param psz_text marq option value
  */
-VLC_PUBLIC_API void libvlc_video_set_marquee_string( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_video_set_marquee_string( libvlc_media_player_t *p_mi,
                                                      unsigned option, const char *psz_text );
 
 /** option values for libvlc_video_{get,set}_logo_{int,string} */
@@ -1067,7 +1153,7 @@ enum libvlc_video_logo_option_t {
  * \param p_mi libvlc media player instance
  * \param option logo option to get, values of libvlc_video_logo_option_t
  */
-VLC_PUBLIC_API int libvlc_video_get_logo_int( libvlc_media_player_t *p_mi,
+LIBVLC_API int libvlc_video_get_logo_int( libvlc_media_player_t *p_mi,
                                               unsigned option );
 
 /**
@@ -1080,7 +1166,7 @@ VLC_PUBLIC_API int libvlc_video_get_logo_int( libvlc_media_player_t *p_mi,
  * \param option logo option to set, values of libvlc_video_logo_option_t
  * \param value logo option value
  */
-VLC_PUBLIC_API void libvlc_video_set_logo_int( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_video_set_logo_int( libvlc_media_player_t *p_mi,
                                                unsigned option, int value );
 
 /**
@@ -1091,7 +1177,7 @@ VLC_PUBLIC_API void libvlc_video_set_logo_int( libvlc_media_player_t *p_mi,
  * \param option logo option to set, values of libvlc_video_logo_option_t
  * \param psz_value logo option value
  */
-VLC_PUBLIC_API void libvlc_video_set_logo_string( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_video_set_logo_string( libvlc_media_player_t *p_mi,
                                       unsigned option, const char *psz_value );
 
 
@@ -1112,7 +1198,7 @@ enum libvlc_video_adjust_option_t {
  * \param option adjust option to get, values of libvlc_video_adjust_option_t
  * \version LibVLC 1.1.1 and later.
  */
-VLC_PUBLIC_API int libvlc_video_get_adjust_int( libvlc_media_player_t *p_mi,
+LIBVLC_API int libvlc_video_get_adjust_int( libvlc_media_player_t *p_mi,
                                                 unsigned option );
 
 /**
@@ -1126,7 +1212,7 @@ VLC_PUBLIC_API int libvlc_video_get_adjust_int( libvlc_media_player_t *p_mi,
  * \param value adjust option value
  * \version LibVLC 1.1.1 and later.
  */
-VLC_PUBLIC_API void libvlc_video_set_adjust_int( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_video_set_adjust_int( libvlc_media_player_t *p_mi,
                                                  unsigned option, int value );
 
 /**
@@ -1136,7 +1222,7 @@ VLC_PUBLIC_API void libvlc_video_set_adjust_int( libvlc_media_player_t *p_mi,
  * \param option adjust option to get, values of libvlc_video_adjust_option_t
  * \version LibVLC 1.1.1 and later.
  */
-VLC_PUBLIC_API float libvlc_video_get_adjust_float( libvlc_media_player_t *p_mi,
+LIBVLC_API float libvlc_video_get_adjust_float( libvlc_media_player_t *p_mi,
                                                     unsigned option );
 
 /**
@@ -1148,7 +1234,7 @@ VLC_PUBLIC_API float libvlc_video_get_adjust_float( libvlc_media_player_t *p_mi,
  * \param value adjust option value
  * \version LibVLC 1.1.1 and later.
  */
-VLC_PUBLIC_API void libvlc_video_set_adjust_float( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_video_set_adjust_float( libvlc_media_player_t *p_mi,
                                                    unsigned option, float value );
 
 /** @} video */
@@ -1193,7 +1279,7 @@ typedef enum libvlc_audio_output_channel_t {
 *          \see libvlc_audio_output_list_release \see libvlc_audio_output_t .
  *         In case of error, NULL is returned.
  */
-VLC_PUBLIC_API libvlc_audio_output_t *
+LIBVLC_API libvlc_audio_output_t *
         libvlc_audio_output_list_get( libvlc_instance_t *p_instance );
 
 /**
@@ -1201,7 +1287,7 @@ VLC_PUBLIC_API libvlc_audio_output_t *
  *
  * \param p_list list with audio outputs for release
  */
-VLC_PUBLIC_API void libvlc_audio_output_list_release( libvlc_audio_output_t *p_list );
+LIBVLC_API void libvlc_audio_output_list_release( libvlc_audio_output_t *p_list );
 
 /**
  * Set the audio output.
@@ -1212,7 +1298,7 @@ VLC_PUBLIC_API void libvlc_audio_output_list_release( libvlc_audio_output_t *p_l
  *               use psz_name of \see libvlc_audio_output_t
  * \return true if function succeded
  */
-VLC_PUBLIC_API int libvlc_audio_output_set( libvlc_media_player_t *p_mi,
+LIBVLC_API int libvlc_audio_output_set( libvlc_media_player_t *p_mi,
                                             const char *psz_name );
 
 /**
@@ -1223,7 +1309,7 @@ VLC_PUBLIC_API int libvlc_audio_output_set( libvlc_media_player_t *p_mi,
  * \param psz_audio_output - name of audio output, \see libvlc_audio_output_t
  * \return number of devices
  */
-VLC_PUBLIC_API int libvlc_audio_output_device_count( libvlc_instance_t *p_instance,
+LIBVLC_API int libvlc_audio_output_device_count( libvlc_instance_t *p_instance,
                                                      const char *psz_audio_output );
 
 /**
@@ -1234,7 +1320,7 @@ VLC_PUBLIC_API int libvlc_audio_output_device_count( libvlc_instance_t *p_instan
  * \param i_device device index
  * \return long name of device
  */
-VLC_PUBLIC_API char * libvlc_audio_output_device_longname( libvlc_instance_t *p_instance,
+LIBVLC_API char * libvlc_audio_output_device_longname( libvlc_instance_t *p_instance,
                                                            const char *psz_audio_output,
                                                            int i_device );
 
@@ -1246,7 +1332,7 @@ VLC_PUBLIC_API char * libvlc_audio_output_device_longname( libvlc_instance_t *p_
  * \param i_device device index
  * \return id name of device, use for setting device, need to be free after use
  */
-VLC_PUBLIC_API char * libvlc_audio_output_device_id( libvlc_instance_t *p_instance,
+LIBVLC_API char * libvlc_audio_output_device_id( libvlc_instance_t *p_instance,
                                                      const char *psz_audio_output,
                                                      int i_device );
 
@@ -1257,7 +1343,7 @@ VLC_PUBLIC_API char * libvlc_audio_output_device_id( libvlc_instance_t *p_instan
  * \param psz_audio_output - name of audio output, \see libvlc_audio_output_t
  * \param psz_device_id device
  */
-VLC_PUBLIC_API void libvlc_audio_output_device_set( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_audio_output_device_set( libvlc_media_player_t *p_mi,
                                                     const char *psz_audio_output,
                                                     const char *psz_device_id );
 
@@ -1268,7 +1354,7 @@ VLC_PUBLIC_API void libvlc_audio_output_device_set( libvlc_media_player_t *p_mi,
  * \param p_mi media player
  * \return the audio devices type \see libvlc_audio_output_device_types_t
  */
-VLC_PUBLIC_API int libvlc_audio_output_get_device_type( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_audio_output_get_device_type( libvlc_media_player_t *p_mi );
 
 /**
  * Set current audio device type.
@@ -1277,7 +1363,7 @@ VLC_PUBLIC_API int libvlc_audio_output_get_device_type( libvlc_media_player_t *p
  * \param device_type the audio device type,
           according to \see libvlc_audio_output_device_types_t
  */
-VLC_PUBLIC_API void libvlc_audio_output_set_device_type( libvlc_media_player_t *p_mi,
+LIBVLC_API void libvlc_audio_output_set_device_type( libvlc_media_player_t *p_mi,
                                                          int device_type );
 
 
@@ -1286,7 +1372,7 @@ VLC_PUBLIC_API void libvlc_audio_output_set_device_type( libvlc_media_player_t *
  *
  * \param p_mi media player
  */
-VLC_PUBLIC_API void libvlc_audio_toggle_mute( libvlc_media_player_t *p_mi );
+LIBVLC_API void libvlc_audio_toggle_mute( libvlc_media_player_t *p_mi );
 
 /**
  * Get current mute status.
@@ -1294,7 +1380,7 @@ VLC_PUBLIC_API void libvlc_audio_toggle_mute( libvlc_media_player_t *p_mi );
  * \param p_mi media player
  * \return the mute status (boolean)
  */
-VLC_PUBLIC_API int libvlc_audio_get_mute( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_audio_get_mute( libvlc_media_player_t *p_mi );
 
 /**
  * Set mute status.
@@ -1302,7 +1388,7 @@ VLC_PUBLIC_API int libvlc_audio_get_mute( libvlc_media_player_t *p_mi );
  * \param p_mi media player
  * \param status If status is true then mute, otherwise unmute
  */
-VLC_PUBLIC_API void libvlc_audio_set_mute( libvlc_media_player_t *p_mi, int status );
+LIBVLC_API void libvlc_audio_set_mute( libvlc_media_player_t *p_mi, int status );
 
 /**
  * Get current audio level.
@@ -1310,7 +1396,7 @@ VLC_PUBLIC_API void libvlc_audio_set_mute( libvlc_media_player_t *p_mi, int stat
  * \param p_mi media player
  * \return the audio level (int)
  */
-VLC_PUBLIC_API int libvlc_audio_get_volume( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_audio_get_volume( libvlc_media_player_t *p_mi );
 
 /**
  * Set current audio level.
@@ -1319,7 +1405,7 @@ VLC_PUBLIC_API int libvlc_audio_get_volume( libvlc_media_player_t *p_mi );
  * \param i_volume the volume (int)
  * \return 0 if the volume was set, -1 if it was out of range
  */
-VLC_PUBLIC_API int libvlc_audio_set_volume( libvlc_media_player_t *p_mi, int i_volume );
+LIBVLC_API int libvlc_audio_set_volume( libvlc_media_player_t *p_mi, int i_volume );
 
 /**
  * Get number of available audio tracks.
@@ -1327,7 +1413,7 @@ VLC_PUBLIC_API int libvlc_audio_set_volume( libvlc_media_player_t *p_mi, int i_v
  * \param p_mi media player
  * \return the number of available audio tracks (int), or -1 if unavailable
  */
-VLC_PUBLIC_API int libvlc_audio_get_track_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_audio_get_track_count( libvlc_media_player_t *p_mi );
 
 /**
  * Get the description of available audio tracks.
@@ -1335,7 +1421,7 @@ VLC_PUBLIC_API int libvlc_audio_get_track_count( libvlc_media_player_t *p_mi );
  * \param p_mi media player
  * \return list with description of available audio tracks, or NULL
  */
-VLC_PUBLIC_API libvlc_track_description_t *
+LIBVLC_API libvlc_track_description_t *
         libvlc_audio_get_track_description( libvlc_media_player_t *p_mi );
 
 /**
@@ -1344,7 +1430,7 @@ VLC_PUBLIC_API libvlc_track_description_t *
  * \param p_mi media player
  * \return the audio track (int), or -1 if none.
  */
-VLC_PUBLIC_API int libvlc_audio_get_track( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_audio_get_track( libvlc_media_player_t *p_mi );
 
 /**
  * Set current audio track.
@@ -1353,7 +1439,7 @@ VLC_PUBLIC_API int libvlc_audio_get_track( libvlc_media_player_t *p_mi );
  * \param i_track the track (int)
  * \return 0 on success, -1 on error
  */
-VLC_PUBLIC_API int libvlc_audio_set_track( libvlc_media_player_t *p_mi, int i_track );
+LIBVLC_API int libvlc_audio_set_track( libvlc_media_player_t *p_mi, int i_track );
 
 /**
  * Get current audio channel.
@@ -1361,7 +1447,7 @@ VLC_PUBLIC_API int libvlc_audio_set_track( libvlc_media_player_t *p_mi, int i_tr
  * \param p_mi media player
  * \return the audio channel \see libvlc_audio_output_channel_t
  */
-VLC_PUBLIC_API int libvlc_audio_get_channel( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_audio_get_channel( libvlc_media_player_t *p_mi );
 
 /**
  * Set current audio channel.
@@ -1370,7 +1456,7 @@ VLC_PUBLIC_API int libvlc_audio_get_channel( libvlc_media_player_t *p_mi );
  * \param channel the audio channel, \see libvlc_audio_output_channel_t
  * \return 0 on success, -1 on error
  */
-VLC_PUBLIC_API int libvlc_audio_set_channel( libvlc_media_player_t *p_mi, int channel );
+LIBVLC_API int libvlc_audio_set_channel( libvlc_media_player_t *p_mi, int channel );
 
 /**
  * Get current audio delay.
@@ -1379,7 +1465,7 @@ VLC_PUBLIC_API int libvlc_audio_set_channel( libvlc_media_player_t *p_mi, int ch
  * \return the audio delay (microseconds)
  * \version LibVLC 1.1.1 or later
  */
-VLC_PUBLIC_API int64_t libvlc_audio_get_delay( libvlc_media_player_t *p_mi );
+LIBVLC_API int64_t libvlc_audio_get_delay( libvlc_media_player_t *p_mi );
 
 /**
  * Set current audio delay. The audio delay will be reset to zero each time the media changes.
@@ -1389,7 +1475,7 @@ VLC_PUBLIC_API int64_t libvlc_audio_get_delay( libvlc_media_player_t *p_mi );
  * \return 0 on success, -1 on error
  * \version LibVLC 1.1.1 or later
  */
-VLC_PUBLIC_API int libvlc_audio_set_delay( libvlc_media_player_t *p_mi, int64_t i_delay );
+LIBVLC_API int libvlc_audio_set_delay( libvlc_media_player_t *p_mi, int64_t i_delay );
 
 /** @} audio */
 

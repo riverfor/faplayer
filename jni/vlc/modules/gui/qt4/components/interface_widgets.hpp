@@ -2,7 +2,7 @@
  * interface_widgets.hpp : Custom widgets for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: dc895ecd8c4ea6e3c45a24c495a87ab629bb92f7 $
+ * $Id: a2ce18f0916568aa5b97a6182b61efcd0308ce02 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -89,11 +89,11 @@ public:
     void setExpandstoHeight( bool b_expand ) { b_expandPixmap = b_expand; }
     void setWithArt( bool b_withart_ ) { b_withart = b_withart_; };
 private:
+    intf_thread_t *p_intf;
     QString pixmapUrl;
     bool b_expandPixmap;
     bool b_withart;
     virtual void contextMenuEvent( QContextMenuEvent *event );
-    intf_thread_t *p_intf;
 protected:
     void paintEvent( QPaintEvent *e );
     static const int MARGIN = 5;
@@ -140,9 +140,11 @@ private:
     bool b_remainingTime;
     int cachedLength;
     QTimer *bufTimer;
-    float bufVal;
+
     bool buffering;
     bool showBuffering;
+    float bufVal;
+
     char psz_length[MSTRTIME_MAX_SIZE];
     char psz_time[MSTRTIME_MAX_SIZE];
     void toggleTimeDisplay();

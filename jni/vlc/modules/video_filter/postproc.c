@@ -2,7 +2,7 @@
  * postproc.c: video postprocessing using libpostproc
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id: 8b74a69a8505578826d731794be5f3783b393867 $
+ * $Id: 00eb7cc4164e21178cc4bbb5f7501dbd663335d4 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@netcourrier.com>
@@ -84,7 +84,7 @@ vlc_module_begin ()
     set_callbacks( OpenPostproc, ClosePostproc )
 
     add_integer_with_range( FILTER_PREFIX "q", PP_QUALITY_MAX, 0,
-                            PP_QUALITY_MAX, NULL, Q_TEXT, Q_LONGTEXT, false )
+                            PP_QUALITY_MAX, Q_TEXT, Q_LONGTEXT, false )
         add_deprecated_alias( "ffmpeg-pp-q" )
         change_safe()
     add_string( FILTER_PREFIX "name", "default", NAME_TEXT,

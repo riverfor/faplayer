@@ -2,7 +2,7 @@
  * events.c: Windows DirectX video output events handler
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: def6f7edc310384b027aa8d8118da182f987ae30 $
+ * $Id: 85f715ecd44d2459c96a5cf5535042d0ed24b2b3 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -1011,7 +1011,7 @@ int EventThreadGetWindowStyle( event_thread_t *p_event )
 
 void EventThreadUpdateWindowPosition( event_thread_t *p_event,
                                       bool *pb_moved, bool *pb_resized,
-                                      int x, int y, int w, int h )
+                                      int x, int y, unsigned w, unsigned h )
 {
     vlc_mutex_lock( &p_event->lock );
     *pb_moved   = x != p_event->wnd_cfg.x ||

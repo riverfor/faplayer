@@ -41,17 +41,26 @@ static subpicture_region_t * vout_OSDEpgSlider(int x, int y,
                                                int width, int height,
                                                float ratio)
 {
-    video_format_t fmt;
-    subpicture_region_t *region;
-
     /* Create a new subpicture region */
-    video_format_Init(&fmt, VLC_CODEC_YUVA);
+    video_palette_t palette = {
+        .i_entries = 4,
+        .palette = {
+            [0] = { 0xff, 0x80, 0x80, 0x00 },
+            [1] = { 0x00, 0x80, 0x80, 0x00 },
+            [2] = { 0xff, 0x80, 0x80, 0xff },
+            [3] = { 0x00, 0x80, 0x80, 0xff },
+        },
+    };
+
+    video_format_t fmt;
+    video_format_Init(&fmt, VLC_CODEC_YUVP);
     fmt.i_width  = fmt.i_visible_width  = width;
     fmt.i_height = fmt.i_visible_height = height;
-    fmt.i_sar_num = 0;
+    fmt.i_sar_num = 1;
     fmt.i_sar_den = 1;
+    fmt.p_palette = &palette;
 
-    region = subpicture_region_New(&fmt);
+    subpicture_region_t *region = subpicture_region_New(&fmt);
     if (!region)
         return NULL;
 
@@ -65,24 +74,16 @@ static subpicture_region_t * vout_OSDEpgSlider(int x, int y,
 
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
-            #define WRITE_COMP(plane, value) \
-                picture->p[plane].p_pixels[picture->p[plane].i_pitch * j + i] = value
-
-            /* Draw the slider. */
+            /* Slider border. */
             bool is_outline = j == 0 || j == height - 1 ||
                               i == 0 || i == width  - 1;
-            WRITE_COMP(0, is_outline ? 0x00 : 0xff);
-            WRITE_COMP(1, 0x80);
-            WRITE_COMP(2, 0x80);
-
             /* We can see the video through the part of the slider
                which corresponds to the leaving time. */
             bool is_border = j < 3 || j > height - 4 ||
                              i < 3 || i > width  - 4 ||
                              i < filled_part_width;
-            WRITE_COMP(3, is_border ? 0xff : 0x00);
 
-            #undef WRITE_COMP
+            picture->p->p_pixels[picture->p->i_pitch * j + i] = 2 * is_border + is_outline;
         }
     }
 
@@ -102,7 +103,7 @@ static subpicture_region_t * vout_OSDEpgText(const char *text,
 
     /* Create a new subpicture region */
     video_format_Init(&fmt, VLC_CODEC_TEXT);
-    fmt.i_sar_num = 0;
+    fmt.i_sar_num = 1;
     fmt.i_sar_den = 1;
 
     region = subpicture_region_New(&fmt);
@@ -228,15 +229,20 @@ static void OSDEpgUpdate(subpicture_t *subpic,
                          mtime_t ts)
 {
     subpicture_updater_sys_t *sys = subpic->updater.p_sys;
-    VLC_UNUSED(fmt_dst); VLC_UNUSED(ts);
+    VLC_UNUSED(fmt_src); VLC_UNUSED(ts);
 
-    subpic->i_original_picture_width  = fmt_src->i_width;
-    subpic->i_original_picture_height = fmt_src->i_height;
+    video_format_t fmt = *fmt_dst;
+    fmt.i_width         = fmt.i_width         * fmt.i_sar_num / fmt.i_sar_den;
+    fmt.i_visible_width = fmt.i_visible_width * fmt.i_sar_num / fmt.i_sar_den;
+    fmt.i_x_offset      = fmt.i_x_offset      * fmt.i_sar_num / fmt.i_sar_den;
+
+    subpic->i_original_picture_width  = fmt.i_width;
+    subpic->i_original_picture_height = fmt.i_height;
     subpic->p_region = vout_BuildOSDEpg(sys->epg,
-                                        fmt_src->i_x_offset,
-                                        fmt_src->i_y_offset,
-                                        fmt_src->i_visible_width,
-                                        fmt_src->i_visible_height);
+                                        fmt.i_x_offset,
+                                        fmt.i_y_offset,
+                                        fmt.i_visible_width,
+                                        fmt.i_visible_height);
 }
 
 static void OSDEpgDestroy(subpicture_t *subpic)

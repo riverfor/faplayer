@@ -2,7 +2,7 @@
  * skin_main.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 9497303b1317b6502a0199cd77e2afc19f64e6d3 $
+ * $Id: f9ae23d2a51f41b2d1670fc220a7f3c81ce00ae4 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -404,7 +404,6 @@ static int WindowControl( vout_window_t *pWnd, int query, va_list args )
 {
     vout_window_sys_t* sys = pWnd->sys;
     intf_thread_t *pIntf = sys->pIntf;
-    VoutManager *pVoutManager = VoutManager::instance( pIntf );
     AsyncQueue *pQueue = AsyncQueue::instance( pIntf );
 
     switch( query )

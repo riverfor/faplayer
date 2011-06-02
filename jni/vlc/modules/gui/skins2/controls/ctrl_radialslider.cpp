@@ -2,7 +2,7 @@
  * ctrl_radialslider.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 3ca78acccd596af3e493c8a1b73a4cbbddc824bc $
+ * $Id: 14a6e2d274b532e1c7ddb90b772b73c1e0cc477c $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -40,8 +40,8 @@ CtrlRadialSlider::CtrlRadialSlider( intf_thread_t *pIntf,
                                     VarBool *pVisible ):
     CtrlGeneric( pIntf, rHelp, pVisible ), m_fsm( pIntf ), m_numImg( numImg ),
     m_rVariable( rVariable ), m_minAngle( minAngle ), m_maxAngle( maxAngle ),
-    m_cmdUpDown( this ), m_cmdDownUp( this ),
-    m_cmdMove( this ), m_position( 0 )
+    m_position( 0 ), m_cmdUpDown( this ), m_cmdDownUp( this ),
+    m_cmdMove( this )
 {
     // Build the images of the sequence
     m_pImgSeq = OSFactory::instance( getIntf() )->createOSGraphics(
@@ -105,9 +105,9 @@ void CtrlRadialSlider::draw( OSGraphics &rImage, int xDest, int yDest, int w, in
 }
 
 
-void CtrlRadialSlider::onUpdate( Subject<VarPercent> &rVariable,
-                                 void *arg  )
+void CtrlRadialSlider::onUpdate( Subject<VarPercent> &rVariable, void *arg )
 {
+    (void)arg;
     if( &rVariable == &m_rVariable )
     {
         int position = (int)( m_rVariable.get() * ( m_numImg - 1 ) );

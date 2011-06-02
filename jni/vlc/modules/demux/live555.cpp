@@ -2,7 +2,7 @@
  * live555.cpp : LIVE555 Streaming Media support.
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id: dd262b5ae191ee265ee73029690966b40672a06c $
+ * $Id: a59a23d69bb161640d7490806bf3d06388157206 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Derk-Jan Hartman <hartman at videolan. org>
@@ -566,8 +566,6 @@ static int Connect( demux_t *p_demux )
     char *psz_user    = NULL;
     char *psz_pwd     = NULL;
     char *psz_url     = NULL;
-    char *psz_options = NULL;
-    char *p_sdp       = NULL;
     int  i_http_port  = 0;
     int  i_ret        = VLC_SUCCESS;
     const int i_timeout = var_InheritInteger( p_demux, "ipv4-timeout" );
@@ -1724,6 +1722,8 @@ static void StreamRead( void *p_private, unsigned int i_size,
                         unsigned int i_truncated_bytes, struct timeval pts,
                         unsigned int duration )
 {
+    VLC_UNUSED( duration );
+
     live_track_t   *tk = (live_track_t*)p_private;
     demux_t        *p_demux = tk->p_demux;
     demux_sys_t    *p_sys = p_demux->p_sys;

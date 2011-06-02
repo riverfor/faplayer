@@ -2,7 +2,7 @@
  * main_interface.hpp : Main Interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: 2c24fb74a98978c4be429f387c0bf096da8b4c54 $
+ * $Id: aed2b1ed15362886eb964c06977da7137a9d482a $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -158,7 +158,6 @@ private:
     bool                 b_autoresize;          ///< persistent resizable window
     bool                 b_videoEmbedded;       ///< Want an external Video Window
     bool                 b_videoFullScreen;     ///< --fullscreen
-    bool                 b_videoOnTop;          ///< --video-on-top
     bool                 b_hideAfterCreation;
     bool                 b_minimalView;         ///< Minimal video
     bool                 b_interfaceFullScreen;

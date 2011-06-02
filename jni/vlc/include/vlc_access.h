@@ -2,7 +2,7 @@
  * vlc_access.h: Access descriptor, queries and methods
  *****************************************************************************
  * Copyright (C) 1999-2006 the VideoLAN team
- * $Id: 567928b7f510b0632d276fbfa17c59582a6c71ce $
+ * $Id: f9475a8162713daa240b0b5c3ae06ac989ffdb2c $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -151,7 +151,7 @@ static inline void access_InitFields( access_t *p_a )
  * This function will return the parent input of this access.
  * It is retained. It can return NULL.
  */
-VLC_EXPORT( input_thread_t *, access_GetParentInput, ( access_t *p_access ) LIBVLC_USED );
+VLC_API input_thread_t * access_GetParentInput( access_t *p_access ) VLC_USED;
 
 #define ACCESS_SET_CALLBACKS( read, block, control, seek )              \
     p_access->pf_read = read;                                           \

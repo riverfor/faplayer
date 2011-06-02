@@ -5,7 +5,7 @@
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
  *
- * $Id: a70bd18e3afaab53ba6f68c8453fad8e86b8d154 $
+ * $Id: ce11312089a82b925f6269d3e6be61d0b8e6c7e2 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -61,7 +61,7 @@
    Combobox will automatically do autocompletion on the edit zone */
 #define POPULATE_WITH_DEVS(ppsz_devlist, targetCombo) \
     QStringList targetCombo ## StringList = QStringList(); \
-    for ( int i = 0; i< sizeof(ppsz_devlist) / sizeof(*ppsz_devlist); i++ ) \
+    for ( size_t i = 0; i< sizeof(ppsz_devlist) / sizeof(*ppsz_devlist); i++ ) \
         targetCombo ## StringList << QString( ppsz_devlist[ i ] ); \
     targetCombo->addItems( QDir( "/dev/" )\
         .entryList( targetCombo ## StringList, QDir::System )\
@@ -350,7 +350,7 @@ DiscOpenPanel::DiscOpenPanel( QWidget *_parent, intf_thread_t *_p_intf ) :
                 GetVolumeInformationW( drive, psz_name, 511, NULL, NULL, NULL, NULL, 0 );
 
                 QString displayName = FromWide( drive );
-                if( !EMPTY_STR(psz_name) ) {
+                if( !*psz_name ) {
                     displayName = displayName + " - "  + FromWide( psz_name );
                 }
 
@@ -384,6 +384,7 @@ DiscOpenPanel::DiscOpenPanel( QWidget *_parent, intf_thread_t *_p_intf ) :
             eject() );
 
     CONNECT( ui.deviceCombo, editTextChanged( QString ), this, updateMRL());
+    CONNECT( ui.deviceCombo, currentIndexChanged( QString ), this, updateMRL());
     CONNECT( ui.titleSpin, valueChanged( int ), this, updateMRL());
     CONNECT( ui.chapterSpin, valueChanged( int ), this, updateMRL());
     CONNECT( ui.audioSpin, valueChanged( int ), this, updateMRL());
@@ -667,7 +668,7 @@ void UrlValidator::fixup( QString& str ) const
     str = str.trimmed();
 }
 
-QValidator::State UrlValidator::validate( QString& str, int& pos ) const
+QValidator::State UrlValidator::validate( QString& str, int& ) const
 {
     if( str.contains( ' ' ) )
         return QValidator::Invalid;
@@ -729,12 +730,12 @@ void CaptureOpenPanel::initialize()
     module_config_t *p_config =
         config_FindConfig( VLC_OBJECT(p_intf), "dshow-vdev" );
     vdevDshowW = new StringListConfigControl(
-        VLC_OBJECT(p_intf), p_config, this, false, dshowDevLayout, line );
+        VLC_OBJECT(p_intf), p_config, this, dshowDevLayout, line );
     line++;
 
     p_config = config_FindConfig( VLC_OBJECT(p_intf), "dshow-adev" );
     adevDshowW = new StringListConfigControl(
-        VLC_OBJECT(p_intf), p_config, this, false, dshowDevLayout, line );
+        VLC_OBJECT(p_intf), p_config, this, dshowDevLayout, line );
     line++;
 
     /* dshow Properties */
@@ -929,30 +930,27 @@ void CaptureOpenPanel::initialize()
     dvbCard->setAlignment( Qt::AlignRight );
 #ifdef __linux__
     dvbCard->setPrefix( "/dev/dvb/adapter" );
-    dvbFE = new QSpinBox;
-    dvbFE->setPrefix( "/frontend" );
 #endif
     dvbDevLayout->addWidget( dvbDeviceLabel, 0, 0 );
     dvbDevLayout->addWidget( dvbCard, 0, 1, 1, 2 );
-#ifdef __linux__
-    dvbDevLayout->addWidget( dvbFE, 0, 3 );
-#endif
 
     dvbc = new QRadioButton( "DVB-C" );
     dvbs = new QRadioButton( "DVB-S" );
     dvbs2 = new QRadioButton( "DVB-S2" );
     dvbt = new QRadioButton( "DVB-T" );
+    dvbt2 = new QRadioButton( "DVB-T2" );
     atsc = new QRadioButton( "ATSC" );
     cqam = new QRadioButton( "Clear QAM" );
     dvbt->setChecked( true );
 
     dvbDevLayout->addWidget( dvbTypeLabel, 1, 0, 2, 1 );
-    dvbDevLayout->addWidget( dvbc, 1, 1 );
-    dvbDevLayout->addWidget( dvbs, 1, 2 );
+    dvbDevLayout->addWidget( dvbc,  1, 1 );
+    dvbDevLayout->addWidget( dvbs,  1, 2 );
     dvbDevLayout->addWidget( dvbs2, 2, 2 );
-    dvbDevLayout->addWidget( dvbt, 1, 3 );
-    dvbDevLayout->addWidget( atsc, 1, 4 );
-    dvbDevLayout->addWidget( cqam, 2, 4 );
+    dvbDevLayout->addWidget( dvbt,  1, 3 );
+    dvbDevLayout->addWidget( dvbt2, 2, 3 );
+    dvbDevLayout->addWidget( atsc,  1, 4 );
+    dvbDevLayout->addWidget( cqam,  2, 4 );
 
     /* DVB Props panel */
     QLabel *dvbFreqLabel =
@@ -1014,9 +1012,6 @@ void CaptureOpenPanel::initialize()
 
     /* DVB CONNECTs */
     CuMRL( dvbCard, valueChanged ( int ) );
-#ifdef __linux__
-    CuMRL( dvbFE, valueChanged ( int ) );
-#endif
     CuMRL( dvbFreq, valueChanged ( int ) );
     CuMRL( dvbSrate, valueChanged ( int ) );
     CuMRL( dvbQamBox, currentIndexChanged ( int ) );
@@ -1027,10 +1022,12 @@ void CaptureOpenPanel::initialize()
     BUTTONACT( dvbs, updateButtons() );
     BUTTONACT( dvbs2, updateButtons() );
     BUTTONACT( dvbt, updateButtons() );
+    BUTTONACT( dvbt2, updateButtons() );
     BUTTONACT( atsc, updateButtons() );
     BUTTONACT( cqam, updateButtons() );
     BUTTONACT( dvbc, updateMRL() );
     BUTTONACT( dvbt, updateMRL() );
+    BUTTONACT( dvbt2, updateMRL() );
     BUTTONACT( dvbs, updateMRL() );
     BUTTONACT( dvbs2, updateMRL() );
     BUTTONACT( atsc, updateMRL() );
@@ -1143,6 +1140,8 @@ void CaptureOpenPanel::updateMRL()
         else
         if( dvbt->isChecked() ) mrl = "dvb-t://";
         else
+        if( dvbt2->isChecked() ) mrl = "dvb-t2://";
+        else
         if( atsc->isChecked() ) mrl = "atsc://";
         else
         if( cqam->isChecked() ) mrl = "cqam://";
@@ -1157,16 +1156,13 @@ void CaptureOpenPanel::updateMRL()
                 + dvbPskBox->itemData( dvbPskBox->currentIndex() ).toString();
         if( dvbc->isChecked() || dvbs->isChecked() || dvbs2->isChecked() )
             mrl += ":srate=" + QString::number( dvbSrate->value() );
-        if( dvbt->isChecked() )
+        if( dvbt->isChecked() || dvbt2->isChecked() )
             mrl += ":bandwidth=" +
                 QString::number( dvbBandBox->itemData(
                     dvbBandBox->currentIndex() ).toInt() );
 
         fileList << mrl; mrl= "";
         mrl += " :dvb-adapter=" + QString::number( dvbCard->value() );
-#ifdef __linux__
-        mrl += " :dvb-device=" + QString::number( dvbFE->value() );
-#endif
         break;
     case SCREEN_DEVICE:
         fileList << "screen://";
@@ -1224,7 +1220,7 @@ void CaptureOpenPanel::updateButtons()
             dvbPskBox->show();
             dvbModLabel->show();
         }
-        else if( dvbt->isChecked() )
+        else if( dvbt->isChecked() || dvbt2->isChecked() )
         {
             dvbBandBox->show();
             dvbBandLabel->show();

@@ -2,7 +2,7 @@
  * top_window.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 908a6d30764a4baa0185cc008a6ff95620fa8741 $
+ * $Id: 60dc2a977a5497be4a233a6b171cb7e69ec17b2b $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -75,7 +75,7 @@ TopWindow::~TopWindow()
 
 void TopWindow::processEvent( EvtFocus &rEvtFocus )
 {
-//    fprintf(stderr, rEvtFocus.getAsString().c_str());
+    (void)rEvtFocus;
 }
 
 
@@ -130,9 +130,10 @@ void TopWindow::processEvent( EvtMotion &rEvtMotion )
 
 void TopWindow::processEvent( EvtLeave &rEvtLeave )
 {
+    (void)rEvtLeave;
+
     // No more hit control
     setLastHit( NULL );
-
     if( !m_pCapturingControl )
     {
         m_rWindowManager.hideTooltip();

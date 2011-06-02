@@ -34,14 +34,15 @@
 # define USE_OPENGL_ES 0
 #endif
 
-#define VLCGL_TEXTURE_COUNT 1
-
 #if !defined (__APPLE__)
 # if USE_OPENGL_ES == 2
 #  include <GLES2/gl2.h>
 # elif USE_OPENGL_ES == 1
 #  include <GLES/gl.h>
 # else
+#  ifdef WIN32
+#   include <GL/glew.h>
+#  endif
 #  include <GL/gl.h>
 # endif
 #else
@@ -52,34 +53,19 @@
 # else
 #  define MACOS_OPENGL
 #  include <OpenGL/gl.h>
-#  undef VLCGL_TEXTURE_COUNT
-#  define VLCGL_TEXTURE_COUNT 2
 # endif
 #endif
 
-typedef struct {
-    vlc_gl_t   *gl;
+typedef struct vout_display_opengl_t vout_display_opengl_t;
 
-    video_format_t fmt;
+vout_display_opengl_t *vout_display_opengl_New(video_format_t *fmt,
+                                               const vlc_fourcc_t **subpicture_chromas,
+                                               vlc_gl_t *gl);
+void vout_display_opengl_Delete(vout_display_opengl_t *vgl);
 
-    int        tex_pixel_size;
-    int        tex_width;
-    int        tex_height;
-
-    GLuint     texture[VLCGL_TEXTURE_COUNT];
-    uint8_t    *buffer[VLCGL_TEXTURE_COUNT];
-
-    picture_pool_t *pool;
-} vout_display_opengl_t;
-
-int vout_display_opengl_Init(vout_display_opengl_t *vgl,
-                             video_format_t *fmt, vlc_gl_t *gl);
-void vout_display_opengl_Clean(vout_display_opengl_t *vgl);
-
-int vout_display_opengl_ResetTextures(vout_display_opengl_t *vgl);
-picture_pool_t *vout_display_opengl_GetPool(vout_display_opengl_t *vgl);
+picture_pool_t *vout_display_opengl_GetPool(vout_display_opengl_t *vgl, unsigned);
 
 int vout_display_opengl_Prepare(vout_display_opengl_t *vgl,
-                                picture_t *picture);
+                                picture_t *picture, subpicture_t *subpicture);
 int vout_display_opengl_Display(vout_display_opengl_t *vgl,
                                 const video_format_t *source);

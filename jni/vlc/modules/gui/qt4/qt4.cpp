@@ -2,7 +2,7 @@
  * qt4.cpp : QT4 interface
  ****************************************************************************
  * Copyright © 2006-2009 the VideoLAN team
- * $Id: e5ecb32bc0024e41fb54b1197980826a93b98c28 $
+ * $Id: 0ab6cf0b42062d2d7de80b2aae100c1b2f01595c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -32,7 +32,7 @@
 
 #include "qt4.hpp"
 
-#include "input_manager.hpp"    /* THEMIM creation */
+#include "input_manager.hpp"    /* THEMIM destruction */
 #include "dialogs_provider.hpp" /* THEDP creation */
 #include "main_interface.hpp"   /* MainInterface creation */
 #include "dialogs/help.hpp"     /* Launch Update */
@@ -211,9 +211,9 @@ vlc_module_begin ()
     add_bool( "qt-pause-minimized", true, QT_PAUSE_MINIMIZED_TEXT,
               QT_PAUSE_MINIMIZED_LONGTEXT, false )
 
-    add_float_with_range( "qt-opacity", 1., 0.1, 1., NULL, OPACITY_TEXT,
+    add_float_with_range( "qt-opacity", 1., 0.1, 1., OPACITY_TEXT,
                           OPACITY_LONGTEXT, false )
-    add_float_with_range( "qt-fs-opacity", 0.8, 0.1, 1., NULL, OPACITY_FS_TEXT,
+    add_float_with_range( "qt-fs-opacity", 0.8, 0.1, 1., OPACITY_FS_TEXT,
                           OPACITY_FS_LONGTEXT, false )
 
     add_bool( "qt-video-autoresize", true, KEEPSIZE_TEXT,
@@ -240,7 +240,7 @@ vlc_module_begin ()
     add_bool( "qt-autosave-volume", false, SAVEVOL_TEXT,
               SAVEVOL_TEXT, true )
     add_integer_with_range( "qt-startvolume", QT_VOLUME_DEFAULT, 0,
-               QT_VOLUME_MAX, NULL, STARTVOL_TEXT, STARTVOL_TEXT, true )
+               QT_VOLUME_MAX, STARTVOL_TEXT, STARTVOL_TEXT, true )
 
 #ifdef WIN32
     add_bool( "qt-disable-volume-keys"             /* name */,
@@ -285,9 +285,7 @@ vlc_module_begin ()
 
     add_obsolete_bool( "qt-adv-options" ) /* Since 1.2.0 */
 
-#ifdef WIN32
     cannot_unload_broken_library()
-#endif
 
     add_submodule ()
         set_description( "Dialogs provider" )

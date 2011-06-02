@@ -2,7 +2,7 @@
  * simple_preferences.cpp : "Simple preferences"
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id: b957b730af3698df669ef9f9be8d7b1fa854672a $
+ * $Id: 2a4e6ac34e30ac3161c684a46f20fb543e3a9322 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -29,6 +29,7 @@
 
 #include "components/simple_preferences.hpp"
 #include "components/preferences_widgets.hpp"
+#include "dialogs/ml_configuration.hpp"
 
 #include <vlc_config_cat.h>
 #include <vlc_configuration.h>
@@ -138,7 +139,7 @@ SPrefsPanel::SPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
             if( p_config )                                                \
             {                                                             \
                 control =  new BoolConfigControl( VLC_OBJECT(p_intf),     \
-                           p_config, NULL, ui.qcontrol, false );          \
+                           p_config, NULL, ui.qcontrol );          \
                 controls.append( control );                               \
             }                                                             \
             else { ui.qcontrol->setEnabled( false ); }
@@ -548,6 +549,10 @@ SPrefsPanel::SPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
             ui.assoButton->hide();
             ui.assocLabel->hide();
 #endif
+#ifdef MEDIA_LIBRARY
+            BUTTONACT( ui.sqlMLbtn, configML() );
+#endif
+
             /* interface */
             char *psz_intf = config_GetPsz( p_intf, "intf" );
             if( psz_intf )
@@ -886,6 +891,15 @@ void SPrefsPanel::changeStyle( QString s_style )
     };
 }
 
+void SPrefsPanel::configML()
+{
+#ifdef MEDIA_LIBRARY
+    MLConfDialog *mld = new MLConfDialog( this, p_intf );
+    mld->exec();
+    delete mld;
+#endif
+}
+
 #ifdef WIN32
 #include <QDialogButtonBox>
 #include "util/registry.hpp"
@@ -898,7 +912,7 @@ bool SPrefsPanel::addType( const char * psz_ext, QTreeWidgetItem* current,
     const char* psz_VLC = "VLC";
     current = new QTreeWidgetItem( parent, QStringList( psz_ext ) );
 
-    if( strstr( qvReg->ReadRegistryString( psz_ext, "", ""  ), psz_VLC ) )
+    if( strstr( qvReg->ReadRegistryString( psz_ext, "", "" ), psz_VLC ) )
     {
         current->setCheckState( 0, Qt::Checked );
         b_temp = false;
@@ -952,7 +966,7 @@ void SPrefsPanel::assoDialog()
     videoType->setExpanded( true ); videoType->setCheckState( 0, Qt::Unchecked );
     otherType->setExpanded( true ); otherType->setCheckState( 0, Qt::Unchecked );
 
-    QTreeWidgetItem *currentItem;
+    QTreeWidgetItem *currentItem = NULL;
 
     int i_temp = 0;
 #define aTa( name ) i_temp += addType( name, currentItem, audioType, qvReg )
@@ -1052,7 +1066,7 @@ void addAsso( QVLCRegistry *qvReg, const char *psz_ext )
 void delAsso( QVLCRegistry *qvReg, const char *psz_ext )
 {
     char psz_VLC[] = "VLC";
-    char *psz_value = qvReg->ReadRegistryString( psz_ext, "", ""  );
+    char *psz_value = qvReg->ReadRegistryString( psz_ext, "", "" );
 
     if( psz_value && !strcmp( strcat( psz_VLC, psz_ext ), psz_value ) )
     {
@@ -1067,7 +1081,7 @@ void delAsso( QVLCRegistry *qvReg, const char *psz_ext )
 }
 void SPrefsPanel::saveAsso()
 {
-    QVLCRegistry * qvReg;
+    QVLCRegistry * qvReg = NULL;
     for( int i = 0; i < listAsso.size(); i ++ )
     {
         qvReg  = new QVLCRegistry( HKEY_CLASSES_ROOT );

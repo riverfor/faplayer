@@ -1,8 +1,8 @@
 /*****************************************************************************
  * ncurses.c : NCurses interface for vlc
  *****************************************************************************
- * Copyright © 2001-2010 the VideoLAN team
- * $Id: b920f5b5c65328c3b720e0aa8d8b73051cadcce7 $
+ * Copyright © 2001-2011 the VideoLAN team
+ * $Id: 5dbdb25ad720520d4bbed77025acfdf2fa662e4b $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -214,6 +214,7 @@ struct intf_sys_t
     struct pl_item_t    **pp_plist;
     int             i_plist_entries;
     bool            b_need_update;
+    vlc_mutex_t     pl_lock;
     bool            b_plidx_follow;
     playlist_item_t *p_node;        /* current node */
 
@@ -447,7 +448,7 @@ static void PlaylistRebuild(intf_thread_t *p_intf)
     PL_UNLOCK;
 }
 
-static int PlaylistChanged(vlc_object_t *p_this, const char *psz_variable,
+static int ItemChanged(vlc_object_t *p_this, const char *psz_variable,
                             vlc_value_t oval, vlc_value_t nval, void *param)
 {
     VLC_UNUSED(p_this); VLC_UNUSED(psz_variable);
@@ -455,10 +456,27 @@ static int PlaylistChanged(vlc_object_t *p_this, const char *psz_variable,
 
     intf_thread_t *p_intf   = (intf_thread_t *)param;
     intf_sys_t *p_sys       = p_intf->p_sys;
+
+    vlc_mutex_lock(&p_sys->pl_lock);
+    p_sys->b_need_update = true;
+    vlc_mutex_unlock(&p_sys->pl_lock);
+
+    return VLC_SUCCESS;
+}
+
+static int PlaylistChanged(vlc_object_t *p_this, const char *psz_variable,
+                            vlc_value_t oval, vlc_value_t nval, void *param)
+{
+    VLC_UNUSED(p_this); VLC_UNUSED(psz_variable);
+    VLC_UNUSED(oval); VLC_UNUSED(nval);
+    intf_thread_t *p_intf   = (intf_thread_t *)param;
+    intf_sys_t *p_sys       = p_intf->p_sys;
     playlist_item_t *p_node = playlist_CurrentPlayingItem(pl_Get(p_intf));
 
+    vlc_mutex_lock(&p_sys->pl_lock);
     p_sys->b_need_update = true;
     p_sys->p_node = p_node ? p_node->p_parent : NULL;
+    vlc_mutex_unlock(&p_sys->pl_lock);
 
     return VLC_SUCCESS;
 }
@@ -506,8 +524,12 @@ static inline bool IsIndex(intf_sys_t *p_sys, playlist_t *p_playlist, int i)
 
     PL_ASSERT_LOCKED;
 
-    if (p_item->i_children == 0 && p_item == p_sys->p_node)
+    vlc_mutex_lock(&p_sys->pl_lock);
+    if (p_item->i_children == 0 && p_item == p_sys->p_node) {
+        vlc_mutex_unlock(&p_sys->pl_lock);
         return true;
+    }
+    vlc_mutex_unlock(&p_sys->pl_lock);
 
     p_played_item = playlist_CurrentPlayingItem(p_playlist);
     if (p_played_item && p_item->p_input && p_played_item->p_input)
@@ -778,8 +800,7 @@ static int DrawMeta(intf_thread_t *p_intf)
             continue;
 
         if (p_sys->b_color) color_set(C_CATEGORY, NULL);
-        MainBoxWrite(p_sys, l++, "  [%s]",
-                     vlc_meta_TypeToLocalizedString(i));
+        MainBoxWrite(p_sys, l++, "  [%s]", vlc_meta_TypeToLocalizedString(i));
         if (p_sys->b_color) color_set(C_DEFAULT, NULL);
         MainBoxWrite(p_sys, l++, "      %s", psz_meta);
     }
@@ -997,11 +1018,13 @@ static int DrawPlaylist(intf_thread_t *p_intf)
     intf_sys_t *p_sys = p_intf->p_sys;
     playlist_t *p_playlist = pl_Get(p_intf);
 
+    vlc_mutex_lock(&p_sys->pl_lock);
     if (p_sys->b_need_update)
     {
         PlaylistRebuild(p_intf);
         p_sys->b_need_update = false;
     }
+    vlc_mutex_unlock(&p_sys->pl_lock);
 
     if (p_sys->b_plidx_follow)
         FindIndex(p_sys, p_playlist);
@@ -1011,7 +1034,9 @@ static int DrawPlaylist(intf_thread_t *p_intf)
         char c;
         playlist_item_t *p_current_item;
         playlist_item_t *p_item = p_sys->pp_plist[i]->p_item;
+        vlc_mutex_lock(&p_sys->pl_lock);
         playlist_item_t *p_node = p_sys->p_node;
+        vlc_mutex_unlock(&p_sys->pl_lock);
 
         PL_LOCK;
         assert(p_item);
@@ -1096,10 +1121,14 @@ static int DrawStatus(intf_thread_t *p_intf)
     if (p_input && !p_input->b_dead)
     {
         vlc_value_t val;
+        char *psz_path, *psz_uri;
 
-        char *psz_uri = input_item_GetURI(input_GetItem(p_input));
-        mvnprintw(y++, 0, COLS, _(" Source   : %s"), psz_uri);
+        psz_uri = input_item_GetURI(input_GetItem(p_input));
+        psz_path = make_path(psz_uri);
+
+        mvnprintw(y++, 0, COLS, _(" Source   : %s"), psz_path?psz_path:psz_uri);
         free(psz_uri);
+        free(psz_path);
 
         var_Get(p_input, "state", &val);
         switch(val.i_int)
@@ -1221,7 +1250,9 @@ static void Redraw(intf_thread_t *p_intf)
     {
         FillBox(p_intf);
 
-        if (p_sys->i_box_start > p_sys->i_box_lines_total - 1)
+        if (p_sys->i_box_lines_total == 0)
+            p_sys->i_box_start = 0;
+        else if (p_sys->i_box_start > p_sys->i_box_lines_total - 1)
             p_sys->i_box_start = p_sys->i_box_lines_total - 1;
         y += __MIN(p_sys->i_box_lines_total - p_sys->i_box_start,
                    p_sys->i_box_height);
@@ -1359,7 +1390,9 @@ static bool HandlePlaylistKey(intf_thread_t *p_intf, int key)
         playlist_RecursiveNodeSort(p_playlist, p_playlist->p_root_onelevel,
                                     SORT_TITLE_NODES_FIRST,
                                     (key == 'o')? ORDER_NORMAL : ORDER_REVERSE);
+        vlc_mutex_lock(&p_sys->pl_lock);
         p_sys->b_need_update = true;
+        vlc_mutex_unlock(&p_sys->pl_lock);
         return true;
 
     case 'g':
@@ -1381,7 +1414,9 @@ static bool HandlePlaylistKey(intf_thread_t *p_intf, int key)
         else
             playlist_NodeDelete(p_playlist, p_item, true , false);
         PL_UNLOCK;
+        vlc_mutex_lock(&p_sys->pl_lock);
         p_sys->b_need_update = true;
+        vlc_mutex_unlock(&p_sys->pl_lock);
         return true;
     }
 
@@ -1403,7 +1438,9 @@ static bool HandlePlaylistKey(intf_thread_t *p_intf, int key)
             }
             else
             {
+                vlc_mutex_lock(&p_sys->pl_lock);
                 p_sys->p_node = p_parent;
+                vlc_mutex_unlock(&p_sys->pl_lock);
                 p_item = NULL;
             }
 
@@ -1413,7 +1450,9 @@ static bool HandlePlaylistKey(intf_thread_t *p_intf, int key)
         else
         {   /* We only want to set the current node */
             playlist_Stop(p_playlist);
+            vlc_mutex_lock(&p_sys->pl_lock);
             p_sys->p_node = p_pl_item->p_item;
+            vlc_mutex_unlock(&p_sys->pl_lock);
         }
 
         p_sys->b_plidx_follow = true;
@@ -1463,7 +1502,9 @@ static bool HandleBrowseKey(intf_thread_t *p_intf, int key)
             return true;
 
         playlist_t *p_playlist = pl_Get(p_intf);
+        vlc_mutex_lock(&p_sys->pl_lock);
         playlist_item_t *p_parent = p_sys->p_node;
+        vlc_mutex_unlock(&p_sys->pl_lock);
         if (!p_parent)
         {
             playlist_item_t *p_item;
@@ -1524,7 +1565,9 @@ static void HandleEditBoxKey(intf_thread_t *p_intf, int key, int box)
             }
 
             playlist_t *p_playlist = pl_Get(p_intf);
+            vlc_mutex_lock(&p_sys->pl_lock);
             playlist_item_t *p_parent = p_sys->p_node, *p_current;
+            vlc_mutex_unlock(&p_sys->pl_lock);
 
             PL_LOCK;
             if (!p_parent)
@@ -1772,17 +1815,16 @@ static void HandleKey(intf_thread_t *p_intf)
  *
  */
 
-static void MsgCallback(msg_cb_data_t *data, msg_item_t *msg, unsigned i)
+static void MsgCallback(msg_cb_data_t *data, const msg_item_t *msg)
 {
     intf_sys_t *p_sys = data->p_sys;
-    (void)i; // what is this?
     int canc = vlc_savecancel();
 
     vlc_mutex_lock(&p_sys->msg_lock);
 
     if (p_sys->msgs[p_sys->i_msgs])
-        msg_Release(p_sys->msgs[p_sys->i_msgs]);
-    p_sys->msgs[p_sys->i_msgs++] = msg_Hold(msg);
+        msg_Free(p_sys->msgs[p_sys->i_msgs]);
+    p_sys->msgs[p_sys->i_msgs++] = msg_Copy(msg);
 
     if (p_sys->i_msgs == (sizeof p_sys->msgs / sizeof *p_sys->msgs))
         p_sys->i_msgs = 0;
@@ -1816,6 +1858,7 @@ static void Run(intf_thread_t *p_intf)
     int canc = vlc_savecancel();
 
     var_AddCallback(p_playlist, "intf-change", PlaylistChanged, p_intf);
+    var_AddCallback(p_playlist, "item-change", ItemChanged, p_intf);
     var_AddCallback(p_playlist, "playlist-item-append", PlaylistChanged, p_intf);
 
     while (vlc_object_alive(p_intf) && !p_sys->b_exit)
@@ -1826,6 +1869,7 @@ static void Run(intf_thread_t *p_intf)
     }
 
     var_DelCallback(p_playlist, "intf-change", PlaylistChanged, p_intf);
+    var_DelCallback(p_playlist, "item-change", ItemChanged, p_intf);
     var_DelCallback(p_playlist, "playlist-item-append", PlaylistChanged, p_intf);
     vlc_restorecancel(canc);
 }
@@ -1851,6 +1895,7 @@ static int Open(vlc_object_t *p_this)
 
     msg_cb_data->p_sys = p_sys;
     vlc_mutex_init(&p_sys->msg_lock);
+    vlc_mutex_init(&p_sys->pl_lock);
     p_sys->i_msgs = 0;
     memset(p_sys->msgs, 0, sizeof p_sys->msgs);
     p_sys->p_sub = msg_Subscribe(p_intf->p_libvlc, MsgCallback, msg_cb_data);
@@ -1912,9 +1957,10 @@ static void Close(vlc_object_t *p_this)
 
     msg_Unsubscribe(p_sys->p_sub);
     vlc_mutex_destroy(&p_sys->msg_lock);
+    vlc_mutex_destroy(&p_sys->pl_lock);
     for(unsigned i = 0; i < sizeof p_sys->msgs / sizeof *p_sys->msgs; i++)
         if (p_sys->msgs[i])
-            msg_Release(p_sys->msgs[i]);
+            msg_Free(p_sys->msgs[i]);
 
     free(p_sys);
 }

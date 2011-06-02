@@ -2,7 +2,7 @@
  * panels.hpp : Panels for the playlist
  ****************************************************************************
  * Copyright (C) 2000-2005 the VideoLAN team
- * $Id: 3853918fdde104368b9f1d56ee01c5ab893de08a $
+ * $Id: 6b936a0c8bddeede81b9303f3c06b32abb5a8b67 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -37,6 +37,7 @@
 
 class QSignalMapper;
 class PLModel;
+class MLModel;
 class QKeyEvent;
 class QWheelEvent;
 class QStackedLayout;
@@ -58,7 +59,7 @@ class StandardPLPanel: public QWidget
 
 public:
     StandardPLPanel( PlaylistWidget *, intf_thread_t *,
-                     playlist_item_t *, PLSelector *, PLModel * );
+                     playlist_item_t *, PLSelector *, PLModel *, MLModel * );
     virtual ~StandardPLPanel();
 
     enum { ICON_VIEW = 0,
@@ -67,12 +68,13 @@ public:
            PICTUREFLOW_VIEW,
            VIEW_COUNT };
 
-    const int currentViewIndex();
+    int currentViewIndex() const;
 
 protected:
-
     PLModel *model;
+    MLModel *mlmodel;
     virtual void wheelEvent( QWheelEvent *e );
+
 private:
     intf_thread_t *p_intf;
 
@@ -96,20 +98,20 @@ private:
     void createIconView();
     void createListView();
     void createCoverView();
+    void changeModel ( bool b_ml );
     bool eventFilter ( QObject * watched, QEvent * event );
 
 public slots:
-    void setRoot( playlist_item_t * );
+    void setRoot( playlist_item_t *, bool );
     void browseInto( const QModelIndex& );
 
 private slots:
     void deleteSelection();
     void handleExpansion( const QModelIndex& );
-    void handleRootChange();
     void activate( const QModelIndex & );
 
     void browseInto();
-    void browseInto( input_item_t * );
+    void browseInto( int );
 
     void gotoPlayingItem();
 

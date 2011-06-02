@@ -2,7 +2,7 @@
  * ml_configuration.hpp: ML's configuration dialog (folder view)
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN Team and AUTHORS
- * $Id: 43ab69dcb0a65220a29c956bd44bd2d650295075 $
+ * $Id: 5cefc6d17ab8e486e8276246d051ef5f400221b1 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -85,17 +85,10 @@ public slots:
 class MLConfDialog : public QVLCDialog
 {
     Q_OBJECT;
-    public:
-    static MLConfDialog * getInstance( intf_thread_t *p_intf )
-    {
-        if( !instance )
-            instance = new MLConfDialog( (QWidget *)p_intf->p_sys->p_mi, p_intf );
-        return instance;
-    }
-    virtual ~MLConfDialog();
+public:
+    MLConfDialog( QWidget *, intf_thread_t * );
 
 private:
-    MLConfDialog( QWidget *, intf_thread_t * );
     void init();
 
     vlc_array_t *p_monitored_dirs;

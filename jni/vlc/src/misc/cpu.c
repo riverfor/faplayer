@@ -2,7 +2,7 @@
  * cpu.c: CPU detection code
  *****************************************************************************
  * Copyright (C) 1998-2004 the VideoLAN team
- * $Id: a2009363662f172a7cd3f68d9c1d793b22fb855d $
+ * $Id: 6f5d8fb6302cd50153c9db74f492c0943a2b9af5 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -317,25 +317,6 @@ unsigned vlc_CPU (void)
     return cpu_flags;
 }
 
-const struct
-{
-    uint32_t value;
-    char name[12];
-} cap_dirs[] = {
-#if defined ( __i386__ ) || defined ( __x86_64__ )
-    { CPU_CAPABILITY_MMX,     "mmx" },
-    { CPU_CAPABILITY_MMXEXT,  "mmxext" },
-    { CPU_CAPABILITY_3DNOW,   "3dnow" },
-    { CPU_CAPABILITY_SSE,     "sse" },
-#endif
-#if defined (__ppc__) || defined (__ppc64__) || defined (__powerpc__)
-    { CPU_CAPABILITY_ALTIVEC, "altivec" },
-#endif
-#if defined (__arm__)
-    { CPU_CAPABILITY_NEON,    "arm_neon" },
-#endif
-};
-
 /**
  * Return the number of available logical CPU.
  */
@@ -403,38 +384,12 @@ unsigned vlc_GetCPUCount(void)
 #endif
 }
 
-/**
- * Check if a directory name contains usable plugins w.r.t. the hardware
- * capabilities. Loading a plugin when the hardware has insufficient
- * capabilities may lead to illegal instructions (SIGILL) and must be avoided.
- *
- * @param name the name of the directory (<b>not</b> the path)
- *
- * @return true if the hardware has sufficient capabilities or the directory
- * does not require any special capability; false if the running hardware has
- * insufficient capabilities.
- */
-bool vlc_CPU_CheckPluginDir (const char *name)
-{
-    const unsigned flags = vlc_CPU ();
-    for (size_t i = 0; i < sizeof (cap_dirs) / sizeof (cap_dirs[0]); i++)
-    {
-        if (strcmp (name, cap_dirs[i].name))
-            continue;
-        return (flags & cap_dirs[i].value) != 0;
-    }
-    return true;
-}
-
 static vlc_memcpy_t pf_vlc_memcpy = memcpy;
-static vlc_memset_t pf_vlc_memset = memset;
 
-void vlc_fastmem_register (vlc_memcpy_t cpy, vlc_memset_t set)
+void vlc_fastmem_register (vlc_memcpy_t cpy)
 {
-    if (cpy)
-        pf_vlc_memcpy = cpy;
-    if (set)
-        pf_vlc_memset = set;
+    assert (cpy != NULL);
+    pf_vlc_memcpy = cpy;
 }
 
 /**
@@ -443,14 +398,6 @@ void vlc_fastmem_register (vlc_memcpy_t cpy, vlc_memset_t set)
 void *vlc_memcpy (void *tgt, const void *src, size_t n)
 {
     return pf_vlc_memcpy (tgt, src, n);
-}
-
-/**
- * vlc_memset: fast CPU-dependent memset
- */
-void *vlc_memset (void *tgt, int c, size_t n)
-{
-    return pf_vlc_memset (tgt, c, n);
 }
 
 /**

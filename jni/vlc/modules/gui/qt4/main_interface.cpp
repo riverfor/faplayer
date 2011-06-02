@@ -2,7 +2,7 @@
  * main_interface.cpp : Main interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: 91489508a2aca95d75fb7daee0406477ad9209b1 $
+ * $Id: f744dee771286eba56cf2ef624a775163a02aefd $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -87,6 +87,7 @@ MainInterface::MainInterface( intf_thread_t *_p_intf ) : QVLCMW( _p_intf )
     b_hideAfterCreation  = false; // --qt-start-minimized
     playlistVisible      = false;
     input_name           = "";
+    b_interfaceFullScreen= false;
 
 
     /* Ask for Privacy */
@@ -209,7 +210,6 @@ MainInterface::MainInterface( intf_thread_t *_p_intf ) : QVLCMW( _p_intf )
 
     /* VideoWidget connects for asynchronous calls */
     b_videoFullScreen = false;
-    b_videoOnTop = false;
     connect( this, SIGNAL(askGetVideo(WId*,int*,int*,unsigned*,unsigned *)),
              this, SLOT(getVideoSlot(WId*,int*,int*,unsigned*,unsigned*)),
              Qt::BlockingQueuedConnection );
@@ -553,7 +553,7 @@ void MainInterface::destroyPopupMenu()
     QVLCMenu::PopupMenu( p_intf, false );
 }
 
-void MainInterface::popupMenu( const QPoint &p )
+void MainInterface::popupMenu( const QPoint & )
 {
     QVLCMenu::PopupMenu( p_intf, true );
 }
@@ -562,7 +562,7 @@ void MainInterface::toggleFSC()
 {
    if( !fullscreenControls ) return;
 
-   IMEvent *eShow = new IMEvent( FullscreenControlToggle_Type, 0 );
+   IMEvent *eShow = new IMEvent( FullscreenControlToggle_Type );
    QApplication::postEvent( fullscreenControls, eShow );
 }
 
@@ -593,6 +593,10 @@ WId MainInterface::getVideo( int *pi_x, int *pi_y,
 void MainInterface::getVideoSlot( WId *p_id, int *pi_x, int *pi_y,
                                   unsigned *pi_width, unsigned *pi_height )
 {
+    /* Hidden or minimized, activate */
+    if( isHidden() || isMinimized() )
+        toggleUpdateSystrayMenu();
+
     /* Request the videoWidget */
     WId ret = videoWidget->request( pi_x, pi_y,
                                     pi_width, pi_height, !b_autoresize );
@@ -676,16 +680,14 @@ void MainInterface::setVideoFullScreen( bool fs )
  * Emit askVideoOnTop() to invoke this from other thread. */
 void MainInterface::setVideoOnTop( bool on_top )
 {
-    b_videoOnTop = on_top;
-
     Qt::WindowFlags oldflags = windowFlags(), newflags;
 
-    if( b_videoOnTop )
+    if( on_top )
         newflags = oldflags | Qt::WindowStaysOnTopHint;
     else
         newflags = oldflags & ~Qt::WindowStaysOnTopHint;
+    if( newflags != oldflags && !b_videoFullScreen )
 
-    if( newflags != oldflags )
     {
         setWindowFlags( newflags );
         show(); /* necessary to apply window flags */
@@ -1272,6 +1274,8 @@ void MainInterface::toggleInterfaceFullScreen()
 static int PopupMenuCB( vlc_object_t *p_this, const char *psz_variable,
                         vlc_value_t old_val, vlc_value_t new_val, void *param )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_variable ); VLC_UNUSED( old_val );
+
     intf_thread_t *p_intf = (intf_thread_t *)param;
 
     if( p_intf->pf_show_dialog )
@@ -1289,6 +1293,9 @@ static int PopupMenuCB( vlc_object_t *p_this, const char *psz_variable,
 static int IntfShowCB( vlc_object_t *p_this, const char *psz_variable,
                        vlc_value_t old_val, vlc_value_t new_val, void *param )
 {
+    VLC_UNUSED( p_this ); VLC_UNUSED( psz_variable ); VLC_UNUSED( old_val );
+    VLC_UNUSED( new_val );
+
     intf_thread_t *p_intf = (intf_thread_t *)param;
     p_intf->p_sys->p_mi->toggleFSC();
 

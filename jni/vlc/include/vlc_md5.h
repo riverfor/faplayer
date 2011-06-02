@@ -2,7 +2,7 @@
  * vlc_md5.h: MD5 hash
  *****************************************************************************
  * Copyright (C) 2004-2005 the VideoLAN team
- * $Id: d05126980ffacc7e6778cdc35a74339374386292 $
+ * $Id: f32bccf5ea851fcf29378055f981519bf8004e25 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Sam Hocevar <sam@zoy.org>
@@ -43,9 +43,9 @@ struct md5_s
     uint32_t p_data[16];  /* Buffer to cache non-aligned writes */
 };
 
-VLC_EXPORT(void, InitMD5, ( struct md5_s * ) );
-VLC_EXPORT(void, AddMD5, ( struct md5_s *, const void *, size_t ) );
-VLC_EXPORT(void, EndMD5, ( struct md5_s * ) );
+VLC_API void InitMD5( struct md5_s * );
+VLC_API void AddMD5( struct md5_s *, const void *, size_t );
+VLC_API void EndMD5( struct md5_s * );
 
 /**
  * Returns a char representation of the md5 hash, as shown by UNIX md5 or

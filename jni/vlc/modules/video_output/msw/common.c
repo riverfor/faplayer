@@ -2,7 +2,7 @@
  * common.c:
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: cb55e8f2dffa75c3b3ebeca11ddc9a8906e9b49d $
+ * $Id: 97daadcda258bbde6d525c72b0ecd9c8bd12b413 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -290,11 +290,12 @@ static void CommonChangeThumbnailClip(vout_display_t *vd, bool show)
 
     CoInitialize(0);
 
-    LPTASKBARLIST3 taskbl;
+    void *ptr;
     if (S_OK == CoCreateInstance(&clsid_ITaskbarList,
                                  NULL, CLSCTX_INPROC_SERVER,
                                  &IID_ITaskbarList3,
-                                 &taskbl)) {
+                                 &ptr)) {
+        LPTASKBARLIST3 taskbl = ptr;
         taskbl->vt->HrInit(taskbl);
 
         HWND hroot = GetAncestor(sys->hwnd,GA_ROOT);

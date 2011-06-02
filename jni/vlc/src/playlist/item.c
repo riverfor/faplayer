@@ -2,7 +2,7 @@
  * item.c : Playlist item creation/deletion/add/removal functions
  *****************************************************************************
  * Copyright (C) 1999-2007 the VideoLAN team
- * $Id: 0de77a537ab875d3d1a323a191b214b9df37c146 $
+ * $Id: 29940fc0962b098212cacd45c39b6ee3e293122d $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -126,7 +126,7 @@ static void input_item_add_subitem_tree ( const vlc_event_t * p_event,
                                                  pos,
                                                  b_flat );
 
-    if( !b_flat ) var_SetAddress( p_playlist, "leaf-to-parent", p_input );
+    if( !b_flat ) var_SetInteger( p_playlist, "leaf-to-parent", p_item->i_id );
 
     //control playback only if it was the current playing item that got subitems
     if( b_current )

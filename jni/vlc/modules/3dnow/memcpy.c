@@ -2,7 +2,7 @@
  * memcpy.c : classic memcpy module
  *****************************************************************************
  * Copyright (C) 2001 the VideoLAN team
- * $Id: 37f33e936792139f61de96e93d0e200f059cf4ba $
+ * $Id: 9034d6ffc52e18c3bec0b9f03d052d4995c86702 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -34,8 +34,11 @@
 
 static int Activate( vlc_object_t *p_this )
 {
+    if( !(vlc_CPU() & CPU_CAPABILITY_3DNOW) )
+        return VLC_EGENERIC;
+
     VLC_UNUSED(p_this);
-    vlc_fastmem_register( fast_memcpy, NULL );
+    vlc_fastmem_register( fast_memcpy );
 
     return VLC_SUCCESS;
 }

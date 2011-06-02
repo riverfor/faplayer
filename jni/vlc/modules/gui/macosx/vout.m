@@ -2,7 +2,7 @@
  * vout.m: MacOS X video output module
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id: 7034bad5574d132b59f876c21b845f79da793bb4 $
+ * $Id: 981e157a3e1b482ad8407fb7d5b44317f5564735 $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Florian G. Pflug <fgp@phlo.org>
@@ -669,7 +669,7 @@ int DeviceCallback( vlc_object_t *p_this, const char *psz_variable,
             }
             var_SetCoords( p_vout, "mouse-moved", x, y );
         }
-        if( [self isFullscreen] )
+        if( self && [self isFullscreen] )
             [[[[VLCMain sharedInstance] controls] fspanel] fadeIn];
     }
 

@@ -8,7 +8,6 @@ datarootdir="@datarootdir@"
 optim="@optim@"
 
 plugins="@PLUGINS@ "
-builtins="@BUILTINS@ "
 
 cppflags=""
 cflags=""
@@ -150,10 +149,6 @@ while test $# -gt 0; do
     plugin)
       echo_plugin=yes
       ;;
-    builtin)
-      echo_builtin=yes
-      cppflags="${cppflags} -D__LIBVLC__ -D__BUILTIN__"
-      ;;
     *)
       module="$tgt"
       ;;
@@ -178,10 +173,6 @@ fi
 if test "${echo_list}" = yes; then
   if test "${echo_plugin}" = yes; then
     echo "${plugins}"
-    printf '\n'
-  fi
-  if test "${echo_builtin}" = yes; then
-    echo "${builtins}"
     printf '\n'
   fi
   exit 0

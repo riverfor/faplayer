@@ -25,12 +25,15 @@ libvlc_audio_set_mute
 libvlc_audio_set_track
 libvlc_audio_set_volume
 libvlc_audio_toggle_mute
+libvlc_audio_set_format
+libvlc_audio_set_format_callbacks
+libvlc_audio_set_callbacks
+libvlc_clock
 libvlc_event_attach
 libvlc_event_detach
 libvlc_event_manager_new
 libvlc_event_manager_register_event_type
 libvlc_event_manager_release
-libvlc_event_send
 libvlc_event_type_name
 libvlc_free
 libvlc_get_changeset
@@ -160,7 +163,6 @@ libvlc_media_set_state
 libvlc_media_set_user_data
 libvlc_media_subitems
 libvlc_new
-libvlc_new_with_builtins
 libvlc_playlist_play
 libvlc_release
 libvlc_retain

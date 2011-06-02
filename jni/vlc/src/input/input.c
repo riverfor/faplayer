@@ -2,7 +2,7 @@
  * input.c: input thread
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
- * $Id: 63a148029d21448996035d65d0fa8ac81deb1ba4 $
+ * $Id: efe6b8ed6f0e8d5c7c04abdb9e5e6b275ead3879 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -64,7 +64,7 @@
  *****************************************************************************/
 static void Destructor( input_thread_t * p_input );
 
-static  void *Run            ( vlc_object_t *p_this );
+static  void *Run            ( void * );
 
 static input_thread_t * Create  ( vlc_object_t *, input_item_t *,
                                   const char *, bool, input_resource_t * );
@@ -217,7 +217,9 @@ int input_Preparse( vlc_object_t *p_parent, input_item_t *p_item )
 int input_Start( input_thread_t *p_input )
 {
     /* Create thread and wait for its readiness. */
-    if( vlc_thread_create( p_input, Run, VLC_THREAD_PRIORITY_INPUT ) )
+    p_input->p->is_running = !vlc_clone( &p_input->p->thread,
+                                         Run, p_input, VLC_THREAD_PRIORITY_INPUT );
+    if( !p_input->p->is_running )
     {
         input_ChangeState( p_input, ERROR_S );
         msg_Err( p_input, "cannot create input thread" );
@@ -248,6 +250,28 @@ void input_Stop( input_thread_t *p_input, bool b_abort )
     vlc_mutex_unlock( &p_input->p->lock_control );
 
     input_ControlPush( p_input, INPUT_CONTROL_SET_DIE, NULL );
+}
+
+void input_Join( input_thread_t *p_input )
+{
+    if( p_input->p->is_running )
+        vlc_join( p_input->p->thread, NULL );
+}
+
+void input_Release( input_thread_t *p_input )
+{
+    vlc_object_release( p_input );
+}
+
+/**
+ * Close an input
+ *
+ * It does not call input_Stop itself.
+ */
+void input_Close( input_thread_t *p_input )
+{
+    input_Join( p_input );
+    input_Release( p_input );
 }
 
 /**
@@ -304,8 +328,6 @@ static input_thread_t *Create( vlc_object_t *p_parent, input_item_t *p_item,
                                  VLC_OBJECT_INPUT, input_name );
     if( p_input == NULL )
         return NULL;
-
-    vlc_object_attach( p_input, p_parent );
 
     /* Construct a nice name for the input timer */
     char psz_timer_name[255];
@@ -406,6 +428,7 @@ static input_thread_t *Create( vlc_object_t *p_parent, input_item_t *p_item,
     vlc_cond_init( &p_input->p->wait_control );
     p_input->p->i_control = 0;
     p_input->p->b_abort = false;
+    p_input->p->is_running = false;
 
     /* Create Object Variables for private use only */
     input_ConfigVarInit( p_input );
@@ -531,9 +554,9 @@ static void Destructor( input_thread_t * p_input )
  * This is the "normal" thread that spawns the input processing chain,
  * reads the stream, cleans up and waits
  *****************************************************************************/
-static void *Run( vlc_object_t *p_this )
+static void *Run( void *obj )
 {
-    input_thread_t *p_input = (input_thread_t *)p_this;
+    input_thread_t *p_input = (input_thread_t *)obj;
     const int canc = vlc_savecancel();
 
     if( Init( p_input ) )
@@ -1277,7 +1300,7 @@ static int Init( input_thread_t * p_input )
         {
             /* We don't want a high input priority here or we'll
              * end-up sucking up all the CPU time */
-            vlc_thread_set_priority( p_input, VLC_THREAD_PRIORITY_LOW );
+            vlc_set_priority( p_input->p->thread, VLC_THREAD_PRIORITY_LOW );
         }
 
         msg_Dbg( p_input, "starting in %s mode",
@@ -2724,7 +2747,6 @@ static void InputSourceMeta( input_thread_t *p_input,
                            VLC_OBJECT_GENERIC, "demux meta" );
     if( !p_demux_meta )
         return;
-    vlc_object_attach( p_demux_meta, p_demux );
     p_demux_meta->p_demux = p_demux;
     p_demux_meta->p_item = p_input->p->p_item;
 

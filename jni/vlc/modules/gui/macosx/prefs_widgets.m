@@ -2,7 +2,7 @@
  * prefs_widgets.m: Preferences controls
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: 085883b94a90880e0959c4083ff61f576cf08c7c $
+ * $Id: 7bfc124896759799af772235850d7eda62689010 $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan.org>
  *          Jérôme Decoodt <djc at videolan.org>
@@ -1124,11 +1124,14 @@ o_textfield = [[[NSSecureTextField alloc] initWithFrame: s_rc] retain];       \
 
 - (char *)stringValue
 {
-    if( [o_combo indexOfSelectedItem] >= 0 )
-        return strdup( p_item->ppsz_list[[o_combo indexOfSelectedItem]] );
-    else
-        return strdup( [[VLCMain sharedInstance]
-                            delocalizeString: [o_combo stringValue]] );
+    if( [o_combo indexOfSelectedItem] >= 0 ) {
+        if( p_item->ppsz_list[[o_combo indexOfSelectedItem]] != NULL )
+            return strdup( p_item->ppsz_list[[o_combo indexOfSelectedItem]] );
+    } else {
+        if( [[VLCMain sharedInstance] delocalizeString: [o_combo stringValue]] != NULL )
+            return strdup( [[VLCMain sharedInstance] delocalizeString: [o_combo stringValue]] );
+    }
+    return NULL;
 }
 
 - (void)resetValues

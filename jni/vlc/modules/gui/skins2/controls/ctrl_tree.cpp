@@ -2,7 +2,7 @@
  * ctrl_tree.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: ce0cd93c0afa6c3dee6f33d5c9881249c745f637 $
+ * $Id: 48d694d3bd1ad3b73716dea3cd0639cdb0842146 $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -59,10 +59,10 @@ CtrlTree::CtrlTree( intf_thread_t *pIntf,
     CtrlGeneric( pIntf,rHelp, pVisible), m_rTree( rTree), m_rFont( rFont ),
     m_pBgBitmap( pBgBitmap ), m_pItemBitmap( pItemBitmap ),
     m_pOpenBitmap( pOpenBitmap ), m_pClosedBitmap( pClosedBitmap ),
+    m_pScaledBitmap( NULL ),
     m_fgColor( fgColor ), m_playColor( playColor ), m_bgColor1( bgColor1 ),
     m_bgColor2( bgColor2 ), m_selColor( selColor ),
-    m_pLastSelected( NULL ), m_pImage( NULL ), m_dontMove( false ),
-    m_pScaledBitmap( NULL )
+    m_pLastSelected( NULL ), m_pImage( NULL ), m_dontMove( false )
 {
     // Observe the tree and position variables
     m_rTree.addObserver( this );
@@ -140,6 +140,7 @@ int CtrlTree::maxItems()
 void CtrlTree::onUpdate( Subject<VarTree, tree_update> &rTree,
                          tree_update *arg )
 {
+    (void)rTree;
     if( arg->type == arg->UpdateItem ) // Item update
     {
         if( arg->b_active_item )
@@ -196,6 +197,7 @@ void CtrlTree::onUpdate( Subject<VarTree, tree_update> &rTree,
 
 void CtrlTree::onUpdate( Subject<VarPercent> &rPercent, void* arg)
 {
+    (void)rPercent; (void)arg;
     // Determine what is the first item to display
     VarTree::Iterator it = m_flat ? m_rTree.firstLeaf() : m_rTree.begin();
 
@@ -712,7 +714,6 @@ bool CtrlTree::ensureVisible( VarTree::Iterator item )
 void CtrlTree::autoScroll()
 {
     // Find the current playing stream
-    int playIndex = 0;
     VarTree::Iterator it;
 
     for( it = m_flat ? m_rTree.firstLeaf() : m_rTree.begin();

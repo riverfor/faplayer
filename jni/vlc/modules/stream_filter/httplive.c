@@ -2,7 +2,7 @@
  * httplive.c: HTTP Live Streaming stream filter
  *****************************************************************************
  * Copyright (C) 2010-2011 M2X BV
- * $Id: ce2cbbf908e32d45cfa647cf70b464a1875dbcd9 $
+ * $Id: 5f07c0db6c59a6a2427460fed8f4d32a43f571d6 $
  *
  * Author: Jean-Paul Saman <jpsaman _AT_ videolan _DOT_ org>
  *
@@ -29,6 +29,7 @@
 #endif
 
 #include <limits.h>
+#include <errno.h>
 
 #include <vlc_common.h>
 #include <vlc_plugin.h>
@@ -499,7 +500,7 @@ static char *ConstructUrl(vlc_url_t *url)
     return psz_url;
 }
 
-static int parse_SegmentInformation(stream_t *s, hls_stream_t *hls, char *p_read, const char *uri)
+static int parse_SegmentInformation(hls_stream_t *hls, char *p_read, int *duration)
 {
     assert(hls);
     assert(p_read);
@@ -514,9 +515,41 @@ static int parse_SegmentInformation(stream_t *s, hls_stream_t *hls, char *p_read
     token = strtok_r(NULL, ",", &p_next);
     if (token == NULL)
         return VLC_EGENERIC;
-    int duration = atoi(token);
+
+    int value;
+    if (hls->version < 3)
+    {
+       value = strtol(token, NULL, 10);
+       if (errno == ERANGE)
+       {
+           *duration = -1;
+           return VLC_EGENERIC;
+       }
+       *duration = value;
+    }
+    else
+    {
+        double d = strtod(token, (char **) NULL);
+        if (errno == ERANGE)
+        {
+            *duration = -1;
+            return VLC_EGENERIC;
+        }
+        if ((d) - ((int)d) >= 0.5)
+            value = ((int)d) + 1;
+        else
+            value = ((int)d);
+    }
 
     /* Ignore the rest of the line */
+
+    return VLC_SUCCESS;
+}
+
+static int parse_AddSegment(stream_t *s, hls_stream_t *hls, const int duration, const char *uri)
+{
+    assert(hls);
+    assert(uri);
 
     /* Store segment information */
     char *psz_path = NULL;
@@ -878,6 +911,7 @@ static int parse_M3U8(stream_t *s, vlc_array_t *streams, uint8_t *buffer, const 
         assert(hls);
 
         /* */
+        int segment_duration = -1;
         do
         {
             /* Next line */
@@ -887,17 +921,7 @@ static int parse_M3U8(stream_t *s, vlc_array_t *streams, uint8_t *buffer, const 
             p_begin = p_read;
 
             if (strncmp(line, "#EXTINF", 7) == 0)
-            {
-                char *uri = ReadLine(p_begin, &p_read, p_end - p_begin);
-                if (uri == NULL)
-                    err = VLC_EGENERIC;
-                else
-                {
-                    err = parse_SegmentInformation(s, hls, line, uri);
-                    free(uri);
-                }
-                p_begin = p_read;
-            }
+                err = parse_SegmentInformation(hls, line, &segment_duration);
             else if (strncmp(line, "#EXT-X-TARGETDURATION", 21) == 0)
                 err = parse_TargetDuration(s, hls, line);
             else if (strncmp(line, "#EXT-X-MEDIA-SEQUENCE", 21) == 0)
@@ -914,6 +938,11 @@ static int parse_M3U8(stream_t *s, vlc_array_t *streams, uint8_t *buffer, const 
                 err = parse_Version(s, hls, line);
             else if (strncmp(line, "#EXT-X-ENDLIST", 14) == 0)
                 err = parse_EndList(s, hls);
+            else if (strncmp(line, "#", 1) != 0)
+            {
+                err = parse_AddSegment(s, hls, segment_duration, line);
+                segment_duration = -1; /* reset duration */
+            }
 
             free(line);
             line = NULL;

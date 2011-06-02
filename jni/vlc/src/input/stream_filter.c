@@ -2,7 +2,7 @@
  * stream_filter.c
  *****************************************************************************
  * Copyright (C) 2008 Laurent Aimar
- * $Id: 951bddae6fcb98f1476038f2736a8db8cf7cb144 $
+ * $Id: e9a97898449a31d66e802667eafc89a013bfac86 $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -59,8 +59,6 @@ stream_t *stream_FilterNew( stream_t *p_source,
     s->p_source = p_source;
 
     /* */
-    vlc_object_attach( s, p_source );
-
     s->p_module = module_need( s, "stream_filter", psz_stream_filter, true );
 
     if( !s->p_module )

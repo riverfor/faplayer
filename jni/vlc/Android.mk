@@ -32,9 +32,9 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
-    src/libvlc-module.c \
     src/libvlc.c \
     src/libvlcjni.c \
+    src/libvlc-module.c \
     src/missing.c \
     src/revision.c \
     src/version.c \
@@ -67,6 +67,7 @@ LOCAL_SRC_FILES := \
     src/control/media_player.c \
     src/control/playlist.c \
     src/control/video.c \
+    src/control/vlm.c \
     src/extras/libc.c \
     src/extras/tdestroy.c \
     src/input/access.c \
@@ -88,6 +89,9 @@ LOCAL_SRC_FILES := \
     src/input/stream_memory.c \
     src/input/subtitles.c \
     src/input/var.c \
+    src/input/vlm.c \
+    src/input/vlm_event.c \
+    src/input/vlmshell.c \
     src/interface/dialog.c \
     src/interface/interface.c \
     src/interface/intf_eject.c \
@@ -126,10 +130,10 @@ LOCAL_SRC_FILES := \
     src/modules/cache.c \
     src/modules/entry.c \
     src/modules/modules.c \
-    src/modules/os.c \
     src/modules/textdomain.c \
     src/network/acl.c \
     src/network/getaddrinfo.c \
+    src/network/httpd.c \
     src/network/io.c \
     src/network/poll.c \
     src/network/rootbind.c \
@@ -153,7 +157,12 @@ LOCAL_SRC_FILES := \
     src/posix/dirs.c \
     src/posix/filesystem.c \
     src/posix/linux_specific.c \
+    src/posix/plugin.c \
     src/posix/thread.c \
+    src/stream_output/announce.c \
+    src/stream_output/sap.c \
+    src/stream_output/sdp.c \
+    src/stream_output/stream_output.c \
     src/text/charset.c \
     src/text/filesystem.c \
     src/text/iso_lang.c \

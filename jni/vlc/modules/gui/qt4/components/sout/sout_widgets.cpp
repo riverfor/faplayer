@@ -4,7 +4,7 @@
  * Copyright (C) 2007-2009 the VideoLAN team
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
- * $Id: 1e1d5c1648a67f113caedae4bf7c34c7575bd622 $
+ * $Id: ed37d64959fd57102c006845ed9683429a40d616 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Pierre-Luc Beaudoin <pierre-luc.beaudoin@savoirfairelinux.com>
@@ -232,7 +232,7 @@ MMSHDestBox::MMSHDestBox( QWidget *_parent ) : VirtualDestBox( _parent )
     CT( MMSHEdit );
 }
 
-QString MMSHDestBox::getMRL( const QString& mux )
+QString MMSHDestBox::getMRL( const QString& )
 {
     if( MMSHEdit->text().isEmpty() ) return "";
 
@@ -277,7 +277,7 @@ RTSPDestBox::RTSPDestBox( QWidget *_parent ) : VirtualDestBox( _parent )
     CT( RTSPEdit );
 }
 
-QString RTSPDestBox::getMRL( const QString& mux )
+QString RTSPDestBox::getMRL( const QString& )
 {
     if( RTSPEdit->text().isEmpty() ) return "";
 
@@ -435,7 +435,7 @@ ICEDestBox::ICEDestBox( QWidget *_parent ) : VirtualDestBox( _parent )
 #undef CS
 #undef CT
 
-QString ICEDestBox::getMRL( const QString& mux )
+QString ICEDestBox::getMRL( const QString& )
 {
     if( ICEEdit->text().isEmpty() ) return "";
 

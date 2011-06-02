@@ -2,7 +2,7 @@
  * ts.c: Transport Stream input module for VLC.
  *****************************************************************************
  * Copyright (C) 2004-2005 the VideoLAN team
- * $Id: 4c209f2caf9f3994040ae2658e1c092080bb0bee $
+ * $Id: 7058c7a3f67941d1a30e7598561d171fda141fdb $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Jean-Paul Saman <jpsaman #_at_# m2x.nl>
@@ -146,6 +146,7 @@ vlc_module_begin ()
 
     add_string( "ts-extra-pmt", NULL, PMT_TEXT, PMT_LONGTEXT, true )
     add_bool( "ts-es-id-pid", true, PID_TEXT, PID_LONGTEXT, true )
+        change_safe()
     add_string( "ts-out", NULL, TSOUT_TEXT, TSOUT_LONGTEXT, true )
     add_integer( "ts-out-mtu", 1400, MTUOUT_TEXT,
                  MTUOUT_LONGTEXT, true )

@@ -2,7 +2,7 @@
  * meta.c : Metadata handling
  *****************************************************************************
  * Copyright (C) 1998-2004 the VideoLAN team
- * $Id: a285d7077a43b27b6e6cfa0c3916e298e82f844d $
+ * $Id: d22ca9435718d8e9deace2bad55141ce062fd4a3 $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Clément Stenac <zorglub@videolan.org
@@ -267,7 +267,6 @@ int input_item_WriteMeta( vlc_object_t *obj, input_item_t *p_item )
                            "meta writer" );
     if( p_export == NULL )
         return VLC_ENOMEM;
-    vlc_object_attach( p_export, obj );
     p_export->p_item = p_item;
 
     int type;

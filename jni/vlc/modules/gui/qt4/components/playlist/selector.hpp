@@ -2,7 +2,7 @@
  * selector.hpp : Playlist source selector
  ****************************************************************************
  * Copyright (C) 2000-2009 the VideoLAN team
- * $Id: d97335e7adea1da54892b839c118339d509afcf2 $
+ * $Id: 7657fa292a47ebb6e6f142125d9dd151a0d9a931 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf
@@ -43,7 +43,8 @@ class QLabel;
 enum SelectorItemType {
     CATEGORY_TYPE,
     SD_TYPE,
-    PL_ITEM_TYPE
+    PL_ITEM_TYPE,
+    SQL_ML_TYPE,
 };
 
 enum SpecialData {
@@ -122,6 +123,7 @@ protected:
     virtual void dragMoveEvent ( QDragMoveEvent * event );
     virtual bool dropMimeData ( QTreeWidgetItem *, int, const QMimeData *, Qt::DropAction );
     virtual QStringList mimeTypes () const;
+    virtual void wheelEvent(QWheelEvent *e);
 
 private:
     void createItems();
@@ -134,6 +136,7 @@ private:
     intf_thread_t    *p_intf;
     QTreeWidgetItem  *podcastsParent;
     int               podcastsParentId;
+    QTreeWidgetItem  *curItem;
 
 private slots:
     void setSource( QTreeWidgetItem *item );
@@ -144,7 +147,7 @@ private slots:
     void podcastRemove( PLSelItem* );
 
 signals:
-    void activated( playlist_item_t * );
+    void categoryActivated( playlist_item_t *, bool );
 };
 
 #endif

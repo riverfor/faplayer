@@ -10,7 +10,7 @@
  * Functions prototyped are implemented in interface/mtime.c.
  *****************************************************************************
  * Copyright (C) 1996, 1997, 1998, 1999, 2000 the VideoLAN team
- * $Id: 8d51250dab38177845a3c4ff2fab79e30128506c $
+ * $Id: 46b666a63bfe08ae52d9249e348816cd91e83b29 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -54,11 +54,11 @@
 /*****************************************************************************
  * Prototypes
  *****************************************************************************/
-VLC_EXPORT( char *,  mstrtime, ( char *psz_buffer, mtime_t date ) );
-VLC_EXPORT( mtime_t, mdate,    ( void ) );
-VLC_EXPORT( void,    mwait,    ( mtime_t date ) );
-VLC_EXPORT( void,    msleep,   ( mtime_t delay ) );
-VLC_EXPORT( char *,  secstotimestr, ( char *psz_buffer, int32_t secs ) );
+VLC_API char * mstrtime( char *psz_buffer, mtime_t date );
+VLC_API mtime_t mdate( void );
+VLC_API void mwait( mtime_t date );
+VLC_API void msleep( mtime_t delay );
+VLC_API char * secstotimestr( char *psz_buffer, int32_t secs );
 
 # define VLC_HARD_MIN_SLEEP 10000   /* 10 milliseconds = 1 tick at 100Hz */
 
@@ -128,12 +128,12 @@ struct date_t
     uint32_t i_remainder;
 };
 
-VLC_EXPORT( void,    date_Init,      ( date_t *, uint32_t, uint32_t ) );
-VLC_EXPORT( void,    date_Change,    ( date_t *, uint32_t, uint32_t ) );
-VLC_EXPORT( void,    date_Set,       ( date_t *, mtime_t ) );
-VLC_EXPORT( mtime_t, date_Get,       ( const date_t * ) );
-VLC_EXPORT( void,    date_Move,      ( date_t *, mtime_t ) );
-VLC_EXPORT( mtime_t, date_Increment, ( date_t *, uint32_t ) );
-VLC_EXPORT( mtime_t, date_Decrement, ( date_t *, uint32_t ) );
-VLC_EXPORT( uint64_t, NTPtime64,     ( void ) );
+VLC_API void date_Init( date_t *, uint32_t, uint32_t );
+VLC_API void date_Change( date_t *, uint32_t, uint32_t );
+VLC_API void date_Set( date_t *, mtime_t );
+VLC_API mtime_t date_Get( const date_t * );
+VLC_API void date_Move( date_t *, mtime_t );
+VLC_API mtime_t date_Increment( date_t *, uint32_t );
+VLC_API mtime_t date_Decrement( date_t *, uint32_t );
+VLC_API uint64_t NTPtime64( void );
 #endif /* !__VLC_MTIME_ */

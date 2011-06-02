@@ -2,7 +2,7 @@
  * wingdi.c : Win32 / WinCE GDI video output plugin for vlc
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: feace3f2dc5547832b54334fd1e2511ec4ffb3ae $
+ * $Id: 84ee4ba417340b62dfbd40126cddfc49565e43b9 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Samuel Hocevar <sam@zoy.org>
@@ -345,7 +345,7 @@ static int Init(vout_display_t *vd,
     fmt->i_width  = width;
     fmt->i_height = height;
 
-    uint8_t *p_pic_buffer;
+    void *p_pic_buffer;
     int     i_pic_pitch;
 #ifdef MODULE_NAME_IS_wingapi
     GXOpenDisplay(sys->hvideownd, GX_FULLSCREEN);

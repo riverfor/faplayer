@@ -2,7 +2,7 @@
  * vlc_model.hpp : base for playlist and ml model
  ****************************************************************************
  * Copyright (C) 2010 the VideoLAN team and AUTHORS
- * $Id: 520a1bd6a3350382a07e2d5eb397f50166f97ea9 $
+ * $Id: 450616927801746bbaf96fe1c3af8c6c87dfe40b $
  *
  * Authors: Srikanth Raju <srikiraju#gmail#com>
  *
@@ -59,39 +59,41 @@ public:
     static QString getMeta( const QModelIndex & index, int meta );
     static QPixmap getArtPixmap( const QModelIndex & index, const QSize & size );
 
+    static int columnToMeta( int _column )
+    {
+        int meta = 1;
+        int column = 0;
+
+        while( column != _column && meta != COLUMN_END )
+        {
+            meta <<= 1;
+            column++;
+        }
+
+        return meta;
+    }
+
+    static int columnFromMeta( int meta_col )
+    {
+        int meta = 1;
+        int column = 0;
+
+        while( meta != meta_col && meta != COLUMN_END )
+        {
+            meta <<= 1;
+            column++;
+        }
+
+        return column;
+    }
+
 public slots:
     virtual void activateItem( const QModelIndex &index ) = 0;
 
 protected:
     intf_thread_t *p_intf;
+
 };
 
-static int columnToMeta( int _column )
-{
-    int meta = 1;
-    int column = 0;
-
-    while( column != _column && meta != COLUMN_END )
-    {
-        meta <<= 1;
-        column++;
-    }
-
-    return meta;
-}
-
-static int columnFromMeta( int meta_col )
-{
-    int meta = 1;
-    int column = 0;
-
-    while( meta != meta_col && meta != COLUMN_END )
-    {
-        meta <<= 1;
-        column++;
-    }
-
-    return column;
-}
 
 #endif

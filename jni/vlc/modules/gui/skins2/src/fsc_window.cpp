@@ -2,7 +2,7 @@
  * fsc_window.cpp
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: 5c9051d1fbfb31454cd6efbb9d33e58dd2d65c3f $
+ * $Id: d490f67611ab4538424f649d94f45de612c21424 $
  *
  * Author: Erwan Tulou      <erwan10 at videolan Dot Org>
  *
@@ -44,9 +44,11 @@ FscWindow::FscWindow( intf_thread_t *pIntf, int left, int top,
                       WindowManager &rWindowManager,
                       bool dragDrop, bool playOnDrop, bool visible ) :
     TopWindow( pIntf, left, top, rWindowManager, dragDrop,
-               playOnDrop, false, GenericWindow::FscWindow ), m_cmdFscHide( this ),
-               m_opacity( m_opacity ), m_count( 0 )
+               playOnDrop, false, GenericWindow::FscWindow ),
+    m_pTimer( NULL ), m_count( 0 ), m_opacity( m_opacity ),
+    m_cmdFscHide( this )
 {
+    (void)visible;
     m_pTimer = OSFactory::instance( getIntf() )->createOSTimer( m_cmdFscHide );
 
     VarBool &rFullscreen = VlcProc::instance( getIntf() )->getFullscreenVar();

@@ -2,7 +2,7 @@
  * ctrl_button.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 9aca8d8a5dedb9e061e2d09634e669182a4663e1 $
+ * $Id: 0530bbbefeadf5d451cb2cc5f2dfdcd944bd7af8 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -161,6 +161,7 @@ void CtrlButton::setImage( AnimBitmap *pImg )
 
 void CtrlButton::onUpdate( Subject<AnimBitmap> &rBitmap, void *arg )
 {
+    (void)rBitmap;(void)arg;
     notifyLayout( m_pImg->getWidth(), m_pImg->getHeight() );
 }
 

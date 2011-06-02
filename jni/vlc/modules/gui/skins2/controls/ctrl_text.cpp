@@ -2,7 +2,7 @@
  * ctrl_text.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 4a0859029a266c71b7b24c4e2e4b37912fad7d87 $
+ * $Id: 61d41ae97e42f741950a6525aad951d39ca3d531 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -44,12 +44,12 @@ CtrlText::CtrlText( intf_thread_t *pIntf, VarText &rVariable,
                     const GenericFont &rFont, const UString &rHelp,
                     uint32_t color, VarBool *pVisible, VarBool *pFocus,
                     Scrolling_t scrollMode, Align_t alignment ):
-    CtrlGeneric( pIntf, rHelp, pVisible ), m_pFocus( pFocus), m_fsm( pIntf ),
+    CtrlGeneric( pIntf, rHelp, pVisible ), m_fsm( pIntf ),
     m_rVariable( rVariable ), m_cmdToManual( this ),
     m_cmdManualMoving( this ), m_cmdManualStill( this ),
     m_cmdMove( this ), m_pEvt( NULL ), m_rFont( rFont ),
     m_color( color ), m_scrollMode( scrollMode ), m_alignment( alignment ),
-    m_pImg( NULL ), m_pImgDouble( NULL ),
+    m_pFocus( pFocus), m_pImg( NULL ), m_pImgDouble( NULL ),
     m_pCurrImg( NULL ), m_xPos( 0 ), m_xOffset( 0 ),
     m_cmdUpdateText( this )
 {
@@ -215,6 +215,7 @@ void CtrlText::setText( const UString &rText, uint32_t color )
 
 void CtrlText::onUpdate( Subject<VarText> &rVariable, void* arg )
 {
+    (void)rVariable; (void)arg;
     if( isVisible() )
     {
         displayText( m_rVariable.get() );
@@ -225,6 +226,7 @@ void CtrlText::onUpdate( Subject<VarText> &rVariable, void* arg )
 
 void CtrlText::onUpdate( Subject<VarBool> &rVariable, void *arg  )
 {
+    (void)arg;
     // Visibility changed
     if( &rVariable == m_pVisible )
     {

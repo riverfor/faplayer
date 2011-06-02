@@ -2,7 +2,7 @@
  * posterize.c : Posterize video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: ea2867201433d9059bfea04175926c50201d2060 $
+ * $Id: f0f3a1f288cc1c7c8a6526ba95ca953ef3b2fea0 $
  *
  * Authors: Branko Kokanovic <branko.kokanovic@gmail.com>
  *
@@ -69,7 +69,7 @@ vlc_module_begin ()
     set_category( CAT_VIDEO )
     set_subcategory( SUBCAT_VIDEO_VFILTER )
     set_capability( "video filter2", 0 )
-    add_integer_with_range( CFG_PREFIX "level", 6, 2, 256, NULL,
+    add_integer_with_range( CFG_PREFIX "level", 6, 2, 256,
                            POSTERIZE_LEVEL_TEXT, POSTERIZE_LEVEL_LONGTEXT,
                            false )
     set_callbacks( Create, Destroy )
@@ -279,7 +279,7 @@ static void PlanarYUVPosterize( picture_t *p_pic, picture_t *p_outpic,
  *****************************************************************************/
 static void PackedYUVPosterize( picture_t *p_pic, picture_t *p_outpic, int i_level )
 {
-    uint8_t *p_in, *p_in_end, *p_line_start, *p_line_end, *p_out;
+    uint8_t *p_in, *p_in_end, *p_line_end, *p_out;
     uint8_t y1, y2, u, v;
 
     p_in = p_pic->p[0].p_pixels;
@@ -289,7 +289,6 @@ static void PackedYUVPosterize( picture_t *p_pic, picture_t *p_outpic, int i_lev
 
     while( p_in < p_in_end )
     {
-        p_line_start = p_in;
         p_line_end = p_in + p_pic->p[0].i_visible_pitch;
         while( p_in < p_line_end )
         {
@@ -374,7 +373,7 @@ static void PackedYUVPosterize( picture_t *p_pic, picture_t *p_outpic, int i_lev
 static void RVPosterize( picture_t *p_pic, picture_t *p_outpic,
                                  bool rv32, int level )
 {
-    uint8_t *p_in, *p_in_end, *p_line_start, *p_line_end, *p_out, pixel;
+    uint8_t *p_in, *p_in_end, *p_line_end, *p_out, pixel;
 
     p_in = p_pic->p[0].p_pixels;
     p_in_end = p_in + p_pic->p[0].i_visible_lines
@@ -383,7 +382,6 @@ static void RVPosterize( picture_t *p_pic, picture_t *p_outpic,
 
     while( p_in < p_in_end )
     {
-        p_line_start = p_in;
         p_line_end = p_in + p_pic->p[0].i_visible_pitch;
         while( p_in < p_line_end )
         {

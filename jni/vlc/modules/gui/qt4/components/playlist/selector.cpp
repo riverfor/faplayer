@@ -2,7 +2,7 @@
  * selector.cpp : Playlist source selector
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: e2ed853ea13dc82326caa73f9348e271f876eb82 $
+ * $Id: 9af0969ee73bd4f71db972c118bab5821eb54c3c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf
@@ -129,15 +129,17 @@ PLSelector::PLSelector( QWidget *p, intf_thread_t *_p_intf )
               this, inputItemUpdate( input_item_t * ) );
 
     createItems();
+
+    /***
+     * We need to react to both clicks and activation (enter-key) here.
+     * We use curItem to avoid rebuilding twice.
+     * See QStyle::SH_ItemView_ActivateItemOnSingleClick
+     ***/
+    curItem = NULL;
     CONNECT( this, itemActivated( QTreeWidgetItem *, int ),
              this, setSource( QTreeWidgetItem *) );
     CONNECT( this, itemClicked( QTreeWidgetItem *, int ),
              this, setSource( QTreeWidgetItem *) );
-
-    /* I believe this is unnecessary, seeing
-       QStyle::SH_ItemView_ActivateItemOnSingleClick
-        CONNECT( view, itemClicked( QTreeWidgetItem *, int ),
-             this, setSource( QTreeWidgetItem *) ); */
 
     /* select the first item */
 //  view->setCurrentIndex( model->index( 0, 0, QModelIndex() ) );
@@ -191,6 +193,9 @@ void PLSelector::createItems()
     PLSelItem *ml = putPLData( addItem( PL_ITEM_TYPE, N_("Media Library"), true ),
                               THEPL->p_media_library );
     ml->treeItem()->setData( 0, SPECIAL_ROLE, QVariant( IS_ML ) );
+
+    /* SQL ML */
+    addItem( SQL_ML_TYPE, "SQL Media Library" )->treeItem();
 
     /* SD nodes */
     QTreeWidgetItem *mycomp = addItem( CATEGORY_TYPE, N_("My Computer") )->treeItem();
@@ -255,8 +260,10 @@ void PLSelector::createItems()
 
 void PLSelector::setSource( QTreeWidgetItem *item )
 {
-    if( !item )
+    if( !item || item == curItem )
         return;
+
+    curItem = item;
 
     bool b_ok;
     int i_type = item->data( 0, TYPE_ROLE ).toInt( &b_ok );
@@ -271,11 +278,18 @@ void PLSelector::setSource( QTreeWidgetItem *item )
         if( !sd_loaded )
             playlist_ServicesDiscoveryAdd( THEPL, qtu( qs ) );
     }
+    else if( i_type == SQL_ML_TYPE )
+    {
+        emit categoryActivated( NULL, true );
+        return;
+    }
 
     /* */
     playlist_Lock( THEPL );
     playlist_item_t *pl_item = NULL;
 
+    /* Special case for podcast */
+    // FIXME: simplify
     if( i_type == SD_TYPE )
     {
         /* Find the right item for the SD */
@@ -301,7 +315,7 @@ void PLSelector::setSource( QTreeWidgetItem *item )
 
     /* */
     if( pl_item )
-        emit activated( pl_item );
+        emit categoryActivated( pl_item, false );
 }
 
 PLSelItem * PLSelector::addItem (
@@ -342,8 +356,8 @@ QStringList PLSelector::mimeTypes() const
     return types;
 }
 
-bool PLSelector::dropMimeData ( QTreeWidgetItem * parent, int index,
-    const QMimeData * data, Qt::DropAction action )
+bool PLSelector::dropMimeData ( QTreeWidgetItem * parent, int,
+    const QMimeData * data, Qt::DropAction )
 {
     if( !parent ) return false;
 
@@ -450,7 +464,7 @@ void PLSelector::inputItemUpdate( input_item_t *arg )
     }
 }
 
-void PLSelector::podcastAdd( PLSelItem* item )
+void PLSelector::podcastAdd( PLSelItem * )
 {
     bool ok;
     QString url = QInputDialog::getText( this, qtr( "Subscribe" ),
@@ -460,8 +474,7 @@ void PLSelector::podcastAdd( PLSelItem* item )
 
     setSource( podcastsParent ); //to load the SD in case it's not loaded
 
-    vlc_object_t *p_obj = (vlc_object_t*) vlc_object_find_name(
-        p_intf->p_libvlc, "podcast", FIND_CHILD );
+    vlc_object_t *p_obj = (vlc_object_t*) vlc_object_find_name( p_intf->p_libvlc, "podcast" );
     if( !p_obj ) return;
 
     QString request("ADD:");
@@ -484,7 +497,7 @@ void PLSelector::podcastRemove( PLSelItem* item )
     if( !input ) return;
 
     vlc_object_t *p_obj = (vlc_object_t*) vlc_object_find_name(
-        p_intf->p_libvlc, "podcast", FIND_CHILD );
+        p_intf->p_libvlc, "podcast" );
     if( !p_obj ) return;
 
     QString request("RM:");
@@ -515,4 +528,10 @@ void PLSelector::getCurrentSelectedItem( int* type, QString *string)
 {
     *type = currentItem()->data( 0, TYPE_ROLE ).toInt();
     *string = currentItem()->data( 0, NAME_ROLE ).toString();
+}
+
+void PLSelector::wheelEvent( QWheelEvent *e )
+{
+    // Accept this event in order to prevent unwanted volume up/down changes
+    e->accept();
 }

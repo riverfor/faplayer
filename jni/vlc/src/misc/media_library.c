@@ -2,7 +2,7 @@
  * media_library.c: SQL-based media library: ML creators and destructors
  *****************************************************************************
  * Copyright (C) 2009-2010 the VideoLAN team and AUTHORS
- * $Id: e855703452363a942427ea405d56c93f7c101872 $
+ * $Id: f4a314a4f2e80961c8929d04ce57e9fe2897f0db $
  *
  * Authors: Srikanth Raju <srikiraju at gmail dot com>
  *
@@ -85,7 +85,6 @@ media_library_t *ml_Create( vlc_object_t *p_this, char *psz_name )
         msg_Err( p_this, "unable to create media library object" );
         return NULL;
     }
-    vlc_object_attach( p_ml, p_this );
 
     p_ml->p_module = module_need( p_ml, "media-library", psz_name, false );
     if( !p_ml->p_module )

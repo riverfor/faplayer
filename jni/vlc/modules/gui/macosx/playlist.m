@@ -2,7 +2,7 @@
  * playlist.m: MacOS X interface module
  *****************************************************************************
 * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: b3272a04cd62fc924c8561a08bad3b1fbfc525de $
+ * $Id: c5abc22d27659941544362d3d7248acad81f833d $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videola/n dot org>
@@ -1520,7 +1520,6 @@
 - (IBAction)addNode:(id)sender
 {
     playlist_t * p_playlist = pl_Get( VLCIntf );
-    vlc_thread_set_priority( p_playlist, VLC_THREAD_PRIORITY_LOW );
 
     PL_LOCK;
     playlist_NodeCreate( p_playlist, _("Empty Folder"),

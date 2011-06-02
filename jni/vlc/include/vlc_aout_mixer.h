@@ -2,7 +2,7 @@
  * vlc_aout_mixer.h : audio output mixer interface
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 10d80fe5be7333e1136a3c0f878aa9f3efbef876 $
+ * $Id: e332851e395f3d89f3b8fbb405a1105ea6efb514 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -41,9 +41,6 @@ typedef struct aout_mixer_sys_t aout_mixer_sys_t;
 typedef struct aout_mixer_t aout_mixer_t;
 
 typedef struct {
-    /* Is the input to be ignored while mixing */
-    bool        is_invalid;
-
     /* */
     aout_fifo_t fifo;
 
@@ -72,22 +69,11 @@ struct aout_mixer_t {
      */
     audio_sample_format_t fmt;
 
-    /* Mixer output buffer allocation method.
-     *
-     * You can override it in the open function only.
-     */
-    aout_alloc_t          allocation;
-
-    /* Multiplier used to raise or lower the volume of the sound in
-     * software.
-     */
-    float                 multiplier;
-
     /* Array of mixer inputs */
     aout_mixer_input_t    *input;
 
-    /* Mix input into the given buffer (mandatory) */
-    void (*mix)(aout_mixer_t *, aout_buffer_t *);
+    /* Mix requested number of samples (mandatory) */
+    aout_buffer_t *(*mix)(aout_mixer_t *, unsigned, float);
 
     /* Private place holder for the aout_mixer_t module (optional)
      *

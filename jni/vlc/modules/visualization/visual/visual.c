@@ -2,7 +2,7 @@
  * visual.c : Visualisation system
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: c335605a73acaa6b56bdc8e5ea7e8ecdb9bfaf0a $
+ * $Id: e09b993c6e81861ddcb94f7097ad6248274d0d32 $
  *
  * Authors: Clément Stenac <zorglub@via.ecp.fr>
  *
@@ -419,7 +419,7 @@ static int FilterCallback( vlc_object_t *p_this, char const *psz_cmd,
     VLC_UNUSED(psz_cmd); VLC_UNUSED(oldval);
     VLC_UNUSED(p_data); VLC_UNUSED(newval);
 
-    aout_filter_t     *p_filter = (aout_filter_t *)p_this;
+    filter_t     *p_filter = (filter_t *)p_this;
     /* restart this baby */
     msg_Dbg( p_filter, "we should restart the visual filter" );
     return VLC_SUCCESS;

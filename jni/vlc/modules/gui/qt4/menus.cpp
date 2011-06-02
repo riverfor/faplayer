@@ -2,7 +2,7 @@
  * menus.cpp : Qt menus
  *****************************************************************************
  * Copyright © 2006-2011 the VideoLAN team
- * $Id: 11b5715a8bab95032eb1d2bf6ef582226e14b2e2 $
+ * $Id: be893ae40d31b960cfbb0af6018886b094c8ab51 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -37,6 +37,7 @@
 #include <vlc_common.h>
 #include <vlc_intf_strings.h>
 #include <vlc_vout.h>              /* vout_thread_t */
+#include <vlc_aout.h>
 
 #include "menus.hpp"
 
@@ -54,6 +55,7 @@
 #include <QSignalMapper>
 #include <QSystemTrayIcon>
 #include <QStatusBar>
+#include <QFontMetrics>
 
 /*
   This file defines the main menus and the pop-up menu (right-click menu)
@@ -204,10 +206,6 @@ static QAction * FindActionWithVar( QMenu *menu, const char *psz_var )
 #define PUSH_INPUTVAR( var ) varnames.push_back( var ); \
     objects.push_back( VLC_OBJECT(p_input) );
 
-#define PUSH_SEPARATOR if( objects.size() != i_last_separator ) { \
-    objects.push_back( 0 ); varnames.push_back( "" ); \
-    i_last_separator = objects.size(); }
-
 static int InputAutoMenuBuilder( input_thread_t *p_object,
         vector<vlc_object_t *> &objects,
         vector<const char *> &varnames )
@@ -319,7 +317,7 @@ void QVLCMenu::createMenuBar( MainInterface *mi,
     addMenuToMainbar( ToolsMenu( bar ), qtr( "&Tools" ), bar );
 
     /* View menu, a bit different */
-    BAR_DADD( ViewMenu( p_intf, _menu, mi ), qtr( "V&iew" ), 4 );
+    BAR_DADD( ViewMenu( p_intf, NULL, mi ), qtr( "V&iew" ), 4 );
 
     addMenuToMainbar( HelpMenu( bar ), qtr( "&Help" ), bar );
 
@@ -433,6 +431,7 @@ QMenu *QVLCMenu::ToolsMenu( QMenu *menu )
 /**
  * View Menu
  * Interface modification, load other interfaces, activate Extensions
+ * \param current, set to NULL for menu creation, else for menu update
  **/
 QMenu *QVLCMenu::ViewMenu( intf_thread_t *p_intf, QMenu *current, MainInterface *_mi )
 {
@@ -603,7 +602,7 @@ QMenu *QVLCMenu::AudioMenu( intf_thread_t *p_intf, QMenu * current )
 }
 
 /* Subtitles */
-QMenu *QVLCMenu::SubtitleMenu( intf_thread_t *p_intf, QMenu *current )
+QMenu *QVLCMenu::SubtitleMenu( QMenu *current )
 {
     QAction *action;
     QMenu *submenu = new QMenu( qtr( "&Subtitles Track" ), current );
@@ -630,7 +629,7 @@ QMenu *QVLCMenu::VideoMenu( intf_thread_t *p_intf, QMenu *current, bool b_subtit
     {
         addActionWithSubmenu( current, "video-es", qtr( "Video &Track" ) );
         if( b_subtitle)
-            SubtitleMenu( p_intf, current );
+            SubtitleMenu( current );
 
         current->addSeparator();
 
@@ -744,7 +743,6 @@ QMenu *QVLCMenu::HelpMenu( QWidget *parent )
     delete menu; menu = NULL; \
     if( !show ) \
         return; \
-    unsigned int i_last_separator = 0; \
     vector<vlc_object_t *> objects; \
     vector<const char *> varnames; \
     input_thread_t *p_input = THEMIM->getInput();
@@ -753,7 +751,6 @@ QMenu *QVLCMenu::HelpMenu( QWidget *parent )
     menu = new QMenu(); \
     Populate( p_intf, menu, varnames, objects ); \
     menu->popup( QCursor::pos() ); \
-    i_last_separator = 0;
 
 void QVLCMenu::PopupPlayEntries( QMenu *menu,
                                         intf_thread_t *p_intf,
@@ -914,7 +911,7 @@ void QVLCMenu::MiscPopupMenu( intf_thread_t *p_intf, bool show )
     {
         varnames.push_back( "audio-es" );
         InputAutoMenuBuilder( p_input, objects, varnames );
-        PUSH_SEPARATOR;
+        menu->addSeparator();
     }
 
     menu = new QMenu();
@@ -988,7 +985,7 @@ void QVLCMenu::PopupMenu( intf_thread_t *p_intf, bool show )
         if( action->menu()->isEmpty() )
             action->setEnabled( false );
 
-        submenu = SubtitleMenu( p_intf, menu );
+        submenu = SubtitleMenu( menu );
         submenu->setTitle( qtr( "Subti&tle") );
         UpdateItem( p_intf, menu, "spu-es", VLC_OBJECT(p_input), true );
 
@@ -1033,7 +1030,7 @@ void QVLCMenu::PopupMenu( intf_thread_t *p_intf, bool show )
         else
         {
             QMenu *bar = menu; // Needed for next macro
-            BAR_DADD( ViewMenu( p_intf, _menu, mi ), qtr( "V&iew" ), 4 );
+            BAR_DADD( ViewMenu( p_intf, NULL, mi ), qtr( "V&iew" ), 4 );
         }
 
         menu->addMenu( submenu );
@@ -1097,7 +1094,6 @@ void QVLCMenu::updateSystrayMenu( MainInterface *mi,
 
 
 #undef PUSH_VAR
-#undef PUSH_SEPARATOR
 
 /*************************************************************************
  * Builders for automenus
@@ -1375,7 +1371,7 @@ int QVLCMenu::CreateChoicesMenu( QMenu *submenu, const char *psz_var,
             case VLC_VAR_INTEGER:
                 var_Get( p_object, psz_var, &val );
                 if( CURTEXT ) menutext = qfu( CURTEXT );
-                else menutext.sprintf( "%"PRId64, CURVAL.i_int );
+                else menutext = QString::number( CURVAL.i_int );
                 CreateAndConnect( submenu, psz_var, menutext, "", RADIO_OR_COMMAND,
                         p_object, CURVAL, i_type,
                         ( CURVAL.i_int == val.i_int )
@@ -1486,11 +1482,16 @@ void QVLCMenu::updateRecents( intf_thread_t *p_intf )
         {
             for( int i = 0; i < l.size(); ++i )
             {
+                char *psz_temp = decode_URI_duplicate( qtu( l.at( i ) ) );
+
                 action = recentsMenu->addAction(
-                        QString( "&%1: " ).arg( i + 1 ) + l.at( i ),
+                        QString( "&%1: " ).arg( i + 1 ) +
+                            QApplication::fontMetrics().elidedText( psz_temp, Qt::ElideLeft, 400 ),
                         rmrl->signalMapper, SLOT( map() ),
                         i <= 9 ? QString( "Ctrl+%1" ).arg( i + 1 ) : "" );
                 rmrl->signalMapper->setMapping( action, l.at( i ) );
+
+                free( psz_temp );
             }
 
             recentsMenu->addSeparator();

@@ -2,7 +2,7 @@
  * generic_window.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: ee4a8e33304c4f8e85fba9ad14f98cf88f7ed4b6 $
+ * $Id: 2bc5ebac0bcfecad024967f7aed6cce8b35a2e5b $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -65,13 +65,13 @@ public:
     virtual ~GenericWindow();
 
     /// Methods to process OS events.
-    virtual void processEvent( EvtFocus &rEvtFocus ) { }
-    virtual void processEvent( EvtMenu &rEvtMenu ) { }
-    virtual void processEvent( EvtMotion &rEvtMotion ) { }
-    virtual void processEvent( EvtMouse &rEvtMouse ) { }
-    virtual void processEvent( EvtLeave &rEvtLeave ) { }
-    virtual void processEvent( EvtKey &rEvtKey ) { }
-    virtual void processEvent( EvtScroll &rEvtScroll ) { }
+    virtual void processEvent( EvtFocus &rEvtFocus ) { (void)rEvtFocus; }
+    virtual void processEvent( EvtMenu &rEvtMenu ) { (void)rEvtMenu; }
+    virtual void processEvent( EvtMotion &rEvtMotion ) { (void)rEvtMotion; }
+    virtual void processEvent( EvtMouse &rEvtMouse ) { (void)rEvtMouse; }
+    virtual void processEvent( EvtLeave &rEvtLeave ) { (void)rEvtLeave; }
+    virtual void processEvent( EvtKey &rEvtKey ) { (void)rEvtKey; }
+    virtual void processEvent( EvtScroll &rEvtScroll ) { (void)rEvtScroll; }
 
     virtual void processEvent( EvtRefresh &rEvtRefresh );
 
@@ -79,7 +79,8 @@ public:
     virtual void resize( int width, int height );
 
     /// Refresh an area of the window
-    virtual void refresh( int left, int top, int width, int height ) { }
+    virtual void refresh( int left, int top, int width, int height )
+        { (void)left; (void)top; (void)width; (void)height; }
 
     /// Invalidate an area of the window
     virtual void invalidateRect( int left, int top, int width, int height );

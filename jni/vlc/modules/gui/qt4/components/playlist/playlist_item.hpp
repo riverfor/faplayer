@@ -2,7 +2,7 @@
  * playlist_item.hpp : Item for a playlist tree
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: bbde855566940aa8956b4859979f16da89111a18 $
+ * $Id: d36b19c1a0967d778e71f14dfbd34abd10b4e846 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -39,8 +39,8 @@ public:
 
     int row() const;
 
-    void insertChild( PLItem *, int pos, bool signal = true );
-    void appendChild( PLItem *item, bool signal = true );
+    void insertChild( PLItem *, int pos );
+    void appendChild( PLItem *item );
     void removeChild( PLItem * );
     void removeChildren();
     void takeChildAt( int );

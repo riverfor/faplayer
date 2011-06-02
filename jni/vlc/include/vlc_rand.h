@@ -2,7 +2,7 @@
  * vlc_rand.h: RNG
  *****************************************************************************
  * Copyright © 2007 Rémi Denis-Courmont
- * $Id: 0023d7cdaf6869e0de68a1e6412906d08a21f8f4 $
+ * $Id: 4c738a0b61ca9dba51a90c749007267ee5a62370 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@
  * This file defined random number generator function in vlc
  */
 
-VLC_EXPORT( void, vlc_rand_bytes, (void *buf, size_t len) );
+VLC_API void vlc_rand_bytes(void *buf, size_t len);
 
 /* Interlocked (but not reproducible) functions for the POSIX PRNG */
-VLC_EXPORT( double, vlc_drand48, (void) LIBVLC_USED );
-VLC_EXPORT( long, vlc_lrand48, (void) LIBVLC_USED );
-VLC_EXPORT( long, vlc_mrand48, (void) LIBVLC_USED );
+VLC_API double vlc_drand48(void) VLC_USED;
+VLC_API long vlc_lrand48(void) VLC_USED;
+VLC_API long vlc_mrand48(void) VLC_USED;
 
 #endif
