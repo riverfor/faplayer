@@ -77,6 +77,11 @@ struct decoder_sys_t
     int     i_late_frames;
     mtime_t i_late_frames_start;
 
+    int i_decode_called_count;
+    mtime_t i_decode_total_time;
+    mtime_t i_decode_average_time;
+    mtime_t i_display_date_head;
+
     /* for direct rendering */
     bool b_direct_rendering;
     int  i_direct_rendering_used;
@@ -412,6 +417,11 @@ int InitVideoDec( decoder_t *p_dec, AVCodecContext *p_context,
         return VLC_EGENERIC;
     }
 
+    p_sys->i_decode_called_count = 0;
+    p_sys->i_decode_total_time = 0;
+    p_sys->i_decode_average_time = 0;
+    p_sys->i_display_date_head = 0;
+
     return VLC_SUCCESS;
 }
 
@@ -467,6 +477,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         p_sys->i_late_frames = 0;
     }
 
+#if 0
     if( !p_dec->b_pace_control && (p_sys->i_late_frames > 0) &&
         (mdate() - p_sys->i_late_frames_start > INT64_C(5000000)) )
     {
@@ -529,6 +540,21 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
 #endif
     }
 
+#else
+    mtime_t i_time_now = mdate();
+    mtime_t i_time_adv = p_sys->i_display_date_head > 0 ? (p_sys->i_display_date_head - p_sys->i_decode_average_time - i_time_now) : 0;
+    bool b_skip = ( (!p_dec->b_pace_control) && (i_time_adv < 0));
+    p_context->skip_frame = b_skip ? AVDISCARD_NONREF : AVDISCARD_DEFAULT;
+    if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
+        b_drawpicture = 1;
+    else
+        b_drawpicture = 0;
+    if( p_context->width <= 0 || p_context->height <= 0 )
+    {
+        b_null_size = true;
+    }
+#endif
+
     /*
      * Do the actual decoding now */
 
@@ -569,6 +595,8 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
 
         post_mt( p_sys );
 
+        mtime_t i_decode_start = mdate();
+
         av_init_packet( &pkt );
         pkt.data = p_block->p_buffer;
         pkt.size = p_block->i_buffer;
@@ -585,6 +613,13 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
             i_used = avcodec_decode_video2( p_context, p_sys->p_ff_pic,
                                            &b_gotpicture, &pkt );
         }
+
+        mtime_t i_decode_end = mdate();
+        mtime_t i_decode_time = i_decode_end - i_decode_start;
+        p_sys->i_decode_called_count += 1;
+        p_sys->i_decode_total_time += i_decode_time;
+        p_sys->i_decode_average_time = (p_sys->i_decode_total_time / p_sys->i_decode_called_count);
+
         wait_mt( p_sys );
 
         if( p_sys->b_flush )
@@ -686,6 +721,8 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         mtime_t i_display_date = 0;
         if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
             i_display_date = decoder_GetDisplayDate( p_dec, i_pts );
+
+        p_sys->i_display_date_head = i_display_date;
 
         if( i_display_date > 0 && i_display_date <= mdate() )
         {
