@@ -119,7 +119,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 				}
 			} else {
 				if (mOnPreparedListener != null) {
-					mOnPreparedListener.onPrepaired(this);
+					mOnPreparedListener.onPrepared(this);
 				}
 				if (mOnVideoSizeChangedListener != null) {
 					int width = getVideoWidth();

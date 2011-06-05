@@ -186,6 +186,8 @@ public class PlayerActivity extends Activity implements
 				case MEDIA_PLAYER_PREPARED: {
 					mMediaPlayer.start();
 					mPrepared = true;
+					int resource = SystemUtility.getDrawableId("btn_play_1");
+					mImageButtonTogglePlay.setBackgroundResource(resource);
 					break;
 				}
 				case MEDIA_PLAYER_PROGRESS_UPDATE: {
@@ -647,7 +649,7 @@ public class PlayerActivity extends Activity implements
 	}
 
 	@Override
-	public void onPrepaired(AbsMediaPlayer mp) {
+	public void onPrepared(AbsMediaPlayer mp) {
 		Message msg = new Message();
 		msg.what = MEDIA_PLAYER_PREPARED;
 		mEventHandler.sendMessage(msg);

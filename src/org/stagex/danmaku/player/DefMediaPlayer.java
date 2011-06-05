@@ -358,7 +358,7 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 	public void onPrepared(MediaPlayer mp) {
 		Log.d(LOGTAG, "MediaPlayer onPrepared");
 		if (mOnPreparedListener != null) {
-			mOnPreparedListener.onPrepaired(this);
+			mOnPreparedListener.onPrepared(this);
 		}
 	}
 

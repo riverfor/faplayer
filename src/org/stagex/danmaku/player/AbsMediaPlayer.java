@@ -24,7 +24,7 @@ public abstract class AbsMediaPlayer {
 	}
 
 	public interface OnPreparedListener {
-		public void onPrepaired(AbsMediaPlayer mp);
+		public void onPrepared(AbsMediaPlayer mp);
 	}
 
 	public interface OnProgressUpdateListener {
