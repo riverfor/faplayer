@@ -80,7 +80,9 @@ struct decoder_sys_t
     int i_decode_called_count;
     mtime_t i_decode_total_time;
     mtime_t i_decode_average_time;
+    mtime_t i_decode_last_time;
     mtime_t i_display_date_head;
+    int i_decode_may_suck;
 
     /* for direct rendering */
     bool b_direct_rendering;
@@ -420,7 +422,9 @@ int InitVideoDec( decoder_t *p_dec, AVCodecContext *p_context,
     p_sys->i_decode_called_count = 0;
     p_sys->i_decode_total_time = 0;
     p_sys->i_decode_average_time = 0;
+    p_sys->i_decode_last_time = 0;
     p_sys->i_display_date_head = 0;
+    p_sys->i_decode_may_suck = 0;
 
     return VLC_SUCCESS;
 }
@@ -543,16 +547,19 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
 #else
     mtime_t i_time_now = mdate();
     mtime_t i_time_adv = p_sys->i_display_date_head > 0 ? (p_sys->i_display_date_head - p_sys->i_decode_average_time - i_time_now) : 0;
-    bool b_skip = ( (!p_dec->b_pace_control) && (i_time_adv < 0));
+    p_sys->i_decode_may_suck = (i_time_adv < 0) ? (p_sys->i_decode_may_suck + 1) : 0;
+    bool b_skip_pred = (p_sys->i_decode_may_suck > 0);
+    bool b_skip_late = (p_sys->i_late_frames > 4);
+    bool b_no_skip_pred = (p_sys->i_decode_last_time < p_sys->i_decode_average_time);
+    bool b_no_skip_late = (i_time_now + p_sys->i_decode_average_time - p_sys->i_late_frames_start < 200000);
+    bool b_skip = ( (!p_dec->b_pace_control) &&  ((b_skip_pred && !b_no_skip_pred) || (b_skip_late && !b_no_skip_late)) );
     p_context->skip_frame = b_skip ? AVDISCARD_NONREF : AVDISCARD_DEFAULT;
     if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
         b_drawpicture = 1;
     else
         b_drawpicture = 0;
     if( p_context->width <= 0 || p_context->height <= 0 )
-    {
         b_null_size = true;
-    }
 #endif
 
     /*
@@ -619,6 +626,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         p_sys->i_decode_called_count += 1;
         p_sys->i_decode_total_time += i_decode_time;
         p_sys->i_decode_average_time = (p_sys->i_decode_total_time / p_sys->i_decode_called_count);
+        p_sys->i_decode_last_time = i_decode_time;
 
         wait_mt( p_sys );
 
