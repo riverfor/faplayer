@@ -55,6 +55,10 @@
 #include <vlc_charset.h>
 #include "../libvlc.h"
 
+#ifdef ANDROID
+extern void faplayer_message_logcat(const char* fmt, ...);
+#endif
+
 /*****************************************************************************
  * Local macros
  *****************************************************************************/
@@ -482,5 +486,8 @@ static void PrintMsg ( vlc_object_t *p_this, const msg_item_t *p_item )
     fflush (stream);
 #endif
     funlockfile (stream);
+#ifdef ANDROID
+    faplayer_message_logcat(p_item->psz_header ? "[%p][%s]%s %s%s: %s" : "[%p]%s%s %s%s: %s", (void *)p_item->i_object_id, p_item->psz_header ? p_item->psz_header : "", p_item->psz_module, objtype, msgtype[type], p_item->psz_msg);
+#endif
     vlc_restorecancel (canc);
 }
