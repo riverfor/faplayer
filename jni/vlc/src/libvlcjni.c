@@ -319,7 +319,7 @@ JNIEXPORT jint JNICALL NAME(nativeGetCurrentPosition)(JNIEnv *env, jobject thiz)
     {
         return -1;
     }
-    return (jint) (position / 1000);
+    return (jint) (position);
 }
 
 JNIEXPORT jint JNICALL NAME(nativeGetDuration)(JNIEnv *env, jobject thiz)
@@ -334,7 +334,7 @@ JNIEXPORT jint JNICALL NAME(nativeGetDuration)(JNIEnv *env, jobject thiz)
     {
         return -1;
     }
-    return (jint) (duration / 1000);
+    return (jint) (duration);
 }
 
 JNIEXPORT jint JNICALL NAME(nativeGetVideoHeight)(JNIEnv *env, jobject thiz)
