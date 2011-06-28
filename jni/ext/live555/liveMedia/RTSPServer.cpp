@@ -271,7 +271,7 @@ void RTSPServer::incomingConnectionHandler(int serverSocket) {
   increaseSendBufferTo(envir(), clientSocket, 50*1024);
 
 #ifdef DEBUG
-  envir() << "accept()ed connection from " << our_inet_ntoa(clientAddr.sin_addr) << '\n';
+  envir() << "accept()ed connection from " << our_inet_ntoa(clientAddr.sin_addr) << "\n";
 #endif
 
   // Create a new object for this RTSP session.
@@ -1322,6 +1322,12 @@ Boolean RTSPServer::RTSPClientSession::parseHTTPRequestString(char* resultCmdNam
 void RTSPServer::RTSPClientSession::handleHTTPCmd_notSupported() {
   snprintf((char*)fResponseBuffer, sizeof fResponseBuffer,
 	   "HTTP/1.0 405 Method Not Allowed\r\n%s\r\n\r\n",
+	   dateHeader());
+}
+
+void RTSPServer::RTSPClientSession::handleHTTPCmd_notFound() {
+  snprintf((char*)fResponseBuffer, sizeof fResponseBuffer,
+	   "HTTP/1.0 404 Not Found\r\n%s\r\n\r\n",
 	   dateHeader());
 }
 

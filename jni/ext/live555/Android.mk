@@ -35,7 +35,8 @@ LOCAL_SRC_FILES := \
     groupsock/IOHandlers.cpp \
     groupsock/NetAddress.cpp \
     groupsock/NetInterface.cpp \
-	groupsock/inet.c \
+    groupsock/inet.c \
+    liveMedia/AC3AudioFileServerMediaSubsession.cpp \
     liveMedia/AC3AudioRTPSink.cpp \
     liveMedia/AC3AudioRTPSource.cpp \
     liveMedia/AC3AudioStreamFramer.cpp \
