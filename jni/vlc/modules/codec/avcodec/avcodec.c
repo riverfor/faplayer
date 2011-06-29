@@ -400,7 +400,12 @@ int ffmpeg_OpenCodec( decoder_t *p_dec )
     {
         if( p_sys->i_codec_id == CODEC_ID_VC1 ||
             p_sys->i_codec_id == CODEC_ID_VORBIS ||
+#ifdef ANDROID
             p_sys->i_codec_id == CODEC_ID_THEORA )
+#else
+            p_sys->i_codec_id == CODEC_ID_THEORA ||
+            p_sys->i_codec_id == CODEC_ID_AAC )
+#endif
         {
             msg_Warn( p_dec, "waiting for extra data for codec %s",
                       p_sys->psz_namecodec );

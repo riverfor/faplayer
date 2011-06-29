@@ -2,7 +2,7 @@
  * avi.c : AVI file Stream input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 4a1d49108aeecc3765b9477e057e642da177d9fa $
+ * $Id: 66b8428b6fe33f7f41f1964981da39ac27f88ffe $
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -557,7 +557,7 @@ static int Open( vlc_object_t * p_this )
                 {
                     /* The palette is not always included in biSize */
                     fmt.i_extra = p_vids->i_chunk_size - sizeof(BITMAPINFOHEADER);
-                    if( fmt.i_extra > 0 )
+                    if( fmt.i_extra > 0 && fmt.p_extra )
                     {
                         const uint8_t *p_pal = fmt.p_extra;
 

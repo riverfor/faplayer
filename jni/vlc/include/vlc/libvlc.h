@@ -2,7 +2,7 @@
  * libvlc.h:  libvlc external API
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 32bd68335c9d63b23e41619566f56d9eeeabb55c $
+ * $Id: bcf9bdca2112a5da2389b26948224d30b5e6bec2 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -441,8 +441,6 @@ typedef struct libvlc_module_description_t
     char *psz_help;
     struct libvlc_module_description_t *p_next;
 } libvlc_module_description_t;
-
-libvlc_module_description_t *libvlc_module_description_list_get( libvlc_instance_t *p_instance, const char *capability );
 
 /**
  * Release a list of module descriptions.

@@ -67,7 +67,6 @@ LOCAL_SRC_FILES := \
     src/control/media_player.c \
     src/control/playlist.c \
     src/control/video.c \
-    src/control/vlm.c \
     src/extras/libc.c \
     src/extras/tdestroy.c \
     src/input/access.c \
@@ -89,9 +88,6 @@ LOCAL_SRC_FILES := \
     src/input/stream_memory.c \
     src/input/subtitles.c \
     src/input/var.c \
-    src/input/vlm.c \
-    src/input/vlm_event.c \
-    src/input/vlmshell.c \
     src/interface/dialog.c \
     src/interface/interface.c \
     src/interface/intf_eject.c \
@@ -133,7 +129,6 @@ LOCAL_SRC_FILES := \
     src/modules/textdomain.c \
     src/network/acl.c \
     src/network/getaddrinfo.c \
-    src/network/httpd.c \
     src/network/io.c \
     src/network/poll.c \
     src/network/rootbind.c \
@@ -159,10 +154,6 @@ LOCAL_SRC_FILES := \
     src/posix/linux_specific.c \
     src/posix/plugin.c \
     src/posix/thread.c \
-    src/stream_output/announce.c \
-    src/stream_output/sap.c \
-    src/stream_output/sdp.c \
-    src/stream_output/stream_output.c \
     src/text/charset.c \
     src/text/filesystem.c \
     src/text/iso_lang.c \
@@ -187,7 +178,7 @@ LOCAL_SRC_FILES := \
 LOCAL_LDLIBS += -ldl -llog -lz
 
 # modules begin
-LOCAL_STATIC_LIBRARIES += access_http_plugin access_mms_plugin aout_android_plugin audio_format_neon_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin dummy_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libasf_plugin libass_plugin libavi_plugin libmp4_plugin live555_plugin mpgv_plugin packetizer_copy_plugin packetizer_dirac_plugin packetizer_flac_plugin packetizer_h264_plugin packetizer_mlp_plugin packetizer_mpeg4audio_plugin packetizer_mpeg4video_plugin packetizer_mpegvideo_plugin packetizer_vc1_plugin realrtsp_plugin simple_channel_mixer_plugin subsdec_plugin subsusf_plugin subtitle_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vout_android_plugin yuv2rgb_plugin
+LOCAL_STATIC_LIBRARIES += access_http_plugin access_mms_plugin amem_plugin android_surface_plugin audiotrack_android_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin dummy_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libasf_plugin libass_plugin libavi_plugin libmp4_plugin live555_plugin mpgv_plugin packetizer_copy_plugin packetizer_dirac_plugin packetizer_flac_plugin packetizer_h264_plugin packetizer_mlp_plugin packetizer_mpeg4audio_plugin packetizer_mpeg4video_plugin packetizer_mpegvideo_plugin packetizer_vc1_plugin realrtsp_plugin simple_channel_mixer_plugin subsdec_plugin subsusf_plugin subtitle_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vmem_plugin yuv2rgb_plugin
 # modules end
 
 LOCAL_STATIC_LIBRARIES += compat

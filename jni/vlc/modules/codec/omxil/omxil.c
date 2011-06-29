@@ -2,7 +2,7 @@
  * omxil.c: Video decoder module making use of OpenMAX IL components.
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: 17cfa6b0592bab20a2bb539950437e6f053ad1fe $
+ * $Id: edd7617e60c2b134d1c1c3e58b8a0ad712ca5a0c $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -89,7 +89,7 @@ static OMX_ERRORTYPE OmxFillBufferDone( OMX_HANDLETYPE, OMX_PTR,
 vlc_module_begin ()
     set_description( N_("Audio/Video decoder (using OpenMAX IL)") )
     set_category( CAT_INPUT )
-    set_subcategory( SUBCAT_INPUT_SCODEC )
+    set_subcategory( SUBCAT_INPUT_VCODEC )
     set_section( N_("Decoding") , NULL )
 #ifdef HAVE_MAEMO
     set_capability( "decoder", 80 )

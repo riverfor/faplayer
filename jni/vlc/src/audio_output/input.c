@@ -2,7 +2,7 @@
  * input.c : internal management of input streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: ab0fe61436c5974af9b784cbcdb80ba978ace1dd $
+ * $Id: b47b1c7184d9b80541ec93d6f6cf3f02a396f69c $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -83,7 +83,6 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
 
     /* Prepare FIFO. */
     aout_FifoInit( p_aout, &p_input->mixer.fifo, p_aout->mixer_format.i_rate );
-    p_input->mixer.begin = NULL;
 
     /* */
     if( p_request_vout )
@@ -449,7 +448,7 @@ int aout_InputDelete( aout_instance_t * p_aout, aout_input_t * p_input )
     aout_FiltersDestroyPipeline( p_input->pp_resamplers,
                                  p_input->i_nb_resamplers );
     p_input->i_nb_resamplers = 0;
-    aout_FifoDestroy( p_aout, &p_input->mixer.fifo );
+    aout_FifoDestroy( &p_input->mixer.fifo );
 
     return 0;
 }
@@ -471,7 +470,6 @@ void aout_InputCheckAndRestart( aout_instance_t * p_aout, aout_input_t * p_input
 
     /* A little trick to avoid loosing our input fifo and properties */
 
-    uint8_t *p_first_byte_to_mix = p_input->mixer.begin;
     aout_fifo_t fifo = p_input->mixer.fifo;
     bool b_paused = p_input->b_paused;
     mtime_t i_pause_date = p_input->i_pause_date;
@@ -481,7 +479,6 @@ void aout_InputCheckAndRestart( aout_instance_t * p_aout, aout_input_t * p_input
     aout_InputDelete( p_aout, p_input );
 
     aout_InputNew( p_aout, p_input, &p_input->request_vout );
-    p_input->mixer.begin = p_first_byte_to_mix;
     p_input->mixer.fifo = fifo;
     p_input->b_paused = b_paused;
     p_input->i_pause_date = i_pause_date;
@@ -545,24 +542,22 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
         p_input->i_last_input_rate = i_input_rate;
     }
 
+    mtime_t now = mdate();
+
     /* We don't care if someone changes the start date behind our back after
      * this. We'll deal with that when pushing the buffer, and compensate
      * with the next incoming buffer. */
     aout_lock_input_fifos( p_aout );
-    start_date = aout_FifoNextStart( p_aout, &p_input->mixer.fifo );
-    aout_unlock_input_fifos( p_aout );
+    start_date = aout_FifoNextStart( &p_input->mixer.fifo );
 
-    if ( start_date != 0 && start_date < mdate() )
+    if ( start_date != 0 && start_date < now )
     {
         /* The decoder is _very_ late. This can only happen if the user
          * pauses the stream (or if the decoder is buggy, which cannot
          * happen :). */
         msg_Warn( p_aout, "computed PTS is out of range (%"PRId64"), "
-                  "clearing out", mdate() - start_date );
-        aout_lock_input_fifos( p_aout );
-        aout_FifoSet( p_aout, &p_input->mixer.fifo, 0 );
-        p_input->mixer.begin = NULL;
-        aout_unlock_input_fifos( p_aout );
+                  "clearing out", now - start_date );
+        aout_FifoSet( &p_input->mixer.fifo, 0 );
         if ( p_input->i_resampling_type != AOUT_RESAMPLING_NONE )
             msg_Warn( p_aout, "timing screwed, stopping resampling" );
         inputResamplingStop( p_input );
@@ -570,59 +565,57 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
         start_date = 0;
     }
 
-    if ( p_buffer->i_pts < mdate() + AOUT_MIN_PREPARE_TIME )
+    if ( p_buffer->i_pts < now + AOUT_MIN_PREPARE_TIME )
     {
         /* The decoder gives us f*cked up PTS. It's its business, but we
          * can't present it anyway, so drop the buffer. */
         msg_Warn( p_aout, "PTS is out of range (%"PRId64"), dropping buffer",
-                  mdate() - p_buffer->i_pts );
-
+                  now - p_buffer->i_pts );
         inputDrop( p_input, p_buffer );
         inputResamplingStop( p_input );
-        return 0;
+        goto out;
     }
 
     /* If the audio drift is too big then it's not worth trying to resample
      * the audio. */
-    mtime_t i_pts_tolerance = 3 * AOUT_PTS_TOLERANCE * i_input_rate / INPUT_RATE_DEFAULT;
-    if ( start_date != 0 &&
-         ( start_date < p_buffer->i_pts - i_pts_tolerance ) )
+    if( !start_date )
+        start_date = p_buffer->i_pts;
+
+    mtime_t tolerance = 3 * AOUT_PTS_TOLERANCE
+                          * i_input_rate / INPUT_RATE_DEFAULT;
+    mtime_t drift = start_date - p_buffer->i_pts;
+
+    if( drift < -tolerance )
     {
-        msg_Warn( p_aout, "audio drift is too big (%"PRId64"), clearing out",
-                  start_date - p_buffer->i_pts );
-        aout_lock_input_fifos( p_aout );
-        aout_FifoSet( p_aout, &p_input->mixer.fifo, 0 );
-        p_input->mixer.begin = NULL;
-        aout_unlock_input_fifos( p_aout );
+        msg_Warn( p_aout, "buffer way too early (%"PRId64"), clearing queue",
+                  drift );
+        aout_FifoSet( &p_input->mixer.fifo, 0 );
         if ( p_input->i_resampling_type != AOUT_RESAMPLING_NONE )
             msg_Warn( p_aout, "timing screwed, stopping resampling" );
         inputResamplingStop( p_input );
         p_buffer->i_flags |= BLOCK_FLAG_DISCONTINUITY;
-        start_date = 0;
+        start_date = p_buffer->i_pts;
+        drift = 0;
     }
-    else if ( start_date != 0 &&
-              ( start_date > p_buffer->i_pts + i_pts_tolerance) )
+    else if( drift > +tolerance )
     {
-        msg_Warn( p_aout, "audio drift is too big (%"PRId64"), dropping buffer",
-                  start_date - p_buffer->i_pts );
+        msg_Warn( p_aout, "buffer way too late (%"PRId64"), dropping buffer",
+                  drift );
         inputDrop( p_input, p_buffer );
-        return 0;
+        goto out;
     }
-
-    if ( start_date == 0 ) start_date = p_buffer->i_pts;
 
 #ifndef AOUT_PROCESS_BEFORE_CHEKS
     /* Run pre-filters. */
     aout_FiltersPlay( p_input->pp_filters, p_input->i_nb_filters, &p_buffer );
     if( !p_buffer )
-        return 0;
+        goto out;
 #endif
 
     /* Run the resampler if needed.
      * We first need to calculate the output rate of this resampler. */
     if ( ( p_input->i_resampling_type == AOUT_RESAMPLING_NONE ) &&
-         ( start_date < p_buffer->i_pts - AOUT_PTS_TOLERANCE
-           || start_date > p_buffer->i_pts + AOUT_PTS_TOLERANCE ) &&
+         ( drift < -AOUT_PTS_TOLERANCE || drift > +AOUT_PTS_TOLERANCE ) &&
          p_input->i_nb_resamplers > 0 )
     {
         /* Can happen in several circumstances :
@@ -632,20 +625,13 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
          *    synchronization
          * Solution : resample the buffer to avoid a scratch.
          */
-        mtime_t drift = p_buffer->i_pts - start_date;
-
-        p_input->i_resamp_start_date = mdate();
-        p_input->i_resamp_start_drift = (int)drift;
-
-        if ( drift > 0 )
-            p_input->i_resampling_type = AOUT_RESAMPLING_DOWN;
-        else
-            p_input->i_resampling_type = AOUT_RESAMPLING_UP;
-
-        msg_Warn( p_aout, "buffer is %"PRId64" %s, triggering %ssampling",
-                          drift > 0 ? drift : -drift,
-                          drift > 0 ? "in advance" : "late",
-                          drift > 0 ? "down" : "up");
+        p_input->i_resamp_start_date = now;
+        p_input->i_resamp_start_drift = (int)-drift;
+        p_input->i_resampling_type = (drift < 0) ? AOUT_RESAMPLING_DOWN
+                                                 : AOUT_RESAMPLING_UP;
+        msg_Warn( p_aout, (drift < 0)
+                  ? "buffer too early (%"PRId64"), down-sampling"
+                  : "buffer too late  (%"PRId64"), up-sampling", drift );
     }
 
     if ( p_input->i_resampling_type != AOUT_RESAMPLING_NONE )
@@ -655,13 +641,9 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
          * it isn't too audible to the listener. */
 
         if( p_input->i_resampling_type == AOUT_RESAMPLING_UP )
-        {
             p_input->pp_resamplers[0]->fmt_in.audio.i_rate += 2; /* Hz */
-        }
         else
-        {
             p_input->pp_resamplers[0]->fmt_in.audio.i_rate -= 2; /* Hz */
-        }
 
         /* Check if everything is back to normal, in which case we can stop the
          * resampling */
@@ -674,7 +656,7 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
             p_input->i_resampling_type = AOUT_RESAMPLING_NONE;
             msg_Warn( p_aout, "resampling stopped after %"PRIi64" usec "
                       "(drift: %"PRIi64")",
-                      mdate() - p_input->i_resamp_start_date,
+                      now - p_input->i_resamp_start_date,
                       p_buffer->i_pts - start_date);
         }
         else if( abs( (int)(p_buffer->i_pts - start_date) ) <
@@ -709,29 +691,20 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
     }
 
     if( !p_buffer )
-        return 0;
+        goto out;
     if( p_buffer->i_nb_samples <= 0 )
     {
         block_Release( p_buffer );
-        return 0;
+        goto out;
     }
 #endif
 
     /* Adding the start date will be managed by aout_FifoPush(). */
     p_buffer->i_pts = start_date;
-
-    aout_lock_input_fifos( p_aout );
-    aout_FifoPush( p_aout, &p_input->mixer.fifo, p_buffer );
+    aout_FifoPush( &p_input->mixer.fifo, p_buffer );
+out:
     aout_unlock_input_fifos( p_aout );
     return 0;
-}
-
-bool aout_InputIsEmpty( aout_instance_t * p_aout, aout_input_t * p_input )
-{
-    aout_lock_input_fifos( p_aout );
-    bool is_empty = date_Get( &p_input->mixer.fifo.end_date ) <= mdate();
-    aout_unlock_input_fifos( p_aout );
-    return is_empty;
 }
 
 /*****************************************************************************
@@ -748,7 +721,7 @@ static void inputFailure( aout_instance_t * p_aout, aout_input_t * p_input,
     aout_FiltersDestroyPipeline( p_input->pp_filters, p_input->i_nb_filters );
     aout_FiltersDestroyPipeline( p_input->pp_resamplers,
                                  p_input->i_nb_resamplers );
-    aout_FifoDestroy( p_aout, &p_input->mixer.fifo );
+    aout_FifoDestroy( &p_input->mixer.fifo );
     var_Destroy( p_aout, "visual" );
     var_Destroy( p_aout, "equalizer" );
     var_Destroy( p_aout, "audio-filter" );

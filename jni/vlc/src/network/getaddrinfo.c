@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
  * Copyright (C) 2002-2007 Rémi Denis-Courmont
- * $Id: f63b64aa0e6a44a1048a59017bbbe4b5e0d38544 $
+ * $Id: 6648f88f739ed6291034033bfa37211976fdafe8 $
  *
  * Author: Rémi Denis-Courmont <rem # videolan.org>
  *
@@ -133,17 +133,6 @@ int vlc_getaddrinfo( vlc_object_t *p_this, const char *node,
 
     /* We only ever use port *numbers* */
     hints.ai_flags |= AI_NUMERICSERV;
-
-    if( hints.ai_family == AF_UNSPEC )
-    {
-#ifdef AF_INET6
-        if (var_InheritBool (p_this, "ipv6"))
-            hints.ai_family = AF_INET6;
-        else
-#endif
-        if (var_InheritBool (p_this, "ipv4"))
-            hints.ai_family = AF_INET;
-    }
 
     /*
      * VLC extensions :

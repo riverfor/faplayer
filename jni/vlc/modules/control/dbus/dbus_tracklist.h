@@ -4,7 +4,7 @@
  * Copyright © 2006-2008 Rafaël Carré
  * Copyright © 2007-2010 Mirsal Ennaime
  * Copyright © 2009-2010 The VideoLAN team
- * $Id: c6cb5996a388cd37992eb5b9e6d82a692ebb32d2 $
+ * $Id: 5aba14a6dde15c14b10002667fa2e96f80df8b1e $
  *
  * Authors:    Mirsal Ennaime <mirsal at mirsal fr>
  *             Rafaël Carré <funman at videolanorg>
@@ -39,11 +39,6 @@ DBusHandlerResult handle_tracklist ( DBusConnection *p_conn,
                                      DBusMessage *p_from,
                                      void *p_this );
 
-static const DBusObjectPathVTable dbus_mpris_tracklist_vtable = {
-        NULL, handle_tracklist, /* handler function */
-        NULL, NULL, NULL, NULL
-};
-
-int TrackListChangeEmit( intf_thread_t *, int, int );
+int TrackListPropertiesChangedEmit( intf_thread_t *, vlc_dictionary_t * );
 
 #endif //dbus_tracklist.h

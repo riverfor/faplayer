@@ -2,7 +2,7 @@
  * fbosd.c : framebuffer osd plugin for vlc
  *****************************************************************************
  * Copyright (C) 2007-2008, the VideoLAN team
- * $Id: 35c139d34455e5bd42f0e1338b6f946e4573712c $
+ * $Id: 375d89505740180123cda956b8c5ba6737f30bd1 $
  *
  * Authors: Jean-Paul Saman
  * Copied from modules/video_output/fb.c by Samuel Hocevar <sam@zoy.org>
@@ -869,7 +869,7 @@ static picture_t *RenderText( intf_thread_t *p_intf, const char *psz_string,
             memset( &fmt_out, 0, sizeof(video_format_t) );
 
             p_sys->p_text->pf_render_text( p_sys->p_text,
-                                           p_region, p_region );
+                                           p_region, p_region, NULL );
 
 #if defined(FBOSD_BLENDING)
             fmt_out = p_region->fmt;

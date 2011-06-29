@@ -2,7 +2,7 @@
  * quartztext.c : Put text on the video, using Mac OS X Quartz Engine
  *****************************************************************************
  * Copyright (C) 2007, 2009 the VideoLAN team
- * $Id: a0efdaebde0aac3432260f3a3bcd82e082eb231f $
+ * $Id: e6b066f65d710b055dc86f173c995a13e1a97f42 $
  *
  * Authors: Bernie Purcell <bitmap@videolan.org>
  *
@@ -66,9 +66,11 @@ static void Destroy( vlc_object_t * );
 static int LoadFontsFromAttachments( filter_t *p_filter );
 
 static int RenderText( filter_t *, subpicture_region_t *,
-                       subpicture_region_t * );
+                       subpicture_region_t *,
+                       const vlc_fourcc_t * );
 static int RenderHtml( filter_t *, subpicture_region_t *,
-                       subpicture_region_t * );
+                       subpicture_region_t *,
+                       const vlc_fourcc_t * );
 
 static int GetFontSize( filter_t *p_filter );
 static int RenderYUVA( filter_t *p_filter, subpicture_region_t *p_region,
@@ -308,7 +310,8 @@ static char *EliminateCRLF( char *psz_string )
 // Renders a text subpicture region into another one.
 // It is used as pf_add_string callback in the vout method by this module
 static int RenderText( filter_t *p_filter, subpicture_region_t *p_region_out,
-                       subpicture_region_t *p_region_in )
+                       subpicture_region_t *p_region_in,
+                       const vlc_fourcc_t *p_chroma_list )
 {
     filter_sys_t *p_sys = p_filter->p_sys;
     char         *psz_string;
@@ -316,7 +319,6 @@ static int RenderText( filter_t *p_filter, subpicture_region_t *p_region_out,
     uint32_t      i_font_color;
     bool          b_bold, b_uline, b_italic;
     vlc_value_t val;
-    int i_scale = 1000;
     b_bold = b_uline = b_italic = FALSE;
 
     p_sys->i_font_size    = GetFontSize( p_filter );
@@ -326,14 +328,11 @@ static int RenderText( filter_t *p_filter, subpicture_region_t *p_region_out,
     psz_string = p_region_in->psz_text;
     if( !psz_string || !*psz_string ) return VLC_EGENERIC;
 
-    if( VLC_SUCCESS == var_Get( p_filter, "scale", &val ))
-        i_scale = val.i_int;
-
     if( p_region_in->p_style )
     {
         i_font_color = __MAX( __MIN( p_region_in->p_style->i_font_color, 0xFFFFFF ), 0 );
         i_font_alpha = __MAX( __MIN( p_region_in->p_style->i_font_alpha, 255 ), 0 );
-        i_font_size  = __MAX( __MIN( p_region_in->p_style->i_font_size, 255 ), 0 ) * i_scale / 1000;
+        i_font_size  = __MAX( __MIN( p_region_in->p_style->i_font_size, 255 ), 0 );
         if( p_region_in->p_style->i_style_flags )
         {
             if( p_region_in->p_style->i_style_flags & STYLE_BOLD )
@@ -476,7 +475,7 @@ static int PeekFont( font_stack_t **p_font, char **psz_name, int *i_size,
 }
 
 static int HandleFontAttributes( xml_reader_t *p_xml_reader,
-                                  font_stack_t **p_fonts, int i_scale )
+                                  font_stack_t **p_fonts )
 {
     int        rv;
     char      *psz_fontname = NULL;
@@ -493,7 +492,7 @@ static int HandleFontAttributes( xml_reader_t *p_xml_reader,
                                  &i_font_color ))
     {
         psz_fontname = strdup( psz_fontname );
-        i_font_size = i_font_size * 1000 / i_scale;
+        i_font_size = i_font_size;
     }
     i_font_alpha = (i_font_color >> 24) & 0xff;
     i_font_color &= 0x00ffffff;
@@ -534,7 +533,7 @@ static int HandleFontAttributes( xml_reader_t *p_xml_reader,
     }
     rv = PushFont( p_fonts,
                    psz_fontname,
-                   i_font_size * i_scale / 1000,
+                   i_font_size,
                    (i_font_color & 0xffffff) | ((i_font_alpha & 0xff) << 24) );
 
     free( psz_fontname );
@@ -650,8 +649,6 @@ static int ProcessNodes( filter_t *p_filter,
     int           rv             = VLC_SUCCESS;
     filter_sys_t *p_sys          = p_filter->p_sys;
     font_stack_t *p_fonts        = NULL;
-    vlc_value_t   val;
-    int           i_scale        = 1000;
 
     int type;
     const char *node;
@@ -660,14 +657,11 @@ static int ProcessNodes( filter_t *p_filter,
     bool b_bold   = false;
     bool b_uline  = false;
 
-    if( VLC_SUCCESS == var_Get( p_filter, "scale", &val ))
-        i_scale = val.i_int;
-
     if( p_font_style )
     {
         rv = PushFont( &p_fonts,
                p_font_style->psz_fontname,
-               p_font_style->i_font_size * i_scale / 1000,
+               p_font_style->i_font_size,
                (p_font_style->i_font_color & 0xffffff) |
                    ((p_font_style->i_font_alpha & 0xff) << 24) );
 
@@ -705,7 +699,7 @@ static int ProcessNodes( filter_t *p_filter,
                 break;
             case XML_READER_STARTELEM:
                 if( !strcasecmp( "font", node ) )
-                    rv = HandleFontAttributes( p_xml_reader, &p_fonts, i_scale );
+                    rv = HandleFontAttributes( p_xml_reader, &p_fonts );
                 else if( !strcasecmp( "b", node ) )
                     b_bold = true;
                 else if( !strcasecmp( "i", node ) )
@@ -777,7 +771,8 @@ static int ProcessNodes( filter_t *p_filter,
 }
 
 static int RenderHtml( filter_t *p_filter, subpicture_region_t *p_region_out,
-                       subpicture_region_t *p_region_in )
+                       subpicture_region_t *p_region_in,
+                       const vlc_fourcc_t *p_chroma_list )
 {
     int          rv = VLC_SUCCESS;
     stream_t     *p_sub = NULL;

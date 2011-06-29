@@ -2,7 +2,7 @@
  * extended_panels.cpp : Extended controls panels
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 340e49aa91aac15e6329021074a15b718c0e996a $
+ * $Id: d848d908009b026b6aaeb10cbf95c3dbf058be37 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea .t videolan d@t org>
@@ -615,15 +615,16 @@ void ExtVideo::updateFilterOptions()
     }
     else if( i_type == VLC_VAR_STRING )
     {
-        char *psz_string = NULL;
-        if( lineedit ) psz_string = strdup( qtu( lineedit->text() ) );
-        else if( combobox ) psz_string = strdup( qtu( combobox->itemData(
-                                       combobox->currentIndex() ).toString() ) );
-        else msg_Warn( p_intf, "Oops %s %s %d", __FILE__, __func__, __LINE__ );
-        config_PutPsz( p_intf, qtu( option ), psz_string );
+        QString val;
+        if( lineedit )
+            val = lineedit->text();
+        else if( combobox )
+            val = combobox->itemData( combobox->currentIndex() ).toString();
+        else
+            msg_Warn( p_intf, "Oops %s %s %d", __FILE__, __func__, __LINE__ );
+        config_PutPsz( p_intf, qtu( option ), qtu( val ) );
         if( b_is_command )
-            var_SetString( p_obj, qtu( option ), psz_string );
-        free( psz_string );
+            var_SetString( p_obj, qtu( option ), qtu( val ) );
     }
     else
         msg_Err( p_intf,
@@ -828,8 +829,8 @@ void ExtV4l2::ValueChange( int value )
     vlc_object_t *p_obj = (vlc_object_t*)vlc_object_find_name( pl_Get(p_intf), "v4l2" );
     if( p_obj )
     {
-        char *psz_var = strdup( qtu( s->objectName() ) );
-        int i_type = var_Type( p_obj, psz_var );
+        QString var = s->objectName();
+        int i_type = var_Type( p_obj, qtu( var ) );
         switch( i_type & VLC_VAR_TYPE )
         {
             case VLC_VAR_INTEGER:
@@ -838,16 +839,15 @@ void ExtV4l2::ValueChange( int value )
                     QComboBox *combobox = qobject_cast<QComboBox*>( s );
                     value = combobox->itemData( value ).toInt();
                 }
-                var_SetInteger( p_obj, psz_var, value );
+                var_SetInteger( p_obj, qtu( var ), value );
                 break;
             case VLC_VAR_BOOL:
-                var_SetBool( p_obj, psz_var, value );
+                var_SetBool( p_obj, qtu( var ), value );
                 break;
             case VLC_VAR_VOID:
-                var_TriggerCallback( p_obj, psz_var );
+                var_TriggerCallback( p_obj, qtu( var ) );
                 break;
         }
-        free( psz_var );
         vlc_object_release( p_obj );
     }
     else
@@ -1041,13 +1041,12 @@ void Equalizer::setCoreBands()
         band_texts[i]->setText( band_frequencies[i] + "\n" + val + "dB" );
         values += " " + val;
     }
-    const char *psz_values = values.toAscii().constData();
 
     aout_instance_t *p_aout = THEMIM->getAout();
     if( p_aout )
     {
         //delCallbacks( p_aout );
-        var_SetString( p_aout, "equalizer-bands", psz_values );
+        var_SetString( p_aout, "equalizer-bands", qtu( values ) );
         //addCallbacks( p_aout );
         vlc_object_release( p_aout );
     }
@@ -1059,7 +1058,7 @@ char * Equalizer::createValuesFromPreset( int i_preset )
 
     /* Create the QString in Qt */
     for( int i = 0 ; i< BANDS ;i++ )
-        values += QString( " %1" ).arg( eqz_preset_10b[i_preset]->f_amp[i] );
+        values += QString( " %1" ).arg( eqz_preset_10b[i_preset]->f_amp[i], 5, 'f', 1 );
 
     /* Convert it to char * */
     return strdup( values.toAscii().constData() );
@@ -1617,9 +1616,10 @@ SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent ) :
     BUTTON_SET_ACT_I( updateButton, "", update,
             qtr( "Force update of this dialog's values" ), update() );
 
+    initSubsDuration();
+
     /* Set it */
     update();
-    updateSubsDuration();
 }
 
 SyncControls::~SyncControls()
@@ -1634,7 +1634,6 @@ void SyncControls::clean()
     subsSpin->setValue( 0.0 );
     subSpeedSpin->setValue( 1.0 );
     subsdelayClean();
-    updateSubsDuration();
     b_userAction = true;
 }
 
@@ -1650,6 +1649,7 @@ void SyncControls::update()
         i_delay = var_GetTime( THEMIM->getInput(), "spu-delay" );
         subsSpin->setValue( ( (double)i_delay ) / 1000000 );
         subSpeedSpin->setValue( var_GetFloat( THEMIM->getInput(), "sub-fps" ) );
+        subDurationSpin->setValue( var_InheritFloat( p_intf, SUBSDELAY_CFG_FACTOR ) );
     }
     b_userAction = true;
 }
@@ -1689,7 +1689,7 @@ void SyncControls::adjustSubsDuration( double f_factor )
     }
 }
 
-void SyncControls::updateSubsDuration()
+void SyncControls::initSubsDuration()
 {
     int i_mode = var_InheritInteger( p_intf, SUBSDELAY_CFG_MODE );
 
@@ -1713,8 +1713,6 @@ void SyncControls::updateSubsDuration()
         subDurationSpin->setSuffix( "" );
         break;
     }
-
-    subDurationSpin->setValue( var_InheritFloat( p_intf, SUBSDELAY_CFG_FACTOR ) );
 }
 
 void SyncControls::subsdelayClean()

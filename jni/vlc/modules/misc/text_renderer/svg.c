@@ -2,7 +2,7 @@
  * svg.c : Put SVG on the video
  *****************************************************************************
  * Copyright (C) 2002, 2003 the VideoLAN team
- * $Id: 344197cb8fcface07fc8a1d7fabe45a5c0699229 $
+ * $Id: 5e7de1be55684262afbc7c013ab2935068dc9ee4 $
  *
  * Authors: Olivier Aubert <oaubert@lisi.univ-lyon1.fr>
  *
@@ -55,7 +55,8 @@ typedef struct svg_rendition_t svg_rendition_t;
 static int  Create    ( vlc_object_t * );
 static void Destroy   ( vlc_object_t * );
 static int  RenderText( filter_t *p_filter, subpicture_region_t *p_region_out,
-                        subpicture_region_t *p_region_in );
+                        subpicture_region_t *p_region_in,
+                        const vlc_fourcc_t * );
 static char *svg_GetTemplate( vlc_object_t *p_this );
 
 /*****************************************************************************
@@ -428,7 +429,8 @@ static void svg_RenderPicture( filter_t *p_filter,
 
 
 static int RenderText( filter_t *p_filter, subpicture_region_t *p_region_out,
-                       subpicture_region_t *p_region_in )
+                       subpicture_region_t *p_region_in,
+                       const vlc_fourcc_t *p_chroma_list )
 {
     filter_sys_t *p_sys = p_filter->p_sys;
     svg_rendition_t *p_svg = NULL;

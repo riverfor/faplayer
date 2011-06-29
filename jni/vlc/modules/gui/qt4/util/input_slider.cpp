@@ -2,7 +2,7 @@
  * input_slider.cpp : VolumeSlider and SeekSlider
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: 5449a9339878dc6cacc67bf6a9aeb12a33d1da8a $
+ * $Id: 81db2e4436112554eda8c09cbdb31f8395ee7a48 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -51,6 +51,7 @@ SeekSlider::SeekSlider( Qt::Orientation q, QWidget *_parent )
           : QSlider( q, _parent )
 {
     b_isSliding = false;
+    f_buffering = 1.0;
 
     /* Timer used to fire intermediate updatePos() when sliding */
     seekLimitTimer = new QTimer( this );
@@ -74,7 +75,6 @@ SeekSlider::SeekSlider( Qt::Orientation q, QWidget *_parent )
 
     CONNECT( this, sliderMoved( int ), this, startSeekTimer() );
     CONNECT( seekLimitTimer, timeout(), this, updatePos() );
-
     mTimeTooltip->installEventFilter( this );
 }
 
@@ -87,6 +87,7 @@ SeekSlider::SeekSlider( Qt::Orientation q, QWidget *_parent )
  ***/
 void SeekSlider::setPosition( float pos, int64_t time, int length )
 {
+    VLC_UNUSED(time);
     if( pos == -1.0 )
     {
         setEnabled( false );
@@ -112,6 +113,12 @@ void SeekSlider::updatePos()
 {
     float f_pos = (float)( value() ) / 1000.0;
     emit sliderDragged( f_pos ); /* Send new position to VLC's core */
+}
+
+void SeekSlider::updateBuffering( float f_buffering_ )
+{
+    f_buffering = f_buffering_;
+    repaint();
 }
 
 void SeekSlider::mouseReleaseEvent( QMouseEvent *event )
@@ -310,6 +317,17 @@ void SeekSlider::paintEvent( QPaintEvent *event )
         painter.setPen( Qt::NoPen );
         painter.setBrush( foregroundGradient );
         painter.drawRoundedRect( valueRect, barCorner, barCorner );
+    }
+
+    // draw buffering overlay
+    if ( f_buffering < 1.0 )
+    {
+        QRect innerRect = barRect.adjusted( 1, 1,
+                            barRect.width() * ( -1.0 + f_buffering ) - 1, 0 );
+        QColor overlayColor = QColor( "Orange" );
+        overlayColor.setAlpha( 128 );
+        painter.setBrush( overlayColor );
+        painter.drawRoundedRect( innerRect, barCorner, barCorner );
     }
 
     // draw handle

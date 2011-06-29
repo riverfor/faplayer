@@ -259,12 +259,10 @@ case $TARGET in
     ;;
     arm-none-linux-gnueabi)
         if test -f /etc/maemo_version; then
-            hint_distro maemo
+            hint_distro maemo5
             EXTRA_CFLAGS=" -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a"
             EXTRA_CFLAGS="$EXTRA_CFLAGS -mfpu=neon -mfloat-abi=softfp"
             EXTRA_CFLAGS="$EXTRA_CFLAGS -O3 -fno-tree-vectorize"
-        else
-            EXTRA_CFLAGS="-msoft-float"
         fi
     ;;
     *86_64*linux*)
@@ -294,7 +292,9 @@ if test -z "${DISTRO}" -a "$TARGET" = "$BUILD"; then
     if test -f /etc/fedora-release; then
         hint_distro fedora
     elif test -f /etc/maemo_version; then
-        hint_distro maemo
+        hint_distro maemo5
+    elif test "$SBOX_UNAME_MACHINE"; then
+        hint_distro maemo6
     elif test -f /etc/debian_version; then
         # NOTE: check for Debian *after* its derivatives
         hint_distro debian
@@ -373,6 +373,9 @@ case "$DISTRO" in
     add_makefile_cfg "ANDROID_NDK = ${ANDROID_NDK}"
     add_makefile_cfg "PATH = ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/:${PATH}"
     add_enabled_makefile_cfg "HAVE_LINUX"
+    if test -z "$NO_NEON"; then
+        add_enabled_makefile_cfg "HAVE_NEON"
+    fi
 esac
 
 # Save passed flags

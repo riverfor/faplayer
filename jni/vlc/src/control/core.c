@@ -2,7 +2,7 @@
  * core.c: Core libvlc new API functions : initialization
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id: 2fb408494e6b856b7546341b4856ff26fa176bb4 $
+ * $Id: d5836bebe53cec1be5bb18c74abe2209686c60f7 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -173,7 +173,8 @@ void libvlc_free( void *ptr )
     free( ptr );
 }
 
-libvlc_module_description_t *libvlc_module_description_list_get( libvlc_instance_t *p_instance, const char *capability )
+static libvlc_module_description_t *module_description_list_get(
+                libvlc_instance_t *p_instance, const char *capability )
 {
     VLC_UNUSED( p_instance );
     libvlc_module_description_t *p_list = NULL,
@@ -238,12 +239,12 @@ void libvlc_module_description_list_release( libvlc_module_description_t *p_list
 
 libvlc_module_description_t *libvlc_audio_filter_list_get( libvlc_instance_t *p_instance )
 {
-    return libvlc_module_description_list_get( p_instance, "audio filter" );
+    return module_description_list_get( p_instance, "audio filter" );
 }
 
 libvlc_module_description_t *libvlc_video_filter_list_get( libvlc_instance_t *p_instance )
 {
-    return libvlc_module_description_list_get( p_instance, "video filter2" );
+    return module_description_list_get( p_instance, "video filter2" );
 }
 
 int64_t libvlc_clock(void)

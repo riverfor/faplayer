@@ -4,7 +4,7 @@
  * Copyright © 2006-2011 Rafaël Carré
  * Copyright © 2007-2011 Mirsal Ennaime
  * Copyright © 2009-2011 The VideoLAN team
- * $Id: 8bf66dd5305cbeb8e980719b9c7f1dc7b7f8d42e $
+ * $Id: fc71d8764b4c7e9c8beaf32655eae9728141d7e4 $
  *
  * Authors:    Mirsal Ennaime <mirsal at mirsal fr>
  *             Rafaël Carré <funman at videolanorg>
@@ -216,25 +216,120 @@ DBUS_METHOD( RemoveTrack )
     REPLY_SEND;
 }
 
-/******************************************************************************
- * TrackListChange: tracklist order / length change signal
- *****************************************************************************/
-DBUS_SIGNAL( TrackListChangeSignal )
-{ /* emit the new tracklist lengh */
-    SIGNAL_INIT( DBUS_MPRIS_TRACKLIST_INTERFACE,
-                 DBUS_MPRIS_TRACKLIST_PATH,
-                 "TrackListChange");
+DBUS_METHOD( Tracks )
+{ /* Tracks property */
+    VLC_UNUSED( p_this );
 
+    REPLY_INIT;
     OUT_ARGUMENTS;
 
-    playlist_t *p_playlist = ((intf_thread_t*)p_data)->p_sys->p_playlist;
+    DBusMessageIter tracks, v;
+    char *psz_track_id = NULL;
+    playlist_t   *p_playlist   = PL;
+    input_item_t *p_input      = NULL;
+
+    dbus_message_iter_open_container( &args, DBUS_TYPE_VARIANT, "ao", &v );
+    dbus_message_iter_open_container( &v,    DBUS_TYPE_ARRAY, "o", &tracks );
+
     PL_LOCK;
-    dbus_int32_t i_elements = p_playlist->current.i_size;
+
+    for( int i = 0; i < playlist_CurrentSize( p_playlist ); i++ )
+    {
+        p_input = p_playlist->current.p_elems[i]->p_input;
+
+        if( ( -1 == asprintf( &psz_track_id,
+                              MPRIS_TRACKID_FORMAT,
+                              p_input->i_id ) ) ||
+            !dbus_message_iter_append_basic( &tracks,
+                                             DBUS_TYPE_OBJECT_PATH,
+                                             &psz_track_id ) )
+        {
+            PL_UNLOCK;
+            dbus_message_iter_abandon_container( &v, &tracks );
+            dbus_message_iter_abandon_container( &args, &v );
+            return DBUS_HANDLER_RESULT_NEED_MEMORY;
+        }
+
+        free( psz_track_id );
+    }
+
     PL_UNLOCK;
 
-    ADD_INT32( &i_elements );
-    SIGNAL_SEND;
+    if( !dbus_message_iter_close_container( &v, &tracks ) ||
+        !dbus_message_iter_close_container( &args, &v ) )
+        return DBUS_HANDLER_RESULT_NEED_MEMORY;
+
+    REPLY_SEND;
 }
+
+DBUS_METHOD( CanEditTracks )
+{ /* CanEditTracks property */
+    VLC_UNUSED( p_this );
+    REPLY_INIT;
+    OUT_ARGUMENTS;
+
+    DBusMessageIter v;
+    const dbus_bool_t b_ret = TRUE;
+
+    if( !dbus_message_iter_open_container( &args, DBUS_TYPE_VARIANT, "b", &v ) )
+        return DBUS_HANDLER_RESULT_NEED_MEMORY;
+
+    if( !dbus_message_iter_append_basic( &v, DBUS_TYPE_BOOLEAN, &b_ret ) )
+    {
+        dbus_message_iter_abandon_container( &args, &v );
+        return DBUS_HANDLER_RESULT_NEED_MEMORY;
+    }
+
+    if( !dbus_message_iter_close_container( &args, &v ) )
+    {
+        dbus_message_iter_abandon_container( &args, &v );
+        return DBUS_HANDLER_RESULT_NEED_MEMORY;
+    }
+
+    REPLY_SEND;
+}
+
+#define PROPERTY_MAPPING_BEGIN if( 0 ) {}
+#define PROPERTY_FUNC( interface, property, function ) \
+    else if( !strcmp( psz_interface_name, interface ) && \
+             !strcmp( psz_property_name,  property ) ) \
+        return function( p_conn, p_from, p_this );
+#define PROPERTY_MAPPING_END return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+
+DBUS_METHOD( GetProperty )
+{
+    DBusError error;
+
+    char *psz_interface_name = NULL;
+    char *psz_property_name  = NULL;
+
+    dbus_error_init( &error );
+    dbus_message_get_args( p_from, &error,
+            DBUS_TYPE_STRING, &psz_interface_name,
+            DBUS_TYPE_STRING, &psz_property_name,
+            DBUS_TYPE_INVALID );
+
+    if( dbus_error_is_set( &error ) )
+    {
+        msg_Err( (vlc_object_t*) p_this, "D-Bus message reading : %s",
+                                         error.message );
+        dbus_error_free( &error );
+        return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+    }
+
+    msg_Dbg( (vlc_object_t*) p_this, "Getting property %s",
+                                     psz_property_name );
+
+    PROPERTY_MAPPING_BEGIN
+    PROPERTY_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "Tracks", Tracks )
+    PROPERTY_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "CanEditTracks",
+                                                   CanEditTracks )
+    PROPERTY_MAPPING_END
+}
+
+#undef PROPERTY_MAPPING_BEGIN
+#undef PROPERTY_GET_FUNC
+#undef PROPERTY_MAPPING_END
 
 #define METHOD_FUNC( interface, method, function ) \
     else if( dbus_message_is_method_call( p_from, interface, method ) )\
@@ -245,49 +340,78 @@ handle_tracklist ( DBusConnection *p_conn, DBusMessage *p_from, void *p_this )
 {
     if(0);
 
-/*  METHOD_FUNC( DBUS_INTERFACE_PROPERTIES, "Get",    GetProperty );
-    METHOD_FUNC( DBUS_INTERFACE_PROPERTIES, "Set",    SetProperty );
-    METHOD_FUNC( DBUS_INTERFACE_PROPERTIES, "GetAll", GetAllProperties ); */
+    METHOD_FUNC( DBUS_INTERFACE_PROPERTIES, "Get",    GetProperty );
 
     /* here D-Bus method names are associated to an handler */
 
-    METHOD_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "GetTracksMetadata", GetTracksMetadata );
-    METHOD_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "AddTrack",        AddTrack );
-    METHOD_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "RemoveTrack",     RemoveTrack );
-    METHOD_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "GoTo",            GoTo );
+    METHOD_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "GoTo",        GoTo );
+    METHOD_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "AddTrack",    AddTrack );
+    METHOD_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "RemoveTrack", RemoveTrack );
+    METHOD_FUNC( DBUS_MPRIS_TRACKLIST_INTERFACE, "GetTracksMetadata",
+                                                  GetTracksMetadata );
 
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }
 
-/*****************************************************************************
- * TrackListChangeEmit: Emits the TrackListChange signal
- *****************************************************************************/
-/* FIXME: It is not called on tracklist reordering */
-int TrackListChangeEmit( intf_thread_t *p_intf, int signal, int i_node )
+#undef METHOD_FUNC
+
+/**
+ * PropertiesChangedSignal: synthetizes and sends the
+ * org.freedesktop.DBus.Properties.PropertiesChanged signal
+ */
+static DBusHandlerResult
+PropertiesChangedSignal( intf_thread_t    *p_intf,
+                         vlc_dictionary_t *p_changed_properties )
 {
-    // "playlist-item-append"
-    if( signal == SIGNAL_PLAYLIST_ITEM_APPEND )
+    DBusConnection  *p_conn = p_intf->p_sys->p_conn;
+    DBusMessageIter changed_properties, invalidated_properties;
+    const char *psz_interface_name = DBUS_MPRIS_TRACKLIST_INTERFACE;
+    char **ppsz_properties = NULL;
+    int i_properties = 0;
+
+    SIGNAL_INIT( DBUS_INTERFACE_PROPERTIES,
+                 DBUS_MPRIS_OBJECT_PATH,
+                 "PropertiesChanged" );
+
+    OUT_ARGUMENTS;
+    ADD_STRING( &psz_interface_name );
+    dbus_message_iter_open_container( &args, DBUS_TYPE_ARRAY, "{sv}",
+                                      &changed_properties );
+
+    dbus_message_iter_close_container( &args, &changed_properties );
+
+    dbus_message_iter_open_container( &args, DBUS_TYPE_ARRAY, "s",
+                                      &invalidated_properties );
+
+    i_properties    = vlc_dictionary_keys_count( p_changed_properties );
+    ppsz_properties = vlc_dictionary_all_keys( p_changed_properties );
+
+    for( int i = 0; i < i_properties; i++ )
     {
-        /* don't signal when items are added/removed in p_category */
-        playlist_t *p_playlist = p_intf->p_sys->p_playlist;
-        PL_LOCK;
-        playlist_item_t *p_item = playlist_ItemGetById( p_playlist, i_node );
-        assert( p_item );
-        while( p_item->p_parent )
-            p_item = p_item->p_parent;
-        if( p_item == p_playlist->p_root_category )
-        {
-            PL_UNLOCK;
-            return VLC_SUCCESS;
-        }
-        PL_UNLOCK;
+        if( !strcmp( ppsz_properties[i], "Tracks" ) )
+            dbus_message_iter_append_basic( &invalidated_properties,
+                                            DBUS_TYPE_STRING,
+                                            &ppsz_properties[i] );
+
+        free( ppsz_properties[i] );
     }
 
+    dbus_message_iter_close_container( &args, &invalidated_properties );
+    free( ppsz_properties );
+
+    SIGNAL_SEND;
+}
+
+/**
+ * TrackListPropertiesChangedEmit: Emits the
+ * org.freedesktop.DBus.Properties.PropertiesChanged signal
+ */
+int TrackListPropertiesChangedEmit( intf_thread_t    * p_intf,
+                                    vlc_dictionary_t * p_changed_properties )
+{
     if( p_intf->p_sys->b_dead )
         return VLC_SUCCESS;
 
-    TrackListChangeSignal( p_intf->p_sys->p_conn, p_intf );
+    PropertiesChangedSignal( p_intf, p_changed_properties );
     return VLC_SUCCESS;
 }
-
-#undef METHOD_FUNC

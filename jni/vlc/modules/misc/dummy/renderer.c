@@ -2,7 +2,7 @@
  * renderer.c : dummy text rendering functions
  *****************************************************************************
  * Copyright (C) 2000, 2001 the VideoLAN team
- * $Id: 75c76932c31c901b9064bfcbae05ec08b3505250 $
+ * $Id: 219cef746e046952420c01aeed5a145ad8b679ad $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *
@@ -31,8 +31,14 @@
 
 #include "dummy.h"
 
-static int RenderText( filter_t *, subpicture_region_t *,
-                       subpicture_region_t * );
+static int RenderText( filter_t *p_filter, subpicture_region_t *p_region_out,
+                       subpicture_region_t *p_region_in,
+                       const vlc_fourcc_t *p_chroma_list )
+{
+    VLC_UNUSED(p_filter); VLC_UNUSED(p_region_out); VLC_UNUSED(p_region_in);
+    VLC_UNUSED(p_chroma_list);
+    return VLC_EGENERIC;
+}
 
 int OpenRenderer( vlc_object_t *p_this )
 {
@@ -42,9 +48,3 @@ int OpenRenderer( vlc_object_t *p_this )
     return VLC_SUCCESS;
 }
 
-static int RenderText( filter_t *p_filter, subpicture_region_t *p_region_out,
-                       subpicture_region_t *p_region_in )
-{
-    VLC_UNUSED(p_filter); VLC_UNUSED(p_region_out); VLC_UNUSED(p_region_in);
-    return VLC_EGENERIC;
-}

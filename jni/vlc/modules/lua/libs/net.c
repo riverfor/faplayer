@@ -2,7 +2,7 @@
  * net.c: Network related functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: c4696b318d26ebd30ad1fd3e29cb48eb37bc056d $
+ * $Id: 1c7cd122a39d0f931fd55b073339e661770614ea $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -190,7 +190,10 @@ static int vlclua_net_recv( lua_State *L )
     size_t i_len = luaL_optint( L, 2, 1 );
     char psz_buffer[i_len];
     ssize_t i_ret = recv( i_fd, psz_buffer, i_len, 0 );
-    lua_pushlstring( L, psz_buffer, (i_ret >= 0) ? i_ret : 0 );
+    if( i_ret > 0 )
+        lua_pushlstring( L, psz_buffer, i_ret );
+    else
+        lua_pushnil( L );
     return 1;
 }
 
@@ -265,7 +268,10 @@ static int vlclua_fd_read( lua_State *L )
     size_t i_len = luaL_optint( L, 2, 1 );
     char psz_buffer[i_len];
     ssize_t i_ret = read( i_fd, psz_buffer, i_len );
-    lua_pushlstring( L, psz_buffer, (i_ret >= 0) ? i_ret : 0 );
+    if( i_ret > 0 )
+        lua_pushlstring( L, psz_buffer, i_ret );
+    else
+        lua_pushnil( L );
     return 1;
 }
 

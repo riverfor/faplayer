@@ -2,7 +2,7 @@
  * misc.m: code not specific to vlc
  *****************************************************************************
  * Copyright (C) 2003-2011 the VideoLAN team
- * $Id: c20f835decbc6e48cf8f004840f31bedba919676 $
+ * $Id: 2336553ee8114ccf2ef911f842c96985eb561cef $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -29,6 +29,7 @@
 #import "misc.h"
 #import "playlist.h"
 #import "controls.h"
+#import <vlc_url.h>
 
 /*****************************************************************************
  * NSImage (VLCAdditions)
@@ -135,7 +136,7 @@ static NSMutableArray *blackoutWindows = NULL;
 + (NSScreen *)screenWithDisplayID: (CGDirectDisplayID)displayID
 {
     int i;
- 
+
     for( i = 0; i < [[NSScreen screens] count]; i++ )
     {
         NSScreen *screen = [[NSScreen screens] objectAtIndex: i];
@@ -173,7 +174,7 @@ static NSMutableArray *blackoutWindows = NULL;
         NSScreen *screen = [[NSScreen screens] objectAtIndex: i];
         VLCWindow *blackoutWindow;
         NSRect screen_rect;
- 
+
         if([self isScreen: screen])
             continue;
 
@@ -188,13 +189,13 @@ static NSMutableArray *blackoutWindows = NULL;
                 backing: NSBackingStoreBuffered defer: NO screen: screen];
         [blackoutWindow setBackgroundColor:[NSColor blackColor]];
         [blackoutWindow setLevel: NSFloatingWindowLevel]; /* Disappear when Expose is triggered */
- 
+
         [blackoutWindow displayIfNeeded];
         [blackoutWindow orderFront: self animate: YES];
 
         [blackoutWindows addObject: blackoutWindow];
         [blackoutWindow release];
-        
+
         if( [screen isMainScreen ] )
            SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
     }
@@ -209,7 +210,7 @@ static NSMutableArray *blackoutWindows = NULL;
         VLCWindow *blackoutWindow = [blackoutWindows objectAtIndex: i];
         [blackoutWindow closeAndAnimate: YES];
     }
-    
+
    SetSystemUIMode( kUIModeNormal, 0);
 }
 
@@ -252,7 +253,7 @@ static NSMutableArray *blackoutWindows = NULL;
 - (void)closeAndAnimate: (BOOL)animate
 {
     NSInvocation *invoc;
- 
+
     if (!animate)
     {
         [super close];
@@ -333,7 +334,7 @@ static NSMutableArray *blackoutWindows = NULL;
     NSViewAnimation *anim;
     NSViewAnimation *current_anim;
     NSMutableDictionary *dict;
- 
+
     if (!animate)
     {
         [super orderFront: sender];
@@ -355,11 +356,11 @@ static NSMutableArray *blackoutWindows = NULL;
     dict = [[NSMutableDictionary alloc] initWithCapacity:2];
 
     [dict setObject:self forKey:NSViewAnimationTargetKey];
- 
+
     [dict setObject:NSViewAnimationFadeInEffect forKey:NSViewAnimationEffectKey];
     anim = [[NSViewAnimation alloc] initWithViewAnimations:[NSArray arrayWithObjects:dict, nil]];
     [dict release];
- 
+
     [anim setAnimationBlockingMode:NSAnimationNonblocking];
     [anim setDuration:0.5];
     [anim setFrameRate:30];
@@ -432,6 +433,9 @@ static NSMutableArray *blackoutWindows = NULL;
         [self setContentBorderThickness:28.0 forEdge:NSMinYEdge];
     }
     */
+
+    /* we want to be moveable regardless of our style */
+    [self setMovableByWindowBackground: YES];
 
     /* we don't want this window to be restored on relaunch */
     if ([self respondsToSelector:@selector(setRestorable:)])
@@ -510,7 +514,13 @@ static NSMutableArray *blackoutWindows = NULL;
             for( i = 0; i < (int)[o_values count]; i++)
             {
                 NSDictionary *o_dic;
-                o_dic = [NSDictionary dictionaryWithObject:[o_values objectAtIndex:i] forKey:@"ITEM_URL"];
+                char *psz_uri = make_URI([[o_values objectAtIndex:i] UTF8String], NULL);
+                if( !psz_uri )
+                    continue;
+
+                o_dic = [NSDictionary dictionaryWithObject:[NSString stringWithCString:psz_uri encoding:NSUTF8StringEncoding] forKey:@"ITEM_URL"];
+
+                free( psz_uri );
                 o_array = [o_array arrayByAddingObject: o_dic];
             }
             [(VLCPlaylist *)[[VLCMain sharedInstance] playlist] appendArray: o_array atPos: -1 enqueue:NO];
@@ -589,7 +599,13 @@ static NSMutableArray *blackoutWindows = NULL;
             for( i = 0; i < (int)[o_values count]; i++)
             {
                 NSDictionary *o_dic;
-                o_dic = [NSDictionary dictionaryWithObject:[o_values objectAtIndex:i] forKey:@"ITEM_URL"];
+                char *psz_uri = make_URI([[o_values objectAtIndex:i] UTF8String], NULL);
+                if( !psz_uri )
+                    continue;
+
+                o_dic = [NSDictionary dictionaryWithObject:[NSString stringWithCString:psz_uri encoding:NSUTF8StringEncoding] forKey:@"ITEM_URL"];
+                free( psz_uri );
+
                 o_array = [o_array arrayByAddingObject: o_dic];
             }
             if( b_autoplay )
@@ -621,7 +637,7 @@ void _drawKnobInRect(NSRect knobRect)
     // Center knob in given rect
     knobRect.origin.x += (int)((float)(knobRect.size.width - 7)/2.0);
     knobRect.origin.y += (int)((float)(knobRect.size.height - 7)/2.0);
- 
+
     // Draw diamond
     NSRectFillUsingOperation(NSMakeRect(knobRect.origin.x + 3, knobRect.origin.y + 6, 1, 1), NSCompositeSourceOver);
     NSRectFillUsingOperation(NSMakeRect(knobRect.origin.x + 2, knobRect.origin.y + 5, 3, 1), NSCompositeSourceOver);
@@ -648,7 +664,7 @@ void _drawFrameInRect(NSRect frameRect)
     NSRectClip(NSZeroRect);
     [super drawRect:rect];
     [[NSGraphicsContext currentContext] restoreGraphicsState];
- 
+
     // Full size
     rect = [self bounds];
     int diff = (int)(([[self cell] knobThickness] - 7.0)/2.0) - 1;
@@ -656,13 +672,13 @@ void _drawFrameInRect(NSRect frameRect)
     rect.origin.y += diff;
     rect.size.width -= 2*diff-2;
     rect.size.height -= 2*diff;
- 
+
     // Draw dark
     NSRect knobRect = [[self cell] knobRectFlipped:NO];
     [[[NSColor blackColor] colorWithAlphaComponent:0.6] set];
     _drawFrameInRect(rect);
     _drawKnobInRect(knobRect);
- 
+
     // Draw shadow
     [[[NSColor blackColor] colorWithAlphaComponent:0.1] set];
     rect.origin.x++;
@@ -675,6 +691,40 @@ void _drawFrameInRect(NSRect frameRect)
 
 @end
 
+/*****************************************************************************
+ * TimeLineSlider
+ *****************************************************************************/
+
+@implementation TimeLineSlider
+
+- (void)drawKnobInRect:(NSRect)knobRect
+{
+    NSRect image_rect;
+    NSImage *img = [NSImage imageNamed:@"progression-knob"];
+    image_rect.size = [img size];
+    image_rect.origin.x = 0;
+    image_rect.origin.y = 0;
+    knobRect.origin.x += (knobRect.size.width - image_rect.size.width) / 2;
+    knobRect.size.width = image_rect.size.width;
+    knobRect.size.height = image_rect.size.height;
+    [img drawInRect:knobRect fromRect:image_rect operation:NSCompositeSourceOver fraction:1];
+}
+
+- (void)drawRect:(NSRect)rect
+{
+    /* Draw default to make sure the slider behaves correctly */
+    [[NSGraphicsContext currentContext] saveGraphicsState];
+    NSRectClip(NSZeroRect);
+    [super drawRect:rect];
+    [[NSGraphicsContext currentContext] restoreGraphicsState];
+
+    NSRect knobRect = [[self cell] knobRectFlipped:NO];
+    knobRect.origin.y+=1;
+    //    [[[NSColor blackColor] colorWithAlphaComponent:0.6] set];
+    [self drawKnobInRect: knobRect];
+}
+
+@end
 
 /*****************************************************************************
  * ITSlider
@@ -682,90 +732,31 @@ void _drawFrameInRect(NSRect frameRect)
 
 @implementation ITSlider
 
-- (void)awakeFromNib
+- (void)drawKnobInRect:(NSRect)knobRect
 {
-    if ([[self cell] class] != [ITSliderCell class]) {
-        // replace cell
-        NSSliderCell *oldCell = [self cell];
-        NSSliderCell *newCell = [[[ITSliderCell alloc] init] autorelease];
-        [newCell setTag:[oldCell tag]];
-        [newCell setTarget:[oldCell target]];
-        [newCell setAction:[oldCell action]];
-        [newCell setControlSize:[oldCell controlSize]];
-        [newCell setType:[oldCell type]];
-        [newCell setState:[oldCell state]];
-        [newCell setAllowsTickMarkValuesOnly:[oldCell allowsTickMarkValuesOnly]];
-        [newCell setAltIncrementValue:[oldCell altIncrementValue]];
-        [newCell setControlTint:[oldCell controlTint]];
-        [newCell setKnobThickness:[oldCell knobThickness]];
-        [newCell setMaxValue:[oldCell maxValue]];
-        [newCell setMinValue:[oldCell minValue]];
-        [newCell setDoubleValue:[oldCell doubleValue]];
-        [newCell setNumberOfTickMarks:[oldCell numberOfTickMarks]];
-        [newCell setEditable:[oldCell isEditable]];
-        [newCell setEnabled:[oldCell isEnabled]];
-        [newCell setFormatter:[oldCell formatter]];
-        [newCell setHighlighted:[oldCell isHighlighted]];
-        [newCell setTickMarkPosition:[oldCell tickMarkPosition]];
-        [self setCell:newCell];
-    }
+    NSRect image_rect;
+    NSImage *img = [NSImage imageNamed:@"volume-slider-knob"];
+    image_rect.size = [img size];
+    image_rect.origin.x = 0;
+    image_rect.origin.y = 0;
+    knobRect.origin.x += (knobRect.size.width - image_rect.size.width) / 2;
+    knobRect.size.width = image_rect.size.width;
+    knobRect.size.height = image_rect.size.height;
+    [img drawInRect:knobRect fromRect:image_rect operation:NSCompositeSourceOver fraction:1];
 }
 
-@end
-
-/*************************************************************************** **
- * ITSliderCell
- *****************************************************************************/
-@implementation ITSliderCell
-
-- (id)init
+- (void)drawRect:(NSRect)rect
 {
-    self = [super init];
-    _knobOff = [NSImage imageNamed:@"volumeslider_normal"];
-	_knobOn = [NSImage imageNamed:@"volumeslider_graphite"];
-    b_mouse_down = FALSE;
-    return self;
-}
+    /* Draw default to make sure the slider behaves correctly */
+    [[NSGraphicsContext currentContext] saveGraphicsState];
+    NSRectClip(NSZeroRect);
+    [super drawRect:rect];
+    [[NSGraphicsContext currentContext] restoreGraphicsState];
 
-
-
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver: self];
-    [_knobOff release];
-    [_knobOn release];
-    [super dealloc];
-}
-
-- (void)drawKnob:(NSRect)knob_rect
-{
-    NSImage *knob;
-
-    if( b_mouse_down )
-        knob = _knobOn;
-    else
-        knob = _knobOff;
-
-    [[self controlView] lockFocus];
-    [knob compositeToPoint:NSMakePoint( knob_rect.origin.x + 1,
-        knob_rect.origin.y + knob_rect.size.height -2 )
-        operation:NSCompositeSourceOver];
-    [[self controlView] unlockFocus];
-}
-
-- (void)stopTracking:(NSPoint)lastPoint at:(NSPoint)stopPoint inView:
-        (NSView *)controlView mouseIsUp:(BOOL)flag
-{
-    b_mouse_down = NO;
-    [self drawKnob];
-    [super stopTracking:lastPoint at:stopPoint inView:controlView mouseIsUp:flag];
-}
-
-- (BOOL)startTrackingAt:(NSPoint)startPoint inView:(NSView *)controlView
-{
-    b_mouse_down = YES;
-    [self drawKnob];
-    return [super startTrackingAt:startPoint inView:controlView];
+    NSRect knobRect = [[self cell] knobRectFlipped:NO];
+    knobRect.origin.y+=2;
+//    [[[NSColor blackColor] colorWithAlphaComponent:0.6] set];
+    [self drawKnobInRect: knobRect];
 }
 
 @end

@@ -2,7 +2,7 @@
  * standard.c: standard stream output module
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id: 45580024ae984fccd5b91f15ee16885d2d17a7c4 $
+ * $Id: 59fc401fdac378fda698637c8bd69ea8470ddd62 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -26,10 +26,6 @@
  *****************************************************************************/
 #ifdef HAVE_CONFIG_H
 # include "config.h"
-#endif
-
-#ifndef _WIN32_WINNT
-# define _WIN32_WINNT 0x0500
 #endif
 
 #include <vlc_common.h>

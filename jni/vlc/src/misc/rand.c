@@ -2,7 +2,7 @@
  * rand.c : non-predictible random bytes generator
  *****************************************************************************
  * Copyright © 2007 Rémi Denis-Courmont
- * $Id: 82c67c3d7f4626ce10b8495d7dc6c83f51b65705 $
+ * $Id: 5ee6dccb21480e29e173064fd52e6d3f11b51b90 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,6 +176,7 @@ static void init_rand48 (void)
     if (!rand48.init)
     {
         vlc_rand_bytes (rand48.subi, sizeof (rand48.subi));
+        rand48.init = true;
 #if 0 // short would be more than 16-bits ?
         for (unsigned i = 0; i < 3; i++)
             subi[i] &= 0xffff;

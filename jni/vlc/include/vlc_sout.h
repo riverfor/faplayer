@@ -2,7 +2,7 @@
  * stream_output.h : stream output module
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: 54f696593cbdf95808e2b8ed664e1d4233a8bf8f $
+ * $Id: b0d2841198ab03a7aa2781d9779ea9d7bccb887b $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -30,7 +30,7 @@
 
 /**
  * \file
- * This file defines structures and functions for stream ouput in vlc
+ * This file defines structures and functions for stream output in vlc
  */
 
 #ifdef __cplusplus

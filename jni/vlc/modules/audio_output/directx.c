@@ -2,7 +2,7 @@
  * directx.c: Windows DirectX audio output method
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: f2ceb1e28951b2eb68ec3f543a8960099f0afe2a $
+ * $Id: 97e659d0dfd593bdba999d10a2f3e388543d5013 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -579,12 +579,12 @@ static void Play( aout_instance_t *p_aout )
 
         /* get the playing date of the first aout buffer */
         p_aout->output.p_sys->p_notif->start_date =
-            aout_FifoFirstDate( p_aout, &p_aout->output.fifo );
+            aout_FifoFirstDate( &p_aout->output.fifo );
 
         /* fill in the first samples */
         for( int i = 0; i < FRAMES_NUM; i++ )
         {
-            p_buffer = aout_FifoPop( p_aout, &p_aout->output.fifo );
+            p_buffer = aout_FifoPop( &p_aout->output.fifo );
             if( !p_buffer ) break;
             FillBuffer( p_aout, i, p_buffer );
         }

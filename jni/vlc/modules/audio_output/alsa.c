@@ -2,7 +2,7 @@
  * alsa.c : alsa plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2001 the VideoLAN team
- * $Id: 1fdaf14c1bdff32dd495fd84ae92fe00a86ab1ec $
+ * $Id: 7ff939a5d490b120496706db4fe66ccc54beff42 $
  *
  * Authors: Henri Fallon <henri@videolan.org> - Original Author
  *          Jeffrey Baker <jwbaker@acm.org> - Port to ALSA 1.0 API
@@ -531,8 +531,7 @@ static void Play( aout_instance_t *p_aout )
     p_aout->output.pf_play = PlayIgnore;
 
     /* get the playing date of the first aout buffer */
-    p_aout->output.p_sys->start_date =
-        aout_FifoFirstDate( p_aout, &p_aout->output.fifo );
+    p_aout->output.p_sys->start_date = aout_FifoFirstDate( &p_aout->output.fifo );
 
     /* wake up the audio output thread */
     sem_post( &p_aout->output.p_sys->wait );

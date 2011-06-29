@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2009 Geoffroy Couprie
  * Copyright (C) 2009 Laurent Aimar
- * $Id: b1f2bf1f5f8c000833f32b0247e24d05be654ff1 $
+ * $Id: 21cbd07bc6e9c86ff19fa9542683611106fd7f1b $
  *
  * Authors: Geoffroy Couprie <geal@videolan.org>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -71,6 +71,12 @@ static const GUID DXVA2_ModeMPEG2_IDCT = {
 static const GUID DXVA2_ModeMPEG2_VLD = {
     0xee27417f, 0x5e28,0x4e65, {0xbe,0xea,0x1d,0x26,0xb5,0x08,0xad,0xc9}
 };
+static const GUID DXVA2_ModeMPEG2and1_VLD = {
+    0x86695f12, 0x340e,0x4f04, {0x9f,0xd3,0x92,0x53,0xdd,0x32,0x74,0x60}
+};
+static const GUID DXVA2_ModeMPEG1_VLD = {
+    0x6f3ec719, 0x3735,0x42cc, {0x80,0x63,0x65,0xcc,0x3c,0xb3,0x66,0x16}
+};
 
 static const GUID DXVA2_ModeH264_A = {
     0x1b81be64, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
@@ -90,13 +96,16 @@ static const GUID DXVA2_ModeH264_E = {
 static const GUID DXVA2_ModeH264_F = {
     0x1b81be69, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
 };
+static const GUID DXVA_ModeH264_VLD_WithFMOASO_NoFGT = {
+    0xd5f04ff9, 0x3418,0x45d8, {0x95,0x61,0x32,0xa7,0x6a,0xae,0x2d,0xdd}
+};
 static const GUID DXVADDI_Intel_ModeH264_A = {
     0x604F8E64, 0x4951,0x4c54, {0x88,0xFE,0xAB,0xD2,0x5C,0x15,0xB3,0xD6}
 };
 static const GUID DXVADDI_Intel_ModeH264_C = {
     0x604F8E66, 0x4951,0x4c54, {0x88,0xFE,0xAB,0xD2,0x5C,0x15,0xB3,0xD6}
 };
-static const GUID DXVADDI_Intel_ModeH264_E = {
+static const GUID DXVADDI_Intel_ModeH264_E = { // DXVA_Intel_H264_ClearVideo
     0x604F8E68, 0x4951,0x4c54, {0x88,0xFE,0xAB,0xD2,0x5C,0x15,0xB3,0xD6}
 };
 static const GUID DXVA2_ModeWMV8_A = {
@@ -127,9 +136,30 @@ static const GUID DXVA2_ModeVC1_C = {
 static const GUID DXVA2_ModeVC1_D = {
     0x1b81beA3, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
 };
+/* Conformity to the August 2010 update of the specification, ModeVC1_VLD2010 */
+static const GUID DXVA2_ModeVC1_D2010 = {
+    0x1b81beA4, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
+};
 
 static const GUID DXVA_NoEncrypt = {
     0x1b81bed0, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
+};
+
+static const GUID DXVA_Intel_VC1_ClearVideo = {
+    0xBCC5DB6D, 0xA2B6,0x4AF0, {0xAC,0xE4,0xAD,0xB1,0xF7,0x87,0xBC,0x89}
+};
+
+static const GUID DXVA_nVidia_MPEG4_ASP = {
+    0x9947EC6F, 0x689B,0x11DC, {0xA3,0x20,0x00,0x19,0xDB,0xBC,0x41,0x84}
+};
+static const GUID DXVA_ModeMPEG4pt2_VLD_Simple = {
+    0xefd64d74, 0xc9e8,0x41d7, {0xa5,0xe9,0xe9,0xb0,0xe3,0x9f,0xa3,0x19}
+};
+static const GUID DXVA_ModeMPEG4pt2_VLD_AdvSimple_NoGMC = {
+    0xed418a9f, 0x10d,0x4eda,  {0x9a,0xe3,0x9a,0x65,0x35,0x8d,0x8d,0x2e}
+};
+static const GUID DXVA_ModeMPEG4pt2_VLD_AdvSimple_GMC = {
+    0xab998b5b, 0x4258,0x44a9, {0x9f,0xeb,0x94,0xe5,0x97,0xa6,0xba,0xae}
 };
 
 /* */
@@ -141,18 +171,22 @@ typedef struct {
 /* XXX Prefered modes must come first */
 static const dxva2_mode_t dxva2_modes[] = {
     { "MPEG-2 variable-length decoder",            &DXVA2_ModeMPEG2_VLD,     CODEC_ID_MPEG2VIDEO },
+    { "MPEG-2 & MPEG-1 variable-length decoder",   &DXVA2_ModeMPEG2and1_VLD, CODEC_ID_MPEG2VIDEO },
     { "MPEG-2 motion compensation",                &DXVA2_ModeMPEG2_MoComp,  0 },
     { "MPEG-2 inverse discrete cosine transform",  &DXVA2_ModeMPEG2_IDCT,    0 },
 
-    { "H.264 variable-length decoder, film grain technology",                      &DXVA2_ModeH264_F,         CODEC_ID_H264 },
-    { "H.264 variable-length decoder, no film grain technology",                   &DXVA2_ModeH264_E,         CODEC_ID_H264 },
-    { "H.264 variable-length decoder, no film grain technology (Intel)",           &DXVADDI_Intel_ModeH264_E, CODEC_ID_H264 },
-    { "H.264 inverse discrete cosine transform, film grain technology",            &DXVA2_ModeH264_D,         0             },
-    { "H.264 inverse discrete cosine transform, no film grain technology",         &DXVA2_ModeH264_C,         0             },
-    { "H.264 inverse discrete cosine transform, no film grain technology (Intel)", &DXVADDI_Intel_ModeH264_C, 0             },
-    { "H.264 motion compensation, film grain technology",                          &DXVA2_ModeH264_B,         0             },
-    { "H.264 motion compensation, no film grain technology",                       &DXVA2_ModeH264_A,         0             },
-    { "H.264 motion compensation, no film grain technology (Intel)",               &DXVADDI_Intel_ModeH264_A, 0             },
+    { "MPEG-1 variable-length decoder",            &DXVA2_ModeMPEG1_VLD,     0 },
+
+    { "H.264 variable-length decoder, film grain technology",                      &DXVA2_ModeH264_F,                   CODEC_ID_H264 },
+    { "H.264 variable-length decoder, no film grain technology",                   &DXVA2_ModeH264_E,                   CODEC_ID_H264 },
+    { "H.264 variable-length decoder, no film grain technology (Intel ClearVideo)",&DXVADDI_Intel_ModeH264_E,           CODEC_ID_H264 },
+    { "H.264 variable-length decoder, no film grain technology, FMO/ASO",          &DXVA_ModeH264_VLD_WithFMOASO_NoFGT, CODEC_ID_H264 },
+    { "H.264 inverse discrete cosine transform, film grain technology",            &DXVA2_ModeH264_D,                   0             },
+    { "H.264 inverse discrete cosine transform, no film grain technology",         &DXVA2_ModeH264_C,                   0             },
+    { "H.264 inverse discrete cosine transform, no film grain technology (Intel)", &DXVADDI_Intel_ModeH264_C,           0             },
+    { "H.264 motion compensation, film grain technology",                          &DXVA2_ModeH264_B,                   0             },
+    { "H.264 motion compensation, no film grain technology",                       &DXVA2_ModeH264_A,                   0             },
+    { "H.264 motion compensation, no film grain technology (Intel)",               &DXVADDI_Intel_ModeH264_A,           0             },
 
     { "Windows Media Video 8 motion compensation", &DXVA2_ModeWMV8_B, 0 },
     { "Windows Media Video 8 post processing",     &DXVA2_ModeWMV8_A, 0 },
@@ -163,9 +197,18 @@ static const dxva2_mode_t dxva2_modes[] = {
 
     { "VC-1 variable-length decoder",              &DXVA2_ModeVC1_D, CODEC_ID_VC1 },
     { "VC-1 variable-length decoder",              &DXVA2_ModeVC1_D, CODEC_ID_WMV3 },
+    { "VC-1 variable-length decoder",              &DXVA2_ModeVC1_D2010, CODEC_ID_VC1 },
+    { "VC-1 variable-length decoder",              &DXVA2_ModeVC1_D2010, CODEC_ID_WMV3 },
     { "VC-1 inverse discrete cosine transform",    &DXVA2_ModeVC1_C, 0 },
     { "VC-1 motion compensation",                  &DXVA2_ModeVC1_B, 0 },
     { "VC-1 post processing",                      &DXVA2_ModeVC1_A, 0 },
+
+    { "VC-1 variable-length decoder (Intel)",      &DXVA_Intel_VC1_ClearVideo, 0 },
+
+    { "MPEG-4 Part 2 nVidia bitstream decoder",                                                         &DXVA_nVidia_MPEG4_ASP,                 0 },
+    { "MPEG-4 Part 2 variable-length decoder, Simple Profile",                                          &DXVA_ModeMPEG4pt2_VLD_Simple,          0 },
+    { "MPEG-4 Part 2 variable-length decoder, Simple&Advanced Profile, no global motion compensation",  &DXVA_ModeMPEG4pt2_VLD_AdvSimple_NoGMC, 0 },
+    { "MPEG-4 Part 2 variable-length decoder, Simple&Advanced Profile, global motion compensation",     &DXVA_ModeMPEG4pt2_VLD_AdvSimple_GMC,   0 },
 
     { NULL, NULL, 0 }
 };

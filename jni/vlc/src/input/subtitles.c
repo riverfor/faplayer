@@ -2,7 +2,7 @@
  * subtitles.c : subtitles detection
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: 94231eaed0db0c5d990dd88842111bacb02c5ebb $
+ * $Id: 4a65687b24cbb15c51f246c393fc1e733d6080a6 $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan.org>
  * This is adapted code from the GPL'ed MPlayer (http://mplayerhq.hu)
@@ -60,7 +60,7 @@ static const char const sub_exts[][6] = {
     "rt",   "aqt", "txt",
     "usf", "jss",  "cdg",
     "psb", "mpsub","mpl2",
-    "pjs", "dks",
+    "pjs", "dks", "stl",
     ""
 };
 

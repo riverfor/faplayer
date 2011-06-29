@@ -2,7 +2,7 @@
  * simple_preferences.cpp : "Simple preferences"
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id: 2a4e6ac34e30ac3161c684a46f20fb543e3a9322 $
+ * $Id: 43973374c33ecf93fad30aeb120e54e5ccd20ca1 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -782,14 +782,13 @@ void SPrefsPanel::apply()
     case SPrefsInputAndCodecs:
     {
         /* Device default selection */
-        char *psz_devicepath =
-            strdup( qtu( qobject_cast<QComboBox *>(optionWidgets[inputLE])->currentText() ) );
-        if( !EMPTY_STR( psz_devicepath ) )
+        QByteArray devicepath =
+            qobject_cast<QComboBox *>(optionWidgets[inputLE])->currentText().toUtf8();
+        if( devicepath.size() > 0 )
         {
-            config_PutPsz( p_intf, "dvd", psz_devicepath );
-            config_PutPsz( p_intf, "vcd", psz_devicepath );
-            config_PutPsz( p_intf, "cd-audio", psz_devicepath );
-            free( psz_devicepath );
+            config_PutPsz( p_intf, "dvd", devicepath );
+            config_PutPsz( p_intf, "vcd", devicepath );
+            config_PutPsz( p_intf, "cd-audio", devicepath );
         }
 
 #define CaCi( name, int ) config_PutInt( p_intf, name, int * i_comboValue )

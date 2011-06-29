@@ -2,7 +2,7 @@
  * aout.c : dummy audio output plugin
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: 981107f0dbbe6e4920c4a36bd9324d2fc6490759 $
+ * $Id: 8a4e031db86ded099d260be4130ffa31d9f0f951 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -76,7 +76,7 @@ int OpenAudio ( vlc_object_t * p_this )
  *****************************************************************************/
 static void Play( aout_instance_t * p_aout )
 {
-    aout_buffer_t * p_buffer = aout_FifoPop( p_aout, &p_aout->output.fifo );
+    aout_buffer_t * p_buffer = aout_FifoPop( &p_aout->output.fifo );
     aout_BufferFree( p_buffer );
 }
 

@@ -2,7 +2,7 @@
  * ogg.c : ogg stream demux module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: 6b044fc3269e6cb36750c4c831342f67344842f8 $
+ * $Id: 2ab4a3f8d374c4e6a7688b484a0d1dbe9accd8f5 $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *          Andre Pang <Andre.Pang@csiro.au> (Annodex support)
@@ -1139,7 +1139,7 @@ static int Ogg_FindLogicalStreams( demux_t *p_demux )
                     }
                 }
                 else if( (*oggpacket.packet & PACKET_TYPE_BITS ) == PACKET_TYPE_HEADER &&
-                         oggpacket.bytes >= 56+1 )
+                         oggpacket.bytes >= 44+1 )
                 {
                     stream_header_t tmp;
                     stream_header_t *st = &tmp;
@@ -1154,7 +1154,8 @@ static int Ogg_FindLogicalStreams( demux_t *p_demux )
                     st->bits_per_sample = GetWLE( &oggpacket.packet[1+40] ); // (padding 2)
 
                     /* Check for video header (new format) */
-                    if( !strncmp( st->streamtype, "video", 5 ) )
+                    if( !strncmp( st->streamtype, "video", 5 ) &&
+                        oggpacket.bytes >= 52+1 )
                     {
                         st->sh.video.width = GetDWLE( &oggpacket.packet[1+44] );
                         st->sh.video.height = GetDWLE( &oggpacket.packet[1+48] );
@@ -1187,7 +1188,8 @@ static int Ogg_FindLogicalStreams( demux_t *p_demux )
                                  p_stream->fmt.video.i_bits_per_pixel );
                     }
                     /* Check for audio header (new format) */
-                    else if( !strncmp( st->streamtype, "audio", 5 ) )
+                    else if( !strncmp( st->streamtype, "audio", 5 ) &&
+                             oggpacket.bytes >= 56+1 )
                     {
                         char p_buffer[5];
                         int i_extra_size;

@@ -3,7 +3,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: fd6e2c959a0706f320c235ad6276f14b3aa878a6 $
+ * $Id: a8c6100a3213b49610762fc6bfd32461bf0d96a2 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -49,7 +49,7 @@ public:
         AppendUID( p_segment->p_next_segment_uid );
     }
 
-    void AddSegments( std::vector<matroska_segment_c*> segments );
+    void AddSegments( const std::vector<matroska_segment_c*> &segments );
 
     void Seek( demux_t & demuxer, mtime_t i_date, mtime_t i_time_offset, chapter_item_c *p_chapter, int64_t i_global_position );
 

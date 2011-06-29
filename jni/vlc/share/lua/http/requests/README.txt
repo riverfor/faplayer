@@ -50,6 +50,15 @@ status.xml:
 > empty playlist:
   ?command=pl_empty
 
+> set audio delay
+  ?command=audiodelay&val=<delayinseconds>
+
+> set subtitle delay
+  ?command=subdelay&val=<delayinseconds>
+
+> set playback rate. must be > 0
+  ?command=rate&val=<newplaybackrate>
+
 > sort playlist using sort mode <val> and order <id>:
   ?command=pl_sort&id=<id>&val=<val>
   If id=0 then items will be sorted in normal order, if id=1 they will be
@@ -115,3 +124,8 @@ vlm_cmd.xml:
 < execute VLM command <cmd>
   ?command=<cmd>
 > get the error message from <cmd>
+
+equalizer.xml:
+=============
+>command=preamp&val=<val in dB> 
+ sets the preamp value, must be >=-20 and <=20

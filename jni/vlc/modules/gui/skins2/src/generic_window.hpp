@@ -2,7 +2,7 @@
  * generic_window.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 2bc5ebac0bcfecad024967f7aed6cce8b35a2e5b $
+ * $Id: 058dd52ecf04d2883911e33435cafb97faee669e $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -38,6 +38,10 @@ class EvtMouse;
 class EvtKey;
 class EvtRefresh;
 class EvtScroll;
+class EvtDragEnter;
+class EvtDragLeave;
+class EvtDragOver;
+class EvtDragDrop;
 class WindowManager;
 
 
@@ -73,6 +77,15 @@ public:
     virtual void processEvent( EvtKey &rEvtKey ) { (void)rEvtKey; }
     virtual void processEvent( EvtScroll &rEvtScroll ) { (void)rEvtScroll; }
 
+    virtual void processEvent( EvtDragEnter &rEvtDragEnter )
+        { (void)rEvtDragEnter; }
+    virtual void processEvent( EvtDragLeave &rEvtDragLeave )
+        { (void)rEvtDragLeave; }
+    virtual void processEvent( EvtDragOver &rEvtDragOver )
+        { (void)rEvtDragOver; }
+    virtual void processEvent( EvtDragDrop &rEvtDragDrop )
+        { (void)rEvtDragDrop; }
+
     virtual void processEvent( EvtRefresh &rEvtRefresh );
 
     /// Resize the window
@@ -90,6 +103,7 @@ public:
     int getTop() const { return m_top; }
     int getWidth() const { return m_width; }
     int getHeight() const { return m_height; }
+    void getMonitorInfo( int* x, int* y, int* width, int* height ) const;
 
     /// Give access to the visibility variable
     VarBool &getVisibleVar() { return *m_pVarVisible; }

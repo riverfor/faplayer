@@ -2,7 +2,7 @@
  * vlc_objects.h: vlc_object_t definition and manipulation methods
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: 71c1ab7d2a8fd33c0b5abf24cdf0d1c2dd32f70d $
+ * $Id: 4ba8fc9e6c982b9814d7b7159599a0ec9500232b $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -87,7 +87,7 @@ VLC_API void vlc_object_kill( vlc_object_t * ) VLC_DEPRECATED;
 #define vlc_object_kill(a) \
     vlc_object_kill( VLC_OBJECT(a) )
 
-VLC_USED
+VLC_USED VLC_DEPRECATED
 static inline bool vlc_object_alive (const vlc_object_t *obj)
 {
     barrier ();

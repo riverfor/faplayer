@@ -476,6 +476,7 @@ static const char psz_authors[] =
 "Omer Ensari - Kurmanji (Kurdish)\n"
 "Otto Kekäläinen - Finnish\n"
 "Pittayakom Saingtong - Thai\n"
+"Predrag Ljubenović - Serbian\n"
 "Roustam Ghizdatov - Russian\n"
 "Salar Khalilzadeh\" - Persian\n"
 "Сергей Дарьичев - Belarusian\n"

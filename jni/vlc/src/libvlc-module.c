@@ -2,7 +2,7 @@
  * libvlc-module.c: Options for the main (libvlc itself) module
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 7ea88ba32107e33fedf6be70d82f710d7d522a0d $
+ * $Id: 6ace42b70c6b6564555e3281d78c9377a5f87e57 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -888,14 +888,6 @@ static const char *const ppsz_clock_descriptions[] =
 #define VCD_DEVICE       CD_DEVICE
 #define CDAUDIO_DEVICE   CD_DEVICE
 
-#define IPV6_TEXT N_("Force IPv6")
-#define IPV6_LONGTEXT N_( \
-    "IPv6 will be used by default for all connections.")
-
-#define IPV4_TEXT N_("Force IPv4")
-#define IPV4_LONGTEXT N_( \
-    "IPv4 will be used by default for all connections.")
-
 #define TIMEOUT_TEXT N_("TCP connection timeout")
 #define TIMEOUT_LONGTEXT N_( \
     "Default TCP connection timeout (in milliseconds). " )
@@ -1254,8 +1246,8 @@ static const char *const ppsz_albumart_descriptions[] =
 
 #define SD_TEXT N_( "Services discovery modules")
 #define SD_LONGTEXT N_( \
-     "Specifies the services discovery modules to load, separated by " \
-     "colons. Typical values are sap, hal, ..." )
+     "Specifies the services discovery modules to preload, separated by " \
+     "colons. Typical value is \"sap\"." )
 
 #define RANDOM_TEXT N_("Play files randomly forever")
 #define RANDOM_LONGTEXT N_( \
@@ -1885,10 +1877,8 @@ vlc_module_begin ()
     add_integer( "server-port", 1234,
                  SERVER_PORT_TEXT, SERVER_PORT_LONGTEXT, false )
     add_integer( "mtu", MTU_DEFAULT, MTU_TEXT, MTU_LONGTEXT, true )
-    add_bool( "ipv6", 0, IPV6_TEXT, IPV6_LONGTEXT, false )
-        change_short('6')
-    add_bool( "ipv4", 0, IPV4_TEXT, IPV4_LONGTEXT, false )
-        change_short('4')
+    add_obsolete_bool( "ipv6" ) /* since 1.2.0 */
+    add_obsolete_bool( "ipv4" ) /* since 1.2.0 */
     add_integer( "ipv4-timeout", 5 * 1000, TIMEOUT_TEXT,
                  TIMEOUT_LONGTEXT, true )
 
@@ -2129,8 +2119,7 @@ vlc_module_begin ()
                              ppsz_albumart_descriptions )
 
     set_subcategory( SUBCAT_PLAYLIST_SD )
-    add_module_list_cat( "services-discovery", SUBCAT_PLAYLIST_SD, NULL,
-                         SD_TEXT, SD_LONGTEXT, false )
+    add_string( "services-discovery", "", SD_TEXT, SD_LONGTEXT, true )
         change_short('S')
 
 /* Interface options */

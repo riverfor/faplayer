@@ -2,7 +2,7 @@
  * vout_manager.hpp
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 60f473e6cd231b0155449f9528951cfe02dfbd6c $
+ * $Id: 3d0bf39cf3b951f9d2fc75d62f2aadae7db85711 $
  *
  * Authors: Erwan Tulou < brezhoneg1 at yahoo.fr r>
  *
@@ -34,6 +34,7 @@
 #include "../controls/ctrl_video.hpp"
 #include "../events/evt_key.hpp"
 #include "../events/evt_scroll.hpp"
+#include "../src/fsc_window.hpp"
 
 class VarBool;
 class GenericWindow;
@@ -146,6 +147,9 @@ public:
 
     /// called when fullscreen variable changed
     virtual void onUpdate( Subject<VarBool> &rVariable , void* );
+
+    /// reconfigure fullscreen (multiple screens)
+    virtual void configureFullscreen( VoutWindow& rWindow );
 
 protected:
     // Protected because it is a singleton

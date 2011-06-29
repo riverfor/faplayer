@@ -49,19 +49,19 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved)
     pthread_mutex_destroy(&s_surface_mutex);
 }
 
-void LockSurface()
+void *jni_LockAndGetAndroidSurface()
 {
     pthread_mutex_lock(&s_surface_mutex);
-}
-
-void *GetSurface()
-{
     return s_surface;
 }
 
-void UnlockSurface()
+void jni_UnlockAndroidSurface()
 {
     pthread_mutex_unlock(&s_surface_mutex);
+}
+
+void jni_SetAndroidSurfaceSize(int width, int height)
+{
 }
 
 JNIEXPORT int Java_org_stagex_danmaku_helper_SystemUtility_setenv(JNIEnv *env, jclass klz, jstring key, jstring val, jboolean overwrite)
@@ -319,7 +319,7 @@ JNIEXPORT jint JNICALL NAME(nativeGetCurrentPosition)(JNIEnv *env, jobject thiz)
     {
         return -1;
     }
-    return (jint) (position);
+    return (jint) (position / 1000);
 }
 
 JNIEXPORT jint JNICALL NAME(nativeGetDuration)(JNIEnv *env, jobject thiz)
@@ -334,7 +334,7 @@ JNIEXPORT jint JNICALL NAME(nativeGetDuration)(JNIEnv *env, jobject thiz)
     {
         return -1;
     }
-    return (jint) (duration);
+    return (jint) (duration / 1000);
 }
 
 JNIEXPORT jint JNICALL NAME(nativeGetVideoHeight)(JNIEnv *env, jobject thiz)

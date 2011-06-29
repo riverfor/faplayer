@@ -2,7 +2,7 @@
  * mms.c: MMS over tcp, udp and http access plug-in
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id: 7d9fb20414e64d65ae1e8e38a6e8b20b1a86c0cb $
+ * $Id: 2a8bcce67fdf15755696006037ef3bca4c6e2784 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -106,10 +106,6 @@ struct access_sys_t
 static int Open( vlc_object_t *p_this )
 {
     access_t *p_access = (access_t*)p_this;
-
-    /* First set ipv4/ipv6 */
-    var_Create( p_access, "ipv4", VLC_VAR_BOOL | VLC_VAR_DOINHERIT );
-    var_Create( p_access, "ipv6", VLC_VAR_BOOL | VLC_VAR_DOINHERIT );
 
     /* mms-caching */
     var_Create( p_access, "mms-caching", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT );

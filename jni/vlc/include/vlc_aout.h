@@ -2,7 +2,7 @@
  * audio_output.h : audio output interface
  *****************************************************************************
  * Copyright (C) 2002-2005 the VideoLAN team
- * $Id: 953702a7ac066b7508df5f481f37acf208106da9 $
+ * $Id: b7dc31434d015f77fc871163cf47c2e813532c6d $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -270,8 +270,8 @@ VLC_API void aout_FormatPrepare( audio_sample_format_t * p_format );
 VLC_API void aout_FormatPrint( aout_instance_t * p_aout, const char * psz_text, const audio_sample_format_t * p_format );
 VLC_API const char * aout_FormatPrintChannels( const audio_sample_format_t * ) VLC_USED;
 
-VLC_API mtime_t aout_FifoFirstDate( aout_instance_t *, aout_fifo_t * ) VLC_USED;
-VLC_API aout_buffer_t * aout_FifoPop( aout_instance_t * p_aout, aout_fifo_t * p_fifo ) VLC_USED;
+VLC_API mtime_t aout_FifoFirstDate( const aout_fifo_t * ) VLC_USED;
+VLC_API aout_buffer_t *aout_FifoPop( aout_fifo_t * p_fifo ) VLC_USED;
 
 /* From intf.c : */
 VLC_API void aout_VolumeSoftInit( aout_instance_t * );

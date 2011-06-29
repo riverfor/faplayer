@@ -2,7 +2,7 @@
  * video_text.c : OSD text manipulation functions
  *****************************************************************************
  * Copyright (C) 1999-2010 the VideoLAN team
- * $Id: 610cba07f15e2ea84d2ad4765359300856bfcc11 $
+ * $Id: 03aca701fa4d3f315516ca8ebbb9e32cc0f1cec9 $
  *
  * Author: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *         Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -41,10 +41,11 @@ static int OSDTextValidate(subpicture_t *subpic,
                            bool has_dst_changed, const video_format_t *fmt_dst,
                            mtime_t ts)
 {
-    VLC_UNUSED(subpic); VLC_UNUSED(ts); VLC_UNUSED(fmt_src);
-    VLC_UNUSED(has_dst_changed); VLC_UNUSED(fmt_dst);
+    VLC_UNUSED(subpic); VLC_UNUSED(ts);
+    VLC_UNUSED(fmt_src); VLC_UNUSED(has_src_changed);
+    VLC_UNUSED(fmt_dst);
 
-    if( !has_src_changed && !has_dst_changed)
+    if( !has_dst_changed )
         return VLC_SUCCESS;
     return VLC_EGENERIC;
 }

@@ -2,7 +2,7 @@
  * win32_window.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 4786d960898958c78b33ddecc42d021dee0f042f $
+ * $Id: 6eb2b0c75999f027535b832b394b3d216e5c5128 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -118,8 +118,8 @@ Win32Window::Win32Window( intf_thread_t *pIntf, GenericWindow &rWindow,
     // Drag & drop
     if( m_dragDrop )
     {
-        m_pDropTarget = (LPDROPTARGET) new Win32DragDrop( getIntf(),
-                                                          playOnDrop );
+        m_pDropTarget = (LPDROPTARGET)
+            new Win32DragDrop( getIntf(), playOnDrop, &rWindow );
         // Register the window as a drop target
         RegisterDragDrop( m_hWnd, m_pDropTarget );
     }

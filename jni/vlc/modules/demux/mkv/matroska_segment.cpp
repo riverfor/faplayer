@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2010 the VideoLAN team
- * $Id: fd63c8eaa39a7a253a343612b095ba1eaf27e38c $
+ * $Id: efa2c5558cbb0274521d2852cf35163da38daa60 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -560,8 +560,8 @@ bool matroska_segment_c::Preload( )
         else if( MKV_IS_ID( el, KaxTag ) )
         {
             msg_Dbg( &sys.demuxer, "|   + Tags" );
-            if( i_tags_position < 0) // FIXME
-                ;//LoadTags( static_cast<KaxTags*>( el ) );
+            /*FIXME if( i_tags_position < 0)
+                LoadTags( static_cast<KaxTags*>( el ) );*/
             i_tags_position = (int64_t) es.I_O().getFilePointer();
         }
         else if( MKV_IS_ID( el, EbmlVoid ) )

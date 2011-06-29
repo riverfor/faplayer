@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1999, 2000, 2001, 2002 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: 99fc643f4f1975324651ad3f1405824994e69831 $
+ * $Id: c702cc04a8084ecb039961367da1b54f527f6f06 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -37,7 +37,7 @@ size_t vlc_towc (const char *str, uint32_t *restrict pwc);
 /*
  * OS-specific initialization
  */
-void system_Init      ( libvlc_int_t *, int *, const char *[] );
+void system_Init      ( void );
 void system_Configure ( libvlc_int_t *, int, const char *const [] );
 void system_End       ( libvlc_int_t * );
 

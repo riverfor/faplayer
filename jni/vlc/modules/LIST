@@ -1,4 +1,4 @@
-List of vlc plugins (366)
+List of vlc plugins (379)
 $Id$
  * a52: A/52 basic parser/packetizer
  * a52tofloat32: A/52 audio converter & decoder plugin, using liba52
@@ -42,6 +42,7 @@ $Id$
  * alphamask: Alpha layer mask video filter
  * alsa: audio output module using the ALSA API
  * amem: audio memory output
+ * android_surface: video output for Android, based on Surface
  * antiflicker: anti-flicker video filter
  * aout_directx: audio output module using the DirectX API
  * aout_file: Audio output to write to a file
@@ -73,6 +74,7 @@ $Id$
  * cdg: CD-G decoder
  * chain: Video filtering using a chain of video filter modules
  * chorus_flanger: variable delay audio filter
+ * chroma_omx: OMX Development Layer chroma conversions
  * clone: Clone video filter
  * colorthres:  Theshold color based on similarity to reference color Video filter
  * compressor: Dynamic range compressor
@@ -87,6 +89,7 @@ $Id$
  * decomp: Decompression module
  * deinterlace: naive deinterlacing filter
  * demux_cdg: Demuxer for CD-G files (Karaoke)
+ * demux_stl: EBU STL subtitles demuxer
  * demuxdump: Pseudo-demuxer that dumps the stream
  * dirac: BBC Dirac codec
  * direct2d: video output module using the Direct2D API
@@ -117,6 +120,7 @@ $Id$
  * fb: video output module for the Linux framebuffer
  * fbosd: framebuffer osd plugin
  * filesystem: Filesystem access module
+ * fixed32_mixer: Fixed-point audio mixer
  * flac: Flac decoder using libflac
  * flacsys: FLAC demuxer
  * float32_mixer: Precise float32 audio mixer
@@ -211,7 +215,6 @@ $Id$
  * mux_wav: a WAV muxer
  * ncurses: interface module using the ncurses library
  * netsync: synchronizes the clock of remote VLCs with a server for synchronous playback
- * noise: Noise adding video filter
  * normvol: a audio filter for volume normalization
  * notify: notifications using libnotify
  * nsc: decoder for Microsoft proprietary NSC descriptors
@@ -223,6 +226,7 @@ $Id$
  * omxil: OpenMAX IL audio/video decoder
  * opencv_example: OpenCV example (face identification)
  * opencv_wrapper: OpenCV wrapper video filter
+ * opensles_android: OpenSL ES audio output for Android
  * osd_parser: OSD import module
  * osdmenu: video_filter for displaying and streaming a On Screen Display menu
  * oss: audio output module using the OSS /dev/dsp interface
@@ -283,11 +287,11 @@ $Id$
  * skins2: Skinnable interface, new generation
  * smf: Standard MIDI file demuxer
  * spatializer: A spatializer audio filter
- * spdif_mixer: dummy audio mixer for the S/PDIF output
  * speex: a speex audio decoder/packetizer using the libspeex library
  * spudec: RLE DVD subtitles decoder
  * sqlite: manage an SQLite database
  * stats: Stats encoder function
+ * stl: EBU STL decoder
  * stream_filter_httplive: HTTP Live streaming for playback
  * stream_filter_rar: Stream filter to read inside Rar files
  * stream_filter_record: record any stream instantly

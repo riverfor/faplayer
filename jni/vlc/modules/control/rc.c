@@ -2,7 +2,7 @@
  * rc.c : remote control stdin/stdout module for vlc
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: d91433c0b11b684bebb32e484af5a0afdb14831a $
+ * $Id: 462480ca3e2fe7357a0a04f696a6c4ad56ba4300 $
  *
  * Author: Peter Surda <shurdeek@panorama.sth.ac.at>
  *         Jean-Paul Saman <jpsaman #_at_# m2x _replaceWith#dot_ nl>
@@ -1735,8 +1735,8 @@ static int AudioConfig( vlc_object_t *p_this, char const *psz_cmd,
     }
 
     /* Get the descriptive name of the variable */
-    var_Change( (vlc_object_t *)p_aout, psz_variable, VLC_VAR_GETTEXT,
-                 &val_name, NULL );
+    var_Change( p_aout, psz_variable, VLC_VAR_GETTEXT,
+                &val_name, NULL );
     if( !val_name.psz_string ) val_name.psz_string = strdup(psz_variable);
 
     if ( !*newval.psz_string )
@@ -1745,17 +1745,17 @@ static int AudioConfig( vlc_object_t *p_this, char const *psz_cmd,
         vlc_value_t val, text;
         int i, i_value;
 
-        if ( var_Get( (vlc_object_t *)p_aout, psz_variable, &val ) < 0 )
+        if ( var_Get( p_aout, psz_variable, &val ) < 0 )
         {
-            vlc_object_release( (vlc_object_t *)p_aout );
+            vlc_object_release( p_aout );
             return VLC_EGENERIC;
         }
         i_value = val.i_int;
 
-        if ( var_Change( (vlc_object_t *)p_aout, psz_variable,
+        if ( var_Change( p_aout, psz_variable,
                          VLC_VAR_GETLIST, &val, &text ) < 0 )
         {
-            vlc_object_release( (vlc_object_t *)p_aout );
+            vlc_object_release( p_aout );
             return VLC_EGENERIC;
         }
 
@@ -1780,9 +1780,9 @@ static int AudioConfig( vlc_object_t *p_this, char const *psz_cmd,
         vlc_value_t val;
         val.i_int = atoi( newval.psz_string );
 
-        i_error = var_Set( (vlc_object_t *)p_aout, psz_variable, val );
+        i_error = var_Set( p_aout, psz_variable, val );
     }
-    vlc_object_release( (vlc_object_t *)p_aout );
+    vlc_object_release( p_aout );
 
     return i_error;
 }

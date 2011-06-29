@@ -4,7 +4,7 @@
  * Copyright © 2006-2008 Rafaël Carré
  * Copyright © 2007-2010 Mirsal Ennaime
  * Copyright © 2009-2010 The VideoLAN team
- * $Id: de2db5ad9a860d35f209f46bc03ac727dbb0a067 $
+ * $Id: 9f2d7b2a61092280d9ac9838a8b92c0c46605d77 $
  *
  * Authors:    Mirsal Ennaime <mirsal at mirsal fr>
  *             Rafaël Carré <funman at videolanorg>
@@ -971,12 +971,14 @@ PropertiesChangedSignal( intf_thread_t    *p_intf,
             dbus_message_iter_close_container( &entry, &variant );
         }
         dbus_message_iter_close_container( &changed_properties, &entry );
+        free( ppsz_properties[i] );
     }
 
     dbus_message_iter_close_container( &args, &changed_properties );
     dbus_message_iter_open_container( &args, DBUS_TYPE_ARRAY, "s",
                                       &invalidated_properties );
     dbus_message_iter_close_container( &args, &invalidated_properties );
+    free( ppsz_properties );
 
     SIGNAL_SEND;
 }

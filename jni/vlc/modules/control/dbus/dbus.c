@@ -4,7 +4,7 @@
  * Copyright © 2006-2008 Rafaël Carré
  * Copyright © 2007-2010 Mirsal Ennaime
  * Copyright © 2009-2010 The VideoLAN team
- * $Id: 88cf956c9af1660ce0ea7508f92584b2d5fd11ee $
+ * $Id: 6fe6b1d4bdf638c32b9d4c29eaf81a8e69ff10fe $
  *
  * Authors:    Rafaël Carré <funman at videolanorg>
  *             Mirsal Ennaime <mirsal at mirsal fr>
@@ -163,17 +163,14 @@ static int Open( vlc_object_t *p_this )
     if( !dbus_threads_init_default() )
         return VLC_EGENERIC;
 
-    intf_sys_t *p_sys  = malloc( sizeof( intf_sys_t ) );
+    intf_sys_t *p_sys  = calloc( 1, sizeof( intf_sys_t ) );
     if( unlikely(!p_sys) )
         return VLC_ENOMEM;
 
     playlist_t      *p_playlist;
     DBusConnection  *p_conn;
-    p_sys->b_meta_read     = false;
-    p_sys->b_dead          = false;
-    p_sys->p_input         = NULL;
     p_sys->i_player_caps   = PLAYER_CAPS_NONE;
-    p_sys->i_playing_state = -1;
+    p_sys->i_playing_state = PLAYBACK_STATE_INVALID;
 
     if( vlc_pipe( p_sys->p_pipe_fds ) )
     {
@@ -239,8 +236,8 @@ static int Open( vlc_object_t *p_this )
 
     var_AddCallback( p_playlist, "item-current", AllCallback, p_intf );
     var_AddCallback( p_playlist, "intf-change", AllCallback, p_intf );
-    var_AddCallback( p_playlist, "volume-change", AllCallback, p_intf );
-    var_AddCallback( p_playlist, "volume-muted", AllCallback, p_intf );
+    var_AddCallback( p_playlist, "volume", AllCallback, p_intf );
+    var_AddCallback( p_playlist, "mute", AllCallback, p_intf );
     var_AddCallback( p_playlist, "playlist-item-append", AllCallback, p_intf );
     var_AddCallback( p_playlist, "playlist-item-deleted", AllCallback, p_intf );
     var_AddCallback( p_playlist, "random", AllCallback, p_intf );
@@ -292,8 +289,8 @@ static void Close   ( vlc_object_t *p_this )
 
     var_DelCallback( p_playlist, "item-current", AllCallback, p_intf );
     var_DelCallback( p_playlist, "intf-change", AllCallback, p_intf );
-    var_DelCallback( p_playlist, "volume-change", AllCallback, p_intf );
-    var_DelCallback( p_playlist, "volume-muted", AllCallback, p_intf );
+    var_DelCallback( p_playlist, "volume", AllCallback, p_intf );
+    var_DelCallback( p_playlist, "mute", AllCallback, p_intf );
     var_DelCallback( p_playlist, "playlist-item-append", AllCallback, p_intf );
     var_DelCallback( p_playlist, "playlist-item-deleted", AllCallback, p_intf );
     var_DelCallback( p_playlist, "random", AllCallback, p_intf );
@@ -545,8 +542,9 @@ static void ProcessEvents( intf_thread_t *p_intf,
     playlist_t *p_playlist = p_intf->p_sys->p_playlist;
     bool        b_can_play = p_intf->p_sys->b_can_play;
 
-    vlc_dictionary_t player_properties;
-    vlc_dictionary_init( &player_properties, 0 );
+    vlc_dictionary_t player_properties, tracklist_properties;
+    vlc_dictionary_init( &player_properties,    0 );
+    vlc_dictionary_init( &tracklist_properties, 0 );
 
     for( int i = 0; i < i_events; i++ )
     {
@@ -562,11 +560,14 @@ static void ProcessEvents( intf_thread_t *p_intf,
             PL_LOCK;
             b_can_play = playlist_CurrentSize( p_playlist ) > 0;
             PL_UNLOCK;
+
             if( b_can_play != p_intf->p_sys->b_can_play )
             {
                 p_intf->p_sys->b_can_play = b_can_play;
                 vlc_dictionary_insert( &player_properties, "CanPlay", NULL );
             }
+
+            vlc_dictionary_insert( &tracklist_properties, "Tracks", NULL );
             break;
         case SIGNAL_VOLUME_MUTED:
         case SIGNAL_VOLUME_CHANGE:
@@ -630,7 +631,11 @@ static void ProcessEvents( intf_thread_t *p_intf,
     if( vlc_dictionary_keys_count( &player_properties ) )
         PlayerPropertiesChangedEmit( p_intf, &player_properties );
 
-    vlc_dictionary_clear( &player_properties, NULL, NULL );
+    if( vlc_dictionary_keys_count( &tracklist_properties ) )
+        TrackListPropertiesChangedEmit( p_intf, &tracklist_properties );
+
+    vlc_dictionary_clear( &player_properties,    NULL, NULL );
+    vlc_dictionary_clear( &tracklist_properties, NULL, NULL );
 }
 
 /**
@@ -1037,10 +1042,10 @@ static int AllCallback( vlc_object_t *p_this, const char *psz_var,
     if( !strcmp( "item-current", psz_var ) )
         info->signal = SIGNAL_ITEM_CURRENT;
 
-    else if( !strcmp( "volume-change", psz_var ) )
+    else if( !strcmp( "volume", psz_var ) )
         info->signal = SIGNAL_VOLUME_CHANGE;
 
-    else if( !strcmp( "volume-muted", psz_var ) )
+    else if( !strcmp( "mute", psz_var ) )
         info->signal = SIGNAL_VOLUME_MUTED;
 
     else if( !strcmp( "intf-change", psz_var ) )
@@ -1253,6 +1258,8 @@ int GetInputMeta( input_item_t* p_input,
     ADD_VLC_META_STRING( 23, Publisher );
     ADD_VLC_META_STRING( 24, Setting );
     ADD_VLC_META_STRING( 25, URL );
+
+    free( psz_trackid );
 
     vlc_mutex_lock( &p_input->lock );
     if( p_input->p_meta )

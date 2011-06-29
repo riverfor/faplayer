@@ -2,7 +2,7 @@
  * stream.c: stream functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: 4dcae620646de25394b1cc71ab42fcdbef2c194a $
+ * $Id: ef7187cac94ab8d94eaa2687336a0ae53848c931 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -108,8 +108,12 @@ static int vlclua_stream_read( lua_State *L )
     int n = luaL_checkint( L, 2 );
     uint8_t *p_read = malloc( n );
     if( !p_read ) return vlclua_error( L );
+
     i_read = stream_Read( *pp_stream, p_read, n );
-    lua_pushlstring( L, (const char *)p_read, i_read );
+    if( i_read > 0 )
+        lua_pushlstring( L, (const char *)p_read, i_read );
+    else
+        lua_pushnil( L );
     free( p_read );
     return 1;
 }

@@ -4,7 +4,7 @@
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: ac8afb58f862dfbccc6b4fa80615e4e34e343510 $
+ * $Id: 5f8e7300d694b49170550fdc2f4d80da40b5ae61 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Rémi Denis-Courmont <rem$videolan,org>
@@ -434,9 +434,11 @@ void date_Move( date_t *p_date, mtime_t i_difference )
  */
 mtime_t date_Increment( date_t *p_date, uint32_t i_nb_samples )
 {
-    mtime_t i_dividend = (mtime_t)i_nb_samples * 1000000 * p_date->i_divider_den;
-    p_date->date += i_dividend / p_date->i_divider_num;
-    p_date->i_remainder += (int)(i_dividend % p_date->i_divider_num);
+    mtime_t i_dividend = i_nb_samples * CLOCK_FREQ * p_date->i_divider_den;
+    lldiv_t d = lldiv( i_dividend, p_date->i_divider_num );
+
+    p_date->date += d.quot;
+    p_date->i_remainder += (int)d.rem;
 
     if( p_date->i_remainder >= p_date->i_divider_num )
     {

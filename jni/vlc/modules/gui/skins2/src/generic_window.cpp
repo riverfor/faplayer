@@ -2,7 +2,7 @@
  * generic_window.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: fce0b2a4fbd8de1f7f3ddaf6161d7edb7760b893 $
+ * $Id: 445a3a2824696f19a90709c0b8f841b63549923c $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -198,4 +198,11 @@ void GenericWindow::invalidateRect( int left, int top, int width, int height )
         if( !b_supported )
             refresh( left, top, width, height );
     }
+}
+
+
+void GenericWindow::getMonitorInfo( int* x, int* y, int* width, int* height ) const
+{
+    OSFactory *pOsFactory = OSFactory::instance( getIntf() );
+    pOsFactory->getMonitorInfo( *this, x, y, width, height );
 }

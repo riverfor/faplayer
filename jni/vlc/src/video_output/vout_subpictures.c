@@ -2,7 +2,7 @@
  * vout_subpictures.c : subpicture management functions
  *****************************************************************************
  * Copyright (C) 2000-2007 the VideoLAN team
- * $Id: 12b15223e867882b977924deb25a1c42910aaef6 $
+ * $Id: e41d09cd24b2285d5d0604b9db45127203c211f4 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -223,7 +223,6 @@ static filter_t *SpuRenderCreateAndLoadText(spu_t *spu)
     /* Create a few variables used for enhanced text rendering */
     var_Create(text, "spu-elapsed",   VLC_VAR_TIME);
     var_Create(text, "text-rerender", VLC_VAR_BOOL);
-    var_Create(text, "scale",         VLC_VAR_INTEGER);
 
     return text;
 }
@@ -258,7 +257,8 @@ static filter_t *SpuRenderCreateAndLoadScale(vlc_object_t *object,
 
 static void SpuRenderText(spu_t *spu, bool *rerender_text,
                           subpicture_region_t *region,
-                          mtime_t render_date)
+                          const vlc_fourcc_t *chroma_list,
+                          mtime_t elapsed_time)
 {
     filter_t *text = spu->p->text;
 
@@ -286,13 +286,13 @@ static void SpuRenderText(spu_t *spu, bool *rerender_text,
      * least show up on screen, but the effect won't change
      * the text over time.
      */
-    var_SetTime(text, "spu-elapsed", render_date);
+    var_SetTime(text, "spu-elapsed", elapsed_time);
     var_SetBool(text, "text-rerender", false);
 
     if (text->pf_render_html && region->psz_html)
-        text->pf_render_html(text, region, region);
+        text->pf_render_html(text, region, region, chroma_list);
     else if (text->pf_render_text)
-        text->pf_render_text(text, region, region);
+        text->pf_render_text(text, region, region, chroma_list);
     *rerender_text = var_GetBool(text, "text-rerender");
 }
 
@@ -692,7 +692,8 @@ static void SpuRenderRegion(spu_t *spu,
     /* Render text region */
     if (region->fmt.i_chroma == VLC_CODEC_TEXT) {
         SpuRenderText(spu, &restore_text, region,
-                      render_date);
+                      chroma_list,
+                      render_date - subpic->i_start);
 
         /* Check if the rendering has failed ... */
         if (region->fmt.i_chroma == VLC_CODEC_TEXT)
@@ -925,7 +926,7 @@ static void SpuRenderRegion(spu_t *spu,
         dst->p_picture = picture_Hold(region_picture);
         int fade_alpha = 255;
         if (subpic->b_fade) {
-            mtime_t fade_start = (subpic->i_stop + subpic->i_start) / 2;
+            mtime_t fade_start = subpic->i_start + 3 * (subpic->i_stop - subpic->i_start) / 4;
 
             if (fade_start <= render_date && fade_start < subpic->i_stop)
                 fade_alpha = 255 * (subpic->i_stop - render_date) /
@@ -1031,8 +1032,6 @@ static subpicture_t *SpuRenderSubpictures(spu_t *spu,
 
             sys->text->fmt_out.video.i_height         =
             sys->text->fmt_out.video.i_visible_height = subpic->i_original_picture_height;
-
-            var_SetInteger(sys->text, "scale", SCALE_UNIT);
         }
 
         /* Render all regions

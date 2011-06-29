@@ -2,7 +2,7 @@
  * extended_panels.hpp : Exentended Panels
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: 68837614ae5b3abd159f28536eef94051b8d4296 $
+ * $Id: 30583382428ac2e4beb1610844e24690c5e4074f $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -186,7 +186,7 @@ private:
 
     void clean();
 
-    void updateSubsDuration();
+    void initSubsDuration();
     void subsdelayClean();
     void subsdelaySetFactor( double );
 public slots:

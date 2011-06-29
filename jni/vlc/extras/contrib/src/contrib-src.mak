@@ -35,11 +35,11 @@ include ./packages.mak
 # Set a clean environment
 # ***************************************************************************
 
-#ifdef HAVE_DARWIN_OS
+ifdef HAVE_DARWIN_OS
 export PATH := $(PREFIX)/bin:$(EXTRA_PATH):/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:
-#else
+else
 export PATH := $(PREFIX)/bin:$(EXTRA_PATH):$(PATH)
-#endif
+endif
 export PKG_CONFIG_PATH
 export PKG_CONFIG_LIBDIR = $(PREFIX)/lib/pkgconfig
 export MACOSX_DEPLOYMENT_TARGET = $(SDK_TARGET)
@@ -743,21 +743,16 @@ endif
 ifdef HAVE_MACOSX
 	( cd $@; sed -e 's%-dynamiclib%-dynamiclib -arch $(ARCH)%' -i.orig  configure )
 endif
+	patch -p0 < Patches/libFLAC-pc.patch
 
 FLAC_DISABLE_FLAGS = --disable-oggtest --disable-xmms-plugin --disable-cpplibs
+ifdef HAVE_MACOSX_ON_INTEL
+FLAC_DISABLE_FLAGS += --disable-asm-optimizations
+endif
 
 .flac: flac .ogg
-ifdef HAVE_MACOSX_ON_INTEL
-	cd $< && \
-	$(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-asm-optimizations $(FLAC_DISABLE_FLAGS)
-else
-	cd $< && \
-	$(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX)  $(FLAC_DISABLE_FLAGS)
-endif
-	cd $</src && \
-	make -C libFLAC && \
-	echo 'Requires.private: ogg' >> libFLAC/flac.pc && \
-	make -C libFLAC install
+	cd $< && $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) $(FLAC_DISABLE_FLAGS)
+	cd $</src && make -C libFLAC && make -C libFLAC install
 	cd $< && make -C include install
 	$(INSTALL_NAME)
 	touch $@
@@ -945,50 +940,53 @@ CLEAN_PKG += libamrwb
 DISTCLEAN_PKG += amrwb-$(LIBAMR_WB_VERSION).tar.bz2
 
 # ***************************************************************************
-
 # ffmpeg
 # ***************************************************************************
 
-FFMPEGCONF=--disable-doc --disable-decoder=libvpx
+#Common configuration
+FFMPEGCONF = --disable-doc \
+	--disable-decoder=libvpx \
+	--disable-debug \
+	--enable-gpl \
+	--enable-postproc \
+	--disable-ffprobe \
+	--disable-ffserver \
+	--disable-ffmpeg \
+	--disable-ffplay \
+	--disable-devices \
+	--disable-protocols \
+	--disable-avfilter \
+	--disable-network
 
+FFMPEGCONFSMALL = --disable-encoders --disable-muxers
+FFMPEGCONFNEON = --cpu=cortex-a8 --disable-runtime-cpudetect --enable-neon
+
+#Cross-Compilation
 ifdef HAVE_CROSS_COMPILE
 FFMPEGCONF += --enable-cross-compile
 endif
+
 ifdef HAVE_CROSS_COMPILE_NEEDS_CROSS_PREFIX
 ifndef HAVE_ANDROID
 ifndef HAVE_SYMBIAN
 FFMPEGCONF += --cross-prefix=$(HOST)-
 else
-FFMPEGCONF += --cross-prefix=arm-none-symbianelf- --arch=armv6 --disable-asm
+FFMPEGCONF += --cross-prefix=arm-none-symbianelf- --arch=armv6 --disable-asm --target-os=none
+FFMPEGCONF += $(FFMPEGCONFSMALL)
 endif
 else
 FFMPEGCONF += --cross-prefix=arm-linux-androideabi- --arch=armv4l
+FFMPEGCONF += $(FFMPEGCONFSMALL)
 endif
+endif
+
+ifdef CC
+FFMPEGCONF += --cc="$(CC)"
 endif
 
 #
 # Special target-dependant options
 #
-
-ifdef HAVE_WINCE
-FFMPEGCONF+= --target-os=mingw32ce --arch=armv4l --cpu=armv4t \
-             --disable-encoders --disable-muxers --disable-mpegaudio-hp \
-			 --disable-decoder=snow --disable-decoder=vc9 \
-			 --disable-decoder=wmv3 --disable-decoder=vorbis \
-			 --disable-decoder=dvdsub --disable-decoder=dvbsub \
-			 --disable-protocols
-endif
-
-ifdef HAVE_UCLIBC
-ifdef HAVE_BIGENDIAN
-FFMPEGCONF+= --arch=armeb --enable-armv5te --enable-iwmmxt
-else
-FFMPEGCONF+= --arch=armv4l
-endif
-FFMPEGCONF+= --enable-small --disable-mpegaudio-hp
-FFMPEG_CFLAGS += -DHAVE_LRINTF --std=c99
-endif
-
 ifndef HAVE_UCLIBC
 ifndef HAVE_WINCE
 ifndef HAVE_IOS
@@ -999,10 +997,7 @@ endif
 endif
 endif
 
-ifdef CC
-FFMPEGCONF += --cc="$(CC)"
-endif
-
+# MacOS X
 ifdef HAVE_MACOSX_ON_INTEL
 FFMPEGCONF += --enable-memalign-hack
 endif
@@ -1029,36 +1024,45 @@ endif
 ifdef HAVE_IOS
 FFMPEGCONF += --sysroot=${IOS_SDK_ROOT}
 ifeq ($(ARCH),arm)
-FFMPEGCONF += --disable-runtime-cpudetect --enable-neon --cpu=cortex-a8
+FFMPEGCONF += $(FFMPEGCONFNEON)
 else
 FFMPEGCONF += --disable-mmx
 endif
 endif #IOS
 
-ifdef HAVE_AMR
-FFMPEGCONF+= --enable-libamr-nb --enable-libamr-wb --enable-nonfree
-endif
-
+# Linux
 ifdef HAVE_LINUX
-FFMPEGCONF += --target-os=linux
-FFMPEGCONF += --enable-pic
-endif
-
-ifdef HAVE_SYMBIAN
-FFMPEGCONF += --target-os=none
+FFMPEGCONF += --target-os=linux --enable-pic
 endif
 
 ifdef HAVE_MAEMO
 ifneq ($(filter -m%=cortex-a8, $(EXTRA_CFLAGS)),)
-FFMPEGCONF += --disable-runtime-cpudetect --enable-neon --cpu=cortex-a8
+FFMPEGCONF += $(FFMPEGCONFNEON)
 endif
 endif
 
+ifdef HAVE_ANDROID
+ifdef HAVE_NEON
+FFMPEGCONF += $(FFMPEGCONFNEON)
+FFMPEG_CFLAGS +=-mfloat-abi=softfp -mfpu=neon
+endif
+endif
+
+ifdef HAVE_UCLIBC
+ifdef HAVE_BIGENDIAN
+FFMPEGCONF+= --arch=armeb --enable-armv5te --enable-iwmmxt
+else
+FFMPEGCONF+= --arch=armv4l
+endif
+FFMPEGCONF+= --enable-small --disable-mpegaudio-hp
+FFMPEG_CFLAGS += -DHAVE_LRINTF --std=c99
+endif
+
+# Win32
 ifdef HAVE_WIN32
 FFMPEGCONF+= --target-os=mingw32 --arch=x86 --enable-memalign-hack
-
 FFMPEGCONF += --disable-bzlib --disable-decoder=dca --disable-encoder=vorbis \
-		      --enable-libmp3lame --enable-w32threads --disable-bsfs
+			--enable-libmp3lame --enable-w32threads --disable-bsfs
 ifdef HAVE_WIN64
 FFMPEGCONF += --disable-dxva2
 FFMPEGCONF+= --cpu=athlon64 --arch=x86_64
@@ -1066,6 +1070,15 @@ else # !WIN64
 FFMPEGCONF += --enable-dxva2 --enable-libvpx
 FFMPEGCONF+= --cpu=i686
 endif
+endif
+
+# WinCE
+ifdef HAVE_WINCE
+FFMPEGCONF+= --target-os=mingw32ce --arch=armv4l --cpu=armv4t \
+			 --disable-decoder=snow --disable-decoder=vc9 \
+			 --disable-decoder=wmv3 --disable-decoder=vorbis \
+			 --disable-decoder=dvdsub --disable-decoder=dvbsub
+FFMPEGCONF += $(FFMPEGCONFSMALL)
 endif
 
 ifndef HAVE_WIN32
@@ -1102,19 +1115,6 @@ ffmpeg-$(FFMPEG_VERSION).tar.gz:
 ffmpeg/.untar: ffmpeg-$(FFMPEG_VERSION).tar.gz
 	$(EXTRACT_GZ)
 	touch $@
-
-FFMPEGCONF += \
-	--disable-debug \
-	--enable-gpl \
-	--enable-postproc \
-	--disable-ffprobe \
-	--disable-ffserver \
-	--disable-ffmpeg \
-	--disable-ffplay \
-	--disable-devices \
-	--disable-protocols \
-	--disable-avfilter \
-	--disable-network
 
 ifeq ($(ARCH),armel)
 HAVE_ARMELF=1
@@ -1441,7 +1441,7 @@ ifdef HAVE_LINUX
 X264CONF += --enable-pic
 endif
 
-X264CONF += --disable-avs --disable-lavf --disable-ffms
+X264CONF += --disable-avs --disable-lavf --disable-ffms --enable-static
 
 x264-$(X264_VERSION).tar.gz:
 	$(WGET) $(X264_URL)
@@ -1460,12 +1460,8 @@ x264:
 endif
 
 ifdef HAVE_WIN32
-.x264: x264 .pthreads
-  ifdef HAVE_CYGWIN
-	(cd $<; $(HOSTCC) RANLIB="ranlib" AR="ar" STRIP="strip" ./configure $(X264CONF) --prefix="$(PREFIX)" --extra-cflags="-I$(PREFIX)/include" --extra-ldflags="-L$(PREFIX)/lib" && make && make install)
-  else
-	(cd $<; $(HOSTCC) ./configure $(X264CONF) --prefix="$(PREFIX)" && make && make install)
-  endif
+.x264: x264
+	(cd $<; $(HOSTCC) ./configure $(X264CONF) --prefix="$(PREFIX)" --enable-win32thread && make && make install)
 else
 ifdef HAVE_MACOSX_ON_INTEL
   .x264: x264 .yasm
@@ -2232,7 +2228,7 @@ libtiger: libtiger-$(TIGER_VERSION).tar.gz
 	$(EXTRACT_GZ)
 
 .tiger: libtiger .kate
-	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) && make && make install)
+	(cd $<; $(HOSTCC) ./configure $(HOSTCONF) --prefix=$(PREFIX) --disable-valgrind --disable-doc && make && make install)
 	$(INSTALL_NAME)
 	touch $@
 
@@ -2395,20 +2391,20 @@ DISTCLEAN_PKG += schroedinger-$(SCHROED_VERSION).tar.gz
 # libass
 # ***************************************************************************
 
-libass-$(ASS_VERSION).tar.bz2:
+libass-$(ASS_VERSION).tar.gz:
 	$(WGET) $(ASS_URL)
 
-libass: libass-$(ASS_VERSION).tar.bz2
-	$(EXTRACT_BZ2)
+libass: libass-$(ASS_VERSION).tar.gz
+	$(EXTRACT_GZ)
 	(cd $@; autoreconf -ivf)
 
-.libass: libass .freetype
+.libass: libass .freetype .fontconfig
 	(cd $<; $(HOSTCC) ./configure --disable-png --disable-shared $(HOSTCONF) --prefix=$(PREFIX) CFLAGS="$(CFLAGS) -O3" && make && make install)
 	touch $@
 
 CLEAN_FILE += .libass
 CLEAN_PKG += libass
-DISTCLEAN_PKG += libass-$(ASS_VERSION).tar.bz2
+DISTCLEAN_PKG += libass-$(ASS_VERSION).tar.gz
 
 # ***************************************************************************
 # Sparkle

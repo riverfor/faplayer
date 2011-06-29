@@ -1,7 +1,7 @@
 diff -Nurp vlc-a/Android.mk vlc-b/Android.mk
 --- vlc-a/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/Android.mk	2011-06-02 18:06:10.477433170 +0800
-@@ -0,0 +1,206 @@
++++ vlc-b/Android.mk	2011-06-29 14:18:39.774433769 +0800
+@@ -0,0 +1,197 @@
 +
 +LOCAL_PATH:= $(call my-dir)
 +
@@ -71,7 +71,6 @@ diff -Nurp vlc-a/Android.mk vlc-b/Android.mk
 +    src/control/media_player.c \
 +    src/control/playlist.c \
 +    src/control/video.c \
-+    src/control/vlm.c \
 +    src/extras/libc.c \
 +    src/extras/tdestroy.c \
 +    src/input/access.c \
@@ -93,9 +92,6 @@ diff -Nurp vlc-a/Android.mk vlc-b/Android.mk
 +    src/input/stream_memory.c \
 +    src/input/subtitles.c \
 +    src/input/var.c \
-+    src/input/vlm.c \
-+    src/input/vlm_event.c \
-+    src/input/vlmshell.c \
 +    src/interface/dialog.c \
 +    src/interface/interface.c \
 +    src/interface/intf_eject.c \
@@ -137,7 +133,6 @@ diff -Nurp vlc-a/Android.mk vlc-b/Android.mk
 +    src/modules/textdomain.c \
 +    src/network/acl.c \
 +    src/network/getaddrinfo.c \
-+    src/network/httpd.c \
 +    src/network/io.c \
 +    src/network/poll.c \
 +    src/network/rootbind.c \
@@ -163,10 +158,6 @@ diff -Nurp vlc-a/Android.mk vlc-b/Android.mk
 +    src/posix/linux_specific.c \
 +    src/posix/plugin.c \
 +    src/posix/thread.c \
-+    src/stream_output/announce.c \
-+    src/stream_output/sap.c \
-+    src/stream_output/sdp.c \
-+    src/stream_output/stream_output.c \
 +    src/text/charset.c \
 +    src/text/filesystem.c \
 +    src/text/iso_lang.c \
@@ -191,7 +182,7 @@ diff -Nurp vlc-a/Android.mk vlc-b/Android.mk
 +LOCAL_LDLIBS += -ldl -llog -lz
 +
 +# modules begin
-+LOCAL_STATIC_LIBRARIES += access_http_plugin access_mms_plugin aout_android_plugin audio_format_neon_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin dummy_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libasf_plugin libass_plugin libavi_plugin libmp4_plugin live555_plugin mpgv_plugin packetizer_copy_plugin packetizer_dirac_plugin packetizer_flac_plugin packetizer_h264_plugin packetizer_mlp_plugin packetizer_mpeg4audio_plugin packetizer_mpeg4video_plugin packetizer_mpegvideo_plugin packetizer_vc1_plugin realrtsp_plugin simple_channel_mixer_plugin subsdec_plugin subsusf_plugin subtitle_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vout_android_plugin yuv2rgb_plugin
++LOCAL_STATIC_LIBRARIES += access_http_plugin access_mms_plugin amem_plugin android_surface_plugin audiotrack_android_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin dummy_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libasf_plugin libass_plugin libavi_plugin libmp4_plugin live555_plugin mpgv_plugin packetizer_copy_plugin packetizer_dirac_plugin packetizer_flac_plugin packetizer_h264_plugin packetizer_mlp_plugin packetizer_mpeg4audio_plugin packetizer_mpeg4video_plugin packetizer_mpegvideo_plugin packetizer_vc1_plugin realrtsp_plugin simple_channel_mixer_plugin subsdec_plugin subsusf_plugin subtitle_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vmem_plugin yuv2rgb_plugin
 +# modules end
 +
 +LOCAL_STATIC_LIBRARIES += compat
@@ -210,7 +201,7 @@ diff -Nurp vlc-a/Android.mk vlc-b/Android.mk
 +
 diff -Nurp vlc-a/compat/Android.mk vlc-b/compat/Android.mk
 --- vlc-a/compat/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/compat/Android.mk	2011-05-23 21:51:48.164193000 +0800
++++ vlc-b/compat/Android.mk	2011-06-29 14:18:39.764436273 +0800
 @@ -0,0 +1,26 @@
 +LOCAL_PATH:= $(call my-dir)
 +
@@ -240,7 +231,7 @@ diff -Nurp vlc-a/compat/Android.mk vlc-b/compat/Android.mk
 +
 diff -Nurp vlc-a/compat/debug.c vlc-b/compat/debug.c
 --- vlc-a/compat/debug.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/compat/debug.c	2011-06-02 15:58:57.796808000 +0800
++++ vlc-b/compat/debug.c	2011-06-29 14:18:39.764436273 +0800
 @@ -0,0 +1,57 @@
 +
 +#include <jni.h>
@@ -301,7 +292,7 @@ diff -Nurp vlc-a/compat/debug.c vlc-b/compat/debug.c
 +
 diff -Nurp vlc-a/compat/pthread-cancel.c vlc-b/compat/pthread-cancel.c
 --- vlc-a/compat/pthread-cancel.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/compat/pthread-cancel.c	2011-06-02 15:58:57.806807000 +0800
++++ vlc-b/compat/pthread-cancel.c	2011-06-29 14:18:39.764436273 +0800
 @@ -0,0 +1,330 @@
 +/*****************************************************************************
 + * pthread_cancel.c: pthread deferred cancellation replacement
@@ -635,8 +626,8 @@ diff -Nurp vlc-a/compat/pthread-cancel.c vlc-b/compat/pthread-cancel.c
 +
 diff -Nurp vlc-a/config.h vlc-b/config.h
 --- vlc-a/config.h	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/config.h	2011-06-02 17:29:55.146810991 +0800
-@@ -0,0 +1,831 @@
++++ vlc-b/config.h	2011-06-29 14:18:39.503810076 +0800
+@@ -0,0 +1,840 @@
 +/* config.h.  Generated from config.h.in by configure.  */
 +/* config.h.in.  Generated from configure.ac by autoheader.  */
 +
@@ -689,7 +680,7 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +/* #undef CAN_COMPILE_SSSE3 */
 +
 +/* The ./configure command line */
-+#define CONFIGURE_LINE "extras/package/android/../../../configure  '--host=arm-eabi-linux' '--build=x86_64-unknown-linux' '--disable-vlc' '--disable-debug' '--enable-swscale' '--enable-avcodec' '--enable-avformat' '--disable-postproc' '--disable-a52' '--disable-dbus' '--disable-lua' '--disable-mad' '--without-x' '--disable-xcb' '--disable-xvideo' '--disable-glx' '--disable-alsa' '--disable-skins2' '--disable-libgcrypt' 'build_alias=x86_64-unknown-linux' 'host_alias=arm-eabi-linux' 'CC=/opt/android/android-ndk-r5b//toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-gcc' 'CFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2' 'LDFLAGS=-Wl,-rpath-link=/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/lib,-Bdynamic,-dynamic-linker=/system/bin/linker -Wl,--no-undefined -Wl,-shared -L/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/lib -Wl,--fix-cortex-a8' 'LIBS=-lc -ldl -lgcc' 'CPPFLAGS=-I/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/include' 'CXX=/opt/android/android-ndk-r5b//toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-g++' 'CXXFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2'"
++#define CONFIGURE_LINE "./../../../configure  '--host=arm-eabi-linux' '--build=x86_64-unknown-linux' '--enable-static-modules' '--disable-vlc' '--disable-debug' '--disable-vlm' '--disable-sout' '--disable-dbus' '--disable-lua' '--disable-httpd' '--disable-libgcrypt' '--disable-a52' '--enable-live555' '--disable-vcd' '--disable-v4l2' '--disable-gnomevfs' '--disable-dvdread' '--disable-dvdnav' '--disable-bluray' '--disable-linsys' '--disable-decklink' '--enable-avformat' '--enable-swscale' '--enable-avcodec' '--disable-postproc' '--disable-libva' '--disable-mkv' '--disable-dv' '--disable-mod' '--disable-sid' '--disable-x264' '--disable-mad' '--disable-schroedinger' '--disable-dirac' '--disable-sdl-image' '--disable-zvbi' '--disable-fluidsynth' '--enable-opensles' '--disable-jack' '--disable-pulse' '--disable-alsa' '--disable-portaudio' '--disable-sdl' '--disable-xcb' '--disable-atmo' '--disable-qt4' '--disable-skins2' '--disable-mtp' '--disable-taglib' '--disable-notify' '--enable-freetype' '--enable-libass' '--disable-svg' '--disable-sqlite' '--disable-udev' '--disable-libxml2' '--enable-android-surface' '--disable-caca' '--disable-glx' '--disable-egl' '--disable-gl' '--disable-gles1' '--disable-gles2' '--disable-goom' '--disable-projectm' 'build_alias=x86_64-unknown-linux' 'host_alias=arm-eabi-linux' 'CC=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-gcc' 'CFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2' 'LDFLAGS=-Wl,-rpath-link=/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib,-Bdynamic,-dynamic-linker=/system/bin/linker -Wl,--no-undefined -Wl,-shared -L/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib -Wl,--fix-cortex-a8' 'LIBS=-lc -ldl -lgcc' 'CPPFLAGS=-I/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/include' 'CXX=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-g++' 'CXXFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2'"
 +
 +/* Copyright string */
 +#define COPYRIGHT_MESSAGE "Copyright © 1996-2011 the VideoLAN team"
@@ -704,17 +695,17 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +/* #undef DISTRO_VERSION */
 +
 +/* Define if you want the HTTP dameon support */
-+#define ENABLE_HTTPD 1
++/* #undef ENABLE_HTTPD */
 +
 +/* Define to 1 if translation of program messages to the user's native
 +   language is requested. */
 +/* #undef ENABLE_NLS */
 +
 +/* Define to 1 for stream output support. */
-+#define ENABLE_SOUT 1
++/* #undef ENABLE_SOUT */
 +
 +/* Define if you want the VideoLAN manager support */
-+#define ENABLE_VLM 1
++/* #undef ENABLE_VLM */
 +
 +/* Define to 1 if you have the <a52dec/a52.h> header file. */
 +/* #undef HAVE_A52DEC_A52_H */
@@ -829,7 +820,7 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +/* #undef HAVE_EBML_EBMLVERSION_H */
 +
 +/* Define to 1 if you have the `eventfd' function. */
-+/* #undef HAVE_EVENTFD */
++#define HAVE_EVENTFD 1
 +
 +/* Define to 1 if you have the <execinfo.h> header file. */
 +/* #undef HAVE_EXECINFO_H */
@@ -844,7 +835,7 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +#define HAVE_FCNTL_H 1
 +
 +/* Define to 1 if you have the `fdatasync' function. */
-+/* #undef HAVE_FDATASYNC */
++#define HAVE_FDATASYNC 1
 +
 +/* Define to 1 if you have the `fdopendir' function. */
 +#define HAVE_FDOPENDIR 1
@@ -860,6 +851,9 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +
 +/* Define to 1 if you have the `fstatvfs' function. */
 +/* #undef HAVE_FSTATVFS */
++
++/* Define to 1 if you have the `fsync' function. */
++#define HAVE_FSYNC 1
 +
 +/* Define to 1 if you have the `getcwd' function. */
 +#define HAVE_GETCWD 1
@@ -893,6 +887,12 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +
 +/* Define if you have the iconv() function and it works. */
 +#define HAVE_ICONV 1
++
++/* Define to 1 if you have the `if_nameindex' function. */
++/* #undef HAVE_IF_NAMEINDEX */
++
++/* Define to 1 if you have the `if_nametoindex' function. */
++#define HAVE_IF_NAMETOINDEX 1
 +
 +/* Define to 1 if you have the `inet_aton' function. */
 +#define HAVE_INET_ATON 1
@@ -982,10 +982,10 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +#define HAVE_LINUX_VERSION_H 1
 +
 +/* Define to 1 if you have the <linux/videodev2.h> header file. */
-+#define HAVE_LINUX_VIDEODEV2_H 1
++/* #undef HAVE_LINUX_VIDEODEV2_H */
 +
 +/* Define to 1 if you have the <liveMedia_version.hh> header file. */
-+#define HAVE_LIVEMEDIA_VERSION_HH 1
++/* #undef HAVE_LIVEMEDIA_VERSION_HH */
 +
 +/* Define to 1 if you have the `lldiv' function. */
 +#define HAVE_LLDIV 1
@@ -1122,6 +1122,9 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +/* Define to 1 if you have the `setlocale' function. */
 +#define HAVE_SETLOCALE 1
 +
++/* Define to 1 if you have the <SLES/OpenSLES.h> header file. */
++#define HAVE_SLES_OPENSLES_H 1
++
 +/* Define to 1 if you have the <soundcard.h> header file. */
 +/* #undef HAVE_SOUNDCARD_H */
 +
@@ -1224,12 +1227,6 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +
 +/* Define to 1 if you have the <sys/videoio.h> header file. */
 +/* #undef HAVE_SYS_VIDEOIO_H */
-+
-+/* Define to 1 if you have the <taglib/apefile.h> header file. */
-+/* #undef HAVE_TAGLIB_APEFILE_H */
-+
-+/* Define to 1 if you have the <taglib/mp4coverart.h> header file. */
-+/* #undef HAVE_TAGLIB_MP4COVERART_H */
 +
 +/* Define to 1 if you have the `tdestroy' function. */
 +/* #undef HAVE_TDESTROY */
@@ -1396,7 +1393,7 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +#endif
 +
 +/* Define to 1 if the X Window System is missing or not being used. */
-+#define X_DISPLAY_MISSING 1
++/* #undef X_DISPLAY_MISSING */
 +
 +/* Define if the zvbi module is built */
 +/* #undef ZVBI_COMPILED */
@@ -1423,6 +1420,9 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +/* Same as _REENTANT for some other OSes. */
 +#define _THREAD_SAFE /**/
 +
++/* Define to '0x0501' for IE 5.01 (and shell) APIs. */
++/* #undef _WIN32_IE */
++
 +/* Define to '0x0501' for Windows XP APIs. */
 +/* #undef _WIN32_WINNT */
 +
@@ -1433,7 +1433,7 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +/* #undef const */
 +
 +/* Alias fdatasync() to fsync() if missing. */
-+#define fdatasync fsync
++/* #undef fdatasync */
 +
 +/* Define to `__inline__' or `__inline' if that's what the C compiler
 +   calls it, or to nothing if 'inline' is not supported under any name.  */
@@ -1469,8 +1469,8 @@ diff -Nurp vlc-a/config.h vlc-b/config.h
 +
 +#include <vlc_fixups.h>
 diff -Nurp vlc-a/include/vlc/libvlc.h vlc-b/include/vlc/libvlc.h
---- vlc-a/include/vlc/libvlc.h	2011-06-02 18:33:40.016811126 +0800
-+++ vlc-b/include/vlc/libvlc.h	2011-06-02 17:04:40.386185210 +0800
+--- vlc-a/include/vlc/libvlc.h	2011-06-29 12:56:10.183324938 +0800
++++ vlc-b/include/vlc/libvlc.h	2011-06-29 14:18:39.492914859 +0800
 @@ -138,6 +138,39 @@ LIBVLC_API libvlc_instance_t *
  libvlc_new( int argc , const char *const *argv );
  
@@ -1513,7 +1513,7 @@ diff -Nurp vlc-a/include/vlc/libvlc.h vlc-b/include/vlc/libvlc.h
   *
 diff -Nurp vlc-a/include/vlc/libvlc_version.h vlc-b/include/vlc/libvlc_version.h
 --- vlc-a/include/vlc/libvlc_version.h	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/include/vlc/libvlc_version.h	2011-06-02 17:31:22.567435000 +0800
++++ vlc-b/include/vlc/libvlc_version.h	2011-06-29 14:18:39.492914859 +0800
 @@ -0,0 +1,55 @@
 +/*****************************************************************************
 + * libvlc_version.h
@@ -1572,8 +1572,8 @@ diff -Nurp vlc-a/include/vlc/libvlc_version.h vlc-b/include/vlc/libvlc_version.h
 +#endif
 diff -Nurp vlc-a/include/vlc_about.h vlc-b/include/vlc_about.h
 --- vlc-a/include/vlc_about.h	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/include/vlc_about.h	2011-06-02 17:31:22.637432000 +0800
-@@ -0,0 +1,774 @@
++++ vlc-b/include/vlc_about.h	2011-06-29 14:18:39.492914859 +0800
+@@ -0,0 +1,775 @@
 +/* Automatically generated file - DO NOT EDIT */
 +static const char psz_license[] =
 +"                    GNU GENERAL PUBLIC LICENSE\n"
@@ -2052,6 +2052,7 @@ diff -Nurp vlc-a/include/vlc_about.h vlc-b/include/vlc_about.h
 +"Omer Ensari - Kurmanji (Kurdish)\n"
 +"Otto Kekäläinen - Finnish\n"
 +"Pittayakom Saingtong - Thai\n"
++"Predrag Ljubenović - Serbian\n"
 +"Roustam Ghizdatov - Russian\n"
 +"Salar Khalilzadeh\" - Persian\n"
 +"Сергей Дарьичев - Belarusian\n"
@@ -2349,8 +2350,8 @@ diff -Nurp vlc-a/include/vlc_about.h vlc-b/include/vlc_about.h
 +"Yves Duret\n"
 +;
 diff -Nurp vlc-a/include/vlc_threads.h vlc-b/include/vlc_threads.h
---- vlc-a/include/vlc_threads.h	2011-06-02 18:33:40.125652866 +0800
-+++ vlc-b/include/vlc_threads.h	2011-06-02 17:45:10.465559029 +0800
+--- vlc-a/include/vlc_threads.h	2011-06-29 12:56:10.303125518 +0800
++++ vlc-b/include/vlc_threads.h	2011-06-29 14:18:39.492914859 +0800
 @@ -110,7 +110,19 @@ typedef pthread_mutex_t vlc_mutex_t;
  #define VLC_STATIC_MUTEX PTHREAD_MUTEX_INITIALIZER
  typedef pthread_cond_t  vlc_cond_t;
@@ -2373,14 +2374,14 @@ diff -Nurp vlc-a/include/vlc_threads.h vlc-b/include/vlc_threads.h
  
 diff -Nurp vlc-a/modules/Android.mk vlc-b/modules/Android.mk
 --- vlc-a/modules/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/Android.mk	2011-05-23 21:51:51.465224000 +0800
++++ vlc-b/modules/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,3 @@
 +LOCAL_PATH := $(call my-dir)
 +include $(CLEAR_VARS)
 +include $(call all-makefiles-under,$(LOCAL_PATH))
 diff -Nurp vlc-a/modules/access/Android.mk vlc-b/modules/access/Android.mk
 --- vlc-a/modules/access/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/access/Android.mk	2011-05-23 21:51:51.485224000 +0800
++++ vlc-b/modules/access/Android.mk	2011-06-29 14:18:39.854433831 +0800
 @@ -0,0 +1,59 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -2443,7 +2444,7 @@ diff -Nurp vlc-a/modules/access/Android.mk vlc-b/modules/access/Android.mk
 +
 diff -Nurp vlc-a/modules/access/mms/Android.mk vlc-b/modules/access/mms/Android.mk
 --- vlc-a/modules/access/mms/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/access/mms/Android.mk	2011-05-23 21:51:51.834341000 +0800
++++ vlc-b/modules/access/mms/Android.mk	2011-06-29 14:18:39.854433831 +0800
 @@ -0,0 +1,32 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -2479,7 +2480,7 @@ diff -Nurp vlc-a/modules/access/mms/Android.mk vlc-b/modules/access/mms/Android.
 +
 diff -Nurp vlc-a/modules/access/rtsp/Android.mk vlc-b/modules/access/rtsp/Android.mk
 --- vlc-a/modules/access/rtsp/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/access/rtsp/Android.mk	2011-05-23 21:51:51.994812000 +0800
++++ vlc-b/modules/access/rtsp/Android.mk	2011-06-29 14:18:39.854433831 +0800
 @@ -0,0 +1,33 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -2516,7 +2517,7 @@ diff -Nurp vlc-a/modules/access/rtsp/Android.mk vlc-b/modules/access/rtsp/Androi
 +
 diff -Nurp vlc-a/modules/arm_neon/Android.mk vlc-b/modules/arm_neon/Android.mk
 --- vlc-a/modules/arm_neon/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/Android.mk	2011-05-23 21:51:52.234359000 +0800
++++ vlc-b/modules/arm_neon/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,68 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -2588,7 +2589,7 @@ diff -Nurp vlc-a/modules/arm_neon/Android.mk vlc-b/modules/arm_neon/Android.mk
 +
 diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.420565.c vlc-b/modules/arm_neon/yuv2rgb.420565.c
 --- vlc-a/modules/arm_neon/yuv2rgb.420565.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv2rgb.420565.c	2011-05-23 21:51:52.264445000 +0800
++++ vlc-b/modules/arm_neon/yuv2rgb.420565.c	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,201 @@
 +// Copyright (c) 2010 The Chromium Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can be
@@ -2793,7 +2794,7 @@ diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.420565.c vlc-b/modules/arm_neon/yuv2rg
 +}
 diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.422565.S vlc-b/modules/arm_neon/yuv2rgb.422565.S
 --- vlc-a/modules/arm_neon/yuv2rgb.422565.S	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv2rgb.422565.S	2011-05-23 21:51:52.275226000 +0800
++++ vlc-b/modules/arm_neon/yuv2rgb.422565.S	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,395 @@
 +/*------------------------------------------------------------------------
 +* jdcolor-armv7.s
@@ -3192,7 +3193,7 @@ diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.422565.S vlc-b/modules/arm_neon/yuv2rg
 +.end
 diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.444565.S vlc-b/modules/arm_neon/yuv2rgb.444565.S
 --- vlc-a/modules/arm_neon/yuv2rgb.444565.S	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv2rgb.444565.S	2011-05-23 21:51:52.275226000 +0800
++++ vlc-b/modules/arm_neon/yuv2rgb.444565.S	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,328 @@
 +/*------------------------------------------------------------------------
 +* jdcolor-armv7.s
@@ -3524,7 +3525,7 @@ diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.444565.S vlc-b/modules/arm_neon/yuv2rg
 +.end
 diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.c vlc-b/modules/arm_neon/yuv2rgb.c
 --- vlc-a/modules/arm_neon/yuv2rgb.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv2rgb.c	2011-05-23 21:51:52.284239000 +0800
++++ vlc-b/modules/arm_neon/yuv2rgb.c	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,289 @@
 +
 +#ifdef HAVE_CONFIG_H
@@ -3817,7 +3818,7 @@ diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.c vlc-b/modules/arm_neon/yuv2rgb.c
 +
 diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.h vlc-b/modules/arm_neon/yuv2rgb.h
 --- vlc-a/modules/arm_neon/yuv2rgb.h	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv2rgb.h	2011-05-23 21:51:52.284239000 +0800
++++ vlc-b/modules/arm_neon/yuv2rgb.h	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,150 @@
 +/* YUV-> RGB conversion code.
 + *
@@ -3971,7 +3972,7 @@ diff -Nurp vlc-a/modules/arm_neon/yuv2rgb.h vlc-b/modules/arm_neon/yuv2rgb.h
 +#endif /* YUV2RGB_H */
 diff -Nurp vlc-a/modules/arm_neon/yuv2rgb16tab.c vlc-b/modules/arm_neon/yuv2rgb16tab.c
 --- vlc-a/modules/arm_neon/yuv2rgb16tab.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv2rgb16tab.c	2011-05-23 21:51:52.284239000 +0800
++++ vlc-b/modules/arm_neon/yuv2rgb16tab.c	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,802 @@
 +/* YUV-> RGB conversion code.
 + *
@@ -4777,7 +4778,7 @@ diff -Nurp vlc-a/modules/arm_neon/yuv2rgb16tab.c vlc-b/modules/arm_neon/yuv2rgb1
 +};
 diff -Nurp vlc-a/modules/arm_neon/yuv420rgb565.S vlc-b/modules/arm_neon/yuv420rgb565.S
 --- vlc-a/modules/arm_neon/yuv420rgb565.S	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv420rgb565.S	2011-05-23 21:51:52.284239000 +0800
++++ vlc-b/modules/arm_neon/yuv420rgb565.S	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,1070 @@
 +@ YUV-> RGB conversion code Copyright (C) 2008 Robin Watts (robin;wss.co.uk).
 +@
@@ -5851,7 +5852,7 @@ diff -Nurp vlc-a/modules/arm_neon/yuv420rgb565.S vlc-b/modules/arm_neon/yuv420rg
 +	@ END
 diff -Nurp vlc-a/modules/arm_neon/yuv422rgb565.S vlc-b/modules/arm_neon/yuv422rgb565.S
 --- vlc-a/modules/arm_neon/yuv422rgb565.S	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv422rgb565.S	2011-05-23 21:51:52.284239000 +0800
++++ vlc-b/modules/arm_neon/yuv422rgb565.S	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,898 @@
 +@ YUV-> RGB conversion code Copyright (C) 2008 Robin Watts (robin;wss.co.uk).
 +@
@@ -6753,7 +6754,7 @@ diff -Nurp vlc-a/modules/arm_neon/yuv422rgb565.S vlc-b/modules/arm_neon/yuv422rg
 +	@ END
 diff -Nurp vlc-a/modules/arm_neon/yuv444rgb565.S vlc-b/modules/arm_neon/yuv444rgb565.S
 --- vlc-a/modules/arm_neon/yuv444rgb565.S	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/arm_neon/yuv444rgb565.S	2011-05-23 21:51:52.284239000 +0800
++++ vlc-b/modules/arm_neon/yuv444rgb565.S	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,950 @@
 +@ YUV-> RGB conversion code Copyright (C) 2008 Robin Watts (robin;wss.co.uk).
 +@
@@ -7707,14 +7708,14 @@ diff -Nurp vlc-a/modules/arm_neon/yuv444rgb565.S vlc-b/modules/arm_neon/yuv444rg
 +	@ END
 diff -Nurp vlc-a/modules/audio_filter/Android.mk vlc-b/modules/audio_filter/Android.mk
 --- vlc-a/modules/audio_filter/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/audio_filter/Android.mk	2011-05-23 21:51:52.284239000 +0800
++++ vlc-b/modules/audio_filter/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,3 @@
 +LOCAL_PATH := $(call my-dir)
 +include $(CLEAR_VARS)
 +include $(call all-makefiles-under,$(LOCAL_PATH))
 diff -Nurp vlc-a/modules/audio_filter/channel_mixer/Android.mk vlc-b/modules/audio_filter/channel_mixer/Android.mk
 --- vlc-a/modules/audio_filter/channel_mixer/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/audio_filter/channel_mixer/Android.mk	2011-05-23 21:51:52.314287000 +0800
++++ vlc-b/modules/audio_filter/channel_mixer/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,28 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -7746,7 +7747,7 @@ diff -Nurp vlc-a/modules/audio_filter/channel_mixer/Android.mk vlc-b/modules/aud
 +
 diff -Nurp vlc-a/modules/audio_filter/converter/Android.mk vlc-b/modules/audio_filter/converter/Android.mk
 --- vlc-a/modules/audio_filter/converter/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/audio_filter/converter/Android.mk	2011-05-23 21:51:52.354401000 +0800
++++ vlc-b/modules/audio_filter/converter/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,28 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -7778,7 +7779,7 @@ diff -Nurp vlc-a/modules/audio_filter/converter/Android.mk vlc-b/modules/audio_f
 +
 diff -Nurp vlc-a/modules/audio_filter/resampler/Android.mk vlc-b/modules/audio_filter/resampler/Android.mk
 --- vlc-a/modules/audio_filter/resampler/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/audio_filter/resampler/Android.mk	2011-05-23 21:51:52.483975000 +0800
++++ vlc-b/modules/audio_filter/resampler/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,53 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -7835,7 +7836,7 @@ diff -Nurp vlc-a/modules/audio_filter/resampler/Android.mk vlc-b/modules/audio_f
 +
 diff -Nurp vlc-a/modules/audio_mixer/Android.mk vlc-b/modules/audio_mixer/Android.mk
 --- vlc-a/modules/audio_mixer/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/audio_mixer/Android.mk	2011-05-23 21:51:52.545225000 +0800
++++ vlc-b/modules/audio_mixer/Android.mk	2011-06-29 14:18:39.834433544 +0800
 @@ -0,0 +1,53 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -7892,8 +7893,8 @@ diff -Nurp vlc-a/modules/audio_mixer/Android.mk vlc-b/modules/audio_mixer/Androi
 +
 diff -Nurp vlc-a/modules/audio_output/Android.mk vlc-b/modules/audio_output/Android.mk
 --- vlc-a/modules/audio_output/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/audio_output/Android.mk	2011-05-23 21:51:52.583984000 +0800
-@@ -0,0 +1,28 @@
++++ vlc-b/modules/audio_output/Android.mk	2011-06-29 14:18:39.834433544 +0800
+@@ -0,0 +1,79 @@
 +
 +LOCAL_PATH := $(call my-dir)
 +
@@ -7904,13 +7905,38 @@ diff -Nurp vlc-a/modules/audio_output/Android.mk vlc-b/modules/audio_output/Andr
 +LOCAL_ARM_NEON := true
 +endif
 +
-+LOCAL_MODULE := aout_android_plugin
++LOCAL_MODULE := amem_plugin
 +
 +LOCAL_CFLAGS += \
 +    -std=c99 \
 +    -DHAVE_CONFIG_H \
-+    -DMODULE_STRING=\"aout_android\" \
-+    -DMODULE_NAME=aout_android
++    -DMODULE_STRING=\"amem\" \
++    -DMODULE_NAME=amem
++
++LOCAL_C_INCLUDES += \
++    $(VLCROOT) \
++    $(VLCROOT)/include \
++    $(VLCROOT)/src
++
++LOCAL_SRC_FILES := \
++    amem.c
++
++include $(BUILD_STATIC_LIBRARY)
++
++include $(CLEAR_VARS)
++
++LOCAL_ARM_MODE := arm
++ifeq ($(BUILD_WITH_NEON),1)
++LOCAL_ARM_NEON := true
++endif
++
++LOCAL_MODULE := audiotrack_android_plugin
++
++LOCAL_CFLAGS += \
++    -std=c99 \
++    -DHAVE_CONFIG_H \
++    -DMODULE_STRING=\"audiotrack_android\" \
++    -DMODULE_NAME=audiotrack_android
 +
 +LOCAL_C_INCLUDES += \
 +    $(VLCROOT) \
@@ -7922,9 +7948,35 @@ diff -Nurp vlc-a/modules/audio_output/Android.mk vlc-b/modules/audio_output/Andr
 +
 +include $(BUILD_STATIC_LIBRARY)
 +
++include $(CLEAR_VARS)
++
++LOCAL_ARM_MODE := arm
++ifeq ($(BUILD_WITH_NEON),1)
++LOCAL_ARM_NEON := true
++endif
++
++# TODO: enable this when >= android-9
++#LOCAL_MODULE := opensles_android_plugin
++
++LOCAL_CFLAGS += \
++    -std=c99 \
++    -DHAVE_CONFIG_H \
++    -DMODULE_STRING=\"opensles_android\" \
++    -DMODULE_NAME=opensles_android
++
++LOCAL_C_INCLUDES += \
++    $(VLCROOT) \
++    $(VLCROOT)/include \
++    $(VLCROOT)/src
++
++LOCAL_SRC_FILES := \
++    opensles_android.c
++
++#include $(BUILD_STATIC_LIBRARY)
++
 diff -Nurp vlc-a/modules/audio_output/android_AudioTrack.c vlc-b/modules/audio_output/android_AudioTrack.c
 --- vlc-a/modules/audio_output/android_AudioTrack.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/audio_output/android_AudioTrack.c	2011-06-02 18:26:48.086807777 +0800
++++ vlc-b/modules/audio_output/android_AudioTrack.c	2011-06-29 14:18:39.834433544 +0800
 @@ -0,0 +1,240 @@
 +
 +#ifdef HAVE_CONFIG_H
@@ -8153,7 +8205,7 @@ diff -Nurp vlc-a/modules/audio_output/android_AudioTrack.c vlc-b/modules/audio_o
 +    aout_buffer_t *p_buffer;
 +
 +    while (vlc_object_alive(p_aout)) {
-+        p_buffer = aout_FifoPop(p_aout, &p_aout->output.fifo);
++        p_buffer = aout_FifoPop(&p_aout->output.fifo);
 +        if (p_buffer != NULL) {
 +            length = 0;
 +            while (length < p_buffer->i_buffer) {
@@ -8168,7 +8220,7 @@ diff -Nurp vlc-a/modules/audio_output/android_AudioTrack.c vlc-b/modules/audio_o
 +
 diff -Nurp vlc-a/modules/codec/Android.mk vlc-b/modules/codec/Android.mk
 --- vlc-a/modules/codec/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/codec/Android.mk	2011-05-23 21:51:52.704294000 +0800
++++ vlc-b/modules/codec/Android.mk	2011-06-29 14:18:39.804434241 +0800
 @@ -0,0 +1,85 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8257,7 +8309,7 @@ diff -Nurp vlc-a/modules/codec/Android.mk vlc-b/modules/codec/Android.mk
 +
 diff -Nurp vlc-a/modules/codec/avcodec/Android.mk vlc-b/modules/codec/avcodec/Android.mk
 --- vlc-a/modules/codec/avcodec/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/codec/avcodec/Android.mk	2011-06-02 18:16:29.916185553 +0800
++++ vlc-b/modules/codec/avcodec/Android.mk	2011-06-29 14:18:39.804434241 +0800
 @@ -0,0 +1,37 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8296,9 +8348,131 @@ diff -Nurp vlc-a/modules/codec/avcodec/Android.mk vlc-b/modules/codec/avcodec/An
 +
 +include $(BUILD_STATIC_LIBRARY)
 +
+diff -Nurp vlc-a/modules/codec/avcodec/avcodec.c vlc-b/modules/codec/avcodec/avcodec.c
+--- vlc-a/modules/codec/avcodec/avcodec.c	2011-06-29 12:56:10.764434341 +0800
++++ vlc-b/modules/codec/avcodec/avcodec.c	2011-06-29 14:18:39.804434241 +0800
+@@ -400,8 +400,12 @@ int ffmpeg_OpenCodec( decoder_t *p_dec )
+     {
+         if( p_sys->i_codec_id == CODEC_ID_VC1 ||
+             p_sys->i_codec_id == CODEC_ID_VORBIS ||
++#ifdef ANDROID
++            p_sys->i_codec_id == CODEC_ID_THEORA )
++#else
+             p_sys->i_codec_id == CODEC_ID_THEORA ||
+             p_sys->i_codec_id == CODEC_ID_AAC )
++#endif
+         {
+             msg_Warn( p_dec, "waiting for extra data for codec %s",
+                       p_sys->psz_namecodec );
+diff -Nurp vlc-a/modules/codec/avcodec/video.c vlc-b/modules/codec/avcodec/video.c
+--- vlc-a/modules/codec/avcodec/video.c	2011-06-29 12:56:10.864435879 +0800
++++ vlc-b/modules/codec/avcodec/video.c	2011-06-29 14:18:39.804434241 +0800
+@@ -77,6 +77,15 @@ struct decoder_sys_t
+     int     i_late_frames;
+     mtime_t i_late_frames_start;
+ 
++#ifdef ANDROID
++    int i_decode_called_count;
++    mtime_t i_decode_total_time;
++    mtime_t i_decode_average_time;
++    mtime_t i_decode_last_time;
++    mtime_t i_display_date_head;
++    int i_decode_may_suck;
++#endif
++
+     /* for direct rendering */
+     bool b_direct_rendering;
+     int  i_direct_rendering_used;
+@@ -419,6 +428,15 @@ int InitVideoDec( decoder_t *p_dec, AVCo
+         return VLC_EGENERIC;
+     }
+ 
++#ifdef ANDROID
++    p_sys->i_decode_called_count = 0;
++    p_sys->i_decode_total_time = 0;
++    p_sys->i_decode_average_time = 0;
++    p_sys->i_decode_last_time = 0;
++    p_sys->i_display_date_head = 0;
++    p_sys->i_decode_may_suck = 0;
++#endif
++
+     return VLC_SUCCESS;
+ }
+ 
+@@ -474,6 +492,7 @@ picture_t *DecodeVideo( decoder_t *p_dec
+         p_sys->i_late_frames = 0;
+     }
+ 
++#ifndef ANDROID
+     if( !p_dec->b_pace_control && (p_sys->i_late_frames > 0) &&
+         (mdate() - p_sys->i_late_frames_start > INT64_C(5000000)) )
+     {
+@@ -535,6 +554,23 @@ picture_t *DecodeVideo( decoder_t *p_dec
+                                                   AVDISCARD_NONREF );
+ #endif
+     }
++#else
++    mtime_t i_time_now = mdate();
++    mtime_t i_time_adv = p_sys->i_display_date_head > 0 ? (p_sys->i_display_date_head - p_sys->i_decode_average_time - i_time_now) : 0;
++    p_sys->i_decode_may_suck = (i_time_adv < 0) ? (p_sys->i_decode_may_suck + 1) : 0;
++    bool b_skip_pred = (p_sys->i_decode_may_suck > 0);
++    bool b_skip_late = (p_sys->i_late_frames > 4);
++    bool b_no_skip_pred = (p_sys->i_decode_last_time < p_sys->i_decode_average_time);
++    bool b_no_skip_late = (i_time_now + p_sys->i_decode_average_time - p_sys->i_late_frames_start < 200000);
++    bool b_skip = ( (!p_dec->b_pace_control) &&  ((b_skip_pred && !b_no_skip_pred) || (b_skip_late && !b_no_skip_late)) );
++    p_context->skip_frame = b_skip ? AVDISCARD_NONREF : AVDISCARD_DEFAULT;
++    if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
++        b_drawpicture = 1;
++    else
++        b_drawpicture = 0;
++    if( p_context->width <= 0 || p_context->height <= 0 )
++        b_null_size = true;
++#endif
+ 
+     /*
+      * Do the actual decoding now */
+@@ -576,6 +612,10 @@ picture_t *DecodeVideo( decoder_t *p_dec
+ 
+         post_mt( p_sys );
+ 
++#ifdef ANDROID
++        mtime_t i_decode_start = mdate();
++#endif
++
+         av_init_packet( &pkt );
+         pkt.data = p_block->p_buffer;
+         pkt.size = p_block->i_buffer;
+@@ -592,6 +632,16 @@ picture_t *DecodeVideo( decoder_t *p_dec
+             i_used = avcodec_decode_video2( p_context, p_sys->p_ff_pic,
+                                            &b_gotpicture, &pkt );
+         }
++
++#ifdef ANDROID
++        mtime_t i_decode_end = mdate();
++        mtime_t i_decode_time = i_decode_end - i_decode_start;
++        p_sys->i_decode_called_count += 1;
++        p_sys->i_decode_total_time += i_decode_time;
++        p_sys->i_decode_average_time = (p_sys->i_decode_total_time / p_sys->i_decode_called_count);
++        p_sys->i_decode_last_time = i_decode_time;
++#endif
++
+         wait_mt( p_sys );
+ 
+         if( p_sys->b_flush )
+@@ -694,6 +744,10 @@ picture_t *DecodeVideo( decoder_t *p_dec
+         if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
+             i_display_date = decoder_GetDisplayDate( p_dec, i_pts );
+ 
++#ifdef ANDROID
++        p_sys->i_display_date_head = i_display_date;
++#endif
++
+         if( i_display_date > 0 && i_display_date <= mdate() )
+         {
+             p_sys->i_late_frames++;
 diff -Nurp vlc-a/modules/codec/libass.c vlc-b/modules/codec/libass.c
---- vlc-a/modules/codec/libass.c	2011-06-02 18:33:40.365606192 +0800
-+++ vlc-b/modules/codec/libass.c	2011-06-02 18:10:16.865845282 +0800
+--- vlc-a/modules/codec/libass.c	2011-06-29 12:56:10.893009203 +0800
++++ vlc-b/modules/codec/libass.c	2011-06-29 14:18:39.804434241 +0800
 @@ -199,6 +199,13 @@ static int Create( vlc_object_t *p_this 
      const char *psz_font = NULL; /* We don't ship a default font with VLC */
      const char *psz_family = "Arial"; /* Use Arial if we can't find anything more suitable */
@@ -8315,7 +8489,7 @@ diff -Nurp vlc-a/modules/codec/libass.c vlc-b/modules/codec/libass.c
      dialog_progress_bar_t *p_dialog =
 diff -Nurp vlc-a/modules/demux/Android.mk vlc-b/modules/demux/Android.mk
 --- vlc-a/modules/demux/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/demux/Android.mk	2011-05-23 21:51:53.613982000 +0800
++++ vlc-b/modules/demux/Android.mk	2011-06-29 14:18:39.784433385 +0800
 @@ -0,0 +1,59 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8378,7 +8552,7 @@ diff -Nurp vlc-a/modules/demux/Android.mk vlc-b/modules/demux/Android.mk
 +
 diff -Nurp vlc-a/modules/demux/asf/Android.mk vlc-b/modules/demux/asf/Android.mk
 --- vlc-a/modules/demux/asf/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/demux/asf/Android.mk	2011-05-23 21:51:53.625226000 +0800
++++ vlc-b/modules/demux/asf/Android.mk	2011-06-29 14:18:39.784433385 +0800
 @@ -0,0 +1,28 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8410,7 +8584,7 @@ diff -Nurp vlc-a/modules/demux/asf/Android.mk vlc-b/modules/demux/asf/Android.mk
 +
 diff -Nurp vlc-a/modules/demux/avformat/Android.mk vlc-b/modules/demux/avformat/Android.mk
 --- vlc-a/modules/demux/avformat/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/demux/avformat/Android.mk	2011-06-02 18:18:57.365994362 +0800
++++ vlc-b/modules/demux/avformat/Android.mk	2011-06-29 14:18:39.784433385 +0800
 @@ -0,0 +1,31 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8445,7 +8619,7 @@ diff -Nurp vlc-a/modules/demux/avformat/Android.mk vlc-b/modules/demux/avformat/
 +
 diff -Nurp vlc-a/modules/demux/avi/Android.mk vlc-b/modules/demux/avi/Android.mk
 --- vlc-a/modules/demux/avi/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/demux/avi/Android.mk	2011-05-23 21:51:53.675224000 +0800
++++ vlc-b/modules/demux/avi/Android.mk	2011-06-29 14:18:39.784433385 +0800
 @@ -0,0 +1,28 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8477,7 +8651,7 @@ diff -Nurp vlc-a/modules/demux/avi/Android.mk vlc-b/modules/demux/avi/Android.mk
 +
 diff -Nurp vlc-a/modules/demux/mp4/Android.mk vlc-b/modules/demux/mp4/Android.mk
 --- vlc-a/modules/demux/mp4/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/demux/mp4/Android.mk	2011-05-23 21:51:53.855225000 +0800
++++ vlc-b/modules/demux/mp4/Android.mk	2011-06-29 14:18:39.784433385 +0800
 @@ -0,0 +1,29 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8510,7 +8684,7 @@ diff -Nurp vlc-a/modules/demux/mp4/Android.mk vlc-b/modules/demux/mp4/Android.mk
 +
 diff -Nurp vlc-a/modules/demux/mpeg/Android.mk vlc-b/modules/demux/mpeg/Android.mk
 --- vlc-a/modules/demux/mpeg/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/demux/mpeg/Android.mk	2011-05-23 21:51:53.915112000 +0800
++++ vlc-b/modules/demux/mpeg/Android.mk	2011-06-29 14:18:39.784433385 +0800
 @@ -0,0 +1,27 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8541,7 +8715,7 @@ diff -Nurp vlc-a/modules/demux/mpeg/Android.mk vlc-b/modules/demux/mpeg/Android.
 +
 diff -Nurp vlc-a/modules/demux/playlist/Android.mk.bak vlc-b/modules/demux/playlist/Android.mk.bak
 --- vlc-a/modules/demux/playlist/Android.mk.bak	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/demux/playlist/Android.mk.bak	2011-05-23 21:51:54.005223000 +0800
++++ vlc-b/modules/demux/playlist/Android.mk.bak	2011-06-29 14:18:39.784433385 +0800
 @@ -0,0 +1,43 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8588,14 +8762,14 @@ diff -Nurp vlc-a/modules/demux/playlist/Android.mk.bak vlc-b/modules/demux/playl
 +
 diff -Nurp vlc-a/modules/misc/Android.mk vlc-b/modules/misc/Android.mk
 --- vlc-a/modules/misc/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/misc/Android.mk	2011-05-23 21:51:57.624226000 +0800
++++ vlc-b/modules/misc/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,3 @@
 +LOCAL_PATH := $(call my-dir)
 +include $(CLEAR_VARS)
 +include $(call all-makefiles-under,$(LOCAL_PATH))
 diff -Nurp vlc-a/modules/misc/dummy/Android.mk vlc-b/modules/misc/dummy/Android.mk
 --- vlc-a/modules/misc/dummy/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/misc/dummy/Android.mk	2011-06-02 15:58:57.806807000 +0800
++++ vlc-b/modules/misc/dummy/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,34 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8633,7 +8807,7 @@ diff -Nurp vlc-a/modules/misc/dummy/Android.mk vlc-b/modules/misc/dummy/Android.
 +
 diff -Nurp vlc-a/modules/misc/text_renderer/Android.mk vlc-b/modules/misc/text_renderer/Android.mk
 --- vlc-a/modules/misc/text_renderer/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/misc/text_renderer/Android.mk	2011-05-23 21:51:57.904093000 +0800
++++ vlc-b/modules/misc/text_renderer/Android.mk	2011-06-29 14:18:39.844433761 +0800
 @@ -0,0 +1,32 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8669,7 +8843,7 @@ diff -Nurp vlc-a/modules/misc/text_renderer/Android.mk vlc-b/modules/misc/text_r
 +
 diff -Nurp vlc-a/modules/packetizer/Android.mk vlc-b/modules/packetizer/Android.mk
 --- vlc-a/modules/packetizer/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/packetizer/Android.mk	2011-05-23 21:51:58.055224000 +0800
++++ vlc-b/modules/packetizer/Android.mk	2011-06-29 14:18:39.804434241 +0800
 @@ -0,0 +1,228 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8901,7 +9075,7 @@ diff -Nurp vlc-a/modules/packetizer/Android.mk vlc-b/modules/packetizer/Android.
 +
 diff -Nurp vlc-a/modules/video_filter/Android.mk vlc-b/modules/video_filter/Android.mk
 --- vlc-a/modules/video_filter/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/video_filter/Android.mk	2011-05-23 21:51:58.485224000 +0800
++++ vlc-b/modules/video_filter/Android.mk	2011-06-29 14:18:39.804434241 +0800
 @@ -0,0 +1,57 @@
 +
 +LOCAL_PATH := $(call my-dir)
@@ -8962,8 +9136,8 @@ diff -Nurp vlc-a/modules/video_filter/Android.mk vlc-b/modules/video_filter/Andr
 +
 diff -Nurp vlc-a/modules/video_output/Android.mk vlc-b/modules/video_output/Android.mk
 --- vlc-a/modules/video_output/Android.mk	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/video_output/Android.mk	2011-05-23 21:51:59.164091000 +0800
-@@ -0,0 +1,29 @@
++++ vlc-b/modules/video_output/Android.mk	2011-06-29 14:18:39.794434086 +0800
+@@ -0,0 +1,53 @@
 +
 +LOCAL_PATH := $(call my-dir)
 +
@@ -8974,265 +9148,79 @@ diff -Nurp vlc-a/modules/video_output/Android.mk vlc-b/modules/video_output/Andr
 +LOCAL_ARM_NEON := true
 +endif
 +
-+LOCAL_MODULE := vout_android_plugin
++LOCAL_MODULE := android_surface_plugin
 +
 +LOCAL_CFLAGS += \
 +    -std=c99 \
 +    -DHAVE_CONFIG_H \
-+    -DMODULE_STRING=\"vout_android\" \
-+    -DMODULE_NAME=vout_android
++    -DMODULE_STRING=\"android_surface\" \
++    -DMODULE_NAME=android_surface
 +
 +LOCAL_C_INCLUDES += \
-+    $(EXTROOT)/pixman/pixman \
 +    $(VLCROOT) \
 +    $(VLCROOT)/include \
 +    $(VLCROOT)/src
 +
 +LOCAL_SRC_FILES := \
-+    android_Surface.c
++    androidsurface.c
 +
 +include $(BUILD_STATIC_LIBRARY)
 +
-diff -Nurp vlc-a/modules/video_output/android_Surface.c vlc-b/modules/video_output/android_Surface.c
---- vlc-a/modules/video_output/android_Surface.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/modules/video_output/android_Surface.c	2011-06-02 15:58:57.806807000 +0800
-@@ -0,0 +1,233 @@
++include $(CLEAR_VARS)
 +
-+#ifdef HAVE_CONFIG_H
-+# include "config.h"
-+#endif
++LOCAL_ARM_MODE := arm
++ifeq ($(BUILD_WITH_NEON),1)
++LOCAL_ARM_NEON := true
++endif
 +
-+#include <vlc_common.h>
-+#include <vlc_plugin.h>
-+#include <vlc_vout_display.h>
-+#include <vlc_picture_pool.h>
-+#include <vlc_threads.h>
++LOCAL_MODULE := vmem_plugin
 +
-+#include <dlfcn.h>
++LOCAL_CFLAGS += \
++    -std=c99 \
++    -DHAVE_CONFIG_H \
++    -DMODULE_STRING=\"vmem\" \
++    -DMODULE_NAME=vmem
 +
-+extern void LockSurface();
-+extern void UnlockSurface();
-+extern void *GetSurface();
++LOCAL_C_INCLUDES += \
++    $(VLCROOT) \
++    $(VLCROOT)/include \
++    $(VLCROOT)/src
 +
-+static void *InitLibrary();
++LOCAL_SRC_FILES := \
++    vmem.c
 +
-+static int Open (vlc_object_t *);
-+static void Close(vlc_object_t *);
++include $(BUILD_STATIC_LIBRARY)
 +
-+vlc_module_begin()
-+    set_shortname("AndroidSurface")
-+    set_category(CAT_VIDEO)
-+    set_subcategory(SUBCAT_VIDEO_VOUT)
-+    set_description(N_("Android Surface video output"))
-+    set_capability("vout display", 25)
-+    add_shortcut("android")
-+    set_callbacks(Open, Close)
-+vlc_module_end()
-+
-+static picture_pool_t *Pool(vout_display_t *, unsigned);
-+static void Display(vout_display_t *, picture_t *, subpicture_t *);
-+static int Control(vout_display_t *, int, va_list);
-+
-+// _ZN7android7Surface4lockEPNS0_11SurfaceInfoEb
-+typedef void (*Surface_lock)(void *, void *, int);
-+// _ZN7android7Surface13unlockAndPostEv
-+typedef void (*Surface_unlockAndPost)(void *);
-+
-+struct vout_display_sys_t {
-+    vout_display_place_t place;
-+    picture_pool_t *p_pool;
-+    void *p_libsfc_or_ui;
-+};
-+
-+typedef struct _SurfaceInfo {
-+    uint32_t    w;
-+    uint32_t    h;
-+    uint32_t    s;
-+    uint32_t    a;
-+    uint32_t    b;
-+    uint32_t    c;
-+    uint32_t    reserved[2];
-+} SurfaceInfo;
-+
-+static Surface_lock s_lock = NULL;
-+static Surface_unlockAndPost s_unlockAndPost = NULL;
-+
-+static void *InitLibrary()
-+{
-+    void *p_library;
-+
-+    p_library = dlopen("libsurfaceflinger_client.so", RTLD_NOW);
-+    if (p_library)
-+    {
-+        s_lock = (Surface_lock)(dlsym(p_library, "_ZN7android7Surface4lockEPNS0_11SurfaceInfoEb"));
-+        s_unlockAndPost = (Surface_unlockAndPost)(dlsym(p_library, "_ZN7android7Surface13unlockAndPostEv"));
-+        if (s_lock && s_unlockAndPost)
-+        {
-+            return p_library;
-+        }
-+        dlclose(p_library);
-+    }
-+    p_library = dlopen("libui.so", RTLD_NOW);
-+    if (p_library)
-+    {
-+        s_lock = (Surface_lock)(dlsym(p_library, "_ZN7android7Surface4lockEPNS0_11SurfaceInfoEb"));
-+        s_unlockAndPost = (Surface_unlockAndPost)(dlsym(p_library, "_ZN7android7Surface13unlockAndPostEv"));
-+        if (s_lock && s_unlockAndPost)
-+        {
-+            return p_library;
-+        }
-+        dlclose(p_library);
-+    }
-+    return NULL;
-+}
-+
-+static int Open(vlc_object_t *p_this)
-+{
-+    vout_display_t *vd = (vout_display_t *) p_this;
-+    void *p_library;
-+    void *p_surface;
-+    SurfaceInfo info;
-+    int i_pixel_format;
-+    char *psz_chroma_format = "RV16";
-+    vout_display_sys_t *sys;
-+
-+    p_library = InitLibrary();
-+    if (!p_library)
-+    {
-+        return VLC_EGENERIC;
-+    }
-+
-+    LockSurface();
-+    p_surface = GetSurface();
-+    if (!p_surface)
-+    {
-+        UnlockSurface();
-+        dlclose(p_library);
-+        return VLC_EGENERIC;
-+    }
-+    s_lock(p_surface, &info, 1);
-+    s_unlockAndPost(p_surface);
-+    UnlockSurface();
-+
-+    vlc_fourcc_t chroma = vlc_fourcc_GetCodecFromString(VIDEO_ES, psz_chroma_format);
-+    if (!chroma || chroma != VLC_CODEC_RGB16)
-+    {
-+        dlclose(p_library);
-+        return VLC_EGENERIC;
-+    }
-+
-+    video_format_t fmt = vd->fmt;
-+    fmt.i_chroma = chroma;
-+    /* rgb32 looks strange and slow */
-+    fmt.i_rmask = 0x0000f800;
-+    fmt.i_gmask = 0x000007e0;
-+    fmt.i_bmask = 0x0000001f;
-+
-+    sys = (struct vout_display_sys_t*) calloc(1, sizeof(struct vout_display_sys_t));
-+    if (!sys)
-+        return VLC_ENOMEM;
-+    sys->p_pool = NULL;
-+    sys->p_libsfc_or_ui = p_library;
-+
-+    vout_display_SendEventFullscreen(vd, false);
-+    vout_display_SendEventDisplaySize(vd, fmt.i_width, fmt.i_height, false);
-+
-+    vd->sys = sys;
-+    vd->fmt = fmt;
-+    vd->pool = Pool;
-+    vd->prepare = NULL;
-+    vd->display = Display;
-+    vd->control = Control;
-+    vd->manage  = NULL;
-+
-+    return VLC_SUCCESS;
-+}
-+
-+static void Close(vlc_object_t *p_this)
-+{
-+    vout_display_t *vd = (vout_display_t *) p_this;
-+    vout_display_sys_t *sys = vd->sys;
-+
-+    if (sys->p_pool)
-+        picture_pool_Delete(sys->p_pool);
-+
-+    free(sys);
-+}
-+
-+static picture_pool_t *Pool(vout_display_t *vd, unsigned count)
-+{
-+    vout_display_sys_t *sys = vd->sys;
-+
-+    if (!sys->p_pool)
-+        sys->p_pool = picture_pool_NewFromFormat(&vd->fmt, count);
-+
-+    return sys->p_pool;
-+}
-+
-+static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture)
-+{
-+    vout_display_sys_t *sys = vd->sys;
-+    void *p_surface;
-+    SurfaceInfo info;
-+    uint32_t sw, sh, dw, dh;
-+    void *p_bits;
-+
-+    VLC_UNUSED(subpicture);
-+
-+    sw = picture->p[0].i_visible_pitch / picture->p[0].i_pixel_pitch;
-+    sh = picture->p[0].i_visible_lines;
-+
-+    LockSurface();
-+
-+    p_surface = GetSurface();
-+    if (!p_surface)
-+        goto bail;
-+
-+    s_lock(p_surface, &info, 1);
-+
-+    dw = info.w;
-+    dh = info.h;
-+    p_bits = (void *)(info.s >= info.w ? info.c : info.b);
-+
-+    if (sw == dw && sh == dh)
-+    {
-+        if (info.s > info.w)
-+        {
-+            for (int i = 0; i < sh; i++) 
-+            {
-+                memcpy(p_bits + i * info.s * 2, ((char *) picture->p[0].p_pixels) + i * picture->p[0].i_pitch, sw * 2);
-+            }
-+        }
-+        else
-+            memcpy(p_bits, picture->p[0].p_pixels, sw * sh * 2);
-+    }
-+
-+    s_unlockAndPost(p_surface);
-+
-+bail:
-+    UnlockSurface();
-+
-+    picture_Release(picture);
-+}
-+
-+static int Control(vout_display_t *vd, int query, va_list args)
-+{
-+    vout_display_sys_t *sys = vd->sys;
-+
-+    switch (query)
-+    {
-+    case VOUT_DISPLAY_HIDE_MOUSE:
-+        return VLC_SUCCESS;
-+    default:
-+        return VLC_EGENERIC;
-+    }
-+
-+    return VLC_EGENERIC;
-+}
-+
+diff -Nurp vlc-a/modules/video_output/androidsurface.c vlc-b/modules/video_output/androidsurface.c
+--- vlc-a/modules/video_output/androidsurface.c	2011-06-29 12:56:12.003810286 +0800
++++ vlc-b/modules/video_output/androidsurface.c	2011-06-29 14:18:39.794434086 +0800
+@@ -161,10 +161,10 @@ static int Open(vlc_object_t *p_this) {
+ 
+     /* Setup chroma */
+     video_format_t fmt = vd->fmt;
+-    fmt.i_chroma = VLC_CODEC_RGB32;
+-    fmt.i_rmask  = 0x000000ff;
+-    fmt.i_gmask  = 0x0000ff00;
+-    fmt.i_bmask  = 0x00ff0000;
++    fmt.i_chroma = VLC_CODEC_RGB16;
++    fmt.i_rmask  = 0x0000f800;
++    fmt.i_gmask  = 0x000007e0;
++    fmt.i_bmask  = 0x0000001f;
+     video_format_FixRgb(&fmt);
+ 
+     /* Create the associated picture */
+@@ -265,7 +265,7 @@ static int  AndroidLockSurface(picture_t
+     }
+ 
+     picture->p->p_pixels = (uint8_t*)info->bits;
+-    picture->p->i_pitch = 4 * info->s;
++    picture->p->i_pitch = 2 * info->s;
+     picture->p->i_lines = info->h;
+ 
+     return VLC_SUCCESS;
 diff -Nurp vlc-a/src/control/core.c vlc-b/src/control/core.c
---- vlc-a/src/control/core.c	2011-06-02 18:33:43.325560811 +0800
-+++ vlc-b/src/control/core.c	2011-06-02 16:38:36.105559471 +0800
+--- vlc-a/src/control/core.c	2011-06-29 12:56:13.194435735 +0800
++++ vlc-b/src/control/core.c	2011-06-29 14:18:39.764436273 +0800
 @@ -38,7 +38,8 @@
  
  static const char nomemstr[] = "Insufficient memory";
@@ -9266,8 +9254,8 @@ diff -Nurp vlc-a/src/control/core.c vlc-b/src/control/core.c
  {
      assert( p_instance != NULL );
 diff -Nurp vlc-a/src/control/error.c vlc-b/src/control/error.c
---- vlc-a/src/control/error.c	2011-06-02 18:33:43.325560811 +0800
-+++ vlc-b/src/control/error.c	2011-06-02 18:40:31.805561135 +0800
+--- vlc-a/src/control/error.c	2011-06-29 12:56:13.194435735 +0800
++++ vlc-b/src/control/error.c	2011-06-29 14:18:39.764436273 +0800
 @@ -25,6 +25,10 @@
  #include <assert.h>
  #include <vlc/libvlc.h>
@@ -9309,8 +9297,8 @@ diff -Nurp vlc-a/src/control/error.c vlc-b/src/control/error.c
      vlc_mutex_unlock (&lock);
  }
 diff -Nurp vlc-a/src/control/libvlc_internal.h vlc-b/src/control/libvlc_internal.h
---- vlc-a/src/control/libvlc_internal.h	2011-06-02 18:33:43.325560811 +0800
-+++ vlc-b/src/control/libvlc_internal.h	2011-06-02 16:41:44.755565040 +0800
+--- vlc-a/src/control/libvlc_internal.h	2011-06-29 12:56:13.194435735 +0800
++++ vlc-b/src/control/libvlc_internal.h	2011-06-29 14:18:39.764436273 +0800
 @@ -44,7 +44,7 @@
   * Internal creation and destruction functions
   ***************************************************************************/
@@ -9321,8 +9309,8 @@ diff -Nurp vlc-a/src/control/libvlc_internal.h vlc-b/src/control/libvlc_internal
  VLC_API void libvlc_InternalDestroy( libvlc_int_t * );
  
 diff -Nurp vlc-a/src/libvlc-module.c vlc-b/src/libvlc-module.c
---- vlc-a/src/libvlc-module.c	2011-06-02 18:33:43.506355055 +0800
-+++ vlc-b/src/libvlc-module.c	2011-06-02 16:37:59.076213159 +0800
+--- vlc-a/src/libvlc-module.c	2011-06-29 12:56:13.274438387 +0800
++++ vlc-b/src/libvlc-module.c	2011-06-29 14:18:39.764436273 +0800
 @@ -27,6 +27,7 @@
  // Pretend we are a builtin module
  #define MODULE_NAME main
@@ -9332,8 +9320,8 @@ diff -Nurp vlc-a/src/libvlc-module.c vlc-b/src/libvlc-module.c
  
  #ifdef HAVE_CONFIG_H
 diff -Nurp vlc-a/src/libvlc.c vlc-b/src/libvlc.c
---- vlc-a/src/libvlc.c	2011-06-02 18:33:43.506355055 +0800
-+++ vlc-b/src/libvlc.c	2011-06-02 16:38:36.115561031 +0800
+--- vlc-a/src/libvlc.c	2011-06-29 12:56:13.284436817 +0800
++++ vlc-b/src/libvlc.c	2011-06-29 14:18:39.774433769 +0800
 @@ -249,7 +249,7 @@ error:
   *  - configuration and commandline parsing
   */
@@ -9354,7 +9342,7 @@ diff -Nurp vlc-a/src/libvlc.c vlc-b/src/libvlc.c
          b_exit = true;
 diff -Nurp vlc-a/src/libvlcjni.c vlc-b/src/libvlcjni.c
 --- vlc-a/src/libvlcjni.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/src/libvlcjni.c	2011-06-02 15:58:57.806807000 +0800
++++ vlc-b/src/libvlcjni.c	2011-06-29 14:18:39.764436273 +0800
 @@ -0,0 +1,527 @@
 +
 +#ifdef HAVE_CONFIG_H
@@ -9407,19 +9395,19 @@ diff -Nurp vlc-a/src/libvlcjni.c vlc-b/src/libvlcjni.c
 +    pthread_mutex_destroy(&s_surface_mutex);
 +}
 +
-+void LockSurface()
++void *jni_LockAndGetAndroidSurface()
 +{
 +    pthread_mutex_lock(&s_surface_mutex);
-+}
-+
-+void *GetSurface()
-+{
 +    return s_surface;
 +}
 +
-+void UnlockSurface()
++void jni_UnlockAndroidSurface()
 +{
 +    pthread_mutex_unlock(&s_surface_mutex);
++}
++
++void jni_SetAndroidSurfaceSize(int width, int height)
++{
 +}
 +
 +JNIEXPORT int Java_org_stagex_danmaku_helper_SystemUtility_setenv(JNIEnv *env, jclass klz, jstring key, jstring val, jboolean overwrite)
@@ -9885,13 +9873,14 @@ diff -Nurp vlc-a/src/libvlcjni.c vlc-b/src/libvlcjni.c
 +
 diff -Nurp vlc-a/src/libvlcjni.h vlc-b/src/libvlcjni.h
 --- vlc-a/src/libvlcjni.h	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/src/libvlcjni.h	2011-06-02 18:27:14.826954335 +0800
-@@ -0,0 +1,81 @@
++++ vlc-b/src/libvlcjni.h	2011-06-29 14:18:39.764436273 +0800
+@@ -0,0 +1,83 @@
 +/* auto generated */
 +vlc_declare_plugin(access_http);
 +vlc_declare_plugin(access_mms);
-+vlc_declare_plugin(aout_android);
-+vlc_declare_plugin(audio_format_neon);
++vlc_declare_plugin(amem);
++vlc_declare_plugin(android_surface);
++vlc_declare_plugin(audiotrack_android);
 +vlc_declare_plugin(avcodec);
 +vlc_declare_plugin(avformat);
 +vlc_declare_plugin(bandlimited_resampler);
@@ -9924,13 +9913,14 @@ diff -Nurp vlc-a/src/libvlcjni.h vlc-b/src/libvlcjni.h
 +vlc_declare_plugin(swscale);
 +vlc_declare_plugin(trivial_mixer);
 +vlc_declare_plugin(ugly_resampler);
-+vlc_declare_plugin(vout_android);
++vlc_declare_plugin(vmem);
 +vlc_declare_plugin(yuv2rgb);
 +const void *vlc_builtins_modules[] = {
 +	vlc_plugin(access_http),
 +	vlc_plugin(access_mms),
-+	vlc_plugin(aout_android),
-+	vlc_plugin(audio_format_neon),
++	vlc_plugin(amem),
++	vlc_plugin(android_surface),
++	vlc_plugin(audiotrack_android),
 +	vlc_plugin(avcodec),
 +	vlc_plugin(avformat),
 +	vlc_plugin(bandlimited_resampler),
@@ -9963,14 +9953,14 @@ diff -Nurp vlc-a/src/libvlcjni.h vlc-b/src/libvlcjni.h
 +	vlc_plugin(swscale),
 +	vlc_plugin(trivial_mixer),
 +	vlc_plugin(ugly_resampler),
-+	vlc_plugin(vout_android),
++	vlc_plugin(vmem),
 +	vlc_plugin(yuv2rgb),
 +	NULL
 +};
 +/* auto generated */
 diff -Nurp vlc-a/src/modules/modules.c vlc-b/src/modules/modules.c
---- vlc-a/src/modules/modules.c	2011-06-02 18:33:43.796254328 +0800
-+++ vlc-b/src/modules/modules.c	2011-06-02 17:54:21.275559979 +0800
+--- vlc-a/src/modules/modules.c	2011-06-29 12:56:13.344436811 +0800
++++ vlc-b/src/modules/modules.c	2011-06-29 14:18:39.774433769 +0800
 @@ -186,13 +186,19 @@ void module_EndBank( vlc_object_t *p_thi
   * \param p_this vlc object structure
   * \return nothing
@@ -9993,8 +9983,8 @@ diff -Nurp vlc-a/src/modules/modules.c vlc-b/src/modules/modules.c
      if( p_bank->i_usage == 1 )
      {
 diff -Nurp vlc-a/src/modules/modules.h vlc-b/src/modules/modules.h
---- vlc-a/src/modules/modules.h	2011-06-02 18:33:43.796254328 +0800
-+++ vlc-b/src/modules/modules.h	2011-06-02 17:55:43.126864557 +0800
+--- vlc-a/src/modules/modules.h	2011-06-29 12:56:13.344436811 +0800
++++ vlc-b/src/modules/modules.h	2011-06-29 14:18:39.774433769 +0800
 @@ -133,8 +133,8 @@ module_t *vlc_submodule_create (module_t
  
  void  module_InitBank( vlc_object_t * );
@@ -10007,11 +9997,11 @@ diff -Nurp vlc-a/src/modules/modules.h vlc-b/src/modules/modules.h
  #define module_EndBank(a,b) module_EndBank(VLC_OBJECT(a), b)
  
 diff -Nurp vlc-a/src/network/udp.c vlc-b/src/network/udp.c
---- vlc-a/src/network/udp.c	2011-06-02 18:33:43.826810136 +0800
-+++ vlc-b/src/network/udp.c	2011-06-02 17:34:23.886249966 +0800
-@@ -375,9 +375,15 @@ net_IPv4Join (vlc_object_t *obj, int fd,
+--- vlc-a/src/network/udp.c	2011-06-29 12:56:13.354436484 +0800
++++ vlc-b/src/network/udp.c	2011-06-29 14:18:39.764436273 +0800
+@@ -370,9 +370,15 @@ net_IPv4Join (vlc_object_t *obj, int fd,
      {
- # ifdef IP_ADD_SOURCE_MEMBERSHIP
+ # if defined( IP_ADD_SOURCE_MEMBERSHIP ) && !defined( __ANDROID__ )
          cmd = IP_ADD_SOURCE_MEMBERSHIP;
 +#ifdef ANDROID
 +        opt.gsr4.imr_multiaddr = grp->sin_addr.s_addr;
@@ -10026,8 +10016,8 @@ diff -Nurp vlc-a/src/network/udp.c vlc-b/src/network/udp.c
  # else
          errno = ENOSYS;
 diff -Nurp vlc-a/src/posix/thread.c vlc-b/src/posix/thread.c
---- vlc-a/src/posix/thread.c	2011-06-02 18:33:43.836812176 +0800
-+++ vlc-b/src/posix/thread.c	2011-06-02 17:41:58.175558111 +0800
+--- vlc-a/src/posix/thread.c	2011-06-29 12:56:13.354436484 +0800
++++ vlc-b/src/posix/thread.c	2011-06-29 14:18:39.774433769 +0800
 @@ -52,6 +52,23 @@
  # include <mach/mach_init.h> /* mach_task_self in semaphores */
  #endif
@@ -10184,6 +10174,6 @@ diff -Nurp vlc-a/src/posix/thread.c vlc-b/src/posix/thread.c
      return ret;
 diff -Nurp vlc-a/src/revision.c vlc-b/src/revision.c
 --- vlc-a/src/revision.c	1970-01-01 08:00:00.000000000 +0800
-+++ vlc-b/src/revision.c	2011-06-02 18:05:44.906162570 +0800
++++ vlc-b/src/revision.c	2011-06-29 14:18:39.774433769 +0800
 @@ -0,0 +1 @@
-+const char psz_vlc_changeset[] = "\\^_^/ - 6436e12260028451198abbc7567a03481e543126";
++const char psz_vlc_changeset[] = "\\^_^/ - 32e84aaf456f758bd536fe08083ad2f2e7b4e7d3";

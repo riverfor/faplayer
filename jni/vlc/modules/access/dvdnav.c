@@ -2,7 +2,7 @@
  * dvdnav.c: DVD module using the dvdnav library.
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: 8cceae4b9a180f2e4256129c656fe8aa27e74aaa $
+ * $Id: b51ee7ef962f03e4099fa2330a5728c268e7135a $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -1482,8 +1482,11 @@ static int ProbeDVD( const char *psz_name )
     }
 #endif
     /* Match extension as the anchor exhibits too many false positives */
-    const size_t len = strlen( psz_name );
-    if( len < 4 || strcasecmp( psz_name + len - 4, ".iso" ) )
+    const char *ext = strrchr( psz_name, '.' );
+    if( ext == NULL )
+        goto bailout;
+    ext++;
+    if( strcasecmp( ext, "iso" ) && strcasecmp( ext, "img" ) )
         goto bailout;
 
     /* Try to find the anchor (2 bytes at LBA 256) */

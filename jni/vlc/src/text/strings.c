@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2008-2009 Rémi Denis-Courmont
- * $Id: 3bc335b629655de2f36d6092bc468a8644d80f3b $
+ * $Id: 830d8c40541c1fa495f76d97381dbfd398ece98d $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Daniel Stranger <vlc at schmaller dot de>
@@ -738,12 +738,12 @@ char *str_format_meta( vlc_object_t *p_object, const char *string )
                     break;
                 case 's':
                     {
-                        char *lang = NULL;
+                        char *psz_lang = NULL;
                         if( p_input )
-                            lang = var_GetNonEmptyString( p_input, "sub-language" );
-                        if( lang == NULL )
-                            lang = strdup( b_empty_if_na ? "" : "-" );
-                        INSERT_STRING( lang );
+                            psz_lang = var_GetNonEmptyString( p_input, "sub-language" );
+                        if( psz_lang == NULL )
+                            psz_lang = strdup( b_empty_if_na ? "" : "-" );
+                        INSERT_STRING( psz_lang );
                         break;
                     }
                 case 't':
@@ -901,19 +901,21 @@ char *str_format_meta( vlc_object_t *p_object, const char *string )
                 case 'Z':
                     if( p_item )
                     {
-                        char *now_playing = input_item_GetNowPlaying( p_item );
-                        if ( now_playing == NULL )
+                        char *psz_now_playing = input_item_GetNowPlaying( p_item );
+                        if ( psz_now_playing == NULL )
                         {
-                            char *temp = input_item_GetTitleFbName( p_item );
-                            if( !EMPTY_STR( temp ) )
+                            char *psz_temp = input_item_GetTitleFbName( p_item );
+                            char *psz_artist = input_item_GetArtist( p_item );
+                            if( !EMPTY_STR( psz_temp ) )
                             {
-                                INSERT_STRING( temp );
-                                INSERT_STRING_NO_FREE( " - " );
+                                INSERT_STRING( psz_temp );
+                                if ( !EMPTY_STR( psz_artist ) )
+                                    INSERT_STRING_NO_FREE( " - " );
                             }
-                            INSERT_STRING( input_item_GetArtist( p_item ) );
+                            INSERT_STRING( psz_artist );
                         }
                         else
-                            INSERT_STRING( now_playing );
+                            INSERT_STRING( psz_now_playing );
                     }
                     break;
 

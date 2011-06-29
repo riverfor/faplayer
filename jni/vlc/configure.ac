@@ -294,21 +294,20 @@ case "${host_os}" in
   *mingw32* | *cygwin* | *wince* | *mingwce*)
     AC_CHECK_TOOL(WINDRES, windres, :)
     AC_CHECK_TOOL(OBJCOPY, objcopy, :)
+    AC_DEFINE([_WIN32_WINNT], 0x0501, [Define to '0x0501' for Windows XP APIs.])
+    AC_DEFINE([_WIN32_IE], 0x0501, [Define to '0x0501' for IE 5.01 (and shell) APIs.])
 
     case "${host_os}" in
       *wince* | *mingwce* | *mingw32ce*)
         SYS=mingwce
         dnl Sadly CeGCC still needs non-wince macros
-        AC_DEFINE([_WIN32_WINNT], 0x0501, [Define to '0x0500' for Windows 2000 APIs.])
         ;;
       *mingw32*)
         SYS=mingw32
-        AC_DEFINE([_WIN32_WINNT], 0x0501, [Define to '0x0500' for Windows XP APIs.])
         ;;
       *cygwin*)
         dnl Check if we are using the mno-cygwin mode in which case we are
         dnl actually dealing with a mingw32 compiler.
-        AC_DEFINE([_WIN32_WINNT], 0x0501, [Define to '0x0501' for Windows XP APIs.])
         AC_EGREP_CPP(yes,
             [#ifdef WIN32
              yes
@@ -402,6 +401,23 @@ case "${build_os}" in
     *)
     ;;
 esac
+
+dnl Android is linux, but a bit different
+AS_IF([test "$SYS" = linux],[
+    AC_MSG_CHECKING([for an Android system])
+    AC_PREPROC_IFELSE([AC_LANG_PROGRAM(
+        [[#ifndef __ANDROID__
+         # error Not Android
+         #endif
+        ]],[[;]])
+    ],[
+      HAVE_ANDROID="1"
+      AC_MSG_RESULT([yes])
+    ],[
+      AC_MSG_RESULT([no])
+    ])
+])
+AM_CONDITIONAL(HAVE_ANDROID, test "${HAVE_ANDROID}" = "1")
 
 dnl
 dnl  Libtool
@@ -550,8 +566,8 @@ dnl Check for system libs needed
 need_libc=false
 
 dnl Check for usual libc functions
-AC_CHECK_FUNCS([daemon fcntl fdopendir fstatvfs fork getenv getpwuid_r gettimeofday isatty lstat memalign mmap openat pread posix_fadvise posix_madvise posix_memalign setlocale stricmp strnicmp uselocale])
-AC_REPLACE_FUNCS([asprintf atof atoll dirfd flockfile getcwd getdelim getpid gmtime_r lldiv localtime_r nrand48 rewind setenv strcasecmp strcasestr strdup strlcpy strncasecmp strndup strnlen strsep strtof strtok_r strtoll swab tdestroy vasprintf])
+AC_CHECK_FUNCS([daemon fcntl fdopendir fstatvfs fork getenv getpwuid_r gettimeofday if_nameindex if_nametoindex isatty lstat memalign mmap openat pread posix_fadvise posix_madvise posix_memalign setlocale stricmp strnicmp uselocale])
+AC_REPLACE_FUNCS([asprintf atof atoll dirfd flockfile fsync getcwd getdelim getpid gmtime_r lldiv localtime_r nrand48 rewind setenv strcasecmp strcasestr strdup strlcpy strncasecmp strndup strnlen strsep strtof strtok_r strtoll swab tdestroy vasprintf])
 AC_CHECK_FUNCS(fdatasync,,
   [AC_DEFINE(fdatasync, fsync, [Alias fdatasync() to fsync() if missing.])
 ])
@@ -661,7 +677,7 @@ AC_SUBST(GNUGETOPT_LIBS)
 
 if test "${SYS}" != "mingw32" -a "${SYS}" != "mingwce"; then
 AC_CHECK_LIB(m,cos,[
-  VLC_ADD_LIBS([adjust wave ripple psychedelic gradient a52tofloat32 dtstofloat32 x264 goom visual panoramix rotate noise grain scene kate flac lua chorus_flanger],[-lm])
+  VLC_ADD_LIBS([adjust wave ripple psychedelic gradient a52tofloat32 dtstofloat32 x264 goom visual panoramix rotate noise grain scene kate flac lua chorus_flanger freetype],[-lm])
 ])
 AC_CHECK_LIB(m,pow,[
   VLC_ADD_LIBS([avcodec avformat access_avio swscale postproc i420_rgb faad twolame equalizer spatializer param_eq libvlccore freetype mod mpc dmo quicktime realvideo qt4],[-lm])
@@ -1759,10 +1775,6 @@ AS_IF([test "${enable_taglib}" != "no"], [
     VLC_ADD_PLUGIN([taglib])
     VLC_ADD_LIBS([taglib],[$TAGLIB_LIBS -lz])
     VLC_ADD_CXXFLAGS([taglib],[$TAGLIB_CFLAGS])
-    AC_LANG_PUSH(C++)
-    AC_CHECK_HEADERS(taglib/mp4coverart.h)
-    AC_CHECK_HEADERS(taglib/apefile.h)
-    AC_LANG_POP(C++)
   ], [
     AC_MSG_WARN(TagLib library not found)])
 ])
@@ -2929,7 +2941,7 @@ PKG_ENABLE_MODULES_VLC([DIRAC], [], [dirac >= 0.10.0], [dirac encoder], [auto])
 dnl
 dnl  schroedinger decoder plugin (for dirac format video)
 dnl
-PKG_ENABLE_MODULES_VLC([SCHROEDINGER], [], [schroedinger-1.0 >= 1.0.10], [dirac decoder and encoder using schroedinger], [auto])
+PKG_ENABLE_MODULES_VLC([SCHROEDINGER], [], [schroedinger-1.0 >= 1.0.6], [dirac decoder using schroedinger], [auto])
 
 dnl
 dnl  PNG decoder module
@@ -3307,6 +3319,19 @@ dnl
 PKG_ENABLE_MODULES_VLC([SVG], [], [librsvg-2.0 >= 2.9.0], [SVG rendering library],[auto])
 
 dnl
+dnl  android surface module
+dnl
+AC_ARG_ENABLE(android-surface,
+  [  --enable-android-surface   Android Surface video output module (default disabled)])
+if test "${enable_android_surface}" = "yes"; then
+  if test "${HAVE_ANDROID}" = "1"; then
+     VLC_ADD_PLUGIN([android_surface])
+     VLC_ADD_LDFLAGS([android_surface], [-ldl])
+  fi
+fi
+
+
+dnl
 dnl  iOS vout module
 dnl
 AC_ARG_ENABLE(ios-vout,
@@ -3617,6 +3642,19 @@ dnl
 PKG_ENABLE_MODULES_VLC([JACK], [jack access_jack], [jack], [JACK audio I/O modules],[auto])
 
 dnl
+dnl  OpenSLES Android
+dnl
+AC_ARG_ENABLE(opensles,
+  [  --enable-opensles       Android OpenSL ES audio module (default disabled)])
+if test "${HAVE_ANDROID}" = "1"; then
+  if test "${enable_opensles}" = "yes"; then
+      AC_CHECK_HEADERS(SLES/OpenSLES.h,
+        [ VLC_ADD_PLUGIN([opensles_android]) ],
+        [ AC_MSG_ERROR([cannot find OpenSLES headers])] )
+  fi
+fi
+
+dnl
 dnl UPnP Plugin (Intel SDK)
 dnl
 PKG_ENABLE_MODULES_VLC([UPNP], [upnp], [libupnp], [Intel UPnp SDK],[auto])
@@ -3666,10 +3704,11 @@ AS_IF([test "${enable_skins2}" = "yes"], [
 
   ], [
     PKG_CHECK_MODULES([XPM], [xpm])
+    PKG_CHECK_MODULES([XINERAMA], [xinerama])
     PKG_CHECK_MODULES([XEXT], [xext])
     VLC_ADD_CPPFLAGS([skins2],[-Imodules/gui/skins2 ${X_CFLAGS} ${XEXT_CFLAGS} ${XPM_CFLAGS} -DX11_SKINS])
     VLC_ADD_CXXFLAGS([skins2],[-O2 -fno-rtti])
-    VLC_ADD_LIBS([skins2],[${X_LIBS} ${X_PRE_LIBS} ${XEXT_LIBS} ${XPM_LIBS} -lX11])
+    VLC_ADD_LIBS([skins2],[${X_LIBS} ${X_PRE_LIBS} ${XEXT_LIBS} ${XPM_LIBS} ${XINERAMA_LIBS} -lX11])
 
   ])
   VLC_ADD_PLUGIN([skins2])
@@ -4449,16 +4488,6 @@ echo "vlc aliases           :${ALIASES}"
 else
 echo "build vlc executable  : no"
 fi
-echo "plugins/bindings      :${PLUGINS_BINDINGS}
-
+echo "
 You can tune the compiler flags in vlc-config.
-To build vlc and its plugins, type \`./compile' or \`$USE_MAKE_OR_GMAKE'.
-"
-if test "x$ac_ld_does_not_support_text_reloc" = "xyes"; then
-   echo ""
-   echo "Warning: Due to a bug in ld, mmx/sse support has been"
-   echo "         turned off."
-   echo "         FFmpeg will be REALLY slow."
-   echo "         VLC WILL NOT PERFORM AS EXPECTED."
-   echo ""
-fi
+To build vlc and its plugins, type \`./compile' or \`$USE_MAKE_OR_GMAKE'."

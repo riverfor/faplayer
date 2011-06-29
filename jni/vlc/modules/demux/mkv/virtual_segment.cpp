@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: 836f18de98d5d05489896b3ca939379c222733ed $
+ * $Id: da65f1803308506d8e53766a8a126ac8944d0f86 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -263,7 +263,7 @@ chapter_item_c *virtual_segment_c::FindChapter( int64_t i_find_uid )
     return NULL;
 }
 
-void virtual_segment_c::AddSegments(std::vector<matroska_segment_c *> segments)
+void virtual_segment_c::AddSegments( const std::vector<matroska_segment_c *> &segments)
 {
     // fill our current virtual segment with all hard linked segments
     size_t i_preloaded;

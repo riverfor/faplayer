@@ -2,7 +2,7 @@
  * common.h: Windows video output header file
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 0a8fbaedf3b5d37012391d09b9aa04760d1e52c8 $
+ * $Id: e7bed61c84c0ab9db9b2dd0c191dea8bcda000b6 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Damien Fouilleul <damienf@videolan.org>
@@ -182,6 +182,7 @@ struct vout_display_sys_t
     // scene objects
     LPDIRECT3DTEXTURE9      d3dtex;
     LPDIRECT3DVERTEXBUFFER9 d3dvtc;
+    D3DFORMAT               d3dregion_format;
     int                     d3dregion_count;
     struct d3d_region_t     *d3dregion;
 

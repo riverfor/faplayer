@@ -2,7 +2,7 @@
  * fsc_window.cpp
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: d490f67611ab4538424f649d94f45de612c21424 $
+ * $Id: ed368af0aa15f25a14c2956e0b9a3b4c3653a752 $
  *
  * Author: Erwan Tulou      <erwan10 at videolan Dot Org>
  *
@@ -166,6 +166,16 @@ void FscWindow::innerHide()
     m_count = 0;
 
     TopWindow::innerHide();
+}
+
+
+void FscWindow::moveTo( int x, int y, int width, int height )
+{
+    // relocate the fs controller
+    // (centered horizontally and lowered vertically with a 3% margin)
+    int x_fsc = x + ( width - getWidth() ) / 2;
+    int y_fsc = y + height - getHeight() - height * 3 / 100;
+    move( x_fsc, y_fsc );
 }
 
 

@@ -2,7 +2,7 @@
  * var.c: object variables for input thread
  *****************************************************************************
  * Copyright (C) 2004-2007 the VideoLAN team
- * $Id: 83510c8c3cfb99b88e8793e94ffe049b477c2e1f $
+ * $Id: f1fbc3cb58b9bff2ac36d99c94d86a1c3bfb02a4 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -137,8 +137,6 @@ void input_ControlVarInit ( input_thread_t *p_input )
 
     /* Rate */
     var_Create( p_input, "rate", VLC_VAR_FLOAT | VLC_VAR_DOINHERIT );
-    val.f_float = (float)INPUT_RATE_DEFAULT / (float)p_input->p->i_rate;
-    var_Change( p_input, "rate", VLC_VAR_SETVALUE, &val, NULL );
 
     var_Create( p_input, "frame-next", VLC_VAR_VOID );
 

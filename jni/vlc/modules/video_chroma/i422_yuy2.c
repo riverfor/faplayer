@@ -2,7 +2,7 @@
  * i422_yuy2.c : Planar YUV 4:2:2 to Packed YUV conversion module for vlc
  *****************************************************************************
  * Copyright (C) 2000, 2001 the VideoLAN team
- * $Id: 142057fd684ecbd66590bf824ed0a7c2c324cf4f $
+ * $Id: 74eb2dc6955009ce0aa3ff5e24edbcc5004d9eb0 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Damien Fouilleul <damienf@videolan.org>
@@ -120,6 +120,7 @@ static int Activate( vlc_object_t *p_this )
                     p_filter->pf_video_filter = I422_UYVY_Filter;
                     break;
 
+                case VLC_FOURCC('I','U','Y','V'):
                     p_filter->pf_video_filter = I422_IUYV_Filter;
                     break;
 

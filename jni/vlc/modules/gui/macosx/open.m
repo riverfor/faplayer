@@ -2,7 +2,7 @@
  * open.m: Open dialogues for VLC's MacOS X port
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: 06bd7f6d317fdb4130baef03eb15292d2c0d9524 $
+ * $Id: 62e52bf485cb5add1948d8a99c0324733b62bd15 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -630,7 +630,8 @@ static VLCOpen *_o_sharedMainInstance = nil;
 
         [self setMRL: o_mrl_string];
     }
-    [self setMRL: @""];
+    else
+        [self setMRL: @""];
 }
 
 - (IBAction)openFileBrowse:(id)sender

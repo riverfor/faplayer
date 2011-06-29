@@ -2,7 +2,7 @@
  * mixer.c : audio output mixing operations
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id: 287df6422a4e0af04126d56306d9751b05c7817f $
+ * $Id: 424f42ce283c67a8c66e4eb6e7fda52947a57aa0 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -58,7 +58,7 @@ int aout_MixerNew( aout_instance_t * p_aout )
     p_mixer->module = module_need( p_mixer, "audio mixer", NULL, false );
     if( !p_mixer->module )
     {
-        msg_Err( p_aout, "no suitable audio mixer" );
+        msg_Err( p_mixer, "no suitable audio mixer" );
         vlc_object_release( p_mixer );
         return VLC_EGENERIC;
     }
@@ -94,15 +94,10 @@ void aout_MixerDelete( aout_instance_t * p_aout )
 static int MixBuffer( aout_instance_t * p_aout, float volume )
 {
     aout_mixer_t *p_mixer = p_aout->p_mixer;
-
-    assert( p_aout->p_input != NULL );
-
-    aout_input_t *p_input = p_aout->p_input;
-    if( p_input->b_paused )
-        return -1;
-
-    aout_fifo_t * p_fifo = &p_input->mixer.fifo;
+    aout_mixer_input_t *p_input = p_mixer->input;
+    aout_fifo_t *p_fifo = &p_input->fifo;
     mtime_t now = mdate();
+    const unsigned samples = p_aout->output.i_nb_samples;
 
     aout_lock_input_fifos( p_aout );
     aout_lock_output_fifo( p_aout );
@@ -116,62 +111,46 @@ static int MixBuffer( aout_instance_t * p_aout, float volume )
         /* The output is _very_ late. This can only happen if the user
          * pauses the stream (or if the decoder is buggy, which cannot
          * happen :). */
-        msg_Warn( p_aout, "output PTS is out of range (%"PRId64"), clearing out",
+        msg_Warn( p_mixer, "output PTS is out of range (%"PRId64"), clearing out",
                   mdate() - start_date );
-        aout_FifoSet( p_aout, &p_aout->output.fifo, 0 );
+        aout_FifoSet( &p_aout->output.fifo, 0 );
         date_Set( &exact_start_date, 0 );
         start_date = 0;
     }
 
     aout_unlock_output_fifo( p_aout );
 
-    /* See if we have enough data to prepare a new buffer for the audio
-     * output. First : start date. */
+    /* See if we have enough data to prepare a new buffer for the audio output. */
+    aout_buffer_t *p_buffer = p_fifo->p_first;
+    if( p_buffer == NULL )
+        goto giveup;
+
+    /* Find the earliest start date available. */
     if ( !start_date )
     {
-        /* Find the latest start date available. */
-        aout_buffer_t *p_buffer;
-        for( ;; )
-        {
-            p_buffer = p_fifo->p_first;
-            if( p_buffer == NULL )
-                goto giveup;
-            if( p_buffer->i_pts >= now )
-                break;
-
-            msg_Warn( p_aout, "input PTS is out of range (%"PRId64"), "
-                      "trashing", now - p_buffer->i_pts );
-            aout_BufferFree( aout_FifoPop( p_aout, p_fifo ) );
-            p_input->mixer.begin = NULL;
-        }
-
-        date_Set( &exact_start_date, p_buffer->i_pts );
         start_date = p_buffer->i_pts;
+        date_Set( &exact_start_date, start_date );
     }
-
-    date_Increment( &exact_start_date, p_aout->output.i_nb_samples );
-    mtime_t end_date = date_Get( &exact_start_date );
+    /* Compute the end date for the new buffer. */
+    mtime_t end_date = date_Increment( &exact_start_date, samples );
 
     /* Check that start_date is available. */
-    aout_buffer_t *p_buffer = p_fifo->p_first;
     mtime_t prev_date;
-
     for( ;; )
     {
-        if( p_buffer == NULL )
-            goto giveup;
-
         /* Check for the continuity of start_date */
         prev_date = p_buffer->i_pts + p_buffer->i_length;
         if( prev_date >= start_date - 1 )
             break;
         /* We authorize a +-1 because rounding errors get compensated
          * regularly. */
-        msg_Warn( p_aout, "the mixer got a packet in the past (%"PRId64")",
+        msg_Warn( p_mixer, "the mixer got a packet in the past (%"PRId64")",
                   start_date - prev_date );
-        aout_BufferFree( aout_FifoPop( p_aout, p_fifo ) );
-        p_input->mixer.begin = NULL;
+        aout_BufferFree( aout_FifoPop( p_fifo ) );
+
         p_buffer = p_fifo->p_first;
+        if( p_buffer == NULL )
+            goto giveup;
     }
 
     /* Check that we have enough samples. */
@@ -184,63 +163,95 @@ static int MixBuffer( aout_instance_t * p_aout, float volume )
         /* Check that all buffers are contiguous. */
         if( prev_date != p_buffer->i_pts )
         {
-            msg_Warn( p_aout,
+            msg_Warn( p_mixer,
                       "buffer hole, dropping packets (%"PRId64")",
                       p_buffer->i_pts - prev_date );
 
             aout_buffer_t *p_deleted;
             while( (p_deleted = p_fifo->p_first) != p_buffer )
-                aout_BufferFree( aout_FifoPop( p_aout, p_fifo ) );
+                aout_BufferFree( aout_FifoPop( p_fifo ) );
         }
 
         prev_date = p_buffer->i_pts + p_buffer->i_length;
     }
 
-    p_buffer = p_fifo->p_first;
     if( !AOUT_FMT_NON_LINEAR( &p_mixer->fmt ) )
     {
+        p_buffer = p_fifo->p_first;
+
         /* Additionally check that p_first_byte_to_mix is well located. */
-        mtime_t i_buffer = (start_date - p_buffer->i_pts)
-                         * p_mixer->fmt.i_bytes_per_frame
-                         * p_mixer->fmt.i_rate
-                         / p_mixer->fmt.i_frame_length
-                         / CLOCK_FREQ;
-        if( p_input->mixer.begin == NULL )
-            p_input->mixer.begin = p_buffer->p_buffer;
-
-        ptrdiff_t bytes = p_input->mixer.begin - p_buffer->p_buffer;
-        if( !((i_buffer + p_mixer->fmt.i_bytes_per_frame > bytes)
-         && (i_buffer < p_mixer->fmt.i_bytes_per_frame + bytes)) )
+        const unsigned framesize = p_mixer->fmt.i_bytes_per_frame;
+        ssize_t delta = (start_date - p_buffer->i_pts)
+                      * p_mixer->fmt.i_rate / CLOCK_FREQ;
+        if( delta != 0 )
+            msg_Warn( p_mixer, "mixer start is not output end (%zd)", delta );
+        if( delta < 0 )
         {
-            msg_Warn( p_aout, "mixer start is not output start (%"PRId64")",
-                      i_buffer - bytes );
+            /* Is it really the best way to do it ? */
+            aout_lock_output_fifo( p_aout );
+            aout_FifoSet( &p_aout->output.fifo, 0 );
+            date_Set( &exact_start_date, 0 );
+            aout_unlock_output_fifo( p_aout );
+            goto giveup;
+        }
+        if( delta > 0 )
+        {
+            p_buffer->i_nb_samples -= delta;
+            p_buffer->i_pts += delta * CLOCK_FREQ / p_mixer->fmt.i_rate;
+            p_buffer->i_length -= delta * CLOCK_FREQ / p_mixer->fmt.i_rate;
+            delta *= framesize;
+            p_buffer->p_buffer += delta;
+            p_buffer->i_buffer -= delta;
+        }
 
-            /* Round to the nearest multiple */
-            i_buffer /= p_mixer->fmt.i_bytes_per_frame;
-            i_buffer *= p_mixer->fmt.i_bytes_per_frame;
-            if( i_buffer < 0 )
+        /* Build packet with adequate number of samples */
+        unsigned needed = samples * framesize;
+        p_buffer = block_Alloc( needed );
+        if( unlikely(p_buffer == NULL) )
+            /* XXX: should free input buffers */
+            goto giveup;
+        p_buffer->i_nb_samples = samples;
+
+        for( uint8_t *p_out = p_buffer->p_buffer; needed > 0; )
+        {
+            aout_buffer_t *p_inbuf = p_fifo->p_first;
+            if( unlikely(p_inbuf == NULL) )
             {
-                /* Is it really the best way to do it ? */
-                aout_lock_output_fifo( p_aout );
-                aout_FifoSet( p_aout, &p_aout->output.fifo, 0 );
-                date_Set( &exact_start_date, 0 );
-                aout_unlock_output_fifo( p_aout );
-                goto giveup;
+                msg_Err( p_mixer, "internal amix error" );
+                vlc_memset( p_out, 0, needed );
+                break;
             }
-            p_input->mixer.begin = p_buffer->p_buffer + i_buffer;
+
+            const uint8_t *p_in = p_inbuf->p_buffer;
+            size_t avail = p_inbuf->i_nb_samples * framesize;
+            if( avail > needed )
+            {
+                vlc_memcpy( p_out, p_in, needed );
+                p_fifo->p_first->p_buffer += needed;
+                p_fifo->p_first->i_buffer -= needed;
+                needed /= framesize;
+                p_fifo->p_first->i_nb_samples -= needed;
+                p_fifo->p_first->i_pts += needed * CLOCK_FREQ / p_mixer->fmt.i_rate;
+                p_fifo->p_first->i_length -= needed * CLOCK_FREQ / p_mixer->fmt.i_rate;
+                break;
+            }
+
+            vlc_memcpy( p_out, p_in, avail );
+            needed -= avail;
+            p_out += avail;
+            /* Next buffer */
+            aout_BufferFree( aout_FifoPop( p_fifo ) );
         }
     }
-
-    /* Run the mixer. */
-    p_buffer = p_mixer->mix( p_aout->p_mixer, p_aout->output.i_nb_samples,
-                             volume );
-    aout_unlock_input_fifos( p_aout );
-
-    if( unlikely(p_buffer == NULL) )
-        return -1;
+    else
+        p_buffer = aout_FifoPop( p_fifo );
 
     p_buffer->i_pts = start_date;
     p_buffer->i_length = end_date - start_date;
+
+    /* Run the mixer. */
+    p_mixer->mix( p_mixer, p_buffer, volume );
+    aout_unlock_input_fifos( p_aout );
     aout_OutputPlay( p_aout, p_buffer );
     return 0;
 

@@ -2,7 +2,7 @@
  * media_list_player.c: libvlc new API media_list player functions
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: a6d509869119c9eb33c94a04ca67d8ece623fa5d $
+ * $Id: 343866bb75eea21dd4725eb72aa6009429fde6c8 $
  *
  * Authors: Pierre d'Herbemont <pdherbemont # videolan.org>
  *
@@ -517,6 +517,19 @@ void libvlc_media_list_player_release(libvlc_media_list_player_t * p_mlp)
     free(p_mlp->current_playing_item_path);
     libvlc_release(p_mlp->p_libvlc_instance);
     free(p_mlp);
+}
+
+/**************************************************************************
+ *        retain (Public)
+ **************************************************************************/
+void libvlc_media_list_player_retain(libvlc_media_list_player_t * p_mlp)
+{
+    if (!p_mlp)
+        return;
+
+    lock(p_mlp);
+    p_mlp->i_refcount++;
+    unlock(p_mlp);
 }
 
 /**************************************************************************

@@ -1,10 +1,11 @@
 /*****************************************************************************
  * misc.h: code not specific to vlc
  *****************************************************************************
- * Copyright (C) 2003-2007 the VideoLAN team
- * $Id: 8569d27cd3ce86821012c5c76ab945c578d35cee $
+ * Copyright (C) 2003-2011 the VideoLAN team
+ * $Id: 99dcab95ccb8f858f13690aaabf16d2e6eb72c77 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
+ *          Felix Paul Kühne <fkuehne at videolan dot org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,6 +132,19 @@
 @end
 
 /*****************************************************************************
+ * TimeLineSlider
+ *****************************************************************************/
+
+@interface TimeLineSlider : NSSlider
+{
+}
+
+- (void)drawRect:(NSRect)rect;
+- (void)drawKnobInRect:(NSRect)knobRect;
+
+@end
+
+/*****************************************************************************
  * ITSlider
  *****************************************************************************/
 
@@ -138,17 +152,7 @@
 {
 }
 
-@end
-
-/*****************************************************************************
- * ITSliderCell
- *****************************************************************************/
-
-@interface ITSliderCell : NSSliderCell
-{
-    NSImage *_knobOff;
-    NSImage *_knobOn;
-    BOOL b_mouse_down;
-}
+- (void)drawRect:(NSRect)rect;
+- (void)drawKnobInRect:(NSRect)knobRect;
 
 @end

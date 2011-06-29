@@ -2,7 +2,7 @@
  * live555.cpp : LIVE555 Streaming Media support.
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id: a59a23d69bb161640d7490806bf3d06388157206 $
+ * $Id: 9fc040bcedec6153e0eed2f63ae9d3cdb9c61c08 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Derk-Jan Hartman <hartman at videolan. org>
@@ -47,7 +47,6 @@
 #include <vlc_url.h>
 #include <vlc_strings.h>
 
-#include <iostream>
 #include <limits.h>
 #include <assert.h>
 

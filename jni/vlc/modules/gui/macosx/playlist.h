@@ -2,7 +2,7 @@
  * playlist.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2006 the VideoLAN team
- * $Id: 96cee08f15b3f482fe5d709d0413bc106f0c0a85 $
+ * $Id: 77349edb24c4f9b71892f8cf9c1b77073d09e182 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videolan dot org>
@@ -77,8 +77,6 @@
     IBOutlet id o_btn_playlist;
     IBOutlet id o_playlist_view;
     IBOutlet id o_sidebar;
-    IBOutlet id o_status_field;
-    IBOutlet id o_status_field_embed;
     IBOutlet id o_search_field;
     IBOutlet id o_search_field_other;
     IBOutlet id o_mi_save_playlist;
@@ -118,10 +116,6 @@
     BOOL b_selected_item_met;
     BOOL b_isSortDescending;
     id o_tc_sortColumn;
-
-    /* "add node" button and menu entry */
-    IBOutlet id o_mi_addNode;
-    IBOutlet id o_btn_addNode;
 }
 
 - (void)searchfieldChanged:(NSNotification *)o_notification;
@@ -147,8 +141,6 @@
 - (IBAction)sortNodeByName:(id)sender;
 - (IBAction)sortNodeByAuthor:(id)sender;
 - (IBAction)recursiveExpandNode:(id)sender;
-
-- (IBAction)addNode:(id)sender;
 
 - (void)playSidebarItem:(id)item;
 - (id)playingItem;

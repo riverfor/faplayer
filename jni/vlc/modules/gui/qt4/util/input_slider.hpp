@@ -2,7 +2,7 @@
  * input_slider.hpp : VolumeSlider and SeekSlider
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: 49dcc3d34159dbc96cf71392bb77a0a566724eb5 $
+ * $Id: ed3d83ae80807de51ff59e6d3f806094266e4444 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -66,9 +66,11 @@ private:
     char psz_length[MSTRTIME_MAX_SIZE]; /* Used for the ToolTip */
     QTimer *seekLimitTimer;
     TimeTooltip *mTimeTooltip;
+    float f_buffering;
 
 public slots:
     void setPosition( float, int64_t, int );
+    void updateBuffering( float );
 
 private slots:
     void startSeekTimer();

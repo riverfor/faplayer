@@ -2,7 +2,7 @@
  * item.c : Playlist item creation/deletion/add/removal functions
  *****************************************************************************
  * Copyright (C) 1999-2007 the VideoLAN team
- * $Id: 29940fc0962b098212cacd45c39b6ee3e293122d $
+ * $Id: fd975d1bebd3c286fc78379e0939071e9fb280e0 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -64,7 +64,7 @@ static void input_item_add_subitem_tree ( const vlc_event_t * p_event,
     assert( p_item != NULL );
 
     bool b_current = get_current_status_item( p_playlist ) == p_item;
-    bool b_autostart = var_CreateGetBool( p_playlist, "playlist-autostart" );
+    bool b_autostart = var_GetBool( p_playlist, "playlist-autostart" );
     bool b_stop = p_item->i_flags & PLAYLIST_SUBITEM_STOP_FLAG;
     bool b_flat = false;
 

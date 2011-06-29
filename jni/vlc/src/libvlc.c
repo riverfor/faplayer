@@ -2,7 +2,7 @@
  * libvlc.c: libvlc instances creation and deletion, interfaces handling
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: 6097529d069020467fa11de3a42959df6b43e81b $
+ * $Id: 4aa27ffe0c4892563ddd505f4e08ae27cdd10309 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -145,7 +145,7 @@ void *vlc_hold (gc_object_t * p_gc)
  */
 void vlc_release (gc_object_t *p_gc)
 {
-    unsigned refs;
+    uintptr_t refs;
 
     assert( p_gc );
     refs = vlc_atomic_dec (&p_gc->refs);
@@ -268,7 +268,7 @@ int libvlc_InternalInit( libvlc_int_t *p_libvlc, int i_argc,
 #endif
 
     /* System specific initialization code */
-    system_Init( p_libvlc, &i_argc, ppsz_argv );
+    system_Init();
 
     /*
      * Support for gettext

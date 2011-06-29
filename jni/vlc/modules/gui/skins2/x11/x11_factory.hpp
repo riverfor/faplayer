@@ -2,7 +2,7 @@
  * x11_factory.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: e6d98c90b8cabba8732e1be3909a158c3e62e87b $
+ * $Id: 3660bc1f71e6f59b474d8d973cb56d24fd9e7469 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -127,6 +127,16 @@ public:
     virtual int getScreenWidth() const;
     virtual int getScreenHeight() const;
 
+    /// Get Monitor Information
+    virtual void getMonitorInfo( const GenericWindow &rWindow,
+                                 int* x, int* y,
+                                 int* width, int* height ) const;
+    virtual void getMonitorInfo( int numScreen,
+                                 int* x, int* y,
+                                 int* width, int* height ) const;
+
+    virtual void getDefaultGeometry( int* width, int* height ) const;
+
     /// Get the work area (screen area without taskbars)
     virtual SkinsRect getWorkArea() const;
 
@@ -152,6 +162,8 @@ private:
     const string m_dirSep;
     /// Resource path
     list<string> m_resourcePath;
+    /// Monitor geometry
+    int m_screenWidth, m_screenHeight;
 };
 
 #endif

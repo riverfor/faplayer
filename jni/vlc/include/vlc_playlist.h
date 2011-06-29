@@ -2,7 +2,7 @@
  * vlc_playlist.h : Playlist functions
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 96b9e6337b92fe64fbb3d8667ca2cac074a2e118 $
+ * $Id: 16ec6c781772e81f290817de3ac0a5e815e8b845 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -324,7 +324,7 @@ VLC_API int playlist_ServicesDiscoveryAdd(playlist_t *, const char *);
 /** Remove a services discovery module by name */
 VLC_API int playlist_ServicesDiscoveryRemove(playlist_t *, const char *);
 /** Check whether a given SD is loaded */
-VLC_API bool playlist_IsServicesDiscoveryLoaded( playlist_t *,const char *);
+VLC_API bool playlist_IsServicesDiscoveryLoaded( playlist_t *,const char *) VLC_DEPRECATED;
 /** Query a services discovery */
 VLC_API int playlist_ServicesDiscoveryControl( playlist_t *, const char *, int, ... );
 

@@ -1,8 +1,9 @@
 /* auto generated */
 vlc_declare_plugin(access_http);
 vlc_declare_plugin(access_mms);
-vlc_declare_plugin(aout_android);
-vlc_declare_plugin(audio_format_neon);
+vlc_declare_plugin(amem);
+vlc_declare_plugin(android_surface);
+vlc_declare_plugin(audiotrack_android);
 vlc_declare_plugin(avcodec);
 vlc_declare_plugin(avformat);
 vlc_declare_plugin(bandlimited_resampler);
@@ -35,13 +36,14 @@ vlc_declare_plugin(subtitle);
 vlc_declare_plugin(swscale);
 vlc_declare_plugin(trivial_mixer);
 vlc_declare_plugin(ugly_resampler);
-vlc_declare_plugin(vout_android);
+vlc_declare_plugin(vmem);
 vlc_declare_plugin(yuv2rgb);
 const void *vlc_builtins_modules[] = {
 	vlc_plugin(access_http),
 	vlc_plugin(access_mms),
-	vlc_plugin(aout_android),
-	vlc_plugin(audio_format_neon),
+	vlc_plugin(amem),
+	vlc_plugin(android_surface),
+	vlc_plugin(audiotrack_android),
 	vlc_plugin(avcodec),
 	vlc_plugin(avformat),
 	vlc_plugin(bandlimited_resampler),
@@ -74,7 +76,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(swscale),
 	vlc_plugin(trivial_mixer),
 	vlc_plugin(ugly_resampler),
-	vlc_plugin(vout_android),
+	vlc_plugin(vmem),
 	vlc_plugin(yuv2rgb),
 	NULL
 };

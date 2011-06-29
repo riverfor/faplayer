@@ -2,7 +2,7 @@
  * xspf.c : XSPF playlist import functions
  *******************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: a8a4e9071214049c5f4803680ca22ff5378f0a8f $
+ * $Id: 464286ecf604a48812da7f5fdfce59ef690340ab $
  *
  * Authors: Daniel Stränger <vlc at schmaller dot de>
  *          Yoann Peronneau <yoann@videolan.org>
@@ -427,7 +427,8 @@ static bool parse_track_node COMPLEX_INTERFACE
                     else
                         free( psz_uri );
 
-                    if( p_sys->i_track_id < 0 )
+                    if( p_sys->i_track_id < 0
+                     || p_sys->i_track_id >= (SIZE_MAX / sizeof(p_new_input)) )
                     {
                         input_item_node_AppendNode( p_input_node, p_new_node );
                         vlc_gc_decref( p_new_input );
@@ -440,10 +441,20 @@ static bool parse_track_node COMPLEX_INTERFACE
                         pp = realloc( p_sys->pp_tracklist,
                             (p_sys->i_track_id + 1) * sizeof(*pp) );
                         if( !pp )
+                        {
+                            vlc_gc_decref( p_new_input );
                             return false;
+                        }
                         p_sys->pp_tracklist = pp;
                         while( p_sys->i_track_id >= p_sys->i_tracklist_entries )
                             pp[p_sys->i_tracklist_entries++] = NULL;
+                    }
+                    else if( p_sys->pp_tracklist[p_sys->i_track_id] != NULL )
+                    {
+                        msg_Err( p_demux, "track ID %d collision",
+                                 p_sys->i_track_id );
+                        vlc_gc_decref( p_new_input );
+                        return false;
                     }
 
                     p_sys->pp_tracklist[ p_sys->i_track_id ] = p_new_input;

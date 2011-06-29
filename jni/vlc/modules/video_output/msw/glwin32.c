@@ -2,7 +2,7 @@
  * glwin32.c: Windows OpenGL provider
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: fb7ec3046fc0670ed168dc75391a8cb1b3e275ba $
+ * $Id: 719909454a59c065a6ac58b5f35198d635d8f3bf $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -39,6 +39,7 @@
 #endif
 
 #include "../opengl.h"
+#include <GL/wglew.h>
 #include "common.h"
 
 /*****************************************************************************
@@ -107,6 +108,15 @@ static int Open(vlc_object_t *object)
     /* Create and enable the render context */
     sys->hGLRC = wglCreateContext(sys->hGLDC);
     wglMakeCurrent(sys->hGLDC, sys->hGLRC);
+
+    const char *extensions = (const char*)glGetString(GL_EXTENSIONS);
+#ifdef WGL_EXT_swap_control
+    if (HasExtension(extensions, "WGL_EXT_swap_control")) {
+        PFNWGLSWAPINTERVALEXTPROC SwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+        if (SwapIntervalEXT)
+            SwapIntervalEXT(1);
+    }
+#endif
 
     /* */
     sys->gl.lock = NULL;

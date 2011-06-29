@@ -2,7 +2,7 @@
  * video.c: video decoder using the ffmpeg library
  *****************************************************************************
  * Copyright (C) 1999-2001 the VideoLAN team
- * $Id: 38e79643e8cc2bfc319d67253cd0cb42d832e88a $
+ * $Id: 86266c4691632cf5cb5b8a346586057f405bf295 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -77,12 +77,14 @@ struct decoder_sys_t
     int     i_late_frames;
     mtime_t i_late_frames_start;
 
+#ifdef ANDROID
     int i_decode_called_count;
     mtime_t i_decode_total_time;
     mtime_t i_decode_average_time;
     mtime_t i_decode_last_time;
     mtime_t i_display_date_head;
     int i_decode_may_suck;
+#endif
 
     /* for direct rendering */
     bool b_direct_rendering;
@@ -350,13 +352,20 @@ int InitVideoDec( decoder_t *p_dec, AVCodecContext *p_context,
 
 #ifdef HAVE_AVCODEC_VA
     const bool b_use_hw = var_CreateGetBool( p_dec, "ffmpeg-hw" );
-    if( b_use_hw )
+    if( b_use_hw &&
+        (i_codec_id == CODEC_ID_MPEG1VIDEO || i_codec_id == CODEC_ID_MPEG2VIDEO ||
+         i_codec_id == CODEC_ID_MPEG4 ||
+         i_codec_id == CODEC_ID_H264 ||
+         i_codec_id == CODEC_ID_VC1 || i_codec_id == CODEC_ID_WMV3) )
     {
 #ifdef HAVE_AVCODEC_MT
-        msg_Err( p_dec, "ffmpeg-hw is not compatible with ffmpeg-mt" );
-#else
-        p_sys->p_context->get_format = ffmpeg_GetFormat;
+        if( p_sys->p_context->thread_type & FF_THREAD_FRAME )
+        {
+            msg_Warn( p_dec, "threaded frame decoding is not compatible with ffmpeg-hw, disabled" );
+            p_sys->p_context->thread_type &= ~FF_THREAD_FRAME;
+        }
 #endif
+        p_sys->p_context->get_format = ffmpeg_GetFormat;
     }
 #endif
 
@@ -419,12 +428,14 @@ int InitVideoDec( decoder_t *p_dec, AVCodecContext *p_context,
         return VLC_EGENERIC;
     }
 
+#ifdef ANDROID
     p_sys->i_decode_called_count = 0;
     p_sys->i_decode_total_time = 0;
     p_sys->i_decode_average_time = 0;
     p_sys->i_decode_last_time = 0;
     p_sys->i_display_date_head = 0;
     p_sys->i_decode_may_suck = 0;
+#endif
 
     return VLC_SUCCESS;
 }
@@ -481,7 +492,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         p_sys->i_late_frames = 0;
     }
 
-#if 0
+#ifndef ANDROID
     if( !p_dec->b_pace_control && (p_sys->i_late_frames > 0) &&
         (mdate() - p_sys->i_late_frames_start > INT64_C(5000000)) )
     {
@@ -543,7 +554,6 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
                                                   AVDISCARD_NONREF );
 #endif
     }
-
 #else
     mtime_t i_time_now = mdate();
     mtime_t i_time_adv = p_sys->i_display_date_head > 0 ? (p_sys->i_display_date_head - p_sys->i_decode_average_time - i_time_now) : 0;
@@ -602,7 +612,9 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
 
         post_mt( p_sys );
 
+#ifdef ANDROID
         mtime_t i_decode_start = mdate();
+#endif
 
         av_init_packet( &pkt );
         pkt.data = p_block->p_buffer;
@@ -621,12 +633,14 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
                                            &b_gotpicture, &pkt );
         }
 
+#ifdef ANDROID
         mtime_t i_decode_end = mdate();
         mtime_t i_decode_time = i_decode_end - i_decode_start;
         p_sys->i_decode_called_count += 1;
         p_sys->i_decode_total_time += i_decode_time;
         p_sys->i_decode_average_time = (p_sys->i_decode_total_time / p_sys->i_decode_called_count);
         p_sys->i_decode_last_time = i_decode_time;
+#endif
 
         wait_mt( p_sys );
 
@@ -730,7 +744,9 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
             i_display_date = decoder_GetDisplayDate( p_dec, i_pts );
 
+#ifdef ANDROID
         p_sys->i_display_date_head = i_display_date;
+#endif
 
         if( i_display_date > 0 && i_display_date <= mdate() )
         {
@@ -1014,13 +1030,12 @@ static int ffmpeg_GetFrameBuf( struct AVCodecContext *p_context,
     }
 
     wait_mt( p_sys );
-
     /* Some codecs set pix_fmt only after the 1st frame has been decoded,
      * so we need to check for direct rendering again. */
 
-    int i_width = p_sys->p_context->width;
-    int i_height = p_sys->p_context->height;
-    avcodec_align_dimensions( p_sys->p_context, &i_width, &i_height );
+    int i_width = p_context->width;
+    int i_height = p_context->height;
+    avcodec_align_dimensions( p_context, &i_width, &i_height );
 
     if( GetVlcChroma( &p_dec->fmt_out.video, p_context->pix_fmt ) != VLC_SUCCESS ||
         p_context->pix_fmt == PIX_FMT_PAL8 )
@@ -1029,7 +1044,7 @@ static int ffmpeg_GetFrameBuf( struct AVCodecContext *p_context,
     p_dec->fmt_out.i_codec = p_dec->fmt_out.video.i_chroma;
 
     /* Get a new picture */
-    p_pic = ffmpeg_NewPictBuf( p_dec, p_sys->p_context );
+    p_pic = ffmpeg_NewPictBuf( p_dec, p_context );
     if( !p_pic )
         goto no_dr;
     bool b_compatible = true;
@@ -1075,7 +1090,7 @@ static int ffmpeg_GetFrameBuf( struct AVCodecContext *p_context,
         p_sys->i_direct_rendering_used = 1;
     }
 
-    p_sys->p_context->draw_horiz_band = NULL;
+    p_context->draw_horiz_band = NULL;
 
     p_ff_pic->opaque = (void*)p_pic;
     p_ff_pic->type = FF_BUFFER_TYPE_USER;

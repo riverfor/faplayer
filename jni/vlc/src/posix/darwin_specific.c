@@ -3,7 +3,7 @@
  * darwin_specific.m: Darwin specific features
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 810bd1b27ae175a7935d64dddd90eff13edf6154 $
+ * $Id: 9dead944acbb58eb1ae504538ba499b64e16abb9 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -47,14 +47,12 @@
 /*****************************************************************************
  * system_Init: fill in program path & retrieve language
  *****************************************************************************/
-void system_Init( libvlc_int_t *p_this, int *pi_argc, const char *ppsz_argv[] )
+void system_Init(void)
 {
-    VLC_UNUSED(p_this);
     char i_dummy;
     char *p_char = NULL;
     char *p_oldchar = &i_dummy;
     unsigned int i;
-    (void)pi_argc;
 
     /* Get the full program path and name */
     /* First try to see if we are linked to the framework */
@@ -106,11 +104,6 @@ void system_Init( libvlc_int_t *p_this, int *pi_argc, const char *ppsz_argv[] )
         uint32_t path_len = MAXPATHLEN;
         if ( !_NSGetExecutablePath(path, &path_len) )
             p_char = strdup(path);
-    }
-    if( !p_char )
-    {
-        /* We are not linked to the VLC.framework, return the executable path */
-        p_char = strdup( ppsz_argv[ 0 ] );
     }
 
     free(psz_vlcpath);

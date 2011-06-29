@@ -2,7 +2,7 @@
  * output.c : internal management of output streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id: 38f3b84c8084621df2a36ef43119dce8fdb46b0a $
+ * $Id: d2626c3c4138b7783411cdc7ae2fcc6570632d14 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -41,7 +41,7 @@
  * This function is entered with the mixer lock.
  *****************************************************************************/
 int aout_OutputNew( aout_instance_t * p_aout,
-                    audio_sample_format_t * p_format )
+                    const audio_sample_format_t * p_format )
 {
     p_aout->output.output = *p_format;
 
@@ -158,8 +158,7 @@ int aout_OutputNew( aout_instance_t * p_aout,
     aout_lock_output_fifo( p_aout );
 
     /* Prepare FIFO. */
-    aout_FifoInit( p_aout, &p_aout->output.fifo,
-                   p_aout->output.output.i_rate );
+    aout_FifoInit( p_aout, &p_aout->output.fifo, p_aout->output.output.i_rate );
 
     aout_unlock_output_fifo( p_aout );
 
@@ -212,7 +211,7 @@ void aout_OutputDelete( aout_instance_t * p_aout )
                                  p_aout->output.i_nb_filters );
 
     aout_lock_output_fifo( p_aout );
-    aout_FifoDestroy( p_aout, &p_aout->output.fifo );
+    aout_FifoDestroy( &p_aout->output.fifo );
     aout_unlock_output_fifo( p_aout );
 }
 
@@ -235,7 +234,7 @@ void aout_OutputPlay( aout_instance_t * p_aout, aout_buffer_t * p_buffer )
     }
 
     aout_lock_output_fifo( p_aout );
-    aout_FifoPush( p_aout, &p_aout->output.fifo, p_buffer );
+    aout_FifoPush( &p_aout->output.fifo, p_buffer );
     p_aout->output.pf_play( p_aout );
     aout_unlock_output_fifo( p_aout );
 }
@@ -252,51 +251,46 @@ aout_buffer_t * aout_OutputNextBuffer( aout_instance_t * p_aout,
                                        mtime_t start_date,
                                        bool b_can_sleek )
 {
+    aout_fifo_t *p_fifo = &p_aout->output.fifo;
     aout_buffer_t * p_buffer;
     mtime_t now = mdate();
 
     aout_lock_output_fifo( p_aout );
 
-    p_buffer = p_aout->output.fifo.p_first;
-
     /* Drop the audio sample if the audio output is really late.
      * In the case of b_can_sleek, we don't use a resampler so we need to be
      * a lot more severe. */
-    while ( p_buffer && p_buffer->i_pts <
-            (b_can_sleek ? start_date : now) - AOUT_PTS_TOLERANCE )
+    while( ((p_buffer = p_fifo->p_first) != NULL)
+     && p_buffer->i_pts < (b_can_sleek ? start_date : now) - AOUT_PTS_TOLERANCE )
     {
         msg_Dbg( p_aout, "audio output is too slow (%"PRId64"), "
                  "trashing %"PRId64"us", now - p_buffer->i_pts,
                  p_buffer->i_length );
-        p_buffer = p_buffer->p_next;
-        aout_BufferFree( p_aout->output.fifo.p_first );
-        p_aout->output.fifo.p_first = p_buffer;
+        aout_BufferFree( aout_FifoPop( p_fifo ) );
     }
 
-    if ( p_buffer == NULL )
+    if( p_buffer == NULL )
     {
-        p_aout->output.fifo.pp_last = &p_aout->output.fifo.p_first;
-
 #if 0 /* This is bad because the audio output might just be trying to fill
        * in its internal buffers. And anyway, it's up to the audio output
        * to deal with this kind of starvation. */
 
         /* Set date to 0, to allow the mixer to send a new buffer ASAP */
-        aout_FifoSet( p_aout, &p_aout->output.fifo, 0 );
+        aout_FifoSet( &p_aout->output.fifo, 0 );
         if ( !p_aout->output.b_starving )
             msg_Dbg( p_aout,
                  "audio output is starving (no input), playing silence" );
-        p_aout->output.b_starving = 1;
+        p_aout->output.b_starving = true;
 #endif
-
         aout_unlock_output_fifo( p_aout );
         return NULL;
     }
 
+    mtime_t delta = start_date - p_buffer->i_pts;
     /* Here we suppose that all buffers have the same duration - this is
      * generally true, and anyway if it's wrong it won't be a disaster.
      */
-    if ( p_buffer->i_pts > start_date + p_buffer->i_length )
+    if ( 0 > delta + p_buffer->i_length )
     /*
      *                   + AOUT_PTS_TOLERANCE )
      * There is no reason to want that, it just worsen the scheduling of
@@ -304,43 +298,31 @@ aout_buffer_t * aout_OutputNextBuffer( aout_instance_t * p_aout,
      * --Gibalou
      */
     {
-        const mtime_t i_delta = p_buffer->i_pts - start_date;
-        aout_unlock_output_fifo( p_aout );
-
         if ( !p_aout->output.b_starving )
             msg_Dbg( p_aout, "audio output is starving (%"PRId64"), "
-                     "playing silence", i_delta );
-        p_aout->output.b_starving = 1;
+                     "playing silence", -delta );
+        p_aout->output.b_starving = true;
+        aout_unlock_output_fifo( p_aout );
         return NULL;
     }
 
-    p_aout->output.b_starving = 0;
-
-    p_aout->output.fifo.p_first = p_buffer->p_next;
-    if ( p_buffer->p_next == NULL )
-    {
-        p_aout->output.fifo.pp_last = &p_aout->output.fifo.p_first;
-    }
+    p_aout->output.b_starving = false;
+    p_buffer = aout_FifoPop( p_fifo );
 
     if( !b_can_sleek )
     {
-        mtime_t difference = start_date - p_buffer->i_pts;
-
-        if( difference > AOUT_PTS_TOLERANCE
-         || difference < -AOUT_PTS_TOLERANCE )
+        if( delta > AOUT_PTS_TOLERANCE || delta < -AOUT_PTS_TOLERANCE )
         {
+            aout_unlock_output_fifo( p_aout );
             /* Try to compensate the drift by doing some resampling. */
             msg_Warn( p_aout, "output date isn't PTS date, requesting "
-                      "resampling (%"PRId64")", difference );
-
-            aout_FifoMoveDates( p_aout, &p_aout->output.fifo, difference );
-            aout_unlock_output_fifo( p_aout );
+                      "resampling (%"PRId64")", delta );
 
             aout_lock_input_fifos( p_aout );
-            aout_fifo_t *p_fifo = &p_aout->p_input->mixer.fifo;
-            aout_FifoMoveDates( p_aout, p_fifo, difference );
+            aout_lock_output_fifo( p_aout );
+            aout_FifoMoveDates( &p_aout->p_input->mixer.fifo, delta );
+            aout_FifoMoveDates( p_fifo, delta );
             aout_unlock_input_fifos( p_aout );
-            return p_buffer;
         }
     }
     aout_unlock_output_fifo( p_aout );

@@ -4,7 +4,7 @@
  * interface, such as message output.
  *****************************************************************************
  * Copyright (C) 1999, 2000 the VideoLAN team
- * $Id: 4978f0ab04229bd9dbc5aeb1d1665d64f1d265de $
+ * $Id: 455f59d8bbf6d8c073630bca8c52031734c08b3e $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -60,7 +60,6 @@ typedef struct intf_thread_t
 
     /* Specific interfaces */
     intf_sys_t *        p_sys;                          /** system interface */
-    char *              psz_intf;                    /** intf name specified */
 
     /** Interface module */
     module_t *   p_module;
@@ -169,7 +168,7 @@ typedef enum vlc_dialog {
 /* Useful text messages shared by interfaces */
 #define INTF_ABOUT_MSG LICENSE_MSG
 
-#define EXTENSIONS_AUDIO_CSV "a52", "aac", "ac3", "ape", "dts", "flac", "it", \
+#define EXTENSIONS_AUDIO_CSV "a52", "aac", "ac3", "ape", "awb", "dts", "flac", "it", \
                          "m4a", "m4p", "mka", "mlp", "mod", "mp1", "mp2", "mp3",\
                          "oga", "ogg", "oma", "s3m", "spx" \
                          "wav", "wma", "wv", "xm"
@@ -193,6 +192,7 @@ typedef enum vlc_dialog {
     "*.amr;" \
     "*.aob;" \
     "*.ape;" \
+    "*.awb;" \
     "*.cda;" \
     "*.dts;" \
     "*.flac;"\
@@ -234,8 +234,13 @@ typedef enum vlc_dialog {
 #define EXTENSIONS_MEDIA EXTENSIONS_VIDEO ";" EXTENSIONS_AUDIO ";" \
                           EXTENSIONS_PLAYLIST
 
-#define EXTENSIONS_SUBTITLE "*.cdg;*.idx;*.srt;*.sub;*.utf;*.ass;*.ssa;*.aqt;" \
-                            "*.jss;*.psb;*.rt;*.smi;*.txt;*.smil"
+#define EXTENSIONS_SUBTITLE "*.cdg;*.idx;*.srt;" \
+                            "*.sub;*.utf;*.ass;" \
+                            "*.ssa;*.aqt;" \
+                            "*.jss;*.psb;" \
+                            "*.rt;*.smi;*.txt;" \
+                            "*.smil;*.stl;*.usf" \
+                            "*.dks;*.pjs;*.mpl2"
 
 /** \defgroup vlc_interaction Interaction
  * \ingroup vlc_interface

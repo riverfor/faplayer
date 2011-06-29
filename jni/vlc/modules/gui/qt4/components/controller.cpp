@@ -2,7 +2,7 @@
  * Controller.cpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: 0696bf7b812bb88b216e1a232fe61794579fe7b7 $
+ * $Id: 11d0b755cfa77429f789348c7f01c8af4dff505d $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -347,6 +347,8 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
         /* And update the IM, when the position has changed */
         CONNECT( slider, sliderDragged( float ),
                  THEMIM->getIM(), sliderUpdate( float ) );
+        CONNECT( THEMIM->getIM(), cachingChanged( float ),
+                 slider, updateBuffering( float ) );
         widget = slider;
         }
         break;

@@ -2,7 +2,7 @@
  * EPGItem.h : EPGItem
  ****************************************************************************
  * Copyright © 2009-2010 VideoLAN
- * $Id: 932e419a7381f87c7e688d54a30ee5f2c2feec6b $
+ * $Id: 7bf5cc38f0667b5fd7efaa0a0f97300657ef473a $
  *
  * Authors: Ludovic Fauvet <etix@l0cal.com>
  *
@@ -24,7 +24,8 @@
 #ifndef EPGITEM_H
 #define EPGITEM_H
 
-#include <vlc_common.h>
+#include "qt4.hpp"
+
 #include <vlc_epg.h>
 #include <QGraphicsItem>
 #include <QDateTime>

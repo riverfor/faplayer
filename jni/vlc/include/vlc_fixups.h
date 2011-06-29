@@ -181,6 +181,10 @@ char *getcwd (char *buf, size_t size);
 pid_t getpid (void);
 #endif
 
+#ifndef HAVE_FSYNC
+int fsync (int fd);
+#endif
+
 /* dirent.h */
 #ifndef HAVE_DIRFD
 #ifdef __APPLE__
@@ -276,6 +280,20 @@ struct pollfd
 # include <poll.h>
 # define poll(a, b, c) vlc_poll(a, b, c)
 int vlc_poll (struct pollfd *, unsigned, int);
+#endif
+
+#ifndef HAVE_IF_NAMEINDEX
+#include <errno.h>
+struct if_nameindex
+{
+    unsigned if_index;
+    char    *if_name;
+};
+# ifndef HAVE_IF_NAMETOINDEX
+#  define if_nametoindex(name)   atoi(name)
+# endif
+# define if_nameindex()         (errno = ENOBUFS, NULL)
+# define if_freenameindex(list) (void)0
 #endif
 
 /* search.h */

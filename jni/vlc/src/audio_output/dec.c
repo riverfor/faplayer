@@ -2,7 +2,7 @@
  * dec.c : audio output API towards decoders
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: 663fd80c8ad87e1fb6972ec63b7d34e6350e4bad $
+ * $Id: 8bf692e2d527a07b5b9d3061c866d9bfd72e1f9d $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -283,10 +283,16 @@ void aout_DecChangePause( aout_instance_t *p_aout, aout_input_t *p_input, bool b
 void aout_DecFlush( aout_instance_t *p_aout, aout_input_t *p_input )
 {
     aout_lock_input_fifos( p_aout );
-
-    aout_FifoSet( p_aout, &p_input->mixer.fifo, 0 );
-    p_input->mixer.begin = NULL;
-
+    aout_FifoSet( &p_input->mixer.fifo, 0 );
     aout_unlock_input_fifos( p_aout );
 }
 
+bool aout_DecIsEmpty( aout_instance_t * p_aout, aout_input_t * p_input )
+{
+    mtime_t end_date;
+
+    aout_lock_input_fifos( p_aout );
+    end_date = aout_FifoNextStart( &p_input->mixer.fifo );
+    aout_unlock_input_fifos( p_aout );
+    return end_date <= mdate();
+}

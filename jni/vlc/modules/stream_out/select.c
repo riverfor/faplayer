@@ -2,7 +2,7 @@
  * select.c: Select individual es to enable or disable from stream
  *****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: d2c7e65cc6e026b22e35799ca573ce9baa7ada37 $
+ * $Id: ffeefcfe39f9ad8e3e3dc9e427affecd68f8d506 $
  *
  * Authors: Jean-Paul Saman <jpsaman@videolan.org>
  * Based upon autodel.c written by: Christophe Massiot <massiot@via.ecp.fr>
@@ -203,11 +203,9 @@ static void* Command(void *p_this)
             mutex_cleanup_push(&p_sys->es_lock);
             for (int i = 0; i < p_sys->i_es_num; i++)
             {
-                i_len = snprintf(psz_buffer, sizeof(psz_buffer), "%.4s : %d",
+                msg_Info(p_stream, "%.4s : %d",
                                  (char *)&p_sys->pp_es[i]->fmt.i_codec,
                                  p_sys->pp_es[i]->fmt.i_id);
-                psz_buffer[i_len] = '\0';
-                msg_Info(p_stream, psz_buffer);
             }
             vlc_cleanup_pop();
         }

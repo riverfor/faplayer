@@ -2,7 +2,7 @@
  * subsdec.c : text subtitles decoder
  *****************************************************************************
  * Copyright (C) 2000-2006 the VideoLAN team
- * $Id: 48abf5e1ce80c3c1c9d41f05d7dfb7cb9f0ed103 $
+ * $Id: abdac8a4f28e0427fd186bb1d6334ef74b84353d $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Samuel Hocevar <sam@zoy.org>
@@ -684,8 +684,6 @@ static char *CreateHtmlSubtitle( int *pi_align, char *psz_subtitle )
                                 i_len = strcspn( psz_subtitle, " \t>" );
                             }
                             HtmlPut( &psz_html, "\"" );
-                            if( !strcmp( psz_attribs[ k ], "color=" ) && *psz_subtitle >= '0' && *psz_subtitle <= '9' )
-                                HtmlPut( &psz_html, "#" );
                             HtmlNPut( &psz_html, psz_subtitle, i_len );
                             HtmlPut( &psz_html, "\"" );
 

@@ -2,7 +2,7 @@
  * direct3d.c: Windows Direct3D video output module
  *****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- *$Id: da11e58dd6be5d4d30d3fac650a6b12db7839c99 $
+ *$Id: db06c73dca4c0f30203f9e1a933e931aa2609d2d $
  *
  * Authors: Damien Fouilleul <damienf@videolan.org>
  *
@@ -50,8 +50,7 @@
 /*****************************************************************************
  * Module descriptor
  *****************************************************************************/
-static int  OpenVideoXP(vlc_object_t *);
-static int  OpenVideoVista(vlc_object_t *);
+static int  Open(vlc_object_t *);
 static void Close(vlc_object_t *);
 
 #define DESKTOP_TEXT N_("Enable desktop mode ")
@@ -76,13 +75,7 @@ vlc_module_begin ()
 
     set_capability("vout display", 240)
     add_shortcut("direct3d")
-    set_callbacks(OpenVideoVista, Close)
-
-    add_submodule()
-        set_description(N_("Direct3D video output (XP)"))
-        set_capability("vout display", 220)
-        add_shortcut("direct3d_xp")
-        set_callbacks(OpenVideoXP, Close)
+    set_callbacks(Open, Close)
 
 vlc_module_end ()
 
@@ -192,6 +185,7 @@ static int Open(vlc_object_t *object)
     info.has_pictures_invalid = true;
     info.has_event_thread = true;
     if (var_InheritBool(vd, "direct3d-hw-blending") &&
+        sys->d3dregion_format != D3DFMT_UNKNOWN &&
         (sys->d3dcaps.SrcBlendCaps  & D3DPBLENDCAPS_SRCALPHA) &&
         (sys->d3dcaps.DestBlendCaps & D3DPBLENDCAPS_INVSRCALPHA) &&
         (sys->d3dcaps.TextureCaps   & D3DPTEXTURECAPS_ALPHA) &&
@@ -232,25 +226,6 @@ error:
     Direct3DDestroy(vd);
     free(vd->sys);
     return VLC_EGENERIC;
-}
-
-static bool IsVistaOrAbove(void)
-{
-    OSVERSIONINFO winVer;
-    winVer.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    return GetVersionEx(&winVer) && winVer.dwMajorVersion > 5;
-}
-
-static int OpenVideoXP(vlc_object_t *obj)
-{
-    /* Windows XP or lower, make sure this module isn't the default */
-    return IsVistaOrAbove() ? VLC_EGENERIC : Open(obj);
-}
-
-static int OpenVideoVista(vlc_object_t *obj)
-{
-    /* Windows Vista or above, make this module the default */
-    return IsVistaOrAbove() ? Open(obj) : VLC_EGENERIC;
 }
 
 /**
@@ -723,6 +698,8 @@ static void Direct3DDestroyScene(vout_display_t *vd);
  */
 static int Direct3DCreateResources(vout_display_t *vd, video_format_t *fmt)
 {
+    vout_display_sys_t *sys = vd->sys;
+
     if (Direct3DCreatePool(vd, fmt)) {
         msg_Err(vd, "Direct3D picture pool initialization failed");
         return VLC_EGENERIC;
@@ -730,6 +707,20 @@ static int Direct3DCreateResources(vout_display_t *vd, video_format_t *fmt)
     if (Direct3DCreateScene(vd, fmt)) {
         msg_Err(vd, "Direct3D scene initialization failed !");
         return VLC_EGENERIC;
+    }
+    sys->d3dregion_format = D3DFMT_UNKNOWN;
+    for (int i = 0; i < 2; i++) {
+        D3DFORMAT fmt = i == 0 ? D3DFMT_A8B8G8R8 : D3DFMT_A8R8G8B8;
+        if (SUCCEEDED(IDirect3D9_CheckDeviceFormat(sys->d3dobj,
+                                                   D3DADAPTER_DEFAULT,
+                                                   D3DDEVTYPE_HAL,
+                                                   sys->d3dpp.BackBufferFormat,
+                                                   D3DUSAGE_DYNAMIC,
+                                                   D3DRTYPE_TEXTURE,
+                                                   fmt))) {
+            sys->d3dregion_format = fmt;
+            break;
+        }
     }
     return VLC_SUCCESS;
 }
@@ -1227,7 +1218,7 @@ static void Direct3DImportSubpicture(vout_display_t *vd,
         for (int j = 0; j < sys->d3dregion_count; j++) {
             d3d_region_t *cache = &sys->d3dregion[j];
             if (cache->texture &&
-                cache->format == D3DFMT_A8R8G8B8 &&
+                cache->format == sys->d3dregion_format &&
                 cache->width  == r->fmt.i_visible_width &&
                 cache->height == r->fmt.i_visible_height) {
                 msg_Dbg(vd, "Reusing %dx%d texture for OSD",
@@ -1237,7 +1228,7 @@ static void Direct3DImportSubpicture(vout_display_t *vd,
             }
         }
         if (!d3dr->texture) {
-            d3dr->format = D3DFMT_A8R8G8B8;
+            d3dr->format = sys->d3dregion_format;
             d3dr->width  = r->fmt.i_visible_width;
             d3dr->height = r->fmt.i_visible_height;
             hr = IDirect3DDevice9_CreateTexture(sys->d3ddev,
@@ -1263,11 +1254,21 @@ static void Direct3DImportSubpicture(vout_display_t *vd,
         if (SUCCEEDED(hr)) {
             uint8_t *dst_data  = lock.pBits;
             int      dst_pitch = lock.Pitch;
+            uint8_t *src_data  = r->p_picture->p->p_pixels;
+            int      src_pitch = r->p_picture->p->i_pitch;
             for (unsigned y = 0; y < r->fmt.i_visible_height; y++) {
                 int copy_pitch = __MIN(dst_pitch, r->p_picture->p->i_visible_pitch);
-                memcpy(&dst_data[y * dst_pitch],
-                       &r->p_picture->p->p_pixels[y * r->p_picture->p->i_pitch],
-                       copy_pitch);
+                if (d3dr->format == D3DFMT_A8B8G8R8) {
+                    memcpy(&dst_data[y * dst_pitch], &src_data[y * src_pitch],
+                           copy_pitch);
+                } else {
+                    for (int x = 0; x < copy_pitch; x += 4) {
+                        dst_data[y * dst_pitch + x + 0] = src_data[y * src_pitch + x + 2];
+                        dst_data[y * dst_pitch + x + 1] = src_data[y * src_pitch + x + 1];
+                        dst_data[y * dst_pitch + x + 2] = src_data[y * src_pitch + x + 0];
+                        dst_data[y * dst_pitch + x + 3] = src_data[y * src_pitch + x + 3];
+                    }
+                }
             }
             hr = IDirect3DTexture9_UnlockRect(d3dr->texture, 0);
             if (FAILED(hr))

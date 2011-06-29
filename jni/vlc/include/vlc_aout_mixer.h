@@ -2,7 +2,7 @@
  * vlc_aout_mixer.h : audio output mixer interface
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: e332851e395f3d89f3b8fbb405a1105ea6efb514 $
+ * $Id: a38de406fe667fb29c2bcfd2899cee14adc41d89 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -44,12 +44,6 @@ typedef struct {
     /* */
     aout_fifo_t fifo;
 
-    /* Pointer on the first byte of data to mix.
-     *
-     * It points in the first buffer of fifo
-     */
-    uint8_t     *begin;
-
     /* Software multiplier */
     float       multiplier;
 } aout_mixer_input_t;
@@ -72,8 +66,8 @@ struct aout_mixer_t {
     /* Array of mixer inputs */
     aout_mixer_input_t    *input;
 
-    /* Mix requested number of samples (mandatory) */
-    aout_buffer_t *(*mix)(aout_mixer_t *, unsigned, float);
+    /* Mix buffer (mandatory) */
+    void (*mix)(aout_mixer_t *, aout_buffer_t *, float);
 
     /* Private place holder for the aout_mixer_t module (optional)
      *

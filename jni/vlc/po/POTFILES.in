@@ -311,8 +311,8 @@ modules/audio_filter/spatializer/revmodel.cpp
 modules/audio_filter/spatializer/revmodel.hpp
 modules/audio_filter/spatializer/spatializer.cpp
 modules/audio_filter/spatializer/tuning.h
+modules/audio_mixer/fixed32.c
 modules/audio_mixer/float32.c
-modules/audio_mixer/spdif.c
 modules/audio_mixer/trivial.c
 modules/audio_output/alsa.c
 modules/audio_output/amem.c
@@ -497,8 +497,12 @@ modules/demux/voc.c
 modules/demux/wav.c
 modules/demux/xa.c
 modules/gui/fbosd.c
+modules/gui/macosx/AudioEffects.m
 modules/gui/macosx/AppleRemote.h
 modules/gui/macosx/AppleRemote.m
+modules/gui/macosx/MainMenu.m
+modules/gui/macosx/TrackSynchronization.m
+modules/gui/macosx/VideoEffects.m
 modules/gui/macosx/about.h
 modules/gui/macosx/about.m
 modules/gui/macosx/applescript.h
@@ -513,8 +517,6 @@ modules/gui/macosx/embeddedwindow.h
 modules/gui/macosx/embeddedwindow.m
 modules/gui/macosx/equalizer.h
 modules/gui/macosx/equalizer.m
-modules/gui/macosx/extended.h
-modules/gui/macosx/extended.m
 modules/gui/macosx/eyetv.h
 modules/gui/macosx/eyetv.m
 modules/gui/macosx/fspanel.h
@@ -538,6 +540,7 @@ modules/gui/macosx/prefs_widgets.h
 modules/gui/macosx/prefs_widgets.m
 modules/gui/macosx/simple_prefs.h
 modules/gui/macosx/simple_prefs.m
+modules/gui/macosx/vout.m
 modules/gui/macosx/wizard.h
 modules/gui/macosx/wizard.m
 modules/gui/macosx_dialog_provider/VLCLoginPanel.h
@@ -945,7 +948,6 @@ modules/misc/stats/stats.h
 modules/misc/text_renderer/freetype.c
 modules/misc/text_renderer/quartztext.c
 modules/misc/text_renderer/svg.c
-modules/misc/text_renderer/text_renderer.h
 modules/misc/text_renderer/win32text.c
 modules/misc/xml/libxml.c
 modules/mmx/memcpy.c
@@ -1085,7 +1087,6 @@ modules/video_filter/mosaic.c
 modules/video_filter/mosaic.h
 modules/video_filter/motionblur.c
 modules/video_filter/motiondetect.c
-modules/video_filter/noise.c
 modules/video_filter/opencv_example.c
 modules/video_filter/opencv_wrapper.c
 modules/video_filter/osdmenu.c

@@ -2,7 +2,7 @@
  * file.c : audio output which writes the samples to a file
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: 5ba6e782c13ba86aad94d64158564223abc48261 $
+ * $Id: 8151a0d1512bb167c02a34c0d41b5211a2216bf1 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Gildas Bazin <gbazin@netcourrier.com>
@@ -318,7 +318,7 @@ static void Play( aout_instance_t * p_aout )
 {
     aout_buffer_t * p_buffer;
 
-    p_buffer = aout_FifoPop( p_aout, &p_aout->output.fifo );
+    p_buffer = aout_FifoPop( &p_aout->output.fifo );
 
     if( fwrite( p_buffer->p_buffer, p_buffer->i_buffer, 1,
                 p_aout->output.p_sys->p_file ) != 1 )

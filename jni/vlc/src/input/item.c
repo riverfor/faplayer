@@ -2,7 +2,7 @@
  * item.c: input_item management
  *****************************************************************************
  * Copyright (C) 1998-2004 the VideoLAN team
- * $Id: de510bcc24acdd10c01c6aff2570e6a804e60fdf $
+ * $Id: ccd7013c12f3a12302fc0a67a27209fb6d2c6de7 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -896,8 +896,12 @@ input_item_t *input_item_Copy( vlc_object_t *p_obj, input_item_t *p_input )
                                   p_input->ppsz_options[i],
                                   p_input->optflagv[i] );
         }
-        p_new_input->p_meta = vlc_meta_New();
-        vlc_meta_Merge( p_new_input->p_meta, p_input->p_meta );
+
+        if( p_input->p_meta )
+        {
+            p_new_input->p_meta = vlc_meta_New();
+            vlc_meta_Merge( p_new_input->p_meta, p_input->p_meta );
+        }
     }
 
     vlc_mutex_unlock( &p_input->lock );

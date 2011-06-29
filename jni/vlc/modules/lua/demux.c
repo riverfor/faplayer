@@ -2,7 +2,7 @@
  * demux.c :  Lua playlist demux module
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: f924512a3d62cd16264ce0c548130320c053e0b6 $
+ * $Id: 5f3d1e98598eaadc7fcfeb82074d1a50ac3e63e4 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -60,8 +60,12 @@ static int vlclua_demux_peek( lua_State *L )
     demux_t *p_demux = (demux_t *)vlclua_get_this( L );
     int n = luaL_checkint( L, 1 );
     const uint8_t *p_peek;
+
     int i_peek = stream_Peek( p_demux->s, &p_peek, n );
-    lua_pushlstring( L, (const char *)p_peek, i_peek );
+    if( i_peek > 0 )
+        lua_pushlstring( L, (const char *)p_peek, i_peek );
+    else
+        lua_pushnil( L );
     return 1;
 }
 
@@ -71,9 +75,16 @@ static int vlclua_demux_read( lua_State *L )
     const uint8_t *p_read;
     int n = luaL_checkint( L, 1 );
     int i_read = stream_Peek( p_demux->s, &p_read, n );
-    lua_pushlstring( L, (const char *)p_read, i_read );
-    int i_seek = stream_Read( p_demux->s, NULL, i_read );
-    assert(i_read==i_seek);
+
+    if( i_read > 0 )
+    {
+        lua_pushlstring( L, (const char *)p_read, i_read );
+        int i_seek = stream_Read( p_demux->s, NULL, i_read );
+        assert( i_read == i_seek );
+    }
+    else
+        lua_pushnil( L );
+
     return 1;
 }
 

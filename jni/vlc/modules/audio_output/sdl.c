@@ -2,7 +2,7 @@
  * sdl.c : SDL audio output plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2002 the VideoLAN team
- * $Id: a474d24e1d5f397861cbb7c50766f40b890ac035 $
+ * $Id: f88f12449761586ca396d87e9cce5addf45e54c8 $
  *
  * Authors: Michel Kaempf <maxx@via.ecp.fr>
  *          Sam Hocevar <sam@zoy.org>
@@ -251,7 +251,7 @@ static void SDLCallback( void * _p_aout, uint8_t * p_stream, int i_len )
      * it at SDL's face. Nah. */
 
     vlc_mutex_lock( &p_aout->output_fifo_lock );
-    p_buffer = aout_FifoPop( p_aout, &p_aout->output.fifo );
+    p_buffer = aout_FifoPop( &p_aout->output.fifo );
     vlc_mutex_unlock( &p_aout->output_fifo_lock );
 
     if ( p_buffer != NULL )

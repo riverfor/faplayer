@@ -2,7 +2,7 @@
  * vlc_video.h: common video definitions
  *****************************************************************************
  * Copyright (C) 1999 - 2008 the VideoLAN team
- * $Id: e0b138558f4a162ebb38b1bbf62dd130869ae861 $
+ * $Id: ead4188eaab50295757ab734115be591c5e2cc23 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@via.ecp.fr>
@@ -59,7 +59,7 @@ typedef struct {
 } vout_configuration_t;
 
 /**
- * Video ouput thread private structure
+ * Video output thread private structure
  */
 typedef struct vout_thread_sys_t vout_thread_sys_t;
 

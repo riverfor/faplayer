@@ -2,7 +2,7 @@
  * update.c: VLC update checking and downloading
  *****************************************************************************
  * Copyright © 2005-2008 the VideoLAN team
- * $Id: 3b699be3d9ac6855a72971f2bf64a4851f8c1f23 $
+ * $Id: 73560808351f0a06c7094778004bf1b49fa37043 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *          Rémi Duraffort <ivoire at via.ecp.fr>
@@ -77,7 +77,11 @@
 #if defined( UNDER_CE )
 #   define UPDATE_VLC_STATUS_URL "http://update.videolan.org/vlc/status-ce"
 #elif defined( WIN32 )
-#   define UPDATE_VLC_STATUS_URL "http://update.videolan.org/vlc/status-win-x86"
+#  ifndef NDEBUG
+#    define UPDATE_VLC_STATUS_URL "http://update-test.videolan.org/vlc/status-win-x86"
+#  else
+#    define UPDATE_VLC_STATUS_URL "http://update.videolan.org/vlc/status-win-x86"
+#  endif
 #else
 #   define UPDATE_VLC_STATUS_URL "http://update.videolan.org/vlc/status"
 #endif

@@ -2,7 +2,7 @@
  * top_window.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: c9afddc4d5aca9e0381ec38045a3c9f03f6e11dd $
+ * $Id: a64dd49d593bb8f814c6cf9defb5a0f1c53ffa7d $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -56,6 +56,9 @@ public:
     virtual void processEvent( EvtLeave &rEvtLeave );
     virtual void processEvent( EvtKey &rEvtKey );
     virtual void processEvent( EvtScroll &rEvtScroll );
+    virtual void processEvent( EvtDragDrop &rEvtDragDrop );
+    virtual void processEvent( EvtDragOver &rEvtDragOver );
+    virtual void processEvent( EvtDragLeave &rEvtDragLeave );
 
     /// Forward an event to a control
     virtual void forwardEvent( EvtGeneric &rEvt, CtrlGeneric &rCtrl );
@@ -102,6 +105,8 @@ private:
 
     /// Initial visibility status
     bool m_initialVisibility;
+    /// indicator if playback is requested on drag&drop
+    bool m_playOnDrop;
     /// Window manager
     WindowManager &m_rWindowManager;
     /// Current active layout of the window
@@ -112,6 +117,8 @@ private:
     CtrlGeneric *m_pCapturingControl;
     /// Control that has the focus
     CtrlGeneric *m_pFocusControl;
+    /// Control over which drag&drop is hovering
+    CtrlGeneric *m_pDragControl;
     /// Current key modifier (also used for mouse)
     int m_currModifier;
 

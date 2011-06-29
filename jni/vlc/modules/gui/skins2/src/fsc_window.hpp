@@ -2,7 +2,7 @@
  * fsc_window.hpp
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: 93b40b325ee33371e9c5bb41306cbbf731d60f1e $
+ * $Id: 92244900484fdf05cec0343bf312114663a349b8 $
  *
  * Author: Erwan Tulou      <erwan10 At videolan Dot Org>
  *
@@ -56,6 +56,9 @@ public:
 
     /// Action for each transition of fading out
     virtual void onTimerExpired();
+
+    /// Relocate fsc into new area
+    virtual void moveTo( int x, int y, int width, int height );
 
 private:
     /// Timer for fsc fading-out

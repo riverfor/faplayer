@@ -2,7 +2,7 @@
  * vlc_filter.h: filter related structures and functions
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id: f7b536d3f3812f842200fcb33e349740beb2f590 $
+ * $Id: c2ec30f8174d357323b378fe8f7a88231dd626aa $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -125,9 +125,11 @@ struct filter_t
         struct
         {
             int         (*pf_text) ( filter_t *, subpicture_region_t *,
-                                     subpicture_region_t * );
+                                     subpicture_region_t *,
+                                     const vlc_fourcc_t * );
             int         (*pf_html) ( filter_t *, subpicture_region_t *,
-                                     subpicture_region_t * );
+                                     subpicture_region_t *,
+                                     const vlc_fourcc_t * );
         } render;
 #define pf_render_text     u.render.pf_text
 #define pf_render_html     u.render.pf_html

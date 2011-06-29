@@ -2,7 +2,7 @@
  * embeddedwindow.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2005-2011 the VideoLAN team
- * $Id: 56d4d5f5147eaf7a227d8f6ee15b7d20b1c175ef $
+ * $Id: 82b4d331a0994107495afa8c38c040bfd8a42034 $
  *
  * Authors: Benjamin Pracht <bigben at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -32,6 +32,7 @@
 #import "embeddedwindow.h"
 #import "fspanel.h"
 #import "playlist.h"
+#import <vlc_url.h>
 
 /* SetSystemUIMode, ... */
 #import <Carbon/Carbon.h>
@@ -904,7 +905,13 @@
             for( i = 0; i < (int)[o_values count]; i++)
             {
                 NSDictionary *o_dic;
-                o_dic = [NSDictionary dictionaryWithObject:[o_values objectAtIndex:i] forKey:@"ITEM_URL"];
+                char *psz_uri = make_URI([[o_values objectAtIndex:i] UTF8String], NULL);
+                if( !psz_uri )
+                    continue;
+
+                o_dic = [NSDictionary dictionaryWithObject:[NSString stringWithCString:psz_uri encoding:NSUTF8StringEncoding] forKey:@"ITEM_URL"];
+                free( psz_uri );
+
                 o_array = [o_array arrayByAddingObject: o_dic];
             }
             if( b_autoplay )

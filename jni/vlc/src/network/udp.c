@@ -4,7 +4,7 @@
  * Copyright (C) 2004-2006 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
  *
- * $Id: 80522afc25251e5a4aa2c396ae48339b3a6c9cf1 $
+ * $Id: 74217f8735cb95ff3e92e827b2790c14dd0f8d01 $
  *
  * Authors: Laurent Aimar <fenrir@videolan.org>
  *          Rémi Denis-Courmont <rem # videolan.org>
@@ -45,16 +45,11 @@
 #       define IP_ADD_MEMBERSHIP 5
 #   endif
 #   define EAFNOSUPPORT WSAEAFNOSUPPORT
-#   define if_nametoindex( str ) atoi( str )
 #else
 #   include <unistd.h>
 #   ifdef HAVE_NET_IF_H
 #       include <net/if.h>
 #   endif
-#endif
-
-#ifdef __OS2__
-#   define if_nametoindex( str ) atoi( str )
 #endif
 
 #ifdef HAVE_LINUX_DCCP_H
@@ -373,7 +368,7 @@ net_IPv4Join (vlc_object_t *obj, int fd,
     memset (&opt, 0, sizeof (opt));
     if (src != NULL)
     {
-# ifdef IP_ADD_SOURCE_MEMBERSHIP
+# if defined( IP_ADD_SOURCE_MEMBERSHIP ) && !defined( __ANDROID__ )
         cmd = IP_ADD_SOURCE_MEMBERSHIP;
 #ifdef ANDROID
         opt.gsr4.imr_multiaddr = grp->sin_addr.s_addr;

@@ -2,7 +2,7 @@
  * telepathy.c : changes Telepathy Presence information using MissionControl
  *****************************************************************************
  * Copyright © 2007-2009 the VideoLAN team
- * $Id: 6ef4586f7941deb4f8f8fbe4c00e18497a1808a5 $
+ * $Id: d73cf065e4da72c0424f386ab1d294ea618bd3b5 $
  *
  * Author: Rafaël Carré <funman@videoanorg>
  *
@@ -256,6 +256,9 @@ static int SendToTelepathy( intf_thread_t *p_intf, const char *psz_msg )
 
     p_reply = dbus_connection_send_with_reply_and_block( p_conn, p_msg,
         50, &error ); /* blocks 50ms maximum */
+
+    if( dbus_error_is_set( &error ) )
+        dbus_error_free( &error );
 
     dbus_message_unref( p_msg );
     if( p_reply == NULL )

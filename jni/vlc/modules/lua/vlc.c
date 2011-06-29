@@ -2,7 +2,7 @@
  * vlc.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: aeb7c8641314fe8af5d846ab56874938ba25fff2 $
+ * $Id: ca20d7a7c5fa182160a266a1f0f7a8cba06a2570 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -94,38 +94,54 @@
 static int vlc_sd_probe_Open( vlc_object_t * );
 
 vlc_module_begin ()
-        set_shortname( N_("Lua Interface Module") )
-        set_description( N_("Interfaces implemented using lua scripts") )
-        add_shortcut( "luaintf" )
-        add_shortcut( "luahttp" )
-        add_shortcut( "http" )
-        add_shortcut( "luatelnet" )
-        add_shortcut( "telnet" )
-        add_shortcut( "luahotkeys" )
-        /* add_shortcut( "hotkeys" ) */
-        set_capability( "interface", 0 )
+        set_shortname( N_("Lua") )
+        set_description( N_("Lua interpreter") )
         set_category( CAT_INTERFACE )
         set_subcategory( SUBCAT_INTERFACE_CONTROL )
         add_string( "lua-intf", "dummy",
                     INTF_TEXT, INTF_LONGTEXT, false )
         add_string( "lua-config", "",
                     CONFIG_TEXT, CONFIG_LONGTEXT, false )
+        set_capability( "interface", 0 )
+        set_callbacks( Open_LuaIntf, Close_LuaIntf )
+        add_shortcut( "luaintf" )
+
+    add_submodule ()
         set_section( N_("Lua HTTP"), 0 )
             add_string ( "http-host", NULL, HOST_TEXT, HOST_LONGTEXT, true )
             add_string ( "http-src",  NULL, SRC_TEXT,  SRC_LONGTEXT,  true )
             add_bool   ( "http-index", false, INDEX_TEXT, INDEX_LONGTEXT, true )
+        set_capability( "interface", 0 )
+        set_callbacks( Open_LuaHTTP, Close_LuaIntf )
+        add_shortcut( "luahttp", "http" )
+
+    add_submodule ()
         set_section( N_("Lua CLI"), 0 )
             add_string( "rc-host", NULL, RCHOST_TEXT, RCHOST_LONGTEXT, true )
             add_string( "cli-host", NULL, CLIHOST_TEXT, CLIHOST_LONGTEXT, true )
+        set_capability( "interface", 25 )
+        set_callbacks( Open_LuaCLI, Close_LuaIntf )
+#ifndef WIN32
+        add_shortcut( "luacli", "luarc", "cli", "rc" )
+#else
+        add_shortcut( "luacli", "luarc" )
+#endif
+
+    add_submodule ()
         set_section( N_("Lua Telnet"), 0 )
             add_string( "telnet-host", "localhost", TELNETHOST_TEXT,
                         TELNETHOST_LONGTEXT, true )
             add_integer( "telnet-port", TELNETPORT_DEFAULT, TELNETPORT_TEXT,
                          TELNETPORT_LONGTEXT, true )
             add_password( "telnet-password", TELNETPWD_DEFAULT, TELNETPWD_TEXT,
-                          TELNETPWD_LONGTEXT, true )
 
-        set_callbacks( Open_LuaIntf, Close_LuaIntf )
+                          TELNETPWD_LONGTEXT, true )
+        set_capability( "interface", 0 )
+        set_callbacks( Open_LuaTelnet, Close_LuaIntf )
+        add_shortcut( "luatelnet", "telnet" )
+
+        /* add_shortcut( "luahotkeys" ) */
+        /* add_shortcut( "hotkeys" ) */
 
     add_submodule ()
         set_shortname( N_( "Lua Meta Fetcher" ) )
@@ -145,17 +161,6 @@ vlc_module_begin ()
         set_description( N_("Lua Playlist Parser Interface") )
         set_capability( "demux", 2 )
         set_callbacks( Import_LuaPlaylist, Close_LuaPlaylist )
-
-    add_submodule ()
-        set_description( N_("Lua Interface Module (shortcuts)") )
-        add_shortcut( "luacli" )
-        add_shortcut( "luarc" )
-#ifndef WIN32
-        add_shortcut( "cli" )
-        add_shortcut( "rc" )
-#endif
-        set_capability( "interface", 25 )
-        set_callbacks( Open_LuaIntf, Close_LuaIntf )
 
     add_submodule ()
         set_shortname( N_( "Lua Art" ) )
@@ -404,6 +409,12 @@ void __vlclua_read_meta_data( vlc_object_t *p_this, lua_State *L,
 void __vlclua_read_custom_meta_data( vlc_object_t *p_this, lua_State *L,
                                      input_item_t *p_input )
 {
+    /* Lock the input item and create the meta table if needed */
+    vlc_mutex_lock( &p_input->lock );
+
+    if( !p_input->p_meta )
+        p_input->p_meta = vlc_meta_New();
+
     /* ... item */
     lua_getfield( L, -1, "meta" );
     /* ... item meta */
@@ -414,60 +425,24 @@ void __vlclua_read_custom_meta_data( vlc_object_t *p_this, lua_State *L,
         while( lua_next( L, -2 ) )
         {
             /* ... item meta key value */
-            if( !lua_isstring( L, -2 ) )
+            if( !lua_isstring( L, -2 ) || !lua_isstring( L, -1 ) )
             {
-                msg_Warn( p_this, "Custom meta data category name must be "
-                                   "a string" );
+                msg_Err( p_this, "'meta' keys and values must be strings");
+                lua_pop( L, 1 ); /* pop "value" */
+                continue;
             }
-            else if( !lua_istable( L, -1 ) )
-            {
-                msg_Warn( p_this, "Custom meta data category contents "
-                                   "must be a table" );
-            }
-            else
-            {
-                const char *psz_meta_category = lua_tostring( L, -2 );
-                msg_Dbg( p_this, "Found custom meta data category: %s",
-                         psz_meta_category );
-                lua_pushnil( L );
-                /* ... item meta key value nil */
-                while( lua_next( L, -2 ) )
-                {
-                    /* ... item meta key value key2 value2 */
-                    if( !lua_isstring( L, -2 ) )
-                    {
-                        msg_Warn( p_this, "Custom meta category item name "
-                                           "must be a string." );
-                    }
-                    else if( !lua_isstring( L, -1 ) )
-                    {
-                        msg_Warn( p_this, "Custom meta category item value "
-                                           "must be a string." );
-                    }
-                    else
-                    {
-                        const char *psz_meta_name =
-                            lua_tostring( L, -2 );
-                        const char *psz_meta_value =
-                            lua_tostring( L, -1 );
-                        msg_Dbg( p_this, "Custom meta %s, %s: %s",
-                                 psz_meta_category, psz_meta_name,
-                                 psz_meta_value );
-                        input_item_AddInfo( p_input, psz_meta_category,
-                                           psz_meta_name, "%s", psz_meta_value );
-                    }
-                    lua_pop( L, 1 ); /* pop item */
-                    /* ... item meta key value key2 */
-                }
-                /* ... item meta key value */
-            }
-            lua_pop( L, 1 ); /* pop category */
-            /* ... item meta key */
+            const char *psz_key = lua_tostring( L, -2 );
+            const char *psz_value = lua_tostring( L, -1 );
+
+            vlc_meta_AddExtra( p_input->p_meta, psz_key, psz_value );
+
+            lua_pop( L, 1 ); /* pop "value" */
         }
-        /* ... item meta */
     }
     lua_pop( L, 1 ); /* pop "meta" */
     /* ... item -> back to original stack */
+
+    vlc_mutex_unlock( &p_input->lock );
 }
 
 /*****************************************************************************

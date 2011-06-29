@@ -10,6 +10,8 @@ SOURCES_macosx = \
 	SPInvocationGrabbing.m \
 	SPMediaKeyTap.h \
 	SPMediaKeyTap.m \
+	MainMenu.h \
+	MainMenu.m \
 	about.h \
 	about.m \
 	applescript.h \
@@ -41,12 +43,12 @@ SOURCES_macosx = \
 	output.m \
 	wizard.h \
 	wizard.m \
-	extended.h \
-	extended.m \
 	AudioEffects.h \
 	AudioEffects.m \
 	TrackSynchronization.h \
 	TrackSynchronization.m \
+	VideoEffects.h \
+	VideoEffects.m \
 	bookmarks.h \
 	bookmarks.m \
 	embeddedwindow.h \

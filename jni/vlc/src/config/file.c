@@ -2,7 +2,7 @@
  * file.c: configuration file handling
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: 3872966cab395ece2759272b855efaa099d97aec $
+ * $Id: e6951bff155e849048d544e4cc11a4fbc5696b7f $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -577,11 +577,15 @@ static int SaveConfigFile (vlc_object_t *p_this)
         clearerr (file);
         goto error;
     }
-#if !defined( WIN32 ) && !defined( __OS2__ )
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__ANDROID__)
     fsync (fd); /* Flush from OS */
 #else
     fdatasync (fd); /* Flush from OS */
+#endif
+#if defined (WIN32) || defined (__OS2__)
+    /* Windows cannot (re)move open files nor overwrite existing ones */
+    fclose (file);
+    vlc_unlink (permanent);
 #endif
     /* Atomically replace the file... */
     if (vlc_rename (temporary, permanent))
@@ -589,14 +593,8 @@ static int SaveConfigFile (vlc_object_t *p_this)
     /* (...then synchronize the directory, err, TODO...) */
     /* ...and finally close the file */
     vlc_mutex_unlock (&lock);
-#endif
+#if !defined (WIN32) && !defined (__OS2__)
     fclose (file);
-#if defined( WIN32 ) || defined( __OS2__ )
-    /* Windows cannot remove open files nor overwrite existing ones */
-    vlc_unlink (permanent);
-    if (vlc_rename (temporary, permanent))
-        vlc_unlink (temporary);
-    vlc_mutex_unlock (&lock);
 #endif
 
     free (temporary);

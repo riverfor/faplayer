@@ -50,7 +50,7 @@
 /* #undef CAN_COMPILE_SSSE3 */
 
 /* The ./configure command line */
-#define CONFIGURE_LINE "extras/package/android/../../../configure  '--host=arm-eabi-linux' '--build=x86_64-unknown-linux' '--disable-vlc' '--disable-debug' '--enable-swscale' '--enable-avcodec' '--enable-avformat' '--disable-postproc' '--disable-a52' '--disable-dbus' '--disable-lua' '--disable-mad' '--without-x' '--disable-xcb' '--disable-xvideo' '--disable-glx' '--disable-alsa' '--disable-skins2' '--disable-libgcrypt' 'build_alias=x86_64-unknown-linux' 'host_alias=arm-eabi-linux' 'CC=/opt/android/android-ndk-r5b//toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-gcc' 'CFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2' 'LDFLAGS=-Wl,-rpath-link=/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/lib,-Bdynamic,-dynamic-linker=/system/bin/linker -Wl,--no-undefined -Wl,-shared -L/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/lib -Wl,--fix-cortex-a8' 'LIBS=-lc -ldl -lgcc' 'CPPFLAGS=-I/opt/android/android-ndk-r5b//platforms/android-9/arch-arm/usr/include' 'CXX=/opt/android/android-ndk-r5b//toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-g++' 'CXXFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2'"
+#define CONFIGURE_LINE "./../../../configure  '--host=arm-eabi-linux' '--build=x86_64-unknown-linux' '--enable-static-modules' '--disable-vlc' '--disable-debug' '--disable-vlm' '--disable-sout' '--disable-dbus' '--disable-lua' '--disable-httpd' '--disable-libgcrypt' '--disable-a52' '--enable-live555' '--disable-vcd' '--disable-v4l2' '--disable-gnomevfs' '--disable-dvdread' '--disable-dvdnav' '--disable-bluray' '--disable-linsys' '--disable-decklink' '--enable-avformat' '--enable-swscale' '--enable-avcodec' '--disable-postproc' '--disable-libva' '--disable-mkv' '--disable-dv' '--disable-mod' '--disable-sid' '--disable-x264' '--disable-mad' '--disable-schroedinger' '--disable-dirac' '--disable-sdl-image' '--disable-zvbi' '--disable-fluidsynth' '--enable-opensles' '--disable-jack' '--disable-pulse' '--disable-alsa' '--disable-portaudio' '--disable-sdl' '--disable-xcb' '--disable-atmo' '--disable-qt4' '--disable-skins2' '--disable-mtp' '--disable-taglib' '--disable-notify' '--enable-freetype' '--enable-libass' '--disable-svg' '--disable-sqlite' '--disable-udev' '--disable-libxml2' '--enable-android-surface' '--disable-caca' '--disable-glx' '--disable-egl' '--disable-gl' '--disable-gles1' '--disable-gles2' '--disable-goom' '--disable-projectm' 'build_alias=x86_64-unknown-linux' 'host_alias=arm-eabi-linux' 'CC=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-gcc' 'CFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2' 'LDFLAGS=-Wl,-rpath-link=/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib,-Bdynamic,-dynamic-linker=/system/bin/linker -Wl,--no-undefined -Wl,-shared -L/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib -Wl,--fix-cortex-a8' 'LIBS=-lc -ldl -lgcc' 'CPPFLAGS=-I/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/include' 'CXX=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-g++' 'CXXFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2'"
 
 /* Copyright string */
 #define COPYRIGHT_MESSAGE "Copyright © 1996-2011 the VideoLAN team"
@@ -65,17 +65,17 @@
 /* #undef DISTRO_VERSION */
 
 /* Define if you want the HTTP dameon support */
-#define ENABLE_HTTPD 1
+/* #undef ENABLE_HTTPD */
 
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 /* #undef ENABLE_NLS */
 
 /* Define to 1 for stream output support. */
-#define ENABLE_SOUT 1
+/* #undef ENABLE_SOUT */
 
 /* Define if you want the VideoLAN manager support */
-#define ENABLE_VLM 1
+/* #undef ENABLE_VLM */
 
 /* Define to 1 if you have the <a52dec/a52.h> header file. */
 /* #undef HAVE_A52DEC_A52_H */
@@ -190,7 +190,7 @@
 /* #undef HAVE_EBML_EBMLVERSION_H */
 
 /* Define to 1 if you have the `eventfd' function. */
-/* #undef HAVE_EVENTFD */
+#define HAVE_EVENTFD 1
 
 /* Define to 1 if you have the <execinfo.h> header file. */
 /* #undef HAVE_EXECINFO_H */
@@ -205,7 +205,7 @@
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `fdatasync' function. */
-/* #undef HAVE_FDATASYNC */
+#define HAVE_FDATASYNC 1
 
 /* Define to 1 if you have the `fdopendir' function. */
 #define HAVE_FDOPENDIR 1
@@ -221,6 +221,9 @@
 
 /* Define to 1 if you have the `fstatvfs' function. */
 /* #undef HAVE_FSTATVFS */
+
+/* Define to 1 if you have the `fsync' function. */
+#define HAVE_FSYNC 1
 
 /* Define to 1 if you have the `getcwd' function. */
 #define HAVE_GETCWD 1
@@ -254,6 +257,12 @@
 
 /* Define if you have the iconv() function and it works. */
 #define HAVE_ICONV 1
+
+/* Define to 1 if you have the `if_nameindex' function. */
+/* #undef HAVE_IF_NAMEINDEX */
+
+/* Define to 1 if you have the `if_nametoindex' function. */
+#define HAVE_IF_NAMETOINDEX 1
 
 /* Define to 1 if you have the `inet_aton' function. */
 #define HAVE_INET_ATON 1
@@ -343,10 +352,10 @@
 #define HAVE_LINUX_VERSION_H 1
 
 /* Define to 1 if you have the <linux/videodev2.h> header file. */
-#define HAVE_LINUX_VIDEODEV2_H 1
+/* #undef HAVE_LINUX_VIDEODEV2_H */
 
 /* Define to 1 if you have the <liveMedia_version.hh> header file. */
-#define HAVE_LIVEMEDIA_VERSION_HH 1
+/* #undef HAVE_LIVEMEDIA_VERSION_HH */
 
 /* Define to 1 if you have the `lldiv' function. */
 #define HAVE_LLDIV 1
@@ -483,6 +492,9 @@
 /* Define to 1 if you have the `setlocale' function. */
 #define HAVE_SETLOCALE 1
 
+/* Define to 1 if you have the <SLES/OpenSLES.h> header file. */
+#define HAVE_SLES_OPENSLES_H 1
+
 /* Define to 1 if you have the <soundcard.h> header file. */
 /* #undef HAVE_SOUNDCARD_H */
 
@@ -585,12 +597,6 @@
 
 /* Define to 1 if you have the <sys/videoio.h> header file. */
 /* #undef HAVE_SYS_VIDEOIO_H */
-
-/* Define to 1 if you have the <taglib/apefile.h> header file. */
-/* #undef HAVE_TAGLIB_APEFILE_H */
-
-/* Define to 1 if you have the <taglib/mp4coverart.h> header file. */
-/* #undef HAVE_TAGLIB_MP4COVERART_H */
 
 /* Define to 1 if you have the `tdestroy' function. */
 /* #undef HAVE_TDESTROY */
@@ -757,7 +763,7 @@
 #endif
 
 /* Define to 1 if the X Window System is missing or not being used. */
-#define X_DISPLAY_MISSING 1
+/* #undef X_DISPLAY_MISSING */
 
 /* Define if the zvbi module is built */
 /* #undef ZVBI_COMPILED */
@@ -784,6 +790,9 @@
 /* Same as _REENTANT for some other OSes. */
 #define _THREAD_SAFE /**/
 
+/* Define to '0x0501' for IE 5.01 (and shell) APIs. */
+/* #undef _WIN32_IE */
+
 /* Define to '0x0501' for Windows XP APIs. */
 /* #undef _WIN32_WINNT */
 
@@ -794,7 +803,7 @@
 /* #undef const */
 
 /* Alias fdatasync() to fsync() if missing. */
-#define fdatasync fsync
+/* #undef fdatasync */
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */
