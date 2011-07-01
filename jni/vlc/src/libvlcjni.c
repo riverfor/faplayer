@@ -8,8 +8,6 @@
 
 #ifdef ANDROID
 
-void faplayer_message_logcat(const char *fmt, ...);
-
 #include <jni.h>
 
 #include "libvlcjni.h"
@@ -99,16 +97,10 @@ static void vlc_event_callback(const libvlc_event_t *ev, void *data)
     jobject obj_VlcEvent;
 
     if ((*gJVM)->AttachCurrentThread(gJVM, &env, 0) < 0)
-    {
-        faplayer_message_logcat("AttachCurrentThread() failed");
         return;
-    }
     obj_VlcEvent = (*env)->AllocObject(env, clz_VlcEvent);
     if (!obj_VlcEvent)
-    {
-        faplayer_message_logcat("AllocObject() failed");
         return;
-    }
     (*env)->SetIntField(env, obj_VlcEvent, f_VlcEvent_eventType, ev->type);
     switch (ev->type) {
     case libvlc_MediaDurationChanged: {

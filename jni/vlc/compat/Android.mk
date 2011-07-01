@@ -16,7 +16,6 @@ LOCAL_C_INCLUDES += \
     $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
-    debug.c \
     getdelim.c \
     pthread-cancel.c \
     swab.c \
