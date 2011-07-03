@@ -11,6 +11,7 @@ vlc_declare_plugin(blend);
 vlc_declare_plugin(converter_fixed);
 vlc_declare_plugin(dummy);
 vlc_declare_plugin(filesystem);
+vlc_declare_plugin(fixed32_mixer);
 vlc_declare_plugin(float32_mixer);
 vlc_declare_plugin(freetype);
 vlc_declare_plugin(libasf);
@@ -51,6 +52,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(converter_fixed),
 	vlc_plugin(dummy),
 	vlc_plugin(filesystem),
+	vlc_plugin(fixed32_mixer),
 	vlc_plugin(float32_mixer),
 	vlc_plugin(freetype),
 	vlc_plugin(libasf),

@@ -29,26 +29,31 @@ list.each { |l|
     }
 }
 all.sort!
-f = File.open('jni/vlc/src/libvlcjni.h', 'w') { |f|
-    f.write("/* auto generated */\n")
-    all.each { |m|
-        a = m.sub(/_plugin$/, '')
-        f.write("vlc_declare_plugin(#{a});\n")
-    }
-    f.write("const void *vlc_builtins_modules[] = {\n");
-    all.each { |m|
-        a = m.sub(/_plugin$/, '')
-        f.write("\tvlc_plugin(#{a}),\n");
-    }
-    f.write("\tNULL\n");
-    f.write("};\n");
-    f.write("/* auto generated */\n")
+jni_h_old = `cat jni/vlc/src/libvlcjni.h`
+jni_h_new = ''
+jni_h_new += "/* auto generated */\n"
+all.each { |m|
+    a = m.sub(/_plugin$/, '')
+    jni_h_new += "vlc_declare_plugin(#{a});\n"
 }
-n = `grep -n '# modules' jni/vlc/Android.mk | cut -d: -f1`
+jni_h_new += "const void *vlc_builtins_modules[] = {\n"
+all.each { |m|
+    a = m.sub(/_plugin$/, '')
+    jni_h_new += "\tvlc_plugin(#{a}),\n"
+}
+jni_h_new += "\tNULL\n"
+jni_h_new += "};\n"
+jni_h_new += "/* auto generated */\n"
+if jni_h_old != jni_h_new
+    f = File.open('jni/vlc/src/libvlcjni.h', 'w') { |f|
+        f.write(jni_h_new)
+    }
+end
+n = `grep -n '# modules' jni/vlc/Modules.mk | cut -d: -f1`
 n = n.to_i + 1
-old = `sed -n #{n}p jni/vlc/Android.mk`.strip!
-new = 'LOCAL_STATIC_LIBRARIES += ' + all.join(' ')
-if old != new
-    `sed -i "#{n} c\\#{new}" jni/vlc/Android.mk`
+modules_old = `sed -n #{n}p jni/vlc/Modules.mk`.strip!
+modules_new = 'LOCAL_STATIC_LIBRARIES += ' + all.join(' ')
+if modules_old != modules_new
+    `sed -i "#{n} c\\#{modules_new}" jni/vlc/Modules.mk`
 end
 

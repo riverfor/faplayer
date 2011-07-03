@@ -177,19 +177,13 @@ LOCAL_SRC_FILES := \
 
 LOCAL_LDLIBS += -ldl -llog -lz
 
-# modules begin
-LOCAL_STATIC_LIBRARIES += access_http_plugin access_mms_plugin amem_plugin android_surface_plugin audiotrack_android_plugin avcodec_plugin avformat_plugin bandlimited_resampler_plugin blend_plugin converter_fixed_plugin dummy_plugin filesystem_plugin float32_mixer_plugin freetype_plugin libasf_plugin libass_plugin libavi_plugin libmp4_plugin live555_plugin mpgv_plugin packetizer_copy_plugin packetizer_dirac_plugin packetizer_flac_plugin packetizer_h264_plugin packetizer_mlp_plugin packetizer_mpeg4audio_plugin packetizer_mpeg4video_plugin packetizer_mpegvideo_plugin packetizer_vc1_plugin realrtsp_plugin simple_channel_mixer_plugin subsdec_plugin subsusf_plugin subtitle_plugin swscale_plugin trivial_mixer_plugin ugly_resampler_plugin vmem_plugin yuv2rgb_plugin
-# modules end
+include $(LOCAL_PATH)/Modules.mk
 
 LOCAL_STATIC_LIBRARIES += compat
 
 ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_STATIC_LIBRARIES += arm_neon
 endif
-
-LOCAL_STATIC_LIBRARIES += ass freetype iconv charset live555
-
-LOCAL_WHOLE_STATIC_LIBRARIES += avformat avfilter avcodec avdevice avutil swscale
 
 include $(BUILD_SHARED_LIBRARY)
 

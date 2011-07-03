@@ -28,7 +28,6 @@ LOCAL_SRC_FILES := \
     chroma.c \
     copy.c \
     deinterlace.c \
-    encoder.c \
     fourcc.c \
     subtitle.c \
     video.c
