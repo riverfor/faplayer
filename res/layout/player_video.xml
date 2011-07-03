@@ -5,7 +5,7 @@
     android:layout_height="fill_parent" >
 
     <SurfaceView
-        android:id="@+id/player_surface_msg"
+        android:id="@+id/player_surface_def"
         android:visibility="gone"
         android:keepScreenOn="true"
         android:layout_gravity="center"
@@ -21,7 +21,7 @@
         android:layout_height="fill_parent" />
 
     <SurfaceView
-        android:id="@+id/player_surface_def"
+        android:id="@+id/player_surface_msg"
         android:visibility="gone"
         android:keepScreenOn="true"
         android:layout_gravity="center"
