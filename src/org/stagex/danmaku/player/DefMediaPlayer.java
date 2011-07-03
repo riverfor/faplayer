@@ -55,7 +55,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public int getCurrentPosition() {
-		Log.d(LOGTAG, "DefMediaPlayer getCurrentPosition() called");
 		int ret = -1;
 		try {
 			ret = mMediaPlayer.getCurrentPosition();
@@ -67,7 +66,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public int getDuration() {
-		Log.d(LOGTAG, "DefMediaPlayer getDuration() called");
 		int ret = -1;
 		try {
 			ret = mMediaPlayer.getDuration();
@@ -79,7 +77,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public int getVideoHeight() {
-		Log.d(LOGTAG, "DefMediaPlayer getVideoHeight() called");
 		int ret = -1;
 		try {
 			ret = mMediaPlayer.getVideoHeight();
@@ -91,7 +88,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public int getVideoWidth() {
-		Log.d(LOGTAG, "DefMediaPlayer getVideoWidth() called");
 		int ret = -1;
 		try {
 			ret = mMediaPlayer.getVideoWidth();
@@ -103,7 +99,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public boolean isLooping() {
-		Log.d(LOGTAG, "DefMediaPlayer isLooping() called");
 		try {
 			return mMediaPlayer.isLooping();
 		} catch (Exception e) {
@@ -114,7 +109,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public boolean isPlaying() {
-		Log.d(LOGTAG, "DefMediaPlayer isPlaying() called");
 		try {
 			return mMediaPlayer.isPlaying();
 		} catch (Exception e) {
@@ -125,7 +119,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void pause() {
-		Log.d(LOGTAG, "DefMediaPlayer pause() called");
 		try {
 			mMediaPlayer.pause();
 		} catch (Exception e) {
@@ -135,7 +128,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void prepare() {
-		Log.d(LOGTAG, "DefMediaPlayer prepare() called");
 		try {
 			mMediaPlayer.prepare();
 		} catch (Exception e) {
@@ -145,7 +137,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void prepareAsync() {
-		Log.d(LOGTAG, "DefMediaPlayer prepareAsync() called");
 		try {
 			mMediaPlayer.prepareAsync();
 		} catch (Exception e) {
@@ -155,7 +146,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void release() {
-		Log.d(LOGTAG, "DefMediaPlayer release() called");
 		try {
 			mMediaPlayer.release();
 		} catch (Exception e) {
@@ -166,7 +156,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void reset() {
-		Log.d(LOGTAG, "DefMediaPlayer reset() called");
 		stop();
 		try {
 			mMediaPlayer.reset();
@@ -177,7 +166,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void seekTo(int msec) {
-		Log.d(LOGTAG, "DefMediaPlayer seekTo() called");
 		try {
 			mMediaPlayer.seekTo(msec);
 		} catch (Exception e) {
@@ -187,8 +175,8 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void setDataSource(String uri) {
-		Log.d(LOGTAG, "DefMediaPlayer setDataSource() called");
 		try {
+			/* MediaPlayer doen't accept file:// prefix */
 			if (uri.startsWith("file://"))
 				uri = uri.substring(7);
 			mMediaPlayer.setDataSource(uri);
@@ -200,7 +188,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void setDisplay(SurfaceHolder holder) {
-		Log.d(LOGTAG, "DefMediaPlayer setDisplay() called");
 		try {
 			mMediaPlayer.setDisplay(holder);
 		} catch (Exception e) {
@@ -210,7 +197,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void setLooping(boolean looping) {
-		Log.d(LOGTAG, "DefMediaPlayer setLooping() called");
 		try {
 			mMediaPlayer.setLooping(looping);
 		} catch (Exception e) {
@@ -259,7 +245,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void start() {
-		Log.d(LOGTAG, "DefMediaPlayer start() called");
 		try {
 			mMediaPlayer.start();
 			if (mTimer != null) {
@@ -275,7 +260,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void stop() {
-		Log.d(LOGTAG, "DefMediaPlayer stop() called");
 		try {
 			if (mTimer != null) {
 				mTimer.purge();
@@ -289,40 +273,40 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public int getAudioTrackCount() {
-		Log.d(LOGTAG, "DefMediaPlayer getAudioTrackCount() called");
+		/* not possible in MediaPlayer */
 		return -1;
 	}
 
 	@Override
 	public int getAudioTrack() {
+		/* not possible in MediaPlayer */
 		return -1;
 	}
 
 	@Override
 	public void setAudioTrack(int index) {
-		Log.d(LOGTAG, "DefMediaPlayer setAudioTrack() called");
+		/* not possible in MediaPlayer */
 	}
 
 	@Override
 	public int getSubtitleTrackCount() {
-		Log.d(LOGTAG, "DefMediaPlayer getSubtitleTrackCount() called");
+		/* not possible in MediaPlayer */
 		return -1;
 	}
 
 	@Override
 	public int getSubtitleTrack() {
+		/* not possible in MediaPlayer */
 		return -1;
 	}
 
 	@Override
 	public void setSubtitleTrack(int index) {
-		Log.d(LOGTAG, "DefMediaPlayer setSubtitleTrack() called");
+		/* not possible in MediaPlayer */
 	}
 
 	@Override
 	public void onBufferingUpdate(MediaPlayer mp, int percent) {
-		Log.d(LOGTAG,
-				String.format("MediaPlayer onBufferingUpdate %d", percent));
 		if (mOnBufferingUpdateListener != null) {
 			mOnBufferingUpdateListener.onBufferingUpdate(this, percent);
 		}
@@ -330,7 +314,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
-		Log.d(LOGTAG, "MediaPlayer onCompletion");
 		if (mOnCompletionListener != null) {
 			mOnCompletionListener.onCompletion(this);
 		}
@@ -338,7 +321,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public boolean onError(MediaPlayer mp, int what, int extra) {
-		Log.d(LOGTAG, String.format("MediaPlayer onError %d %d", what, extra));
 		if (mOnErrorListener != null) {
 			return mOnErrorListener.onError(this, what, extra);
 		}
@@ -347,7 +329,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public boolean onInfo(MediaPlayer mp, int what, int extra) {
-		Log.d(LOGTAG, String.format("MediaPlayer onInfo %d %d", what, extra));
 		if (mOnInfoListener != null) {
 			return mOnInfoListener.onInfo(this, what, extra);
 		}
@@ -356,7 +337,6 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void onPrepared(MediaPlayer mp) {
-		Log.d(LOGTAG, "MediaPlayer onPrepared");
 		if (mOnPreparedListener != null) {
 			mOnPreparedListener.onPrepared(this);
 		}
@@ -364,13 +344,11 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	@Override
 	public void onSeekComplete(MediaPlayer mp) {
-		Log.d(LOGTAG, "MediaPlayer onSeekComplete");
+		/* not used */
 	}
 
 	@Override
 	public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-		Log.d(LOGTAG, String.format("MediaPlayer onVideoSizeChanged %d %d",
-				width, height));
 		if (mOnVideoSizeChangedListener != null) {
 			mOnVideoSizeChangedListener.onVideoSizeChangedListener(this, width,
 					height);

@@ -35,7 +35,7 @@ public class FileBrowserAdapter extends BaseAdapter implements
 	private ArrayList<String> mTop = new ArrayList<String>();
 	private ArrayList<String> mBottom = new ArrayList<String>();
 	private ArrayList<String> mList = new ArrayList<String>();
-	private String mFilter = "3gp#amv#ape#asf#avi#flac#flv#hlv#mkv#mov#mp3#mp4#mpeg#mpg#rm#rmvb#tta#wav#wma#wmv";
+	private String mFilter = "3gp#amv#ape#asf#avi#flac#flv#hlv#mkv#mov#mp3#mp4#mpeg#mpg#rm#rmvb#tta#wav#wma#wmv#xml";
 
 	public FileBrowserAdapter(Context context, String path) {
 		mContext = context;

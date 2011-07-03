@@ -26,7 +26,7 @@ public class TestActivity extends Activity {
 		mButtonPlay = (Button) findViewById(R.id.test_play);
 		mButtonPlay.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View arg0) {
+			public void onClick(View view) {
 				String uri = mTextUri.getText().toString();
 				if (uri.length() > 0) {
 					Intent intent = new Intent(TestActivity.this,

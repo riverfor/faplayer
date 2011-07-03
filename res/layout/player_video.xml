@@ -5,6 +5,14 @@
     android:layout_height="fill_parent" >
 
     <SurfaceView
+        android:id="@+id/player_surface_msg"
+        android:visibility="gone"
+        android:keepScreenOn="true"
+        android:layout_gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <SurfaceView
         android:id="@+id/player_surface_vlc"
         android:visibility="gone"
         android:keepScreenOn="true"
@@ -19,13 +27,5 @@
         android:layout_gravity="center"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
-
-    <View
-        android:id="@+id/player_view_message"
-        android:layout_gravity="center"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:background="@null"
-        android:visibility="gone" />
 
 </FrameLayout>

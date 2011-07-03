@@ -107,6 +107,7 @@ public abstract class AbsMediaPlayer {
 
 	protected static AbsMediaPlayer sDefMediaPlayer = null;
 	protected static AbsMediaPlayer sVlcMediaPlayer = null;
+	protected static AbsMediaPlayer sMsgMediaPlayer = null;
 
 	protected static AbsMediaPlayer getDefMediaPlayer() {
 		if (sDefMediaPlayer == null)
@@ -124,6 +125,13 @@ public abstract class AbsMediaPlayer {
 
 	public static AbsMediaPlayer getMediaPlayer(boolean useDefault) {
 		return useDefault ? getDefMediaPlayer() : getVlcMediaPlayer();
+	}
+
+	public static AbsMediaPlayer getMessagePlayer() {
+		if (sMsgMediaPlayer == null) {
+			sMsgMediaPlayer = new MsgMediaPlayer();
+		}
+		return sMsgMediaPlayer;
 	}
 
 }
