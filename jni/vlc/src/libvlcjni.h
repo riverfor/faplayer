@@ -1,4 +1,5 @@
 /* auto generated */
+vlc_declare_plugin(access_avformat);
 vlc_declare_plugin(access_http);
 vlc_declare_plugin(access_mms);
 vlc_declare_plugin(amem);
@@ -40,6 +41,7 @@ vlc_declare_plugin(ugly_resampler);
 vlc_declare_plugin(vmem);
 vlc_declare_plugin(yuv2rgb);
 const void *vlc_builtins_modules[] = {
+	vlc_plugin(access_avformat),
 	vlc_plugin(access_http),
 	vlc_plugin(access_mms),
 	vlc_plugin(amem),

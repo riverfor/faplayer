@@ -254,7 +254,7 @@ static libvlc_event_type_t mp_listening[] = {
 JNIEXPORT void JNICALL NAME(nativeCreate)(JNIEnv *env, jobject thiz)
 {
     initClasses(env, thiz);
-    const char *argv[] = {"-I", "dummy", "-vvv", "--no-plugins-cache", "--no-drop-late-frames"};
+    const char *argv[] = {"-I", "dummy", "-vvv", "--no-plugins-cache", "--no-drop-late-frames", "--input-timeshift-path", "/data/local/tmp"};
     libvlc_instance_t *instance = libvlc_new_with_builtins(sizeof(argv) / sizeof(*argv), argv, vlc_builtins_modules);
     setIntValue(env, thiz, "mLibVlcInstance", (jint) instance);
     libvlc_media_player_t *mp = libvlc_media_player_new(instance);
