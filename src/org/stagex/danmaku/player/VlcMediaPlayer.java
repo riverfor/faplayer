@@ -256,6 +256,10 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setDataSource(String path) {
+		/* force to use avformat acess_demux */
+		if (path.startsWith("http://") && path.endsWith(".m3u8")) {
+			path = String.format("avformat://%s", path);
+		}
 		nativeSetDataSource(path);
 	}
 
