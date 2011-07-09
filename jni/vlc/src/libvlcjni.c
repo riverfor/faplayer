@@ -98,6 +98,14 @@ static void vlc_event_callback(const libvlc_event_t *ev, void *data)
 
     if ((*gJVM)->AttachCurrentThread(gJVM, &env, 0) < 0)
         return;
+    /* do not report media parsed for non-file media */
+    if (ev->type == libvlc_MediaParsedChanged && ev->u.media_parsed_changed.new_status != 21178) {
+        libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, obj_VlcMediaPlayer, "mLibVlcMediaPlayer");
+        libvlc_media_t *media = (libvlc_media_t *) getIntValue(env, obj_VlcMediaPlayer, "mLibVlcMedia");
+        char *mrl = libvlc_media_get_mrl(media);
+        if (*mrl != '/' && strncmp(mrl, "file://", 7))
+            return;
+    }
     obj_VlcEvent = (*env)->AllocObject(env, clz_VlcEvent);
     if (!obj_VlcEvent)
         return;
@@ -421,7 +429,7 @@ JNIEXPORT void JNICALL NAME(nativePrepare)(JNIEnv *env, jobject thiz)
         libvlc_event_t ev;
 
         ev.type = libvlc_MediaParsedChanged;
-        ev.u.media_parsed_changed.new_status = 1;
+        ev.u.media_parsed_changed.new_status = 21178;
         vlc_event_callback(&ev, thiz);
     }
 }
@@ -440,7 +448,7 @@ JNIEXPORT void JNICALL NAME(nativePrepareAsync)(JNIEnv *env, jobject thiz)
         libvlc_event_t ev;
 
         ev.type = libvlc_MediaParsedChanged;
-        ev.u.media_parsed_changed.new_status = 1;
+        ev.u.media_parsed_changed.new_status = 21178;
         vlc_event_callback(&ev, thiz);
     }
 }
