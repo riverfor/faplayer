@@ -436,7 +436,7 @@ JNIEXPORT void JNICALL NAME(nativePrepareAsync)(JNIEnv *env, jobject thiz)
     libvlc_media_parse_async(media);
     /* vlc parses the media only if it's a file */
     char *mrl = libvlc_media_get_mrl(media);
-    if (*mrl == '/' || strncmp(mrl, "file://", 7)) {
+    if (*mrl != '/' && strncmp(mrl, "file://", 7)) {
         libvlc_event_t ev;
 
         ev.type = libvlc_MediaParsedChanged;
