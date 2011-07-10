@@ -3,23 +3,12 @@ package org.stagex.danmaku.activity;
 import java.util.ArrayList;
 
 import org.stagex.danmaku.R;
-import org.stagex.danmaku.comment.CPI;
-import org.stagex.danmaku.comment.CommentDrawable;
-import org.stagex.danmaku.comment.CommentManager;
 import org.stagex.danmaku.helper.SystemUtility;
 import org.stagex.danmaku.player.AbsMediaPlayer;
 import org.stagex.danmaku.player.DefMediaPlayer;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -103,7 +92,6 @@ public class PlayerActivity extends Activity implements
 	private LinearLayout mLinearLayoutControlBar;
 
 	/* player video */
-	private View mViewMessage;
 	private SurfaceView mSurfaceViewDef;
 	private SurfaceHolder mSurfaceHolderDef;
 	private SurfaceView mSurfaceViewVlc;
@@ -282,9 +270,6 @@ public class PlayerActivity extends Activity implements
 				mEventHandler.dispatchMessage(msg);
 			}
 		});
-		mViewMessage = (View) findViewById(R.id.player_view_message);
-		mViewMessage.setBackgroundDrawable(new CommentDrawable());
-		mViewMessage.setOnTouchListener(this);
 
 		mTextViewTime = (TextView) findViewById(R.id.player_text_position);
 		mSeekBarProgress = (SeekBar) findViewById(R.id.player_seekbar_progress);
@@ -337,8 +322,6 @@ public class PlayerActivity extends Activity implements
 		mLength = -1;
 		mCanSeek = true;
 		mAspectRatio = 0;
-		/* */
-		mViewMessage.setVisibility(View.GONE);
 		/* */
 		mImageButtonToggleMessage.setVisibility(View.GONE);
 		mImageButtonSwitchAudio.setVisibility(View.GONE);
@@ -540,12 +523,6 @@ public class PlayerActivity extends Activity implements
 	public void onClick(View v) {
 		int id = v.getId();
 		switch (id) {
-		case R.id.player_button_toggle_message: {
-			int visibility = mViewMessage.getVisibility();
-			mViewMessage.setVisibility(visibility == View.VISIBLE ? View.GONE
-					: View.VISIBLE);
-			break;
-		}
 		case R.id.player_button_switch_audio: {
 
 			break;
