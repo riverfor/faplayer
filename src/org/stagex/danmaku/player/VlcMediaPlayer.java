@@ -14,6 +14,8 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	private static final String LOGTAG = "DANMAKU-VlcMediaPlayer";
 
+	protected static VlcMediaPlayer sInstance = null;
+
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
 	protected AbsMediaPlayer.OnErrorListener mOnErrorListener = null;
@@ -21,12 +23,15 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected AbsMediaPlayer.OnPreparedListener mOnPreparedListener = null;
 	protected AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
 	/* double check this */
-	private AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
+	protected AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
 
 	/* used by the native side */
 	protected int mLibVlcInstance = 0;
 	protected int mLibVlcMediaPlayer = 0;
 	protected int mLibVlcMedia = 0;
+	protected int mNativeMediaParsed = 0;
+	protected int mNativeMediaParseLock = 0;
+	protected int mNativeMediaParseCond = 0;
 
 	/* */
 	private int mTime = -1;
@@ -62,8 +67,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected native void nativeSeekTo(int msec);
 
 	protected native void nativeSetDataSource(String path);
-
-	// protected native void nativeSetDisplay(SurfaceHolder holder);
 
 	protected native void nativeSetLooping(boolean looping);
 
@@ -109,7 +112,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	/* called by native side */
 	private void onVlcEvent(VlcEvent ev) {
-		Log.d(LOGTAG, String.format("received vlc event %d", ev.eventType));
 		switch (ev.eventType) {
 		case VlcEvent.MediaParsedChanged: {
 			if (!ev.booleanValue) {
@@ -191,86 +193,80 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 		}
 	}
 
+	public static VlcMediaPlayer getInstance() {
+		if (sInstance == null)
+			sInstance = new VlcMediaPlayer();
+		return sInstance;
+	}
+
 	protected VlcMediaPlayer() {
 		nativeCreate();
 	}
 
 	@Override
 	public int getCurrentPosition() {
-		Log.d(LOGTAG, "VlcMediaPlayer getCurrentPosition() called");
 		return nativeGetCurrentPosition();
 	}
 
 	@Override
 	public int getDuration() {
-		Log.d(LOGTAG, "VlcMediaPlayer getDuration() called");
 		return nativeGetDuration();
 	}
 
 	@Override
 	public int getVideoHeight() {
-		Log.d(LOGTAG, "VlcMediaPlayer getVideoHeight() called");
 		return nativeGetVideoHeight();
 	}
 
 	@Override
 	public int getVideoWidth() {
-		Log.d(LOGTAG, "VlcMediaPlayer getVideoWidth() called");
 		return nativeGetVideoWidth();
 	}
 
 	@Override
 	public boolean isLooping() {
-		Log.d(LOGTAG, "VlcMediaPlayer isLooping() called");
+		/* not implemented yet */
 		return nativeIsLooping();
 	}
 
 	@Override
 	public boolean isPlaying() {
-		Log.d(LOGTAG, "VlcMediaPlayer isPlaying() called");
 		return nativeIsPlaying();
 	}
 
 	@Override
 	public void pause() {
-		Log.d(LOGTAG, "VlcMediaPlayer pause() called");
 		nativePause();
 	}
 
 	@Override
 	public void prepare() {
-		Log.d(LOGTAG, "VlcMediaPlayer prepare() called");
 		nativePrepare();
 	}
 
 	@Override
 	public void prepareAsync() {
-		Log.d(LOGTAG, "VlcMediaPlayer prepareAsync() called");
 		nativePrepareAsync();
 	}
 
 	@Override
 	public void release() {
-		Log.d(LOGTAG, "VlcMediaPlayer release() called");
 		nativeRelease();
-		sVlcMediaPlayer = null;
+		sInstance = null;
 	}
 
 	@Override
 	public void reset() {
-		Log.d(LOGTAG, "VlcMediaPlayer reset() called");
-
+		/* not implemented yet */
 	}
 
 	@Override
 	public void seekTo(int msec) {
-		Log.d(LOGTAG, "VlcMediaPlayer seekTo() called");
 		nativeSeekTo(msec);
 	}
 
 	@Override
 	public void setDataSource(String path) {
-		Log.d(LOGTAG, "VlcMediaPlayer setDataSource() called");
 		/* force to use avformat acess_demux */
 		if (path.startsWith("http://") && path.endsWith(".m3u8")) {
 			path = String.format("avformat://%s", path);
@@ -280,7 +276,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setDisplay(SurfaceHolder holder) {
-		Log.d(LOGTAG, "VlcMediaPlayer setDisplay() called");
 		holder.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceChanged(SurfaceHolder holder, int format,
@@ -304,7 +299,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setLooping(boolean looping) {
-		Log.d(LOGTAG, "VlcMediaPlayer setLooping() called");
+		/* not implemented yet */
 		nativeSetLooping(looping);
 	}
 
@@ -349,48 +344,46 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void start() {
-		Log.d(LOGTAG, "VlcMediaPlayer start() called");
 		nativeStart();
 	}
 
 	@Override
 	public void stop() {
-		Log.d(LOGTAG, "VlcMediaPlayer stop() called");
 		nativeStop();
 	}
 
 	@Override
 	public int getAudioTrackCount() {
-		// TODO Auto-generated method stub
+		/* not implemented yet */
 		return 0;
 	}
 
 	@Override
 	public int getAudioTrack() {
+		/* not implemented yet */
 		return 0;
 	}
 
 	@Override
 	public void setAudioTrack(int index) {
-		// TODO Auto-generated method stub
-
+		/* not implemented yet */
 	}
 
 	@Override
 	public int getSubtitleTrackCount() {
-		// TODO Auto-generated method stub
+		/* not implemented yet */
 		return 0;
 	}
 
 	@Override
 	public int getSubtitleTrack() {
+		/* not implemented yet */
 		return 0;
 	}
 
 	@Override
 	public void setSubtitleTrack(int index) {
-		// TODO Auto-generated method stub
-
+		/* not implemented yet */
 	}
 
 }

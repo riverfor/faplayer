@@ -9,6 +9,8 @@
 #ifdef ANDROID
 
 #include <jni.h>
+#include <android/log.h>
+#include <stdlib.h>
 
 #include "libvlcjni.h"
 
@@ -98,14 +100,6 @@ static void vlc_event_callback(const libvlc_event_t *ev, void *data)
 
     if ((*gJVM)->AttachCurrentThread(gJVM, &env, 0) < 0)
         return;
-    /* do not report media parsed for non-file media */
-    if (ev->type == libvlc_MediaParsedChanged && ev->u.media_parsed_changed.new_status != 21178) {
-        libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, obj_VlcMediaPlayer, "mLibVlcMediaPlayer");
-        libvlc_media_t *media = (libvlc_media_t *) getIntValue(env, obj_VlcMediaPlayer, "mLibVlcMedia");
-        char *mrl = libvlc_media_get_mrl(media);
-        if (*mrl != '/' && strncmp(mrl, "file://", 7))
-            return;
-    }
     obj_VlcEvent = (*env)->AllocObject(env, clz_VlcEvent);
     if (!obj_VlcEvent)
         return;
@@ -117,6 +111,14 @@ static void vlc_event_callback(const libvlc_event_t *ev, void *data)
         break;
     }
     case libvlc_MediaParsedChanged: {
+        libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, obj_VlcMediaPlayer, "mLibVlcMediaPlayer");
+        vlc_mutex_t *parse_lock = (vlc_mutex_t *) getIntValue(env, obj_VlcMediaPlayer, "mNativeMediaParseLock");
+        vlc_cond_t *parse_cond = (vlc_cond_t *) getIntValue(env, obj_VlcMediaPlayer, "mNativeMediaParseCond");
+        vlc_mutex_lock(parse_lock);
+        setIntValue(env, obj_VlcMediaPlayer, "mNativeMediaParsed", 1);
+        vlc_cond_broadcast(parse_cond);
+        vlc_mutex_unlock(parse_lock);
+        libvlc_media_player_set_pause(mp, 1);
         int status = ev->u.media_parsed_changed.new_status;
         (*env)->SetBooleanField(env, obj_VlcEvent, f_VlcEvent_booleanValue, status > 0);
         break;
@@ -267,16 +269,30 @@ JNIEXPORT void JNICALL NAME(nativeCreate)(JNIEnv *env, jobject thiz)
     setIntValue(env, thiz, "mLibVlcInstance", (jint) instance);
     libvlc_media_player_t *mp = libvlc_media_player_new(instance);
     setIntValue(env, thiz, "mLibVlcMediaPlayer", (jint) mp);
+    /* throw? */
     libvlc_event_manager_t *em = libvlc_media_player_event_manager(mp);
     for (int i = 0; i < sizeof(mp_listening) / sizeof(*mp_listening); i++)
     {
         libvlc_event_attach(em, mp_listening[i], vlc_event_callback, thiz);
     }
-    jclass clz = (*env)->FindClass(env, PREFIX "VlcMediaPlayer$VlcEvent");
+    vlc_mutex_t *parse_lock = calloc(1, sizeof(vlc_mutex_t));
+    vlc_mutex_init(parse_lock);
+    setIntValue(env, thiz, "mNativeMediaParseLock", (jint) parse_lock);
+    vlc_cond_t *parse_cond = calloc(1, sizeof(vlc_cond_t));
+    vlc_cond_init(parse_cond);
+    setIntValue(env, thiz, "mNativeMediaParseCond", (jint) parse_cond);
 }
 
 JNIEXPORT void JNICALL NAME(nativeRelease)(JNIEnv *env, jobject thiz)
 {
+    vlc_mutex_t *parse_lock = (vlc_mutex_t *) getIntValue(env, thiz, "mNativeMediaParseLock");
+    vlc_cond_t *parse_cond = (vlc_cond_t *) getIntValue(env, thiz, "mNativeMediaParseCond");
+    vlc_mutex_destroy(parse_lock);
+    free(parse_lock);
+    setIntValue(env, thiz, "mNativeMediaParseLock", 0);
+    vlc_cond_destroy(parse_cond);
+    free(parse_cond);
+    setIntValue(env, thiz, "mNativeMediaParseCond", 0);
     jint mLibVlcMediaPlayer = getIntValue(env, thiz, "mLibVlcMediaPlayer");
     if (mLibVlcMediaPlayer != 0)
     {
@@ -310,10 +326,6 @@ JNIEXPORT void JNICALL NAME(nativeRelease)(JNIEnv *env, jobject thiz)
 JNIEXPORT jint JNICALL NAME(nativeGetCurrentPosition)(JNIEnv *env, jobject thiz)
 {
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return -1;
-    }
     int64_t position = libvlc_media_player_get_time(mp);
     if (position < 0)
     {
@@ -325,10 +337,6 @@ JNIEXPORT jint JNICALL NAME(nativeGetCurrentPosition)(JNIEnv *env, jobject thiz)
 JNIEXPORT jint JNICALL NAME(nativeGetDuration)(JNIEnv *env, jobject thiz)
 {
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return -1;
-    }
     int64_t duration = libvlc_media_player_get_length(mp);
     if (duration < 0)
     {
@@ -388,96 +396,65 @@ JNIEXPORT jint JNICALL NAME(nativeGetVideoWidth)(JNIEnv *env, jobject thiz)
 JNIEXPORT jboolean JNICALL NAME(nativeIsLooping)(JNIEnv *env, jobject thiz)
 {
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return 0;
-    }
     return 0;
 }
 
 JNIEXPORT jboolean JNICALL NAME(nativeIsPlaying)(JNIEnv *env, jobject thiz)
 {
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return 0;
-    }
     return (libvlc_media_player_is_playing(mp) != 0);
 }
 
 JNIEXPORT void JNICALL NAME(nativePause)(JNIEnv *env, jobject thiz)
 {
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return;
-    }
     libvlc_media_player_set_pause(mp, 1);
 }
 
 JNIEXPORT void JNICALL NAME(nativePrepare)(JNIEnv *env, jobject thiz)
 {
     libvlc_media_t *media = (libvlc_media_t *) getIntValue(env, thiz, "mLibVlcMedia");
-    if (!media)
-    {
-        return;
-    }
     libvlc_media_parse(media);
     /* vlc parses the media only if it's a file */
     char *mrl = libvlc_media_get_mrl(media);
-    if (*mrl != '/' && strncmp(mrl, "file://", 7)) {
-        libvlc_event_t ev;
-
-        ev.type = libvlc_MediaParsedChanged;
-        ev.u.media_parsed_changed.new_status = 21178;
-        vlc_event_callback(&ev, thiz);
+    if (strncmp(mrl, "file://", 7)) {
+        libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
+        libvlc_media_player_play(mp);
+        vlc_mutex_t *parse_lock = (vlc_mutex_t *) getIntValue(env, thiz, "mNativeMediaParseLock");
+        vlc_cond_t *parse_cond = (vlc_cond_t *) getIntValue(env, thiz, "mNativeMediaParseCond");
+        vlc_mutex_lock(parse_lock);
+        while (!getIntValue(env, thiz, "mNativeMediaParsed"))
+            vlc_cond_wait(parse_cond, parse_lock);
+        vlc_mutex_unlock(parse_lock);
     }
 }
 
 JNIEXPORT void JNICALL NAME(nativePrepareAsync)(JNIEnv *env, jobject thiz)
 {
     libvlc_media_t *media = (libvlc_media_t *) getIntValue(env, thiz, "mLibVlcMedia");
-    if (!media)
-    {
-        return;
-    }
     libvlc_media_parse_async(media);
     /* vlc parses the media only if it's a file */
     char *mrl = libvlc_media_get_mrl(media);
-    if (*mrl != '/' && strncmp(mrl, "file://", 7)) {
-        libvlc_event_t ev;
-
-        ev.type = libvlc_MediaParsedChanged;
-        ev.u.media_parsed_changed.new_status = 21178;
-        vlc_event_callback(&ev, thiz);
+    if (strncmp(mrl, "file://", 7)) {
+        libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
+        libvlc_media_player_play(mp);
     }
 }
 
 JNIEXPORT void JNICALL NAME(nativeSeekTo)(JNIEnv *env, jobject thiz, jint msec)
 {
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return;
-    }
     libvlc_media_player_set_time(mp, msec);
 }
 
 JNIEXPORT void JNICALL NAME(nativeSetDataSource)(JNIEnv *env, jobject thiz, jstring path)
 {
     libvlc_instance_t *instance = (libvlc_instance_t *) getIntValue(env, thiz, "mLibVlcInstance");
-    if (!instance)
-    {
-        return;
-    }
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return;
-    }
     const char *str = (*env)->GetStringUTFChars(env, path, 0);
     if (!str)
     {
+        /* throw? */
         return;
     }
     libvlc_media_t *media = (*str == '/') ? libvlc_media_new_path(instance, str) : libvlc_media_new_location(instance, str);
@@ -507,19 +484,11 @@ JNIEXPORT void JNICALL NAME(nativeSetLooping)(JNIEnv *env, jobject thiz, jboolea
 JNIEXPORT void JNICALL NAME(nativeStart)(JNIEnv *env, jobject thiz)
 {
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return;
-    }
     libvlc_media_player_play(mp);
 }
 
 JNIEXPORT void JNICALL NAME(nativeStop)(JNIEnv *env, jobject thiz) {
     libvlc_media_player_t *mp = (libvlc_media_player_t *) getIntValue(env, thiz, "mLibVlcMediaPlayer");
-    if (!mp)
-    {
-        return;
-    }
     libvlc_media_player_stop(mp);
 }
 
