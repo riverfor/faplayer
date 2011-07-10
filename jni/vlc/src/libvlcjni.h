@@ -1,5 +1,4 @@
 /* auto generated */
-vlc_declare_plugin(access_avformat);
 vlc_declare_plugin(access_http);
 vlc_declare_plugin(access_mms);
 vlc_declare_plugin(amem);
@@ -20,6 +19,7 @@ vlc_declare_plugin(libass);
 vlc_declare_plugin(libavi);
 vlc_declare_plugin(libmp4);
 vlc_declare_plugin(live555);
+vlc_declare_plugin(mkv);
 vlc_declare_plugin(mpgv);
 vlc_declare_plugin(packetizer_copy);
 vlc_declare_plugin(packetizer_dirac);
@@ -41,7 +41,6 @@ vlc_declare_plugin(ugly_resampler);
 vlc_declare_plugin(vmem);
 vlc_declare_plugin(yuv2rgb);
 const void *vlc_builtins_modules[] = {
-	vlc_plugin(access_avformat),
 	vlc_plugin(access_http),
 	vlc_plugin(access_mms),
 	vlc_plugin(amem),
@@ -62,6 +61,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(libavi),
 	vlc_plugin(libmp4),
 	vlc_plugin(live555),
+	vlc_plugin(mkv),
 	vlc_plugin(mpgv),
 	vlc_plugin(packetizer_copy),
 	vlc_plugin(packetizer_dirac),

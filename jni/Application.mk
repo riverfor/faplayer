@@ -40,5 +40,5 @@ OPT_CPPFLAGS := $(OPT_CLFAGS)
 APP_CFLAGS := $(APP_CFLAGS) $(OPT_CFLAGS)
 APP_CPPFLAGS := $(APP_CPPFLAGS) $(OPT_CPPFLAGS) 
 
-APP_STL := stlport_static
+APP_STL := gnustl_static
 
