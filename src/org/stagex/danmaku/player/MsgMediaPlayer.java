@@ -1,183 +1,272 @@
 package org.stagex.danmaku.player;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import org.stagex.danmaku.helper.SystemUtility;
+import org.stagex.danmaku.site.CommentParser;
+import org.stagex.danmaku.site.CommentParserFactory;
+import org.stagex.danmaku.site.MessagePlayer;
+import org.stagex.danmaku.site.MessagePlayerFactory;
+
 import android.graphics.PixelFormat;
+import android.net.Uri;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
-public class MsgMediaPlayer extends AbsMediaPlayer {
+public class MsgMediaPlayer extends AbsMediaPlayer implements
+		MessagePlayer.OnCompletionListener,
+		MessagePlayer.OnProgressUpdateListener {
+
+	private static final String LOGTAG = "DANMAKU-MsgMediaPlayer";
+
+	protected static MsgMediaPlayer sInstance = null;
+
+	protected Thread mPrepareThread = null;
+
+	protected String mDataSource = null;
+
+	protected SurfaceHolder mDisplay = null;
+
+	protected CommentParser mCommentParser = null;
+	protected MessagePlayer mMessagePlayer = null;
 
 	protected OnBufferingUpdateListener mOnBufferingUpdateListener = null;
+	protected OnCompletionListener mOnCompletionListener = null;
+	protected OnErrorListener mOnErrorListener = null;
 	protected OnPreparedListener mOnPreparedListener = null;
+	protected OnProgressUpdateListener mOnProgressUpdateListener = null;
 	protected OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
 
-	private SurfaceHolder mDisplay = null;
-	private ReentrantLock mDisplayLock = new ReentrantLock();
-	private Condition mDisplayCond = mDisplayLock.newCondition();
-
-	/* example only, not safe!!! */
-	private Thread mRenderer = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			while (mDisplay == null) {
-				mDisplayLock.lock();
-				try {
-					mDisplayCond.await();
-				} catch (InterruptedException e) {
-				}
-				mDisplayLock.unlock();
-			}
-			while (true) {
-				String text = String.format("%d", System.currentTimeMillis());
-				Paint paint = new Paint();
-				paint.setColor(0x7f00ff7f);
-				paint.setTextSize(25);
-				Canvas canvas = mDisplay.lockCanvas();
-				int w = canvas.getWidth();
-				int h = canvas.getHeight();
-				canvas.drawText(text, 25, 25, paint);
-				mDisplay.unlockCanvasAndPost(canvas);
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					break;
-				}
-			}
-		}
-	});
+	public static MsgMediaPlayer getInstance() {
+		if (sInstance == null)
+			sInstance = new MsgMediaPlayer();
+		return sInstance;
+	}
 
 	protected MsgMediaPlayer() {
-		mRenderer.start();
+
 	}
 
 	@Override
 	public int getCurrentPosition() {
-		// TODO Auto-generated method stub
-		return 0;
+		if (mMessagePlayer != null)
+			return mMessagePlayer.getCurrentPosition();
+		return -1;
 	}
 
 	@Override
 	public int getDuration() {
-		// TODO Auto-generated method stub
-		return 0;
+		/* not useful, should synchronize with the video */
+		if (mMessagePlayer != null)
+			return mMessagePlayer.getDuration();
+		return -1;
 	}
 
 	@Override
 	public int getVideoHeight() {
-		// TODO Auto-generated method stub
-		return 384;
+		if (mMessagePlayer != null)
+			return mMessagePlayer.getVideoHeight();
+		return -1;
 	}
 
 	@Override
 	public int getVideoWidth() {
-		// TODO Auto-generated method stub
-		return 512;
+		if (mMessagePlayer != null)
+			return mMessagePlayer.getVideoWidth();
+		return -1;
 	}
 
 	@Override
 	public boolean isLooping() {
-		// TODO Auto-generated method stub
+		/* not useful, should synchronize with the video */
 		return false;
 	}
 
 	@Override
 	public boolean isPlaying() {
-		// TODO Auto-generated method stub
+		if (mMessagePlayer != null)
+			return mMessagePlayer.isPlaying();
 		return false;
 	}
 
 	@Override
 	public void pause() {
-		// TODO Auto-generated method stub
-
+		if (mMessagePlayer != null)
+			mMessagePlayer.pause();
 	}
 
 	@Override
 	public void prepare() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void prepareAsync() {
-		// TODO Auto-generated method stub
-		if (mOnBufferingUpdateListener != null) {
-			mOnBufferingUpdateListener.onBufferingUpdate(this, 100);
+		/* only file and HTTP is supported */
+		if (mDataSource == null
+				|| (!mDataSource.startsWith("/")
+						&& !mDataSource.startsWith("file://") && !mDataSource
+							.startsWith("http://"))) {
+			Log.d(LOGTAG, String.format("not supported input %s", mDataSource));
+			if (mOnErrorListener != null) {
+				mOnErrorListener.onError(this, 0, 0);
+			}
+			return;
 		}
+		/* fake buffering update */
+		if (mOnBufferingUpdateListener != null) {
+			mOnBufferingUpdateListener.onBufferingUpdate(this, 0);
+		}
+		try {
+			/* prepare the file that may contain messages */
+			if (mDataSource.startsWith("file://")) {
+				mDataSource = Uri.decode(mDataSource);
+				mDataSource = mDataSource.substring(7);
+			}
+			InputStream in = null;
+			if (mDataSource.startsWith("/")) {
+				in = new FileInputStream(mDataSource);
+			} else {
+				String fileName = mDataSource.substring(mDataSource
+						.lastIndexOf('/'));
+				int indexOfDot = fileName.lastIndexOf('.');
+				if (indexOfDot >= 0) {
+					fileName = fileName.substring(0, indexOfDot);
+				}
+				/* TODO: where to delete or place it? */
+				fileName = String.format("%s/%s.xml",
+						SystemUtility.getTempPath(), fileName);
+				boolean downloaded = SystemUtility.simpleHttpGet(mDataSource,
+						fileName);
+				if (!downloaded) {
+					Log.d(LOGTAG,
+							String.format("failed to download %s", mDataSource));
+					if (mOnErrorListener != null) {
+						mOnErrorListener.onError(this, 0, 0);
+					}
+					return;
+				}
+				in = new FileInputStream(fileName);
+			}
+			/* parse it */
+			mCommentParser = CommentParserFactory.parse(in);
+			in.close();
+			if (mCommentParser == null) {
+				Log.d(LOGTAG, String.format("failed to parse %s", mDataSource));
+				if (mOnErrorListener != null) {
+					mOnErrorListener.onError(this, 0, 0);
+				}
+				return;
+			}
+			/* create corresponding message player */
+			String site = mCommentParser.getParserName();
+			mMessagePlayer = MessagePlayerFactory.createPlayer(site);
+			if (mMessagePlayer == null) {
+				Log.d(LOGTAG,
+						String.format("failed to create a player for %s", site));
+				if (mOnErrorListener != null) {
+					mOnErrorListener.onError(this, 0, 0);
+				}
+				return;
+			}
+			/* display */
+			mMessagePlayer.setDisplay(mDisplay);
+			/* message player is fix-sized so here we have size */
+			if (mOnVideoSizeChangedListener != null) {
+				int videoWidth = mMessagePlayer.getVideoWidth();
+				int videoHeight = mMessagePlayer.getVideoHeight();
+				mOnVideoSizeChangedListener.onVideoSizeChangedListener(this,
+						videoWidth, videoHeight);
+			}
+			/* listen to available message player events */
+			mMessagePlayer.setOnCompletionListener(this);
+			mMessagePlayer.setOnProgressUpdateListener(this);
+			/* fake buffering update */
+			if (mOnBufferingUpdateListener != null) {
+				mOnBufferingUpdateListener.onBufferingUpdate(this, 50);
+			}
+			/* message player will deal with comments, this may take time */
+			mMessagePlayer.setDataSource(mCommentParser.getParserResult());
+			/* fake buffering update */
+			if (mOnBufferingUpdateListener != null) {
+				mOnBufferingUpdateListener.onBufferingUpdate(this, 100);
+			}
+		} catch (IOException e) {
+			Log.d(LOGTAG, "message player failed to prepare");
+			if (mOnErrorListener != null) {
+				mOnErrorListener.onError(this, 0, 0);
+			}
+			return;
+		}
+		/* everything is fine */
+		Log.d(LOGTAG, "message player successfully prepared");
 		if (mOnPreparedListener != null) {
 			mOnPreparedListener.onPrepared(this);
 		}
 	}
 
 	@Override
-	public void release() {
-		// TODO Auto-generated method stub
+	public void prepareAsync() {
+		if (mPrepareThread != null && mPrepareThread.isAlive())
+			return;
+		mPrepareThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				MsgMediaPlayer.this.prepare();
+			}
+		});
+		mPrepareThread.start();
+	}
 
+	@Override
+	public void release() {
+		if (mPrepareThread.isAlive()) {
+			try {
+				mPrepareThread.join();
+			} catch (InterruptedException e) {
+			}
+		}
+		if (mCommentParser != null)
+			mCommentParser = null;
+		if (mMessagePlayer != null) {
+			mMessagePlayer.stop();
+			mMessagePlayer.release();
+			mMessagePlayer = null;
+		}
+		mOnBufferingUpdateListener = null;
+		mOnCompletionListener = null;
+		mOnErrorListener = null;
+		mOnPreparedListener = null;
+		mOnProgressUpdateListener = null;
+		mOnVideoSizeChangedListener = null;
 	}
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-
+		if (mMessagePlayer != null)
+			mMessagePlayer.reset();
 	}
 
 	@Override
 	public void seekTo(int msec) {
-		// TODO Auto-generated method stub
-
+		if (mMessagePlayer != null)
+			mMessagePlayer.seekTo(msec);
 	}
 
 	@Override
 	public void setDataSource(String path) {
-		// TODO Auto-generated method stub
+		mDataSource = path;
 	}
 
 	@Override
-	public void setDisplay(SurfaceHolder holder) {
-		holder.setFormat(PixelFormat.TRANSLUCENT);
-		if (mOnVideoSizeChangedListener != null) {
-			mOnVideoSizeChangedListener.onVideoSizeChangedListener(this, 512,
-					384);
-		}
-		mDisplayLock.lock();
-		mDisplay = holder;
-		mDisplay.addCallback(new SurfaceHolder.Callback() {
-
-			@Override
-			public void surfaceDestroyed(SurfaceHolder holder) {
-				// TODO Auto-generated method stub
-				try {
-					mRenderer.interrupt();
-				} catch (Exception e) {
-
-				}
-			}
-
-			@Override
-			public void surfaceCreated(SurfaceHolder holder) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void surfaceChanged(SurfaceHolder holder, int format,
-					int width, int height) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-		mDisplayCond.signal();
-		mDisplayLock.unlock();
+	public void setDisplay(SurfaceHolder display) {
+		mDisplay = display;
+		if (display != null)
+			mDisplay.setFormat(PixelFormat.RGBA_8888);
+		if (mMessagePlayer != null)
+			mMessagePlayer.setDisplay(display);
 	}
 
 	@Override
 	public void setLooping(boolean looping) {
-		// TODO Auto-generated method stub
-
+		/* not used for now */
 	}
 
 	@Override
@@ -187,14 +276,12 @@ public class MsgMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setOnCompletionListener(OnCompletionListener listener) {
-		// TODO Auto-generated method stub
-
+		mOnCompletionListener = listener;
 	}
 
 	@Override
 	public void setOnErrorListener(OnErrorListener listener) {
-		// TODO Auto-generated method stub
-
+		mOnErrorListener = listener;
 	}
 
 	@Override
@@ -209,8 +296,7 @@ public class MsgMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setOnProgressUpdateListener(OnProgressUpdateListener listener) {
-		// TODO Auto-generated method stub
-
+		mOnProgressUpdateListener = listener;
 	}
 
 	@Override
@@ -221,50 +307,58 @@ public class MsgMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void start() {
-		// TODO Auto-generated method stub
-
+		if (mMessagePlayer != null)
+			mMessagePlayer.start();
 	}
 
 	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
-
+		if (mMessagePlayer != null)
+			mMessagePlayer.stop();
 	}
 
 	@Override
 	public int getAudioTrackCount() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public int getAudioTrack() {
-		// TODO Auto-generated method stub
-		return 0;
+		return -1;
 	}
 
 	@Override
 	public void setAudioTrack(int index) {
-		// TODO Auto-generated method stub
-
+		/* not possible */
 	}
 
 	@Override
 	public int getSubtitleTrackCount() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public int getSubtitleTrack() {
-		// TODO Auto-generated method stub
-		return 0;
+		return -1;
 	}
 
 	@Override
 	public void setSubtitleTrack(int index) {
-		// TODO Auto-generated method stub
+		/* not possible */
+	}
 
+	/* bridged events */
+
+	@Override
+	public void onCompletion() {
+		if (mOnCompletionListener != null)
+			mOnCompletionListener.onCompletion(this);
+	}
+
+	@Override
+	public void onProgressUpdate(int time, int length) {
+		if (mOnProgressUpdateListener != null)
+			mOnProgressUpdateListener.onProgressUpdate(this, time, length);
 	}
 
 }

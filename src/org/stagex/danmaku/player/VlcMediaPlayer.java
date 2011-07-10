@@ -2,6 +2,7 @@ package org.stagex.danmaku.player;
 
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -12,6 +13,8 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	}
 
 	private static final String LOGTAG = "DANMAKU-VlcMediaPlayer";
+
+	protected static VlcMediaPlayer sInstance = null;
 
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
@@ -26,6 +29,9 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected int mLibVlcInstance = 0;
 	protected int mLibVlcMediaPlayer = 0;
 	protected int mLibVlcMedia = 0;
+	protected int mNativeMediaParsed = 0;
+	protected int mNativeMediaParseLock = 0;
+	protected int mNativeMediaParseCond = 0;
 
 	/* */
 	private int mTime = -1;
@@ -106,7 +112,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	/* called by native side */
 	private void onVlcEvent(VlcEvent ev) {
-		// Log.d(LOGTAG, String.format("received vlc event %d", ev.eventType));
+		Log.d(LOGTAG, String.format("received vlc event %d", ev.eventType));
 		switch (ev.eventType) {
 		case VlcEvent.MediaParsedChanged: {
 			if (!ev.booleanValue) {
@@ -188,6 +194,12 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 		}
 	}
 
+	public static VlcMediaPlayer getInstance() {
+		if (sInstance == null)
+			sInstance = new VlcMediaPlayer();
+		return sInstance;
+	}
+
 	protected VlcMediaPlayer() {
 		nativeCreate();
 	}
@@ -241,7 +253,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	@Override
 	public void release() {
 		nativeRelease();
-		sVlcMediaPlayer = null;
+		sInstance = null;
 	}
 
 	@Override
@@ -265,25 +277,11 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setDisplay(SurfaceHolder holder) {
-		holder.addCallback(new SurfaceHolder.Callback() {
-			@Override
-			public void surfaceChanged(SurfaceHolder holder, int format,
-					int width, int height) {
-				nativeAttachSurface(holder.getSurface());
-			}
-
-			@Override
-			public void surfaceCreated(SurfaceHolder holder) {
-				nativeAttachSurface(holder.getSurface());
-			}
-
-			@Override
-			public void surfaceDestroyed(SurfaceHolder holder) {
-				nativeDetachSurface();
-			}
-		});
-		holder.setType(SurfaceHolder.SURFACE_TYPE_NORMAL);
-		holder.setFormat(PixelFormat.RGB_565);
+		if (holder != null) {
+			holder.setFormat(PixelFormat.RGB_565);
+			nativeAttachSurface(holder.getSurface());
+		} else
+			nativeDetachSurface();
 	}
 
 	@Override

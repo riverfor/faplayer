@@ -17,6 +17,8 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 
 	private static final String LOGTAG = "DANMAKU-DefMediaPlayer";
 
+	protected static DefMediaPlayer sInstance = null;
+
 	private MediaPlayer mMediaPlayer = null;
 
 	private Timer mTimer = null;
@@ -41,6 +43,12 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 	private AbsMediaPlayer.OnPreparedListener mOnPreparedListener = null;
 	private AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
 	private AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
+
+	public static DefMediaPlayer getInstance() {
+		if (sInstance == null)
+			sInstance = new DefMediaPlayer();
+		return sInstance;
+	}
 
 	protected DefMediaPlayer() {
 		mMediaPlayer = new MediaPlayer();
@@ -151,7 +159,7 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 		} catch (Exception e) {
 			Log.e(LOGTAG, "release()");
 		}
-		sDefMediaPlayer = null;
+		sInstance = null;
 	}
 
 	@Override

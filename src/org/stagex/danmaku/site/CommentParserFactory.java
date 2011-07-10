@@ -1,13 +1,15 @@
 package org.stagex.danmaku.site;
 
-import java.util.ArrayList;
-
-import org.stagex.danmaku.comment.Comment;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class CommentParserFactory {
 
+	private static String[] sParserList = new String[] { "Acfun", "Bilibili",
+			"Ichiba", "Nico" };
+
 	public static String[] getParserList() {
-		return new String[] { "Acfun", "Bilibili", "Ichiba", "Nico" };
+		return sParserList;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -22,18 +24,21 @@ public class CommentParserFactory {
 		return parser;
 	}
 
-	public static ArrayList<Comment> parse(String file) {
-		ArrayList<Comment> result = null;
+	public static CommentParser parse(InputStream in) {
 		String[] list = CommentParserFactory.getParserList();
 		for (String name : list) {
 			CommentParser parser = CommentParserFactory.createParser(name);
 			if (parser == null)
 				continue;
-			result = parser.parse(file);
-			if (result != null)
-				break;
+			try {
+				in.reset();
+			} catch (IOException e) {
+			}
+			boolean result = parser.parse(in);
+			if (result)
+				return parser;
 		}
-		return result;
+		return null;
 	}
 
 }

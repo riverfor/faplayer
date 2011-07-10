@@ -1,28 +1,21 @@
 package org.stagex.danmaku.site;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.stagex.danmaku.comment.Comment;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 public class CommentParserBilibili extends CommentParser {
 
+	protected ArrayList<Comment> mParserResult = new ArrayList<Comment>();
+
 	@Override
-	public ArrayList<Comment> parse(String uri) {
-		ArrayList<Comment> result = new ArrayList<Comment>();
+	public boolean parse(InputStream in) {
 		try {
-			if (uri.startsWith("file://")) {
-				uri = uri.substring(7);
-			} else {
-				return null;
-			}
-			InputStream fin = new FileInputStream(uri);
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 			XmlPullParser parser = factory.newPullParser();
-			parser.setInput(fin, null);
+			parser.setInput(in, null);
 			int commentTime = -1;
 			int commentType = -1;
 			int commentSize = -1;
@@ -68,13 +61,12 @@ public class CommentParserBilibili extends CommentParser {
 					currentDepth -= 1;
 					if (currentDepth == 1 && tagName.compareTo("d") == 0) {
 						Comment comment = new Comment();
-						comment.site = Comment.SITE_BILIBILI;
 						comment.time = commentTime;
 						comment.type = commentType;
 						comment.size = commentSize;
 						comment.color = commentColor;
 						comment.text = commentText;
-						result.add(comment);
+						mParserResult.add(comment);
 					}
 					continue;
 				}
@@ -87,11 +79,14 @@ public class CommentParserBilibili extends CommentParser {
 					continue;
 				}
 			}
-			fin.close();
 		} catch (Exception e) {
-
+			return false;
 		}
-		return result.size() > 0 ? result : null;
+		return true;
+	}
+
+	public ArrayList<Comment> getParserResult() {
+		return mParserResult;
 	}
 
 }

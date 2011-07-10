@@ -105,22 +105,15 @@ public abstract class AbsMediaPlayer {
 
 	public abstract void setSubtitleTrack(int index);
 
-	protected static AbsMediaPlayer sDefMediaPlayer = null;
-	protected static AbsMediaPlayer sVlcMediaPlayer = null;
-	protected static AbsMediaPlayer sMsgMediaPlayer = null;
-
 	protected static AbsMediaPlayer getDefMediaPlayer() {
-		if (sDefMediaPlayer == null)
-			sDefMediaPlayer = new DefMediaPlayer();
 		Log.d(LOGTAG, "using DefMediaPlayer");
-		return sDefMediaPlayer;
+		return DefMediaPlayer.getInstance();
 	}
 
 	protected static AbsMediaPlayer getVlcMediaPlayer() {
-		if (sVlcMediaPlayer == null)
-			sVlcMediaPlayer = new VlcMediaPlayer();
+		/* this is not needed to be singleton */
 		Log.d(LOGTAG, "using VlcMediaPlayer");
-		return sVlcMediaPlayer;
+		return VlcMediaPlayer.getInstance();
 	}
 
 	public static AbsMediaPlayer getMediaPlayer(boolean useDefault) {
@@ -128,10 +121,8 @@ public abstract class AbsMediaPlayer {
 	}
 
 	public static AbsMediaPlayer getMessagePlayer() {
-		if (sMsgMediaPlayer == null) {
-			sMsgMediaPlayer = new MsgMediaPlayer();
-		}
-		return sMsgMediaPlayer;
+		/* this is not needed to be singleton */
+		return MsgMediaPlayer.getInstance();
 	}
 
 }
