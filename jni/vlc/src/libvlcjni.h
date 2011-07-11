@@ -20,6 +20,7 @@ vlc_declare_plugin(libavi);
 vlc_declare_plugin(libmp4);
 vlc_declare_plugin(live555);
 vlc_declare_plugin(mkv);
+vlc_declare_plugin(mpeg_audio);
 vlc_declare_plugin(mpgv);
 vlc_declare_plugin(packetizer_copy);
 vlc_declare_plugin(packetizer_dirac);
@@ -62,6 +63,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(libmp4),
 	vlc_plugin(live555),
 	vlc_plugin(mkv),
+	vlc_plugin(mpeg_audio),
 	vlc_plugin(mpgv),
 	vlc_plugin(packetizer_copy),
 	vlc_plugin(packetizer_dirac),
