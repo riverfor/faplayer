@@ -29,6 +29,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected int mLibVlcInstance = 0;
 	protected int mLibVlcMediaPlayer = 0;
 	protected int mLibVlcMedia = 0;
+	protected int mNativeMediaBufferingCount = 0;
 	protected int mNativeMediaParsed = 0;
 	protected int mNativeMediaParseLock = 0;
 	protected int mNativeMediaParseCond = 0;
@@ -133,15 +134,9 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 			}
 			break;
 		}
-		case VlcEvent.MediaPlayerOpening: {
-			if (mOnBufferingUpdateListener != null) {
-				mOnBufferingUpdateListener.onBufferingUpdate(this, 0);
-			}
-			break;
-		}
 		case VlcEvent.MediaPlayerBuffering: {
 			if (mOnBufferingUpdateListener != null) {
-				int percent = (int) (ev.floatValue * 100);
+				int percent = (int) (ev.floatValue);
 				mOnBufferingUpdateListener.onBufferingUpdate(this, percent);
 			}
 			break;
@@ -268,10 +263,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setDataSource(String path) {
-		/* force to use avformat acess_demux */
-		if (path.startsWith("http://") && path.endsWith(".m3u8")) {
-			path = String.format("avformat://%s", path);
-		}
 		nativeSetDataSource(path);
 	}
 

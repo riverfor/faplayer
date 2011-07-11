@@ -160,23 +160,21 @@ public class PlayerActivity extends Activity implements
 					if (isDefMediaPlayer(msg.obj)) {
 						selectMediaPlayer(
 								mPlayListArray.get(mPlayListSelected), true);
+						break;
 					} else if (isVlcMediaPlayer(msg.obj)) {
 						/* update status */
 						mMediaPlayerLoaded = true;
-						/* update UI */
-						if (mMessagePlayerLoaded)
-							mProgressBarPreparing.setVisibility(View.GONE);
 						/* destroy media player */
 						mSurfaceViewVlc.setVisibility(View.GONE);
 					} else if (isMsgMediaPlayer(msg.obj)) {
 						/* update status */
 						mMessagePlayerLoaded = true;
-						/* update UI */
-						if (mMediaPlayerLoaded)
-							mProgressBarPreparing.setVisibility(View.GONE);
 						/* destroy message player */
 						mSurfaceViewMsg.setVisibility(View.GONE);
 					}
+					/* update UI */
+					if (mMediaPlayerLoaded && mMessagePlayerLoaded)
+						mProgressBarPreparing.setVisibility(View.GONE);
 					startAllPlayers();
 					break;
 				}
@@ -194,6 +192,9 @@ public class PlayerActivity extends Activity implements
 						/* update status */
 						mMessagePlayerLoaded = true;
 					}
+					/* update UI */
+					if (mMediaPlayerLoaded && mMessagePlayerLoaded)
+						mProgressBarPreparing.setVisibility(View.GONE);
 					startAllPlayers();
 					break;
 				}
@@ -428,8 +429,6 @@ public class PlayerActivity extends Activity implements
 	protected void destroyMediaPlayer(boolean isDefault) {
 		boolean testDefault = isDefMediaPlayer(mMediaPlayer);
 		if (isDefault == testDefault) {
-			if (mMediaPlayer.isPlaying())
-				mMediaPlayer.stop();
 			mMediaPlayer.setDisplay(null);
 			mMediaPlayer.release();
 			mMediaPlayer = null;
@@ -477,9 +476,6 @@ public class PlayerActivity extends Activity implements
 	}
 
 	protected void destroyMessagePlayer() {
-		if (mMessagePlayer.isPlaying())
-			mMessagePlayer.stop();
-		mMessagePlayer.setDisplay(null);
 		mMessagePlayer.release();
 		mMessagePlayer = null;
 	}

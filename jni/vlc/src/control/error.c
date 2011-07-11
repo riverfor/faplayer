@@ -26,8 +26,12 @@
 #include <vlc/libvlc.h>
 
 #ifdef ANDROID
+
+#include <android/log.h>
+
 void pthread_cancel_initialize(void);
 void pthread_cancel_deinitialize(void);
+
 #endif
 
 static const char oom[] = "Out of memory";
@@ -142,6 +146,9 @@ const char *libvlc_printerr (const char *fmt, ...)
 
     va_start (ap, fmt);
     msg = libvlc_vprinterr (fmt, ap);
+#ifdef ANDROID
+	__android_log_vprint(ANDROID_LOG_ERROR, "LIBVLC", fmt, ap);
+#endif
     va_end (ap);
     return msg;
 }

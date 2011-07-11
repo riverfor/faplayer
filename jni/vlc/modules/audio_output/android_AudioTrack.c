@@ -224,17 +224,12 @@ static void Play(aout_instance_t *p_aout) {
     int length;
     aout_buffer_t *p_buffer;
 
-    while (vlc_object_alive(p_aout)) {
-        p_buffer = aout_FifoPop(&p_aout->output.fifo);
-        if (p_buffer != NULL) {
-            length = 0;
-            while (length < p_buffer->i_buffer) {
-                length += at_write(p_sys->AudioTrack, (char*)(p_buffer->p_buffer) + length, p_buffer->i_buffer - length);
-            }
-            aout_BufferFree(p_buffer);
+    while ((p_buffer = aout_FifoPop(&p_aout->output.fifo)) != NULL) {
+        length = 0;
+        while (length < p_buffer->i_buffer) {
+            length += at_write(p_sys->AudioTrack, (char*)(p_buffer->p_buffer) + length, p_buffer->i_buffer - length);
         }
-        else
-            break;
+        aout_BufferFree(p_buffer);
     }
 }
 
