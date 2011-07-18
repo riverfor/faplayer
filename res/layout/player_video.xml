@@ -5,7 +5,7 @@
     android:layout_height="fill_parent" >
 
     <SurfaceView
-        android:id="@+id/player_surface_vlc"
+        android:id="@+id/player_surface_def"
         android:visibility="gone"
         android:keepScreenOn="true"
         android:layout_gravity="center"
@@ -13,8 +13,9 @@
         android:layout_height="fill_parent" />
 
     <SurfaceView
-        android:id="@+id/player_surface_def"
+        android:id="@+id/player_surface_vlc"
         android:visibility="gone"
+        android:background="@android:color/transparent"
         android:keepScreenOn="true"
         android:layout_gravity="center"
         android:layout_width="fill_parent"

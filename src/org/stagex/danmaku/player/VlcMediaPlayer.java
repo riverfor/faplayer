@@ -2,7 +2,6 @@ package org.stagex.danmaku.player;
 
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -29,6 +28,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected int mLibVlcInstance = 0;
 	protected int mLibVlcMediaPlayer = 0;
 	protected int mLibVlcMedia = 0;
+	protected int mNativeMediaBufferingCount = 0;
 	protected int mNativeMediaParsed = 0;
 	protected int mNativeMediaParseLock = 0;
 	protected int mNativeMediaParseCond = 0;
@@ -132,15 +132,9 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 			}
 			break;
 		}
-		case VlcEvent.MediaPlayerOpening: {
-			if (mOnBufferingUpdateListener != null) {
-				mOnBufferingUpdateListener.onBufferingUpdate(this, 0);
-			}
-			break;
-		}
 		case VlcEvent.MediaPlayerBuffering: {
 			if (mOnBufferingUpdateListener != null) {
-				int percent = (int) (ev.floatValue * 100);
+				int percent = (int) (ev.floatValue);
 				mOnBufferingUpdateListener.onBufferingUpdate(this, percent);
 			}
 			break;
@@ -267,7 +261,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setDataSource(String path) {
-		/* force to use avformat acess_demux */
+		/* force to use avformat access_demux module */
 		if (path.startsWith("http://") && path.endsWith(".m3u8")) {
 			path = String.format("avformat://%s", path);
 		}
@@ -276,25 +270,11 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setDisplay(SurfaceHolder holder) {
-		holder.addCallback(new SurfaceHolder.Callback() {
-			@Override
-			public void surfaceChanged(SurfaceHolder holder, int format,
-					int width, int height) {
-				nativeAttachSurface(holder.getSurface());
-			}
-
-			@Override
-			public void surfaceCreated(SurfaceHolder holder) {
-				nativeAttachSurface(holder.getSurface());
-			}
-
-			@Override
-			public void surfaceDestroyed(SurfaceHolder holder) {
-				nativeDetachSurface();
-			}
-		});
-		holder.setType(SurfaceHolder.SURFACE_TYPE_NORMAL);
-		holder.setFormat(PixelFormat.RGB_565);
+		if (holder != null) {
+			holder.setFormat(PixelFormat.RGB_565);
+			nativeAttachSurface(holder.getSurface());
+		} else
+			nativeDetachSurface();
 	}
 
 	@Override

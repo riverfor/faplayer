@@ -1,6 +1,6 @@
 VLC-1.2.0-git is on the road!
 
-Any questions please contact tewilove@gmail.com.
+Any questions please contact tewilove@gmail.com, or leave a message to http://myloli.cc.
 
 Requirements:
 1. NDK-r5c
@@ -16,12 +16,12 @@ Build steps:
 Build examples:
 ./build.sh # <-- this will build for cortex-a8 with neon by default.
 ./build.sh ABI=armeabi # <-- this will build for arm1136j-s with softfp.
-./build.sh ABI=armeabi-v7a FPU=vfpv3 TUNE=cortex-a9 # <-- 
-
-Application.mk file:
-Currently you can only build the source with one ABI choice, armeabi or armeabi-v7a.
-If you want to disable NEON version of ffmpeg, open jni/Application.mk and change APP_ABI to armeabi.
+./build.sh ABI=armeabi-v7a FPU=vfpv3-d16 TUNE=cortex-a9 # <-- Xoom
 
 NDK issues:
 Known not building on NDK-r5b and before unless LOCAL_WHOLE_STATIC_LIBRARIES bug is fixed.
+
+Branches:
+master contains the minium player source.
+message-player is built on top of master with acfun/bilibili/* support.
 

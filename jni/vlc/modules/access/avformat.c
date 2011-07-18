@@ -76,8 +76,6 @@ struct demux_sys_t
 {
     AVInputFormat  *fmt;
     AVFormatContext *ic;
-    URLContext     url;
-    URLProtocol    prot;
 
     int             i_tk;
     es_out_id_t     **tk;
@@ -100,9 +98,6 @@ struct demux_sys_t
  *****************************************************************************/
 static int Demux  ( demux_t *p_demux );
 static int Control( demux_t *p_demux, int i_query, va_list args );
-
-static int IORead( void *opaque, uint8_t *buf, int buf_size );
-static int64_t IOSeek( void *opaque, int64_t offset, int whence );
 
 static block_t *BuildSsaFrame( const AVPacket *p_pkt, unsigned i_order );
 static void UpdateSeekPoint( demux_t *p_demux, int64_t i_time );
