@@ -23,11 +23,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/vnd.rn-realmedia" />
                 <data android:mimeType="video/*" />
-                <data android:mimeType="*/flv" />
-                <data android:mimeType="*/hlv" />
-                <data android:mimeType="*/mkv" />
-                <data android:mimeType="*/rmvb" />
+                <data android:mimeType="video/x-flv" />
+                <data android:mimeType="video/x-hlv" />
+                <data android:mimeType="video/x-matroska" />
+                <data android:mimeType="video/x-msvideo" />
             </intent-filter>
         </activity>
     </application>

@@ -47,7 +47,6 @@ LOCAL_CFLAGS += \
     -DMODULE_NAME=yuv2rgb
 
 LOCAL_C_INCLUDES += \
-    $(EXTROOR)/pixman/pixman \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src

@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -28,6 +29,8 @@ import android.widget.TextView;
 public class FileBrowserAdapter extends BaseAdapter implements
 		OnItemClickListener, OnItemLongClickListener, OnKeyListener,
 		FilenameFilter {
+
+	public final static String LOGTAG = "DANMAKU-FileBrowserAdapter";
 
 	private Context mContext;
 	private String mCurrentPath;
@@ -174,8 +177,10 @@ public class FileBrowserAdapter extends BaseAdapter implements
 		if (dot < 0 || dot == name.length() - 1)
 			return false;
 		String ext = name.substring(dot + 1).toLowerCase();
-		if (mFilter.indexOf(ext) < 0)
-			return false;
-		return true;
+		String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+		if (mFilter.indexOf(ext) >= 0
+				|| (mime != null && mime.startsWith("video")))
+			return true;
+		return false;
 	}
 }

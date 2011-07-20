@@ -31,7 +31,6 @@ static int Activate(vlc_object_t *p_this) {
 
     if (p_filter->fmt_out.video.i_chroma != VLC_CODEC_RGB16)
         return VLC_EGENERIC;
-    // TODO: use pixman to resize
     if (p_filter->fmt_in.video.i_width != p_filter->fmt_out.video.i_width)
         return VLC_EGENERIC;
     if (p_filter->fmt_in.video.i_height != p_filter->fmt_out.video.i_height)
