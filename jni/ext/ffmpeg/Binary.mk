@@ -39,7 +39,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_CFLAGS += -DHAVE_NEON=$(BUILD_WITH_NEON)
 
-LOCAL_STATIC_LIBRARIES += avformat avfilter avcodec avutil swscale avdevice
+LOCAL_STATIC_LIBRARIES += libavformat libavfilter libavcodec libavutil libswscale libavdevice
 
 LOCAL_LDLIBS += -lz
 

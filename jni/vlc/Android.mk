@@ -8,7 +8,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := vlccore
+LOCAL_MODULE := libvlccore
 
 LOCAL_CFLAGS += \
     -DICONV_CONST=
@@ -182,7 +182,7 @@ include $(LOCAL_PATH)/Modules.mk
 LOCAL_STATIC_LIBRARIES += compat
 
 ifeq ($(BUILD_WITH_NEON),1)
-LOCAL_STATIC_LIBRARIES += arm_neon
+LOCAL_STATIC_LIBRARIES += libneon
 endif
 
 include $(BUILD_SHARED_LIBRARY)

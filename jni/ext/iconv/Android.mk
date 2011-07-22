@@ -8,7 +8,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := iconv
+LOCAL_MODULE := libiconv
 
 LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H \
@@ -22,7 +22,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     lib/iconv.c
 
-LOCAL_STATIC_LIBRARIES += charset
+LOCAL_STATIC_LIBRARIES += libcharset
 
 include $(BUILD_STATIC_LIBRARY)
 

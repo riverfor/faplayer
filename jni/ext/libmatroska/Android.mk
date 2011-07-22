@@ -8,7 +8,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := matroska
+LOCAL_MODULE := libmatroska
 
 LOCAL_CFLAGS += -Wall -Wno-unknown-pragmas -fno-gnu-keywords -D_GNU_SOURCE -Wshadow
 

@@ -35,6 +35,8 @@ static jfieldID f_VlcEvent_longValue = 0;
 static jfieldID f_VlcEvent_floatValue = 0;
 static jfieldID f_VlcEvent_stringValue = 0;
 static jmethodID m_VlcMediaPlayer_onVlcEvent = 0;
+// XXX: fix thread safe here or Java side
+static jobject g_obj_VlcMediaPlayer = 0;
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -74,17 +76,16 @@ JNIEXPORT int Java_org_stagex_danmaku_helper_SystemUtility_setenv(JNIEnv *env, j
     return err;
 }
 
-static int getIntValue(JNIEnv *env, jobject thiz, const char *name)
+static inline jint getIntValue(JNIEnv *env, jobject thiz, const char *name)
 {
     jclass clz = (*env)->GetObjectClass(env, thiz);
     jfieldID field = (*env)->GetFieldID(env, clz, name, "I");
     int value = (*env)->GetIntField(env, thiz, field);
     (*env)->DeleteLocalRef(env, clz);
     return value;
-
 }
 
-static void setIntValue(JNIEnv *env, jobject thiz, const char *name, int value)
+static inline void setIntValue(JNIEnv *env, jobject thiz, const char *name, jint value)
 {
     jclass clz = (*env)->GetObjectClass(env, thiz);
     jfieldID field = (*env)->GetFieldID(env, clz, name, "I");
@@ -95,7 +96,7 @@ static void setIntValue(JNIEnv *env, jobject thiz, const char *name, int value)
 static void vlc_event_callback(const libvlc_event_t *ev, void *data)
 {
     JNIEnv *env;
-    jobject obj_VlcMediaPlayer = (jobject) data;
+    jobject obj_VlcMediaPlayer = g_obj_VlcMediaPlayer;
     jobject obj_VlcEvent;
     int trigger = 1;
 
@@ -113,7 +114,7 @@ static void vlc_event_callback(const libvlc_event_t *ev, void *data)
     switch (ev->type) {
     case libvlc_MediaDurationChanged: {
         int64_t duration = ev->u.media_duration_changed.new_duration;
-        (*env)->SetIntField(env, obj_VlcEvent, f_VlcEvent_longValue, (jlong) duration);
+        (*env)->SetLongField(env, obj_VlcEvent, f_VlcEvent_longValue, (jlong) duration);
         break;
     }
     case libvlc_MediaStateChanged: {
@@ -207,6 +208,10 @@ static void initClasses(JNIEnv *env, jobject thiz)
 {
     jclass clz;
 
+    if (!g_obj_VlcMediaPlayer)
+    {
+        g_obj_VlcMediaPlayer = (*env)->NewGlobalRef(env, thiz);
+    }
     if (!m_VlcMediaPlayer_onVlcEvent)
     {
         clz = (*env)->GetObjectClass(env, thiz);
@@ -223,6 +228,7 @@ static void initClasses(JNIEnv *env, jobject thiz)
         f_VlcEvent_longValue = (*env)->GetFieldID(env, clz, "longValue", "J");
         f_VlcEvent_floatValue = (*env)->GetFieldID(env, clz, "floatValue", "F");
         f_VlcEvent_stringValue = (*env)->GetFieldID(env, clz, "stringValue", "Ljava/lang/String;");
+        (*env)->DeleteLocalRef(env, clz);
     }
 }
 
@@ -232,6 +238,11 @@ static void freeClasses(JNIEnv *env, jobject thiz)
     {
         (*env)->DeleteGlobalRef(env, clz_VlcEvent);
         clz_VlcEvent = 0;
+    }
+    if (g_obj_VlcMediaPlayer)
+    {
+        (*env)->DeleteGlobalRef(env, g_obj_VlcMediaPlayer);
+        g_obj_VlcMediaPlayer = 0;
     }
 }
 
@@ -253,6 +264,7 @@ JNIEXPORT void JNICALL NAME(nativeAttachSurface)(JNIEnv *env, jobject thiz, jobj
         }
         f_Surface_mSurface = (*env)->GetFieldID(env, clz, "mNativeSurface", "I");
     }
+    (*env)->DeleteLocalRef(env, clz);
     surface = (*env)->GetIntField(env, s, f_Surface_mSurface);
     pthread_mutex_lock(&s_surface_mutex);
     s_surface = (void *) surface;

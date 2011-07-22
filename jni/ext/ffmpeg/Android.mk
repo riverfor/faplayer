@@ -793,7 +793,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := avcodec
+LOCAL_MODULE := libavcodec
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
@@ -820,7 +820,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := avdevice
+LOCAL_MODULE := libavdevice
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
@@ -842,7 +842,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := avfilter
+LOCAL_MODULE := libavfilter
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
@@ -864,7 +864,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := avformat
+LOCAL_MODULE := libavformat
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
@@ -886,7 +886,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := avutil
+LOCAL_MODULE := libavutil
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
@@ -908,7 +908,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := swscale
+LOCAL_MODULE := libswscale
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
