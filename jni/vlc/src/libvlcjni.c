@@ -502,10 +502,9 @@ JNIEXPORT void JNICALL NAME(nativeSetDataSource)(JNIEnv *env, jobject thiz, jstr
     const char *str = (*env)->GetStringUTFChars(env, path, 0);
     if (!str)
     {
-        /* throw? */
+        /* XXX: throw */
         return;
     }
-    /* XXX: check and free mLibVlcMedia first */
     libvlc_media_t *media = (*str == '/') ? libvlc_media_new_path(instance, str) : libvlc_media_new_location(instance, str);
     if (media)
     {
@@ -514,7 +513,9 @@ JNIEXPORT void JNICALL NAME(nativeSetDataSource)(JNIEnv *env, jobject thiz, jstr
         {
             libvlc_event_attach(em, md_listening[i], vlc_event_callback, thiz);
         }
+        /* this will cancel current input and start a new one */
         libvlc_media_player_set_media(mp, media);
+        setIntValue(env, thiz, "mNativeMediaBufferingCount", 0);
     }
     (*env)->ReleaseStringUTFChars(env, path, str);
     setIntValue(env, thiz, "mLibVlcMedia", (jint) media);
