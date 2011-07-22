@@ -1,11 +1,11 @@
 # armeabi/armeabi-v7a
 
 _ABI ?= $(ABI)
-ABI := $(_ABI)
+ABI := $(strip $(_ABI))
 _FPU ?= $(FPU)
-FPU := $(_FPU)
+FPU := $(strip $(_FPU))
 _TUNE ?= $(TUNE)
-TUNE := $(_TUNE)
+TUNE := $(strip $(_TUNE))
 
 ifeq ($(ABI),)
     ABI := armeabi-v7a
@@ -18,9 +18,14 @@ ifeq ($(TUNE),)
 endif
 
 APP_ABI := $(ABI)
-APP_OPTIM := release
 
+ifeq ($(NDK_DEBUG),1)
+APP_OPTIM := debug
+OPT_CFLAGS :=
+else
+APP_OPTIM := release
 OPT_CFLAGS := -O3 -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math
+endif
 
 ifeq ($(APP_ABI),armeabi-v7a)
     ifeq ($(FPU),neon)

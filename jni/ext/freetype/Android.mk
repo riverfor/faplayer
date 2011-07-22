@@ -60,7 +60,7 @@ LOCAL_CFLAGS += "-DFT2_BUILD_LIBRARY"
 
 #LOCAL_CFLAGS += -O2
 
-LOCAL_MODULE:= freetype
+LOCAL_MODULE:= libfreetype
 
 include $(BUILD_STATIC_LIBRARY)
 endif

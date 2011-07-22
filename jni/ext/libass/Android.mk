@@ -8,7 +8,7 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := ass
+LOCAL_MODULE := libass
 
 LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H

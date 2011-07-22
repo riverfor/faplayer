@@ -8,7 +8,7 @@ include $(CLEAR_VARS)
 LOCAL_ARM_MODE := arm
 LOCAL_ARM_NEON := true
 
-LOCAL_MODULE := arm_neon
+LOCAL_MODULE := libneon
 
 LOCAL_SRC_FILES := \
     memcpy.S \
