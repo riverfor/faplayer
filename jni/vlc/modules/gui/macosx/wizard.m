@@ -2,7 +2,7 @@
  * wizard.m: MacOS X Streaming Wizard
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: 7f746bfdb3b20437d4936371f385a8b1490843b1 $
+ * $Id: 1e41dca832b3b7779b7a4c13cdd11145266bad3d $
  *
  * Authors: Felix Kühne <fkuehne at videolan dot org>
  *
@@ -1244,7 +1244,7 @@ static VLCWizard *_o_sharedInstance = nil;
             NSString *tempString = [NSString stringWithFormat:
                 @"%@ (%i/%i)", _NS("Streaming/Transcoding Wizard"),
                 ( x + 1 ), y];
-            input_item_t *p_input = input_item_New( p_playlist,
+            input_item_t *p_input = input_item_New(
                 [[[o_userSelections objectForKey:@"pathToStrm"]
                 objectAtIndex:x] UTF8String],
                 [tempString UTF8String] );

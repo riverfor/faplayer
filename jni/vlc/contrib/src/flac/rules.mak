@@ -4,6 +4,9 @@ FLAC_VERSION := 1.2.1
 FLAC_URL := $(SF)/flac/flac-$(FLAC_VERSION).tar.gz
 
 PKGS += flac
+ifeq ($(call need_pkg,"flac"),)
+PKGS_FOUND += flac
+endif
 
 $(TARBALLS)/flac-$(FLAC_VERSION).tar.gz:
 	$(call download,$(FLAC_URL))
@@ -12,13 +15,12 @@ $(TARBALLS)/flac-$(FLAC_VERSION).tar.gz:
 
 flac: flac-$(FLAC_VERSION).tar.gz .sum-flac
 	$(UNPACK)
-	(cd $@-$(FLAC_VERSION) && patch -p1) < $(SRC)/flac/flac-win32.patch
-	(cd $@-$(FLAC_VERSION) && patch -p1) < $(SRC)/flac/libFLAC-pc.patch
+	$(APPLY) $(SRC)/flac/flac-win32.patch
+	$(APPLY) $(SRC)/flac/libFLAC-pc.patch
 ifdef HAVE_MACOSX
-	cd $<-$(FLAC_VERSION) && sed -e 's,-dynamiclib,-dynamiclib -arch $(ARCH),' -i.orig configure
+	cd $(UNPACK_DIR) && sed -e 's,-dynamiclib,-dynamiclib -arch $(ARCH),' -i.orig configure
 endif
-	mv $@-$(FLAC_VERSION) $@
-	touch $@
+	$(MOVE)
 
 FLACCONF := $(HOSTCONF) \
 	--disable--thorough-tests \
@@ -33,7 +35,9 @@ FLAC_DISABLE_FLAGS += --disable-asm-optimizations
 endif
 endif
 
-.flac: flac .ogg
+DEPS_flac = ogg $(DEPS_ogg)
+
+.flac: flac
 	cd $< && $(HOSTVARS) ./configure $(FLACCONF)
 	cd $</src && $(MAKE) -C libFLAC install
 	cd $< && $(MAKE) -C include install

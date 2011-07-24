@@ -2,7 +2,7 @@
  * file.c: configuration file handling
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: e6951bff155e849048d544e4cc11a4fbc5696b7f $
+ * $Id: b15bba65ffdd636422fca6da8f77cf41d19626d3 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -213,7 +213,7 @@ int config_LoadConfigFile( vlc_object_t *p_this )
             continue;
 
         const char *psz_option_value = ptr + 1;
-        switch (item->i_type)
+        switch (CONFIG_CLASS(item->i_type))
         {
             case CONFIG_ITEM_BOOL:
             case CONFIG_ITEM_INTEGER:
@@ -512,7 +512,7 @@ static int SaveConfigFile (vlc_object_t *p_this)
              p_item < p_end;
              p_item++ )
         {
-            if ((p_item->i_type & CONFIG_HINT) /* ignore hint */
+            if (!CONFIG_ITEM(p_item->i_type)   /* ignore hint */
              || p_item->b_removed              /* ignore deprecated option */
              || p_item->b_unsaveable)          /* ignore volatile option */
                 continue;
@@ -521,7 +521,7 @@ static int SaveConfigFile (vlc_object_t *p_this)
             {
                 int64_t val = p_item->value.i;
                 config_Write (file, p_item->psz_text,
-                              (p_item->i_type == CONFIG_ITEM_BOOL)
+                             (CONFIG_CLASS(p_item->i_type) == CONFIG_ITEM_BOOL)
                                   ? N_("boolean") : N_("integer"),
                               val == p_item->orig.i,
                               p_item->psz_name, "%"PRId64, val);

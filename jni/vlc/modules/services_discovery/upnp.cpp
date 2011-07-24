@@ -2,7 +2,7 @@
  * Upnp.cpp :  UPnP discovery module (libupnp)
  *****************************************************************************
  * Copyright (C) 2004-2011 the VideoLAN team
- * $Id: 7e6311e9e6635c18640abd186bd84decddb5e979 $
+ * $Id: 3a9b174c6dc8789211d995bab51ceb191649b191 $
  *
  * Authors: Rémi Denis-Courmont <rem # videolan.org> (original plugin)
  *          Christian Henz <henz # c-lab.de>
@@ -136,7 +136,7 @@ static int Open( vlc_object_t *p_this )
         return VLC_EGENERIC;
     }
 
-    i_res = UpnpSetMaxContentLength( 262144 );
+    i_res = UpnpSetMaxContentLength( 0 );
     if( i_res != UPNP_E_SUCCESS )
     {
         msg_Err( p_sd, "Failed to set maximum content length: %s", UpnpGetErrorMessage( i_res ) );
@@ -755,36 +755,15 @@ bool MediaServer::_fetchContents( Container* p_parent )
             if ( !objectID )
                 continue;
 
-            const char* childCountStr =
-                    ixmlElement_getAttribute( containerElement, "childCount" );
-
-            if ( !childCountStr )
-                continue;
-
-            int childCount = atoi( childCountStr );
             const char* title = xml_getChildElementValue( containerElement,
                                                           "dc:title" );
 
             if ( !title )
                 continue;
 
-            const char* resource = xml_getChildElementValue( containerElement,
-                                                             "res" );
-
-            if ( resource && childCount < 1 )
-            {
-                Item* item = new Item( p_parent, objectID, title, resource, -1 );
-                p_parent->addItem( item );
-            }
-
-            else
-            {
-                Container* container = new Container( p_parent, objectID, title );
-                p_parent->addContainer( container );
-
-                if ( childCount > 0 )
-                    _fetchContents( container );
-            }
+            Container* container = new Container( p_parent, objectID, title );
+            p_parent->addContainer( container );
+            _fetchContents( container );
         }
         ixmlNodeList_free( containerNodeList );
     }
@@ -890,7 +869,7 @@ void MediaServer::_buildPlaylist( Container* p_parent, input_item_node_t *p_inpu
     {
         Container* p_container = p_parent->getContainer( i );
 
-        input_item_t* p_input_item = input_item_New( _p_sd, "vlc://nop",
+        input_item_t* p_input_item = input_item_New( "vlc://nop",
                                                     p_container->getTitle() );
         input_item_node_t *p_new_node =
             input_item_node_AppendItem( p_input_node, p_input_item );
@@ -903,8 +882,7 @@ void MediaServer::_buildPlaylist( Container* p_parent, input_item_node_t *p_inpu
     {
         Item* p_item = p_parent->getItem( i );
 
-        input_item_t* p_input_item = input_item_NewExt( _p_sd,
-                                               p_item->getResource(),
+        input_item_t* p_input_item = input_item_NewExt( p_item->getResource(),
                                                p_item->getTitle(),
                                                0,
                                                NULL,
@@ -966,8 +944,7 @@ bool MediaServerList::addServer( MediaServer* p_server )
 
     msg_Dbg( _p_sd, "Adding server '%s' with uuid '%s'", p_server->getFriendlyName(), p_server->getUDN() );
 
-    p_input_item = input_item_New( _p_sd, "vlc://nop",
-                                  p_server->getFriendlyName() );
+    p_input_item = input_item_New( "vlc://nop", p_server->getFriendlyName() );
 
     input_item_SetDescription( p_input_item, p_server->getUDN() );
 

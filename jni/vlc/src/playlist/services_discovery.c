@@ -2,7 +2,7 @@
  * services_discovery.c : Manage playlist services_discovery modules
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: fd9cc75bd3a056cf135fc336621f7193e8a3d17d $
+ * $Id: 77ffb97b822cfe8c65b177ee9e610033fefc95a7 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -111,14 +111,13 @@ services_discovery_t *vlc_sd_Create( vlc_object_t *p_super,
 {
     services_discovery_t *p_sd;
 
-    p_sd = vlc_custom_create( p_super, sizeof( *p_sd ), VLC_OBJECT_GENERIC,
-                              "services discovery" );
+    p_sd = vlc_custom_create( p_super, sizeof( *p_sd ), "services discovery" );
     if( !p_sd )
         return NULL;
     free(config_ChainCreate( &p_sd->psz_name, &p_sd->p_cfg, cfg ));
 
     vlc_event_manager_t *em = &p_sd->event_manager;
-    vlc_event_manager_init( em, p_sd, (vlc_object_t *)p_sd );
+    vlc_event_manager_init( em, p_sd );
     vlc_event_manager_register_event_type(em, vlc_ServicesDiscoveryItemAdded);
     vlc_event_manager_register_event_type(em, vlc_ServicesDiscoveryItemRemoved);
     vlc_event_manager_register_event_type(em, vlc_ServicesDiscoveryStarted);

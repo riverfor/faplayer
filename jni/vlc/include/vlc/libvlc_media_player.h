@@ -2,7 +2,7 @@
  * libvlc_media_player.h:  libvlc_media_player external API
  *****************************************************************************
  * Copyright (C) 1998-2010 the VideoLAN team
- * $Id: ad866768471646b631e365c697028a67c697a1dc $
+ * $Id: 70c4b9137c6d3383d9e379215be4b7241bc7e278 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -539,7 +539,7 @@ void libvlc_audio_set_format_callbacks( libvlc_media_player_t *mp,
  * and is mutually exclusive with libvlc_audio_set_format_callbacks().
  *
  * \param mp the media player
- * \param fourcc a four-characters string identifying the sample format
+ * \param format a four-characters string identifying the sample format
  *               (e.g. "S16N" or "FL32")
  * \param rate sample rate (expressed in Hz)
  * \param channels channels count
@@ -820,7 +820,7 @@ void libvlc_video_set_key_input( libvlc_media_player_t *p_mi, unsigned on );
  * handled. This is needed for DVD menus to work, as well as a few video
  * filters such as "puzzle".
  *
- * \note See also libvlc_video_set_key_input().
+ * \see libvlc_video_set_key_input().
  *
  * \warning This function is only implemented for X11 and Win32 at the moment.
  *
@@ -1296,7 +1296,7 @@ LIBVLC_API void libvlc_audio_output_list_release( libvlc_audio_output_t *p_list 
  * \param p_mi media player
  * \param psz_name name of audio output,
  *               use psz_name of \see libvlc_audio_output_t
- * \return true if function succeded
+ * \return 0 if function succeded, -1 on error
  */
 LIBVLC_API int libvlc_audio_output_set( libvlc_media_player_t *p_mi,
                                             const char *psz_name );

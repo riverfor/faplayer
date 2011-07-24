@@ -2,7 +2,7 @@
  * prefs.m: MacOS X module for vlc
  *****************************************************************************
  * Copyright (C) 2002-2006 the VideoLAN team
- * $Id: de04314bfa4cbd474d35a091a87c9b62c8802581 $
+ * $Id: 3cb744acd7c003a8a0f1f8f3c60a417ac9248e7c $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videolan dot org>
@@ -385,7 +385,7 @@ static VLCPrefs *_o_sharedMainInstance = nil;
                 }
             }
             
-            if( module_is_main( p_module) && (configType & CONFIG_ITEM) )
+            if( module_is_main( p_module) && CONFIG_ITEM(configType) )
             {
                 if( categoryItem && [self isSubCategoryGeneral:lastsubcat] )
                 {
@@ -396,7 +396,7 @@ static VLCPrefs *_o_sharedMainInstance = nil;
                     [[subCategoryItem options] addObject:[[VLCTreeLeafItem alloc] initWithConfigItem:&p_configs[j]]];
                 }
             }
-            else if( !module_is_main( p_module) && (configType & CONFIG_ITEM))
+            else if( !module_is_main( p_module) && CONFIG_ITEM(configType))
             {
                 if( ![[subCategoryItem children] containsObject: pluginItem] )
                 {

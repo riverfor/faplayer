@@ -5,10 +5,12 @@ FFMPEG_URL=$(SF)/ffmpeg/ffmpeg-$(FFMPEG_VERSION).tar.gz
 FFMPEG_SVN=svn://svn.ffmpeg.org/ffmpeg/trunk
 FFMPEG_SVN_REV=26400
 
-
-FFMPEGCONF = --cc="$(CC)" \
+FFMPEGCONF = \
+	--cc="$(CC)" \
 	--disable-doc \
 	--disable-decoder=libvpx \
+	--enable-libgsm \
+	--enable-libvpx \
 	--disable-debug \
 	--enable-gpl \
 	--enable-postproc \
@@ -20,44 +22,30 @@ FFMPEGCONF = --cc="$(CC)" \
 	--disable-protocols \
 	--disable-avfilter \
 	--disable-network
+DEPS_ffmpeg = zlib gsm vpx $(DEPS_vpx)
 
 # Optional dependencies
 ifdef BUILD_ENCODERS
 # TODO:
-#FFMPEGCONF+= --enable-libmp3lame
-#.ffmpeg: .lame
+#FFMPEGCONF += --enable-libmp3lame
+#DEPS_ffmpeg += lame $(DEPS_lame)
 else
 FFMPEGCONF += --disable-encoders --disable-muxers
 # XXX: REVISIT --enable-small ?
 endif
 
+# XXX: REVISIT
+#ifndef HAVE_FPU
+#FFMPEGCONF += --disable-mpegaudio-hp
+#endif
+
 ifdef HAVE_CROSS_COMPILE
 FFMPEGCONF += --enable-cross-compile --cross-prefix=$(HOST)-
 endif
-# XXX: REVISIT: gsm and vpx not used by VLC so should in PKGS?
-ifneq ($(filter gsm,$(PKGS)),)
-#FFMPEGCONF+= --enable-libgsm
-#.ffmpeg: .gsm
-endif
-ifneq ($(filter vpx,$(PKGS)),)
-#FFMPEGCONF += --enable-libvpx
-#.ffmpeg: .vpx
-endif
-
-# XXX: REVISIT
-#ifndef HAVE_FPU
-#FFMPEGCONF+= --disable-mpegaudio-hp
-#endif
 
 # ARM stuff
 ifeq ($(ARCH),arm)
 FFMPEGCONF += --disable-runtime-cpudetect
-# TODO: define HAVE_ARM_NEON or something
-ifdef HAVE_ARM_NEON
-# XXX: REVISIT choice of CPU?
-FFMPEGCONF += --cpu=cortex-a8 --enable-neon
-endif
-# TODO: --enable-iwmmxt if anyone still cares
 endif
 
 # Darwin
@@ -72,7 +60,7 @@ endif
 ifeq ($(ARCH),x86_64)
 FFMPEGCONF += --cpu=core2
 endif
-.ffmpeg: .yasm
+DEPS_ffmpeg += yasm $(DEPS_yasm)
 endif
 
 # Linux
@@ -86,12 +74,15 @@ FFMPEGCONF += --target-os=mingw32 --enable-memalign-hack
 FFMPEGCONF += --enable-w32threads \
 	--disable-bzlib --disable-bsfs \
 	--disable-decoder=dca --disable-encoder=vorbis
+
 ifdef HAVE_WIN64
 FFMPEGCONF += --disable-dxva2
+
 FFMPEGCONF += --cpu=athlon64 --arch=x86_64
 else # !WIN64
 FFMPEGCONF += --enable-dxva2
-.ffmpeg: .directx
+DEPS_ffmpeg += directx
+
 FFMPEGCONF+= --cpu=i686 --arch=x86
 endif
 else
@@ -109,7 +100,10 @@ FFMPEG_CFLAGS += --std=gnu99
 
 # Build
 
-PKGS += libav
+PKGS += ffmpeg
+ifeq ($(call need_pkg,"libavcodec libavformat libswscale"),)
+PKGS_FOUND += ffmpeg
+endif
 
 ffmpeg-$(FFMPEG_VERSION).tar.gz:
 	$(error FFmpeg snapshot is too old, VCS must be used!)
@@ -117,7 +111,7 @@ ffmpeg-$(FFMPEG_VERSION).tar.gz:
 
 $(TARBALLS)/ffmpeg-svn.tar.gz:
 	$(SVN) export $(FFMPEG_SVN) ffmpeg-svn
-	tar cv ffmpeg-svn | gzip > $@
+	tar cvz ffmpeg-svn > $@
 
 FFMPEG_VERSION := svn
 
@@ -128,17 +122,15 @@ FFMPEG_VERSION := svn
 ffmpeg: ffmpeg-$(FFMPEG_VERSION).tar.gz .sum-ffmpeg
 	$(UNPACK)
 ifdef HAVE_WIN64
-	(cd $@-$(FFMPEG_VERSION)/libswscale && patch -p0) < $(SRC)/ffmpeg/ffmpeg-win64.patch
+	$(APPLY) $(SRC)/ffmpeg/ffmpeg-win64.patch
 endif
 ifdef HAVE_WIN32
 	sed -i "s/std=c99/std=gnu99/" $@-$(FFMPEG_VERSION)/configure
 endif
-	(cd $@-$(FFMPEG_VERSION) && patch -p1) < $(SRC)/ffmpeg/libavformat-ape.c.patch
-	mv $@-$(FFMPEG_VERSION) $@
-	touch $@
+	$(APPLY) $(SRC)/ffmpeg/libavformat-ape.c.patch
+	$(MOVE)
 
 .ffmpeg: ffmpeg
-	# TODO: .zlib
 	cd $< && $(HOSTVARS) ./configure \
 		--extra-cflags="$(FFMPEG_CFLAGS) -DHAVE_STDINT_H"  \
 		--extra-ldflags="$(LDFLAGS)" $(FFMPEGCONF) \

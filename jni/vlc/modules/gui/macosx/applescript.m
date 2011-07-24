@@ -2,7 +2,7 @@
  * applescript.m: MacOS X AppleScript support
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 65cae704c661d9ae9c2cdab4badd3f6f576d618c $
+ * $Id: 530557a52509df22e88983cfadecfac167f3470d $
  *
  * Authors: Derk-Jan Hartman <thedj@users.sourceforge.net>
  *
@@ -52,8 +52,7 @@
             NSURL * o_url;
             input_item_t *p_input;
 
-            p_input = input_item_New( p_playlist,
-                                    [o_urlString fileSystemRepresentation],
+            p_input = input_item_New( [o_urlString fileSystemRepresentation],
                                     [[[NSFileManager defaultManager]
                                     displayNameAtPath: o_urlString] UTF8String] );
             /* FIXME: playlist_AddInput() can fail */

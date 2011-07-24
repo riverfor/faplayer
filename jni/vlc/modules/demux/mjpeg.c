@@ -2,7 +2,7 @@
  * mjpeg.c : demuxes mjpeg webcam http streams
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id: 2ebb4a87701caaa91ec2effc47ab5998101a1743 $
+ * $Id: afdc484d39f26277726ed2cce81ffb57acc5ff84 $
  *
  * Authors: Henry Jen (slowhog) <henryjen@ztune.net>
  *          Derk-Jan Hartman (thedj)
@@ -303,8 +303,12 @@ static int Open( vlc_object_t * p_this )
     bool        b_matched = false;
     float       f_fps;
 
+    p_sys = malloc( sizeof( demux_sys_t ) );
+    if( unlikely(p_sys == NULL) )
+        return VLC_ENOMEM;
+
     p_demux->pf_control = Control;
-    p_demux->p_sys      = p_sys = malloc( sizeof( demux_sys_t ) );
+    p_demux->p_sys      = p_sys;
     p_sys->p_es         = NULL;
     p_sys->i_time       = 0;
     p_sys->i_level      = 0;

@@ -2,7 +2,7 @@
  * MainMenu.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 12ce6d119a9e2f70083a234d22a6df84555db5f5 $
+ * $Id: 77b16626ee25da7183152e252f3232f402da8fce $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -38,6 +38,7 @@
 #import "controls.h"
 #import "playlistinfo.h"
 #import "vout.h"
+#import "CoreInteraction.h"
 
 @implementation VLCMainMenu
 static VLCMainMenu *_o_sharedInstance = nil;
@@ -116,15 +117,6 @@ static VLCMainMenu *_o_sharedInstance = nil;
     o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-stop" )];
     [o_mi_stop setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_stop setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-faster" )];
-    [o_mi_faster setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
-    [o_mi_faster setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-slower" )];
-    [o_mi_slower setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
-    [o_mi_slower setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-rate-normal" )];
-    [o_mi_normalSpeed setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
-    [o_mi_normalSpeed setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
     o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-prev" )];
     [o_mi_previous setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_previous setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
@@ -214,9 +206,12 @@ static VLCMainMenu *_o_sharedInstance = nil;
     [o_mu_controls setTitle: _NS("Playback")];
     [o_mi_play setTitle: _NS("Play")];
     [o_mi_stop setTitle: _NS("Stop")];
-    [o_mi_faster setTitle: _NS("Faster")];
-    [o_mi_slower setTitle: _NS("Slower")];
-    [o_mi_normalSpeed setTitle: _NS("Normal rate")];
+    [o_mi_rate setView: o_mi_rate_view];
+    [o_mi_rate_lbl setStringValue: _NS("Playback Speed")];
+    [o_mi_rate_lbl_gray setStringValue: _NS("Playback Speed")];
+    [o_mi_rate_slower_lbl setStringValue: _NS("Slower")];
+    [o_mi_rate_normal_lbl setStringValue: _NS("Normal")];
+    [o_mi_rate_faster_lbl setStringValue: _NS("Faster")];
     [o_mi_trackSynchronization setTitle: _NS("Track Synchronization")];
     [o_mi_previous setTitle: _NS("Previous")];
     [o_mi_next setTitle: _NS("Next")];
@@ -463,6 +458,25 @@ static VLCMainMenu *_o_sharedInstance = nil;
     [o_mi_teletext setEnabled: b_enabled];
 }
 
+- (void)setRateControlsEnabled:(BOOL)b_enabled
+{
+    [o_mi_rate_sld setEnabled: b_enabled];
+    [o_mi_rate_sld setIntValue: [[VLCCoreInteraction sharedInstance] playbackRate]];
+    int i = [[VLCCoreInteraction sharedInstance] playbackRate];
+    if (i == 0)
+        i = 1;
+    [o_mi_rate_fld setStringValue: [NSString stringWithFormat:@"%ix", i]];
+    if (b_enabled) {
+        [o_mi_rate_lbl setHidden: NO];
+        [o_mi_rate_lbl_gray setHidden: YES];
+    }
+    else
+    {
+        [o_mi_rate_lbl setHidden: YES];
+        [o_mi_rate_lbl_gray setHidden: NO];
+    }
+}
+
 #pragma mark -
 #pragma mark Recent Items
 - (void)openRecentItem:(id)item
@@ -475,6 +489,18 @@ static VLCMainMenu *_o_sharedInstance = nil;
     [[NSDocumentController sharedDocumentController]
      clearRecentDocuments: nil];
 }
+
+#pragma mark -
+#pragma mark Playback
+- (IBAction)setPlaybackRate:(id)sender
+{
+    [[VLCCoreInteraction sharedInstance] setPlaybackRate: [o_mi_rate_sld intValue]];
+    int i = [[VLCCoreInteraction sharedInstance] playbackRate];
+    if (i == 0)
+        i = 1;
+    [o_mi_rate_fld setStringValue: [NSString stringWithFormat:@"%ix", i]];
+}
+
 
 #pragma mark -
 #pragma mark Panels
@@ -789,7 +815,7 @@ static VLCMainMenu *_o_sharedInstance = nil;
         o_lmi_tmp2 = [o_menu addItemWithTitle: _NS("Lock Aspect Ratio") action: @selector(lockVideosAspectRatio:) keyEquivalent: @""];
         [o_lmi_tmp2 setTarget: self];
         [o_lmi_tmp2 setEnabled: YES];
-        [o_lmi_tmp2 setState: [[[VLCMain sharedInstance] controls] aspectRatioIsLocked]];
+        [o_lmi_tmp2 setState: [[VLCCoreInteraction sharedInstance] aspectRatioIsLocked]];
         [o_parent setEnabled: YES];
         [o_menu addItem: [NSMenuItem separatorItem]];
     }
@@ -955,19 +981,6 @@ static VLCMainMenu *_o_sharedInstance = nil;
             bEnabled = FALSE;
         }
     }
-    else if( [o_title isEqualToString: _NS("Faster")] ||
-            [o_title isEqualToString: _NS("Slower")] ||
-            [o_title isEqualToString: _NS("Normal rate")] )
-    {
-        if( p_input != NULL )
-        {
-            bEnabled = var_GetBool( p_input, "can-rate" );
-        }
-        else
-        {
-            bEnabled = FALSE;
-        }
-    }
     else if( [o_title isEqualToString: _NS("Stop")] )
     {
         if( p_input == NULL )
@@ -1024,7 +1037,7 @@ static VLCMainMenu *_o_sharedInstance = nil;
     }
     else if( [o_title isEqualToString: _NS("Mute")] )
     {
-        [o_mi setState: p_intf->p_sys->b_mute ? NSOnState : NSOffState];
+        //FIXME [o_mi setState: p_intf->p_sys->b_mute ? NSOnState : NSOffState];
         [self setupMenus]; /* Make sure audio menu is up to date */
     }
     else if( [o_title isEqualToString: _NS("Half Size")] ||

@@ -2,7 +2,7 @@
  * ram.c : RAM playlist format import
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 91f2da9aa1abf68071eff62936ffb45fa934e3f3 $
+ * $Id: 78ad7784a61bd4d5ec047fb0a643fcfaa8ab097d $
  *
  * Authors: Srikanth Raju <srikiraju@gmail.com>
  *
@@ -326,7 +326,7 @@ static int Demux( demux_t *p_demux )
             }
 
             /* Create the input item and pump in all the options into playlist item */
-            p_input = input_item_NewExt( p_demux, psz_mrl, psz_title, i_options, ppsz_options, 0, i_duration );
+            p_input = input_item_NewExt( psz_mrl, psz_title, i_options, ppsz_options, 0, i_duration );
 
             if( !EMPTY_STR( psz_artist ) ) input_item_SetArtist( p_input, psz_artist );
             if( !EMPTY_STR( psz_author ) ) input_item_SetPublisher( p_input, psz_author );

@@ -2,7 +2,7 @@
  * podcast.c : podcast playlist imports
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: 445d0c70b54e155ac5f061b8f71fefd2dc4da771 $
+ * $Id: f346a0b07721fa99b529a40bd5316e850d9eea61 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -243,7 +243,7 @@ static int Demux( demux_t *p_demux )
                         goto error;
                     }
 
-                    p_input = input_item_New( p_demux, psz_item_mrl, psz_item_name );
+                    p_input = input_item_New( psz_item_mrl, psz_item_name );
                     FREENULL( psz_item_mrl );
                     FREENULL( psz_item_name );
 

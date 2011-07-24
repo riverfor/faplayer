@@ -2,7 +2,7 @@
  * playlist_model.cpp : Manage playlist model
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: 6d5d0c312f9417c472fa68e6acc99bfb1a6f5ae0 $
+ * $Id: 606069fb697e1a760a0616eb3419fb7966a917bc $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakkka <ileoo (at) videolan dot org>
@@ -88,6 +88,8 @@ PLModel::PLModel( playlist_t *_p_playlist,  /* THEPL */
     ADD_ICON( NODE, ":/type/node" );
 #undef ADD_ICON
 
+    i_zoom = getSettings()->value( "Playlist/zoom", 0 ).toInt();
+
     rebuild( p_root );
     DCONNECT( THEMIM->getIM(), metaChanged( input_item_t *),
               this, processInputItemUpdate( input_item_t *) );
@@ -101,6 +103,7 @@ PLModel::PLModel( playlist_t *_p_playlist,  /* THEPL */
 
 PLModel::~PLModel()
 {
+    getSettings()->setValue( "Playlist/zoom", i_zoom );
     delete rootItem;
     delete sortingMenu;
 }
@@ -367,7 +370,7 @@ QVariant PLModel::data( const QModelIndex &index, const int role ) const
     else if( role == Qt::FontRole )
     {
         QFont f;
-        f.setPointSize( f.pointSize() - 1 );
+        f.setPointSize( f.pointSize() - 1 + i_zoom );
         if( isCurrent( index ) )
             f.setBold( true );
         return QVariant( f );

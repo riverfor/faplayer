@@ -2,7 +2,7 @@
  * vlm.c: VLM interface plugin
  *****************************************************************************
  * Copyright (C) 2000-2005 the VideoLAN team
- * $Id: 66dfbf7bf817408a6fcb649006401eee4e2b0fda $
+ * $Id: e66b4ba34869d57d2c8d40bbacb85ad1fd6634b8 $
  *
  * Authors: Simon Latapie <garf@videolan.org>
  *          Laurent Aimar <fenrir@videolan.org>
@@ -51,6 +51,7 @@
 #if defined (WIN32) && !defined (UNDER_CE)
 #include <sys/timeb.h>                                            /* ftime() */
 #endif
+#include <limits.h>
 
 #include <vlc_input.h>
 #include <vlc_stream.h>
@@ -66,7 +67,6 @@
  * Local prototypes.
  *****************************************************************************/
 
-static void vlm_Destructor( vlm_t *p_vlm );
 static void* Manage( void * );
 static int vlm_MediaVodControl( void *, vod_media_t *, const char *, int, va_list );
 
@@ -131,7 +131,6 @@ vlm_t *vlm_New ( vlc_object_t *p_this )
 {
     vlm_t *p_vlm = NULL, **pp_vlm = &(libvlc_priv (p_this->p_libvlc)->p_vlm);
     char *psz_vlmconf;
-    static const char vlm_object_name[] = "vlm daemon";
 
     /* Avoid multiple creation */
     vlc_mutex_lock( &vlm_mutex );
@@ -139,7 +138,10 @@ vlm_t *vlm_New ( vlc_object_t *p_this )
     p_vlm = *pp_vlm;
     if( p_vlm )
     {   /* VLM already exists */
-        vlc_object_hold( p_vlm );
+        if( likely( p_vlm->users < UINT_MAX ) )
+            p_vlm->users++;
+        else
+            p_vlm = NULL;
         vlc_mutex_unlock( &vlm_mutex );
         return p_vlm;
     }
@@ -147,7 +149,7 @@ vlm_t *vlm_New ( vlc_object_t *p_this )
     msg_Dbg( p_this, "creating VLM" );
 
     p_vlm = vlc_custom_create( p_this->p_libvlc, sizeof( *p_vlm ),
-                               VLC_OBJECT_GENERIC, vlm_object_name );
+                               "vlm daemon" );
     if( !p_vlm )
     {
         vlc_mutex_unlock( &vlm_mutex );
@@ -157,6 +159,7 @@ vlm_t *vlm_New ( vlc_object_t *p_this )
     vlc_mutex_init( &p_vlm->lock );
     vlc_mutex_init( &p_vlm->lock_manage );
     vlc_cond_init_daytime( &p_vlm->wait_manage );
+    p_vlm->users = 1;
     p_vlm->input_state_changed = false;
     p_vlm->i_id = 1;
     TAB_INIT( p_vlm->i_media, p_vlm->media );
@@ -196,7 +199,6 @@ vlm_t *vlm_New ( vlc_object_t *p_this )
     }
     free( psz_vlmconf );
 
-    vlc_object_set_destructor( p_vlm, (vlc_destructor_t)vlm_Destructor );
     vlc_mutex_unlock( &vlm_mutex );
 
     return p_vlm;
@@ -208,18 +210,22 @@ vlm_t *vlm_New ( vlc_object_t *p_this )
 void vlm_Delete( vlm_t *p_vlm )
 {
     /* vlm_Delete() is serialized against itself, and against vlm_New().
-     * This way, vlm_Destructor () (called from vlc_objet_release() above)
-     * is serialized against setting libvlc_priv->p_vlm from vlm_New(). */
+     * This mutex protects libvlc_priv->p_vlm and p_vlm->users. */
     vlc_mutex_lock( &vlm_mutex );
-    vlc_object_release( p_vlm );
+    assert( p_vlm->users > 0 );
+    if( --p_vlm->users == 0 )
+    {
+        assert( libvlc_priv(p_vlm->p_libvlc)->p_vlm = p_vlm );
+        libvlc_priv(p_vlm->p_libvlc)->p_vlm = NULL;
+    }
+    else
+        p_vlm = NULL;
     vlc_mutex_unlock( &vlm_mutex );
-}
 
-/*****************************************************************************
- * vlm_Destructor:
- *****************************************************************************/
-static void vlm_Destructor( vlm_t *p_vlm )
-{
+    if( p_vlm == NULL )
+        return;
+
+    /* Destroy and release VLM */
     vlc_mutex_lock( &p_vlm->lock );
     vlm_ControlInternal( p_vlm, VLM_CLEAR_MEDIAS );
     TAB_CLEAN( p_vlm->i_media, p_vlm->media );
@@ -228,7 +234,6 @@ static void vlm_Destructor( vlm_t *p_vlm )
     TAB_CLEAN( p_vlm->i_schedule, p_vlm->schedule );
     vlc_mutex_unlock( &p_vlm->lock );
 
-    libvlc_priv(p_vlm->p_libvlc)->p_vlm = NULL;
     vlc_object_kill( p_vlm );
 
     if( p_vlm->p_vod )
@@ -248,6 +253,7 @@ static void vlm_Destructor( vlm_t *p_vlm )
     vlc_cond_destroy( &p_vlm->wait_manage );
     vlc_mutex_destroy( &p_vlm->lock );
     vlc_mutex_destroy( &p_vlm->lock_manage );
+    vlc_object_release( p_vlm );
 }
 
 /*****************************************************************************
@@ -621,8 +627,7 @@ static int vlm_OnMediaUpdate( vlm_t *p_vlm, vlm_media_sys_t *p_media )
             vlc_gc_decref( p_media->vod.p_item );
 
             char *psz_uri = make_URI( p_cfg->ppsz_input[0], NULL );
-            p_media->vod.p_item = input_item_New( p_vlm, psz_uri,
-                p_cfg->psz_name );
+            p_media->vod.p_item = input_item_New( psz_uri, p_cfg->psz_name );
             free( psz_uri );
 
             if( p_cfg->psz_output )
@@ -759,7 +764,7 @@ static int vlm_ControlMediaAdd( vlm_t *p_vlm, vlm_media_t *p_cfg, int64_t *p_id 
     if( p_cfg->b_vod && !p_vlm->p_vod )
     {
         p_vlm->p_vod = vlc_custom_create( VLC_OBJECT(p_vlm), sizeof( vod_t ),
-                                          VLC_OBJECT_GENERIC, "vod server" );
+                                          "vod server" );
         p_vlm->p_vod->p_module = module_need( p_vlm->p_vod, "vod server", "$vod-server", false );
         if( !p_vlm->p_vod->p_module )
         {
@@ -781,7 +786,7 @@ static int vlm_ControlMediaAdd( vlm_t *p_vlm, vlm_media_t *p_cfg, int64_t *p_id 
     p_media->cfg.id = p_vlm->i_id++;
     /* FIXME do we do something here if enabled is true ? */
 
-    p_media->vod.p_item = input_item_New( p_vlm, NULL, NULL );
+    p_media->vod.p_item = input_item_New( NULL, NULL );
 
     p_media->vod.p_media = NULL;
     TAB_INIT( p_media->i_instance, p_media->instance );
@@ -896,7 +901,7 @@ static vlm_media_instance_sys_t *vlm_MediaInstanceNew( vlm_t *p_vlm, const char 
     if( psz_name )
         p_instance->psz_name = strdup( psz_name );
 
-    p_instance->p_item = input_item_New( p_vlm, NULL, NULL );
+    p_instance->p_item = input_item_New( NULL, NULL );
 
     p_instance->i_index = 0;
     p_instance->b_sout_keep = false;

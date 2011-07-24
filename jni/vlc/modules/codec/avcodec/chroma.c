@@ -2,7 +2,7 @@
  * chroma.c: libavutil <-> libvlc conversion routines
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id: 8b5594e50b3dd1719c438bb1f62646c096f97c6e $
+ * $Id: fcad6ec8183db0b6d9b19249ec661522575b1157 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -30,6 +30,7 @@
 #include <vlc_codec.h>
 
 #include <libavutil/avutil.h>
+#include <libavutil/pixfmt.h>
 #include "chroma.h"
 
 /*****************************************************************************

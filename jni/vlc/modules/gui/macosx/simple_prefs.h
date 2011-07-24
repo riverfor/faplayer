@@ -2,7 +2,7 @@
 * simple_prefs.h: Simple Preferences for Mac OS X
 *****************************************************************************
 * Copyright (C) 2008-2011 the VideoLAN team
-* $Id: f35723dfc21ac37911f9125ddf5197859110ba6b $
+* $Id: 7ad1aaf198e7a959bc9b7f5296298c20cf004d42 $
 *
 * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
 *
@@ -32,7 +32,6 @@
     IBOutlet id o_audio_effects_box;
     IBOutlet id o_audio_enable_ckb;
     IBOutlet id o_audio_general_box;
-    IBOutlet id o_audio_headphone_ckb;
     IBOutlet id o_audio_lang_fld;
     IBOutlet id o_audio_lang_txt;
     IBOutlet id o_audio_last_box;
@@ -41,9 +40,6 @@
     IBOutlet id o_audio_lastpwd_txt;
     IBOutlet id o_audio_lastuser_fld;
     IBOutlet id o_audio_lastuser_txt;
-    IBOutlet id o_audio_norm_ckb;
-    IBOutlet id o_audio_norm_fld;
-    IBOutlet id o_audio_norm_stepper;
     IBOutlet id o_audio_spdif_ckb;
     IBOutlet id o_audio_view;
     IBOutlet id o_audio_visual_pop;
@@ -85,6 +81,9 @@
     IBOutlet id o_input_serverport_txt;
     IBOutlet id o_input_view;
 
+    IBOutlet id o_intf_style_txt;
+    IBOutlet id o_intf_style_dark_bcell;
+    IBOutlet id o_intf_style_bright_bcell;
     IBOutlet id o_intf_art_pop;
     IBOutlet id o_intf_art_txt;
     IBOutlet id o_intf_embedded_ckb;
@@ -112,6 +111,11 @@
     IBOutlet id o_osd_lang_box;
     IBOutlet id o_osd_lang_fld;
     IBOutlet id o_osd_lang_txt;
+    IBOutlet id o_osd_opacity_txt;
+    IBOutlet id o_osd_opacity_fld;
+    IBOutlet id o_osd_opacity_sld;
+    IBOutlet id o_osd_forcebold_ckb;
+    IBOutlet id o_osd_moreoptions_txt;
     IBOutlet id o_osd_osd_box;
     IBOutlet id o_osd_osd_ckb;
     IBOutlet id o_osd_view;

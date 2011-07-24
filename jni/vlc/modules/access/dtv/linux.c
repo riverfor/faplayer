@@ -489,35 +489,54 @@ static int dvb_find_frontend (dvb_device_t *d, fe_type_t type, fe_caps_t caps)
     return -1;
 }
 
-const delsys_t *dvb_guess_system (dvb_device_t *d)
+/**
+ * Detects supported delivery systems.
+ * @return a bit mask of supported systems (zero on failure)
+ */
+unsigned dvb_enum_systems (dvb_device_t *d)
 {
-    if (d->frontend == -1)
+    unsigned systems = 0;
+
+    for (unsigned n = 0; n < 256; n++)
     {
-        d->frontend = dvb_open_node (d->dir, "frontend", 0, O_RDWR);
-        if (d->frontend == -1)
+        int fd = dvb_open_node (d->dir, "frontend", n, O_RDWR);
+        if (fd == -1)
         {
-            msg_Err (d->obj, "cannot access frontend %u; %m", 0);
-            return NULL;
+            if (errno == ENOENT)
+                break; /* all frontends already enumerated */
+            msg_Err (d->obj, "cannot access frontend %u; %m", n);
+            continue;
         }
 
-        if (ioctl (d->frontend, FE_GET_INFO, &d->info) < 0)
+        struct dvb_frontend_info info;
+        if (ioctl (fd, FE_GET_INFO, &info) < 0)
         {
-            msg_Err (d->obj, "cannot get frontend %u info: %m", 0);
-            close (d->frontend);
-            d->frontend = -1;
-            return NULL;
+            msg_Err (d->obj, "cannot get frontend %u info: %m", n);
+            close (fd);
+            continue;
         }
-    }
+        close (fd);
 
-    //bool v2 = d->info.caps & FE_CAN_2G_MODULATION;
-    switch (d->info.type)
-    {
-        case FE_QPSK: return /*v2 ? &dvbs2 :*/ &dvbs;
-        case FE_QAM:  return &dvbc;
-        case FE_OFDM: return /*v2 ? &dvbt2 :*/ &dvbt;
-        case FE_ATSC: return &atsc;
+        /* Linux DVB lacks detection for non-DVB/non-ATSC demods */
+        static const unsigned types[] = {
+            [FE_QPSK] = DVB_S,
+            [FE_QAM] = DVB_C,
+            [FE_OFDM] = DVB_T,
+            [FE_ATSC] = ATSC,
+        };
+
+        if (((unsigned)info.type) >= sizeof (types) / sizeof (types[0]))
+        {
+            msg_Err (d->obj, "unknown frontend type %u", info.type);
+            continue;
+        }
+
+        unsigned sys = types[info.type];
+        if (info.caps & FE_CAN_2G_MODULATION)
+            sys |= sys << 1; /* DVB_foo -> DVB_foo|DVB_foo2 */
+        systems |= sys;
     }
-    return NULL;
+    return systems;
 }
 
 float dvb_get_signal_strength (dvb_device_t *d)

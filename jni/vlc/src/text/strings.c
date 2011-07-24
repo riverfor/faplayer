@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2008-2009 Rémi Denis-Courmont
- * $Id: 830d8c40541c1fa495f76d97381dbfd398ece98d $
+ * $Id: 0666cfd9b6948609f7354117edd3ac1e2357ac39 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Daniel Stranger <vlc at schmaller dot de>
@@ -42,11 +42,12 @@
 #include <vlc_input.h>
 #include <vlc_meta.h>
 #include <vlc_playlist.h>
-#include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 
 #include <vlc_strings.h>
 #include <vlc_url.h>
 #include <vlc_charset.h>
+#include <vlc_fs.h>
 #include <libvlc.h>
 #include <errno.h>
 
@@ -1129,13 +1130,15 @@ char *make_URI (const char *path, const char *scheme)
     else
     if (path[0] != DIR_SEP_CHAR)
     {   /* Relative path: prepend the current working directory */
-        char cwd[PATH_MAX];
+        char *cwd, *ret;
 
-        if (getcwd (cwd, sizeof (cwd)) == NULL) /* FIXME: UTF8? */
+        if ((cwd = vlc_getcwd ()) == NULL)
             return NULL;
-        if (asprintf (&buf, "%s/%s", cwd, path) == -1)
-            return NULL;
-        char *ret = make_URI (buf, scheme);
+        if (asprintf (&buf, "%s"DIR_SEP"%s", cwd, path) == -1)
+            buf = NULL;
+
+        free (cwd);
+        ret = (buf != NULL) ? make_URI (buf, scheme) : NULL;
         free (buf);
         return ret;
     }

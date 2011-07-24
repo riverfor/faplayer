@@ -2,7 +2,7 @@
  * mp4.c : MP4 file input module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2004, 2010 the VideoLAN team
- * $Id: 3583fe7aea18acf87f1eb46723c891dad2d7836b $
+ * $Id: b4f99f4dcd8f161a00379b8b0b1bb4bbab0e3c18 $
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -334,6 +334,21 @@ static int Open( vlc_object_t * p_this )
                          "ISO Media file (isom) version %d.",
                          p_ftyp->data.p_ftyp->i_minor_version );
                 break;
+            case( FOURCC_3gp4 ):
+            case( VLC_FOURCC( '3', 'g', 'p', '5' ) ):
+            case( VLC_FOURCC( '3', 'g', 'p', '6' ) ):
+            case( VLC_FOURCC( '3', 'g', 'p', '7' ) ):
+                msg_Dbg( p_demux, "3GPP Media file Release: %c",
+#ifdef WORDS_BIGENDIAN
+                        p_ftyp->data.p_ftyp->i_major_brand
+#else
+                        p_ftyp->data.p_ftyp->i_major_brand >> 24
+#endif
+                        );
+                break;
+            case( VLC_FOURCC( 'q', 't', ' ', ' ') ):
+                msg_Dbg( p_demux, "Apple QuickTime file" );
+                break;
             default:
                 msg_Dbg( p_demux,
                          "unrecognized major file specification (%4.4s).",
@@ -353,8 +368,13 @@ static int Open( vlc_object_t * p_this )
 
         if( !p_foov )
         {
-            msg_Err( p_demux, "MP4 plugin discarded (no moov box)" );
-            goto error;
+            /* search also for moof box used by smoothstreaming */
+            p_foov = MP4_BoxGet( p_sys->p_root, "/moof" );
+            if( !p_foov )
+            {
+                msg_Err( p_demux, "MP4 plugin discarded (no moov,foov,moof box)" );
+                goto error;
+            }
         }
         /* we have a free box as a moov, rename it */
         p_foov->i_type = FOURCC_moov;
@@ -421,7 +441,7 @@ static int Open( vlc_object_t * p_this )
                     free( psz_path );
                 }
                 msg_Dbg( p_demux, "adding ref = `%s'", psz_ref );
-                input_item_t *p_input = input_item_New( p_demux, psz_ref, NULL );
+                input_item_t *p_input = input_item_New( psz_ref, NULL );
                 input_item_CopyOptions( p_current, p_input );
                 input_item_node_AppendItem( p_subitems, p_input );
                 vlc_gc_decref( p_input );
@@ -1020,6 +1040,7 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
         case DEMUX_HAS_UNSUPPORTED_META:
         case DEMUX_GET_ATTACHMENTS:
         case DEMUX_GET_PTS_DELAY:
+        case DEMUX_CAN_RECORD:
             return VLC_EGENERIC;
 
         default:

@@ -2,7 +2,7 @@
  * playlist_model.hpp : Model for a playlist tree
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: 925b129852a96e40a851bfba7ac8c554174f1b6d $
+ * $Id: d1bf758e3eeb26f4260b5b3b3af4ebc9d9531179 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jakob Leben <jleben@videolan.org>
@@ -104,6 +104,10 @@ public:
     {
         return getItem( index )->id();
     }
+    inline int getZoom() const
+    {
+        return i_zoom;
+    }
 
 signals:
     void currentChanged( const QModelIndex& );
@@ -112,6 +116,11 @@ signals:
 public slots:
     virtual void activateItem( const QModelIndex &index );
     void activateItem( playlist_item_t *p_item );
+    inline void changeZoom( const int zoom )
+    {
+        i_zoom = zoom;
+        emit layoutChanged();
+    }
 
 private:
     /* General */
@@ -152,6 +161,9 @@ private:
     PLItem *p_cached_item_bi;
     int i_cached_id;
     int i_cached_input_id;
+
+    /* Zoom factor for font-size */
+    int i_zoom;
 
 private slots:
     void popupPlay();

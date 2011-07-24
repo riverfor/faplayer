@@ -2,7 +2,7 @@
  * sdl.c : SDL audio output plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2002 the VideoLAN team
- * $Id: f88f12449761586ca396d87e9cce5addf45e54c8 $
+ * $Id: 9151939cf419e8dacac1a8f6bf2f9766013e3f9e $
  *
  * Authors: Michel Kaempf <maxx@via.ecp.fr>
  *          Sam Hocevar <sam@zoy.org>
@@ -215,6 +215,7 @@ static int Open ( vlc_object_t *p_this )
     p_aout->output.output.i_rate = obtained.freq;
     p_aout->output.i_nb_samples = obtained.samples;
     p_aout->output.pf_play = Play;
+    p_aout->output.pf_pause = NULL;
 
     return VLC_SUCCESS;
 }
@@ -250,9 +251,9 @@ static void SDLCallback( void * _p_aout, uint8_t * p_stream, int i_len )
      * hardware latency, or the buffer state. So we just pop data and throw
      * it at SDL's face. Nah. */
 
-    vlc_mutex_lock( &p_aout->output_fifo_lock );
+    vlc_mutex_lock( &p_aout->lock );
     p_buffer = aout_FifoPop( &p_aout->output.fifo );
-    vlc_mutex_unlock( &p_aout->output_fifo_lock );
+    vlc_mutex_unlock( &p_aout->lock );
 
     if ( p_buffer != NULL )
     {

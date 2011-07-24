@@ -2,7 +2,7 @@
  * libvlc_audio.c: New libvlc audio control API
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: d39de60ad75c1b339e7ad2d87473efe16fa1f91b $
+ * $Id: 9123328de2cef5ac5a81b9aa6ec78b5d22082ba4 $
  *
  * Authors: Filippo Carone <filippo@carone.org>
  *          Jean-Paul Saman <jpsaman _at_ m2x _dot_ nl>
@@ -34,6 +34,7 @@
 
 #include <vlc_common.h>
 #include <vlc_input.h>
+#include <vlc_aout_intf.h>
 #include <vlc_aout.h>
 #include <vlc_modules.h>
 
@@ -133,9 +134,13 @@ void libvlc_audio_output_list_release( libvlc_audio_output_t *p_list )
  ***********************/
 int libvlc_audio_output_set( libvlc_media_player_t *mp, const char *psz_name )
 {
-    if( !module_exists( psz_name ) )
+    char *value;
+
+    if( !module_exists( psz_name )
+     || asprintf( &value, "%s,none", psz_name ) == -1 )
         return -1;
-    var_SetString( mp, "aout", psz_name );
+    var_SetString( mp, "aout", value );
+    free( value );
     return 0;
 }
 

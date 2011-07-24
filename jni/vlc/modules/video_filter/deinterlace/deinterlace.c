@@ -2,7 +2,7 @@
  * deinterlace.c : deinterlacer plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2011 the VideoLAN team
- * $Id: fa1a00b66cc664b3b2a05ac754d6de914b15980a $
+ * $Id: 60b5f4503ca8a6301c6c313195124d39ba397a00 $
  *
  * Author: Sam Hocevar <sam@zoy.org>
  *         Christophe Massiot <massiot@via.ecp.fr>
@@ -682,7 +682,7 @@ int Open( vlc_object_t *p_this )
     }
     else
 #endif
-#if defined __ARM_NEON__
+#if defined __ARM_NEON__ // FIXME: runtime detect support
     if( vlc_CPU() & CPU_CAPABILITY_NEON )
     {
         p_sys->pf_merge = MergeNEON;

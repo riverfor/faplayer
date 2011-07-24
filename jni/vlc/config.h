@@ -28,6 +28,9 @@
 /* Define to 1 if MMX EXT inline assembly is available. */
 /* #undef CAN_COMPILE_MMXEXT */
 
+/* Define to 1 if NEON (and ARMv6) assembly is available with NEON_CFLAGS. */
+/* #undef CAN_COMPILE_NEON */
+
 /* Define to 1 if SSE inline assembly is available. */
 /* #undef CAN_COMPILE_SSE */
 
@@ -50,7 +53,7 @@
 /* #undef CAN_COMPILE_SSSE3 */
 
 /* The ./configure command line */
-#define CONFIGURE_LINE "./../../../configure  '--host=arm-eabi-linux' '--build=x86_64-unknown-linux' '--enable-static-modules' '--disable-vlc' '--disable-debug' '--disable-vlm' '--disable-sout' '--disable-dbus' '--disable-lua' '--disable-httpd' '--disable-libgcrypt' '--disable-a52' '--enable-live555' '--disable-vcd' '--disable-v4l2' '--disable-gnomevfs' '--disable-dvdread' '--disable-dvdnav' '--disable-bluray' '--disable-linsys' '--disable-decklink' '--enable-avformat' '--enable-swscale' '--enable-avcodec' '--disable-postproc' '--disable-libva' '--enable-mkv' '--disable-dv' '--disable-mod' '--disable-sid' '--disable-x264' '--disable-mad' '--disable-schroedinger' '--disable-dirac' '--disable-sdl-image' '--disable-zvbi' '--disable-fluidsynth' '--enable-opensles' '--disable-jack' '--disable-pulse' '--disable-alsa' '--disable-portaudio' '--disable-sdl' '--disable-xcb' '--disable-atmo' '--disable-qt4' '--disable-skins2' '--disable-mtp' '--disable-taglib' '--disable-notify' '--enable-freetype' '--enable-libass' '--disable-svg' '--disable-sqlite' '--disable-udev' '--disable-libxml2' '--enable-android-surface' '--disable-caca' '--disable-glx' '--disable-egl' '--disable-gl' '--disable-gles1' '--disable-gles2' '--disable-goom' '--disable-projectm' 'build_alias=x86_64-unknown-linux' 'host_alias=arm-eabi-linux' 'CC=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-gcc' 'CFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2' 'LDFLAGS=-Wl,-rpath-link=/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib,-Bdynamic,-dynamic-linker=/system/bin/linker -Wl,--no-undefined -Wl,-shared -L/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib -Wl,--fix-cortex-a8' 'LIBS=-lc -ldl -lgcc' 'CPPFLAGS=-I/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/include' 'CXX=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-g++' 'CXXFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2'"
+#define CONFIGURE_LINE "./../../../configure  '--host=arm-eabi-linux' '--build=x86_64-unknown-linux' '--enable-static-modules' '--disable-a52' '--disable-vlc' '--disable-vlm' '--disable-sout' '--disable-httpd' '--disable-dbus' '--disable-lua' '--disable-libgcrypt' '--enable-live555' '--enable-realrtsp' '--disable-vcd' '--disable-v4l2' '--disable-gnomevfs' '--disable-dvdread' '--disable-dvdnav' '--disable-bluray' '--disable-linsys' '--disable-decklink' '--enable-avformat' '--enable-swscale' '--enable-avcodec' '--disable-postproc' '--disable-libva' '--enable-mkv' '--disable-dv' '--disable-mod' '--disable-sid' '--disable-x264' '--disable-mad' '--disable-schroedinger' '--disable-dirac' '--disable-sdl-image' '--disable-zvbi' '--disable-fluidsynth' '--enable-opensles' '--disable-jack' '--disable-pulse' '--disable-alsa' '--disable-portaudio' '--disable-sdl' '--disable-xcb' '--disable-atmo' '--disable-qt4' '--disable-skins2' '--disable-mtp' '--disable-taglib' '--disable-notify' '--enable-freetype' '--enable-libass' '--disable-svg' '--disable-sqlite' '--disable-udev' '--disable-libxml2' '--enable-android-surface' '--disable-caca' '--disable-glx' '--disable-egl' '--disable-gl' '--disable-gles1' '--disable-gles2' '--disable-goom' '--disable-projectm' 'build_alias=x86_64-unknown-linux' 'host_alias=arm-eabi-linux' 'CC=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-gcc' 'CFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2' 'LDFLAGS=-Wl,-rpath-link=/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib,-Bdynamic,-dynamic-linker=/system/bin/linker -Wl,--no-undefined -Wl,-shared -L/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib -Wl,--fix-cortex-a8' 'LIBS=-lc -ldl -lgcc' 'CPPFLAGS=-I/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/include -I./../../../extras/contrib/hosts/arm-eabi/include         -I/opt/android/android-ndk-r5c/sources/cxx-stl/gnu-libstdc++/include         -I/opt/android/android-ndk-r5c/sources/cxx-stl/gnu-libstdc++/libs/armeabi-v7a/include/' 'CXX=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-g++' 'CXXFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2 -D__STDC_VERSION__=199901L -D__STDC_CONSTANT_MACROS' 'PKG_CONFIG_LIBDIR=./../../../extras/contrib/hosts/arm-eabi/lib/pkgconfig'"
 
 /* Copyright string */
 #define COPYRIGHT_MESSAGE "Copyright © 1996-2011 the VideoLAN team"
@@ -125,9 +128,6 @@
    the CoreFoundation framework. */
 /* #undef HAVE_CFPREFERENCESCOPYAPPVALUE */
 
-/* Define to 1 if you have clock_nanosleep. */
-/* #undef HAVE_CLOCK_NANOSLEEP */
-
 /* Define to 1 if you have the `connect' function. */
 #define HAVE_CONNECT 1
 
@@ -156,7 +156,8 @@
 /* Define to 1 if you have the <DeckLinkAPIDispatch.cpp> header file. */
 /* #undef HAVE_DECKLINKAPIDISPATCH_CPP */
 
-/* Define if <time.h> defines nanosleep. */
+/* Define to 1 if you have the declaration of `nanosleep', and to 0 if you
+   don't. */
 #define HAVE_DECL_NANOSLEEP 1
 
 /* Define to 1 if you have the `dirfd' function. */
@@ -187,7 +188,7 @@
 #define HAVE_DYNAMIC_PLUGINS 1
 
 /* Define to 1 if you have the <ebml/EbmlVersion.h> header file. */
-/* #undef HAVE_EBML_EBMLVERSION_H */
+#define HAVE_EBML_EBMLVERSION_H 1
 
 /* Define to 1 if you have the `eventfd' function. */
 #define HAVE_EVENTFD 1
@@ -225,9 +226,6 @@
 /* Define to 1 if you have the `fsync' function. */
 #define HAVE_FSYNC 1
 
-/* Define to 1 if you have the `getcwd' function. */
-#define HAVE_GETCWD 1
-
 /* Define to 1 if you have the `getdelim' function. */
 /* #undef HAVE_GETDELIM */
 
@@ -245,9 +243,6 @@
 
 /* Define if the GNU gettext() function is already present or preinstalled. */
 /* #undef HAVE_GETTEXT */
-
-/* Define to 1 if you have the `gettimeofday' function. */
-#define HAVE_GETTIMEOFDAY 1
 
 /* Define to 1 if you have the <GL/gl.h> header file. */
 /* #undef HAVE_GL_GL_H */
@@ -388,10 +383,10 @@
 /* #undef HAVE_MAEMO */
 
 /* Define to 1 if you have the <matroska/KaxAttachments.h> header file. */
-/* #undef HAVE_MATROSKA_KAXATTACHMENTS_H */
+#define HAVE_MATROSKA_KAXATTACHMENTS_H 1
 
 /* Define to 1 if you have the <matroska/KaxVersion.h> header file. */
-/* #undef HAVE_MATROSKA_KAXVERSION_H */
+#define HAVE_MATROSKA_KAXVERSION_H 1
 
 /* Define to 1 if you have the `memalign' function. */
 #define HAVE_MEMALIGN 1
@@ -410,9 +405,6 @@
 
 /* Define to 1 if you have the <mpc/mpcdec.h> header file. */
 /* #undef HAVE_MPC_MPCDEC_H */
-
-/* Define if nanosleep is available. */
-#define HAVE_NANOSLEEP 1
 
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #define HAVE_NETINET_IN_H 1
@@ -559,9 +551,6 @@
 /* Define to 1 if you have the `strtoll' function. */
 #define HAVE_STRTOLL 1
 
-/* Define if <sys/time.h> defines struct timespec. */
-#define HAVE_STRUCT_TIMESPEC 1
-
 /* Define to 1 if you have the `swab' function. */
 /* #undef HAVE_SWAB */
 
@@ -644,7 +633,7 @@
 #define HAVE___VA_COPY 1
 
 /* Define as const if the declaration of iconv() needs const. */
-/* #undef ICONV_CONST */
+#define ICONV_CONST 
 
 /* Dynamic object extension */
 #define LIBEXT ".so"
@@ -689,17 +678,20 @@
 /* Define to the version of this package. */
 #define PACKAGE_VERSION "1.2.0-git"
 
-/* version minor number */
-#define PACKAGE_VERSION_EXTRA "-git"
+/* version development string */
+#define PACKAGE_VERSION_DEV "git"
+
+/* version extra number */
+#define PACKAGE_VERSION_EXTRA 0
 
 /* version major number */
-#define PACKAGE_VERSION_MAJOR "1"
+#define PACKAGE_VERSION_MAJOR 1
 
 /* version minor number */
-#define PACKAGE_VERSION_MINOR "2"
+#define PACKAGE_VERSION_MINOR 2
 
-/* version minor number */
-#define PACKAGE_VERSION_REVISION "0"
+/* version revision number */
+#define PACKAGE_VERSION_REVISION 0
 
 /* Define if you want to use SQLite module */
 /* #undef SQLITE_MODULE */
@@ -745,10 +737,10 @@
 #define VLC_COMPILER "gcc version 4.4.3 (GCC) "
 
 /* user who ran configure */
-#define VLC_COMPILE_BY "luka"
+#define VLC_COMPILE_BY "tewilove"
 
 /* host which ran configure */
-#define VLC_COMPILE_HOST "luka-laptop"
+#define VLC_COMPILE_HOST "localhost"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -763,7 +755,7 @@
 #endif
 
 /* Define to 1 if the X Window System is missing or not being used. */
-/* #undef X_DISPLAY_MISSING */
+#define X_DISPLAY_MISSING 1
 
 /* Define if the zvbi module is built */
 /* #undef ZVBI_COMPILED */

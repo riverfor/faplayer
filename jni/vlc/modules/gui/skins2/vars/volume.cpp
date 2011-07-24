@@ -2,7 +2,7 @@
  * volume.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: d7654f33b82b033cc6c3ed8c618c9875146b6789 $
+ * $Id: cea7cd296b4b2d2585f65aba753e1d368a51b75f $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -27,7 +27,7 @@
 #endif
 
 #include <vlc_common.h>
-#include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 #include <vlc_playlist.h>
 #include "volume.hpp"
 

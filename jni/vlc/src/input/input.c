@@ -2,7 +2,7 @@
  * input.c: input thread
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
- * $Id: 0094846a61eb8528179ca959415a9522e776e3b2 $
+ * $Id: 7927480f9224c3a5228ea54a2a5a60d4c087087c $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -292,19 +292,15 @@ input_item_t *input_GetItem( input_thread_t *p_input )
 static void ObjectKillChildrens( input_thread_t *p_input, vlc_object_t *p_obj )
 {
     vlc_list_t *p_list;
-    int i;
 
     /* FIXME ObjectKillChildrens seems a very bad idea in fact */
-    i = vlc_internals( p_obj )->i_object_type;
-    if( i == VLC_OBJECT_VOUT ||i == VLC_OBJECT_AOUT ||
-        p_obj == VLC_OBJECT(p_input->p->p_sout) ||
-        i == VLC_OBJECT_DECODER )
+    if( p_obj == VLC_OBJECT(p_input->p->p_sout) )
         return;
 
     vlc_object_kill( p_obj );
 
     p_list = vlc_list_children( p_obj );
-    for( i = 0; i < p_list->i_count; i++ )
+    for( int i = 0; i < p_list->i_count; i++ )
         ObjectKillChildrens( p_input, p_list->p_values[i].p_object );
     vlc_list_release( p_list );
 }
@@ -319,13 +315,11 @@ static input_thread_t *Create( vlc_object_t *p_parent, input_item_t *p_item,
                                const char *psz_header, bool b_quick,
                                input_resource_t *p_resource )
 {
-    static const char input_name[] = "input";
     input_thread_t *p_input = NULL;                 /* thread descriptor */
     int i;
 
     /* Allocate descriptor */
-    p_input = vlc_custom_create( p_parent, sizeof( *p_input ),
-                                 VLC_OBJECT_INPUT, input_name );
+    p_input = vlc_custom_create( p_parent, sizeof( *p_input ), "input" );
     if( p_input == NULL )
         return NULL;
 
@@ -941,6 +935,7 @@ static void InitTitle( input_thread_t * p_input )
     if( p_input->b_preparsing )
         return;
 
+    vlc_mutex_lock( &p_input->p->p_item->lock );
     /* Create global title (from master) */
     p_input->p->i_title = p_master->i_title;
     p_input->p->title   = p_master->title;
@@ -957,6 +952,7 @@ static void InitTitle( input_thread_t * p_input )
     p_input->p->b_can_pace_control    = p_master->b_can_pace_control;
     p_input->p->b_can_pause        = p_master->b_can_pause;
     p_input->p->b_can_rate_control = p_master->b_can_rate_control;
+    vlc_mutex_unlock( &p_input->p->p_item->lock );
 }
 
 static void StartTitle( input_thread_t * p_input )
@@ -2744,8 +2740,7 @@ static void InputSourceMeta( input_thread_t *p_input,
         return;
 
     demux_meta_t *p_demux_meta =
-        vlc_custom_create( p_demux, sizeof( *p_demux_meta ),
-                           VLC_OBJECT_GENERIC, "demux meta" );
+        vlc_custom_create( p_demux, sizeof( *p_demux_meta ), "demux meta" );
     if( !p_demux_meta )
         return;
     p_demux_meta->p_demux = p_demux;

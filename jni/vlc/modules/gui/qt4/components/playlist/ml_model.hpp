@@ -2,7 +2,7 @@
  * ml_model.hpp ML model
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id: f1c5fbe9687d6ce29f63d14d2f5ec37df6fa89ae $
+ * $Id: c1994d0893819902cd1a201bd1d8db06d228c8ff $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -62,7 +62,7 @@ public:
     }
     virtual int getId( QModelIndex index ) const;
 
-    QVariant data( const QModelIndex &idx, int role = Qt::DisplayRole ) const;
+    QVariant data( const QModelIndex &idx, const int role = Qt::DisplayRole ) const;
     bool setData( const QModelIndex &idx, const QVariant &value,
                   int role = Qt::EditRole );
     ml_select_e columnType( int column ) const;

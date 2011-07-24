@@ -4,7 +4,7 @@
  * Copyright © 2006-2008 Rafaël Carré
  * Copyright © 2007-2010 Mirsal Ennaime
  * Copyright © 2009-2010 The VideoLAN team
- * $Id: 250b1cfe8031e983053f957b574b2c0258586961 $
+ * $Id: 22e550e517afb6ce68baed80eb55f77d10e75e55 $
  *
  * Authors:    Mirsal Ennaime <mirsal dot ennaime at gmailcom>
  *             Rafaël Carré <funman at videolanorg>
@@ -29,7 +29,6 @@
 
 #include <vlc_common.h>
 #include <vlc_interface.h>
-#include <vlc_aout.h>
 #include <dbus/dbus.h>
 
 #define DBUS_MPRIS_OBJECT_PATH "/org/mpris/MediaPlayer2"

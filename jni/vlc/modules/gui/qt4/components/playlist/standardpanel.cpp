@@ -2,7 +2,7 @@
  * standardpanel.cpp : The "standard" playlist panel : just a treeview
  ****************************************************************************
  * Copyright © 2000-2010 VideoLAN
- * $Id: 8f9e6dbb44de025d4c82aaeb681e103cc76acb28 $
+ * $Id: 76d7e25596faba1bb6f51dd59bc9d9b30a4dc4c5 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -94,14 +94,7 @@ StandardPLPanel::~StandardPLPanel()
     getSettings()->beginGroup("Playlist");
     if( treeView )
         getSettings()->setValue( "headerStateV2", treeView->header()->saveState() );
-    if( currentView == treeView )
-        getSettings()->setValue( "view-mode", TREE_VIEW );
-    else if( currentView == listView )
-        getSettings()->setValue( "view-mode", LIST_VIEW );
-    else if( currentView == iconView )
-        getSettings()->setValue( "view-mode", ICON_VIEW );
-    else if( currentView == picFlowView )
-        getSettings()->setValue( "view-mode", PICTUREFLOW_VIEW );
+    getSettings()->setValue( "view-mode", currentViewIndex() );
     getSettings()->endGroup();
 }
 
@@ -357,6 +350,9 @@ void StandardPLPanel::changeModel( bool b_ml )
         mod = model;
     if( currentView->model() != mod )
         currentView->setModel( mod );
+#else
+    if( currentView->model() != model )
+        currentView->setModel( model );
 #endif
 }
 

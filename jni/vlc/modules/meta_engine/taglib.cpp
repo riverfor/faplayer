@@ -2,7 +2,7 @@
  * taglib.cpp: Taglib tag parser/writer
  *****************************************************************************
  * Copyright (C) 2003-2011 the VideoLAN team
- * $Id: aad820d7f16d1b30814c5896cd8cf62ed3d5fafa $
+ * $Id: d5e9e1cdb9c479fce00a52272127383c3b3be612 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Rafaël Carré <funman@videolanorg>
@@ -29,11 +29,10 @@
 
 #include <vlc_common.h>
 #include <vlc_plugin.h>
-#include <vlc_meta.h>
-#include <vlc_demux.h>
-#include <vlc_strings.h>
-#include <vlc_charset.h>
-#include <vlc_input.h> /* for attachment_new */
+#include <vlc_demux.h>              /* demux_meta_t */
+#include <vlc_strings.h>            /* vlc_b64_decode_binary */
+#include <vlc_charset.h>            /* ToLocale, LocaleFree */
+#include <vlc_input.h>              /* for attachment_new */
 
 #ifdef WIN32
 # include <io.h>
@@ -73,6 +72,8 @@
 # define TAGLIB_HAVE_AIFF_WAV_H
 # include <aifffile.h>
 # include <wavfile.h>
+#else
+# include <id3v2tag.h>
 #endif
 
 #if TAGLIB_VERSION >= VERSION_INT(1,6,1) && defined(TAGLIB_WITH_MP4)
@@ -157,6 +158,9 @@ static void ReadMetaFromASF( ASF::Tag* tag, demux_meta_t* p_demux_meta, vlc_meta
             if( asprintf( &psz_name, "%i", asfPicture.type() ) == -1 )
                 continue;
         }
+
+        msg_Dbg( p_demux_meta, "Found embedded art: %s (%s) is %u bytes",
+                 psz_name, psz_mime, i_data );
 
         p_attachment = vlc_input_attachment_New( psz_name, psz_mime,
                                 psz_name, p_data, i_data );
@@ -445,14 +449,14 @@ static int ReadMeta( vlc_object_t* p_this)
         return VLC_ENOMEM;
 
 #if defined(WIN32) || defined (UNDER_CE)
-    wchar_t wpath[MAX_PATH + 1];
-    if( !MultiByteToWideChar( CP_UTF8, 0, psz_path, -1, wpath, MAX_PATH) )
+    wchar_t *wpath = ToWide( psz_path );
+    if( wpath == NULL )
     {
         free( psz_path );
         return VLC_EGENERIC;
     }
-    wpath[MAX_PATH] = L'\0';
     f = FileRef( wpath );
+    free( wpath );
 #else
     const char* local_name = ToLocale( psz_path );
     if( !local_name )
@@ -677,11 +681,11 @@ static int WriteMeta( vlc_object_t *p_this )
     }
 
 #if defined(WIN32) || defined (UNDER_CE)
-    wchar_t wpath[MAX_PATH + 1];
-    if( !MultiByteToWideChar( CP_UTF8, 0, p_export->psz_file, -1, wpath, MAX_PATH) )
+    wchar_t *wpath = ToWide( p_export->psz_file );
+    if( wpath == NULL )
         return VLC_EGENERIC;
-    wpath[MAX_PATH] = L'\0';
     f = FileRef( wpath );
+    free( wpath );
 #else
     const char* local_name = ToLocale( p_export->psz_file );
     if( !local_name )

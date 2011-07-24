@@ -2,7 +2,7 @@
  * input.c : internal management of input streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: b47b1c7184d9b80541ec93d6f6cf3f02a396f69c $
+ * $Id: 7283dffa3d46869c286d93c22d4b3ffef92e26f6 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -48,8 +48,7 @@
 
 #include "aout_internal.h"
 
-#define AOUT_ASSERT_MIXER_LOCKED vlc_assert_locked( &p_aout->mixer_lock )
-#define AOUT_ASSERT_INPUT_LOCKED vlc_assert_locked( &p_input->lock )
+#define AOUT_ASSERT_LOCKED vlc_assert_locked( &p_aout->lock )
 
 static void inputFailure( aout_instance_t *, aout_input_t *, const char * );
 static void inputDrop( aout_input_t *, aout_buffer_t * );
@@ -266,9 +265,8 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
             }
 
             /* Create a VLC object */
-            static const char typename[] = "audio filter";
             p_filter = vlc_custom_create( p_aout, sizeof(*p_filter),
-                                          VLC_OBJECT_GENERIC, typename );
+                                          "audio filter" );
             if( p_filter == NULL )
             {
                 msg_Err( p_aout, "cannot add user filter %s (skipped)",
@@ -431,7 +429,7 @@ int aout_InputNew( aout_instance_t * p_aout, aout_input_t * p_input, const aout_
  *****************************************************************************/
 int aout_InputDelete( aout_instance_t * p_aout, aout_input_t * p_input )
 {
-    AOUT_ASSERT_MIXER_LOCKED;
+    AOUT_ASSERT_LOCKED;
     if ( p_input->b_error )
         return 0;
 
@@ -460,13 +458,10 @@ int aout_InputDelete( aout_instance_t * p_aout, aout_input_t * p_input )
  *****************************************************************************/
 void aout_InputCheckAndRestart( aout_instance_t * p_aout, aout_input_t * p_input )
 {
-    AOUT_ASSERT_MIXER_LOCKED;
-    AOUT_ASSERT_INPUT_LOCKED;
+    AOUT_ASSERT_LOCKED;
 
     if( !p_input->b_restart )
         return;
-
-    aout_lock_input_fifos( p_aout );
 
     /* A little trick to avoid loosing our input fifo and properties */
 
@@ -484,8 +479,6 @@ void aout_InputCheckAndRestart( aout_instance_t * p_aout, aout_input_t * p_input
     p_input->i_pause_date = i_pause_date;
 
     p_input->b_restart = false;
-
-    aout_unlock_input_fifos( p_aout );
 }
 /*****************************************************************************
  * aout_InputPlay : play a buffer
@@ -494,16 +487,16 @@ void aout_InputCheckAndRestart( aout_instance_t * p_aout, aout_input_t * p_input
  *****************************************************************************/
 /* XXX Do not activate it !! */
 //#define AOUT_PROCESS_BEFORE_CHEKS
-int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
-                    aout_buffer_t * p_buffer, int i_input_rate )
+void aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
+                     aout_buffer_t * p_buffer, int i_input_rate )
 {
     mtime_t start_date;
-    AOUT_ASSERT_INPUT_LOCKED;
+    AOUT_ASSERT_LOCKED;
 
     if( i_input_rate != INPUT_RATE_DEFAULT && p_input->p_playback_rate_filter == NULL )
     {
         inputDrop( p_input, p_buffer );
-        return 0;
+        return;
     }
 
 #ifdef AOUT_PROCESS_BEFORE_CHEKS
@@ -511,7 +504,7 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
     aout_FiltersPlay( p_aout, p_input->pp_filters, p_input->i_nb_filters,
                       &p_buffer );
     if( !p_buffer )
-        return 0;
+        return;
 
     /* Actually run the resampler now. */
     if ( p_input->i_nb_resamplers > 0 )
@@ -523,11 +516,11 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
     }
 
     if( !p_buffer )
-        return 0;
+        return;
     if( p_buffer->i_nb_samples <= 0 )
     {
         block_Release( p_buffer );
-        return 0;
+        return;
     }
 #endif
 
@@ -547,7 +540,6 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
     /* We don't care if someone changes the start date behind our back after
      * this. We'll deal with that when pushing the buffer, and compensate
      * with the next incoming buffer. */
-    aout_lock_input_fifos( p_aout );
     start_date = aout_FifoNextStart( &p_input->mixer.fifo );
 
     if ( start_date != 0 && start_date < now )
@@ -573,7 +565,7 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
                   now - p_buffer->i_pts );
         inputDrop( p_input, p_buffer );
         inputResamplingStop( p_input );
-        goto out;
+        return;
     }
 
     /* If the audio drift is too big then it's not worth trying to resample
@@ -581,11 +573,9 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
     if( !start_date )
         start_date = p_buffer->i_pts;
 
-    mtime_t tolerance = 3 * AOUT_PTS_TOLERANCE
-                          * i_input_rate / INPUT_RATE_DEFAULT;
     mtime_t drift = start_date - p_buffer->i_pts;
 
-    if( drift < -tolerance )
+    if( drift < -i_input_rate * 3 * AOUT_MAX_PTS_ADVANCE / INPUT_RATE_DEFAULT )
     {
         msg_Warn( p_aout, "buffer way too early (%"PRId64"), clearing queue",
                   drift );
@@ -597,25 +587,26 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
         start_date = p_buffer->i_pts;
         drift = 0;
     }
-    else if( drift > +tolerance )
+    else
+    if( drift > +i_input_rate * 3 * AOUT_MAX_PTS_DELAY / INPUT_RATE_DEFAULT )
     {
         msg_Warn( p_aout, "buffer way too late (%"PRId64"), dropping buffer",
                   drift );
         inputDrop( p_input, p_buffer );
-        goto out;
+        return;
     }
 
 #ifndef AOUT_PROCESS_BEFORE_CHEKS
     /* Run pre-filters. */
     aout_FiltersPlay( p_input->pp_filters, p_input->i_nb_filters, &p_buffer );
     if( !p_buffer )
-        goto out;
+        return;
 #endif
 
     /* Run the resampler if needed.
      * We first need to calculate the output rate of this resampler. */
     if ( ( p_input->i_resampling_type == AOUT_RESAMPLING_NONE ) &&
-         ( drift < -AOUT_PTS_TOLERANCE || drift > +AOUT_PTS_TOLERANCE ) &&
+         ( drift < -AOUT_MAX_PTS_ADVANCE || drift > +AOUT_MAX_PTS_DELAY ) &&
          p_input->i_nb_resamplers > 0 )
     {
         /* Can happen in several circumstances :
@@ -691,20 +682,17 @@ int aout_InputPlay( aout_instance_t * p_aout, aout_input_t * p_input,
     }
 
     if( !p_buffer )
-        goto out;
+        return;
     if( p_buffer->i_nb_samples <= 0 )
     {
         block_Release( p_buffer );
-        goto out;
+        return;
     }
 #endif
 
     /* Adding the start date will be managed by aout_FifoPush(). */
     p_buffer->i_pts = start_date;
     aout_FifoPush( &p_input->mixer.fifo, p_buffer );
-out:
-    aout_unlock_input_fifos( p_aout );
-    return 0;
 }
 
 /*****************************************************************************
@@ -870,10 +858,10 @@ static int ReplayGainCallback( vlc_object_t *p_this, char const *psz_cmd,
     VLC_UNUSED(newval); VLC_UNUSED(p_data);
     aout_instance_t *p_aout = (aout_instance_t *)p_this;
 
-    aout_lock_mixer( p_aout );
+    aout_lock( p_aout );
     if( p_aout->p_input != NULL )
         ReplayGainSelect( p_aout, p_aout->p_input );
-    aout_unlock_mixer( p_aout );
+    aout_unlock( p_aout );
 
     return VLC_SUCCESS;
 }

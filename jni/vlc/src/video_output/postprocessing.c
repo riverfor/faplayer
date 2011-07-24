@@ -2,7 +2,7 @@
  * postprocessing.c
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id: 6c3e98b3dcc5601e36035ad6686379d39e5b04c1 $
+ * $Id: 7b24ce76072961bdbb1e527e6bb832cbaa2b8aad $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -36,7 +36,7 @@ static bool PostProcessIsPresent(const char *filter)
     const char  *pp        = "postproc";
     const size_t pp_length = strlen(pp);
     return filter &&
-           !strncmp(filter, pp, strlen(pp)) &&
+           !strncmp(filter, pp, pp_length) &&
            (filter[pp_length] == '\0' || filter[pp_length] == ':');
 }
 

@@ -2,7 +2,7 @@
  * input_slider.hpp : VolumeSlider and SeekSlider
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: ed3d83ae80807de51ff59e6d3f806094266e4444 $
+ * $Id: f64dcc3bcb215f0800b1adcfdb59a9b1087527a5 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -36,6 +36,7 @@ class QMouseEvent;
 class QWheelEvent;
 class QHideEvent;
 class QTimer;
+class SeekPoints;
 
 /* Input Slider derived from QSlider */
 class SeekSlider : public QSlider
@@ -44,6 +45,8 @@ class SeekSlider : public QSlider
 public:
     SeekSlider( QWidget *_parent );
     SeekSlider( Qt::Orientation q, QWidget *_parent );
+    ~SeekSlider();
+    void setChapters( SeekPoints * );
 
 protected:
     virtual void mouseMoveEvent( QMouseEvent *event );
@@ -62,11 +65,13 @@ protected:
 
 private:
     bool b_isSliding;       /* Whether we are currently sliding by user action */
+    bool b_is_jumping;      /* if we requested a jump to another chapter */
     int inputLength;        /* InputLength that can change */
     char psz_length[MSTRTIME_MAX_SIZE]; /* Used for the ToolTip */
     QTimer *seekLimitTimer;
     TimeTooltip *mTimeTooltip;
     float f_buffering;
+    SeekPoints* chapters;
 
 public slots:
     void setPosition( float, int64_t, int );

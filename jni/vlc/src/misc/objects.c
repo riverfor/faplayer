@@ -108,7 +108,7 @@ static void libvlc_unlock (libvlc_int_t *p_libvlc)
 
 #undef vlc_custom_create
 void *vlc_custom_create (vlc_object_t *parent, size_t length,
-                         int type, const char *typename)
+                         const char *typename)
 {
     /* NOTE:
      * VLC objects are laid out as follow:
@@ -124,7 +124,6 @@ void *vlc_custom_create (vlc_object_t *parent, size_t length,
     vlc_object_internals_t *priv = malloc (sizeof (*priv) + length);
     if (unlikely(priv == NULL))
         return NULL;
-    priv->i_object_type = type;
     priv->psz_name = NULL;
     priv->var_root = NULL;
     vlc_mutex_init (&priv->var_lock);
@@ -193,7 +192,7 @@ void *vlc_custom_create (vlc_object_t *parent, size_t length,
  */
 void *vlc_object_create( vlc_object_t *p_this, size_t i_size )
 {
-    return vlc_custom_create( p_this, i_size, VLC_OBJECT_GENERIC, "generic" );
+    return vlc_custom_create( p_this, i_size, "generic" );
 }
 
 #undef vlc_object_set_destructor
@@ -403,17 +402,6 @@ void vlc_object_kill( vlc_object_t *p_this )
     }
 }
 
-static int objnamecmp(const vlc_object_t *obj, const char *name)
-{
-    char *objname = vlc_object_get_name(obj);
-    if (objname == NULL)
-        return INT_MIN;
-
-    int ret = strcmp (objname, name);
-    free (objname);
-    return ret;
-}
-
 #undef vlc_object_find_name
 /**
  * Finds a named object and increment its reference count.
@@ -580,7 +568,6 @@ static void DumpVariable (const void *data, const VISIT which, const int depth)
         MYCASE( TIME, "time" );
         MYCASE( COORDS, "coords" );
         MYCASE( ADDRESS, "address" );
-        MYCASE( MUTEX, "mutex" );
 #undef MYCASE
     }
     printf( " *-o \"%s\" (%s", p_var->psz_name, psz_type );
@@ -596,7 +583,6 @@ static void DumpVariable (const void *data, const VISIT which, const int depth)
     switch( p_var->i_type & VLC_VAR_CLASS )
     {
         case VLC_VAR_VOID:
-        case VLC_VAR_MUTEX:
             break;
         case VLC_VAR_BOOL:
             printf( ": %s", p_var->val.b_bool ? "true" : "false" );

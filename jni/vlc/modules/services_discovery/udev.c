@@ -162,8 +162,7 @@ static int AddDevice (services_discovery_t *sd, struct udev_device *dev)
     if (mrl == NULL)
         return 0; /* don't know if it was an error... */
     char *name = p_sys->subsys->get_name (dev);
-    input_item_t *item = input_item_NewWithType (VLC_OBJECT (sd), mrl,
-                                                 name ? name : mrl,
+    input_item_t *item = input_item_NewWithType (mrl, name ? name : mrl,
                                                  0, NULL, 0, -1,
                                                  p_sys->subsys->item_type);
     msg_Dbg (sd, "adding %s (%s)", mrl, name);
@@ -410,13 +409,13 @@ static bool is_v4l_legacy (struct udev_device *dev)
 static char *v4l_get_mrl (struct udev_device *dev)
 {
     /* Determine media location */
-    const char *scheme = "v4l2";
     if (is_v4l_legacy (dev))
-        scheme = "v4l";
+        return NULL;
+
     const char *node = udev_device_get_devnode (dev);
     char *mrl;
 
-    if (asprintf (&mrl, "%s://%s", scheme, node) == -1)
+    if (asprintf (&mrl, "v4l2://%s", node) == -1)
         mrl = NULL;
     return mrl;
 }

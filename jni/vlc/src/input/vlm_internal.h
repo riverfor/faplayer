@@ -2,7 +2,7 @@
  * vlm_internal.h: Internal vlm structures
  *****************************************************************************
  * Copyright (C) 1998-2006 the VideoLAN team
- * $Id: 0ecfd377cd75de100d37fcff0937461ba00660d2 $
+ * $Id: 875d50c08b008cdf0fc9cdd976c41fe2eacfd8b6 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -89,6 +89,8 @@ struct vlm_t
     vlc_thread_t thread;
     vlc_mutex_t  lock_manage;
     vlc_cond_t   wait_manage;
+    unsigned     users;
+
     /* tell vlm thread there is work to do */
     bool         input_state_changed;
     /* */

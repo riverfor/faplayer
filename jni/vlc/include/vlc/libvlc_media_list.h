@@ -2,7 +2,7 @@
  * libvlc_media_list.h:  libvlc_media_list API
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: dea6f2257f3845f7075f3b1dac7c62d6861a0798 $
+ * $Id: 893b94539267c2bb8ed8fcb5f55e7c22ac52cfef $
  *
  * Authors: Pierre d'Herbemont
  *
@@ -155,7 +155,7 @@ LIBVLC_API libvlc_media_t *
  * The libvlc_media_list_lock should be held upon entering this function.
  *
  * \param p_ml a media list instance
- * \param p_md media list instance
+ * \param p_md media instance
  * \return position of media instance
  */
 LIBVLC_API int

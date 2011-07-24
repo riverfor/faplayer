@@ -2,7 +2,7 @@
  * aout.c : dummy audio output plugin
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: 8a4e031db86ded099d260be4130ffa31d9f0f951 $
+ * $Id: 087115a5736f00ad0b1624286459715d40003754 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -51,19 +51,20 @@ int OpenAudio ( vlc_object_t * p_this )
     aout_instance_t * p_aout = (aout_instance_t *)p_this;
 
     p_aout->output.pf_play = Play;
+    p_aout->output.pf_pause = NULL;
     aout_VolumeSoftInit( p_aout );
 
     if( AOUT_FMT_NON_LINEAR( &p_aout->output.output )
      && var_InheritBool( p_this, "spdif" ) )
     {
         p_aout->output.output.i_format = VLC_CODEC_SPDIFL;
-        p_aout->output.i_nb_samples = A52_FRAME_NB;
         p_aout->output.output.i_bytes_per_frame = AOUT_SPDIF_SIZE;
         p_aout->output.output.i_frame_length = A52_FRAME_NB;
     }
     else
         p_aout->output.output.i_format =
             HAVE_FPU ? VLC_CODEC_FL32 : VLC_CODEC_S16N;
+    p_aout->output.i_nb_samples = A52_FRAME_NB;
 
     /* Create the variable for the audio-device */
     var_Create( p_aout, "audio-device", VLC_VAR_INTEGER | VLC_VAR_HASCHOICE );

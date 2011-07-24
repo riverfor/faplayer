@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2002-2005 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: 4e506fa346ea66ff09aa2e98564b8f177febb3aa $
+ * $Id: b2a2a619a7a36db0dae312e03de7f3c9e923bff7 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -146,8 +146,8 @@ VLC_API int net_SetCSCov( int fd, int sendcov, int recvcov );
 struct virtual_socket_t
 {
     void *p_sys;
-    int (*pf_recv) ( void *, void *, int );
-    int (*pf_send) ( void *, const void *, int );
+    int (*pf_recv) ( void *, void *, size_t );
+    int (*pf_send) ( void *, const void *, size_t );
 };
 
 VLC_API ssize_t net_Read( vlc_object_t *p_this, int fd, const v_socket_t *, void *p_data, size_t i_data, bool b_retry );

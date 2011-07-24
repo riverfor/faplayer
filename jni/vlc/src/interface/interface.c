@@ -4,7 +4,7 @@
  * interface, such as command line.
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
- * $Id: abc3248e94f52579c3da522c834e842d9b0debea $
+ * $Id: c87cf3021e2209a1a4598f9a0216ca558fc7c391 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -71,11 +71,9 @@ int intf_Create( vlc_object_t *p_this, const char *chain )
 {
     libvlc_int_t *p_libvlc = p_this->p_libvlc;
     intf_thread_t * p_intf;
-    static const char psz_type[] = "interface";
 
     /* Allocate structure */
-    p_intf = vlc_custom_create( p_libvlc, sizeof( *p_intf ),
-                                VLC_OBJECT_GENERIC, psz_type );
+    p_intf = vlc_custom_create( p_libvlc, sizeof( *p_intf ), "interface" );
     if( !p_intf )
         return VLC_ENOMEM;
 

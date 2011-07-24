@@ -2,7 +2,7 @@
  * playlist.m: MacOS X interface module
  *****************************************************************************
 * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: cd013c22d40f7c1769b92b480b855050b69efa3c $
+ * $Id: 15a4c641793e9dc3e149e31f72addf5da35879da $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videola/n dot org>
@@ -522,6 +522,9 @@
 
 - (void)playModeUpdated
 {
+    //FIXME this is broken, re-write with VLCMainWindow!
+    NSLog( @"playModeUpdated is broken, re-write with VLCMainWindow!" );
+    /*
     playlist_t *p_playlist = pl_Get( VLCIntf );
 
     bool loop = var_GetBool( p_playlist, "loop" );
@@ -533,7 +536,7 @@
     else
         [[[VLCMain sharedInstance] controls] repeatOff];
 
-    [[[VLCMain sharedInstance] controls] shuffle];
+    [[[VLCMain sharedInstance] controls] shuffle];*/
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification
@@ -566,11 +569,8 @@
             free( psz_uri );
         }
 
-        if( [[VLCMain sharedInstance] isPlaylistCollapsed] == NO )
-        {
-            /* update our info-panel to reflect the new item, if we aren't collapsed */
-            [[[VLCMain sharedInstance] info] updatePanelWithItem:p_item->p_input];
-        }
+        /* update our info-panel to reflect the new item */
+        [[[VLCMain sharedInstance] info] updatePanelWithItem:p_item->p_input];
     }
 }
 
@@ -1117,7 +1117,7 @@
         o_uri = o_temp;
     }
 
-    p_input = input_item_New( p_playlist, [o_uri fileSystemRepresentation], o_name ? [o_name UTF8String] : NULL );
+    p_input = input_item_New( [o_uri fileSystemRepresentation], o_name ? [o_name UTF8String] : NULL );
     if( !p_input )
         return NULL;
 

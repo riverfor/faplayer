@@ -2,7 +2,7 @@
  * chain.c : configuration module chain parsing stuff
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: 4ef60be922aa19c80d5c64b0c4487930549b756c $
+ * $Id: 027e570c67c6a5b6f11e2f58bf622245f495992b $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -360,8 +360,6 @@ void config_ChainParse( vlc_object_t *p_this, const char *psz_prefix,
                       cfg->psz_name, cfg->psz_value );
             continue;
         }
-
-        i_type &= CONFIG_ITEM;
 
         if( i_type != VLC_VAR_BOOL && cfg->psz_value == NULL )
         {

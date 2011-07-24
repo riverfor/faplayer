@@ -2,7 +2,7 @@
  * ml_model.cpp: the media library's model
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id: 2bcf59f5f48c6d43818dd8bd0a5e613eb0f0dd9a $
+ * $Id: a8e7a359ce3121c88ab0b36ef65ba3bef1bf3dff $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -259,7 +259,7 @@ int MLModel::getId( QModelIndex index ) const
     return getItem( index )->id();
 }
 
-QVariant MLModel::data( const QModelIndex &index, int role ) const
+QVariant MLModel::data( const QModelIndex &index, const int role ) const
 {
     if( index.isValid() )
     {

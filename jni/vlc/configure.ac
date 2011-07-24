@@ -3,10 +3,12 @@ dnl Autoconf settings for vlc
 AC_COPYRIGHT([Copyright 2002-2011 the VideoLAN team])
 
 AC_INIT(vlc, 1.2.0-git)
-VERSION_MAJOR="1"
-VERSION_MINOR="2"
-VERSION_REVISION="0"
-VERSION_EXTRA="-git"
+VERSION_MAJOR=1
+VERSION_MINOR=2
+VERSION_REVISION=0
+VERSION_EXTRA=0
+VERSION_DEV=git
+
 PKGDIR="vlc"
 AC_SUBST(PKGDIR)
 
@@ -566,8 +568,9 @@ dnl Check for system libs needed
 need_libc=false
 
 dnl Check for usual libc functions
-AC_CHECK_FUNCS([daemon fcntl fdopendir fstatvfs fork getenv getpwuid_r gettimeofday if_nameindex if_nametoindex isatty lstat memalign mmap openat pread posix_fadvise posix_madvise posix_memalign setlocale stricmp strnicmp uselocale])
-AC_REPLACE_FUNCS([asprintf atof atoll dirfd flockfile fsync getcwd getdelim getpid gmtime_r lldiv localtime_r nrand48 rewind setenv strcasecmp strcasestr strdup strlcpy strncasecmp strndup strnlen strsep strtof strtok_r strtoll swab tdestroy vasprintf])
+AC_CHECK_DECLS([nanosleep],,,[#include <time.h>])
+AC_CHECK_FUNCS([daemon fcntl fdopendir fstatvfs fork getenv getpwuid_r if_nameindex if_nametoindex isatty lstat memalign mmap openat pread posix_fadvise posix_madvise posix_memalign setlocale stricmp strnicmp uselocale])
+AC_REPLACE_FUNCS([asprintf atof atoll dirfd flockfile fsync getdelim getpid gmtime_r lldiv localtime_r nrand48 rewind setenv strcasecmp strcasestr strdup strlcpy strncasecmp strndup strnlen strsep strtof strtok_r strtoll swab tdestroy vasprintf])
 AC_CHECK_FUNCS(fdatasync,,
   [AC_DEFINE(fdatasync, fsync, [Alias fdatasync() to fsync() if missing.])
 ])
@@ -772,23 +775,19 @@ if test "${SYS}" != "mingw32" -a "${SYS}" != "mingwce"; then
 
   AC_CHECK_LIB(rt, clock_nanosleep, [
     VLC_ADD_LIBS([libvlccore],[-lrt])
-    AC_DEFINE(HAVE_CLOCK_NANOSLEEP, 1, [Define to 1 if you have clock_nanosleep.])
   ], [
+    AC_CHECK_FUNC(nanosleep,,[
+      AC_CHECK_LIB(rt,nanosleep, [
+        VLC_ADD_LIBS([libvlccore],[-lrt])
+      ], [
+        AC_CHECK_LIB(posix4,nanosleep, [
+          VLC_ADD_LIBS([libvlccore],[-lposix4])
+        ])
+      ])
+    ])
     dnl HP/UX port
     AC_CHECK_LIB(rt,sem_init, [VLC_ADD_LIBS([libvlccore],[-lrt])])
   ])
-
-  have_nanosleep=false
-  AC_CHECK_FUNCS(nanosleep,have_nanosleep=:,[
-    AC_CHECK_LIB(rt,nanosleep,
-      [VLC_ADD_LIBS([libvlccore],[-lrt]) have_nanosleep=:],
-      [AC_CHECK_LIB(posix4,nanosleep,
-          [VLC_ADD_LIBS([libvlccore],[-lposix4]) have_nanosleep=:])]
-    )
-  ])
-  if ${have_nanosleep}; then
-    AC_DEFINE(HAVE_NANOSLEEP, 1, [Define if nanosleep is available.])
-  fi
 fi # end "${SYS}" != "mingw32" -a "${SYS}" != "mingwce"
 
 dnl Check for misc headers
@@ -832,28 +831,6 @@ if test ${SYS} != "mingw32" -a ${SYS} != "mingwce"
 then
     AC_MSG_WARN([Your platform does not support poll(). VLC has it's own poll() implementation, but it is only intended to be used on Windows. VLC might crash or be insecure when you see this message. Either switch to an OS with a proper poll() implementation, or implement one for your OS in VLC])
 fi
-])
-
-dnl Mac OS X and other OSes don't have declaration for nanosleep
-if test "${SYS}" != "mingw32" -a "${SYS}" != "mingwce"; then
-  AC_MSG_CHECKING(for nanosleep in time.h)
-  AC_EGREP_HEADER(nanosleep,time.h,[
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(HAVE_DECL_NANOSLEEP, 1,
-              Define if <time.h> defines nanosleep.)
-  ],[
-    AC_MSG_RESULT(no)
-  ])
-fi # end "${SYS}" != "mingw32" -a "${SYS}" != "mingwce"
-
-dnl Make sure we have timespecs
-AC_MSG_CHECKING(for timespec in sys/time.h)
-AC_EGREP_HEADER(timespec,sys/time.h,[
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(HAVE_STRUCT_TIMESPEC, 1,
-            Define if <sys/time.h> defines struct timespec.)
-],[
-  AC_MSG_RESULT(no)
 ])
 
 dnl Check for threads library
@@ -1489,12 +1466,16 @@ asm volatile("ssat r0, #1, r0":::"r0"); /* assume ARMv6 */
     ])
     CFLAGS="${CFLAGS_save}"
   ])
-  ARM_NEON_CFLAGS="$ac_cv_neon_inline"
+  AS_IF([test "$ac_cv_neon_inline" != "no"], [
+    NEON_CFLAGS="$ac_cv_neon_inline"
+    AC_DEFINE([CAN_COMPILE_NEON], 1,
+      [Define to 1 if NEON (and ARMv6) assembly is available with NEON_CFLAGS.])
+  ])
 ], [
   ac_cv_neon_inline="no"
 ])
-AC_SUBST(ARM_NEON_CFLAGS)
-AM_CONDITIONAL(HAVE_ARM_NEON, [test "${ac_cv_neon_inline}" != "no"])
+AC_SUBST(NEON_CFLAGS)
+AM_CONDITIONAL(HAVE_NEON, [test "${ac_cv_neon_inline}" != "no"])
 
 
 AC_ARG_ENABLE(altivec,
@@ -2952,7 +2933,7 @@ if test "${enable_png}" != "no"; then
 AC_CHECK_HEADERS(png.h, [
   LDFLAGS="${LDFLAGS_save} -lz"
   AC_CHECK_LIB(png, png_set_rows, [
-    VLC_ADD_LIBS([png],[-lpng -lz])
+    VLC_ADD_LIBS([png],[-lpng -lz -lm])
     VLC_ADD_PLUGIN([png osdmenu osd_parser])],
     [],[-lz])
     LDFLAGS="${LDFLAGS_save}"
@@ -3809,7 +3790,8 @@ dnl  MacOS X video output/gui modules
 dnl
 AC_ARG_ENABLE(macosx,
   [  --enable-macosx         Mac OS X gui support (default enabled on Mac OS X)])
-if test "x${enable_macosx}" = "xyes"
+if test "x${enable_macosx}" != "xno" &&
+(test "${SYS}" = "darwin" || test "${enable_macosx}" = "yes")
 then
   VLC_ADD_LDFLAGS([macosx minimal_macosx],[-Wl,-framework,Cocoa])
   VLC_ADD_LDFLAGS([macosx minimal_macosx],[-Wl,-framework,OpenGL])
@@ -4065,7 +4047,7 @@ AS_IF([test "${enable_gnutls}" != "no"], [
     VLC_ADD_CFLAGS([gnutls], [$GNUTLS_CFLAGS])
     AS_IF([test "${SYS}" = "mingw32"], [
       dnl pkg-config --libs gnutls omits these
-      VLC_ADD_LIBS([gnutls], [-lz ${LTLIBINTL}])
+      VLC_ADD_LIBS([gnutls], [-lz ${LTLIBINTL} -lcrypt32])
     ])
     VLC_ADD_LIBS([gnutls], [${GCRYPT_LIBS}])
     VLC_ADD_CFLAGS([gnutls], [${GCRYPT_CFLAGS}])
@@ -4282,10 +4264,11 @@ AC_DEFINE_UNQUOTED(VERSION_MESSAGE, "${VERSION_MESSAGE}", [Simple version string
 AC_DEFINE_UNQUOTED(COPYRIGHT_MESSAGE, "${COPYRIGHT_MESSAGE}", [Copyright string])
 AC_DEFINE_UNQUOTED(COPYRIGHT_YEARS, "${COPYRIGHT_YEARS}", [The copyright years])
 AC_DEFINE_UNQUOTED(CONFIGURE_LINE, "${CONFIGURE_LINE}", [The ./configure command line])
-AC_DEFINE_UNQUOTED(PACKAGE_VERSION_MAJOR,"${VERSION_MAJOR}", [version major number])
-AC_DEFINE_UNQUOTED(PACKAGE_VERSION_MINOR,"${VERSION_MINOR}", [version minor number])
-AC_DEFINE_UNQUOTED(PACKAGE_VERSION_REVISION,"${VERSION_REVISION}", [version minor number])
-AC_DEFINE_UNQUOTED(PACKAGE_VERSION_EXTRA,"${VERSION_EXTRA}", [version minor number])
+AC_DEFINE_UNQUOTED(PACKAGE_VERSION_MAJOR,${VERSION_MAJOR}, [version major number])
+AC_DEFINE_UNQUOTED(PACKAGE_VERSION_MINOR,${VERSION_MINOR}, [version minor number])
+AC_DEFINE_UNQUOTED(PACKAGE_VERSION_REVISION,${VERSION_REVISION}, [version revision number])
+AC_DEFINE_UNQUOTED(PACKAGE_VERSION_EXTRA,${VERSION_EXTRA}, [version extra number])
+AC_DEFINE_UNQUOTED(PACKAGE_VERSION_DEV,"${VERSION_DEV}", [version development string])
 AC_SUBST(COPYRIGHT_MESSAGE)
 AC_SUBST(VERSION_MESSAGE)
 AC_SUBST(VERSION_MAJOR)
@@ -4296,13 +4279,6 @@ AC_SUBST(COPYRIGHT_YEARS)
 AC_DEFINE_UNQUOTED(VLC_COMPILE_BY, "`whoami`", [user who ran configure])
 AC_DEFINE_UNQUOTED(VLC_COMPILE_HOST, "`hostname -f 2>/dev/null || hostname`", [host which ran configure])
 AC_DEFINE_UNQUOTED(VLC_COMPILER, "`$CC -v 2>&1 | tail -n 1`", [compiler])
-dnl Win32 need s a numerical version_extra.
-case $( echo ${VERSION_EXTRA}|wc -m ) in
-       "1") VERSION_EXTRA_RC="0";;
-       "2") VERSION_EXTRA_RC=$( echo ${VERSION_EXTRA}|tr "abcdefghi" "123456789") ;;
-       *) VERSION_EXTRA_RC="99"
-esac
-AC_SUBST(VERSION_EXTRA_RC)
 dnl
 dnl  Handle substvars that use $(top_srcdir)
 dnl

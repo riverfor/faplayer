@@ -2,7 +2,7 @@
  * access.c
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id: 01c67e3669fdf7d5cda4e5a198e489c77006e310 $
+ * $Id: 1591560a200a770a2f935efd439607dc2a615310 $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -46,15 +46,16 @@ static char *get_path(const char *location)
     return path;
 }
 
+#undef access_New
 /*****************************************************************************
  * access_New:
  *****************************************************************************/
-access_t *__access_New( vlc_object_t *p_obj, input_thread_t *p_parent_input,
-                        const char *psz_access, const char *psz_demux,
-                        const char *psz_location )
+access_t *access_New( vlc_object_t *p_obj, input_thread_t *p_parent_input,
+                      const char *psz_access, const char *psz_demux,
+                      const char *psz_location )
 {
     access_t *p_access = vlc_custom_create( p_obj, sizeof (*p_access),
-                                            VLC_OBJECT_GENERIC, "access" );
+                                            "access" );
 
     if( p_access == NULL )
         return NULL;

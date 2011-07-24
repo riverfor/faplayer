@@ -140,7 +140,7 @@ static module_config_t *vlc_config_create (module_t *module, int type)
     }
     tab[confsize].i_type = type;
 
-    if (type & CONFIG_ITEM)
+    if (CONFIG_ITEM(type))
     {
         module->i_config_items++;
         if (type == CONFIG_ITEM_BOOL)
@@ -261,7 +261,8 @@ int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
 
         case VLC_CONFIG_VALUE:
         {
-            if (IsConfigIntegerType (item->i_type))
+            if (IsConfigIntegerType (item->i_type)
+             || !CONFIG_ITEM(item->i_type))
             {
                 item->orig.i =
                 item->value.i = va_arg (ap, int64_t);
@@ -285,8 +286,7 @@ int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
         case VLC_CONFIG_RANGE:
         {
             if (IsConfigIntegerType (item->i_type)
-             || item->i_type == CONFIG_ITEM_MODULE_LIST_CAT
-             || item->i_type == CONFIG_ITEM_MODULE_CAT)
+             || !CONFIG_ITEM(item->i_type))
             {
                 item->min.i = va_arg (ap, int64_t);
                 item->max.i = va_arg (ap, int64_t);

@@ -2,7 +2,7 @@
  * demux.c
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 635b675490639dce1b364047a82d0cd896095ecf $
+ * $Id: 6b357c04aae54896533fd2b8d141e56b9d392445 $
  *
  * Author: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -52,19 +52,17 @@ static char *get_path(const char *location)
     return path;
 }
 
-
+#undef demux_New
 /*****************************************************************************
  * demux_New:
  *  if s is NULL then load a access_demux
  *****************************************************************************/
-demux_t *__demux_New( vlc_object_t *p_obj, input_thread_t *p_parent_input,
-                       const char *psz_access, const char *psz_demux,
-                       const char *psz_location,
-                       stream_t *s, es_out_t *out, bool b_quick )
+demux_t *demux_New( vlc_object_t *p_obj, input_thread_t *p_parent_input,
+                    const char *psz_access, const char *psz_demux,
+                    const char *psz_location,
+                    stream_t *s, es_out_t *out, bool b_quick )
 {
-    static const char typename[] = "demux";
-    demux_t *p_demux = vlc_custom_create( p_obj, sizeof( *p_demux ),
-                                          VLC_OBJECT_GENERIC, typename );
+    demux_t *p_demux = vlc_custom_create( p_obj, sizeof( *p_demux ), "demux" );
     const char *psz_module;
 
     if( p_demux == NULL ) return NULL;
@@ -183,8 +181,9 @@ demux_t *__demux_New( vlc_object_t *p_obj, input_thread_t *p_parent_input,
         /* ID3/APE tags will mess-up demuxer probing so we skip it here.
          * ID3/APE parsers will called later on in the demuxer to access the
          * skipped info. */
-        if( !SkipID3Tag( p_demux ) )
-            SkipAPETag( p_demux );
+        while (SkipID3Tag( p_demux ))
+          ;
+        SkipAPETag( p_demux );
 
         p_demux->p_module =
             module_need( p_demux, "demux", psz_module,
@@ -334,7 +333,7 @@ decoder_t *demux_PacketizerNew( demux_t *p_demux, es_format_t *p_fmt, const char
 {
     decoder_t *p_packetizer;
     p_packetizer = vlc_custom_create( p_demux, sizeof( *p_packetizer ),
-                                      VLC_OBJECT_GENERIC, "demux packetizer" );
+                                      "demux packetizer" );
     if( !p_packetizer )
     {
         es_format_Clean( p_fmt );

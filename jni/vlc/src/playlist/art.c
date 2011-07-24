@@ -2,7 +2,7 @@
  * art.c : Art metadata handling
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: 97280e7c79b67863bb52d41736cff87dc5568fb7 $
+ * $Id: 932efc76eb5151d38ed256664519854a373e361f $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Clément Stenac <zorglub@videolan.org
@@ -34,8 +34,6 @@
 #include <vlc_stream.h>
 #include <vlc_url.h>
 #include <vlc_md5.h>
-
-#include <limits.h>                                             /* PATH_MAX */
 
 #ifdef HAVE_SYS_STAT_H
 #   include <sys/stat.h>

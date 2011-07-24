@@ -2,7 +2,7 @@
  * simple_preferences.cpp : "Simple preferences"
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id: 43973374c33ecf93fad30aeb120e54e5ccd20ca1 $
+ * $Id: 229c27111fb7d8398f1b0d662dbf3c429bef23f3 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -33,6 +33,7 @@
 
 #include <vlc_config_cat.h>
 #include <vlc_configuration.h>
+#include <vlc_aout_intf.h>
 
 #include <QString>
 #include <QFont>
@@ -986,7 +987,7 @@ void SPrefsPanel::assoDialog()
     aTv( ".gxf" ); aTv( ".m1v" ); aTv( ".m2v" ); aTv( ".m2ts" ); aTv( ".m4v" );
     aTv( ".mkv" ); aTv( ".mov" ); aTv( ".mp2" ); aTv( ".mp4" ); aTv( ".mpeg" );
     aTv( ".mpeg1" ); aTv( ".mpeg2" ); aTv( ".mpeg4" ); aTv( ".mpg" );
-    aTv( ".mts" ); aTv( ".mxf" );
+    aTv( ".mts" ); aTv( ".mtv" ); aTv( ".mxf" );
     aTv( ".ogg" ); aTv( ".ogm" ); aTv( ".ogx" ); aTv( ".ogv" );  aTv( ".ts" );
     aTv( ".vob" ); aTv( ".vro" ); aTv( ".wmv" );
     videoType->setCheckState( 0, ( i_temp > 0 ) ?

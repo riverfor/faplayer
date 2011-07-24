@@ -2,7 +2,7 @@
  * oss.c : OSS /dev/dsp module for vlc
  *****************************************************************************
  * Copyright (C) 2000-2002 the VideoLAN team
- * $Id: 34c540e4111f173cabc0129c52d990b16a7b5f72 $
+ * $Id: 7037461697b04b42f3310c4cdea4f87242d439ad $
  *
  * Authors: Michel Kaempf <maxx@via.ecp.fr>
  *          Sam Hocevar <sam@zoy.org>
@@ -299,6 +299,7 @@ static int Open( vlc_object_t *p_this )
     free( psz_device );
 
     p_aout->output.pf_play = Play;
+    p_aout->output.pf_pause = NULL;
 
     if ( var_Type( p_aout, "audio-device" ) == 0 )
     {
@@ -632,7 +633,7 @@ static void* OSSThread( void *obj )
             else
             {
                 mtime_t delay = next_date - mdate();
-                if( delay > AOUT_PTS_TOLERANCE )
+                if( delay > AOUT_MAX_PTS_ADVANCE )
                 {
                     msleep( delay / 2 );
                 }

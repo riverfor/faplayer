@@ -13,9 +13,10 @@ Examples:
  space -> +
  ...
 
-status.xml:
+status.xml or status.json
 ===========
 < Get VLC status information, current item info and meta.
+< Get VLC version, and http api version
 
 > add <mrl> to playlist and start playback:
   ?command=in_play&input=<mrl>
@@ -46,6 +47,7 @@ status.xml:
 
 > delete item <id> from playlist:
   ?command=pl_delete&id=<id>
+  NOTA BENE: pl_delete is completly UNSUPPORTED
 
 > empty playlist:
   ?command=pl_empty
@@ -127,5 +129,11 @@ vlm_cmd.xml:
 
 equalizer.xml:
 =============
->command=preamp&val=<val in dB> 
+>command=preamp&val=<val in dB>
  sets the preamp value, must be >=-20 and <=20
+
+>command=equalizer&band=<band>&val=<gain in dB, must be >=-20 and <=20)
+
+<Displays the equalizer band gains.
+Band 0: 60 Hz, 1: 170 Hz, 2: 310 Hz, 3: 600 Hz, 4: 1 kHz,
+5: 3 kHz, 6: 6 kHz, 7: 12 kHz , 8: 14 kHz , 9: 16 kHz

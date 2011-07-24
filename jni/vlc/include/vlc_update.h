@@ -2,7 +2,7 @@
  * vlc_update.h: VLC update download
  *****************************************************************************
  * Copyright © 2005-2007 the VideoLAN team
- * $Id: 5844b7cd456d7c0ceafe781c3ddbd69ded38aa90 $
+ * $Id: 2c56ecfcc32e587c5da68e4d07719859e499b9f1 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *          Rafaël Carré <funman@videolanorg>
@@ -46,7 +46,7 @@ struct update_release_t
     int i_major;        ///< Version major
     int i_minor;        ///< Version minor
     int i_revision;     ///< Version revision
-    unsigned char extra;///< Version extra
+    int i_extra;        ///< Version extra
     char* psz_url;      ///< Download URL
     char* psz_desc;     ///< Release description
 };

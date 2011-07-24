@@ -2,7 +2,7 @@
  * vlc_objects.h: vlc_object_t definition and manipulation methods
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: 4ba8fc9e6c982b9814d7b7159599a0ec9500232b $
+ * $Id: 1758d1e1227cea4e95017c4baa3e644c159f572d $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -30,15 +30,6 @@
  * \defgroup vlc_object Objects
  * @{
  */
-
-/* Object types */
-#define VLC_OBJECT_INPUT       (-7)
-#define VLC_OBJECT_DECODER     (-8)
-#define VLC_OBJECT_VOUT        (-9)
-#define VLC_OBJECT_AOUT        (-10)
-/* Please add new object types below -34 */
-/* Please do not add new object types anyway */
-#define VLC_OBJECT_GENERIC     (-666)
 
 /* Object flags */
 #define OBJECT_FLAGS_NODBG       0x0001

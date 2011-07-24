@@ -2,7 +2,7 @@
  * sql_monitor.c: SQL-based media library: directory scanning and monitoring
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team and AUTHORS
- * $Id: 651b3965d90e9c4ae2b9b215af13802411697b2e $
+ * $Id: 37cd0a29774f3db1f814273e16a3cc75081d9969 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -480,8 +480,7 @@ static void ScanFiles( monitoring_thread_t *p_mon, int i_dir_id,
                 if( b_skip )
                     continue;
 
-                p_input = input_item_New( VLC_OBJECT(p_mon), psz_encoded_uri,
-                                          psz_entry );
+                p_input = input_item_New( psz_encoded_uri, psz_entry );
 
                 playlist_t* p_pl = pl_Get( p_mon );
                 preparsed_item_t* p_itemobject;

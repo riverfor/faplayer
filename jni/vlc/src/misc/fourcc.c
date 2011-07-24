@@ -2,7 +2,7 @@
  * fourcc.c: fourcc helpers functions
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 63bfe1da631b1a058054b041b3bce7565a0d3155 $
+ * $Id: 9293335486970b343ee99852c4215901a17adbcb $
  *
  * Authors: Laurent Aimar <fenrir@videolan.org>
  *
@@ -28,7 +28,9 @@
 # include "config.h"
 #endif
 
+#include <vlc_common.h>
 #include <vlc_fourcc.h>
+#include <vlc_es.h>
 #include <assert.h>
 
 typedef struct
@@ -834,6 +836,9 @@ static const entry_t p_list_video[] = {
         A("mjp2"),
         A("MJP2"),
         A("MJ2C"),
+
+    B(VLC_CODEC_LAGARITH, "Lagarith Lossless"),
+        A("LAGS"),
 
     B(0, "")
 };

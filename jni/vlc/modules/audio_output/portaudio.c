@@ -2,7 +2,7 @@
  * portaudio.c : portaudio (v19) audio output plugin
  *****************************************************************************
  * Copyright (C) 2002, 2006 the VideoLAN team
- * $Id: 79094954bfdb2d3c6a29421d67f0ac792d25f5d3 $
+ * $Id: 8441fd011dc8d89e0ed0835de7ede4548308b8b9 $
  *
  * Authors: Frederic Ruget <frederic.ruget@free.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -183,6 +183,7 @@ static int Open( vlc_object_t * p_this )
     p_sys->p_stream = 0;
     p_aout->output.p_sys = p_sys;
     p_aout->output.pf_play = Play;
+    p_aout->output.pf_pause = NULL;
 
     /* Retrieve output device id from config */
     p_sys->i_device_id = var_CreateGetInteger( p_aout, "portaudio-audio-device" );

@@ -2,7 +2,7 @@
  * Controller_widget.cpp : Controller Widget for the controllers
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 6ad8825c510bf9d1bfc09851066227bbc0568d50 $
+ * $Id: 13a1745fe2097b3cbac286ee3ee2edda69e41b60 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -31,7 +31,7 @@
 #include "input_manager.hpp"         /* Get notification of Volume Change */
 #include "util/input_slider.hpp"     /* SoundSlider */
 
-#include <vlc_aout.h>                /* Volume functions */
+#include <vlc_aout_intf.h>           /* Volume functions */
 
 #include <QLabel>
 #include <QHBoxLayout>

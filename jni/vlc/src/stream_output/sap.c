@@ -2,7 +2,7 @@
  * sap.c : SAP announce handler
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: feee1d0df914978f66efbe01533d56fc3cdad7d2 $
+ * $Id: 4a3b7c258cb480747eb5a134712011edaae39fa2 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Rémi Denis-Courmont <rem # videolan.org>
@@ -103,8 +103,7 @@ sap_handler_t *SAP_Create (vlc_object_t *p_announce)
 {
     sap_handler_t *p_sap;
 
-    p_sap = vlc_custom_create (p_announce, sizeof (*p_sap),
-                               VLC_OBJECT_GENERIC, "sap sender");
+    p_sap = vlc_custom_create (p_announce, sizeof (*p_sap), "sap sender");
     if (p_sap == NULL)
         return NULL;
 

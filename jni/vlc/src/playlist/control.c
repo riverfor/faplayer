@@ -2,7 +2,7 @@
  * control.c : Handle control of the playlist & running through it
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: c2f8171f0f073ec1d9404d6d9b9c196652db91fa $
+ * $Id: 855354dde1aa1de9ae9f96837ed7cfab2d56f38d $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -203,9 +203,9 @@ int playlist_PreparseEnqueue( playlist_t *p_playlist, input_item_t *p_item )
 {
     playlist_private_t *p_sys = pl_priv(p_playlist);
 
-    if( p_sys->p_preparser )
-        playlist_preparser_Push( p_sys->p_preparser, p_item );
-
+    if( unlikely(p_sys->p_preparser == NULL) )
+        return VLC_ENOMEM;
+    playlist_preparser_Push( p_sys->p_preparser, p_item );
     return VLC_SUCCESS;
 }
 
@@ -213,9 +213,9 @@ int playlist_AskForArtEnqueue( playlist_t *p_playlist, input_item_t *p_item )
 {
     playlist_private_t *p_sys = pl_priv(p_playlist);
 
-    if( p_sys->p_fetcher )
-        playlist_fetcher_Push( p_sys->p_fetcher, p_item );
-
+    if( unlikely(p_sys->p_fetcher == NULL) )
+        return VLC_ENOMEM;
+    playlist_fetcher_Push( p_sys->p_fetcher, p_item );
     return VLC_SUCCESS;
 }
 

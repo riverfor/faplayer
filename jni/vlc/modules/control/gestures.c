@@ -2,7 +2,7 @@
  * gestures.c: control vlc with mouse gestures
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: 69ae8e259b7a4f0be1d44fcfd0bf0ad67ad81156 $
+ * $Id: 216b101135c2daead6d299dd5dc007ad4d758201 $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *
@@ -33,7 +33,7 @@
 #include <vlc_plugin.h>
 #include <vlc_interface.h>
 #include <vlc_vout.h>
-#include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 #include <vlc_playlist.h>
 
 #ifdef HAVE_UNISTD_H

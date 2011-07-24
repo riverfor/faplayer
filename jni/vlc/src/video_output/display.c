@@ -2,7 +2,7 @@
  * display.c: "vout display" managment
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 6d8449d9a5fe16680631e8106fb53e54ce4e87de $
+ * $Id: a25c3bef72d3474a1dfd98a054b617dc973af2ba $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -100,8 +100,7 @@ static vout_display_t *vout_display_New(vlc_object_t *obj,
                                         vout_display_owner_t *owner)
 {
     /* */
-    vout_display_t *vd = vlc_custom_create(obj, sizeof(*vd),
-                                           VLC_OBJECT_GENERIC, "vout display");
+    vout_display_t *vd = vlc_custom_create(obj, sizeof(*vd), "vout display" );
 
     /* */
     video_format_Copy(&vd->source, fmt);

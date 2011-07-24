@@ -2,7 +2,7 @@
  * Controller.cpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 7773ea4eb9a519c1fa03d2c0e90f6d20fa7597b4 $
+ * $Id: 401ef301ff1b4f6f1cc35ff37c0e700eb69bce56 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -27,7 +27,7 @@
 #endif
 
 #include <vlc_vout.h>
-#include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 #include <vlc_keys.h>
 
 #include "actions_manager.hpp"

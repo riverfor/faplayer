@@ -2,7 +2,7 @@
  * video.c: video decoder using the ffmpeg library
  *****************************************************************************
  * Copyright (C) 1999-2001 the VideoLAN team
- * $Id: 86266c4691632cf5cb5b8a346586057f405bf295 $
+ * $Id: 2d869b51fe7e514f78d54dd38c81bfc898891672 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -999,7 +999,7 @@ static int ffmpeg_GetFrameBuf( struct AVCodecContext *p_context,
     if( p_sys->p_va )
     {
 #ifdef HAVE_AVCODEC_VA
-        /* hwaccel_context is not present in old fffmpeg version */
+        /* hwaccel_context is not present in old ffmpeg version */
         if( vlc_va_Setup( p_sys->p_va,
                           &p_sys->p_context->hwaccel_context, &p_dec->fmt_out.video.i_chroma,
                           p_sys->p_context->width, p_sys->p_context->height ) )

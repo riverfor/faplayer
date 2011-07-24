@@ -2,7 +2,7 @@
  * itml.c : iTunes Music Library import functions
  *******************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: d3fb93bfffc86b75c6f64f11e7a32d1334f2ee88 $
+ * $Id: fa027809c30a6343cfa85de550562c13d02c07df $
  *
  * Authors: Yoann Peronneau <yoann@videolan.org>
  *
@@ -333,7 +333,7 @@ static bool parse_track_dict( demux_t *p_demux, input_item_node_t *p_input_node,
     }
 
     msg_Info( p_demux, "Adding '%s'", p_track->location );
-    p_new_input = input_item_New( p_demux, p_track->location, NULL );
+    p_new_input = input_item_New( p_track->location, NULL );
     input_item_node_AppendItem( p_input_node, p_new_input );
 
     /* add meta info */

@@ -2,7 +2,7 @@
  * alsa.c : alsa plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2001 the VideoLAN team
- * $Id: 7ff939a5d490b120496706db4fe66ccc54beff42 $
+ * $Id: 3f3804a24e8e5a4c4dc4e0333ebd9a316164820a $
  *
  * Authors: Henri Fallon <henri@videolan.org> - Original Author
  *          Jeffrey Baker <jwbaker@acm.org> - Port to ALSA 1.0 API
@@ -366,6 +366,7 @@ static int Open (vlc_object_t *obj)
     }
 
     p_aout->output.pf_play = Play;
+    p_aout->output.pf_pause = NULL;
 
     snd_pcm_hw_params_t *p_hw;
     snd_pcm_sw_params_t *p_sw;
@@ -568,7 +569,8 @@ static void* ALSAThread( void *data )
 
     /* Wait for the exact time to start playing (avoids resampling) */
     vlc_sem_wait( &p_sys->wait );
-    mwait( p_sys->start_date - AOUT_PTS_TOLERANCE / 4 );
+    mwait( p_sys->start_date - AOUT_MAX_PTS_ADVANCE / 4 );
+#warning Should wait for buffer availability instead!
 
     for(;;)
         ALSAFill( p_aout );

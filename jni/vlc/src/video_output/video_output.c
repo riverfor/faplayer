@@ -6,7 +6,7 @@
  * thread, and destroy a previously oppened video output thread.
  *****************************************************************************
  * Copyright (C) 2000-2007 the VideoLAN team
- * $Id: 48aad9013b86d83cd7ec853e586c5f08be0ffc70 $
+ * $Id: 13506a6f09807073a946430c87fc8a1ea3fe0e29 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -120,7 +120,7 @@ static vout_thread_t *VoutCreate(vlc_object_t *object,
     /* Allocate descriptor */
     vout_thread_t *vout = vlc_custom_create(object,
                                             sizeof(*vout) + sizeof(*vout->p),
-                                            VLC_OBJECT_VOUT, "video output");
+                                            "video output");
     if (!vout) {
         video_format_Clean(&original);
         return NULL;

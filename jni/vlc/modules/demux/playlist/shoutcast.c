@@ -2,7 +2,7 @@
  * shoutcast.c: Winamp >=5.2 shoutcast demuxer
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: a3c9b33ecbc6b6ccdf7de7e06fde08df7d0ac699 $
+ * $Id: 211612eac37144db991b365d369011ef5d3b85e6 $
  *
  * Authors: Antoine Cellerier <dionoea -@t- videolan -Dot- org>
  *          based on b4s.c by Sigmund Augdal Helberg <dnumgis@videolan.org>
@@ -178,7 +178,7 @@ static int DemuxGenre( demux_t *p_demux, xml_reader_t *p_xml_reader,
                                   psz_name ) != -1 )
                     {
                         input_item_t *p_input;
-                        p_input = input_item_New( p_demux, psz_mrl, psz_name );
+                        p_input = input_item_New( psz_mrl, psz_name );
                         input_item_CopyOptions( p_input_node->p_item, p_input );
                         free( psz_mrl );
                         input_item_node_AppendItem( p_input_node, p_input );
@@ -322,7 +322,7 @@ static int DemuxStation( demux_t *p_demux, xml_reader_t *p_xml_reader,
 
                     /* Create the item */
                     input_item_t *p_input;
-                    p_input = input_item_New( p_demux, psz_mrl, psz_name );
+                    p_input = input_item_New( psz_mrl, psz_name );
                     input_item_CopyOptions( p_input_node->p_item, p_input );
                     free( psz_mrl );
 

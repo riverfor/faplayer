@@ -2,7 +2,7 @@
  * podcast.c:  Podcast services discovery module
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: 74c4a011f3bf46d58e07dcfc762c901c5c816528 $
+ * $Id: 5c936cfca87711cd103d92426db7f66705de9945 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -311,7 +311,7 @@ static void ParseUrls( services_discovery_t *p_sd, char *psz_urls )
                          strdup( psz_urls ) );
 
             input_item_t *p_input;
-            p_input = input_item_New( p_sd, psz_urls, psz_urls );
+            p_input = input_item_New( psz_urls, psz_urls );
             input_item_AddOption( p_input, "demux=podcast", VLC_INPUT_OPTION_TRUSTED );
 
             INSERT_ELEM( pp_new_items, i_new_items, i_new_items, p_input );
@@ -374,7 +374,7 @@ static void ParseRequest( services_discovery_t *p_sd )
               strdup( psz_request ) );
 
             input_item_t *p_input;
-            p_input = input_item_New( p_sd, psz_request, psz_request );
+            p_input = input_item_New( psz_request, psz_request );
             input_item_AddOption( p_input, "demux=podcast", VLC_INPUT_OPTION_TRUSTED );
 
             INSERT_ELEM( p_sys->pp_items, p_sys->i_items, p_sys->i_items, p_input );

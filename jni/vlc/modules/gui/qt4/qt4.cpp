@@ -2,7 +2,7 @@
  * qt4.cpp : QT4 interface
  ****************************************************************************
  * Copyright © 2006-2009 the VideoLAN team
- * $Id: 0ab6cf0b42062d2d7de80b2aae100c1b2f01595c $
+ * $Id: a6587e176d966fac647e88dd8397953c0ca7b52c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -38,6 +38,7 @@
 #include "dialogs/help.hpp"     /* Launch Update */
 #include "recents.hpp"          /* Recents Item destruction */
 #include "util/qvlcapp.hpp"     /* QVLCApplication definition */
+#include <vlc_aout_intf.h>
 
 #ifdef Q_WS_X11
  #include <vlc_xlib.h>
@@ -259,7 +260,7 @@ vlc_module_begin ()
     add_bool( "qt-error-dialogs", true, ERROR_TEXT,
               ERROR_TEXT, false )
 
-    add_string( "qt-slider-colours", "255;255;255;20;210;20;255;199;15;245;39;29",
+    add_string( "qt-slider-colours", "153;210;153;20;210;20;255;199;15;245;39;29",
                 SLIDERCOL_TEXT, SLIDERCOL_LONGTEXT, false )
 
     add_bool( "qt-privacy-ask", true, PRIVACY_TEXT, PRIVACY_TEXT,

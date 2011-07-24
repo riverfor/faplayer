@@ -2,7 +2,7 @@
  * ogg.c : ogg stream demux module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: 2ab4a3f8d374c4e6a7688b484a0d1dbe9accd8f5 $
+ * $Id: e659b9cb00841d35a42f10dadc910fc9ad626273 $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *          Andre Pang <Andre.Pang@csiro.au> (Annodex support)
@@ -628,6 +628,7 @@ static void Ogg_DecodePacket( demux_t *p_demux,
             }
             else
             {
+#warning Memory leak
                 p_stream->i_headers = 0;
                 p_stream->p_headers = NULL;
                 free( p_org );

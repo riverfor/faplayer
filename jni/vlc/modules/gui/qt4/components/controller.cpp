@@ -2,7 +2,7 @@
  * Controller.cpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: 11d0b755cfa77429f789348c7f01c8af4dff505d $
+ * $Id: 6a75784ce33022120c10429c6af76bca9f0f4a5b $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -41,6 +41,8 @@
 
 #include "util/input_slider.hpp"                         /* SeekSlider */
 #include "util/customwidgets.hpp"                       /* qEventToKey */
+
+#include "adapters/seekpoints.hpp"
 
 #include <QToolButton>
 #include <QHBoxLayout>
@@ -340,6 +342,9 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
         break;
     case INPUT_SLIDER: {
         SeekSlider *slider = new SeekSlider( Qt::Horizontal, NULL );
+        SeekPoints *chapters = new SeekPoints( this, p_intf );
+        CONNECT( THEMIM->getIM(), titleChanged( bool ), chapters, update() );
+        slider->setChapters( chapters );
 
         /* Update the position when the IM has changed */
         CONNECT( THEMIM->getIM(), positionUpdated( float, int64_t, int ),

@@ -2,7 +2,7 @@
  * input_slider.cpp : VolumeSlider and SeekSlider
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: 81db2e4436112554eda8c09cbdb31f8395ee7a48 $
+ * $Id: 1c54a15d4eba3c8ca860b8ad297f62906ba445a1 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -29,6 +29,10 @@
 #include "qt4.hpp"
 
 #include "util/input_slider.hpp"
+#include "adapters/seekpoints.hpp"
+#include <vlc_aout_intf.h>
+
+#include <stdlib.h>
 
 #include <QPaintEvent>
 #include <QPainter>
@@ -41,6 +45,7 @@
 
 #define MINIMUM 0
 #define MAXIMUM 1000
+#define CHAPTERSSPOTSIZE 3
 
 SeekSlider::SeekSlider( QWidget *_parent ) : QSlider( _parent )
 {
@@ -52,6 +57,7 @@ SeekSlider::SeekSlider( Qt::Orientation q, QWidget *_parent )
 {
     b_isSliding = false;
     f_buffering = 1.0;
+    chapters = NULL;
 
     /* Timer used to fire intermediate updatePos() when sliding */
     seekLimitTimer = new QTimer( this );
@@ -76,6 +82,23 @@ SeekSlider::SeekSlider( Qt::Orientation q, QWidget *_parent )
     CONNECT( this, sliderMoved( int ), this, startSeekTimer() );
     CONNECT( seekLimitTimer, timeout(), this, updatePos() );
     mTimeTooltip->installEventFilter( this );
+}
+
+SeekSlider::~SeekSlider()
+{
+    delete chapters;
+}
+
+/***
+ * \brief Sets the chapters seekpoints adapter
+ *
+ * \params SeekPoints initilized with current intf thread
+***/
+void SeekSlider::setChapters( SeekPoints *chapters_ )
+{
+    delete chapters;
+    chapters = chapters_;
+    chapters->setParent( this );
 }
 
 /***
@@ -126,6 +149,11 @@ void SeekSlider::mouseReleaseEvent( QMouseEvent *event )
     event->accept();
     b_isSliding = false;
     seekLimitTimer->stop(); /* We're not sliding anymore: only last seek on release */
+    if ( b_is_jumping )
+    {
+        b_is_jumping = false;
+        return;
+    }
     QSlider::mouseReleaseEvent( event );
     updatePos();
 }
@@ -138,6 +166,41 @@ void SeekSlider::mousePressEvent( QMouseEvent* event )
     {
         QSlider::mousePressEvent( event );
         return;
+    }
+
+    b_is_jumping = false;
+    /* handle chapter clicks */
+    int i_width = size().width();
+    if ( chapters && inputLength && i_width)
+    {
+        if ( orientation() == Qt::Horizontal ) /* TODO: vertical */
+        {
+             /* only on chapters zone */
+            if ( event->y() < CHAPTERSSPOTSIZE ||
+                 event->y() > ( size().height() - CHAPTERSSPOTSIZE ) )
+            {
+                QList<SeekPoint> points = chapters->getPoints();
+                int i_selected = -1;
+                int i_min_diff = i_width + 1;
+                for( int i = 0 ; i < points.count() ; i++ )
+                {
+                    int x = points.at(i).time / 1000000.0 / inputLength * i_width;
+                    int diff_x = abs( x - event->x() );
+                    if ( diff_x < i_min_diff )
+                    {
+                        i_min_diff = diff_x;
+                        i_selected = i;
+                    } else break;
+                }
+                if ( i_selected && i_min_diff < 4 ) // max 4px around mark
+                {
+                    chapters->jumpTo( i_selected );
+                    event->accept();
+                    b_is_jumping = true;
+                    return;
+                }
+            }
+        }
     }
 
     b_isSliding = true ;
@@ -158,12 +221,26 @@ void SeekSlider::mouseMoveEvent( QMouseEvent *event )
     {
         int posX = qMax( rect().left(), qMin( rect().right(), event->x() ) );
 
+        QString chapterLabel;
         QPoint p( event->globalX() - ( event->x() - posX ) - ( mTimeTooltip->width() / 2 ),
                   QWidget::mapToGlobal( pos() ).y() - ( mTimeTooltip->height() + 2 ) );
 
+        if ( orientation() == Qt::Horizontal ) /* TODO: vertical */
+        {
+                QList<SeekPoint> points = chapters->getPoints();
+                int i_selected = -1;
+                for( int i = 0 ; i < points.count() ; i++ )
+                {
+                    int x = points.at(i).time / 1000000.0 / inputLength * size().width();
+                    if ( event->x() >= x )
+                        i_selected = i;
+                }
+                if ( i_selected >= 0 )
+                    chapterLabel = points.at( i_selected ).name;
+        }
 
         secstotimestr( psz_length, ( posX * inputLength ) / size().width() );
-        mTimeTooltip->setTime( psz_length );
+        mTimeTooltip->setText( psz_length, chapterLabel );
         mTimeTooltip->move( p );
     }
     event->accept();
@@ -330,9 +407,31 @@ void SeekSlider::paintEvent( QPaintEvent *event )
         painter.drawRoundedRect( innerRect, barCorner, barCorner );
     }
 
-    // draw handle
     if ( option.state & QStyle::State_MouseOver )
     {
+        /* draw chapters tickpoints */
+        if ( chapters && inputLength && size().width() )
+        {
+            QColor background = palette().color( QPalette::Active, QPalette::Background );
+            QColor foreground = palette().color( QPalette::Active, QPalette::WindowText );
+            foreground.setHsv( foreground.hue(),
+                            ( background.saturation() + foreground.saturation() ) / 2,
+                            ( background.value() + foreground.value() ) / 2 );
+            if ( orientation() == Qt::Horizontal ) /* TODO: vertical */
+            {
+                QList<SeekPoint> points = chapters->getPoints();
+                foreach( SeekPoint point, points )
+                {
+                    int x = point.time / 1000000.0 / inputLength * size().width();
+                    painter.setPen( foreground );
+                    painter.setBrush( Qt::NoBrush );
+                    painter.drawLine( x, 0, x, CHAPTERSSPOTSIZE );
+                    painter.drawLine( x, height(), x, height() - CHAPTERSSPOTSIZE );
+                }
+            }
+        }
+
+        // draw handle
         if ( sliderPos != -1 )
         {
             const int margin = 0;
@@ -428,8 +527,8 @@ SoundSlider::SoundSlider( QWidget *_parent, int _i_step, bool b_hard,
 
     QColor * foo;
     add_colors( gradient, gradient2, 0.0, 0, 1, 2 );
-    add_colors( gradient, gradient2, 0.22, 3, 4, 5 );
-    add_colors( gradient, gradient2, 0.5, 6, 7, 8 );
+    add_colors( gradient, gradient2, 0.45, 3, 4, 5 );
+    add_colors( gradient, gradient2, 0.55, 6, 7, 8 );
     add_colors( gradient, gradient2, 1.0, 9, 10, 11 );
 
     QPainter painter( &pixGradient );
@@ -540,7 +639,12 @@ void SoundSlider::paintEvent( QPaintEvent *e )
     const QRectF boundsO( 0, 0, pixOutside.width(), pixOutside.height() );
     painter.drawPixmap( boundsO, pixOutside, boundsO );
 
-    painter.setPen( palette().color( QPalette::Active, QPalette::Mid ) );
+    QColor background = palette().color( QPalette::Active, QPalette::Background );
+    QColor foreground = palette().color( QPalette::Active, QPalette::WindowText );
+    foreground.setHsv( foreground.hue(),
+                    ( background.saturation() + foreground.saturation() ) / 2,
+                    ( background.value() + foreground.value() ) / 2 );
+    painter.setPen( foreground );
     QFont font; font.setPixelSize( 9 );
     painter.setFont( font );
     const QRect rect( 0, 0, 34, 15 );

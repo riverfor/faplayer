@@ -2,7 +2,7 @@
  * threads.c : threads implementation for the VideoLAN client
  *****************************************************************************
  * Copyright (C) 1999-2008 the VideoLAN team
- * $Id: 9b3d5c1f47d1d7e542e92efdf906ede96e2ac41c $
+ * $Id: 7f4a29992cdf826a01bfd810f6f58ab65c3bb67c $
  *
  * Authors: Jean-Marc Dressler <polux@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -37,6 +37,8 @@
 void vlc_global_mutex (unsigned n, bool acquire)
 {
     static vlc_mutex_t locks[] = {
+        VLC_STATIC_MUTEX,
+        VLC_STATIC_MUTEX,
         VLC_STATIC_MUTEX,
         VLC_STATIC_MUTEX,
         VLC_STATIC_MUTEX,

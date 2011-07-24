@@ -6,7 +6,10 @@ OGG_URL := http://downloads.xiph.org/releases/ogg/libogg-$(OGG_VERSION).tar.xz
 #OGG_URL := $(CONTRIB_VIDEOLAN)/libogg-$(OGG_VERSION).tar.xz
 OGG_CVSROOT := :pserver:anoncvs@xiph.org:/usr/local/cvsroot
 
-NEED_OGG = $(call need_pkg,"ogg >= 1.0")
+PKGS += ogg
+ifeq ($(call need_pkg,"ogg >= 1.0"),)
+PKGS_FOUND += ogg
+endif
 
 $(TARBALLS)/libogg-$(OGG_VERSION).tar.xz:
 	$(call download,$(OGG_URL))
@@ -15,21 +18,14 @@ $(TARBALLS)/libogg-$(OGG_VERSION).tar.xz:
 
 libogg: libogg-$(OGG_VERSION).tar.xz .sum-ogg
 	$(UNPACK)
-	(cd $@-$(OGG_VERSION) && patch -p1) < $(SRC)/ogg/libogg-1.1.patch
+	$(APPLY) $(SRC)/ogg/libogg-1.1.patch
 ifdef HAVE_WINCE
-	(cd $@-$(OGG_VERSION) && patch -p1) < $(SRC)/ogg/libogg-wince.patch
+	$(APPLY) $(SRC)/ogg/libogg-wince.patch
 endif
-	mv $@-$(OGG_VERSION) $@
-	touch $@
-
-ifeq ($(NEED_OGG),)
-.ogg:
-else
-PKGS += ogg
+	$(MOVE)
 
 .ogg: libogg
-	#cd $< && autoreconf
+	#$(RECONF)
 	cd $< && $(HOSTVARS) ./configure $(HOSTCONF)
 	cd $< && $(MAKE) install
-endif
 	touch $@

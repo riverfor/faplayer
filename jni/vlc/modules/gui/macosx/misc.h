@@ -2,7 +2,7 @@
  * misc.h: code not specific to vlc
  *****************************************************************************
  * Copyright (C) 2003-2011 the VideoLAN team
- * $Id: 99dcab95ccb8f858f13690aaabf16d2e6eb72c77 $
+ * $Id: 570ec799a955e0e2aab5334c3e74017766151e17 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -89,17 +89,6 @@
 
 
 /*****************************************************************************
- * VLCControllerWindow
- *****************************************************************************/
-
-
-@interface VLCControllerWindow : NSWindow
-{
-}
-
-@end
-
-/*****************************************************************************
  * VLCControllerView
  *****************************************************************************/
 
@@ -155,4 +144,15 @@
 - (void)drawRect:(NSRect)rect;
 - (void)drawKnobInRect:(NSRect)knobRect;
 
+@end
+
+/*****************************************************************************
+ * VLCTimeField interface
+ *****************************************************************************
+ * we need the implementation to catch our click-event in the controller window
+ *****************************************************************************/
+
+@interface VLCTimeField : NSTextField
+{
+}
 @end

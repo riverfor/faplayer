@@ -2,7 +2,7 @@
  * cmd_input.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 0461c4ee9efe3cdf08197e145dc39f4c65546f58 $
+ * $Id: 63f4f470feeef9c50a0c756bb0239b635f451587 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -24,7 +24,7 @@
 
 #include "cmd_input.hpp"
 #include "cmd_dialogs.hpp"
-#include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 #include <vlc_input.h>
 #include <vlc_playlist.h>
 

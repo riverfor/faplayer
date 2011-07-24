@@ -2,7 +2,7 @@
  * mosaic.c : Mosaic video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2004-2008 the VideoLAN team
- * $Id: ae33d26de0d3433bcb8d01f1b6536483139b09af $
+ * $Id: 9b0ff0680b3d8528ea96f0c4fcc6b1eddcec5aba $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -58,7 +58,6 @@ static int MosaicCallback   ( vlc_object_t *, char const *, vlc_value_t,
 struct filter_sys_t
 {
     vlc_mutex_t lock;         /* Internal filter lock */
-    vlc_mutex_t *p_lock;      /* Pointer to mosaic bridge lock */
 
     image_handler_t *p_image;
 
@@ -240,9 +239,7 @@ static const char *const ppsz_filter_options[] = {
  * parse the "--mosaic-offsets x1,y1,x2,y2,x3,y3" parameter
  * and set the corresponding struct filter_sys_t entries.
  *****************************************************************************/
-#define mosaic_ParseSetOffsets( a, b, c ) \
-      __mosaic_ParseSetOffsets( VLC_OBJECT( a ), b, c )
-static void __mosaic_ParseSetOffsets( vlc_object_t *p_this,
+static void mosaic_ParseSetOffsets( vlc_object_t *p_this,
                                       filter_sys_t *p_sys,
                                       char *psz_offsets )
 {
@@ -274,6 +271,8 @@ static void __mosaic_ParseSetOffsets( vlc_object_t *p_this,
         p_sys->i_offsets_length = i_index;
     }
 }
+#define mosaic_ParseSetOffsets( a, b, c ) \
+            mosaic_ParseSetOffsets( VLC_OBJECT( a ), b, c )
 
 /*****************************************************************************
  * CreateFiler: allocate mosaic video filter
@@ -298,10 +297,6 @@ static int CreateFilter( vlc_object_t *p_this )
 
     vlc_mutex_init( &p_sys->lock );
     vlc_mutex_lock( &p_sys->lock );
-
-    var_Create( p_libvlc, "mosaic-lock", VLC_VAR_MUTEX );
-    var_Get( p_libvlc, "mosaic-lock", &val );
-    p_sys->p_lock = val.p_address;
 
     config_ChainParse( p_filter, CFG_PREFIX, ppsz_filter_options,
                        p_filter->p_cfg );
@@ -466,12 +461,12 @@ static subpicture_t *Filter( filter_t *p_filter, mtime_t date )
     p_spu->b_absolute = false;
 
     vlc_mutex_lock( &p_sys->lock );
-    vlc_mutex_lock( p_sys->p_lock );
+    vlc_global_lock( VLC_MOSAIC_MUTEX );
 
     p_bridge = GetBridge( p_filter );
     if ( p_bridge == NULL )
     {
-        vlc_mutex_unlock( p_sys->p_lock );
+        vlc_global_unlock( VLC_MOSAIC_MUTEX );
         vlc_mutex_unlock( &p_sys->lock );
         return p_spu;
     }
@@ -657,7 +652,7 @@ static subpicture_t *Filter( filter_t *p_filter, mtime_t date )
         {
             msg_Err( p_filter, "cannot allocate SPU region" );
             p_filter->pf_sub_buffer_del( p_filter, p_spu );
-            vlc_mutex_unlock( p_sys->p_lock );
+            vlc_global_unlock( VLC_MOSAIC_MUTEX );
             vlc_mutex_unlock( &p_sys->lock );
             return p_spu;
         }
@@ -725,7 +720,7 @@ static subpicture_t *Filter( filter_t *p_filter, mtime_t date )
         p_region_prev = p_region;
     }
 
-    vlc_mutex_unlock( p_sys->p_lock );
+    vlc_global_unlock( VLC_MOSAIC_MUTEX );
     vlc_mutex_unlock( &p_sys->lock );
 
     return p_spu;
