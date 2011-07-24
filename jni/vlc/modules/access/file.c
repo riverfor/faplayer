@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2001-2006 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: 429ce346da66553deae03877febaee5d0dcb2e58 $
+ * $Id: 5114f3881c669677b9433189d1b602bbe1c83b83 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Rémi Denis-Courmont <rem # videolan # org>
@@ -58,6 +58,7 @@
 #   include <io.h>
 #   include <ctype.h>
 #   include <shlwapi.h>
+#   include <vlc_charset.h>
 #elif defined( __OS2__ )
 #   include <ctype.h>
 #else
@@ -175,11 +176,10 @@ int Open( vlc_object_t *p_this )
         }
 
 #ifdef WIN32
-        wchar_t wpath[MAX_PATH+1];
-        if (MultiByteToWideChar (CP_UTF8, 0, path, -1,
-                                 wpath, MAX_PATH)
-         && PathIsNetworkPathW (wpath))
+        wchar_t *wpath = ToWide (path);
+        if (wpath != NULL && PathIsNetworkPathW (wpath))
             is_remote = true;
+        free (wpath);
 # define IsRemote( fd ) ((void)fd, is_remote)
 #endif
     }

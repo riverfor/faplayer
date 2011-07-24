@@ -2,7 +2,7 @@
  * preferences.cpp : "Normal preferences"
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: bd7d6ec822ad2c8e4932a4955b2caf499beabc93 $
+ * $Id: 32629dd03009ff4ad12d1b1fd88c557e6019e502 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -213,7 +213,7 @@ PrefsTree::PrefsTree( intf_thread_t *_p_intf, QWidget *_parent ) :
             else if( p_item->i_type == CONFIG_SUBCATEGORY )
                 i_subcategory = p_item->value.i;
 
-            if( p_item->i_type & CONFIG_ITEM )
+            if( CONFIG_ITEM(p_item->i_type) )
                 b_options = true;
 
             if( b_options && i_category && i_subcategory )
@@ -456,7 +456,7 @@ AdvPrefsPanel::AdvPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
             boxlayout = new QGridLayout();
         }
         /* Only one hotkey control */
-        if( (p_item->i_type & CONFIG_ITEM) == CONFIG_ITEM_KEY )
+        if( p_item->i_type == CONFIG_ITEM_KEY )
         {
             if( has_hotkey )
                 continue;

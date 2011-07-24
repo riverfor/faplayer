@@ -2,7 +2,7 @@
  * cache.c: Plugins cache
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: a8fa0b7914a3b6b8350ed372515039700844ba77 $
+ * $Id: a2e96c3cc23999a74604448f227a677cdcdf1586 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Ethan C. Baldridge <BaldridgeE@cadmus.com>
@@ -58,7 +58,7 @@ static int    CacheLoadConfig  ( module_t *, FILE * );
 
 /* Sub-version number
  * (only used to avoid breakage in dev version when cache structure changes) */
-#define CACHE_SUBVERSION_NUM 14
+#define CACHE_SUBVERSION_NUM 15
 
 /* Cache filename */
 #define CACHE_NAME "plugins.dat"
@@ -340,7 +340,6 @@ static int CacheLoadConfig( module_t *p_module, FILE *file )
         LOAD_STRING( p_module->p_config[i].psz_text );
         LOAD_STRING( p_module->p_config[i].psz_longtext );
         LOAD_STRING( p_module->p_config[i].psz_oldname );
-        LOAD_IMMEDIATE( p_module->p_config[i].b_removed );
 
         if (IsConfigStringType (p_module->p_config[i].i_type))
         {
@@ -600,7 +599,6 @@ static int CacheSaveConfig (FILE *file, const module_t *p_module)
         SAVE_STRING( p_module->p_config[i].psz_text );
         SAVE_STRING( p_module->p_config[i].psz_longtext );
         SAVE_STRING( p_module->p_config[i].psz_oldname );
-        SAVE_IMMEDIATE( p_module->p_config[i].b_removed );
 
         if (IsConfigStringType (p_module->p_config[i].i_type))
             SAVE_STRING( p_module->p_config[i].orig.psz );

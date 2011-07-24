@@ -2,7 +2,7 @@
  * zsh.cpp: create zsh completion rule for vlc
  *****************************************************************************
  * Copyright © 2005-2008 the VideoLAN team
- * $Id: e152b42bd512ed3493bca7bf1a55423a49010592 $
+ * $Id: c7aba2396afbe39957d1c4a748190367c3766b4e $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *
@@ -134,16 +134,14 @@ void ParseModules( mumap &mods, mcmap &mods2 )
         i_items = 0;
         do
         {
-            if( p_item->i_type == CONFIG_CATEGORY )
-            {
-//                printf( "  #Category %d\n", p_item->i_value );
-            }
-            else if( p_item->i_type == CONFIG_SUBCATEGORY )
-            {
-//                printf( "  #Subcategory %d\n", p_item->i_value );
-            }
-            if( p_item->i_type & CONFIG_ITEM )
+            if( CONFIG_ITEM(p_item->i_type) )
                 ParseOption( p_item, mods, mods2 );
+#if 0
+            else if( p_item->i_type == CONFIG_CATEGORY )
+                printf( "  #Category %d\n", p_item->i_value );
+            else if( p_item->i_type == CONFIG_SUBCATEGORY )
+                printf( "  #Subcategory %d\n", p_item->i_value );
+#endif
         }
         while( ++i_items < p_module->confsize && p_item++ );
 

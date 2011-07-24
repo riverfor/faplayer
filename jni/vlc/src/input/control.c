@@ -2,7 +2,7 @@
  * control.c
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: e1cd747e5caca03d2ad87fe5a4b8b3be5ef74454 $
+ * $Id: a1d80bdeff03a72685cd9f776981427b48365a3f $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -325,20 +325,28 @@ int input_vaControl( input_thread_t *p_input, int i_query, va_list args )
             vlc_mutex_unlock( &p_input->p->p_item->lock );
             return VLC_SUCCESS;
 
-        case INPUT_ADD_OPTION:
+        case INPUT_GET_TITLE_INFO:
         {
-            const char *psz_option = va_arg( args, const char * );
-            const char *psz_value = va_arg( args, const char * );
-            char *str;
-            int i;
+            input_title_t **p_title = (input_title_t **)va_arg( args, input_title_t ** );
+            int *pi_req_title_offset = (int *) va_arg( args, int * );
 
-            if( asprintf( &str, "%s=%s", psz_option, psz_value ) == -1 )
-                return VLC_ENOMEM;
+            vlc_mutex_lock( &p_input->p->p_item->lock );
 
-            i = input_item_AddOption( p_input->p->p_item, str,
-                                      VLC_INPUT_OPTION_UNIQUE );
-            free( str );
-            return i;
+            int i_current_title = var_GetInteger( p_input, "title" );
+            if ( *pi_req_title_offset < 0 ) /* return current title if -1 */
+                *pi_req_title_offset = i_current_title;
+
+            if( p_input->p->i_title && p_input->p->i_title > *pi_req_title_offset )
+            {
+                *p_title = vlc_input_title_Duplicate( p_input->p->title[*pi_req_title_offset] );
+                vlc_mutex_unlock( &p_input->p->p_item->lock );
+                return VLC_SUCCESS;
+            }
+            else
+            {
+                vlc_mutex_unlock( &p_input->p->p_item->lock );
+                return VLC_EGENERIC;
+            }
         }
 
         case INPUT_GET_VIDEO_FPS:

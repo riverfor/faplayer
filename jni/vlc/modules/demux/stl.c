@@ -2,7 +2,7 @@
  * stl.c: EBU STL demuxer
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id: 9e401569d592261eb668a6cf79e57f2927d08bd3 $
+ * $Id: 50a97e119b94f90b216872416e59b815a8e4ba62 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -173,13 +173,13 @@ static int Open(vlc_object_t *object)
     const int cct = ParseInteger(&header[12], 2);
     const mtime_t program_start = ParseTextTimeCode(&header[256], fps);
     const int tti_count = ParseInteger(&header[238], 5);
-    msg_Dbg(demux, "Detected EBU STL : CCT=%d TTI=%d start=%8.8s %lld", cct, tti_count, &header[256], program_start);
+    msg_Dbg(demux, "Detected EBU STL : CCT=%d TTI=%d start=%8.8s %"PRId64, cct, tti_count, &header[256], program_start);
 
-    demux_sys_t *sys = malloc(sizeof(*sys));
+    demux_sys_t *sys = xmalloc(sizeof(*sys));
     sys->next_date = 0;
     sys->current   = 0;
     sys->count     = 0;
-    sys->index     = calloc(tti_count, sizeof(*sys->index));
+    sys->index     = xcalloc(tti_count, sizeof(*sys->index));
 
 
     bool comment = false;
@@ -221,7 +221,7 @@ static int Open(vlc_object_t *object)
 
     sys->es = es_out_Add(demux->out, &fmt);
 
-    fmt.i_extra = NULL;
+    fmt.i_extra = 0;
     fmt.p_extra = NULL;
     es_format_Clean(&fmt);
 

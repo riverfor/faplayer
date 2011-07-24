@@ -2,7 +2,7 @@
  * pva.c: PVA demuxer
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id: f62b522339ea1b074e2d51a16675c931f8ab4c87 $
+ * $Id: d25702de7a6b34900b033479fcb8d70693f0b438 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -92,10 +92,14 @@ static int Open( vlc_object_t *p_this )
             return VLC_EGENERIC;
     }
 
+    p_sys = malloc( sizeof( demux_sys_t ) );
+    if( unlikely(p_sys == NULL) )
+        return VLC_ENOMEM;
+
     /* Fill p_demux field */
     p_demux->pf_demux = Demux;
     p_demux->pf_control = Control;
-    p_demux->p_sys = p_sys = malloc( sizeof( demux_sys_t ) );
+    p_demux->p_sys = p_sys;
 
     /* Register one audio and one video stream */
     es_format_Init( &fmt, AUDIO_ES, VLC_CODEC_MPGA );

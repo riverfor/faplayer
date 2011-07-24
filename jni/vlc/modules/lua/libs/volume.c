@@ -2,7 +2,7 @@
  * volume.c
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: f9e038d987d6aa5d4cdf846cca337dbbe2e6b2a7 $
+ * $Id: ee40919e3ae5897bf5e414de3c16d713bcedbf2e $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -36,7 +36,7 @@
 #include <vlc_common.h>
 #include <vlc_plugin.h>
 #include <vlc_meta.h>
-#include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 
 #include <lua.h>        /* Low level lua C API */
 #include <lauxlib.h>    /* Higher level C API */

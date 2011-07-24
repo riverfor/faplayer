@@ -4,7 +4,7 @@
  * interface, such as message output.
  *****************************************************************************
  * Copyright (C) 1999, 2000 the VideoLAN team
- * $Id: 455f59d8bbf6d8c073630bca8c52031734c08b3e $
+ * $Id: 55cebe696eb4d6c8c11564101eff9c45f16a5b73 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -123,7 +123,7 @@ VLC_API void libvlc_Quit( libvlc_int_t * );
          } \
          msg_Info( p_intf, "VLC media player - %s", VERSION_MESSAGE ); \
          msg_Info( p_intf, "%s", COPYRIGHT_MESSAGE ); \
-         msg_Info( p_intf, _("\nWarning: if you can't access the GUI " \
+         msg_Info( p_intf, _("\nWarning: if you cannot access the GUI " \
                              "anymore, open a command-line window, go to the " \
                              "directory where you installed VLC and run " \
                              "\"vlc -I qt\"\n") )
@@ -176,7 +176,7 @@ typedef enum vlc_dialog {
 #define EXTENSIONS_VIDEO_CSV "asf", "avi", "divx", "dv", "f4v", "flv", "gxf", "iso", \
                              "m1v", "m2v", "m2t", "m2ts", "m4v", "mkv", "mov",\
                              "mp2", "mp4", "mpeg", "mpeg1", \
-                             "mpeg2", "mpeg4", "mpg", "mts", "mxf", "nuv", \
+                             "mpeg2", "mpeg4", "mpg", "mts", "mtv", "mxf", "nuv", \
                              "ogg", "ogm", "ogv", "ogx", "ps", \
                              "rec", "rm", "rmvb", "ts", "vob", "wmv"
 
@@ -193,6 +193,7 @@ typedef enum vlc_dialog {
     "*.aob;" \
     "*.ape;" \
     "*.awb;" \
+    "*.caf;" \
     "*.cda;" \
     "*.dts;" \
     "*.flac;"\
@@ -225,7 +226,7 @@ typedef enum vlc_dialog {
 
 #define EXTENSIONS_VIDEO "*.3g2;*.3gp;*.3gp2;*.3gpp;*.amv;*.asf;*.avi;*.bin;*.divx;*.dv;*f4v;*.flv;*.gxf;*.iso;*.m1v;*.m2v;" \
                          "*.m2t;*.m2ts;*.m4v;*.mkv;*.mov;*.mp2;*.mp2v;*.mp4;*.mp4v;*.mpa;*.mpe;*.mpeg;*.mpeg1;" \
-                         "*.mpeg2;*.mpeg4;*.mpg;*.mpv2;*.mts;*.mxf;*.nsv;*.nuv;" \
+                         "*.mpeg2;*.mpeg4;*.mpg;*.mpv2;*.mts;*.mtv;*.mxf;*.nsv;*.nuv;" \
                          "*.ogg;*.ogm;*.ogv;*.ogx;*.ps;" \
                          "*.rec;*.rm;*.rmvb;*.tod;*.ts;*.tts;*.vob;*.vro;*.webm;*.wmv"
 

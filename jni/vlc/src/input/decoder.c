@@ -2,7 +2,7 @@
  * decoder.c: Functions for the management of decoders
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 4ae7d33aba2b7384b7aeec5060bea4ad50424b96 $
+ * $Id: bf0997842c8691b19c81aab9737a6ba6b9d3730c $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -598,7 +598,7 @@ void input_DecoderWaitBuffering( decoder_t *p_dec )
 
     vlc_mutex_lock( &p_owner->lock );
 
-    while( vlc_object_alive( p_dec ) && p_owner->b_buffering && !p_owner->buffer.b_full )
+    while( p_owner->b_buffering && !p_owner->buffer.b_full )
     {
         block_FifoWake( p_owner->p_fifo );
         vlc_cond_wait( &p_owner->wait_acknowledge, &p_owner->lock );
@@ -750,8 +750,7 @@ static decoder_t * CreateDecoder( vlc_object_t *p_parent,
     decoder_owner_sys_t *p_owner;
     es_format_t null_es_format;
 
-    p_dec = vlc_custom_create( p_parent, sizeof( *p_dec ), VLC_OBJECT_DECODER,
-                               "decoder" );
+    p_dec = vlc_custom_create( p_parent, sizeof( *p_dec ), "decoder" );
     if( p_dec == NULL )
         return NULL;
 
@@ -826,8 +825,7 @@ static decoder_t * CreateDecoder( vlc_object_t *p_parent,
         p_dec->b_need_packetized && !p_dec->fmt_in.b_packetized )
     {
         p_owner->p_packetizer =
-            vlc_custom_create( p_parent, sizeof( decoder_t ),
-                               VLC_OBJECT_DECODER, "packetizer" );
+            vlc_custom_create( p_parent, sizeof( decoder_t ), "packetizer" );
         if( p_owner->p_packetizer )
         {
             es_format_Copy( &p_owner->p_packetizer->fmt_in,
@@ -979,7 +977,7 @@ static void DecoderFlush( decoder_t *p_dec )
     input_DecoderDecode( p_dec, p_null, false );
 
     /* */
-    while( vlc_object_alive( p_dec ) && p_owner->b_flushing )
+    while( p_owner->b_flushing )
         vlc_cond_wait( &p_owner->wait_acknowledge, &p_owner->lock );
 }
 

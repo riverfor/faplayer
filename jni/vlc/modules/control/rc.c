@@ -2,7 +2,7 @@
  * rc.c : remote control stdin/stdout module for vlc
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: 462480ca3e2fe7357a0a04f696a6c4ad56ba4300 $
+ * $Id: a2a44d808622c5de8a38523b788c042795ade38f $
  *
  * Author: Peter Surda <shurdeek@panorama.sth.ac.at>
  *         Jean-Paul Saman <jpsaman #_at_# m2x _replaceWith#dot_ nl>
@@ -38,7 +38,7 @@
 #include <assert.h>
 
 #include <vlc_interface.h>
-#include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 #include <vlc_vout.h>
 #include <vlc_osd.h>
 #include <vlc_playlist.h>
@@ -136,10 +136,8 @@ struct intf_sys_t
 #endif
 };
 
-#define msg_rc( ... ) __msg_rc( p_intf, __VA_ARGS__ )
-
 VLC_FORMAT(2, 3)
-static void __msg_rc( intf_thread_t *p_intf, const char *psz_fmt, ... )
+static void msg_rc( intf_thread_t *p_intf, const char *psz_fmt, ... )
 {
     va_list args;
     char fmt_eol[strlen (psz_fmt) + 3];
@@ -153,6 +151,7 @@ static void __msg_rc( intf_thread_t *p_intf, const char *psz_fmt, ... )
         net_vaPrintf( p_intf, p_intf->p_sys->i_socket, NULL, fmt_eol, args );
     va_end( args );
 }
+#define msg_rc( ... ) msg_rc( p_intf, __VA_ARGS__ )
 
 /*****************************************************************************
  * Module descriptor
@@ -1705,7 +1704,6 @@ static int AudioConfig( vlc_object_t *p_this, char const *psz_cmd,
     intf_thread_t *p_intf = (intf_thread_t*)p_this;
     input_thread_t *p_input =
         playlist_CurrentInput( p_intf->p_sys->p_playlist );
-    aout_instance_t * p_aout;
     const char * psz_variable;
     vlc_value_t val_name;
     int i_error;
@@ -1720,7 +1718,7 @@ static int AudioConfig( vlc_object_t *p_this, char const *psz_cmd,
         return VLC_EGENERIC;
     }
 
-    p_aout = input_GetAout( p_input );
+    vlc_object_t * p_aout = (vlc_object_t *)input_GetAout( p_input );
     vlc_object_release( p_input );
     if ( p_aout == NULL )
          return VLC_ENOOBJ;
@@ -2115,7 +2113,7 @@ static input_item_t *parse_MRL( intf_thread_t *p_intf, char *psz_mrl )
     /* Now create a playlist item */
     if( psz_item_mrl )
     {
-        p_item = input_item_New( p_intf, psz_item_mrl, NULL );
+        p_item = input_item_New( psz_item_mrl, NULL );
         for( i = 0; i < i_options; i++ )
         {
             input_item_AddOption( p_item, ppsz_options[i], VLC_INPUT_OPTION_TRUSTED );

@@ -64,84 +64,43 @@ struct vlc_thread
 #ifdef UNDER_CE
 static void CALLBACK vlc_cancel_self (ULONG_PTR dummy);
 
-static DWORD vlc_cancelable_wait (DWORD count, const HANDLE *handles,
-                                  DWORD delay)
-{
-    struct vlc_thread *th = vlc_threadvar_get (thread_key);
-    if (th == NULL)
-    {
-        /* Main thread - cannot be cancelled anyway */
-        return WaitForMultipleObjects (count, handles, FALSE, delay);
-    }
-    HANDLE new_handles[count + 1];
-    memcpy(new_handles, handles, count * sizeof(HANDLE));
-    new_handles[count] = th->cancel_event;
-    DWORD result = WaitForMultipleObjects (count + 1, new_handles, FALSE,
-                                           delay);
-    if (result == WAIT_OBJECT_0 + count)
-    {
-        vlc_cancel_self ((uintptr_t)th);
-        return WAIT_IO_COMPLETION;
-    }
-    else
-    {
-        return result;
-    }
-}
-
-DWORD SleepEx (DWORD dwMilliseconds, BOOL bAlertable)
-{
-    if (bAlertable)
-    {
-        DWORD result = vlc_cancelable_wait (0, NULL, dwMilliseconds);
-        return (result == WAIT_TIMEOUT) ? 0 : WAIT_IO_COMPLETION;
-    }
-    else
-    {
-        Sleep(dwMilliseconds);
-        return 0;
-    }
-}
-
-DWORD WaitForSingleObjectEx (HANDLE hHandle, DWORD dwMilliseconds,
-                             BOOL bAlertable)
-{
-    if (bAlertable)
-    {
-        /* The MSDN documentation specifies different return codes,
-         * but in practice they are the same. We just check that it
-         * remains so. */
-#if WAIT_ABANDONED != WAIT_ABANDONED_0
-# error Windows headers changed, code needs to be rewritten!
-#endif
-        return vlc_cancelable_wait (1, &hHandle, dwMilliseconds);
-    }
-    else
-    {
-        return WaitForSingleObject (hHandle, dwMilliseconds);
-    }
-}
-
 DWORD WaitForMultipleObjectsEx (DWORD nCount, const HANDLE *lpHandles,
                                 BOOL bWaitAll, DWORD dwMilliseconds,
                                 BOOL bAlertable)
 {
+    HANDLE handles[nCount + 1];
+    DWORD ret;
+
+    memcpy(handles, lpHandles, count * sizeof(HANDLE));
     if (bAlertable)
     {
-        /* We do not support the bWaitAll case */
-        assert (! bWaitAll);
-        return vlc_cancelable_wait (nCount, lpHandles, dwMilliseconds);
+        struct vlc_thread *th = vlc_threadvar_get (thread_key);
+        if (th != NULL)
+        {
+            handles[nCount] = th->cancel_event;
+            /* bWaitAll not implemented and not used by VLC... */
+            assert (!bWaitAll);
+        }
+        else
+            bAltertable = FALSE;
     }
-    else
+
+    ret = WaitForMultipleObjects (nCount + bAlertable, handles, bWaitAll,
+                                  dwMilliseconds);
+    if (ret == WAIT_OBJECT_0 + nCount)
     {
-        return WaitForMultipleObjects (nCount, lpHandles, bWaitAll,
-                                       dwMilliseconds);
+        assert (bAlertable);
+        vlc_cancel_self ((uintptr_t)th);
+        ret = WAIT_IO_COMPLETION;
     }
+    return ret;
 }
 #endif
 
-vlc_mutex_t super_mutex;
-vlc_cond_t  super_variable;
+static vlc_mutex_t super_mutex;
+static vlc_cond_t  super_variable;
+
+BOOL WINAPI DllMain (HINSTANCE, DWORD, LPVOID);
 
 BOOL WINAPI DllMain (HINSTANCE hinstDll, DWORD fdwReason, LPVOID lpvReserved)
 {
@@ -164,6 +123,34 @@ BOOL WINAPI DllMain (HINSTANCE hinstDll, DWORD fdwReason, LPVOID lpvReserved)
     }
     return TRUE;
 }
+
+static DWORD vlc_WaitForMultipleObjects (DWORD count, const HANDLE *handles,
+                                         DWORD delay)
+{
+    DWORD ret = WaitForMultipleObjectsEx (count, handles, FALSE, delay, TRUE);
+
+   /* We do not abandon objects... this would be a bug */
+   assert (ret < WAIT_ABANDONED_0 || WAIT_ABANDONED_0 + count - 1 < ret);
+
+   if (unlikely(ret == WAIT_FAILED))
+       abort (); /* We are screwed! */
+
+   return ret;
+}
+
+static DWORD vlc_WaitForSingleObject (HANDLE handle, DWORD delay)
+{
+    return vlc_WaitForMultipleObjects (1, &handle, delay);
+}
+
+static DWORD vlc_Sleep (DWORD delay)
+{
+    DWORD ret = vlc_WaitForMultipleObjects (0, NULL, delay);
+    if (ret == WAIT_TIMEOUT)
+        ret = 0;
+    return ret;
+}
+
 
 /*** Mutexes ***/
 void vlc_mutex_init( vlc_mutex_t *p_mutex )
@@ -303,13 +290,11 @@ void vlc_cond_wait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex)
     {
         vlc_testcancel ();
         LeaveCriticalSection (&p_mutex->mutex);
-        result = WaitForSingleObjectEx (p_condvar->handle, INFINITE, TRUE);
+        result = vlc_WaitForSingleObject (p_condvar->handle, INFINITE);
         EnterCriticalSection (&p_mutex->mutex);
     }
     while (result == WAIT_IO_COMPLETION);
 
-    assert (result != WAIT_ABANDONED); /* another thread failed to cleanup! */
-    assert (result != WAIT_FAILED);
     ResetEvent (p_condvar->handle);
 }
 
@@ -326,14 +311,13 @@ int vlc_cond_timedwait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex,
         mtime_t total;
         switch (p_condvar->clock)
         {
-            case CLOCK_MONOTONIC:
-                total = mdate();
-                break;
             case CLOCK_REALTIME: /* FIXME? sub-second precision */
                 total = CLOCK_FREQ * time (NULL);
                 break;
             default:
-                assert (0);
+                assert (p_condvar->clock == CLOCK_MONOTONIC);
+                total = mdate();
+                break;
         }
         total = (deadline - total) / 1000;
         if( total < 0 )
@@ -341,13 +325,11 @@ int vlc_cond_timedwait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex,
 
         DWORD delay = (total > 0x7fffffff) ? 0x7fffffff : total;
         LeaveCriticalSection (&p_mutex->mutex);
-        result = WaitForSingleObjectEx (p_condvar->handle, delay, TRUE);
+        result = vlc_WaitForSingleObject (p_condvar->handle, delay);
         EnterCriticalSection (&p_mutex->mutex);
     }
     while (result == WAIT_IO_COMPLETION);
 
-    assert (result != WAIT_ABANDONED);
-    assert (result != WAIT_FAILED);
     ResetEvent (p_condvar->handle);
 
     return (result == WAIT_OBJECT_0) ? 0 : ETIMEDOUT;
@@ -379,7 +361,7 @@ void vlc_sem_wait (vlc_sem_t *sem)
     do
     {
         vlc_testcancel ();
-        result = WaitForSingleObjectEx (*sem, INFINITE, TRUE);
+        result = vlc_WaitForSingleObject (*sem, INFINITE);
     }
     while (result == WAIT_IO_COMPLETION);
 }
@@ -600,14 +582,16 @@ static int vlc_clone_attr (vlc_thread_t *p_handle, bool detached,
      * function instead of CreateThread, otherwise you'll end up with
      * memory leaks and the signal functions not working (see Microsoft
      * Knowledge Base, article 104641) */
-    hThread = (HANDLE)(uintptr_t)
-        _beginthreadex (NULL, 0, vlc_entry, th, CREATE_SUSPENDED, NULL);
-    if (hThread == NULL)
+    uintptr_t h;
+
+    h = _beginthreadex (NULL, 0, vlc_entry, th, CREATE_SUSPENDED, NULL);
+    if (h == 0)
     {
         int err = errno;
         free (th);
         return err;
     }
+    hThread = (HANDLE)h;
 
 #else
     th->cancel_event = CreateEvent (NULL, FALSE, FALSE, NULL);
@@ -778,6 +762,45 @@ void vlc_control_cancel (int cmd, ...)
 }
 
 
+/*** Clock ***/
+mtime_t mdate (void)
+{
+    /* We don't need the real date, just the value of a high precision timer */
+    LARGE_INTEGER counter, freq;
+    if (!QueryPerformanceCounter (&counter)
+     || !QueryPerformanceFrequency (&freq))
+        abort();
+
+    /* Convert to from (1/freq) to microsecond resolution */
+    /* We need to split the division to avoid 63-bits overflow */
+    lldiv_t d = lldiv (counter.QuadPart, freq.QuadPart);
+
+    return (d.quot * 1000000) + ((d.rem * 1000000) / freq.QuadPart);
+}
+
+#undef mwait
+void mwait (mtime_t deadline)
+{
+    mtime_t delay;
+
+    vlc_testcancel();
+    while ((delay = (deadline - mdate())) > 0)
+    {
+        delay /= 1000;
+        if (unlikely(delay > 0x7fffffff))
+            delay = 0x7fffffff;
+        vlc_Sleep (delay);
+        vlc_testcancel();
+    }
+}
+
+#undef msleep
+void msleep (mtime_t delay)
+{
+    mwait (mdate () + delay);
+}
+
+
 /*** Timers ***/
 struct vlc_timer
 {
@@ -905,4 +928,18 @@ unsigned vlc_timer_getoverrun (vlc_timer_t timer)
 {
     (void)timer;
     return 0;
+}
+
+
+/*** CPU ***/
+unsigned vlc_GetCPUCount (void)
+{
+#ifndef UNDER_CE
+    DWORD process;
+    DWORD system;
+
+    if (GetProcessAffinityMask (GetCurrentProcess(), &process, &system))
+        return popcount (system);
+#endif
+     return 1;
 }

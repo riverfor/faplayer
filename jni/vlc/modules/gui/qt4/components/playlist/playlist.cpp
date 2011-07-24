@@ -2,7 +2,7 @@
  * playlist.cpp : Custom widgets for the playlist
  ****************************************************************************
  * Copyright © 2007-2010 the VideoLAN team
- * $Id: 6fe4bb970e0cefd6580dd55158667179fbd6f37c $
+ * $Id: 3c3816d9507f58988508a9dadd2918125af86a44 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -40,6 +40,7 @@
 
 #include <QMenu>
 #include <QSignalMapper>
+#include <QSlider>
 
 /**********************************************************************
  * Playlist Widget. The embedded playlist
@@ -178,6 +179,16 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
     getSettings()->endGroup();
 
     layout->addWidget( split, 1, 0, 1, -1 );
+
+    /* Zoom */
+    QSlider *zoomSlider = new QSlider( Qt::Horizontal, this );
+    zoomSlider->setRange( -10, 10);
+    zoomSlider->setPageStep( 3 );
+    zoomSlider->setValue( model->getZoom() );
+    CONNECT( zoomSlider, valueChanged( int ), model, changeZoom( int ) );
+
+    layout->addWidget( zoomSlider, 1, 3, ( Qt::AlignBottom | Qt::AlignRight ) );
+
     setAcceptDrops( true );
     setWindowTitle( qtr( "Playlist" ) );
     setWindowRole( "vlc-playlist" );
@@ -270,13 +281,12 @@ void LocationBar::setIndex( const QModelIndex &index )
         QString text;
 
         char *fb_name = input_item_GetTitle( item->inputItem() );
-        if( !EMPTY_STR( fb_name ) )
-             text = qfu(fb_name);
-        else
+        if( EMPTY_STR( fb_name ) )
         {
+            free( fb_name );
             fb_name = input_item_GetName( item->inputItem() );
-            text = qtr(fb_name);
         }
+        text = qfu(fb_name);
         free(fb_name);
 
         QAbstractButton *btn = new LocationButton( text, first, !first, this );

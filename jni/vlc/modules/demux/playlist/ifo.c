@@ -2,7 +2,7 @@
  * ifo.c: Dummy ifo demux to enable opening DVDs rips by double cliking on VIDEO_TS.IFO
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: 9c1d8beee22d633c3e7cba0386ca314ac694ed1d $
+ * $Id: 6e8dc103092e554269acc51cfc0c5688e7791824 $
  *
  * Authors: Antoine Cellerier <dionoea @t videolan d.t org>
  *
@@ -113,7 +113,7 @@ static int Demux( demux_t *p_demux )
         return 0;
 
     input_item_t *p_current_input = GetCurrentItem(p_demux);
-    input_item_t *p_input = input_item_New( p_demux, psz_url, psz_url );
+    input_item_t *p_input = input_item_New( psz_url, psz_url );
     input_item_PostSubItem( p_current_input, p_input );
     vlc_gc_decref( p_input );
 
@@ -136,7 +136,7 @@ static int DemuxDVD_VR( demux_t *p_demux )
     memcpy( psz_url + len, "VR_MOVIE.VRO", 13 );
 
     input_item_t *p_current_input = GetCurrentItem(p_demux);
-    input_item_t *p_input = input_item_New( p_demux, psz_url, psz_url );
+    input_item_t *p_input = input_item_New( psz_url, psz_url );
     input_item_PostSubItem( p_current_input, p_input );
 
     vlc_gc_decref( p_input );

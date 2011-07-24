@@ -2,7 +2,7 @@
  * preferences_widgets.cpp : Widgets for preferences displays
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 3ed751c11b8057007844c4ef2449e9b215bbfb56 $
+ * $Id: 4ef44ea8f9cd5a95d7157d92e07d986784c01d68 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -1255,7 +1255,7 @@ void KeySelectorControl::finish()
         module_config_t *p_item = p_config + i;
 
         /* If we are a (non-global) key option not empty */
-        if( (p_item->i_type & CONFIG_ITEM) && p_item->psz_name != NULL
+        if( CONFIG_ITEM(p_item->i_type) && p_item->psz_name != NULL
          && !strncmp( p_item->psz_name , "key-", 4 )
          && !EMPTY_STR( p_item->psz_text ) )
         {
@@ -1277,7 +1277,7 @@ void KeySelectorControl::finish()
             continue;
         }
 
-        if( (p_item->i_type & CONFIG_ITEM) && p_item->psz_name != NULL
+        if( CONFIG_ITEM(p_item->i_type) && p_item->psz_name != NULL
          && !strncmp( p_item->psz_name , "global-key", 10 )
          && !EMPTY_STR( p_item->psz_text ) )
         {

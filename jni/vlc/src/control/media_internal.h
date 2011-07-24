@@ -3,7 +3,7 @@
  * Also contains some internal utility functions
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: cd1c42aacfcd161c9a3a58282e5ed67b88e72341 $
+ * $Id: c74c7d069d134c4801e4b1d3928c0f5cde8d8b87 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -46,7 +46,6 @@ struct libvlc_media_t
 
     bool is_parsed;
     bool has_asked_preparse;
-    bool has_asked_art;
 };
 
 /* Media Descriptor */

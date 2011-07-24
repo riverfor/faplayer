@@ -2,7 +2,7 @@
  * objects.c: Generic lua<->vlc object wrapper
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: cc91faba0cbd69d0f6049cc88140c70e0fcccac5 $
+ * $Id: e978e7c3e191742d7918718d406be3a562e3e06d $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -25,11 +25,9 @@
 #ifndef VLC_LUA_OBJECTS_H
 #define VLC_LUA_OBJECTS_H
 
-int __vlclua_push_vlc_object( lua_State *L, vlc_object_t *p_obj,
-                              lua_CFunction pf_gc );
-#define vlclua_push_vlc_object( a, b, c ) \
-        __vlclua_push_vlc_object( a, VLC_OBJECT( b ), c )
-int vlclua_gc_release( lua_State *L );
+int vlclua_push_vlc_object( lua_State *L, vlc_object_t *p_obj );
+#define vlclua_push_vlc_object( a, b ) \
+        vlclua_push_vlc_object( a, VLC_OBJECT( b ) )
 
 #endif
 

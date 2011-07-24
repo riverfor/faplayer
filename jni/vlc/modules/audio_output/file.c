@@ -2,7 +2,7 @@
  * file.c : audio output which writes the samples to a file
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: 8151a0d1512bb167c02a34c0d41b5211a2216bf1 $
+ * $Id: 5e13362509406c1c4b59d753510aaaf255e02666 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Gildas Bazin <gbazin@netcourrier.com>
@@ -163,6 +163,7 @@ static int Open( vlc_object_t * p_this )
     }
 
     p_aout->output.pf_play = Play;
+    p_aout->output.pf_pause = NULL;
 
     /* Audio format */
     psz_format = var_CreateGetString( p_this, "audiofile-format" );

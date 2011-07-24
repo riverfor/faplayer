@@ -2,7 +2,7 @@
  * real.c: Real demuxer.
  *****************************************************************************
  * Copyright (C) 2004, 2006-2007 the VideoLAN team
- * $Id: 3ba0a8653b29ec0031e77d557d79c603cc77be2a $
+ * $Id: c9d8b7cb3bd4c87b889ae9edac2bc35e3efbf231 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -840,7 +840,8 @@ static void DemuxAudioSipr( demux_t *p_demux, real_track_t *tk, mtime_t i_pts )
     demux_sys_t *p_sys = p_demux->p_sys;
     block_t *p_block = tk->p_sipr_packet;
 
-    if( p_sys->i_buffer < tk->i_frame_size )
+    if( p_sys->i_buffer < tk->i_frame_size
+     || tk->i_sipr_subpacket_count >= tk->i_subpacket_h )
         return;
 
     if( !p_block )
@@ -850,7 +851,6 @@ static void DemuxAudioSipr( demux_t *p_demux, real_track_t *tk, mtime_t i_pts )
             return;
         tk->p_sipr_packet = p_block;
     }
-
     memcpy( p_block->p_buffer + tk->i_sipr_subpacket_count * tk->i_frame_size,
             p_sys->buffer, tk->i_frame_size );
     if (!tk->i_sipr_subpacket_count)
@@ -963,7 +963,7 @@ static char *StreamReadString2( stream_t *s )
     if( i_length <= 0 )
         return NULL;
 
-    char *psz_string = calloc( 1, i_length + 1 );
+    char *psz_string = xcalloc( 1, i_length + 1 );
 
     stream_Read( s, psz_string, i_length ); /* Valid even if !psz_string */
 
@@ -1377,12 +1377,12 @@ static int CodecVideoParse( demux_t *p_demux, int i_tk_id, const uint8_t *p_data
     fmt.video.i_frame_rate = (GetWBE( &p_data[22] ) << 16) | GetWBE( &p_data[24] );
     fmt.video.i_frame_rate_base = 1 << 16;
 
-    fmt.i_extra = 8;
-    fmt.p_extra = malloc( 8 );
+    fmt.i_extra = i_data - 26;
+    fmt.p_extra = malloc( fmt.i_extra );
     if( !fmt.p_extra )
         return VLC_ENOMEM;
 
-    memcpy( fmt.p_extra, &p_data[26], 8 );
+    memcpy( fmt.p_extra, &p_data[26], fmt.i_extra );
 
     //msg_Dbg( p_demux, "    - video 0x%08x 0x%08x", dw0, dw1 );
 
@@ -1574,7 +1574,7 @@ static int CodecAudioParse( demux_t *p_demux, int i_tk_id, const uint8_t *p_data
         }
         break;
 
-    case VLC_FOURCC( 's','i','p','r' ):
+    case VLC_CODEC_SIPR:
         fmt.i_codec = VLC_CODEC_SIPR;
         if( i_flavor > 3 )
         {
@@ -1590,8 +1590,8 @@ static int CodecAudioParse( demux_t *p_demux, int i_tk_id, const uint8_t *p_data
         fmt.i_bitrate = fmt.audio.i_rate;
         msg_Dbg( p_demux, "    - sipr flavor=%i", i_flavor );
 
-    case VLC_FOURCC( 'c','o','o','k' ):
-    case VLC_FOURCC( 'a','t','r','c' ):
+    case VLC_CODEC_COOK:
+    case VLC_CODEC_ATRAC3:
         if( i_subpacket_size <= 0 || i_frame_size / i_subpacket_size <= 0 )
         {
             es_format_Clean( &fmt );
@@ -1601,11 +1601,6 @@ static int CodecAudioParse( demux_t *p_demux, int i_tk_id, const uint8_t *p_data
             fmt.audio.i_blockalign = i_subpacket_size;
         else
             fmt.audio.i_blockalign = i_coded_frame_size;
-
-        if( fmt.i_codec == VLC_FOURCC( 'c','o','o','k' ) )
-            fmt.i_codec = VLC_CODEC_COOK;
-        else if( fmt.i_codec == VLC_FOURCC( 'a','t','r','c' ) )
-            fmt.i_codec = VLC_CODEC_ATRAC3;
 
         if( i_extra_codec > 0 )
         {
@@ -1661,18 +1656,18 @@ static int CodecAudioParse( demux_t *p_demux, int i_tk_id, const uint8_t *p_data
         tk->i_subpackets =
             i_subpacket_h * i_frame_size / tk->i_subpacket_size;
         tk->p_subpackets =
-            calloc( tk->i_subpackets, sizeof(block_t *) );
+            xcalloc( tk->i_subpackets, sizeof(block_t *) );
         tk->p_subpackets_timecode =
-            calloc( tk->i_subpackets , sizeof( int64_t ) );
+            xcalloc( tk->i_subpackets , sizeof( int64_t ) );
     }
     else if( fmt.i_codec == VLC_CODEC_RA_288 )
     {
         tk->i_subpackets =
             i_subpacket_h * i_frame_size / tk->i_coded_frame_size;
         tk->p_subpackets =
-            calloc( tk->i_subpackets, sizeof(block_t *) );
+            xcalloc( tk->i_subpackets, sizeof(block_t *) );
         tk->p_subpackets_timecode =
-            calloc( tk->i_subpackets , sizeof( int64_t ) );
+            xcalloc( tk->i_subpackets , sizeof( int64_t ) );
     }
 
     /* Check if the calloc went correctly */

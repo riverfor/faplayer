@@ -2,7 +2,7 @@
  * embeddedwindow.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2005-2007 the VideoLAN team
- * $Id: 451d7627f4a9ca08a7c7e019f564b1db815d1841 $
+ * $Id: 8641d39924fa63f8d4c401d36f49178cfc96153f $
  *
  * Authors: Benjamin Pracht <bigben at videolan dot org>
  *
@@ -59,6 +59,7 @@
 	IBOutlet id o_playlist_view;
 	IBOutlet id o_playlist_table;
 	IBOutlet id o_vlc_main;
+    IBOutlet id o_video_view;
 
     NSImage * o_img_play;
     NSImage * o_img_play_pressed;
@@ -81,6 +82,8 @@
 }
 
 - (void)controlTintChanged;
+
+- (id)videoView;
 
 - (void)setTime: (NSString *)o_arg_ime position: (float)f_position;
 - (id)getPgbar;

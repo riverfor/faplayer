@@ -4,7 +4,7 @@
  * It includes functions allowing to declare, get or set configuration options.
  *****************************************************************************
  * Copyright (C) 1999-2006 the VideoLAN team
- * $Id: b69a1c542ba912ee1b42748c283fc364aad919aa $
+ * $Id: 7a40485d063e98db35e962bafbf1ca6de9021fc5 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -41,37 +41,33 @@ extern "C" {
  *****************************************************************************/
 
 /* Configuration hint types */
+#define CONFIG_HINT_CATEGORY                0x02  /* Start of new category */
+#define CONFIG_HINT_SUBCATEGORY             0x03  /* Start of sub-category */
+#define CONFIG_HINT_SUBCATEGORY_END         0x04  /* End of sub-category */
+#define CONFIG_HINT_USAGE                   0x05  /* Usage information */
 
-
-#define CONFIG_HINT_CATEGORY                0x0002  /* Start of new category */
-#define CONFIG_HINT_SUBCATEGORY             0x0003  /* Start of sub-category */
-#define CONFIG_HINT_SUBCATEGORY_END         0x0004  /* End of sub-category */
-#define CONFIG_HINT_USAGE                   0x0005  /* Usage information */
-
-#define CONFIG_CATEGORY                     0x0006 /* Set category */
-#define CONFIG_SUBCATEGORY                  0x0007 /* Set subcategory */
-#define CONFIG_SECTION                      0x0008 /* Start of new section */
-
-#define CONFIG_HINT                         0x000F
+#define CONFIG_CATEGORY                     0x06 /* Set category */
+#define CONFIG_SUBCATEGORY                  0x07 /* Set subcategory */
+#define CONFIG_SECTION                      0x08 /* Start of new section */
 
 /* Configuration item types */
-#define CONFIG_ITEM_STRING                  0x0010  /* String option */
-/* unused 0x0020 */
-#define CONFIG_ITEM_MODULE                  0x0030  /* Module option */
-#define CONFIG_ITEM_INTEGER                 0x0040  /* Integer option */
-#define CONFIG_ITEM_BOOL                    0x0050  /* Bool option */
-#define CONFIG_ITEM_FLOAT                   0x0060  /* Float option */
-#define CONFIG_ITEM_DIRECTORY               0x0070  /* Directory option */
-#define CONFIG_ITEM_KEY                     0x0080  /* Hot key option */
-#define CONFIG_ITEM_MODULE_CAT              0x0090  /* Module option */
-#define CONFIG_ITEM_MODULE_LIST             0x00A0  /* Module option */
-#define CONFIG_ITEM_MODULE_LIST_CAT         0x00B0  /* Module option */
-#define CONFIG_ITEM_FONT                    0x00C0  /* Font option */
-#define CONFIG_ITEM_PASSWORD                0x00D0  /* Password option (*) */
-#define CONFIG_ITEM_LOADFILE                0x00E0  /* Read file option */
-#define CONFIG_ITEM_SAVEFILE                0x00F0  /* Written file option */
+#define CONFIG_ITEM_FLOAT                   0x20  /* Float option */
+#define CONFIG_ITEM_INTEGER                 0x40  /* Integer option */
+#define CONFIG_ITEM_RGB                     0x41  /* RGB color option */
+#define CONFIG_ITEM_BOOL                    0x60  /* Bool option */
+#define CONFIG_ITEM_STRING                  0x80  /* String option */
+#define CONFIG_ITEM_PASSWORD                0x81  /* Password option (*) */
+#define CONFIG_ITEM_KEY                     0x82  /* Hot key option */
+#define CONFIG_ITEM_MODULE                  0x84  /* Module option */
+#define CONFIG_ITEM_MODULE_CAT              0x85  /* Module option */
+#define CONFIG_ITEM_MODULE_LIST             0x86  /* Module option */
+#define CONFIG_ITEM_MODULE_LIST_CAT         0x87  /* Module option */
+#define CONFIG_ITEM_LOADFILE                0x8C  /* Read file option */
+#define CONFIG_ITEM_SAVEFILE                0x8D  /* Written file option */
+#define CONFIG_ITEM_DIRECTORY               0x8E  /* Directory option */
+#define CONFIG_ITEM_FONT                    0x8F  /* Font option */
 
-#define CONFIG_ITEM                         0x00F0
+#define CONFIG_ITEM(x) (((x) & ~0xF) != 0)
 
 /*******************************************************************
  * All predefined categories and subcategories
@@ -159,9 +155,16 @@ struct module_config_t
     int         *pi_list;                              /* Idem for integers */
     char       **ppsz_list_text;          /* Friendly names for list values */
     int          i_list;                               /* Options list size */
-    int          i_type;                               /* Configuration type */
-    vlc_callback_t pf_update_list; /*callback to initialize dropdownlists */
-    char         i_short;                      /* Optional short option name */
+    vlc_callback_t pf_update_list; /* Callback to initialize dropdown lists */
+    uint8_t      i_type;                              /* Configuration type */
+    char         i_short;                     /* Optional short option name */
+
+    /* Misc */
+    unsigned    b_dirty:1;        /* Dirty flag to indicate a config change */
+    unsigned    b_advanced:1;        /* Flag to indicate an advanced option */
+    unsigned    b_internal:1; /* Flag to indicate option is not to be shown */
+    unsigned    b_unsaveable:1;               /* Config should not be saved */
+    unsigned    b_safe:1;       /* Safe to use in web plugins and playlists */
 
     /* Actions list */
     int            i_action;                           /* actions list size */
@@ -171,15 +174,6 @@ struct module_config_t
     /* Deprecated */
     char        *psz_oldname;                          /* Old option name */
     bool        b_removed;
-
-    /* Misc */
-    bool        b_dirty;          /* Dirty flag to indicate a config change */
-    bool        b_advanced;          /* Flag to indicate an advanced option */
-    bool        b_internal;   /* Flag to indicate option is not to be shown */
-    /* Option values loaded from config file */
-    bool        b_unsaveable;                /* Config should not be saved */
-
-    bool        b_safe;
 };
 
 /*****************************************************************************

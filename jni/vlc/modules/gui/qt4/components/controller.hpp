@@ -2,7 +2,7 @@
  * Controller.hpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 9c4f932da9efd844ba0bb048533de1ad25d78008 $
+ * $Id: 5f9ca15f2b3159a5ca525adece98f69f704e1917 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -266,6 +266,8 @@ protected:
     virtual void leaveEvent( QEvent *event );
     virtual void keyPressEvent( QKeyEvent *event );
 
+    virtual void customEvent( QEvent *event );
+
 private slots:
     void showFSC();
     void planHideFSC();
@@ -274,8 +276,6 @@ private slots:
     void centerFSC( int );
 
 private:
-    virtual void customEvent( QEvent *event );
-
     QTimer *p_hideTimer;
 #if HAVE_TRANSPARENCY
     QTimer *p_slowHideTimer;

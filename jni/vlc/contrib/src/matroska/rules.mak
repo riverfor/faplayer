@@ -1,10 +1,11 @@
 # matroska
 
-MATROSKA_VERSION := 1.1.0
+MATROSKA_VERSION := 1.2.0
 MATROSKA_URL := http://dl.matroska.org/downloads/libmatroska/libmatroska-$(MATROSKA_VERSION).tar.bz2
 #MATROSKA_URL := $(CONTRIB_VIDEOLAN)/libmatroska-$(MATROSKA_VERSION).tar.bz2
 
 PKGS += matroska
+DEPS_matroska = ebml $(DEPS_ebml)
 
 $(TARBALLS)/libmatroska-$(MATROSKA_VERSION).tar.bz2:
 	$(call download,$(MATROSKA_URL))
@@ -13,10 +14,9 @@ $(TARBALLS)/libmatroska-$(MATROSKA_VERSION).tar.bz2:
 
 libmatroska: libmatroska-$(MATROSKA_VERSION).tar.bz2 .sum-matroska
 	$(UNPACK)
-	mv $@-$(MATROSKA_VERSION) $@
-	touch $@
+	$(MOVE)
 
-.matroska: libmatroska .ebml
+.matroska: libmatroska
 ifdef HAVE_WIN32
 	cd $< && $(MAKE) -C make/mingw32 prefix="$(PREFIX)" $(HOSTVARS) SHARED=no EBML_DLL=no libmatroska.a
 else

@@ -2,7 +2,7 @@
  * stream.c
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: a2ebd08873732b8e49ad40e5dc90ab67d770cd52 $
+ * $Id: c7418e44012d59ade6243f4b7c4d21bea5eba59b $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -208,8 +208,7 @@ static int  ASeek( stream_t *s, uint64_t i_pos );
  ****************************************************************************/
 stream_t *stream_CommonNew( vlc_object_t *p_obj )
 {
-    stream_t *s = (stream_t *)vlc_custom_create( p_obj, sizeof(*s),
-                                                 VLC_OBJECT_GENERIC, "stream" );
+    stream_t *s = (stream_t *)vlc_custom_create( p_obj, sizeof(*s), "stream" );
 
     if( !s )
         return NULL;
@@ -1680,13 +1679,9 @@ static int AReadStream( stream_t *s, void *p_read, unsigned int i_read )
 {
     stream_sys_t *p_sys = s->p_sys;
     access_t *p_access = p_sys->p_access;
-    input_thread_t *p_input = NULL;
+    input_thread_t *p_input = s->p_input;
     int i_read_orig = i_read;
     int i_total = 0;
-
-    if( s->p_parent && s->p_parent->p_parent &&
-        vlc_internals( s->p_parent->p_parent )->i_object_type == VLC_OBJECT_INPUT )
-        p_input = (input_thread_t *)s->p_parent->p_parent;
 
     if( !p_sys->i_list )
     {
@@ -1749,14 +1744,10 @@ static block_t *AReadBlock( stream_t *s, bool *pb_eof )
 {
     stream_sys_t *p_sys = s->p_sys;
     access_t *p_access = p_sys->p_access;
-    input_thread_t *p_input = NULL;
+    input_thread_t *p_input = s->p_input;
     block_t *p_block;
     bool b_eof;
     int i_total = 0;
-
-    if( s->p_parent && s->p_parent->p_parent &&
-        vlc_internals( s->p_parent->p_parent )->i_object_type == VLC_OBJECT_INPUT )
-        p_input = (input_thread_t *)s->p_parent->p_parent;
 
     if( !p_sys->i_list )
     {

@@ -2,7 +2,7 @@
  * vlc.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: ca20d7a7c5fa182160a266a1f0f7a8cba06a2570 $
+ * $Id: 88e23e8a01d12b134be36a99102bec4a5e303e3f $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -372,8 +372,9 @@ char *vlclua_find_file( vlc_object_t *p_this, const char *psz_luadirname, const 
  * Meta data setters utility.
  * Playlist item table should be on top of the stack when these are called
  *****************************************************************************/
-void __vlclua_read_meta_data( vlc_object_t *p_this, lua_State *L,
-                              input_item_t *p_input )
+#undef vlclua_read_meta_data
+void vlclua_read_meta_data( vlc_object_t *p_this, lua_State *L,
+                            input_item_t *p_input )
 {
 #define TRY_META( a, b )                                        \
     lua_getfield( L, -1, a );                                   \
@@ -406,7 +407,8 @@ void __vlclua_read_meta_data( vlc_object_t *p_this, lua_State *L,
     TRY_META( "trackid", TrackID );
 }
 
-void __vlclua_read_custom_meta_data( vlc_object_t *p_this, lua_State *L,
+#undef vlclua_read_custom_meta_data
+void vlclua_read_custom_meta_data( vlc_object_t *p_this, lua_State *L,
                                      input_item_t *p_input )
 {
     /* Lock the input item and create the meta table if needed */
@@ -451,7 +453,8 @@ void __vlclua_read_custom_meta_data( vlc_object_t *p_this, lua_State *L,
 /**
  * Playlist item table should be on top of the stack when this is called
  */
-void __vlclua_read_options( vlc_object_t *p_this, lua_State *L,
+#undef vlclua_read_options
+void vlclua_read_options( vlc_object_t *p_this, lua_State *L,
                             int *pi_options, char ***pppsz_options )
 {
     lua_getfield( L, -1, "options" );
@@ -477,7 +480,8 @@ void __vlclua_read_options( vlc_object_t *p_this, lua_State *L,
     lua_pop( L, 1 ); /* pop "options" */
 }
 
-int __vlclua_playlist_add_internal( vlc_object_t *p_this, lua_State *L,
+#undef vlclua_playlist_add_internal
+int vlclua_playlist_add_internal( vlc_object_t *p_this, lua_State *L,
                                     playlist_t *p_playlist,
                                     input_item_t *p_parent, bool b_play )
 {
@@ -547,8 +551,7 @@ int __vlclua_playlist_add_internal( vlc_object_t *p_this, lua_State *L,
                     vlclua_read_options( p_this, L, &i_options, &ppsz_options );
 
                     /* Create input item */
-                    p_input = input_item_NewExt( p_playlist, psz_path,
-                                                psz_name, i_options,
+                    p_input = input_item_NewExt( psz_path, psz_name, i_options,
                                                 (const char **)ppsz_options,
                                                 VLC_INPUT_OPTION_TRUSTED,
                                                 i_duration );
@@ -751,7 +754,8 @@ static int vlclua_add_modules_path_inner( lua_State *L, const char *psz_path )
     return count;
 }
 
-int __vlclua_add_modules_path( vlc_object_t *obj, lua_State *L, const char *psz_filename )
+#undef vlclua_add_modules_path
+int vlclua_add_modules_path( vlc_object_t *obj, lua_State *L, const char *psz_filename )
 {
     /* Setup the module search path:
      *   * "The script's directory"/modules

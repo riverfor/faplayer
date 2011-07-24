@@ -2,7 +2,7 @@
  * window.c: "vout window" managment
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 8d4cb7ea0516c85e97969e05c49d47ea84311bda $
+ * $Id: b98a3e9c1ecce02cc9343bf012ba3d939c7976e1 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -55,8 +55,7 @@ vout_window_t *vout_window_New(vlc_object_t *obj,
                                const char *module,
                                const vout_window_cfg_t *cfg)
 {
-    static char const name[] = "window";
-    window_t *w = vlc_custom_create(obj, sizeof(*w), VLC_OBJECT_GENERIC, name);
+    window_t *w = vlc_custom_create(obj, sizeof(*w), "window");
     vout_window_t *window = &w->wnd;
 
     memset(&window->handle, 0, sizeof(window->handle));

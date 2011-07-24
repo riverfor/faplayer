@@ -2,7 +2,7 @@
  * Help.cpp : Help and About dialogs
  ****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: 1ee90002846296a548f2810529da5efda8bbb53f $
+ * $Id: 4fee7ed452ebc002e0e215cfe06da646739bcc5a $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *          Rémi Duraffort <ivoire (at) via.ecp.fr>
@@ -242,7 +242,7 @@ void UpdateDialog::updateNotify( bool b_result )
                 .arg( QString::number( p_release->i_major ) )
                 .arg( QString::number( p_release->i_minor ) )
                 .arg( QString::number( p_release->i_revision ) )
-                .arg( ( p_release->extra )?QString( p_release->extra ):"" );
+                .arg( p_release->i_extra == 0 ? "" : "." + QString::number( p_release->i_extra ) );
 
             ui.updateNotifyLabel->setText( message );
             ui.updateNotifyTextEdit->setText( qfu( p_release->psz_desc ) );

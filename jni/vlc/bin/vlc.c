@@ -2,7 +2,7 @@
  * vlc.c: the VLC player
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: 75a97a1379bcfed64342e621cbb7a1cca9df4576 $
+ * $Id: ee30bd419659302280c6b3891015d245f2690a05 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -121,11 +121,11 @@ int main( int i_argc, const char *ppsz_argv[] )
 
     setlocale (LC_ALL, "");
 
-#ifndef __APPLE__
-    /* This clutters OSX GUI error logs */
-    fprintf( stderr, "VLC media player %s (revision %s)\n",
-             libvlc_get_version(), libvlc_get_changeset() );
-#endif
+    if (isatty (STDERR_FILENO))
+        /* This message clutters error logs. It is print it only on a TTY.
+         * Forunately, LibVLC prints version infos with -vv anyhow. */
+        fprintf (stderr, "VLC media player %s (revision %s)\n",
+                 libvlc_get_version(), libvlc_get_changeset());
 
     sigset_t set;
 

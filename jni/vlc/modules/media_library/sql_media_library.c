@@ -2,7 +2,7 @@
  * sql_media_library.c: SQL-based media library
  *****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN Team and AUTHORS
- * $Id: c56479bd6a966f984fc6762848aa157895dc0876 $
+ * $Id: 2b4a2b08e57f88f09b15eaf6c19ff45e73490112 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -52,9 +52,8 @@ static const char* ppsz_VideoExtensions[] = { EXTENSIONS_VIDEO_CSV, NULL };
 static int load( vlc_object_t* );
 static void unload( vlc_object_t* );
 
-static int CreateInputItemFromMedia( media_library_t *p_ml,
-                              input_item_t **pp_item,
-                              ml_media_t *p_media );
+static int CreateInputItemFromMedia( input_item_t **pp_item,
+                                     ml_media_t *p_media );
 
 
 struct ml_table_elt
@@ -1176,7 +1175,7 @@ input_item_t* GetInputItemFromMedia( media_library_t *p_ml, int i_media )
         ml_media_t* p_media = media_New( p_ml, i_media, ML_MEDIA, true );
         if( p_media == NULL )
             return NULL;
-        CreateInputItemFromMedia( p_ml, &p_item, p_media );
+        CreateInputItemFromMedia( &p_item, p_media );
         watch_add_Item( p_ml, p_item, p_media );
         ml_gc_decref( p_media );
     }
@@ -1349,19 +1348,14 @@ void CopyMediaToInputItem( input_item_t *p_item, ml_media_t *p_media )
 
 /**
  * @brief Copy a ml_media_t to an input_item_t
- * @param p_ml The Media Library object
  * @param pp_item A pointer to a new input_item (return value)
  * @param p_media The media to copy as an input item
  * @note This function is threadsafe
  */
-static int CreateInputItemFromMedia( media_library_t *p_ml,
-                              input_item_t **pp_item,
-                              ml_media_t *p_media )
+static int CreateInputItemFromMedia( input_item_t **pp_item,
+                                     ml_media_t *p_media )
 {
-    playlist_t *p_pl = pl_Get( p_ml );
-    *pp_item = input_item_New( VLC_OBJECT( p_pl ),
-                               p_media->psz_uri,
-                               p_media->psz_title );
+    *pp_item = input_item_New( p_media->psz_uri, p_media->psz_title );
                                /* ITEM_TYPE_FILE ); */
     if( !*pp_item )
         return VLC_EGENERIC;

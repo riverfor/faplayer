@@ -2,7 +2,7 @@
  * media_list.c: libvlc new API media list functions
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: 08271247a3ceca66c8f9a946777741ae7bcbf5a6 $
+ * $Id: 2011f95bc73b6b1f2934c7f9d377b04c6a55cb25 $
  *
  * Authors: Pierre d'Herbemont <pdherbemont # videolan.org>
  *
@@ -250,8 +250,7 @@ libvlc_media_list_add_file_content( libvlc_media_list_t * p_mlist,
     input_item_t * p_input_item;
     libvlc_media_t * p_md;
 
-    p_input_item = input_item_NewExt(
-                           p_mlist->p_libvlc_instance->p_libvlc_int, psz_uri,
+    p_input_item = input_item_NewExt( psz_uri,
                                          _("Media Library"), 0, NULL, 0, -1 );
 
     if( !p_input_item )

@@ -2,7 +2,7 @@
  * filter.c : filter_t helpers.
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: f01fa6666fde4a9e7a54089768d460893ff473be $
+ * $Id: 87571ec99a1c0d37998d5f0ecd88f4339599c540 $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -33,8 +33,7 @@
 filter_t *filter_NewBlend( vlc_object_t *p_this,
                            const video_format_t *p_dst_chroma )
 {
-    filter_t *p_blend = vlc_custom_create( p_this, sizeof(*p_blend),
-                                           VLC_OBJECT_GENERIC, "blend" );
+    filter_t *p_blend = vlc_custom_create( p_this, sizeof(*p_blend), "blend" );
     if( !p_blend )
         return NULL;
 
@@ -119,8 +118,8 @@ video_splitter_t *video_splitter_New( vlc_object_t *p_this,
                                       const char *psz_name,
                                       const video_format_t *p_fmt )
 {
-    video_splitter_t *p_splitter = vlc_custom_create( p_this, sizeof(*p_splitter),
-                                           VLC_OBJECT_GENERIC, "video splitter" );
+    video_splitter_t *p_splitter = vlc_custom_create( p_this,
+                                       sizeof(*p_splitter), "video splitter" );
     if( !p_splitter )
         return NULL;
 

@@ -2,7 +2,7 @@
  * preparse.c: Preparser thread.
  *****************************************************************************
  * Copyright © 1999-2009 the VideoLAN team
- * $Id: dfd955a6392447a939df5814e757a39b968b7210 $
+ * $Id: 232d798bac8c1165ebbf7e630ebed60d0142cad4 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -126,7 +126,10 @@ static void Preparse( playlist_t *p_playlist, input_item_t *p_item )
     vlc_mutex_unlock( &p_item->lock );
 
     if( i_type != ITEM_TYPE_FILE )
+    {
+        input_item_SetPreparsed( p_item, true );
         return;
+    }
 
     stats_TimerStart( p_playlist, "Preparse run", STATS_TIMER_PREPARSE );
 

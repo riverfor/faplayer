@@ -2,7 +2,7 @@
  * projectm: visualization module based on libprojectM
  *****************************************************************************
  * Copyright © 2009-2011 the VideoLAN team
- * $Id: ea7ea3f737e2ce3bbbbbe6e9bf15e7e3840ad36e $
+ * $Id: bcdcb23ba74ea66ecea87dd1038832e3df149df3 $
  *
  * Authors: Rémi Duraffort <ivoire@videolan.org>
  *          Laurent Aimar
@@ -74,6 +74,14 @@ static void Close        ( vlc_object_t * );
 #define TEXTURE_TEXT N_("Texture size")
 #define TEXTURE_LONGTEXT N_("The size of the texture, in pixels.")
 
+#ifdef WIN32
+# define FONT_PATH      "C:\\WINDOWS\\Fonts\\arial.ttf"
+# define FONT_PATH_MENU "C:\\WINDOWS\\Fonts\\arial.ttf"
+#else
+# define FONT_PATH      "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf"
+# define FONT_PATH_MENU "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf"
+#endif
+
 vlc_module_begin ()
     set_shortname( N_("projectM"))
     set_description( N_("libprojectM effect") )
@@ -90,10 +98,10 @@ vlc_module_begin ()
     add_directory( "projectm-preset-path", "/usr/share/projectM/presets",
 #endif
                   PRESET_PATH_TXT, PRESET_PATH_LONGTXT, true )
-    add_loadfile( "projectm-title-font", "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf",
+    add_loadfile( "projectm-title-font", FONT_PATH,
                   TITLE_FONT_TXT, TITLE_FONT_LONGTXT, true )
-    add_loadfile( "projectm-menu-font", "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf",
-              MENU_FONT_TXT, MENU_FONT_LONGTXT, true )
+    add_loadfile( "projectm-menu-font", FONT_PATH_MENU,
+                  MENU_FONT_TXT, MENU_FONT_LONGTXT, true )
 #endif
     add_integer( "projectm-width", 800, WIDTH_TEXT, WIDTH_LONGTEXT,
                  false )

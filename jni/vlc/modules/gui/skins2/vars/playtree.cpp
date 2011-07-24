@@ -2,7 +2,7 @@
  * playtree.cpp
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id: ce529eb1a4f2a5003c93389ae17bdc8133bebeaa $
+ * $Id: 918d4b147ff62eb6fe51487a17c04555ff6a6e3a $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -313,7 +313,7 @@ void Playtree::insertItems( VarTree& elem, const list<string>& files, bool start
         if( !psz_uri )
             continue;
 
-        input_item_t* pItem = input_item_New( m_pPlaylist, psz_uri, NULL );
+        input_item_t* pItem = input_item_New( psz_uri, NULL );
         if( pItem )
         {
             int i_mode = PLAYLIST_APPEND;

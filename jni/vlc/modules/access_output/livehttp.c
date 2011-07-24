@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
  * Copyright (C) 2009-2010 by Keary Griffin
- * $Id: b2c55f301a7556e655fb27f9db79c034f6cf6a9a $
+ * $Id: ce5d0795c63e181b7ca8b05b1cc18df79633c2b0 $
  *
  * Authors: Keary Griffin <kearygriffin at gmail.com>
  *
@@ -84,7 +84,7 @@ vlc_module_begin ()
     set_description( N_("HTTP Live streaming output") )
     set_shortname( N_("LiveHTTP" ))
     add_shortcut( "livehttp" )
-    set_capability( "sout access", 50 )
+    set_capability( "sout access", 0 )
     set_category( CAT_SOUT )
     set_subcategory( SUBCAT_SOUT_ACO )
     add_integer( SOUT_CFG_PREFIX "seglen", 10, SEGLEN_TEXT, SEGLEN_LONGTEXT, true )

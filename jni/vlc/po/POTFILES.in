@@ -279,7 +279,7 @@ modules/access_output/shout.c
 modules/access_output/udp.c
 modules/altivec/memcpy.c
 modules/arm_neon/audio_format.c
-modules/arm_neon/i420_yuy2.c
+modules/arm_neon/chroma_yuv.c
 modules/audio_filter/audiobargraph_a.c
 modules/audio_filter/channel_mixer/dolby.c
 modules/audio_filter/channel_mixer/headphone.c
@@ -501,6 +501,7 @@ modules/gui/macosx/AudioEffects.m
 modules/gui/macosx/AppleRemote.h
 modules/gui/macosx/AppleRemote.m
 modules/gui/macosx/MainMenu.m
+modules/gui/macosx/MainWindow.m
 modules/gui/macosx/TrackSynchronization.m
 modules/gui/macosx/VideoEffects.m
 modules/gui/macosx/about.h
@@ -513,10 +514,9 @@ modules/gui/macosx/controls.h
 modules/gui/macosx/controls.m
 modules/gui/macosx/coredialogs.h
 modules/gui/macosx/coredialogs.m
+modules/gui/macosx/CoreInteraction.m
 modules/gui/macosx/embeddedwindow.h
 modules/gui/macosx/embeddedwindow.m
-modules/gui/macosx/equalizer.h
-modules/gui/macosx/equalizer.m
 modules/gui/macosx/eyetv.h
 modules/gui/macosx/eyetv.m
 modules/gui/macosx/fspanel.h
@@ -937,7 +937,6 @@ modules/misc/playlist/export.c
 modules/misc/playlist/html.c
 modules/misc/playlist/m3u.c
 modules/misc/playlist/xspf.c
-modules/misc/playlist/xspf.h
 modules/misc/rtsp.c
 modules/misc/sqlite.c
 modules/misc/stats/decoder.c
@@ -1021,6 +1020,7 @@ modules/video_chroma/i420_yuy2.h
 modules/video_chroma/i422_i420.c
 modules/video_chroma/i422_yuy2.c
 modules/video_chroma/i422_yuy2.h
+modules/video_chroma/rv32.c
 modules/video_chroma/yuy2_i420.c
 modules/video_chroma/yuy2_i422.c
 modules/video_filter/adjust.c
@@ -1100,7 +1100,6 @@ modules/video_filter/remoteosd_rfbproto.h
 modules/video_filter/ripple.c
 modules/video_filter/rotate.c
 modules/video_filter/rss.c
-modules/video_filter/rv32.c
 modules/video_filter/scale.c
 modules/video_filter/scene.c
 modules/video_filter/sepia.c

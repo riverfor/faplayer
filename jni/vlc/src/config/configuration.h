@@ -42,14 +42,26 @@ void config_UnsortConfig (void);
 
 char *config_GetDataDirDefault( void );
 
-int IsConfigStringType( int type );
-int IsConfigIntegerType (int type);
-static inline int IsConfigFloatType (int type)
+#define CONFIG_CLASS(x) ((x) & ~0x1F)
+
+static inline bool IsConfigStringType(unsigned type)
+{
+    return (type & CONFIG_ITEM_STRING) != 0;
+}
+
+static inline bool IsConfigIntegerType (int type)
+{
+    return (type & CONFIG_ITEM_INTEGER) != 0;
+}
+
+static inline bool IsConfigFloatType (int type)
 {
     return type == CONFIG_ITEM_FLOAT;
 }
 
 extern vlc_rwlock_t config_lock;
+
+bool config_IsSafe (const char *);
 
 /* The configuration file */
 #define CONFIG_FILE                     "vlcrc"

@@ -2,7 +2,7 @@
  * fspanel.m: MacOS X full screen panel
  *****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 89f2b402bf967ef7d9b4eb51dea72739723abaa4 $
+ * $Id: 6a3748d036dfefabbab0400d98243bee33cda102 $
  *
  * Authors: Jérôme Decoodt <djc at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -26,10 +26,11 @@
  * Preamble
  *****************************************************************************/
 #import "intf.h"
-#import "controls.h"
+#import "CoreInteraction.h"
 #import "vout.h"
 #import "misc.h"
 #import "fspanel.h"
+#import "MainWindow.h"
 
 @interface VLCFSPanel ()
 - (void)hideMouse;
@@ -178,9 +179,9 @@
 
 - (void)setActive:(id)noData
 {
-    if( [[[VLCMain sharedInstance] controls] voutView] != nil )
+    if( [[VLCCoreInteraction sharedInstance] voutView] != nil )
     {
-        if( [[[[VLCMain sharedInstance] controls] voutView] isFullscreen] )
+        if( [[[VLCCoreInteraction sharedInstance] voutView] isFullscreen] )
         {
             b_nonActive = NO;
             [self fadeIn];
@@ -247,8 +248,8 @@
 - (void)mouseExited:(NSEvent *)theEvent
 {
     /* give up our focus, so the vout may show us again without letting the user clicking it */
-    if( [[[[VLCMain sharedInstance] controls] voutView] isFullscreen] )
-        [[[[[VLCMain sharedInstance] controls] voutView] window] makeKeyWindow];
+    if( [[[VLCCoreInteraction sharedInstance] voutView] isFullscreen] )
+        [[[[VLCCoreInteraction sharedInstance] voutView] window] makeKeyWindow];
 }
 
 - (void)hideMouse
@@ -554,12 +555,12 @@
 
 - (IBAction)fsTimeSliderUpdate:(id)sender
 {
-    [[VLCMain sharedInstance] timesliderUpdate: sender];
+    [[VLCMainWindow sharedInstance] updateTimeSlider];
 }
 
 - (IBAction)fsVolumeSliderUpdate:(id)sender
 {
-    [[[VLCMain sharedInstance] controls] volumeSliderUpdated: sender];
+    [[VLCCoreInteraction sharedInstance] setVolume: [sender intValue]];
 }
 
 #define addImage(image, _x, _y, mode, _width)                                               \

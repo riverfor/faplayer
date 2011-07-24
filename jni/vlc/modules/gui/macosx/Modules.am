@@ -12,14 +12,16 @@ SOURCES_macosx = \
 	SPMediaKeyTap.m \
 	MainMenu.h \
 	MainMenu.m \
+	MainWindow.h \
+	MainWindow.m \
+	CoreInteraction.h \
+	CoreInteraction.m \
 	about.h \
 	about.m \
 	applescript.h \
 	applescript.m \
 	controls.h \
 	controls.m \
-	equalizer.m \
-	equalizer.h \
 	coredialogs.m \
 	coredialogs.h \
 	intf.m \

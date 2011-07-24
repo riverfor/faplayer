@@ -6,7 +6,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = . test
 
 NULL =
-EXTRA_DIST = extras/COPYING \
+EXTRA_DIST = \
 	libvlc.pc.in \
 	vlc-plugin.pc.in \
 	libvlc.sym \
@@ -46,6 +46,7 @@ pluginsinclude_HEADERS = \
 	../include/vlc_access.h \
 	../include/vlc_acl.h \
 	../include/vlc_aout.h \
+	../include/vlc_aout_intf.h \
 	../include/vlc_aout_mixer.h \
 	../include/vlc_arrays.h \
 	../include/vlc_art_finder.h \
@@ -525,6 +526,19 @@ SOURCES_libvlc_control = \
 	control/media_list_player.c \
 	control/media_library.c \
 	control/media_discoverer.c
+
+###############################################################################
+# libvlc pulse
+###############################################################################
+
+if HAVE_PULSE
+pkglib_LTLIBRARIES = libvlcpulse.la
+endif
+
+libvlcpulse_la_SOURCES = pulse/mainloop.c ../include/vlc_pulse.h
+libvlcpulse_la_CPPFLAGS = $(PULSE_CFLAGS)
+libvlcpulse_la_LIBADD = $(PULSE_LIBS) libvlccore.la
+libvlcpulse_la_LDFLAGS = -export-symbols-regex ^vlc_pa_ -no-undefined
 
 ###############################################################################
 # GIT revision

@@ -2,7 +2,7 @@
  * controls.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: 65f883e7d4b49fa58fd59885a7da516cf42b1a54 $
+ * $Id: dd5c105b478ea5090a269e5186ceda902175b6eb $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -47,12 +47,8 @@
     IBOutlet id o_specificTime_stepper;
     IBOutlet id o_specificTime_mi;
 
-    VLCFSPanel *o_fs_panel;
-    BOOL b_lockAspectRatio;
+    IBOutlet VLCFSPanel *o_fs_panel;
 }
-- (id)voutView;
-- (BOOL)aspectRatioIsLocked;
-
 - (IBAction)play:(id)sender;
 - (IBAction)stop:(id)sender;
 - (IBAction)faster:(id)sender;
@@ -66,12 +62,6 @@
 - (IBAction)loop:(id)sender;
 - (IBAction)repeatButtonAction:(id)sender;
 - (IBAction)quitAfterPlayback:(id)sender;
-
-/* the three ugly helpers again */
-- (void)repeatOne;
-- (void)repeatAll;
-- (void)repeatOff;
-- (void)shuffle;
 
 - (IBAction)forward:(id)sender;
 - (IBAction)backward:(id)sender;
@@ -97,17 +87,5 @@
 - (IBAction)goToSpecificTime:(id)sender;
 
 - (id)fspanel;
-
-@end
-
-/*****************************************************************************
- * VLCTimeField interface
- *****************************************************************************
- * we need the implementation to catch our click-event in the controller window
- *****************************************************************************/
-
-@interface VLCTimeField : NSTextField
-{
-}
 @end
 

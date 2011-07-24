@@ -2,7 +2,7 @@
  * vlc_fourcc.h: Definition of various FOURCC and helpers
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 54cc0781c3b5b7bfbd869909c922d23bedefbbe1 $
+ * $Id: 9aebbba27368eaecd225ab390c994eaa52cdd2ba $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ com>
  *
@@ -25,7 +25,6 @@
 #define VLC_FOURCC_H 1
 
 #include <vlc_common.h>
-#include <vlc_es.h>
 
 /* Video codec */
 #define VLC_CODEC_MPGV      VLC_FOURCC('m','p','g','v')
@@ -116,6 +115,7 @@
 #define VLC_CODEC_INDEO5    VLC_FOURCC('I','V','5','0')
 #define VLC_CODEC_VP8       VLC_FOURCC('V','P','8','0')
 #define VLC_CODEC_JPEG2000  VLC_FOURCC('J','P','2','K')
+#define VLC_CODEC_LAGARITH  VLC_FOURCC('L','A','G','S')
 
 
 /* Planar YUV 4:1:0 Y:V:U */

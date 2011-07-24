@@ -2,7 +2,7 @@
  * open.h: Open dialogues for VLC's MacOS X port
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: dea48b3131557073f05243a93301b14bfe383627 $
+ * $Id: f671c6074f4bb0ecab421bb0ca274a13539707fb $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -23,8 +23,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
-
-NSArray *GetEjectableMediaOfClass( const char *psz_class );
 
 /*****************************************************************************
  * Intf_Open interface
@@ -49,26 +47,66 @@ NSArray *GetEjectableMediaOfClass( const char *psz_class );
     IBOutlet id o_sout_options;
 
     /* open file */
-    IBOutlet id o_file_path;
+    IBOutlet id o_file_name;
+    IBOutlet id o_file_name_stub;
+    IBOutlet id o_file_icon_well;
     IBOutlet id o_file_btn_browse;
     IBOutlet id o_file_stream;
     IBOutlet id o_file_slave_ckbox;
     IBOutlet id o_file_slave_select_btn;
-    IBOutlet id o_file_slave_filename_txt;
+    IBOutlet id o_file_slave_filename_lbl;
+    IBOutlet id o_file_slave_icon_well;
+    IBOutlet id o_file_subtitles_filename_lbl;
+    IBOutlet id o_file_subtitles_icon_well;
 
     /* open disc */
-    IBOutlet id o_disc_type;
-    IBOutlet id o_disc_device;
-    IBOutlet id o_disc_device_lbl;
-    IBOutlet id o_disc_title;
-    IBOutlet id o_disc_title_lbl;
-    IBOutlet id o_disc_title_stp;
-    IBOutlet id o_disc_chapter;
-    IBOutlet id o_disc_chapter_lbl;
-    IBOutlet id o_disc_chapter_stp;
-    IBOutlet id o_disc_videots_folder;
-    IBOutlet id o_disc_videots_btn_browse;
-    IBOutlet id o_disc_dvd_menus;
+    IBOutlet id o_disc_icon_well;
+    IBOutlet id o_disc_selector_pop;
+
+    IBOutlet id o_disc_nodisc_view;
+    IBOutlet id o_disc_nodisc_lbl;
+    IBOutlet id o_disc_nodisc_videots_btn;
+    IBOutlet id o_disc_nodisc_bdmv_btn;
+
+    IBOutlet id o_disc_audiocd_view;
+    IBOutlet id o_disc_audiocd_lbl;
+    IBOutlet id o_disc_audiocd_trackcount_lbl;
+    IBOutlet id o_disc_audiocd_videots_btn;
+    IBOutlet id o_disc_audiocd_bdmv_btn;
+
+    IBOutlet id o_disc_dvd_view;
+    IBOutlet id o_disc_dvd_lbl;
+    IBOutlet id o_disc_dvd_disablemenus_btn;
+    IBOutlet id o_disc_dvd_videots_btn;
+    IBOutlet id o_disc_dvd_bdmv_btn;
+
+    IBOutlet id o_disc_dvdwomenus_view;
+    IBOutlet id o_disc_dvdwomenus_lbl;
+    IBOutlet id o_disc_dvdwomenus_enablemenus_btn;
+    IBOutlet id o_disc_dvdwomenus_videots_btn;
+    IBOutlet id o_disc_dvdwomenus_bdmv_btn;
+    IBOutlet id o_disc_dvdwomenus_title;
+    IBOutlet id o_disc_dvdwomenus_title_lbl;
+    IBOutlet id o_disc_dvdwomenus_title_stp;
+    IBOutlet id o_disc_dvdwomenus_chapter;
+    IBOutlet id o_disc_dvdwomenus_chapter_lbl;
+    IBOutlet id o_disc_dvdwomenus_chapter_stp;
+
+    IBOutlet id o_disc_vcd_view;
+    IBOutlet id o_disc_vcd_lbl;
+    IBOutlet id o_disc_vcd_videots_btn;
+    IBOutlet id o_disc_vcd_bdmv_btn;
+    IBOutlet id o_disc_vcd_title;
+    IBOutlet id o_disc_vcd_title_lbl;
+    IBOutlet id o_disc_vcd_title_stp;
+    IBOutlet id o_disc_vcd_chapter;
+    IBOutlet id o_disc_vcd_chapter_lbl;
+    IBOutlet id o_disc_vcd_chapter_stp;
+
+    IBOutlet id o_disc_bd_view;
+    IBOutlet id o_disc_bd_lbl;
+    IBOutlet id o_disc_bd_videots_btn;
+    IBOutlet id o_disc_bd_bdmv_btn;
 
     /* open network */
     IBOutlet id o_net_http_url;
@@ -140,7 +178,6 @@ NSArray *GetEjectableMediaOfClass( const char *psz_class );
 
     /* screen support */
     IBOutlet id o_screen_view;
-    IBOutlet id o_screen_lbl;
     IBOutlet id o_screen_long_lbl;
     IBOutlet id o_screen_fps_fld;
     IBOutlet id o_screen_fps_lbl;
@@ -161,15 +198,25 @@ NSArray *GetEjectableMediaOfClass( const char *psz_class );
 
     /* QTK support */
     IBOutlet id o_qtk_view;
-    IBOutlet id o_qtk_lbl;
     IBOutlet id o_qtk_long_lbl;
     IBOutlet id o_qtk_device_pop;
     IBOutlet id o_qtk_label_view;
+    IBOutlet id o_capture_width_lbl;
+    IBOutlet id o_capture_width_fld;
+    IBOutlet id o_capture_width_stp;
+    IBOutlet id o_capture_height_lbl;
+    IBOutlet id o_capture_height_fld;
+    IBOutlet id o_capture_height_stp;
 
     NSArray         *qtkvideoDevices;
     NSString        *qtk_currdevice_uid;
 
     BOOL b_autoplay;
+    BOOL b_nodvdmenus;
+    id o_currentOpticalMediaView;
+    NSMutableArray *o_opticalDevices;
+    NSMutableArray *o_specialMediaFolders;
+    NSString *o_file_path;
     id o_currentCaptureView;
     NSString *o_file_slave_path;
     NSString *o_mrl;
@@ -198,11 +245,11 @@ NSArray *GetEjectableMediaOfClass( const char *psz_class );
 - (IBAction)openFileStreamChanged:(id)sender;
 
 - (void)openDisc;
-- (IBAction)openDiscTypeChanged:(id)sender;
-- (IBAction)openDiscStepperChanged:(id)sender;
-- (void)openDiscInfoChanged:(NSNotification *)o_notification;
-- (IBAction)openDiscMenusChanged:(id)sender;
-- (IBAction)openVTSBrowse:(id)sender;
+- (void)scanOpticalMedia:(NSNotification *)o_notification;
+- (IBAction)discSelectorChanged:(id)sender;
+- (IBAction)openSpecialMediaFolder:(id)sender;
+- (IBAction)dvdreadOptionChanged:(id)sender;
+- (IBAction)vcdOptionChanged:(id)sender;
 
 - (void)openNet;
 - (IBAction)openNetModeChanged:(id)sender;

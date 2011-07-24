@@ -2,7 +2,7 @@
  * dvb.c : DVB channel list import (szap/tzap/czap compatible channel lists)
  *****************************************************************************
  * Copyright (C) 2005-20009 the VideoLAN team
- * $Id: 627eebbcb33005f4c869009459d7d0b0c86bb979 $
+ * $Id: 5e712378155bff41fd4382c444603184ef85bbaf $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -146,7 +146,7 @@ static int Demux( demux_t *p_demux )
             }
         }
 
-        p_input = input_item_NewExt( p_demux, psz_uri, psz_name,
+        p_input = input_item_NewExt( psz_uri, psz_name,
                                      i_options, (const char**)ppsz_options, VLC_INPUT_OPTION_TRUSTED, -1 );
         input_item_node_AppendItem( p_subitems, p_input );
         vlc_gc_decref( p_input );

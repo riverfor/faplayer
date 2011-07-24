@@ -344,10 +344,6 @@ typedef int (*httpd_handler_callback_t)( httpd_handler_sys_t *, httpd_handler_t 
 typedef struct httpd_redirect_t httpd_redirect_t;
 typedef struct httpd_stream_t httpd_stream_t;
 
-/* TLS support */
-typedef struct tls_server_t tls_server_t;
-typedef struct tls_session_t tls_session_t;
-
 /* Hashing */
 typedef struct md5_s md5_t;
 
@@ -431,24 +427,6 @@ struct vlc_list_t
     int *           pi_types;
 
 };
-
-/**
- * \defgroup var_type Variable types
- * These are the different types a vlc variable can have.
- * @{
- */
-#define VLC_VAR_VOID      0x0010
-#define VLC_VAR_BOOL      0x0020
-#define VLC_VAR_INTEGER   0x0030
-#define VLC_VAR_HOTKEY    0x0031
-#define VLC_VAR_STRING    0x0040
-#define VLC_VAR_VARIABLE  0x0044
-#define VLC_VAR_FLOAT     0x0050
-#define VLC_VAR_TIME      0x0060
-#define VLC_VAR_ADDRESS   0x0070
-#define VLC_VAR_MUTEX     0x0080
-#define VLC_VAR_COORDS    0x00A0
-/**@}*/
 
 /*****************************************************************************
  * Error values (shouldn't be exposed)
@@ -830,10 +808,6 @@ VLC_API bool vlc_ureduce( unsigned *, unsigned *, uint64_t, uint64_t, uint64_t )
 
 VLC_API void * vlc_memalign( void **base, size_t alignment, size_t size ) VLC_USED;
 
-/* execve wrapper (defined in src/extras/libc.c) */
-VLC_API int vlc_execve( vlc_object_t *p_object, int i_argc, char *const *pp_argv, char *const *pp_env, const char *psz_cwd, const char *p_in, size_t i_in, char **pp_data, size_t *pi_data ) VLC_USED;
-#define vlc_execve(a,b,c,d,e,f,g,h,i) vlc_execve(VLC_OBJECT(a),b,c,d,e,f,g,h,i)
-
 VLC_API void vlc_tdestroy( void *, void (*)(void *) );
 
 /* Fast large memory copy and memory set */
@@ -872,6 +846,14 @@ static inline void *xrealloc (void *ptr, size_t len)
     if (unlikely (nptr == NULL))
         abort ();
     return nptr;
+}
+
+static inline void *xcalloc (size_t n, size_t size)
+{
+    void *ptr = calloc (n, size);
+    if (unlikely (ptr == NULL))
+        abort ();
+    return ptr;
 }
 
 /*****************************************************************************

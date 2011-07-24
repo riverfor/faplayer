@@ -2,7 +2,7 @@
  * m3u.c : M3U playlist format import
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id: 704e055e8284e113d0e577b17096365a2ccef469 $
+ * $Id: 5c34aa386beb469ec52daa6dc77211f966ddb1fd $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Sigmund Augdal Helberg <dnumgis@videolan.org>
@@ -226,7 +226,7 @@ static int Demux( demux_t *p_demux )
                 goto error;
             }
 
-            p_input = input_item_NewExt( p_demux, psz_mrl, psz_name,
+            p_input = input_item_NewExt( psz_mrl, psz_name,
                                         i_options, ppsz_options, 0, i_duration );
 
             free( psz_parse );

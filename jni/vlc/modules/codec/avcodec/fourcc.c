@@ -2,7 +2,7 @@
  * fourcc.c: libavcodec <-> libvlc conversion routines
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id: 7690d30ab6ace15d9fada4037cf0a4f0f5191ff7 $
+ * $Id: b9d0d73895065337473b2a277751c22bac3ee3aa $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -202,6 +202,10 @@ static const struct
     { VLC_CODEC_VP8, CODEC_ID_VP8, VIDEO_ES },
 #endif
 
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT( 52, 108, 2 )
+    { VLC_CODEC_LAGARITH, CODEC_ID_LAGARITH, VIDEO_ES },
+#endif
+
     /* Videogames Codecs */
 
     { VLC_CODEC_INTERPLAY, CODEC_ID_INTERPLAY_VIDEO, VIDEO_ES },
@@ -217,7 +221,6 @@ static const struct
     { VLC_CODEC_VMDVIDEO, CODEC_ID_VMDVIDEO, VIDEO_ES },
 
     { VLC_CODEC_AMV, CODEC_ID_AMV, VIDEO_ES },
-
 
 #if 0
 /*    UNTESTED VideoGames*/

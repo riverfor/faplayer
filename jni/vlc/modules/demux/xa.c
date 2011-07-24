@@ -2,7 +2,7 @@
  * xa.c : xa file demux module for vlc
  *****************************************************************************
  * Copyright (C) 2005 Rémi Denis-Courmont
- * $Id: a70f45a7c3846439c400c9f4b130473f6a8de590 $
+ * $Id: 3e25547da972e615efd429f0962a5419f0fcf896 $
  *
  * Authors: Rémi Denis-Courmont <rem # videolan.org>
  *
@@ -100,9 +100,13 @@ static int Open( vlc_object_t * p_this )
      || ( GetWLE( &p_xa.wBitsPerSample ) != 16) )
         return VLC_EGENERIC;
 
+    p_sys = malloc( sizeof( demux_sys_t ) );
+    if( unlikely( p_sys == NULL ) )
+        return VLC_ENOMEM;
+
     p_demux->pf_demux   = Demux;
     p_demux->pf_control = Control;
-    p_demux->p_sys      = p_sys = malloc( sizeof( demux_sys_t ) );
+    p_demux->p_sys      = p_sys;
     p_sys->p_es         = NULL;
 
     /* skip XA header -- cannot fail */

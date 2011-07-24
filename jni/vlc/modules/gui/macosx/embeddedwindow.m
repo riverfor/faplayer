@@ -2,7 +2,7 @@
  * embeddedwindow.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2005-2011 the VideoLAN team
- * $Id: 82b4d331a0994107495afa8c38c040bfd8a42034 $
+ * $Id: 5f74cc9ae78251a7bb0ecc9f5541e6bb8b27b643 $
  *
  * Authors: Benjamin Pracht <bigben at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -31,6 +31,7 @@
 #import "vout.h"
 #import "embeddedwindow.h"
 #import "fspanel.h"
+#import "CoreInteraction.h"
 #import "playlist.h"
 #import <vlc_url.h>
 
@@ -180,6 +181,11 @@
     [super dealloc];
 }
 
+- (id)videoView
+{
+    return o_video_view;
+}
+
 - (void)setTime:(NSString *)o_arg_time position:(float)f_position
 {
     [o_time setStringValue: o_arg_time];
@@ -279,7 +285,7 @@
     if( videoRatio.height == 0. || videoRatio.width == 0. )
         return proposedFrameSize;
 
-    if( [[[VLCMain sharedInstance] controls] aspectRatioIsLocked] )
+    if( [[VLCCoreInteraction sharedInstance] aspectRatioIsLocked] )
     {
         NSRect viewRect = [o_view convertRect:[o_view bounds] toView: nil];
         NSRect contentRect = [self contentRectForFrameRect:[self frame]];
@@ -480,8 +486,11 @@
              * simply fade the display */
             CGDisplayFadeReservationToken token;
 
-            CGAcquireDisplayFadeReservation(kCGMaxDisplayReservationInterval, &token);
-            CGDisplayFade( token, 0.5, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor, 0, 0, 0, YES );
+            if( blackout_other_displays )
+            {
+                CGAcquireDisplayFadeReservation( kCGMaxDisplayReservationInterval, &token );
+                CGDisplayFade( token, 0.5, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor, 0, 0, 0, YES );
+            }
 
             if ([screen isMainScreen])
                 SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
@@ -495,8 +504,11 @@
 
             [o_fullscreen_window setFrame:screen_rect display:YES];
 
-            CGDisplayFade( token, 0.3, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0, 0, 0, NO );
-            CGReleaseDisplayFadeReservation( token);
+            if( blackout_other_displays )
+            {
+                CGDisplayFade( token, 0.3, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0, 0, 0, NO );
+                CGReleaseDisplayFadeReservation( token );
+            }
 
             /* Will release the lock */
             [self hasBecomeFullscreen];
@@ -598,6 +610,7 @@
 {
     NSMutableDictionary *dict1, *dict2;
     NSRect frame;
+    BOOL blackout_other_displays = config_GetInt( VLCIntf, "macosx-black" );
 
     [self lockFullscreenAnimation];
 
@@ -620,8 +633,11 @@
         * simply fade the display */
         CGDisplayFadeReservationToken token;
 
-        CGAcquireDisplayFadeReservation(kCGMaxDisplayReservationInterval, &token);
-        CGDisplayFade( token, 0.3, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor, 0, 0, 0, YES );
+        if( blackout_other_displays )
+        {
+            CGAcquireDisplayFadeReservation( kCGMaxDisplayReservationInterval, &token );
+            CGDisplayFade( token, 0.3, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor, 0, 0, 0, YES );
+        }
 
         [[[[VLCMain sharedInstance] controls] fspanel] setNonActive: nil];
         SetSystemUIMode( kUIModeNormal, kUIOptionAutoShowMenuBar);
@@ -633,8 +649,12 @@
          * here */
         b_window_is_invisible = YES;
 
-        CGDisplayFade( token, 0.5, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0, 0, 0, NO );
-        CGReleaseDisplayFadeReservation( token);
+        if( blackout_other_displays )
+        {
+            CGDisplayFade( token, 0.5, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0, 0, 0, NO );
+            CGReleaseDisplayFadeReservation( token );
+        }
+
         return;
     }
 

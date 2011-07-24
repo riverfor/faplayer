@@ -2,7 +2,7 @@
  * jack : JACK audio output module
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: aeebfb2c0e579639d5b7a9a6bf76e7ea3baf1100 $
+ * $Id: 343a0de6b90da54afe76227f9f57febce02c0530 $
  *
  * Authors: Cyril Deguet <asmax _at_ videolan.org>
  *          Jon Griffiths <jon_p_griffiths _At_ yahoo _DOT_ com>
@@ -134,6 +134,7 @@ static int Open( vlc_object_t *p_this )
     jack_set_graph_order_callback ( p_sys->p_jack_client, GraphChange, p_aout );
 
     p_aout->output.pf_play = Play;
+    p_aout->output.pf_pause = NULL;
     aout_VolumeSoftInit( p_aout );
 
     /* JACK only supports fl32 format */

@@ -2,7 +2,7 @@
  * output.c : internal management of output streams for the audio output
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id: d2626c3c4138b7783411cdc7ae2fcc6570632d14 $
+ * $Id: c20362a980cd3354b99246068f6de52b92a9fa2b $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -33,6 +33,7 @@
 #include <vlc_cpu.h>
 #include <vlc_modules.h>
 
+#include "libvlc.h"
 #include "aout_internal.h"
 
 /*****************************************************************************
@@ -43,6 +44,7 @@
 int aout_OutputNew( aout_instance_t * p_aout,
                     const audio_sample_format_t * p_format )
 {
+    vlc_assert_locked( &p_aout->lock );
     p_aout->output.output = *p_format;
 
     /* Retrieve user defaults. */
@@ -155,29 +157,30 @@ int aout_OutputNew( aout_instance_t * p_aout,
 
     aout_FormatPrepare( &p_aout->output.output );
 
-    aout_lock_output_fifo( p_aout );
-
     /* Prepare FIFO. */
     aout_FifoInit( p_aout, &p_aout->output.fifo, p_aout->output.output.i_rate );
-
-    aout_unlock_output_fifo( p_aout );
-
     aout_FormatPrint( p_aout, "output", &p_aout->output.output );
 
-    /* Calculate the resulting mixer output format. */
+    /* Choose the mixer format. */
     p_aout->mixer_format = p_aout->output.output;
-    if ( !AOUT_FMT_NON_LINEAR(&p_aout->output.output) )
-    {
-        /* Non-S/PDIF mixer only deals with float32 or fixed32. */
-        p_aout->mixer_format.i_format
-                     = HAVE_FPU ? VLC_CODEC_FL32 : VLC_CODEC_FI32;
-        aout_FormatPrepare( &p_aout->mixer_format );
-    }
-    else
-    {
+    if ( AOUT_FMT_NON_LINEAR(&p_aout->output.output) )
         p_aout->mixer_format.i_format = p_format->i_format;
-    }
+    else
+    /* Most audio filters can only deal with single-precision,
+     * so lets always use that when hardware supports floating point. */
+    if( HAVE_FPU )
+        p_aout->mixer_format.i_format = VLC_CODEC_FL32;
+    else
+    /* Otherwise, audio filters will not work. Use fixed-point if the input has
+     * more than 16-bits depth. */
+    if( p_format->i_bitspersample > 16 )
+        p_aout->mixer_format.i_format = VLC_CODEC_FI32;
+    else
+    /* Fallback to 16-bits. This avoids pointless conversion to and from
+     * 32-bits samples for the sole purpose of software mixing. */
+        p_aout->mixer_format.i_format = VLC_CODEC_S16N;
 
+    aout_FormatPrepare( &p_aout->mixer_format );
     aout_FormatPrint( p_aout, "mixer", &p_aout->mixer_format );
 
     /* Create filters. */
@@ -202,17 +205,16 @@ int aout_OutputNew( aout_instance_t * p_aout,
  *****************************************************************************/
 void aout_OutputDelete( aout_instance_t * p_aout )
 {
+    vlc_assert_locked( &p_aout->lock );
+
     if( p_aout->output.p_module == NULL )
         return;
+
     module_unneed( p_aout, p_aout->output.p_module );
     p_aout->output.p_module = NULL;
-
     aout_FiltersDestroyPipeline( p_aout->output.pp_filters,
                                  p_aout->output.i_nb_filters );
-
-    aout_lock_output_fifo( p_aout );
     aout_FifoDestroy( &p_aout->output.fifo );
-    aout_unlock_output_fifo( p_aout );
 }
 
 /*****************************************************************************
@@ -222,9 +224,10 @@ void aout_OutputDelete( aout_instance_t * p_aout )
  *****************************************************************************/
 void aout_OutputPlay( aout_instance_t * p_aout, aout_buffer_t * p_buffer )
 {
+    vlc_assert_locked( &p_aout->lock );
+
     aout_FiltersPlay( p_aout->output.pp_filters, p_aout->output.i_nb_filters,
                       &p_buffer );
-
     if( !p_buffer )
         return;
     if( p_buffer->i_buffer == 0 )
@@ -233,10 +236,21 @@ void aout_OutputPlay( aout_instance_t * p_aout, aout_buffer_t * p_buffer )
         return;
     }
 
-    aout_lock_output_fifo( p_aout );
     aout_FifoPush( &p_aout->output.fifo, p_buffer );
     p_aout->output.pf_play( p_aout );
-    aout_unlock_output_fifo( p_aout );
+}
+
+/**
+ * Notifies the audio output (if any) of pause/resume events.
+ * This enables the output to expedite pause, instead of waiting for its
+ * buffers to drain.
+ */
+void aout_OutputPause( aout_instance_t *aout, bool pause, mtime_t date )
+{
+    vlc_assert_locked( &aout->lock );
+
+    if( aout->output.pf_pause != NULL )
+        aout->output.pf_pause( aout, pause, date );
 }
 
 /*****************************************************************************
@@ -255,13 +269,13 @@ aout_buffer_t * aout_OutputNextBuffer( aout_instance_t * p_aout,
     aout_buffer_t * p_buffer;
     mtime_t now = mdate();
 
-    aout_lock_output_fifo( p_aout );
+    aout_lock( p_aout );
 
     /* Drop the audio sample if the audio output is really late.
      * In the case of b_can_sleek, we don't use a resampler so we need to be
      * a lot more severe. */
     while( ((p_buffer = p_fifo->p_first) != NULL)
-     && p_buffer->i_pts < (b_can_sleek ? start_date : now) - AOUT_PTS_TOLERANCE )
+     && p_buffer->i_pts < (b_can_sleek ? start_date : now) - AOUT_MAX_PTS_DELAY )
     {
         msg_Dbg( p_aout, "audio output is too slow (%"PRId64"), "
                  "trashing %"PRId64"us", now - p_buffer->i_pts,
@@ -282,8 +296,7 @@ aout_buffer_t * aout_OutputNextBuffer( aout_instance_t * p_aout,
                  "audio output is starving (no input), playing silence" );
         p_aout->output.b_starving = true;
 #endif
-        aout_unlock_output_fifo( p_aout );
-        return NULL;
+        goto out;
     }
 
     mtime_t delta = start_date - p_buffer->i_pts;
@@ -291,40 +304,29 @@ aout_buffer_t * aout_OutputNextBuffer( aout_instance_t * p_aout,
      * generally true, and anyway if it's wrong it won't be a disaster.
      */
     if ( 0 > delta + p_buffer->i_length )
-    /*
-     *                   + AOUT_PTS_TOLERANCE )
-     * There is no reason to want that, it just worsen the scheduling of
-     * an audio sample after an output starvation (ie. on start or on resume)
-     * --Gibalou
-     */
     {
         if ( !p_aout->output.b_starving )
             msg_Dbg( p_aout, "audio output is starving (%"PRId64"), "
                      "playing silence", -delta );
         p_aout->output.b_starving = true;
-        aout_unlock_output_fifo( p_aout );
-        return NULL;
+        p_buffer = NULL;
+        goto out;
     }
 
     p_aout->output.b_starving = false;
     p_buffer = aout_FifoPop( p_fifo );
 
-    if( !b_can_sleek )
+    if( !b_can_sleek
+     && ( delta > AOUT_MAX_PTS_DELAY || delta < -AOUT_MAX_PTS_ADVANCE ) )
     {
-        if( delta > AOUT_PTS_TOLERANCE || delta < -AOUT_PTS_TOLERANCE )
-        {
-            aout_unlock_output_fifo( p_aout );
-            /* Try to compensate the drift by doing some resampling. */
-            msg_Warn( p_aout, "output date isn't PTS date, requesting "
-                      "resampling (%"PRId64")", delta );
+        /* Try to compensate the drift by doing some resampling. */
+        msg_Warn( p_aout, "output date isn't PTS date, requesting "
+                  "resampling (%"PRId64")", delta );
 
-            aout_lock_input_fifos( p_aout );
-            aout_lock_output_fifo( p_aout );
-            aout_FifoMoveDates( &p_aout->p_input->mixer.fifo, delta );
-            aout_FifoMoveDates( p_fifo, delta );
-            aout_unlock_input_fifos( p_aout );
-        }
+        aout_FifoMoveDates( &p_aout->p_input->mixer.fifo, delta );
+        aout_FifoMoveDates( p_fifo, delta );
     }
-    aout_unlock_output_fifo( p_aout );
+out:
+    aout_unlock( p_aout );
     return p_buffer;
 }

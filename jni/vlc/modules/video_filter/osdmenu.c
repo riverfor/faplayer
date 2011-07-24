@@ -2,7 +2,7 @@
  * osdmenu.c: osd filter module
  *****************************************************************************
  * Copyright (C) 2004-2007 M2X
- * $Id: 5eaa96c3064db5e0e2f2a164f15559aad42d89bd $
+ * $Id: 1b4b9444fe683b69ee89651516dee32f558e5e2a $
  *
  * Authors: Jean-Paul Saman <jpsaman #_at_# m2x dot nl>
  *
@@ -106,7 +106,7 @@ static int MouseEvent( filter_t *,
 #if defined( WIN32 ) || defined( UNDER_CE )
 #define OSD_DEFAULT_CFG "osdmenu/default.cfg"
 #else
-#define OSD_DEFAULT_CFG "share/osdmenu/default.cfg"
+#define OSD_DEFAULT_CFG PKGDATADIR"/osdmenu/default.cfg"
 #endif
 
 #define OSD_UPDATE_MIN     0

@@ -5,6 +5,9 @@ THEORA_URL := http://downloads.xiph.org/releases/theora/libtheora-$(THEORA_VERSI
 #THEORA_URL := $(CONTRIB_VIDEOLAN)/libtheora-$(THEORA_VERSION).tar.xz
 
 PKGS += theora
+ifeq ($(call need_pkg,"theora >= 1.0"),)
+PKGS_FOUND += theora
+endif
 
 $(TARBALLS)/libtheora-$(THEORA_VERSION).tar.xz:
 	$(call download,$(THEORA_URL))
@@ -13,12 +16,9 @@ $(TARBALLS)/libtheora-$(THEORA_VERSION).tar.xz:
 
 libtheora: libtheora-$(THEORA_VERSION).tar.xz .sum-theora
 	$(UNPACK)
-	(cd $@-$(THEORA_VERSION) && patch -p1) < $(SRC)/theora/libtheora-includes.patch
-ifdef HAVE_WIN64
-	cd $@ && autoreconf -fi -I m4
-endif
-	mv $@-$(THEORA_VERSION) $@
-	touch $@
+	$(APPLY) $(SRC)/theora/libtheora-includes.patch
+	echo 'ACLOCAL_AMFLAGS = -I m4' >> $(UNPACK_DIR)/Makefile.am
+	$(MOVE)
 
 THEORACONF := $(HOSTCONF) \
 	--disable-spec \
@@ -40,11 +40,12 @@ ifdef HAVE_WIN64
 THEORACONF += --disable-asm
 endif
 
-.theora: libtheora .ogg
+DEPS_theora = ogg $(DEPS_ogg)
+
+.theora: libtheora
 ifdef HAVE_WIN32
-	cd $<; $(HOSTVARS) ./autogen.sh $(THEORACONF)
+	$(RECONF)
 endif
-	test -f $</config.status || \
-	(cd $<  && $(HOSTVARGS) ./configure $(THEORACONF))
+	cd $< && $(HOSTVARGS) ./configure $(THEORACONF)
 	cd $< && $(MAKE) install
 	touch $@

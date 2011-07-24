@@ -2,7 +2,7 @@
  * macosx.m: Mac OS X module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id: 72854ecf68ff3f3d47d7d7bc91b20bd79c6a3d17 $
+ * $Id: 93615f721f616a437db8c568bfbff859118c842b $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Eugenio Jarosiewicz <ej0@cise.ufl.edu>
@@ -38,12 +38,16 @@
 
 #include <vlc_common.h>
 #include <vlc_plugin.h>
+#include <vlc_vout_window.h>
 
 /*****************************************************************************
  * External prototypes
  *****************************************************************************/
 int  OpenIntf     ( vlc_object_t * );
 void CloseIntf    ( vlc_object_t * );
+
+int  WindowOpen   ( vout_window_t *, const vout_window_cfg_t * );
+void WindowClose  ( vout_window_t * );
 
 int  OpenVideoGL  ( vlc_object_t * );
 void CloseVideoGL ( vlc_object_t * );
@@ -96,6 +100,9 @@ void CloseVideoGL ( vlc_object_t * );
 #define USE_MEDIAKEYS_LONGTEXT N_("By default, VLC can be controlled using the media keys on modern Apple " \
                                   "keyboards.")
 
+#define INTERFACE_STYLE_TEXT N_("Run VLC with dark or bright interface style")
+#define INTERFACE_STYLE_LONGTEXT N_("By default, VLC will use the dark interface style.")
+
 vlc_module_begin ()
     set_description( N_("Mac OS X interface") )
     set_capability( "interface", 200 )
@@ -115,13 +122,13 @@ vlc_module_begin ()
              false )
     add_bool( "macosx-mediakeys", true, USE_MEDIAKEYS_TEXT, USE_MEDIAKEYS_LONGTEXT,
              false )
+    add_bool( "macosx-interfacestyle", true, INTERFACE_STYLE_TEXT, INTERFACE_STYLE_LONGTEXT,
+             false )
 
     add_submodule ()
-        set_description( "Mac OS X OpenGL" )
-        set_capability( "opengl provider", 100 )
-        set_category( CAT_VIDEO)
-        set_subcategory( SUBCAT_VIDEO_VOUT )
-//        set_callbacks( OpenVideoGL, CloseVideoGL )
+        set_description( "Mac OS X Video Output Provider" )
+        set_capability( "vout window nsobject", 100 )
+        set_callbacks( WindowOpen, WindowClose )
 
         add_integer( "macosx-vdev", 0, VDEV_TEXT, VDEV_LONGTEXT,
                      false )

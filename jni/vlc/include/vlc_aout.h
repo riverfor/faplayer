@@ -1,8 +1,7 @@
 /*****************************************************************************
- * audio_output.h : audio output interface
+ * vlc_aout.h : audio output interface
  *****************************************************************************
- * Copyright (C) 2002-2005 the VideoLAN team
- * $Id: b7dc31434d015f77fc871163cf47c2e813532c6d $
+ * Copyright (C) 2002-2011 the VideoLAN team
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -29,9 +28,32 @@
  * This file defines functions, structures and macros for audio output object
  */
 
-# ifdef __cplusplus
-extern "C" {
-# endif
+/* Max number of pre-filters per input, and max number of post-filters */
+#define AOUT_MAX_FILTERS                10
+
+/* Buffers which arrive in advance of more than AOUT_MAX_ADVANCE_TIME
+ * will be considered as bogus and be trashed */
+#define AOUT_MAX_ADVANCE_TIME           (AOUT_MAX_PREPARE_TIME + CLOCK_FREQ)
+
+/* Buffers which arrive in advance of more than AOUT_MAX_PREPARE_TIME
+ * will cause the calling thread to sleep */
+#define AOUT_MAX_PREPARE_TIME           (2 * CLOCK_FREQ)
+
+/* Buffers which arrive after pts - AOUT_MIN_PREPARE_TIME will be trashed
+ * to avoid too heavy resampling */
+#define AOUT_MIN_PREPARE_TIME           AOUT_MAX_PTS_ADVANCE
+
+/* Tolerance values from EBU Recommendation 37 */
+/** Maximum advance of actual audio playback time to coded PTS,
+ * above which downsampling will be performed */
+#define AOUT_MAX_PTS_ADVANCE            (CLOCK_FREQ / 25)
+
+/** Maximum delay of actual audio playback time from coded PTS,
+ * above which upsampling will be performed */
+#define AOUT_MAX_PTS_DELAY              (3 * CLOCK_FREQ / 50)
+
+/* Max acceptable resampling (in %) */
+#define AOUT_MAX_RESAMPLING             10
 
 #include "vlc_es.h"
 
@@ -165,8 +187,9 @@ typedef struct aout_output_t
 
     struct module_t *       p_module;
     struct aout_sys_t *     p_sys;
-    void                 (* pf_play)( aout_instance_t * );
-    int                  (* pf_volume_set )( aout_instance_t *, audio_volume_t, bool );
+    void (*pf_play)( aout_instance_t * );
+    void (* pf_pause)( aout_instance_t *, bool, mtime_t );
+    int (* pf_volume_set )( aout_instance_t *, float, bool );
     int                     i_nb_samples;
 } aout_output_t;
 
@@ -177,22 +200,9 @@ struct aout_instance_t
 {
     VLC_COMMON_MEMBERS
 
-    /* Locks : please note that if you need several of these locks, it is
-     * mandatory (to avoid deadlocks) to take them in the following order :
-     * mixer_lock, p_input->lock, output_fifo_lock, input_fifos_lock.
-     * --Meuuh */
-    /* When input_fifos_lock is taken, none of the p_input->fifo structures
-     * can be read or modified by a third-party thread. */
-    vlc_mutex_t             input_fifos_lock;
-    /* When mixer_lock is taken, all decoder threads willing to mix a
-     * buffer must wait until it is released. The output pipeline cannot
-     * be modified. No input stream can be added or removed. */
-    vlc_mutex_t             mixer_lock;
-    /* When output_fifo_lock is taken, the p_aout->output.fifo structure
-     * cannot be read or written  by a third-party thread. */
-    vlc_mutex_t             output_fifo_lock;
-    /* volume_vars_lock is taken */
-    vlc_mutex_t             volume_vars_lock;
+    /* Lock for volume variables (FIXME: should be in input manager) */
+    vlc_mutex_t             volume_lock;
+    vlc_mutex_t             lock;
 
     /* Input streams & pre-filters */
     aout_input_t *          p_input;
@@ -276,29 +286,9 @@ VLC_API aout_buffer_t *aout_FifoPop( aout_fifo_t * p_fifo ) VLC_USED;
 /* From intf.c : */
 VLC_API void aout_VolumeSoftInit( aout_instance_t * );
 VLC_API void aout_VolumeNoneInit( aout_instance_t * );
-VLC_API audio_volume_t aout_VolumeGet( vlc_object_t * );
-#define aout_VolumeGet(a) aout_VolumeGet(VLC_OBJECT(a))
-VLC_API int aout_VolumeSet( vlc_object_t *, audio_volume_t );
-#define aout_VolumeSet(a, b) aout_VolumeSet(VLC_OBJECT(a), b)
-VLC_API int aout_VolumeUp( vlc_object_t *, int, audio_volume_t * );
-#define aout_VolumeUp(a, b, c) aout_VolumeUp(VLC_OBJECT(a), b, c)
-VLC_API int aout_VolumeDown( vlc_object_t *, int, audio_volume_t * );
-#define aout_VolumeDown(a, b, c) aout_VolumeDown(VLC_OBJECT(a), b, c)
-VLC_API int aout_ToggleMute( vlc_object_t *, audio_volume_t * );
-#define aout_ToggleMute(a, b) aout_ToggleMute(VLC_OBJECT(a), b)
-VLC_API int aout_SetMute( vlc_object_t *, audio_volume_t *, bool );
-VLC_API bool aout_IsMuted( vlc_object_t * );
 VLC_API int aout_ChannelsRestart( vlc_object_t *, const char *, vlc_value_t, vlc_value_t, void * );
-
-VLC_API void aout_EnableFilter(vlc_object_t *, const char *, bool );
-#define aout_EnableFilter( o, n, b ) \
-        aout_EnableFilter( VLC_OBJECT(o), n, b )
 
 /* */
 VLC_API vout_thread_t * aout_filter_RequestVout( filter_t *, vout_thread_t *p_vout, video_format_t *p_fmt ) VLC_USED;
 
-# ifdef __cplusplus
-}
-# endif
-
-#endif /* _VLC_AOUT_H */
+#endif /* VLC_AOUT_H */

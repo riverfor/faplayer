@@ -2,7 +2,7 @@
  * loadsave.c : Playlist loading / saving functions
  *****************************************************************************
  * Copyright (C) 1999-2004 the VideoLAN team
- * $Id: 97d75a197d2f9a6b0aa3ede9c72d41ba42196063 $
+ * $Id: 9487af440e29cb9f6c7bc2e4d64a12b9a4b61688 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -43,8 +43,7 @@ int playlist_Export( playlist_t * p_playlist, const char *psz_filename,
     if( p_export_root == NULL ) return VLC_EGENERIC;
 
     playlist_export_t *p_export =
-        vlc_custom_create( p_playlist, sizeof( *p_export ), VLC_OBJECT_GENERIC,
-                           "playlist export" );
+        vlc_custom_create( p_playlist, sizeof( *p_export ), "playlist export" );
     if( !p_export )
         return VLC_ENOMEM;
 
@@ -91,7 +90,7 @@ int playlist_Import( playlist_t *p_playlist, const char *psz_file )
     if( psz_uri == NULL )
         return VLC_EGENERIC;
 
-    p_input = input_item_NewExt( p_playlist, psz_uri, psz_file,
+    p_input = input_item_NewExt( psz_uri, psz_file,
                                  1, &psz_option, VLC_INPUT_OPTION_TRUSTED, -1 );
     free( psz_uri );
 
@@ -150,7 +149,7 @@ int playlist_MLLoad( playlist_t *p_playlist )
     const char *const options[1] = { "meta-file", };
     /* that option has to be cleaned in input_item_subitem_tree_added() */
     /* vlc_gc_decref() in the same function */
-    p_input = input_item_NewExt( p_playlist, psz_uri, _("Media Library"),
+    p_input = input_item_NewExt( psz_uri, _("Media Library"),
                                  1, options, VLC_INPUT_OPTION_TRUSTED, -1 );
     free( psz_uri );
     if( p_input == NULL )

@@ -2,7 +2,7 @@
  * open.cpp : Advanced open dialog
  *****************************************************************************
  * Copyright © 2006-2009 the VideoLAN team
- * $Id: 3db7109ef809c33f0829c5de2cba7f3fd28715f8 $
+ * $Id: 4cc1c7b33d4d1fa792ce6285d2fed699627aa4e8 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -157,7 +157,7 @@ OpenDialog::OpenDialog( QWidget *parent,
     CONNECT( ui.slaveCheckbox, toggled( bool ), this, updateMRL() );
     CONNECT( ui.slaveText, textChanged( const QString& ), this, updateMRL() );
     CONNECT( ui.cacheSpinBox, valueChanged( int ), this, updateMRL() );
-    CONNECT( ui.startTimeDoubleSpinBox, valueChanged( double ), this, updateMRL() );
+    CONNECT( ui.startTimeTimeEdit, 	timeChanged ( const QTime& ), this, updateMRL() );
     BUTTONACT( ui.advancedCheckBox, toggleAdvancedPanel() );
     BUTTONACT( ui.slaveBrowseButton, browseInputSlave() );
 
@@ -178,6 +178,9 @@ OpenDialog::OpenDialog( QWidget *parent,
     /* Initialize caching */
     storedMethod = "";
     newCachingMethod( "file-caching" );
+
+    /* enforce section due to .ui bug */
+    ui.startTimeTimeEdit->setCurrentSection( QDateTimeEdit::SecondSection );
 
     setMinimumSize( sizeHint() );
     setMaximumWidth( 900 );
@@ -361,7 +364,7 @@ void OpenDialog::finish( bool b_enqueue = false )
         bool b_start = !i && !b_enqueue;
 
         input_item_t *p_input;
-        p_input = input_item_New( p_intf, qtu( itemsMRL[i] ), NULL );
+        p_input = input_item_New( qtu( itemsMRL[i] ), NULL );
 
         /* Insert options only for the first element.
            We don't know how to edit that anyway. */
@@ -429,8 +432,13 @@ void OpenDialog::updateMRL() {
     }
     mrl += QString( " :%1=%2" ).arg( storedMethod ).
                                 arg( ui.cacheSpinBox->value() );
-    if( ui.startTimeDoubleSpinBox->value() ) {
-        mrl += " :start-time=" + QString::number( ui.startTimeDoubleSpinBox->value() );
+    if( ui.startTimeTimeEdit->time() != ui.startTimeTimeEdit->minimumTime() ) {
+        mrl += QString( " :start-time=%1.%2" )
+                .arg( QString::number(
+                    ui.startTimeTimeEdit->minimumTime().secsTo(
+                        ui.startTimeTimeEdit->time()
+                ) ) )
+               .arg( ui.startTimeTimeEdit->time().msec(), 3, 10, QChar('0') );
     }
     ui.advancedLineInput->setText( mrl );
     ui.mrlLine->setText( itemsMRL.join( " " ) );

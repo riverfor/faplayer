@@ -2,7 +2,7 @@
  * libmp4.h : LibMP4 library for mp4 module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2004, 2010 the VideoLAN team
- * $Id: 777792dbfad9113104e85cd7be701db39c27bdea $
+ * $Id: 89a5dc11770a0af57da11b577e8dbde095dc6448 $
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -96,6 +96,7 @@
 #define FOURCC_rtp  VLC_FOURCC( 'r', 't', 'p', ' ' )
 
 #define FOURCC_isom VLC_FOURCC( 'i', 's', 'o', 'm' )
+#define FOURCC_3gp4 VLC_FOURCC( '3', 'g', 'p', '4' )
 #define FOURCC_esds VLC_FOURCC( 'e', 's', 'd', 's' )
 
 #define FOURCC__mp3 VLC_FOURCC( '.', 'm', 'p', '3' )
@@ -820,6 +821,63 @@ typedef struct
 
 } MP4_Box_data_rmqu_t;
 
+typedef struct MP4_Box_data_mfhd_s
+{
+    uint32_t i_sequence_number;
+
+    uint8_t *p_vendor_extension;
+
+} MP4_Box_data_mfhd_t;
+
+#define MP4_TFHD_BASE_DATA_OFFSET     (1LL<<0)
+#define MP4_TFHD_SAMPLE_DESC_INDEX    (1LL<<1)
+#define MP4_TFHD_DFLT_SAMPLE_DURATION (1LL<<3)
+#define MP4_TFHD_DFLT_SAMPLE_SIZE     (1LL<<4)
+#define MP4_TFHD_DFLT_SAMPLE_FLAGS    (1LL<<5)
+typedef struct MP4_Box_data_tfhd_s
+{
+    uint8_t  i_version;
+    uint32_t i_flags;
+    uint32_t i_track_ID;
+
+    /* optional fields */
+    uint64_t i_base_data_offset;
+    uint32_t i_sample_description_index;
+    uint32_t i_default_sample_duration;
+    uint32_t i_default_sample_size;
+    uint32_t i_default_sample_flags;
+
+} MP4_Box_data_tfhd_t;
+
+#define MP4_TRUN_DATA_OFFSET         (1<<0)
+#define MP4_TRUN_FIRST_FLAGS         (1<<2)
+#define MP4_TRUN_SAMPLE_DURATION     (1<<8)
+#define MP4_TRUN_SAMPLE_SIZE         (1<<9)
+#define MP4_TRUN_SAMPLE_FLAGS        (1<<10)
+#define MP4_TRUN_SAMPLE_TIME_OFFSET  (1<<11)
+typedef struct MP4_descriptor_trun_sample_t
+{
+    uint32_t i_duration;
+    uint32_t i_size;
+    uint32_t i_flags;
+    uint32_t i_composition_time_offset;
+} MP4_descriptor_trun_sample_t;
+
+typedef struct MP4_Box_data_trun_s
+{
+    uint8_t  i_version;
+    uint32_t i_flags;
+    uint32_t i_sample_count;
+
+    /* optional fields */
+    uint32_t i_data_offset;
+    uint32_t i_first_sample_flags;
+
+    MP4_descriptor_trun_sample_t *p_samples;
+
+} MP4_Box_data_trun_t;
+
+
 typedef struct
 {
     char *psz_text;
@@ -915,6 +973,9 @@ typedef union MP4_Box_data_s
 {
     MP4_Box_data_ftyp_t *p_ftyp;
     MP4_Box_data_mvhd_t *p_mvhd;
+    MP4_Box_data_mfhd_t *p_mfhd;
+    MP4_Box_data_tfhd_t *p_tfhd;
+    MP4_Box_data_trun_t *p_trun;
     MP4_Box_data_tkhd_t *p_tkhd;
     MP4_Box_data_mdhd_t *p_mdhd;
     MP4_Box_data_hdlr_t *p_hdlr;

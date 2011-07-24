@@ -2,7 +2,7 @@
  * variables.c: Generic lua<->vlc variables interface
  *****************************************************************************
  * Copyright (C) 2007-2010 the VideoLAN team
- * $Id: 26bc0d9057d37646a6387c7ff83c32482ded593a $
+ * $Id: 40f42384012d67601e19479a3a720c3033d5b539 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -75,9 +75,6 @@ static int vlclua_pushvalue( lua_State *L, int i_type, vlc_value_t val, bool b_e
         case VLC_VAR_ADDRESS:
             vlclua_error( L );
             break;
-        case VLC_VAR_MUTEX:
-            vlclua_error( L );
-            break;
         default:
             vlclua_error( L );
     }
@@ -125,9 +122,6 @@ static int vlclua_tovalue( lua_State *L, int i_type, vlc_value_t *val )
             }
             break;
         case VLC_VAR_ADDRESS:
-            vlclua_error( L );
-            break;
-        case VLC_VAR_MUTEX:
             vlclua_error( L );
             break;
         default:
@@ -263,22 +257,37 @@ static int vlclua_libvlc_command( lua_State *L )
     return vlclua_push_ret( L, i_ret );
 }
 
-int __vlclua_var_toggle_or_set( lua_State *L, vlc_object_t *p_obj,
-                                const char *psz_name )
+#undef vlclua_var_toggle_or_set
+int vlclua_var_toggle_or_set( lua_State *L, vlc_object_t *p_obj,
+                              const char *psz_name )
 {
     bool b_bool;
     if( lua_gettop( L ) > 1 ) return vlclua_error( L );
 
     if( lua_gettop( L ) == 0 )
-        b_bool = var_ToggleBool( p_obj, psz_name );
-    else /* lua_gettop( L ) == 1 */
     {
-        b_bool = luaL_checkboolean( L, -1 );
-        lua_pop( L, 1 );
-        if( b_bool != var_GetBool( p_obj, psz_name ) )
-            var_SetBool( p_obj, psz_name, b_bool );
+        b_bool = var_ToggleBool( p_obj, psz_name );
+        goto end;
     }
 
+    /* lua_gettop( L ) == 1 */
+    const char *s = luaL_checkstring( L, -1 );
+    lua_pop( L, 1 );
+
+    if( s && !strcmp(s, "on") )
+        b_bool = true;
+    else if( s && !strcmp(s, "off") )
+        b_bool = false;
+    else
+    {
+        b_bool = var_GetBool( p_obj, psz_name );
+        goto end;
+    }
+
+    if( b_bool != var_GetBool( p_obj, psz_name ) )
+        var_SetBool( p_obj, psz_name, b_bool );
+
+end:
     lua_pushboolean( L, b_bool );
     return 1;
 }
@@ -372,7 +381,6 @@ static int vlclua_add_callback( lua_State *L )
         case VLC_VAR_TIME:
             break;
         case VLC_VAR_ADDRESS:
-        case VLC_VAR_MUTEX:
         default:
             return vlclua_error( L );
     }

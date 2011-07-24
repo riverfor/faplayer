@@ -2,7 +2,7 @@
  * waveout.c : Windows waveOut plugin for vlc
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: ffba414c3aa09727a5ec182c7b6313605797c72a $
+ * $Id: efcc7d9c680459946aadcdbf71869b6975207ae0 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          André Weber
@@ -62,7 +62,7 @@ static int PlayWaveOut   ( aout_instance_t *, HWAVEOUT, WAVEHDR *,
 static void CALLBACK WaveOutCallback ( HWAVEOUT, UINT, DWORD, DWORD, DWORD );
 static void* WaveOutThread( void * );
 
-static int VolumeSet( aout_instance_t *, audio_volume_t, bool );
+static int VolumeSet( aout_instance_t *, float, bool );
 
 static int WaveOutClearDoneBuffers(aout_sys_t *p_sys);
 
@@ -154,8 +154,7 @@ static int Open( vlc_object_t *p_this )
         return VLC_ENOMEM;
 
     p_aout->output.pf_play = Play;
-    p_aout->b_die = false;
-
+    p_aout->output.pf_pause = NULL;
 
     /*
      initialize/update Device selection List
@@ -888,10 +887,10 @@ static void* WaveOutThread( void *data )
         return NULL;
 
     msg_Dbg( p_aout, "will start to play in %"PRId64" us",
-             (p_sys->start_date - AOUT_PTS_TOLERANCE/4)-mdate());
+             (p_sys->start_date - AOUT_MAX_PTS_ADVANCE/4)-mdate());
 
     // than wait a short time... before grabbing first frames
-    mwait( p_sys->start_date - AOUT_PTS_TOLERANCE/4 );
+    mwait( p_sys->start_date - AOUT_MAX_PTS_ADVANCE/4 );
 
 #define waveout_warn(msg) msg_Warn( p_aout, "aout_OutputNextBuffer no buffer "\
                            "got next_date=%d ms, "\
@@ -938,7 +937,7 @@ static void* WaveOutThread( void *data )
                     // means we are too early to request a new buffer?
                     waveout_warn("waiting...")
                     next_date = aout_FifoFirstDate( &p_aout->output.fifo );
-                    mwait( next_date - AOUT_PTS_TOLERANCE/4 );
+                    mwait( next_date - AOUT_MAX_PTS_ADVANCE/4 );
                     next_date = mdate();
                     p_buffer = aout_OutputNextBuffer( p_aout, next_date,
                                                       b_sleek );
@@ -999,14 +998,13 @@ static void* WaveOutThread( void *data )
     return NULL;
 }
 
-static int VolumeSet( aout_instance_t * p_aout, audio_volume_t i_volume,
-                      bool mute )
+static int VolumeSet( aout_instance_t * p_aout, float volume, bool mute )
 {
     if( mute )
-        i_volume = AOUT_VOLUME_MIN;
+        volume = 0.;
 
-    unsigned long i_waveout_vol = i_volume * 0xFFFF * 2 / AOUT_VOLUME_MAX;
-    i_waveout_vol |= (i_waveout_vol << 16);
+    unsigned long i_waveout_vol = volume * 0x7FFF;
+    i_waveout_vol = (i_waveout_vol << 16) | (i_waveout_vol & 0xFFFF);
 
 #ifdef UNDER_CE
     waveOutSetVolume( 0, i_waveout_vol );

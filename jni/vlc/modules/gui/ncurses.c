@@ -2,7 +2,7 @@
  * ncurses.c : NCurses interface for vlc
  *****************************************************************************
  * Copyright © 2001-2011 the VideoLAN team
- * $Id: a077fdc391486b0dfa7660d0703da8849dd23575 $
+ * $Id: d838830c4f1a371858074186a35938b7b59c2a4a $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -44,7 +44,7 @@
 
 #include <vlc_interface.h>
 #include <vlc_vout.h>
-#include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 #include <vlc_charset.h>
 #include <vlc_input.h>
 #include <vlc_es.h>

@@ -2,7 +2,7 @@
  * vlc_input.h: Core input structures
  *****************************************************************************
  * Copyright (C) 1999-2006 the VideoLAN team
- * $Id: 266a0ce066b8549100e9836552c8632afc8652e7 $
+ * $Id: bd1e48d1ce62a51ffd3dbebb1378e895a7790f16 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -479,9 +479,6 @@ enum input_query_e
     INPUT_DEL_INFO,   /* arg1= char* arg2= char*              res=can fail */
     INPUT_SET_NAME,   /* arg1= char* res=can fail    */
 
-    /* Input config options */
-    INPUT_ADD_OPTION,      /* arg1= char * arg2= char *  res=can fail*/
-
     /* Input properties */
     INPUT_GET_VIDEO_FPS,         /* arg1= double *        res=can fail */
 
@@ -493,6 +490,9 @@ enum input_query_e
     INPUT_CHANGE_BOOKMARK, /* arg1= seekpoint_t * arg2= int * res=can fail   */
     INPUT_DEL_BOOKMARK,    /* arg1= seekpoint_t *  res=can fail   */
     INPUT_SET_BOOKMARK,    /* arg1= int  res=can fail    */
+
+    /* titles */
+    INPUT_GET_TITLE_INFO,     /* arg1=input_title_t** arg2= int * res=can fail */
 
     /* Attachments */
     INPUT_GET_ATTACHMENTS, /* arg1=input_attachment_t***, arg2=int*  res=can fail */

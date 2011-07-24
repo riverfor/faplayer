@@ -2,7 +2,7 @@
  * vlc_input_item.h: Core input item
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id: 45cc4d2e7c391a83636fb5acfeebf105b2db1f8e $
+ * $Id: 9ccdfac1db0dee200a46f588ec59c74b2a991be9 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -246,27 +246,26 @@ VLC_API void input_item_MergeInfos( input_item_t *, info_category_t * );
  * XXX You may also use input_item_New or input_item_NewExt as they need
  * less arguments.
  */
-VLC_API input_item_t * input_item_NewWithType( vlc_object_t *, const char *psz_uri, const char *psz_name, int i_options, const char *const *ppsz_options, unsigned i_option_flags, mtime_t i_duration, int i_type ) VLC_USED;
+VLC_API input_item_t * input_item_NewWithType( const char *psz_uri, const char *psz_name, int i_options, const char *const *ppsz_options, unsigned i_option_flags, mtime_t i_duration, int i_type ) VLC_USED;
 
 /**
  * This function creates a new input_item_t with the provided information.
  *
  * Provided for convenience.
  */
-VLC_API input_item_t * input_item_NewExt(vlc_object_t *, const char *psz_uri, const char *psz_name, int i_options, const char *const *ppsz_options, unsigned i_option_flags, mtime_t i_duration ) VLC_USED;
-#define input_item_NewExt(a,b,c,d,e,f,g) input_item_NewExt( VLC_OBJECT(a),b,c,d,e,f,g)
+VLC_API input_item_t * input_item_NewExt( const char *psz_uri, const char *psz_name, int i_options, const char *const *ppsz_options, unsigned i_option_flags, mtime_t i_duration ) VLC_USED;
 
 /**
  * This function creates a new input_item_t with the provided information.
  *
  * Provided for convenience.
  */
-#define input_item_New( a,b,c ) input_item_NewExt( a, b, c, 0, NULL, 0, -1 )
+#define input_item_New( a,b ) input_item_NewExt( a, b, 0, NULL, 0, -1 )
 
 /**
  * This function creates a new input_item_t as a copy of another.
  */
-VLC_API input_item_t * input_item_Copy(vlc_object_t *, input_item_t * ) VLC_USED;
+VLC_API input_item_t * input_item_Copy(input_item_t * ) VLC_USED;
 
 
 /******************

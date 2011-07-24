@@ -436,8 +436,8 @@ subpicture_Update
 subpicture_region_ChainDelete
 subpicture_region_Delete
 subpicture_region_New
-tls_ClientCreate
-tls_ClientDelete
+vlc_tls_ClientCreate
+vlc_tls_ClientDelete
 ToCharset
 ToLocale
 ToLocaleDup
@@ -467,6 +467,7 @@ vlc_stat
 vlc_strcasestr
 vlc_unlink
 vlc_rename
+vlc_getcwd
 vlc_dup
 vlc_pipe
 vlc_accept
@@ -532,7 +533,6 @@ vlc_event_manager_fini
 vlc_event_manager_init
 vlc_event_manager_register_event_type
 vlc_event_send
-vlc_execve
 vlc_fastmem_register
 vlc_fourcc_GetCodec
 vlc_fourcc_GetCodecAudio

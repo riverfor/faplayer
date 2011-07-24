@@ -11,9 +11,6 @@ endif
 LOCAL_MODULE := libvlccore
 
 LOCAL_CFLAGS += \
-    -DICONV_CONST=
-
-LOCAL_CFLAGS += \
     -std=c99 \
     -DHAVE_CONFIG_H \
     -DMODULE_STRING=\"main\" \
@@ -22,6 +19,10 @@ LOCAL_CFLAGS += \
     -DSYSCONFDIR=\"/data/data/\"PACKAGENAME\"/cache/etc\" \
     -DDATA_PATH=\"/data/data/\"PACKAGENAME\"/cache/share\" \
     -DPKGLIBDIR=\"/data/data/\"PACKAGENAME\"/cache/lib\"
+
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_CFLAGS += -DCAN_COMPILE_NEON=1
+endif
 
 LOCAL_C_INCLUDES += \
     $(EXTROOT)/iconv/include

@@ -2,7 +2,7 @@
  * extended_panels.hpp : Exentended Panels
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: 30583382428ac2e4beb1610844e24690c5e4074f $
+ * $Id: 19362219a4d4b727a3fd7fb19c313cd56e210517 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -98,8 +98,8 @@ private:
     QSlider *bands[BANDS];
     QLabel *band_texts[BANDS];
 
-    void delCallbacks( aout_instance_t * );
-    void addCallbacks( aout_instance_t * );
+    void delCallbacks( vlc_object_t * );
+    void addCallbacks( vlc_object_t * );
 
     intf_thread_t *p_intf;
     void clean() { enable(); }
@@ -129,8 +129,8 @@ private:
 
     intf_thread_t *p_intf;
 
-    void delCallbacks( aout_instance_t * );
-    void addCallbacks( aout_instance_t * );
+    void delCallbacks( vlc_object_t * );
+    void addCallbacks( vlc_object_t * );
 
     void updateSliders(float *);
     void setValues();
@@ -156,8 +156,8 @@ private:
 
     QCheckBox *enableCheck;
 
-    void delCallbacks( aout_instance_t * );
-    void addCallbacks( aout_instance_t * );
+    void delCallbacks( vlc_object_t * );
+    void addCallbacks( vlc_object_t * );
     intf_thread_t *p_intf;
 
     void setValues();

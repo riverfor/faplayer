@@ -2,7 +2,7 @@
  * main_interface.hpp : Main Interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: aed2b1ed15362886eb964c06977da7137a9d482a $
+ * $Id: d96d6cb9baedc25bb5b028d0d794401ac4702c18 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -194,7 +194,9 @@ public slots:
     void setStatusBarVisibility(bool b_visible);
 
     void popupMenu( const QPoint& );
+#ifdef WIN32
     void changeThumbbarButtons( int );
+#endif
 
     /* Manage the Video Functions from the vout threads */
     void getVideoSlot( WId *p_id, int *pi_x, int *pi_y,

@@ -164,9 +164,9 @@ void dvb_remove_pid (dvb_device_t *, uint16_t)
 {
 }
 
-const delsys_t *dvb_guess_system (dvb_device_t *)
+unsigned dvb_enum_systems (dvb_device_t *)
 {
-    return NULL;
+#warning TODO
 }
 
 float dvb_get_signal_strength (dvb_device_t *)

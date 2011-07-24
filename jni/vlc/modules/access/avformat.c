@@ -63,7 +63,7 @@ vlc_module_begin ()
     set_subcategory( SUBCAT_INPUT_ACCESS )
     set_description( N_("FFmpeg access demuxer" ) )
     set_shortname( N_("Avformat") )
-    set_capability( "access_demux", 0 )
+    set_capability( "access_demux", -1 )
     set_callbacks( OpenDemux, CloseDemux )
 #ifndef MERGE_FFMPEG
 vlc_module_end ()

@@ -2,7 +2,7 @@
  * mmsh.c:
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id: 3094f3add2fe7c19f20b251ef562b12d782a9433 $
+ * $Id: 7deb1bc852c1201baf17754fc80a8cc0aeb05091 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -162,7 +162,7 @@ int MMSHOpen( access_t *p_access )
             goto error;
         }
         /** \bug we do not autodelete here */
-        p_new_loc = input_item_New( p_access, psz_location, psz_location );
+        p_new_loc = input_item_New( psz_location, psz_location );
         input_item_t *p_item = input_GetItem( p_input );
         input_item_PostSubItem( p_item, p_new_loc );
 

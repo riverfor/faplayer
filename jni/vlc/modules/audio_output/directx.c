@@ -2,7 +2,7 @@
  * directx.c: Windows DirectX audio output method
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 97e659d0dfd593bdba999d10a2f3e388543d5013 $
+ * $Id: 773bf86dd16c17ea1f3c6e9d21fe3cc4eefc2054 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -174,6 +174,7 @@ static int OpenAudio( vlc_object_t *p_this )
     p_aout->output.p_sys->b_playing = 0;
 
     p_aout->output.pf_play = Play;
+    p_aout->output.pf_pause = NULL;
     aout_VolumeSoftInit( p_aout );
 
     /* Retrieve config values */
@@ -1027,7 +1028,7 @@ static void* DirectSoundThread( void *data )
     if( !vlc_atomic_get( &p_notif->abort) )
     {
         HRESULT dsresult;
-        mwait( p_notif->start_date - AOUT_PTS_TOLERANCE / 2 );
+        mwait( p_notif->start_date - AOUT_MAX_PTS_ADVANCE / 2 );
 
         /* start playing the buffer */
         dsresult = IDirectSoundBuffer_Play( p_aout->output.p_sys->p_dsbuffer,

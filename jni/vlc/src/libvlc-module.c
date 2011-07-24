@@ -2,7 +2,7 @@
  * libvlc-module.c: Options for the main (libvlc itself) module
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 6ace42b70c6b6564555e3281d78c9377a5f87e57 $
+ * $Id: 67297968e7e4fe37e622d980ca0c2b6cd726e8d0 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -37,6 +37,7 @@
 #include <vlc_common.h>
 #include <vlc_plugin.h>
 #include <vlc_cpu.h>
+#include <vlc_aout_intf.h>
 #include "libvlc.h"
 
 //#define Nothing here, this is just to prevent update-po from being stupid
@@ -1273,6 +1274,10 @@ static const char *const ppsz_albumart_descriptions[] =
 #define PAP_LONGTEXT N_( \
     "Pause each item in the playlist on the last frame." )
 
+#define AUTOSTART_TEXT N_( "Auto start" )
+#define AUTOSTART_LONGTEXT N_( "Automatically start playing the playlist " \
+                "content once it's loaded." )
+
 #define ML_TEXT N_("Use media library")
 #define ML_LONGTEXT N_( \
     "The media library is automatically saved and reloaded each time you " \
@@ -2101,6 +2106,8 @@ vlc_module_begin ()
         change_safe()
     add_bool( "play-and-pause", 0, PAP_TEXT, PAP_LONGTEXT, true )
         change_safe()
+    add_bool( "playlist-autostart", true,
+              AUTOSTART_TEXT, AUTOSTART_LONGTEXT, false )
     add_bool( "media-library", 0, ML_TEXT, ML_LONGTEXT, false )
 #if defined( MEDIA_LIBRARY )
     add_bool( "load-media-library-on-startup", 1, LOAD_ML_TEXT,
@@ -2130,7 +2137,7 @@ vlc_module_begin ()
         change_short('v')
     add_string( "verbose-objects", 0, VERBOSE_OBJECTS_TEXT, VERBOSE_OBJECTS_LONGTEXT,
                  false )
-    add_bool( "quiet", 0, QUIET_TEXT, QUIET_LONGTEXT, true )
+    add_bool( "quiet", 0, QUIET_TEXT, QUIET_LONGTEXT, false )
         change_short('q')
 
 #if !defined(WIN32)

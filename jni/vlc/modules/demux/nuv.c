@@ -2,7 +2,7 @@
  * nuv.c:
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id: 853544d6e1852e12d62658570fb2228088f32028 $
+ * $Id: 028e07159568c5409b704920619668c5de5c030f $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gertjan Van Droogenbroeck <gertjanvd _PLUS_ vlc _AT_ gmail _DOT_ com>
@@ -418,6 +418,8 @@ static int Demux( demux_t *p_demux )
         {
             /* for rtjpeg data, the header is also needed */
             p_data = block_Realloc( p_data, NUV_FH_SIZE, fh.i_length );
+            if( unlikely(!p_data) )
+                abort();
             memcpy( p_data->p_buffer, p_sys->fh_buffer, NUV_FH_SIZE );
         }
         /* 0,1,2,3 -> rtjpeg, >=4 mpeg4 */

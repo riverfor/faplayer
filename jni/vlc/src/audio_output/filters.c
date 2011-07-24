@@ -2,7 +2,7 @@
  * filters.c : audio output filters management
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: c3a8e9b635c54efe00548fb8c8a20a47bf057dd5 $
+ * $Id: 612d897696cacb5f12e0e15709ba3f36cf887de4 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -55,8 +55,7 @@ static filter_t * FindFilter( aout_instance_t * p_aout,
     static const char typename[] = "audio filter";
     filter_t * p_filter;
 
-    p_filter = vlc_custom_create( p_aout, sizeof(*p_filter),
-                                  VLC_OBJECT_GENERIC, typename );
+    p_filter = vlc_custom_create( p_aout, sizeof(*p_filter), typename );
 
     if ( p_filter == NULL ) return NULL;
 

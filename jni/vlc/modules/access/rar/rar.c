@@ -2,7 +2,7 @@
  * rar.h: uncompressed RAR parser
  *****************************************************************************
  * Copyright (C) 2008-2010 Laurent Aimar
- * $Id: 4079d815b0d8a222e4236f3504f7239757b26d42 $
+ * $Id: c2f605e895c350becae958bd216059aa07b0d5d8 $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -201,7 +201,6 @@ static int SkipFile(stream_t *s, int *count, rar_file_t ***file, const rar_block
 
     if (current &&
         (current->is_complete ||
-          current->size != file_size ||
           strcmp(current->name, name) ||
           (hdr->flags & RAR_BLOCK_FILE_HAS_PREVIOUS) == 0))
         current = NULL;
