@@ -55,5 +55,31 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
+LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
+
+LOCAL_MODULE := ts_plugin
+
+LOCAL_CFLAGS += \
+    -std=c99 \
+    -DHAVE_CONFIG_H \
+    -DMODULE_STRING=\"ts\" \
+    -DMODULE_NAME=ts
+
+LOCAL_C_INCLUDES += \
+    $(VLCROOT) \
+    $(VLCROOT)/include \
+    $(EXTROOT)/libdvbpsi
+
+LOCAL_SRC_FILES := \
+    ts.c \
+    ../mux/mpeg/csa.c
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
 include $(call all-makefiles-under,$(LOCAL_PATH))
 

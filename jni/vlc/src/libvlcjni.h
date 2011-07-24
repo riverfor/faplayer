@@ -42,6 +42,7 @@ vlc_declare_plugin(subsusf);
 vlc_declare_plugin(subtitle);
 vlc_declare_plugin(swscale);
 vlc_declare_plugin(trivial_mixer);
+vlc_declare_plugin(ts);
 vlc_declare_plugin(ugly_resampler);
 vlc_declare_plugin(vmem);
 vlc_declare_plugin(yuv2rgb);
@@ -89,6 +90,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(subtitle),
 	vlc_plugin(swscale),
 	vlc_plugin(trivial_mixer),
+	vlc_plugin(ts),
 	vlc_plugin(ugly_resampler),
 	vlc_plugin(vmem),
 	vlc_plugin(yuv2rgb),
