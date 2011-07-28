@@ -8,32 +8,6 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
-LOCAL_MODULE := access_demux_avformat_plugin
-
-LOCAL_CFLAGS += \
-    -std=c99 \
-    -DHAVE_CONFIG_H \
-    -DMODULE_STRING=\"access_demux_avformat\" \
-    -DMODULE_NAME=access_demux_avformat
-
-LOCAL_C_INCLUDES += \
-    $(VLCROOT) \
-    $(VLCROOT)/include \
-    $(VLCROOT)/src \
-    $(EXTROOT)/ffmpeg
-
-LOCAL_SRC_FILES := \
-    avformat.c
-
-include $(BUILD_STATIC_LIBRARY)
-
-include $(CLEAR_VARS)
-
-LOCAL_ARM_MODE := arm
-ifeq ($(BUILD_WITH_NEON),1)
-LOCAL_ARM_NEON := true
-endif
-
 LOCAL_MODULE := access_avio_plugin
 
 LOCAL_CFLAGS += \
