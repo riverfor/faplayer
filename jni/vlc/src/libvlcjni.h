@@ -1,4 +1,6 @@
 /* auto generated */
+vlc_declare_plugin(a52);
+vlc_declare_plugin(a52tofloat32);
 vlc_declare_plugin(access_http);
 vlc_declare_plugin(access_mms);
 vlc_declare_plugin(amem);
@@ -33,6 +35,7 @@ vlc_declare_plugin(packetizer_mpegvideo);
 vlc_declare_plugin(packetizer_vc1);
 vlc_declare_plugin(realrtsp);
 vlc_declare_plugin(simple_channel_mixer);
+vlc_declare_plugin(stream_filter_flash);
 vlc_declare_plugin(stream_filter_httplive);
 vlc_declare_plugin(stream_filter_record);
 vlc_declare_plugin(subsdec);
@@ -45,6 +48,8 @@ vlc_declare_plugin(ugly_resampler);
 vlc_declare_plugin(vmem);
 vlc_declare_plugin(yuv2rgb);
 const void *vlc_builtins_modules[] = {
+	vlc_plugin(a52),
+	vlc_plugin(a52tofloat32),
 	vlc_plugin(access_http),
 	vlc_plugin(access_mms),
 	vlc_plugin(amem),
@@ -79,6 +84,7 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(packetizer_vc1),
 	vlc_plugin(realrtsp),
 	vlc_plugin(simple_channel_mixer),
+	vlc_plugin(stream_filter_flash),
 	vlc_plugin(stream_filter_httplive),
 	vlc_plugin(stream_filter_record),
 	vlc_plugin(subsdec),
