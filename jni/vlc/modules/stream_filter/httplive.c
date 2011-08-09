@@ -1292,7 +1292,18 @@ static void* hls_Reload(void *p_this)
                                                    * (mtime_t)1000000);
         }
 
-        mwait(p_sys->playlist.wakeup);
+        /* XXX: msleep is not cancel point, holy shit */
+        mtime_t step;
+        for (step = now; step < p_sys->playlist.wakeup; step += 5000)
+        {
+            vlc_testcancel();
+            mwait(step);
+        }
+        if (step < p_sys->playlist.wakeup)
+        {
+            vlc_testcancel();
+            mwait(p_sys->playlist.wakeup);
+        }
     }
 
     vlc_restorecancel(canc);
@@ -1646,7 +1657,11 @@ static void Close(vlc_object_t *p_this)
 
     /* */
     if (p_sys->b_live)
+    {
+        vlc_cancel(p_sys->reload);
         vlc_join(p_sys->reload, NULL);
+    }
+    vlc_cancel(p_sys->thread);
     vlc_join(p_sys->thread, NULL);
     vlc_mutex_destroy(&p_sys->download.lock_wait);
     vlc_cond_destroy(&p_sys->download.wait);
