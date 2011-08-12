@@ -14,8 +14,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	private static final String LOGTAG = "DANMAKU-VlcMediaPlayer";
 
-	protected static VlcMediaPlayer sInstance = null;
-
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
 	protected AbsMediaPlayer.OnErrorListener mOnErrorListener = null;
@@ -24,15 +22,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
 	/* double check this */
 	protected AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
-
-	/* used by the native side */
-	protected int mLibVlcInstance = 0;
-	protected int mLibVlcMediaPlayer = 0;
-	protected int mLibVlcMedia = 0;
-	protected int mNativeMediaBufferingCount = 0;
-	protected int mNativeMediaParsed = 0;
-	protected int mNativeMediaParseLock = 0;
-	protected int mNativeMediaParseCond = 0;
 
 	/* */
 	private int mTime = -1;
@@ -190,9 +179,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	}
 
 	public static VlcMediaPlayer getInstance() {
-		if (sInstance == null)
-			sInstance = new VlcMediaPlayer();
-		return sInstance;
+		return new VlcMediaPlayer();
 	}
 
 	protected VlcMediaPlayer() {
@@ -248,7 +235,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	@Override
 	public void release() {
 		nativeRelease();
-		sInstance = null;
 	}
 
 	@Override
