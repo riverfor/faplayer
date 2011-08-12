@@ -2,6 +2,7 @@ package org.stagex.danmaku.player;
 
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -13,8 +14,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	private static final String LOGTAG = "DANMAKU-VlcMediaPlayer";
 
-	protected static VlcMediaPlayer sInstance = null;
-
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
 	protected AbsMediaPlayer.OnErrorListener mOnErrorListener = null;
@@ -23,15 +22,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
 	/* double check this */
 	protected AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
-
-	/* used by the native side */
-	protected int mLibVlcInstance = 0;
-	protected int mLibVlcMediaPlayer = 0;
-	protected int mLibVlcMedia = 0;
-	protected int mNativeMediaBufferingCount = 0;
-	protected int mNativeMediaParsed = 0;
-	protected int mNativeMediaParseLock = 0;
-	protected int mNativeMediaParseCond = 0;
 
 	/* */
 	private int mTime = -1;
@@ -112,6 +102,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	/* called by native side */
 	private void onVlcEvent(VlcEvent ev) {
+		Log.d(LOGTAG, String.format("received vlc event %d", ev.eventType));
 		switch (ev.eventType) {
 		case VlcEvent.MediaParsedChanged: {
 			if (!ev.booleanValue) {
@@ -188,9 +179,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	}
 
 	public static VlcMediaPlayer getInstance() {
-		if (sInstance == null)
-			sInstance = new VlcMediaPlayer();
-		return sInstance;
+		return new VlcMediaPlayer();
 	}
 
 	protected VlcMediaPlayer() {
@@ -246,7 +235,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	@Override
 	public void release() {
 		nativeRelease();
-		sInstance = null;
 	}
 
 	@Override
@@ -261,10 +249,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	@Override
 	public void setDataSource(String path) {
-		/* force to use avformat access_demux module */
-		if (path.startsWith("http://") && path.endsWith(".m3u8")) {
-		 	path = String.format("avformat://%s", path);
-		}
 		nativeSetDataSource(path);
 	}
 
