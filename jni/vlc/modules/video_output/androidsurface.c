@@ -61,9 +61,9 @@ vlc_module_end()
  * JNI prototypes
  *****************************************************************************/
 
-extern void *jni_LockAndGetAndroidSurface();
-extern void  jni_UnlockAndroidSurface();
-extern void  jni_SetAndroidSurfaceSize(int width, int height);
+extern void *jni_LockAndGetAndroidSurface(vlc_object_t *);
+extern void  jni_UnlockAndroidSurface(vlc_object_t *);
+extern void  jni_SetAndroidSurfaceSize(vlc_object_t *, int width, int height);
 
 // _ZN7android7Surface4lockEPNS0_11SurfaceInfoEb
 typedef void (*Surface_lock)(void *, void *, int);
@@ -86,6 +86,8 @@ struct vout_display_sys_t {
     Surface_unlockAndPost s_unlockAndPost;
 
     picture_resource_t resource;
+
+    vlc_object_t *p_vout;
 };
 
 /* */
@@ -158,6 +160,9 @@ static int Open(vlc_object_t *p_this) {
         vlc_mutex_unlock(&single_instance);
         return VLC_EGENERIC;
     }
+
+    /* */
+    sys->p_vout = vd->p_parent;
 
     /* Setup chroma */
     video_format_t fmt = vd->fmt;
@@ -245,11 +250,11 @@ static int  AndroidLockSurface(picture_t *picture) {
     sw = picture->p[0].i_visible_pitch / picture->p[0].i_pixel_pitch;
     sh = picture->p[0].i_visible_lines;
 
-    picsys->surf = surf = jni_LockAndGetAndroidSurface();
+    picsys->surf = surf = jni_LockAndGetAndroidSurface(sys->p_vout);
     info = &(picsys->info);
 
     if (unlikely(!surf)) {
-        jni_UnlockAndroidSurface();
+        jni_UnlockAndroidSurface(sys->p_vout);
         return VLC_EGENERIC;
     }
 
@@ -258,9 +263,9 @@ static int  AndroidLockSurface(picture_t *picture) {
     // input size doesn't match the surface size,
     // request a resize
     if (info->w != sw || info->h != sh) {
-        jni_SetAndroidSurfaceSize(sw, sh);
+        jni_SetAndroidSurfaceSize(sys->p_vout, sw, sh);
         sys->s_unlockAndPost(surf);
-        jni_UnlockAndroidSurface();
+        jni_UnlockAndroidSurface(sys->p_vout);
         return VLC_EGENERIC;
     }
 
@@ -277,7 +282,7 @@ static void AndroidUnlockSurface(picture_t *picture) {
 
     if (likely(picsys->surf))
         sys->s_unlockAndPost(picsys->surf);
-    jni_UnlockAndroidSurface();
+    jni_UnlockAndroidSurface(sys->p_vout);
 }
 
 static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture) {

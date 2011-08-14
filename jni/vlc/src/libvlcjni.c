@@ -4,7 +4,13 @@
 #endif
 
 #include <vlc/vlc.h>
+#include <vlc/libvlc.h>
+#include <vlc/libvlc_media.h>
+#include <vlc/libvlc_media_player.h>
+/* XXX: NG */
+#include "control/media_player_internal.h"
 #include <vlc_common.h>
+#include <vlc_input.h>
 
 #ifdef ANDROID
 
@@ -52,8 +58,8 @@ typedef struct _vlc_jni_player
     vlc_mutex_t parse_lock;
     vlc_cond_t parse_cond;
     int buffering;
-    // void *surface;
-    // vlc_mutex_t surface_lock;
+    void *surface;
+    vlc_mutex_t surface_lock;
 } vlc_jni_player_t;
 
 static void *s_surface = 0;
@@ -115,6 +121,38 @@ static inline void vlc_jni_player_kill(jobject obj)
         }
     }
     vlc_mutex_unlock(&s_VlcMediaPlayer_lock);
+}
+
+static inline vlc_jni_player_t *vlc_jni_player_find_by_vout(vlc_object_t *p_vout)
+{
+    vlc_jni_player_t *vj = 0;
+    vlc_mutex_lock(&s_VlcMediaPlayer_lock);
+    for (int i = 0; i < vlc_array_count(s_VlcMediaPlayer_array); i++)
+    {
+        vlc_jni_player_t *t = (vlc_jni_player_t *) vlc_array_item_at_index(s_VlcMediaPlayer_array, i);
+        input_thread_t *p_input = libvlc_get_input_thread(t->player);
+        if (!p_input)
+            continue;
+        size_t n = 0;
+        vout_thread_t **pp_vouts = NULL;
+        if (input_Control(p_input, INPUT_GET_VOUTS, &pp_vouts, &n))
+        {
+            vlc_object_release(p_input);
+            continue;
+        }
+        for (size_t c = 0; c < n; c++)
+        {
+            if ((int) p_vout == (int) pp_vouts[c])
+                vj = t;
+            vlc_object_release((vlc_object_t *) pp_vouts[c]);
+        }
+        free(pp_vouts);
+        vlc_object_release(p_input);
+        if (vj)
+            break;
+    }
+    vlc_mutex_unlock(&s_VlcMediaPlayer_lock);
+    return vj;
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -194,7 +232,7 @@ static void vlc_event_callback(const libvlc_event_t *ev, void *data)
             /* if it's the first time */
             if (vj->buffering == 1) {
                 /* send buffering update event now */
-                (*env)->CallVoidMethod(env, vj->object, m_VlcMediaPlayer_onVlcEvent, obj_VlcEvent);
+                (*env)->CallVoidMethod(env, vj->reference, m_VlcMediaPlayer_onVlcEvent, obj_VlcEvent);
                 libvlc_media_player_set_pause(vj->player, 1);
                 /* asynchonous preparing is done */
                 vlc_mutex_lock(&vj->parse_lock);
@@ -248,7 +286,7 @@ static void vlc_event_callback(const libvlc_event_t *ev, void *data)
         break;
     }
     if (trigger)
-        (*env)->CallVoidMethod(env, vj->object, m_VlcMediaPlayer_onVlcEvent, obj_VlcEvent);
+        (*env)->CallVoidMethod(env, vj->reference, m_VlcMediaPlayer_onVlcEvent, obj_VlcEvent);
     (*env)->DeleteLocalRef(env, obj_VlcEvent);
     free(mrl);
     /* EXPLAIN: this is called in pthread wrapper routines */
@@ -275,17 +313,17 @@ JNIEXPORT void JNICALL NAME(nativeAttachSurface)(JNIEnv *env, jobject thiz, jobj
     }
     (*env)->DeleteLocalRef(env, clz);
     surface = (*env)->GetIntField(env, s, f_Surface_mSurface);
-    vlc_mutex_lock(&s_surface_lock);
-    s_surface = (void *) surface;
-    vlc_mutex_unlock(&s_surface_lock);
+    vlc_mutex_lock(&vj->surface_lock);
+    vj->surface = (void *) surface;
+    vlc_mutex_unlock(&vj->surface_lock);
 }
 
 JNIEXPORT void JNICALL NAME(nativeDetachSurface)(JNIEnv *env, jobject thiz)
 {
     vlc_jni_player_t *vj = vlc_jni_player_find_or_throw(env, thiz);
-    vlc_mutex_lock(&s_surface_lock);
-    s_surface = 0;
-    vlc_mutex_unlock(&s_surface_lock);
+    vlc_mutex_lock(&vj->surface_lock);
+    vj->surface = 0;
+    vlc_mutex_unlock(&vj->surface_lock);
 }
 
 static libvlc_event_type_t md_listening[] = {
@@ -346,7 +384,7 @@ JNIEXPORT void JNICALL NAME(nativeCreate)(JNIEnv *env, jobject thiz)
     vj->reference = (*env)->NewGlobalRef(env, thiz);
     vlc_mutex_init(&vj->parse_lock);
     vlc_cond_init(&vj->parse_cond);
-    // vlc_mutex_init(&vj->surface_lock);
+    vlc_mutex_init(&vj->surface_lock);
     vj->status = 1;
     vj->player = libvlc_media_player_new(s_vlc_instance);
     libvlc_event_manager_t *em = libvlc_media_player_event_manager(vj->player);
@@ -583,24 +621,30 @@ static void *vlc_jni_player_gc_thread(void *para)
         /* */
         vlc_mutex_destroy(&vj->parse_lock);
         vlc_cond_destroy(&vj->parse_cond);
-        // vlc_mutex_destroy(&vj->surface_lock);
+        vlc_mutex_destroy(&vj->surface_lock);
         free(vj);
     }
 }
 
-/* TODO: identify surface for each player instance */
-void *jni_LockAndGetAndroidSurface()
+void *jni_LockAndGetAndroidSurface(vlc_object_t *p_vout)
 {
-    vlc_mutex_lock(&s_surface_lock);
-    return s_surface;
+    vlc_jni_player_t *vj = vlc_jni_player_find_by_vout(p_vout);
+    if (vj)
+    {
+        vlc_mutex_lock(&vj->surface_lock);
+        return vj->surface;
+    }
+    return NULL;
 }
 
-void jni_UnlockAndroidSurface()
+void jni_UnlockAndroidSurface(vlc_object_t *p_vout)
 {
-    vlc_mutex_unlock(&s_surface_lock);
+    vlc_jni_player_t *vj = vlc_jni_player_find_by_vout(p_vout);
+    if (vj)
+        vlc_mutex_unlock(&vj->surface_lock);
 }
 
-void jni_SetAndroidSurfaceSize(int width, int height)
+void jni_SetAndroidSurfaceSize(vlc_object_t *p_vout, int width, int height)
 {
 }
 
