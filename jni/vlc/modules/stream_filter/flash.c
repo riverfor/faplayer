@@ -108,8 +108,6 @@ struct stream_sys_t
     uint32_t      i_length; /* total length indicated by playlist */
     uint64_t      i_offset; /* virtual stream offset */
     uint64_t      i_size;   /* virtual stream size */
-    uint64_t      i_flv_offset; /* current read offset */
-    uint64_t      i_flv_parsed_bytes; /* how many bytes we have parsed */
     vlc_array_t   *p_flv_tag;
     /* */
     int i_peek;
@@ -128,6 +126,14 @@ static void FreeStream(stream_t *);
 static int  Read   (stream_t *, void *p_read, unsigned int i_read);
 static int  Peek   (stream_t *, const uint8_t **pp_peek, unsigned int i_peek);
 static int  Control(stream_t *, int i_query, va_list);
+
+static int GetStreamIndex(stream_t *s, int64_t position);
+static int GetFlvTagIndex(stream_t *s, int64_t position);
+static int64_t GetStreamParsedPosition(stream_t *s);
+static int EnsureStreamParsed(stream_t *s, uint64_t i_pos);
+static int EnsureStreamPosition(stream_t *s, uint64_t i_offset);
+static int EnsureFlvTagReady(stream_t *s, int index);
+static int ReadNextFlvTag(stream_t *s, uint64_t i_offset);
 
 static int FlvCheckHeader(const uint8_t *p_data);
 static void FlvSetInt(void *p_tag, const char *psz_name, int i_value);
@@ -280,6 +286,43 @@ static int GetFlvTagIndex(stream_t *s, int64_t position)
     return (i == max) ? -1 : i;
 }
 
+static int64_t GetStreamParsedPosition(stream_t *s)
+{
+    stream_sys_t *p_sys = s->p_sys;
+    int64_t i_parsed = 0;
+    int i_count = vlc_array_count(p_sys->p_flv_tag);
+    if (i_count > 0)
+    {
+        flv_tag_t *t = vlc_array_item_at_index(p_sys->p_flv_tag, i_count - 1);
+        i_parsed = t->i_offset + t->i_size;
+    }
+    return i_parsed;
+}
+
+static int EnsureStreamParsed(stream_t *s, uint64_t i_pos)
+{
+    int64_t i_parsed = GetStreamParsedPosition(s);
+    while (i_pos > i_parsed)
+    {
+        int rc = ReadNextFlvTag(s, i_parsed);
+        if (rc < 0)
+            return VLC_EGENERIC;
+        i_parsed = GetStreamParsedPosition(s);
+    }
+    return VLC_SUCCESS;
+}
+
+static int EnsureStreamPosition(stream_t *s, uint64_t i_offset)
+{
+    stream_sys_t *p_sys = s->p_sys;
+    int i_stream = GetStreamIndex(s, i_offset);
+    suburl_t *su = vlc_array_item_at_index(p_sys->p_video, i_stream);
+    uint64_t i_pos = i_offset - su->i_offset + su->i_stream_skip;
+    if (stream_Seek(su->p_stream, i_pos) < 0)
+        return VLC_EGENERIC;
+    return VLC_SUCCESS;
+}
+
 static int EnsureFlvTagReady(stream_t *s, int index)
 {
     stream_sys_t *p_sys = s->p_sys;
@@ -287,9 +330,14 @@ static int EnsureFlvTagReady(stream_t *s, int index)
     flv_tag_t *tag = vlc_array_item_at_index(p_sys->p_flv_tag, index);
     if (!tag)
         return VLC_EGENERIC;
-    flv_tag_t *previous_tag = vlc_array_item_at_index(p_sys->p_flv_tag, index - 1);
+    flv_tag_t *previous_tag = index > 0 ? vlc_array_item_at_index(p_sys->p_flv_tag, index - 1) : NULL;
     if (!tag->p_data)
     {
+        if (EnsureStreamPosition(s, tag->i_offset) < 0)
+        {
+            msg_Err(s, "Could not seek to virtual offset %"PRId64, tag->i_offset);
+            return VLC_EGENERIC;
+        }
         /* read a flv tag */
         tag->p_data = malloc(tag->i_size);
         if (!tag->p_data)
@@ -301,6 +349,7 @@ static int EnsureFlvTagReady(stream_t *s, int index)
         {
             free(tag->p_data);
             tag->p_data = NULL;
+            msg_Err(s, "Could not read #%d for %d bytes", su->i_order, tag->i_size);
             return VLC_EGENERIC;
         }
         tag->p_read = tag->p_data;
@@ -320,12 +369,12 @@ static int EnsureFlvTagReady(stream_t *s, int index)
     return VLC_SUCCESS;
 }
 
-static int GetNextFlvTag(stream_t *s)
+static int ReadNextFlvTag(stream_t *s, uint64_t i_offset)
 {
     stream_sys_t *p_sys = s->p_sys;
 
     /* determine which stream to read */
-    int i_stream = GetStreamIndex(s, p_sys->i_flv_offset);
+    int i_stream = GetStreamIndex(s, i_offset);
     suburl_t *su = vlc_array_item_at_index(p_sys->p_video, i_stream);
     if (!su)
         return VLC_EGENERIC;
@@ -333,9 +382,11 @@ static int GetNextFlvTag(stream_t *s)
     if (i_stream > 0)
     {
         i_hack |= HACK_TYPE_TIME;
-        if (su->i_offset == p_sys->i_flv_offset)
+        if (su->i_offset == i_offset)
             i_hack |= HACK_TYPE_SIZE;
     }
+    if (EnsureStreamPosition(s, i_offset) < 0)
+        return VLC_EGENERIC;
     const uint8_t *peek;
     int peek_size = stream_Peek(su->p_stream, &peek, sizeof(flv_tag_header_t));
     if (peek_size != sizeof(flv_tag_header_t))
@@ -346,7 +397,7 @@ static int GetNextFlvTag(stream_t *s)
     for (int n = vlc_array_count(p_sys->p_flv_tag) - 1; n >= 0; n--)
     {
         flv_tag_t *t = (flv_tag_t *) vlc_array_item_at_index(p_sys->p_flv_tag, n);
-        if (t->i_offset == p_sys->i_flv_offset)
+        if (t->i_offset == i_offset)
         {
             p_tag = t;
             i_tag = n;
@@ -361,117 +412,13 @@ static int GetNextFlvTag(stream_t *s)
         p_tag = calloc(1, sizeof(flv_tag_t));
         if (!p_tag)
             return VLC_ENOMEM;
-        p_tag->i_offset = p_sys->i_flv_parsed_bytes;
+        p_tag->i_offset = i_offset;
         p_tag->i_size = sizeof(flv_tag_header_t) + data_size;
-        p_sys->i_flv_parsed_bytes += p_tag->i_size;
         vlc_array_append(p_sys->p_flv_tag, p_tag);
         i_tag = vlc_array_count(p_sys->p_flv_tag) - 1;
     }
     /* */
     return EnsureFlvTagReady(s, i_tag);
-}
-
-static int ReadStream(stream_t *s, void *p_read, unsigned int i_read)
-{
-    stream_sys_t *p_sys = s->p_sys;
-
-    unsigned int i_copy = 0;
-    while (i_copy < i_read)
-    {
-        break;
-    }
-
-    return i_copy;
-}
-
-static int PeekStream(stream_t *s, const uint8_t **pp_peek, unsigned int i_peek)
-{
-    stream_sys_t *p_sys = s->p_sys;
-
-    /* prepare space for peeking */
-    if (p_sys->i_peek < i_peek)
-    {
-        void *p_peek = realloc(p_sys->p_peek, i_peek);
-        if (p_peek == NULL)
-            return 0;
-        p_sys->p_peek = p_peek;
-    }
-    /* */
-    int i_tag = GetFlvTagIndex(s, p_sys->i_offset);
-    while (i_tag < 0)
-    {
-        int rc = GetNextFlvTag(s);
-        if (rc < 0)
-        {
-            msg_Err(s, "failed to read next flv tag");
-            return 0;
-        }
-        i_tag = GetFlvTagIndex(s, p_sys->i_offset);
-    }
-    /* */
-    unsigned int i_copy = 0;
-    while (i_copy < i_peek)
-    {
-        flv_tag_t *tag = vlc_array_item_at_index(p_sys->p_flv_tag, i_tag);
-        if (!tag)
-        {
-            int rc = GetNextFlvTag(s);
-            if (rc < 0)
-                break;
-            continue;
-        }
-        if (EnsureFlvTagReady(s, i_tag) < 0)
-            break;
-        i_tag += 1;
-        
-        
-    }
-    *pp_peek = p_sys->p_peek;
-
-    return i_copy;
-}
-
-static int SeekStream(stream_t *s, int64_t offset)
-{
-    stream_sys_t *p_sys = s->p_sys;
-
-    if (offset >= p_sys->i_size)
-        return VLC_EGENERIC;
-    /* seek */
-    int64_t seek_position = (offset <= p_sys->i_flv_parsed_bytes) ? offset : p_sys->i_flv_parsed_bytes;
-    suburl_t *su = vlc_array_item_at_index(p_sys->p_video, GetStreamIndex(s, p_sys->i_offset));
-    int64_t stream_position = su->i_stream_skip + seek_position - su->i_offset;
-    if (stream_Tell(su->p_stream) != stream_position)
-    {
-        int rc = stream_Seek(su->p_stream, stream_position);
-        if (rc < 0)
-        {
-            msg_Err(s, "failed to seek #%d to %"PRId64, su->i_order, stream_position);
-            return VLC_EGENERIC;
-        }
-    }
-    /* read extra bytes */
-    int chunk = 65536;
-    int64_t count = 0;
-    int64_t total = offset - seek_position;
-    if (total > 0) {
-        while (count < total)
-        {
-            int temp = ReadStream(s, NULL, chunk);
-            count += temp;
-            if (temp < chunk)
-                break;
-        }
-        if (count < total)
-        {
-            msg_Dbg(s, "failed to seek to %"PRId64, offset);
-            return VLC_EGENERIC;
-        }
-    }
-    /* looks good */
-    p_sys->i_offset = offset;
-
-    return VLC_SUCCESS;
 }
 
 static bool DetectStream(stream_t *s)
@@ -654,10 +601,8 @@ static int LoadStream(stream_t *s)
         return VLC_EGENERIC;
     }
     vlc_array_append(p_sys->p_flv_tag, header_tag);
-    p_sys->i_flv_offset = sizeof(flv_header_t);
-    p_sys->i_flv_parsed_bytes = sizeof(flv_header_t);
     /* hold flv metadata */
-    if (GetNextFlvTag(s) < 0)
+    if (ReadNextFlvTag(s, sizeof(flv_header_t)) < 0)
     {
         free(header_tag->p_data);
         free(header_tag);
@@ -747,12 +692,75 @@ static void Close(vlc_object_t *p_this)
 
 static int Read(stream_t *s, void *p_read, unsigned int i_read)
 {
-    return ReadStream(s, p_read, i_read);
+    stream_sys_t *p_sys = s->p_sys;
+
+    unsigned int i_copy = 0;
+    while (i_copy < i_read)
+    {
+        break;
+    }
+
+    return i_copy;
 }
 
 static int Peek(stream_t *s, const uint8_t **pp_peek, unsigned int i_peek)
 {
-    return PeekStream(s, pp_peek, i_peek);
+    stream_sys_t *p_sys = s->p_sys;
+
+    /* prepare space for peeking */
+    if (p_sys->i_peek < i_peek)
+    {
+        void *p_peek = realloc(p_sys->p_peek, i_peek);
+        if (p_peek == NULL)
+            return 0;
+        p_sys->p_peek = p_peek;
+    }
+    /* ensure the data is ready to read */
+    if (EnsureStreamParsed(s, p_sys->i_offset) < 0)
+    {
+        msg_Err(s, "Could not parse to offset %"PRId64" bytes", p_sys->i_offset);
+        return 0;
+    }
+    /* the real work */
+    unsigned int i_copy = 0;
+    while (i_copy < i_peek)
+    {
+        int i_tag = GetFlvTagIndex(s, p_sys->i_offset + i_copy);
+        flv_tag_t *t = vlc_array_item_at_index(p_sys->p_flv_tag, i_tag);
+        if (EnsureFlvTagReady(s, i_tag) < 0)
+        {
+            msg_Err(s, "Could not read data of tag #%d (offset = %"PRId64", size = %d)", i_tag, t->i_offset, t->i_size);
+            break;
+        }
+        int i_stream = GetStreamIndex(s, p_sys->i_offset + i_copy);
+        suburl_t *su = vlc_array_item_at_index(p_sys->p_video, i_stream);
+        int i_start = (p_sys->i_offset > t->i_offset) ? (p_sys->i_offset - t->i_offset) : 0;
+        int i_count = (i_peek - i_copy) < (t->i_size - i_start) ? (i_peek - i_copy) : (t->i_size - i_start);
+        memcpy((uint8_t *)p_sys->p_peek + i_copy, (uint8_t*) t->p_data + i_start, i_count);
+        i_copy += i_count;
+        int64_t i_pos = GetStreamParsedPosition(s);
+        if (EnsureStreamParsed(s, i_pos) < 0)
+        {
+            msg_Err(s, "Could not parse to offset %"PRId64" bytes", i_pos);
+            break;
+        }
+    }
+    *pp_peek = p_sys->p_peek;
+
+    return i_copy;
+}
+
+static int Seek(stream_t *s, int64_t i_offset)
+{
+    stream_sys_t *p_sys = s->p_sys;
+
+    if (i_offset >= p_sys->i_size)
+        return VLC_EGENERIC;
+    if (EnsureStreamParsed(s, i_offset) < 0)
+        return VLC_EGENERIC;
+    p_sys->i_offset = i_offset;
+
+    return VLC_SUCCESS;
 }
 
 static int Control(stream_t *s, int i_query, va_list args)
@@ -779,7 +787,7 @@ static int Control(stream_t *s, int i_query, va_list args)
         case STREAM_SET_POSITION:
         {
             uint64_t new_offset = *(va_arg (args, uint64_t *));
-            return SeekStream(s, new_offset);
+            return Seek(s, new_offset);
         }
         case STREAM_GET_SIZE:
         {
