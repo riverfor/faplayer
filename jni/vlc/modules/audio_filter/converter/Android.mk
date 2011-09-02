@@ -59,6 +59,32 @@ ifeq ($(BUILD_WITH_NEON),1)
 LOCAL_ARM_NEON := true
 endif
 
+LOCAL_MODULE := dtstofloat32_plugin
+
+LOCAL_CFLAGS += \
+    -std=c99 \
+    -DHAVE_CONFIG_H \
+    -DMODULE_STRING=\"dtstofloat32\" \
+    -DMODULE_NAME=dtstofloat32
+
+LOCAL_C_INCLUDES += \
+    $(VLCROOT) \
+    $(VLCROOT)/include \
+    $(VLCROOT)/src \
+    $(EXTROOT)/libdca/include
+
+LOCAL_SRC_FILES := \
+    dtstofloat32.c
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_ARM_MODE := arm
+ifeq ($(BUILD_WITH_NEON),1)
+LOCAL_ARM_NEON := true
+endif
+
 #LOCAL_MODULE := mpgatofixed32_plugin
 
 LOCAL_CFLAGS += \
@@ -70,7 +96,8 @@ LOCAL_CFLAGS += \
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src
+    $(VLCROOT)/src \
+    $(EXTROOT)/libmad
 
 LOCAL_SRC_FILES := \
     mpgatofixed32.c
