@@ -11,6 +11,8 @@ vlc_declare_plugin(avformat);
 vlc_declare_plugin(bandlimited_resampler);
 vlc_declare_plugin(blend);
 vlc_declare_plugin(converter_fixed);
+vlc_declare_plugin(dts);
+vlc_declare_plugin(dtstofloat32);
 vlc_declare_plugin(dummy);
 vlc_declare_plugin(filesystem);
 vlc_declare_plugin(fixed32_mixer);
@@ -60,6 +62,8 @@ const void *vlc_builtins_modules[] = {
 	vlc_plugin(bandlimited_resampler),
 	vlc_plugin(blend),
 	vlc_plugin(converter_fixed),
+	vlc_plugin(dts),
+	vlc_plugin(dtstofloat32),
 	vlc_plugin(dummy),
 	vlc_plugin(filesystem),
 	vlc_plugin(fixed32_mixer),

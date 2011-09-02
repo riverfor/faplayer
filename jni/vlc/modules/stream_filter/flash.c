@@ -11,20 +11,15 @@
 
 #include <vlc_common.h>
 #include <vlc_plugin.h>
-
-#include <assert.h>
-
 #include <vlc_threads.h>
 #include <vlc_arrays.h>
 #include <vlc_stream.h>
 #include <vlc_url.h>
 #include <vlc_memory.h>
 
+#include <assert.h>
+#include <math.h>
 #include <expat.h>
-
-#include <android/log.h>
-
-#define INSERT_DEBUG_LINE() __android_log_print(ANDROID_LOG_DEBUG, "faplayer", "%s %d", __func__, __LINE__)
 
 /*****************************************************************************
  * Module descriptor
@@ -48,8 +43,8 @@ typedef struct _suburl_t
 {
     int i_order; /* order */
     char *psz_url; /* url */
-    uint32_t i_start; /* start time indicated by playlist */
-    uint32_t i_length; /* length indicated by playlist */
+    uint64_t i_start; /* start time indicated by playlist */
+    uint64_t i_length; /* length indicated by playlist */
     uint64_t i_offset; /* = sum of the size of previous streams */
     stream_t *p_stream; /* this stream */
     uint64_t i_stream_skip; /* flv header and metadata size */
@@ -66,7 +61,6 @@ typedef struct _flv_tag_t
     uint8_t *p_data;
     uint8_t *p_read;
     int i_hack;
-    uint8_t p_hack_data[4];
 } flv_tag_t;
 
 #pragma pack(push)
@@ -90,8 +84,14 @@ typedef struct _flv_tag_header_t
 } flv_tag_header_t;
 #pragma pack(pop)
 
+#define SCRIPT_DATA_NUMBER       0
+#define SCRIPT_DATA_BOOLEAN      1
+#define SCRIPT_DATA_STRING       2
+#define SCRIPT_DATA_ECMA         8
+
 // XXX: this is little endian
 
+#define FLV_UI16(x) (((uint8_t *) x)[0] << 8) | ((uint8_t *) x)[1]
 #define FLV_UI24(x) ((((uint8_t *) x)[0] << 16) | (((uint8_t *) x)[1] << 8) | (((uint8_t *) x)[2]))
 #define FLV_UI32(x) ((((uint8_t *) x)[0] << 24) | (((uint8_t *) x)[1] << 16) | (((uint8_t *) x)[2] << 8) | (((uint8_t *) x)[3]))
 
@@ -109,7 +109,7 @@ struct stream_sys_t
     /* */
     int           i_site;
     vlc_array_t   *p_video;
-    uint32_t      i_length; /* total length indicated by playlist */
+    uint64_t      i_length; /* total length indicated by playlist */
     uint64_t      i_offset; /* virtual stream offset */
     uint64_t      i_size;   /* virtual stream size */
     vlc_array_t   *p_flv_tag;
@@ -139,8 +139,10 @@ static int EnsureStreamPosition(stream_t *s, uint64_t i_offset);
 static int ReadFlvTag(stream_t *s, int index);
 static int ReadNextFlvTag(stream_t *s, uint64_t i_offset);
 
+static double int2dbl(int64_t v);
+
 static int FlvCheckHeader(const uint8_t *p_data);
-static void FlvSetInt(void *p_tag, const char *psz_name, int i_value);
+static void FlvMetaDataSetDuration(void *p_tag, int i_tag_size, int64_t i_value);
 
 /****************************************************************************
  *
@@ -623,7 +625,8 @@ static int LoadStream(stream_t *s)
         return VLC_EGENERIC;
     }
     /* do "fixes" on metadata tag */
-    // XXX: TODO
+    flv_tag_t *metadata_tag = vlc_array_item_at_index(p_sys->p_flv_tag, 1);
+    FlvMetaDataSetDuration((uint8_t *) metadata_tag->p_data + sizeof(flv_tag_header_t), metadata_tag->i_size, p_sys->i_length);
 
     return VLC_SUCCESS;
 }
@@ -678,12 +681,12 @@ static int Open(vlc_object_t *p_this)
         msg_Dbg(s, "Could not handle %s://%s", s->psz_access, s->psz_path);
         return VLC_EGENERIC;
     }
-    msg_Dbg(s, "Detected site: %s, length = %d", s_psz_site_name[p_sys->i_site], p_sys->i_length);
+    msg_Dbg(s, "Detected site: %s, length = %"PRId64, s_psz_site_name[p_sys->i_site], p_sys->i_length);
     int i;
     for (i = 0; i < vlc_array_count(p_sys->p_video); i++)
     {
         suburl_t *su = vlc_array_item_at_index(p_sys->p_video, i);
-        msg_Dbg(p_this, "#%d %d - %d %s", su->i_order, su->i_start, su->i_length, su->psz_url);
+        msg_Dbg(p_this, "#%d %"PRId64" - %"PRId64" %s", su->i_order, su->i_start, su->i_length, su->psz_url);
     }
     /* try to open the files */
     if (LoadStream(s) < 0)
@@ -708,10 +711,8 @@ static int Read(stream_t *s, void *p_read, unsigned int i_read)
 {
     stream_sys_t *p_sys = s->p_sys;
 
-    // msg_Dbg(s, "%s %p %d", __func__, p_read, i_read);
     /* ensure the data is ready to read */
     int64_t i_size = (p_sys->i_offset + i_read > p_sys->i_size) ? p_sys->i_size : (p_sys->i_offset + i_read);
-    msg_Dbg(s, "target size %"PRId64, i_size);
     if (EnsureStreamParsed(s, i_size) < 0)
     {
         msg_Err(s, "Could not read to virtual offset %"PRId64" bytes", p_sys->i_offset);
@@ -746,7 +747,6 @@ static int Peek(stream_t *s, const uint8_t **pp_peek, unsigned int i_peek)
 {
     stream_sys_t *p_sys = s->p_sys;
 
-    // msg_Dbg(s, "%s %p %d", __func__, pp_peek, i_peek);
     /* prepare space for peeking */
     if (p_sys->i_peek < i_peek)
     {
@@ -835,15 +835,77 @@ static int Control(stream_t *s, int i_query, va_list args)
     return VLC_SUCCESS;
 }
 
+static double int2dbl(int64_t v)
+{
+    if(v+v > 0xFFEULL<<52)
+        return (0.0/0.0);
+    return ldexp(((v&((1LL<<52)-1)) + (1LL<<52)) * (v>>63|1), (v>>52&0x7FF)-1075);
+}
+
 static int FlvCheckHeader(const uint8_t *p_data)
 {
     return VLC_SUCCESS;
 }
 
-static void FlvSetInt(void *p_tag, const char *psz_name, int i_value)
+static void FlvMetaDataSetDuration(void *p_tag, int i_tag_size, int64_t i_value)
 {
-
+    const char *psz_name = "duration";
+    int i_name_length = strlen(psz_name);
+    if (!i_name_length)
+        return;
+    /* string 10 onMetaData */
+    static uint8_t onMetaData[] = {
+        0x02, 0x00, 0x0a, 0x6f, 0x6e, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61
+    };
+    /* onMetaData + ECMA array + key + value*/
+    if (i_tag_size < sizeof(onMetaData) + 5 + 2 + i_name_length + sizeof(double))
+        return;
+    if (memcmp(p_tag, onMetaData, sizeof(onMetaData)))
+        return;
+    uint8_t *p_array = ((uint8_t *) p_tag) + sizeof(onMetaData);
+    if (*p_array != SCRIPT_DATA_ECMA)
+        return;
+    uint8_t *p_end = (uint8_t *) p_tag + i_tag_size;
+    uint8_t *p_element = p_array + 1 + sizeof(uint32_t);
+    while (p_element < p_end)
+    {
+        /* array key */
+        int i_key_length = FLV_UI16(p_element);
+        if ((i_key_length == i_name_length) && !memcmp(p_element + 2, psz_name, i_name_length) && (*(p_element + 2 + i_key_length) == SCRIPT_DATA_NUMBER))
+        {
+            // !!! why this crashes avformat?
+            #if 0
+            /* make it big edian */
+            double d_value = int2dbl(i_value);
+            uint8_t *p_value = (uint8_t *) &d_value;
+            for (int i = 0; i < sizeof(d_value); i++) {
+                p_value[sizeof(d_value) - 1 - i] = p_value[i];
+            }
+            /* write it */
+            memcpy(p_element + 2 + i_key_length + 1, p_value, sizeof(p_value));
+            #endif
+            break;
+        }
+        /* array value */
+        p_element += (2 + i_key_length);
+        int i_val_length = 1;
+        switch (*p_element)
+        {
+        case SCRIPT_DATA_NUMBER:
+            i_val_length += sizeof(double);
+            break;
+        case SCRIPT_DATA_BOOLEAN:
+            i_val_length += sizeof(uint8_t);
+            break;
+        case SCRIPT_DATA_STRING:
+            i_val_length += 2;
+            i_val_length += FLV_UI16((p_element + 1));
+            break;
+        default:
+            // XXX: not implemented yet
+            return;
+        }
+        p_element += i_val_length;
+    }
 }
-
-
 
