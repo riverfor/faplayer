@@ -18,8 +18,8 @@
 #include <vlc_memory.h>
 
 #include <assert.h>
-#include <math.h>
 #include <expat.h>
+#include <android/log.h>
 
 /*****************************************************************************
  * Module descriptor
@@ -138,8 +138,6 @@ static int EnsureStreamParsed(stream_t *s, uint64_t i_offset);
 static int EnsureStreamPosition(stream_t *s, uint64_t i_offset);
 static int ReadFlvTag(stream_t *s, int index);
 static int ReadNextFlvTag(stream_t *s, uint64_t i_offset);
-
-static double int2dbl(int64_t v);
 
 static int FlvCheckHeader(const uint8_t *p_data);
 static void FlvMetaDataSetDuration(void *p_tag, int i_tag_size, int64_t i_value);
@@ -835,13 +833,6 @@ static int Control(stream_t *s, int i_query, va_list args)
     return VLC_SUCCESS;
 }
 
-static double int2dbl(int64_t v)
-{
-    if(v+v > 0xFFEULL<<52)
-        return (0.0/0.0);
-    return ldexp(((v&((1LL<<52)-1)) + (1LL<<52)) * (v>>63|1), (v>>52&0x7FF)-1075);
-}
-
 static int FlvCheckHeader(const uint8_t *p_data)
 {
     return VLC_SUCCESS;
@@ -851,8 +842,6 @@ static void FlvMetaDataSetDuration(void *p_tag, int i_tag_size, int64_t i_value)
 {
     const char *psz_name = "duration";
     int i_name_length = strlen(psz_name);
-    if (!i_name_length)
-        return;
     /* string 10 onMetaData */
     static uint8_t onMetaData[] = {
         0x02, 0x00, 0x0a, 0x6f, 0x6e, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61
@@ -873,17 +862,26 @@ static void FlvMetaDataSetDuration(void *p_tag, int i_tag_size, int64_t i_value)
         int i_key_length = FLV_UI16(p_element);
         if ((i_key_length == i_name_length) && !memcmp(p_element + 2, psz_name, i_name_length) && (*(p_element + 2 + i_key_length) == SCRIPT_DATA_NUMBER))
         {
-            // !!! why this crashes avformat?
-            #if 0
-            /* make it big edian */
-            double d_value = int2dbl(i_value);
+            uint8_t *p_old_value = p_element + 2 + i_key_length + 1;
+            double d_value;
+            memcpy(&d_value, p_old_value, sizeof(d_value));
+            /* change edian */
             uint8_t *p_value = (uint8_t *) &d_value;
             for (int i = 0; i < sizeof(d_value); i++) {
-                p_value[sizeof(d_value) - 1 - i] = p_value[i];
+                p_value[sizeof(d_value) - 1 - i] = p_old_value[i];
+            }
+            __android_log_print(ANDROID_LOG_DEBUG, "faplayer", "old duration = %.3f", d_value);
+            /* change edian */
+            d_value = (double) i_value / 1000.0;
+            __android_log_print(ANDROID_LOG_DEBUG, "faplayer", "new duration = %.3f", d_value);
+            p_value = (uint8_t *) &d_value;
+            for (int i = 0; i < sizeof(d_value) / 2; i++) {
+                uint8_t tmp = p_value[i];
+                p_value[i] = p_value[sizeof(d_value) - 1 - i];
+                p_value[sizeof(d_value) - 1 - i] = tmp;
             }
             /* write it */
-            memcpy(p_element + 2 + i_key_length + 1, p_value, sizeof(p_value));
-            #endif
+            memcpy(p_old_value, &d_value, sizeof(d_value));
             break;
         }
         /* array value */
