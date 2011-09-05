@@ -64,11 +64,11 @@ public class Danmaku extends Application {
 			return false;
 		}
 		// start VLC
-		String libd = String.format("%s/lib", root);
+		// String libd = String.format("%s/lib", root);
 		// VLC.setenv("VLC_PLUGIN_PATH", libd, true);
-		String conf = String.format("%s/etc/vlcrc", root);
-		String aout = String.format("aout_android");
-		String vout = String.format("vout_android");
+		// String conf = String.format("%s/etc/vlcrc", root);
+		// String aout = String.format("aout_android");
+		// String vout = String.format("vout_android");
 		// XXX: --intf, --aout, --vout don't make sense here
 		// VLC.getInstance().create(
 		// new String[] { "--verbose", "3", "--no-ignore-config",

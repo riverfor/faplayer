@@ -1,7 +1,6 @@
 package org.stagex.danmaku.activity;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.stagex.danmaku.R;
 import org.stagex.danmaku.helper.SystemUtility;
@@ -64,8 +63,8 @@ public class PlayerActivity extends Activity implements
 	private AbsMediaPlayer mMessagePlayer = null;
 
 	/* */
-	private ArrayList<String> mPlayListArray = null;
-	private int mPlayListSelected = -1;
+	private String mMediaPath = null;
+	private String mMessagePath = null;
 
 	/* GUI evnet handler */
 	private Handler mEventHandler;
@@ -80,9 +79,7 @@ public class PlayerActivity extends Activity implements
 	private ImageButton mImageButtonToggleMessage;
 	private ImageButton mImageButtonSwitchAudio;
 	private ImageButton mImageButtonSwitchSubtitle;
-	private ImageButton mImageButtonPrevious;
 	private ImageButton mImageButtonTogglePlay;
-	private ImageButton mImageButtonNext;
 	private ImageButton mImageButtonSwitchAspectRatio;
 
 	private LinearLayout mLinearLayoutControlBar;
@@ -127,19 +124,6 @@ public class PlayerActivity extends Activity implements
 				.compareTo(MsgMediaPlayer.class.getName()) == 0;
 	}
 
-	private static String guessMessageUri(String uri) {
-		if (uri.startsWith("file://")) {
-			String path = Uri.decode(uri).substring(7);
-			int indexOfDot = path.lastIndexOf('.');
-			String name = indexOfDot != -1 ? (path.substring(0, indexOfDot))
-					: path;
-			path = String.format("%s.xml", name);
-			uri = "file://" + Uri.encode(path);
-			return uri;
-		}
-		return uri;
-	}
-
 	protected void initializeEvents() {
 		mEventHandler = new Handler() {
 			public void handleMessage(Message msg) {
@@ -158,8 +142,7 @@ public class PlayerActivity extends Activity implements
 				case MEDIA_PLAYER_ERROR: {
 					/* fall back to VlcMediaPlayer if possible */
 					if (isDefMediaPlayer(msg.obj)) {
-						selectMediaPlayer(
-								mPlayListArray.get(mPlayListSelected), true);
+						selectMediaPlayer(mMediaPath, true);
 						break;
 					} else if (isVlcMediaPlayer(msg.obj)) {
 						/* update status */
@@ -220,6 +203,8 @@ public class PlayerActivity extends Activity implements
 									.getTimeString(mTime));
 							mSeekBarProgress.setProgress(mTime);
 						}
+						if (mMediaPlayer != null && mMessagePlayer != null)
+							mMessagePlayer.seekTo(time);
 					}
 					break;
 				}
@@ -247,8 +232,7 @@ public class PlayerActivity extends Activity implements
 		mSurfaceHolderVlc.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
-				createMediaPlayer(false, mPlayListArray.get(mPlayListSelected),
-						mSurfaceHolderVlc);
+				createMediaPlayer(false, mMediaPath, mSurfaceHolderVlc);
 			}
 
 			@Override
@@ -272,8 +256,7 @@ public class PlayerActivity extends Activity implements
 		mSurfaceHolderDef.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
-				createMediaPlayer(true, mPlayListArray.get(mPlayListSelected),
-						mSurfaceHolderDef);
+				createMediaPlayer(true, mMediaPath, mSurfaceHolderDef);
 			}
 
 			@Override
@@ -296,8 +279,7 @@ public class PlayerActivity extends Activity implements
 		mSurfaceHolderMsg.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
-				createMessagePlayer(mPlayListArray.get(mPlayListSelected),
-						mSurfaceHolderMsg);
+				createMessagePlayer(mMessagePath, mSurfaceHolderMsg);
 			}
 
 			@Override
@@ -323,12 +305,8 @@ public class PlayerActivity extends Activity implements
 		mImageButtonSwitchAudio.setOnClickListener(this);
 		mImageButtonSwitchSubtitle = (ImageButton) findViewById(R.id.player_button_switch_subtitle);
 		mImageButtonSwitchSubtitle.setOnClickListener(this);
-		mImageButtonPrevious = (ImageButton) findViewById(R.id.player_button_previous);
-		mImageButtonPrevious.setOnClickListener(this);
 		mImageButtonTogglePlay = (ImageButton) findViewById(R.id.player_button_toggle_play);
 		mImageButtonTogglePlay.setOnClickListener(this);
-		mImageButtonNext = (ImageButton) findViewById(R.id.player_button_next);
-		mImageButtonNext.setOnClickListener(this);
 		mImageButtonSwitchAspectRatio = (ImageButton) findViewById(R.id.player_button_switch_aspect_ratio);
 		mImageButtonSwitchAspectRatio.setOnClickListener(this);
 
@@ -341,20 +319,16 @@ public class PlayerActivity extends Activity implements
 		Intent intent = getIntent();
 		String action = intent.getAction();
 		if (action != null && action.equals(Intent.ACTION_VIEW)) {
-			String one = intent.getDataString();
-			mPlayListSelected = 0;
-			mPlayListArray = new ArrayList<String>();
-			mPlayListArray.add(one);
+			mMediaPath = intent.getDataString();
 		} else {
-			mPlayListSelected = intent.getIntExtra("selected", 0);
-			mPlayListArray = intent.getStringArrayListExtra("playlist");
+			mMediaPath = intent.getStringExtra("media");
+			mMessagePath = intent.getStringExtra("message");
 		}
-		if (mPlayListArray == null || mPlayListArray.size() == 0) {
+		if (mMediaPath == null && mMessagePath == null) {
 			Log.e(LOGTAG, "initializeData(): empty");
 			finish();
 			return;
 		}
-		// TODO: specify message file URI
 	}
 
 	protected void resetMediaPlayer() {
@@ -369,14 +343,9 @@ public class PlayerActivity extends Activity implements
 		mImageButtonToggleMessage.setVisibility(View.GONE);
 		mImageButtonSwitchAudio.setVisibility(View.GONE);
 		mImageButtonSwitchSubtitle.setVisibility(View.GONE);
-		mImageButtonPrevious
-				.setVisibility((mPlayListArray.size() == 1) ? View.GONE
-						: View.VISIBLE);
 		mImageButtonTogglePlay.setVisibility(View.VISIBLE);
 		resource = SystemUtility.getDrawableId("btn_play_0");
 		mImageButtonTogglePlay.setBackgroundResource(resource);
-		mImageButtonNext.setVisibility((mPlayListArray.size() == 1) ? View.GONE
-				: View.VISIBLE);
 		mImageButtonSwitchAspectRatio.setVisibility(View.VISIBLE);
 		resource = SystemUtility.getDrawableId("btn_aspect_ratio_0");
 		mImageButtonSwitchAspectRatio.setBackgroundResource(resource);
@@ -400,6 +369,9 @@ public class PlayerActivity extends Activity implements
 			}
 		}
 		if (forceVlc) {
+			useDefault = false;
+		}
+		if (uri.startsWith("http")) {
 			useDefault = false;
 		}
 		mSurfaceViewDef.setVisibility(useDefault ? View.VISIBLE : View.GONE);
@@ -442,13 +414,15 @@ public class PlayerActivity extends Activity implements
 	protected void detectMessagePlayer(String uri) {
 		/* assume yes when it's not a local file */
 		boolean hasMessage = false;
-		if (!uri.startsWith("file://")) {
-			hasMessage = true;
-		} else {
-			/* try local file */
-			String path = Uri.decode(uri).substring(7);
-			File test = new File(path);
-			hasMessage = test.isFile();
+		if (uri != null) {
+			if (!uri.startsWith("file://")) {
+				hasMessage = true;
+			} else {
+				/* try local file */
+				String path = Uri.decode(uri).substring(7);
+				File test = new File(path);
+				hasMessage = test.isFile();
+			}
 		}
 		if (!hasMessage) {
 			mMessagePlayerLoaded = true;
@@ -471,7 +445,7 @@ public class PlayerActivity extends Activity implements
 		mMessagePlayer.setOnVideoSizeChangedListener(this);
 		mMessagePlayer.reset();
 		mMessagePlayer.setDisplay(holder);
-		mMessagePlayer.setDataSource(guessMessageUri(uri));
+		mMessagePlayer.setDataSource(uri);
 		mMessagePlayer.prepareAsync();
 	}
 
@@ -481,6 +455,7 @@ public class PlayerActivity extends Activity implements
 	}
 
 	protected void startAllPlayers() {
+		// XXX: barrier?
 		if (mPlayerStarted)
 			return;
 		if (!mMediaPlayerLoaded || !mMessagePlayerLoaded)
@@ -561,9 +536,8 @@ public class PlayerActivity extends Activity implements
 		initializeControls();
 		mProgressBarPreparing.setVisibility(View.VISIBLE);
 		initializeData();
-		String uri = mPlayListArray.get(mPlayListSelected);
-		detectMessagePlayer(uri);
-		selectMediaPlayer(uri, false);
+		detectMessagePlayer(mMessagePath);
+		selectMediaPlayer(mMediaPath, false);
 	}
 
 	@Override
@@ -626,10 +600,6 @@ public class PlayerActivity extends Activity implements
 
 			break;
 		}
-		case R.id.player_button_previous: {
-
-			break;
-		}
 		case R.id.player_button_toggle_play: {
 			boolean playing = false;
 			if (mMediaPlayer != null)
@@ -650,9 +620,6 @@ public class PlayerActivity extends Activity implements
 			String name = String.format("btn_play_%d", !playing ? 1 : 0);
 			int resouce = SystemUtility.getDrawableId(name);
 			mImageButtonTogglePlay.setBackgroundResource(resouce);
-			break;
-		}
-		case R.id.player_button_next: {
 			break;
 		}
 		case R.id.player_button_switch_aspect_ratio: {

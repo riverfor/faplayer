@@ -1,7 +1,5 @@
 package org.stagex.danmaku.activity;
 
-import java.util.ArrayList;
-
 import org.stagex.danmaku.R;
 
 import android.app.Activity;
@@ -31,10 +29,7 @@ public class TestActivity extends Activity {
 				if (uri.length() > 0) {
 					Intent intent = new Intent(TestActivity.this,
 							PlayerActivity.class);
-					ArrayList<String> playlist = new ArrayList<String>();
-					playlist.add(uri);
-					intent.putExtra("selected", 0);
-					intent.putExtra("playlist", playlist);
+					intent.putExtra("media", uri);
 					startActivity(intent);
 				}
 			}

@@ -123,19 +123,15 @@ public class FileBrowserAdapter extends BaseAdapter implements
 			int selected = position - mTop.size();
 			Uri selectedUri = null;
 			Intent intent = new Intent(mContext, PlayerActivity.class);
-			ArrayList<Uri> playlist = new ArrayList<Uri>();
 			int n = 0;
 			for (String name : mBottom) {
 				String path = String.format("/%s/%s", mCurrentPath, name);
 				File tempFile = new File(path);
 				Uri tempUri = Uri.fromFile(tempFile);
-				playlist.add(tempUri);
 				if (n == selected)
 					selectedUri = tempUri;
 				n++;
 			}
-			intent.putExtra("selected", selected);
-			intent.putExtra("playlist", playlist);
 			intent.setAction(Intent.ACTION_VIEW);
 			intent.setData(selectedUri);
 			mContext.startActivity(intent);

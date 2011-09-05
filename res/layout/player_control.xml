@@ -81,30 +81,8 @@
             android:layout_marginBottom="4dip" />
 
 		<ImageButton
-            android:id="@+id/player_button_previous"
-            android:visibility="gone"
-            android:background="@drawable/btn_previous"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dip"
-            android:layout_marginTop="4dip"
-            android:layout_marginRight="8dip"
-            android:layout_marginBottom="4dip" />
-
-		<ImageButton
             android:id="@+id/player_button_toggle_play"
             android:background="@drawable/btn_play_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dip"
-            android:layout_marginTop="4dip"
-            android:layout_marginRight="8dip"
-            android:layout_marginBottom="4dip" />
-
-		<ImageButton
-            android:id="@+id/player_button_next"
-            android:visibility="gone"
-            android:background="@drawable/btn_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dip"
