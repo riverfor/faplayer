@@ -18,7 +18,6 @@
 #include <vlc_memory.h>
 
 #include <assert.h>
-#include <expat.h>
 #include <android/log.h>
 
 /*****************************************************************************
@@ -44,7 +43,6 @@ typedef struct _suburl_t
     int i_order; /* order */
     char *psz_url; /* url */
     uint64_t i_start; /* start time indicated by playlist */
-    uint64_t i_length; /* length indicated by playlist */
     uint64_t i_offset; /* = sum of the size of previous streams */
     stream_t *p_stream; /* this stream */
     uint64_t i_stream_skip; /* flv header and metadata size */
@@ -100,14 +98,6 @@ typedef struct _flv_tag_header_t
 
 struct stream_sys_t
 {
-    /* used for parsing playlist */
-    int           temp_depth;
-    vlc_array_t   *temp_tag;
-    int           temp_order;
-    char          *temp_url;
-    int           temp_length;
-    /* */
-    int           i_site;
     vlc_array_t   *p_video;
     uint64_t      i_length; /* total length indicated by playlist */
     uint64_t      i_offset; /* virtual stream offset */
@@ -145,92 +135,6 @@ static void FlvMetaDataSetDuration(void *p_tag, int i_tag_size, int64_t i_value)
 /****************************************************************************
  *
  ****************************************************************************/
-
-#define SITE_NONE       0
-#define SITE_SINA       1
-
-static char *s_psz_site_name[] = {
-    "none",
-    "sina"
-};
-
-static int parse_int(const char *s, int len)
-{
-    int i, val = 0;
-
-    for (i = 0; i < len; i++)
-    {
-        char c = s[i];
-        val = val * 10 + (c - '0');
-    }
-
-    return val;
-}
-
-static int compare_sina_order(const void *a, const void *b)
-{
-    suburl_t *sua = (suburl_t *) a, *sub = (suburl_t *) b;
-    return (sua->i_order - sub->i_order);
-}
-
-static void XMLCALL xml_start_element_handler(void *user, XML_Char *name, XML_Char **atts)
-{
-    stream_t *s = user;
-    stream_sys_t *p_sys = s->p_sys;
-
-    vlc_array_append(p_sys->temp_tag, strdup(name));
-    p_sys->temp_depth += 1;
-}
-
-static void XMLCALL xml_end_element_handler(void *user, XML_Char *name)
-{
-    stream_t *s = user;
-    stream_sys_t *p_sys = s->p_sys;
-
-    if (p_sys->i_site == SITE_SINA)
-    {
-        if (p_sys->temp_depth == 2 && !strcmp(name, "durl"))
-        {
-            suburl_t *su = calloc(1, sizeof(suburl_t));
-            su->i_order = p_sys->temp_order;
-            su->psz_url = p_sys->temp_url;
-            su->i_length = p_sys->temp_length;
-            vlc_array_append(p_sys->p_video, su);
-        }
-    }
-
-    p_sys->temp_depth -= 1;
-    char *tag = vlc_array_item_at_index(p_sys->temp_tag, p_sys->temp_depth);
-    free(tag);
-    vlc_array_remove(p_sys->temp_tag, p_sys->temp_depth);
-}
-
-static void XMLCALL xml_character_data_handler(void *user, const XML_Char *str, int len)
-{
-    stream_t *s = user;
-    stream_sys_t *p_sys = s->p_sys;
-
-    char *tag = vlc_array_item_at_index(p_sys->temp_tag, p_sys->temp_depth - 1);
-    if (p_sys->i_site == SITE_SINA)
-    {
-        if (p_sys->temp_depth == 2 && !strcmp(tag, "timelength"))
-        {
-            p_sys->i_length = parse_int(str, len);
-        }
-        else if (p_sys->temp_depth == 3 && !strcmp(tag, "order"))
-        {
-            p_sys->temp_order = parse_int(str, len);
-        }
-        else if (p_sys->temp_depth == 3 && !strcmp(tag, "url"))
-        {
-            p_sys->temp_url = strndup(str, len);
-        }
-        else if (p_sys->temp_depth == 3 && !strcmp(tag, "length"))
-        {
-            p_sys->temp_length = parse_int(str, len);
-        }
-    }
-}
 
 static int GetStreamIndex(stream_t *s, int64_t position)
 {
@@ -437,99 +341,41 @@ static int ReadNextFlvTag(stream_t *s, uint64_t i_offset)
 
 static bool DetectStream(stream_t *s)
 {
-    const uint8_t *peek;
-    char *xml;
-    int xml_length;
     stream_sys_t *p_sys = s->p_sys;
-
-    /* should be enough to hold all contents */
-    int64_t peek_size = stream_Peek(s->p_source, &peek, 65536);
-    if (peek_size < 1)
+    const uint8_t *p_peek;
+    int i_peek = stream_Peek(s->p_source, &p_peek, 4);
+    if (i_peek != 4)
         return false;
-    if (strncmp("<?xml", peek, 5))
+    if (strncmp(p_peek, "#FLV", 4))
         return false;
-    /* parse begin tag */
-    char *encoding = NULL, *encoding_start, *encoding_end;
-    encoding_start = strstr(peek, "encoding=\"");
-    if (encoding_start)
-    {
-        encoding_start += 10;
-        encoding_end = strchr(encoding_start, '\"');
-        int encoding_length = encoding_end - encoding_start;
-        if (encoding_length > 0)
-        {
-            encoding = malloc(encoding_length + 1);
-            strncpy(encoding, encoding_start, encoding_length);
-            encoding[encoding_length] = '\0';
-        }
-    }
-    /* convert non utf-8 to utf-8 */
-    if (encoding != NULL && strcasecmp(encoding, "UTF-8"))
-    {
-        // TODO:
-    }
-    else
-    {
-        xml = malloc(peek_size + 1);
-        memcpy(xml, peek, peek_size);
-        xml[peek_size] = 0;
-        xml_length = peek_size;
-    }
-    if (encoding)
-        free(encoding);
-    /* guess type from URL */
-    p_sys->i_site = SITE_NONE;
-    if (!strncmp(s->psz_path, "v.iask.com", 10))
-        p_sys->i_site = SITE_SINA;
-    if (p_sys->i_site == SITE_NONE)
-        return false;
-    /* parse the XML formatted playlist */
     p_sys->p_video = vlc_array_new();
-    p_sys->temp_tag = vlc_array_new();
-    XML_Parser parser = XML_ParserCreate(NULL);
-    XML_SetUserData(parser, s);
-    XML_SetStartElementHandler(parser, (XML_StartElementHandler) xml_start_element_handler);
-    XML_SetEndElementHandler(parser, (XML_EndElementHandler) xml_end_element_handler);
-    XML_SetCharacterDataHandler(parser, xml_character_data_handler);
-    int i = 0;
-    int status = XML_Parse(parser, xml, xml_length, 1);
-    /* failed to parse */
-    if (status == XML_STATUS_ERROR)
+    int i_count = -1;
+    char *psz_line;
+    while ((psz_line = stream_ReadLine(s->p_source)))
     {
-        /* release any result */
-        for (i = 0; i < vlc_array_count(p_sys->p_video); i++)
+        i_count += 1;
+        if (i_count == 0)
+            continue;
+        suburl_t *su = calloc(1, sizeof(suburl_t));
+        char *psz_comma = strchr(psz_line, ',');
+        su->i_order = i_count;
+        if (su->i_order > 1)
+            su->i_start = strtoll(psz_line, &psz_comma, 10);
+        else
         {
-            suburl_t *su = vlc_array_item_at_index(p_sys->p_video, i);
-            if (su->psz_url)
-                free(su->psz_url);
-            free(su);
+            su->i_start = 0;
+            p_sys->i_length = strtoll(psz_line, &psz_comma, 10);
         }
+        su->psz_url = decode_URI_duplicate(psz_comma + 1);
+        vlc_array_append(p_sys->p_video, su);
+        free(psz_line);
+    }
+    if (vlc_array_count(p_sys->p_video) == 0)
+    {
         vlc_array_destroy(p_sys->p_video);
-        msg_Err(s, "Error parsing XML at %d: %s", XML_GetCurrentLineNumber(parser), XML_ErrorString(XML_GetErrorCode(parser)));
+        return false;
     }
-    XML_ParserFree(parser);
-    for (i = 0; i < vlc_array_count(p_sys->temp_tag); i++)
-        free(vlc_array_item_at_index(p_sys->temp_tag, i));
-    vlc_array_destroy(p_sys->temp_tag);
-    free(xml);
-    /* misc */
-    if (status == XML_STATUS_OK)
-    {
-        /* for sina url */
-        if (p_sys->i_site = SITE_SINA)
-        {
-            qsort(p_sys->p_video->pp_elems, vlc_array_count(p_sys->p_video), sizeof(p_sys->p_video->pp_elems[0]), compare_sina_order);
-            /* calculate time */
-            for (i = 1; i < vlc_array_count(p_sys->p_video); i++)
-            {
-                suburl_t *su0 = vlc_array_item_at_index(p_sys->p_video, i - 1);
-                suburl_t *su1 = vlc_array_item_at_index(p_sys->p_video, i);
-                su1->i_start = su0->i_start + su0->i_length;
-            }
-        }
-    }
-
-    return (status == XML_STATUS_OK);
+    return true;
 }
 
 static int LoadStream(stream_t *s)
@@ -665,9 +511,6 @@ static int Open(vlc_object_t *p_this)
     stream_t *s = (stream_t *) p_this;
     stream_sys_t *p_sys;
 
-    /* must be http? */
-    if (strcmp(s->psz_access, "http"))
-        return VLC_EGENERIC;
     p_sys = calloc(1, sizeof(stream_sys_t));
     if (!p_sys)
         return VLC_ENOMEM;
@@ -676,15 +519,13 @@ static int Open(vlc_object_t *p_this)
     if (!DetectStream(s))
     {
         free(p_sys);
-        msg_Dbg(s, "Could not handle %s://%s", s->psz_access, s->psz_path);
         return VLC_EGENERIC;
     }
-    msg_Dbg(s, "Detected site: %s, length = %"PRId64, s_psz_site_name[p_sys->i_site], p_sys->i_length);
     int i;
     for (i = 0; i < vlc_array_count(p_sys->p_video); i++)
     {
         suburl_t *su = vlc_array_item_at_index(p_sys->p_video, i);
-        msg_Dbg(p_this, "#%d %"PRId64" - %"PRId64" %s", su->i_order, su->i_start, su->i_length, su->psz_url);
+        msg_Dbg(p_this, "#%d %"PRId64" %s", su->i_order, su->i_start, su->psz_url);
     }
     /* try to open the files */
     if (LoadStream(s) < 0)
@@ -847,7 +688,7 @@ static void FlvMetaDataSetDuration(void *p_tag, int i_tag_size, int64_t i_value)
         0x02, 0x00, 0x0a, 0x6f, 0x6e, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61
     };
     /* onMetaData + ECMA array + key + value*/
-    if (i_tag_size < sizeof(onMetaData) + 5 + 2 + i_name_length + sizeof(double))
+    if (i_tag_size < sizeof(onMetaData) + 5 + 2 + i_name_length + 1 + sizeof(double))
         return;
     if (memcmp(p_tag, onMetaData, sizeof(onMetaData)))
         return;

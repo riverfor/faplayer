@@ -19,8 +19,7 @@ LOCAL_CFLAGS += \
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src \
-    $(EXTROOT)/expat/lib
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     flash.c
