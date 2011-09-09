@@ -480,27 +480,33 @@ static void FreeStream(stream_t *s)
     stream_sys_t *p_sys = s->p_sys;
 
     int i;
-    for (i = 0; i < vlc_array_count(p_sys->p_video); i++)
+    if (p_sys->p_video)
     {
-        suburl_t *su = vlc_array_item_at_index(p_sys->p_video, i);
-        if (su->psz_url)
-            free(su->psz_url);
-        if (su->p_stream)
-            stream_Delete(su->p_stream);
-        free(su);
-    }
-    vlc_array_destroy(p_sys->p_video);
-    for (i = 0; i < vlc_array_count(p_sys->p_flv_tag); i++)
-    {
-        flv_tag_t *tag = vlc_array_item_at_index(p_sys->p_flv_tag, i);
-        if (tag)
+        for (i = 0; i < vlc_array_count(p_sys->p_video); i++)
         {
-            if (tag->p_data)
-                free(tag->p_data);
-            free(tag);
+            suburl_t *su = vlc_array_item_at_index(p_sys->p_video, i);
+            if (su->psz_url)
+                free(su->psz_url);
+            if (su->p_stream)
+                stream_Delete(su->p_stream);
+            free(su);
         }
+        vlc_array_destroy(p_sys->p_video);
     }
-    vlc_array_destroy(p_sys->p_flv_tag);
+    if (p_sys->p_flv_tag)
+    {
+        for (i = 0; i < vlc_array_count(p_sys->p_flv_tag); i++)
+        {
+            flv_tag_t *tag = vlc_array_item_at_index(p_sys->p_flv_tag, i);
+            if (tag)
+            {
+                if (tag->p_data)
+                    free(tag->p_data);
+                free(tag);
+            }
+        }
+        vlc_array_destroy(p_sys->p_flv_tag);
+    }
     if (p_sys->p_peek)
         free(p_sys->p_peek);
     free(p_sys);
