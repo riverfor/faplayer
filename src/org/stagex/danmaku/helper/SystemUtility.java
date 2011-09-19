@@ -1,13 +1,11 @@
 package org.stagex.danmaku.helper;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -20,51 +18,11 @@ import org.stagex.danmaku.R;
 
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 
 public class SystemUtility {
 
-	static {
-		System.loadLibrary("vlccore");
-	}
-
-	public static native int setenv(String name, String value, boolean overwrite);
-
-	private static int sArmArchitecture = -1;
-
-	public static int getArmArchitecture() {
-		if (sArmArchitecture != -1)
-			return sArmArchitecture;
-		try {
-			InputStream is = new FileInputStream("/proc/cpuinfo");
-			InputStreamReader ir = new InputStreamReader(is);
-			BufferedReader br = new BufferedReader(ir);
-			try {
-				String name = "CPU architecture";
-				while (true) {
-					String line = br.readLine();
-					String[] pair = line.split(":");
-					if (pair.length != 2)
-						continue;
-					String key = pair[0].trim();
-					String val = pair[1].trim();
-					if (key.compareToIgnoreCase(name) == 0) {
-						String n = val.substring(0, 1);
-						sArmArchitecture = Integer.parseInt(n);
-						break;
-					}
-				}
-			} finally {
-				br.close();
-				ir.close();
-				is.close();
-				if (sArmArchitecture == -1)
-					sArmArchitecture = 6;
-			}
-		} catch (Exception e) {
-			sArmArchitecture = 6;
-		}
-		return sArmArchitecture;
-	}
+	public static final String LOGTAG = "DANMAKU-SystemUtility";
 
 	public static int getSDKVersionCode() {
 		// TODO: fix this
@@ -165,4 +123,17 @@ public class SystemUtility {
 		return hash;
 	}
 
+	public static String getprop(String key) {
+		ClassLoader loader = SystemUtility.class.getClassLoader();
+		try {
+			Class<?> clazz = loader.loadClass("android.os.SystemProperties");
+			Method method = clazz
+					.getMethod("get", new Class[] { String.class });
+			String val = (String) method.invoke(clazz, key);
+			return val;
+		} catch (Exception e) {
+			Log.d(LOGTAG, e.getMessage());
+			return "";
+		}
+	}
 }

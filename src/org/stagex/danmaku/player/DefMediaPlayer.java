@@ -3,6 +3,7 @@ package org.stagex.danmaku.player;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.util.Log;
@@ -44,7 +45,7 @@ public class DefMediaPlayer extends AbsMediaPlayer implements
 	private AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
 	private AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
 
-	public static DefMediaPlayer getInstance() {
+	public static DefMediaPlayer getInstance(Context context) {
 		if (sInstance == null)
 			sInstance = new DefMediaPlayer();
 		return sInstance;

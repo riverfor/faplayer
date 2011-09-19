@@ -10,6 +10,7 @@ import org.stagex.danmaku.site.CommentParserFactory;
 import org.stagex.danmaku.site.MessagePlayer;
 import org.stagex.danmaku.site.MessagePlayerFactory;
 
+import android.content.Context;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.util.Log;
@@ -39,7 +40,7 @@ public class MsgMediaPlayer extends AbsMediaPlayer implements
 	protected OnProgressUpdateListener mOnProgressUpdateListener = null;
 	protected OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
 
-	public static MsgMediaPlayer getInstance() {
+	public static MsgMediaPlayer getInstance(Context context) {
 		if (sInstance == null)
 			sInstance = new MsgMediaPlayer();
 		return sInstance;

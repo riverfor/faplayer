@@ -1,5 +1,6 @@
 package org.stagex.danmaku.player;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -105,24 +106,27 @@ public abstract class AbsMediaPlayer {
 
 	public abstract void setSubtitleTrack(int index);
 
-	protected static AbsMediaPlayer getDefMediaPlayer() {
+	protected static AbsMediaPlayer getDefMediaPlayer(Context context) {
 		Log.d(LOGTAG, "using DefMediaPlayer");
-		return DefMediaPlayer.getInstance();
+		return DefMediaPlayer.getInstance(context);
 	}
 
-	protected static AbsMediaPlayer getVlcMediaPlayer() {
+	protected static AbsMediaPlayer getVlcMediaPlayer(Context context) {
 		/* this is not needed to be singleton */
 		Log.d(LOGTAG, "using VlcMediaPlayer");
-		return VlcMediaPlayer.getInstance();
+		return VlcMediaPlayer.getInstance(context);
 	}
 
-	public static AbsMediaPlayer getMediaPlayer(boolean useDefault) {
-		return useDefault ? getDefMediaPlayer() : getVlcMediaPlayer();
+	// TODO: lock
+	public static AbsMediaPlayer getMediaPlayer(Context context,
+			boolean useDefault) {
+		return useDefault ? getDefMediaPlayer(context)
+				: getVlcMediaPlayer(context);
 	}
 
-	public static AbsMediaPlayer getMessagePlayer() {
+	public static AbsMediaPlayer getMessagePlayer(Context context) {
 		/* this is not needed to be singleton */
-		return MsgMediaPlayer.getInstance();
+		return MsgMediaPlayer.getInstance(context);
 	}
 
 }

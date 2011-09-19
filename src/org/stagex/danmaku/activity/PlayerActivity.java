@@ -384,7 +384,7 @@ public class PlayerActivity extends Activity implements
 		/* */
 		resetMediaPlayer();
 		/* */
-		mMediaPlayer = AbsMediaPlayer.getMediaPlayer(useDefault);
+		mMediaPlayer = AbsMediaPlayer.getMediaPlayer(this, useDefault);
 		mMediaPlayer.setOnBufferingUpdateListener(this);
 		mMediaPlayer.setOnCompletionListener(this);
 		mMediaPlayer.setOnErrorListener(this);
@@ -435,7 +435,7 @@ public class PlayerActivity extends Activity implements
 		/* */
 		resetMessagePlayer();
 		/* */
-		mMessagePlayer = AbsMediaPlayer.getMessagePlayer();
+		mMessagePlayer = AbsMediaPlayer.getMessagePlayer(this);
 		mMessagePlayer.setOnBufferingUpdateListener(this);
 		mMessagePlayer.setOnCompletionListener(this);
 		mMessagePlayer.setOnErrorListener(this);

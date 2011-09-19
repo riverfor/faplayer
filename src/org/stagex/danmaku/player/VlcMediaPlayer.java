@@ -1,5 +1,18 @@
 package org.stagex.danmaku.player;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+import org.stagex.danmaku.helper.SystemUtility;
+
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
 import android.util.Log;
@@ -8,11 +21,12 @@ import android.view.SurfaceHolder;
 
 public class VlcMediaPlayer extends AbsMediaPlayer {
 
-	static {
-		System.loadLibrary("vlccore");
-	}
-
 	private static final String LOGTAG = "DANMAKU-VlcMediaPlayer";
+
+	private static final String sPackagePrefix = "cc.myloli.vlc";
+	private static final String sSoName = "vlccore";
+	private static final String sSoFullName = "libvlccore.so";
+	private static boolean sLibraryLoaded = false;
 
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
@@ -178,7 +192,73 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 		}
 	}
 
-	public static VlcMediaPlayer getInstance() {
+	public static VlcMediaPlayer getInstance(Context context) {
+		if (sLibraryLoaded == false) {
+			/* get CPU features */
+			ArrayList<String> features = new ArrayList<String>();
+			try {
+				InputStream is = new FileInputStream("/proc/cpuinfo");
+				InputStreamReader ir = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(ir);
+				try {
+					while (true) {
+						String line = br.readLine();
+						String[] pair = line.split(":");
+						if (pair.length != 2)
+							continue;
+						String key = pair[0].trim();
+						String val = pair[1].trim();
+						if ((key.compareToIgnoreCase("features") == 0)
+								|| (key.compareToIgnoreCase("flags") == 0)) {
+							for (String f : val.split(" ")) {
+								f = f.toLowerCase();
+								f = f.replaceAll("[^0-9a-z]", "");
+								if (f.length() > 0)
+									features.add(0, f);
+							}
+							break;
+						}
+					}
+				} finally {
+					br.close();
+					ir.close();
+					is.close();
+				}
+			} catch (IOException e) {
+				Log.d(LOGTAG, e.getMessage());
+			}
+			features.add("");
+			/* choose the best one */
+			String abi = SystemUtility.getprop("ro.product.cpu.abi");
+			abi = abi.toLowerCase();
+			abi = abi.replaceAll("[^0-9a-z]", "");
+			PackageManager pm = context.getPackageManager();
+			for (String feature : features) {
+				String pn = feature.length() > 0 ? String.format("%s.%s.%s",
+						sPackagePrefix, abi, feature) : String.format("%s.%s",
+						sPackagePrefix, abi);
+				try {
+					ApplicationInfo info = pm.getApplicationInfo(pn,
+							PackageManager.GET_SHARED_LIBRARY_FILES);
+					String path = String.format("%s/lib/%s", info.dataDir,
+							sSoFullName);
+					try {
+						System.load(path);
+						sLibraryLoaded = true;
+						break;
+					} catch (java.lang.UnsatisfiedLinkError e) {
+						Log.d(LOGTAG, e.getMessage());
+					}
+				} catch (NameNotFoundException e) {
+					Log.d(LOGTAG, e.getMessage());
+				}
+			}
+			/* at least the built-in one can be used */
+			if (!sLibraryLoaded) {
+				System.loadLibrary(sSoName);
+				sLibraryLoaded = true;
+			}
+		}
 		return new VlcMediaPlayer();
 	}
 
