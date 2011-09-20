@@ -1,3 +1,0 @@
-etc/vlcrc
-bin/ffmpeg
-bin/.gitkeep

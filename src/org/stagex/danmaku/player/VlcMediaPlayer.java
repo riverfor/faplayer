@@ -23,7 +23,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	private static final String LOGTAG = "DANMAKU-VlcMediaPlayer";
 
-	private static final String sPackagePrefix = "cc.myloli.vlc";
+	private static final String sPackagePrefix = "org.stagex.danmaku.player.vlc";
 	private static final String sSoName = "vlccore";
 	private static final String sSoFullName = "libvlccore.so";
 	private static boolean sLibraryLoaded = false;

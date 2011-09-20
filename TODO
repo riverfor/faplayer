@@ -7,5 +7,6 @@ TODO
 ( ) fix danmaku
 ( ) viewer for acfun/bilibili and so on(nicovideo needs login so do it later)
 ( ) download video & danmaku from acfun/bilibili(nicovideo needs login so do it later)
-( ) merge multiple flv files into one for sina/qq/? source
+(?) merge multiple flv files into one for sina/qq/? source
 (?) implement fullscreen/aspect ration control in both MediaPlayer and VLC
+( ) write a vlc codec plugin working in DICE PLAYER way(no OMX and no privillege issue)

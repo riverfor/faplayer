@@ -2,3 +2,10 @@ bin/*
 gen/*
 libs/*
 obj/*
+vlc/bin/*
+vlc/gen/*
+vlc/obj/*
+vlc/libs/*
+vlc/jni/Application.mk
+vlc/jni/AndroidManifest.xml
+vlc/ndk-build.log

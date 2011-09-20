@@ -1,11 +1,10 @@
 #!/bin/sh
 
-rm -rf libs
-ruby pre-build.rb
-ndk-build $@ || exit 1
-rm -rf assets/lib
-ruby post-build.rb
-rm -rf bin
+ruby vlc/build.rb || exit 1
+# XXX
+rm -rf lib
+unzip -o vlc/bin/faplayer-jni-ARM-NEON.apk 'lib/*'
+mv lib libs
 ant release
 test -f bin/faplayer-unsigned.apk || exit 1
 java -jar signapk.jar testkey.x509.pem testkey.pk8 bin/faplayer-unsigned.apk bin/faplayer.apk
