@@ -176,7 +176,7 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved)
     vlc_cond_destroy(&s_VlcMediaPlayer_cond);
 }
 
-JNIEXPORT int Java_org_stagex_danmaku_helper_SystemUtility_setenv(JNIEnv *env, jclass klz, jstring key, jstring val, jboolean overwrite)
+JNIEXPORT int NAME(setenv)(JNIEnv *env, jclass klz, jstring key, jstring val, jboolean overwrite)
 {
     const char *key_utf8 = (*env)->GetStringUTFChars(env, key, NULL);
     const char *val_utf8 = (*env)->GetStringUTFChars(env, val, NULL);

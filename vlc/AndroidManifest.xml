@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="org.stagex.danmaku.player.vlc.armeabiv7a.vfpv3d16"
-      android:versionCode="1316519707"
-      android:versionName="2011.09.20.19.55.07">
-    <application android:name="VlcJni-ARM-VFPV3D16" android:icon="@drawable/icon" android:label="@string/name">
-    </application>
-    <uses-sdk android:minSdkVersion="3" />
-</manifest>

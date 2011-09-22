@@ -27,6 +27,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	private static final String sSoName = "vlccore";
 	private static final String sSoFullName = "libvlccore.so";
 	private static boolean sLibraryLoaded = false;
+	private static final String sPluginPathEnv = "VLC_PLUGIN_PATH";
 
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
@@ -39,6 +40,10 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	/* */
 	private int mTime = -1;
+
+	/* used to set VLC_PLUGIN_PATH */
+	protected static native int setenv(String name, String value,
+			boolean overwrite);
 
 	/*  */
 	protected native void nativeAttachSurface(Surface s);
@@ -243,6 +248,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 					String path = String.format("%s/lib/%s", info.dataDir,
 							sSoFullName);
 					try {
+						setenv(sPluginPathEnv, info.dataDir, true);
 						System.load(path);
 						sLibraryLoaded = true;
 						break;
@@ -255,6 +261,8 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 			}
 			/* at least the built-in one can be used */
 			if (!sLibraryLoaded) {
+				setenv(sPluginPathEnv, context.getCacheDir().getAbsolutePath(),
+						true);
 				System.loadLibrary(sSoName);
 				sLibraryLoaded = true;
 			}
