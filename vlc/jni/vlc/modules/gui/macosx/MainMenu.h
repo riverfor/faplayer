@@ -2,7 +2,7 @@
  * MainMenu.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 0d0b45be5cd9bd822870685209caa083af930fb4 $
+ * $Id: 3f1f4f54e635bc691ecdba417047771915d60988 $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -74,6 +74,7 @@
     IBOutlet NSMenu * o_mu_controls;
     IBOutlet NSMenuItem * o_mi_play;
     IBOutlet NSMenuItem * o_mi_stop;
+    IBOutlet NSMenuItem * o_mi_record;
     IBOutlet NSMenuItem * o_mi_rate;
     IBOutlet NSView * o_mi_rate_view;
     IBOutlet id o_mi_rate_lbl;
@@ -206,7 +207,15 @@
 - (IBAction)intfOpenNet:(id)sender;
 - (IBAction)intfOpenCapture:(id)sender;
 
+- (IBAction)toggleRecord:(id)sender;
+- (void)updateRecordState:(BOOL)b_value;
 - (IBAction)setPlaybackRate:(id)sender;
+- (void)updatePlaybackRate;
+
+- (IBAction)toggleFullscreen:(id)sender;
+- (IBAction)resizeVideoWindow:(id)sender;
+- (IBAction)floatOnTop:(id)sender;
+- (IBAction)createVideoSnapshot:(id)sender;
 
 - (IBAction)showWizard:(id)sender;
 - (IBAction)showVideoEffects:(id)sender;
@@ -228,6 +237,10 @@
 
 - (void)setPlay;
 - (void)setPause;
+- (void)setRepeatOne;
+- (void)setRepeatAll;
+- (void)setRepeatOff;
+- (void)setShuffle;
 
 - (IBAction)toggleVar:(id)sender;
 - (int)toggleVarThread:(id)_o_data;
@@ -241,6 +254,7 @@
                  var:(const char *)psz_variable
             selector:(SEL)pf_callback;
 
+- (id)voutMenu;
 @end
 
 /*****************************************************************************

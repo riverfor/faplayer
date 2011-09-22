@@ -1,8 +1,8 @@
 /*****************************************************************************
  * voutgl.m: MacOS X OpenGL provider
  *****************************************************************************
- * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 920f1ed47391de526a77d61df5e03da0c44c2a12 $
+ * Copyright (C) 2001-2011 the VideoLAN team
+ * $Id: 17f697d4b1e4769bac40a0602765bf4d01c47641 $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Florian G. Pflug <fgp@phlo.org>
@@ -12,6 +12,7 @@
  *          Benjamin Pracht <bigben at videolan dot org>
  *          Damien Fouilleul <damienf at videolan dot org>
  *          Pierre d'Herbemont <pdherbemont at videolan dot org>
+ *          Felix Paul Kühne <fkuehne at videolan dot org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +44,15 @@
 #include <vlc_plugin.h>
 #include <vlc_vout_display.h>
 #include <vlc_opengl.h>
+#include <vlc_dialog.h>
 #include "opengl.h"
+
+#ifndef MAC_OS_X_VERSION_10_7
+enum {
+    NSApplicationPresentationFullScreen                 = (1 << 10),
+    NSApplicationPresentationAutoHideToolbar            = (1 << 11)
+};
+#endif
 
 /**
  * Forward declarations
@@ -115,6 +124,15 @@ static int Open(vlc_object_t *this)
 
     if (!sys)
         return VLC_ENOMEM;
+
+    if( !CGDisplayUsesOpenGLAcceleration( kCGDirectMainDisplay ) )
+    {
+        msg_Err( this, "no OpenGL hardware acceleration found, video output will fail" );
+        dialog_Fatal( this, _("Video output is not supported"), _("Your Mac lacks Quartz Extreme acceleration, which is required for video output.") );
+        return VLC_EGENERIC;
+    }
+    else
+        msg_Dbg( this, "Quartz Extreme acceleration is active" );
 
     vd->sys = sys;
     sys->pool = NULL;
@@ -189,8 +207,10 @@ static int Open(vlc_object_t *this)
     sys->gl.swap = OpenglSwap;
     sys->gl.getProcAddress = NULL;
     sys->gl.sys = sys;
+    const vlc_fourcc_t *subpicture_chromas;
+    video_format_t fmt = vd->fmt;
 
-	sys->vgl = vout_display_opengl_New(&vd->fmt, NULL, &sys->gl);
+	sys->vgl = vout_display_opengl_New(&vd->fmt, &subpicture_chromas, &sys->gl);
 	if (!sys->vgl)
     {
         sys->gl.sys = NULL;
@@ -200,6 +220,8 @@ static int Open(vlc_object_t *this)
     /* */
     vout_display_info_t info = vd->info;
     info.has_pictures_invalid = false;
+    info.has_event_thread = true;
+    info.subpicture_chromas = subpicture_chromas;
 
     /* Setup vout_display_t once everything is fine */
     vd->info = info;
@@ -288,18 +310,74 @@ static int Control (vout_display_t *vd, int query, va_list ap)
     switch (query)
     {
         case VOUT_DISPLAY_CHANGE_FULLSCREEN:
-        case VOUT_DISPLAY_CHANGE_WINDOW_STATE:
-        case VOUT_DISPLAY_CHANGE_DISPLAY_SIZE:
-        case VOUT_DISPLAY_CHANGE_DISPLAY_FILLED:
-        case VOUT_DISPLAY_CHANGE_ZOOM:
-        case VOUT_DISPLAY_CHANGE_SOURCE_ASPECT:
-        case VOUT_DISPLAY_CHANGE_SOURCE_CROP:
         {
             /* todo */
             return VLC_EGENERIC;
         }
-        case VOUT_DISPLAY_HIDE_MOUSE:
+        case VOUT_DISPLAY_CHANGE_WINDOW_STATE:
+        {
+            unsigned state = va_arg (ap, unsigned);
+            if( (state & VOUT_WINDOW_STATE_ABOVE) != 0)
+                [[sys->glView window] setLevel: NSStatusWindowLevel];
+            else
+                [[sys->glView window] setLevel: NSNormalWindowLevel];
             return VLC_SUCCESS;
+        }
+        case VOUT_DISPLAY_CHANGE_DISPLAY_FILLED:
+        {
+            [[sys->glView window] performSelectorOnMainThread:@selector(zoom:) withObject: nil waitUntilDone:NO];
+            return VLC_SUCCESS;
+        }
+        case VOUT_DISPLAY_CHANGE_DISPLAY_SIZE:
+        case VOUT_DISPLAY_CHANGE_ZOOM:
+        case VOUT_DISPLAY_CHANGE_SOURCE_ASPECT:
+        case VOUT_DISPLAY_CHANGE_SOURCE_CROP:
+        {
+            NSAutoreleasePool * o_pool = [[NSAutoreleasePool alloc] init];
+            NSPoint topleftbase;
+            NSPoint topleftscreen;
+            NSRect new_frame;
+            const vout_display_cfg_t *cfg;
+
+            id o_window = [sys->glView window];
+            if (!o_window)
+                return VLC_SUCCESS; // this is okay, since the event will occur again when we have a window
+            NSRect windowFrame = [o_window frame];
+            NSRect glViewFrame = [sys->glView frame];
+            NSSize windowMinSize = [o_window minSize];
+
+            topleftbase.x = 0;
+            topleftbase.y = windowFrame.size.height;
+            topleftscreen = [o_window convertBaseToScreen: topleftbase];
+            cfg = (const vout_display_cfg_t*)va_arg (ap, const vout_display_cfg_t *);
+            int i_width = cfg->display.width;
+            int i_height = cfg->display.height;
+
+            /* Calculate the window's new size, if it is larger than our minimal size */
+            if (i_width < windowMinSize.width)
+                i_width = windowMinSize.width;
+            if (i_height < windowMinSize.height)
+                i_height = windowMinSize.height;
+
+            if( i_height != glViewFrame.size.height || i_width != glViewFrame.size.width )
+            {
+                new_frame.size.width = windowFrame.size.width - glViewFrame.size.width + i_width;
+                new_frame.size.height = windowFrame.size.height - glViewFrame.size.height + i_height;
+
+                new_frame.origin.x = topleftscreen.x;
+                new_frame.origin.y = topleftscreen.y - new_frame.size.height;
+
+                [sys->glView performSelectorOnMainThread:@selector(setWindowFrameWithValue:) withObject:[NSValue valueWithRect:new_frame] waitUntilDone:NO];
+            }
+            [o_pool release];
+            return VLC_SUCCESS;
+        }
+
+        case VOUT_DISPLAY_HIDE_MOUSE:
+        {
+            [NSCursor setHiddenUntilMouseMoves: YES];
+            return VLC_SUCCESS;
+        }
 
         case VOUT_DISPLAY_GET_OPENGL:
         {
@@ -405,6 +483,20 @@ static void OpenglSwap(vlc_gl_t *gl)
 - (void)setFrameWithValue:(NSValue *)value
 {
     [self setFrame:[value rectValue]];
+}
+
+/**
+ * Gets called by Control() to make sure that we're performing on the main thread
+ */
+- (void)setWindowFrameWithValue:(NSValue *)value
+{
+    if (!(NSAppKitVersionNumber >= 1115.2 && [NSApp currentSystemPresentationOptions] == NSApplicationPresentationFullScreen))
+    {
+        NSRect frame = [value rectValue];
+        if (frame.origin.x <= 0.0 && frame.origin.y <= 0.0)
+            [[self window] center];
+        [[self window] setFrame:frame display:YES animate: YES];
+    }
 }
 
 /**

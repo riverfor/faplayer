@@ -19,10 +19,16 @@ status.xml or status.json
 < Get VLC version, and http api version
 
 > add <mrl> to playlist and start playback:
-  ?command=in_play&input=<mrl>
+  ?command=in_play&input=<mrl>&option=<option>
+  the option field is optional, and can have the values:
+    noaudio
+    novideo
 
 > add <mrl> to playlist:
   ?command=in_enqueue&input=<mrl>
+
+> add subtitle to currently playing file
+  ?command=addsubtitle&val=<path>
 
 > play playlist item <id>. If <id> is omitted, play last active item:
   ?command=pl_play&id=<id>
@@ -60,6 +66,10 @@ status.xml or status.json
 
 > set playback rate. must be > 0
   ?command=rate&val=<newplaybackrate>
+
+> set aspect ratio. Must be one of the following values. Any other value will reset aspect ratio to default
+  ?command=aspectratio&val=<newratio>
+  Valid aspect ratio values: 1:1 , 4:3 , 5:4 , 16:9 , 16:10 , 221:100 , 235:100 , 239:100
 
 > sort playlist using sort mode <val> and order <id>:
   ?command=pl_sort&id=<id>&val=<val>
@@ -108,6 +118,25 @@ status.xml or status.json
     +1H:2M -> seek 1 hour and 2 minutes forward
     -10% -> seek 10% back
 
+>command=preamp&val=<val in dB>
+ sets the preamp value, must be >=-20 and <=20
+
+>command=equalizer&band=<band>&val=<gain in dB, must be >=-20 and <=20)
+ set the gain for a specific band
+
+>command=enableeq&val=<0 or 1>
+ 0 --  disables the equalizer
+ 1 --  enables the equalizer
+
+>command=setpreset&val=<presetid>
+ set the equalizer preset as per the id specified
+
+<Displays the equalizer band gains.
+Band 0: 60 Hz, 1: 170 Hz, 2: 310 Hz, 3: 600 Hz, 4: 1 kHz,
+5: 3 kHz, 6: 6 kHz, 7: 12 kHz , 8: 14 kHz , 9: 16 kHz
+
+<Display the list of presets available for the equalizer
+
 playlist.xml:
 =============
 < get the full playlist tree
@@ -127,13 +156,3 @@ vlm_cmd.xml:
   ?command=<cmd>
 > get the error message from <cmd>
 
-equalizer.xml:
-=============
->command=preamp&val=<val in dB>
- sets the preamp value, must be >=-20 and <=20
-
->command=equalizer&band=<band>&val=<gain in dB, must be >=-20 and <=20)
-
-<Displays the equalizer band gains.
-Band 0: 60 Hz, 1: 170 Hz, 2: 310 Hz, 3: 600 Hz, 4: 1 kHz,
-5: 3 kHz, 6: 6 kHz, 7: 12 kHz , 8: 14 kHz , 9: 16 kHz

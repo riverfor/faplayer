@@ -2,7 +2,7 @@
  * menus.hpp : Menus handling
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: a1ec8f55e726baca568dd53098f29415f8b6bf93 $
+ * $Id: f1f5011476e04e47a6a040af135b3a081fc67580 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -30,7 +30,7 @@
 #include <QObject>
 #include <QAction>
 #include <QMenu>
-#include <vector>
+#include <QVector>
 
 using namespace std;
 
@@ -131,7 +131,7 @@ private:
 
     /* Generic automenu methods */
     static QMenu * Populate( intf_thread_t *, QMenu *current,
-                             vector<const char*>&, vector<vlc_object_t *>& );
+                             QVector<const char*>&, QVector<vlc_object_t *>& );
 
     static void CreateAndConnect( QMenu *, const char *, const QString&,
                                   const QString&, int, vlc_object_t *,

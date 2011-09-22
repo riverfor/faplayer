@@ -36,5 +36,7 @@ LOCAL_SRC_FILES := \
     libass/ass_strtod.c \
     libass/ass_utils.c
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+
 include $(BUILD_STATIC_LIBRARY)
 

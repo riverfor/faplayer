@@ -2,7 +2,7 @@
  * grain.c: add film grain
  *****************************************************************************
  * Copyright (C) 2010 Laurent Aimar
- * $Id: a948046fd649d7ac6df174b3a6cee001c7863086 $
+ * $Id: 1d5f9ccc4cd266c7eee3e1b8ee8b72aa67c2b891 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -427,6 +427,7 @@ static void Close(vlc_object_t *object)
     filter_t     *filter = (filter_t *)object;
     filter_sys_t *sys    = filter->p_sys;
 
+    var_DelCallback(filter, CFG_PREFIX "variance", Callback, NULL);
     vlc_mutex_destroy(&sys->cfg.lock);
     free(sys);
 }

@@ -2,7 +2,7 @@
 * atmo.cpp : "Atmo Light" video filter
 *****************************************************************************
 * Copyright (C) 2000-2006 the VideoLAN team
-* $Id: 381928c8d0487de635cc45bbf7ca49acf30f3a72 $
+* $Id: cd32fb288d7a60125a1480cfd94c0decdb46605c $
 *
 * Authors: André Weber (WeberAndre@gmx.de)
 *
@@ -119,7 +119,7 @@ void SaveBitmap(filter_sys_t *p_sys, uint8_t *p_pixels, char *psz_filename);
 strings for settings menus and hints
 */
 #define MODULE_DESCRIPTION N_ ( \
- "This module allows to control an so called AtmoLight device "\
+ "This module allows controlling an so called AtmoLight device "\
  "connected to your computer.\n"\
  "AtmoLight is the homegrown version of what Philips calls AmbiLight.\n"\
  "If you need further information feel free to visit us at\n\n"\
@@ -229,7 +229,7 @@ static const char *const ppsz_device_type_descriptions[] = {
 #define ZONE_BOTTOM_TEXT       N_("Number of zones on bottom")
 #define ZONE_BOTTOM_LONGTEXT   N_("Number of zones on the bottom of the screen")
 #define ZONE_LR_TEXT           N_("Zones on left / right side")
-#define ZONE_LR_LONGTEXT       N_("left and right side having allways the " \
+#define ZONE_LR_LONGTEXT       N_("left and right side having always the " \
                                   "same number of zones")
 #define ZONE_SUMMARY_TEXT      N_("Calculate a average zone")
 #define ZONE_SUMMARY_LONGTEXT  N_("it contains the average of all pixels " \

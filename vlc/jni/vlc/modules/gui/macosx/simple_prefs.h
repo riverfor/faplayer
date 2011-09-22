@@ -2,7 +2,7 @@
 * simple_prefs.h: Simple Preferences for Mac OS X
 *****************************************************************************
 * Copyright (C) 2008-2011 the VideoLAN team
-* $Id: 7ad1aaf198e7a959bc9b7f5296298c20cf004d42 $
+* $Id: 0bf93f2621a08c06a257022b3163ef6b2e4d5496 $
 *
 * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
 *
@@ -25,7 +25,7 @@
 #import "intf.h"
 #import <vlc_common.h>
 
-@interface VLCSimplePrefs : NSObject
+@interface VLCSimplePrefs : NSObject <NSToolbarDelegate>
 {
     IBOutlet id o_audio_dolby_pop;
     IBOutlet id o_audio_dolby_txt;
@@ -60,6 +60,9 @@
     IBOutlet id o_hotkeys_listbox;
     IBOutlet id o_hotkeys_view;
 
+    IBOutlet id o_input_record_box;
+    IBOutlet id o_input_record_fld;
+    IBOutlet id o_input_record_btn;
     IBOutlet id o_input_avi_pop;
     IBOutlet id o_input_avi_txt;
     IBOutlet id o_input_cachelevel_pop;
@@ -77,8 +80,6 @@
     IBOutlet id o_input_rtsp_ckb;
     IBOutlet id o_input_skipLoop_txt;
     IBOutlet id o_input_skipLoop_pop;
-    IBOutlet id o_input_serverport_fld;
-    IBOutlet id o_input_serverport_txt;
     IBOutlet id o_input_view;
 
     IBOutlet id o_intf_style_txt;
@@ -97,6 +98,7 @@
     IBOutlet id o_intf_update_ckb;
     IBOutlet id o_intf_last_update_lbl;
     IBOutlet id o_intf_enableGrowl_ckb;
+    IBOutlet id o_intf_nativefullscreen_ckb;
 
     IBOutlet id o_osd_encoding_pop;
     IBOutlet id o_osd_encoding_txt;
@@ -120,8 +122,7 @@
     IBOutlet id o_osd_osd_ckb;
     IBOutlet id o_osd_view;
 
-    IBOutlet id o_sprefs_basic_box;
-    IBOutlet id o_sprefs_basicFull_matrix;
+    IBOutlet id o_sprefs_showAll_btn;
     IBOutlet id o_sprefs_cancel_btn;
     IBOutlet id o_sprefs_controls_box;
     IBOutlet id o_sprefs_reset_btn;

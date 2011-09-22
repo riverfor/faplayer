@@ -221,6 +221,8 @@ Objects
 object.input(): Get the current input object.
 object.playlist(): Get the playlist object.
 object.libvlc(): Get the libvlc object.
+object.aout(): Get the audio output object.
+object.vout(): Get the video output object.
 
 object.find( object, type, mode ): Return nil. DO NOT USE.
 
@@ -373,6 +375,8 @@ strings.from_charset( charset, str ): convert a string from a specified
 
 Variables
 ---------
+var.inherit( object, name ): Find the variable "name"'s value inherited by
+  the object. If object is unset, the current module's object will be used.
 var.get( object, name ): Get the object's variable "name"'s value.
 var.get_list( object, name ): Get the object's variable "name"'s value list.
   1st return value is the value list, 2nd return value is the text list.

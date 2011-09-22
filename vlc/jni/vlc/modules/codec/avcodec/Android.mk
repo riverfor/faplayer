@@ -12,6 +12,7 @@ LOCAL_MODULE := avcodec_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"avcodec\" \
     -DMODULE_NAME=avcodec
 
@@ -31,5 +32,11 @@ LOCAL_SRC_FILES := \
     subtitle.c \
     video.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_STATIC_LIBRARIES += libavcodec libavformat libavdevice libavutil
+
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+LOCAL_LDLIBS += -lz
+
+include $(BUILD_SHARED_LIBRARY)
 

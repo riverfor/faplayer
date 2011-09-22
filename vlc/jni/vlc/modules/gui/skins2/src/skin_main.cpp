@@ -2,7 +2,7 @@
  * skin_main.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: f9ae23d2a51f41b2d1670fc220a7f3c81ce00ae4 $
+ * $Id: 8d0dceb579ae0339839853ff41db4f84bc652210 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -57,15 +57,6 @@
 #include "../commands/cmd_on_top.hpp"
 
 //---------------------------------------------------------------------------
-// Exported interface functions.
-//---------------------------------------------------------------------------
-#ifdef WIN32_SKINS
-extern "C" __declspec( dllexport )
-    int __VLC_SYMBOL( vlc_entry ) ( module_t *p_module );
-#endif
-
-
-//---------------------------------------------------------------------------
 // Local prototypes
 //---------------------------------------------------------------------------
 static int  Open  ( vlc_object_t * );
@@ -92,7 +83,7 @@ static int Open( vlc_object_t *p_this )
 
     // Suscribe to messages bank
 #if 0
-    p_intf->p_sys->p_sub = msg_Subscribe( p_intf );
+    p_intf->p_sys->p_sub = vlc_Subscribe( p_intf );
 #endif
 
     p_intf->p_sys->p_input = NULL;
@@ -161,7 +152,7 @@ static void Close( vlc_object_t *p_this )
 
     // Unsubscribe from messages bank
 #if 0
-    msg_Unsubscribe( p_intf, p_intf->p_sys->p_sub );
+    vlc_Unsubscribe( p_intf, p_intf->p_sys->p_sub );
 #endif
 
     // Destroy structure

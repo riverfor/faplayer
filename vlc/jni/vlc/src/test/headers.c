@@ -2,7 +2,7 @@
  * headers.c: Test for public headers usability
  *****************************************************************************
  * Copyright (C) 2007 Rémi Denis-Courmont
- * $Id: 900f47d8c52c0bec9c48992bc4a31ddf2fde4293 $
+ * $Id: 9fd3dea4450d1327e78805985ea24b0651ac9554 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 /* config.h is NOT installed, headers MUST NOT depend on it.
  # include <config.h> */
 /* One thing we don't check is the CPPFLAGS - these MUST be exposed publicly,
- * e.g. using pkg-config or the broken old vlc-config. */
+ * e.g. using pkg-config. */
 
 #define PACKAGE "vlc"
 

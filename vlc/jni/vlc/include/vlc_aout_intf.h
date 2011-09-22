@@ -27,9 +27,7 @@
  */
 
 #define AOUT_VOLUME_DEFAULT             256
-#define AOUT_VOLUME_STEP                32
-#define AOUT_VOLUME_MAX                 1024
-#define AOUT_VOLUME_MIN                 0
+#define AOUT_VOLUME_MAX                 512
 
 VLC_API audio_volume_t aout_VolumeGet( vlc_object_t * );
 #define aout_VolumeGet(a) aout_VolumeGet(VLC_OBJECT(a))
@@ -37,8 +35,7 @@ VLC_API int aout_VolumeSet( vlc_object_t *, audio_volume_t );
 #define aout_VolumeSet(a, b) aout_VolumeSet(VLC_OBJECT(a), b)
 VLC_API int aout_VolumeUp( vlc_object_t *, int, audio_volume_t * );
 #define aout_VolumeUp(a, b, c) aout_VolumeUp(VLC_OBJECT(a), b, c)
-VLC_API int aout_VolumeDown( vlc_object_t *, int, audio_volume_t * ) ;
-#define aout_VolumeDown(a, b, c) aout_VolumeDown(VLC_OBJECT(a), b, c)
+#define aout_VolumeDown(a, b, c) aout_VolumeUp(a, -(b), c)
 VLC_API int aout_ToggleMute( vlc_object_t *, audio_volume_t * );
 #define aout_ToggleMute(a, b) aout_ToggleMute(VLC_OBJECT(a), b)
 VLC_API int aout_SetMute( vlc_object_t *, audio_volume_t *, bool );

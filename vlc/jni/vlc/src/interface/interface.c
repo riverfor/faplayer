@@ -4,7 +4,7 @@
  * interface, such as command line.
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
- * $Id: c87cf3021e2209a1a4598f9a0216ca558fc7c391 $
+ * $Id: 17ca46648da70e8430be4545efeacf9c4eee2d0d $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -41,10 +41,6 @@
 #include <vlc_common.h>
 #include <vlc_modules.h>
 #include <vlc_interface.h>
-
-#if defined( __APPLE__ ) || defined( WIN32 )
-#include "../control/libvlc_internal.h"
-#endif
 #include "libvlc.h"
 
 /*****************************************************************************
@@ -129,7 +125,6 @@ int intf_Create( vlc_object_t *p_this, const char *chain )
         goto error;
     }
 
-    vlc_mutex_lock( &lock );
 #if defined( __APPLE__ )
     /* Hack to get Mac OS X Cocoa runtime running
      * (it needs access to the main thread) */
@@ -139,7 +134,6 @@ int intf_Create( vlc_object_t *p_this, const char *chain )
                        MonitorLibVLCDeath, p_intf, VLC_THREAD_PRIORITY_LOW ) )
         {
             msg_Err( p_intf, "cannot spawn libvlc death monitoring thread" );
-            vlc_mutex_unlock( &lock );
             goto error;
         }
         assert( p_intf->pf_run );
@@ -158,10 +152,10 @@ int intf_Create( vlc_object_t *p_this, const char *chain )
                    RunInterface, p_intf, VLC_THREAD_PRIORITY_LOW ) )
     {
         msg_Err( p_intf, "cannot spawn interface thread" );
-        vlc_mutex_unlock( &lock );
         goto error;
     }
 
+    vlc_mutex_lock( &lock );
     p_intf->p_next = libvlc_priv( p_libvlc )->p_intf;
     libvlc_priv( p_libvlc )->p_intf = p_intf;
     vlc_mutex_unlock( &lock );
@@ -230,7 +224,7 @@ static void* RunInterface( void *p_this )
 }
 
 #if defined( __APPLE__ )
-#include "control/libvlc_internal.h" /* libvlc_InternalWait */
+#include "../lib/libvlc_internal.h" /* libvlc_InternalWait */
 /**
  * MonitorLibVLCDeath: Used when b_should_run_on_first_thread is set.
  *

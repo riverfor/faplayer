@@ -23,11 +23,11 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	private static final String LOGTAG = "DANMAKU-VlcMediaPlayer";
 
+	private static final String sThisAbi = "armeabiv7a";
+	private static final String sThisFeature = "neon";
 	private static final String sPackagePrefix = "org.stagex.danmaku.player.vlc";
 	private static final String sSoName = "vlccore";
 	private static final String sSoFullName = "libvlccore.so";
-	private static boolean sLibraryLoaded = false;
-	private static final String sPluginPathEnv = "VLC_PLUGIN_PATH";
 
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
@@ -39,11 +39,10 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
 
 	/* */
-	private int mTime = -1;
+	private static String sCorePath = null;
+	private static String sPluginPath = null;
 
-	/* used to set VLC_PLUGIN_PATH */
-	protected static native int setenv(String name, String value,
-			boolean overwrite);
+	private int mTime = -1;
 
 	/*  */
 	protected native void nativeAttachSurface(Surface s);
@@ -121,7 +120,7 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 
 	/* called by native side */
 	private void onVlcEvent(VlcEvent ev) {
-		Log.d(LOGTAG, String.format("received vlc event %d", ev.eventType));
+		// Log.d(LOGTAG, String.format("received vlc event %d", ev.eventType));
 		switch (ev.eventType) {
 		case VlcEvent.MediaParsedChanged: {
 			if (!ev.booleanValue) {
@@ -198,75 +197,77 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	}
 
 	public static VlcMediaPlayer getInstance(Context context) {
-		if (sLibraryLoaded == false) {
-			/* get CPU features */
-			ArrayList<String> features = new ArrayList<String>();
+		/* get CPU features */
+		ArrayList<String> features = new ArrayList<String>();
+		try {
+			InputStream is = new FileInputStream("/proc/cpuinfo");
+			InputStreamReader ir = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(ir);
 			try {
-				InputStream is = new FileInputStream("/proc/cpuinfo");
-				InputStreamReader ir = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(ir);
-				try {
-					while (true) {
-						String line = br.readLine();
-						String[] pair = line.split(":");
-						if (pair.length != 2)
-							continue;
-						String key = pair[0].trim();
-						String val = pair[1].trim();
-						if ((key.compareToIgnoreCase("features") == 0)
-								|| (key.compareToIgnoreCase("flags") == 0)) {
-							for (String f : val.split(" ")) {
-								f = f.toLowerCase();
-								f = f.replaceAll("[^0-9a-z]", "");
-								if (f.length() > 0)
-									features.add(0, f);
-							}
-							break;
+				while (true) {
+					String line = br.readLine();
+					String[] pair = line.split(":");
+					if (pair.length != 2)
+						continue;
+					String key = pair[0].trim();
+					String val = pair[1].trim();
+					if ((key.compareToIgnoreCase("features") == 0)
+							|| (key.compareToIgnoreCase("flags") == 0)) {
+						for (String f : val.split(" ")) {
+							f = f.toLowerCase();
+							f = f.replaceAll("[^0-9a-z]", "");
+							if (f.length() > 0)
+								features.add(0, f);
 						}
+						break;
 					}
-				} finally {
-					br.close();
-					ir.close();
-					is.close();
 				}
-			} catch (IOException e) {
+			} finally {
+				br.close();
+				ir.close();
+				is.close();
+			}
+		} catch (IOException e) {
+			Log.d(LOGTAG, e.getMessage());
+		}
+		features.add("");
+		/* choose the best one */
+		String abi = SystemUtility.getprop("ro.product.cpu.abi");
+		abi = abi.toLowerCase();
+		abi = abi.replaceAll("[^0-9a-z]", "");
+		PackageManager pm = context.getPackageManager();
+		for (String feature : features) {
+			String pn = feature.length() > 0 ? String.format("%s.%s.%s",
+					sPackagePrefix, abi, feature) : String.format("%s.%s",
+					sPackagePrefix, abi);
+			try {
+				ApplicationInfo info = pm.getApplicationInfo(pn,
+						PackageManager.GET_SHARED_LIBRARY_FILES);
+				sCorePath = String.format("%s/lib/%s", info.dataDir,
+						sSoFullName);
+				sPluginPath = String.format("%s/lib", info.dataDir);
+				try {
+					System.load(sCorePath);
+					return new VlcMediaPlayer();
+				} catch (UnsatisfiedLinkError e) {
+					Log.e(LOGTAG, e.getMessage());
+					continue;
+				}
+			} catch (NameNotFoundException e) {
 				Log.d(LOGTAG, e.getMessage());
 			}
-			features.add("");
-			/* choose the best one */
-			String abi = SystemUtility.getprop("ro.product.cpu.abi");
-			abi = abi.toLowerCase();
-			abi = abi.replaceAll("[^0-9a-z]", "");
-			PackageManager pm = context.getPackageManager();
-			for (String feature : features) {
-				String pn = feature.length() > 0 ? String.format("%s.%s.%s",
-						sPackagePrefix, abi, feature) : String.format("%s.%s",
-						sPackagePrefix, abi);
-				try {
-					ApplicationInfo info = pm.getApplicationInfo(pn,
-							PackageManager.GET_SHARED_LIBRARY_FILES);
-					String path = String.format("%s/lib/%s", info.dataDir,
-							sSoFullName);
-					try {
-						setenv(sPluginPathEnv, info.dataDir, true);
-						System.load(path);
-						sLibraryLoaded = true;
-						break;
-					} catch (java.lang.UnsatisfiedLinkError e) {
-						Log.d(LOGTAG, e.getMessage());
-					}
-				} catch (NameNotFoundException e) {
-					Log.d(LOGTAG, e.getMessage());
-				}
-			}
-			/* at least the built-in one can be used */
-			if (!sLibraryLoaded) {
-				setenv(sPluginPathEnv, context.getCacheDir().getAbsolutePath(),
-						true);
-				System.loadLibrary(sSoName);
-				sLibraryLoaded = true;
-			}
 		}
+
+		/* XXX: the one in this bundle is for armeabi-v7a and neon */
+		if (abi.compareTo(sThisAbi) != 0
+				|| features.indexOf(sThisFeature) == -1) {
+			return null;
+		}
+
+		/* use the built-in libraries */
+		ApplicationInfo info = context.getApplicationInfo();
+		sPluginPath = String.format("%s/lib", info.dataDir);
+		System.loadLibrary(sSoName);
 		return new VlcMediaPlayer();
 	}
 

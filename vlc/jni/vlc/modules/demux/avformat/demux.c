@@ -1,8 +1,8 @@
 /*****************************************************************************
- * demux.c: demuxer using ffmpeg (libavformat).
+ * demux.c: demuxer using libavformat
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: e20d2495f023000e90b10fef2ee3ee2b35755901 $
+ * $Id: 684dd85a5a1ec1eeaa874b83876104d000376a80 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -52,7 +52,7 @@
 #if defined(HAVE_FFMPEG_AVFORMAT_H) || defined(HAVE_LIBAVFORMAT_AVFORMAT_H)
 
 #if (LIBAVCODEC_VERSION_INT >= ((51<<16)+(50<<8)+0) )
-#   define HAVE_FFMPEG_CODEC_ATTACHMENT 1
+#   define HAVE_AVUTIL_CODEC_ATTACHMENT 1
 #endif
 
 /*****************************************************************************
@@ -71,10 +71,8 @@ struct demux_sys_t
 
     int             i_tk;
     es_out_id_t     **tk;
-
-    int64_t     i_pcr;
-    int64_t     i_pcr_inc;
-    int         i_pcr_tk;
+    int64_t         *tk_pcr;
+    int64_t         i_pcr;
 
     unsigned    i_ssa_order;
 
@@ -96,6 +94,7 @@ static int64_t IOSeek( void *opaque, int64_t offset, int whence );
 
 static block_t *BuildSsaFrame( const AVPacket *p_pkt, unsigned i_order );
 static void UpdateSeekPoint( demux_t *p_demux, int64_t i_time );
+static void ResetTime( demux_t *p_demux, int64_t i_time );
 
 /*****************************************************************************
  * Open
@@ -191,8 +190,7 @@ int OpenDemux( vlc_object_t *p_this )
     p_sys->fmt = fmt;
     p_sys->i_tk = 0;
     p_sys->tk = NULL;
-    p_sys->i_pcr_tk = -1;
-    p_sys->i_pcr = -1;
+    p_sys->tk_pcr = NULL;
     p_sys->i_ssa_order = 0;
     TAB_INIT( p_sys->i_attachments, p_sys->attachments);
     p_sys->p_title = NULL;
@@ -234,6 +232,7 @@ int OpenDemux( vlc_object_t *p_this )
                               p_sys->fmt, NULL ) )
     {
         msg_Err( p_demux, "av_open_input_stream failed" );
+        p_sys->ic = NULL;
         free( psz_url );
         CloseDemux( p_this );
         return VLC_EGENERIC;
@@ -353,7 +352,7 @@ int OpenDemux( vlc_object_t *p_this )
 
         default:
             es_format_Init( &fmt, UNKNOWN_ES, 0 );
-#ifdef HAVE_FFMPEG_CODEC_ATTACHMENT
+#ifdef HAVE_AVUTIL_CODEC_ATTACHMENT
             if( cc->codec_type == AVMEDIA_TYPE_ATTACHMENT )
             {
                 input_attachment_t *p_attachment;
@@ -371,15 +370,16 @@ int OpenDemux( vlc_object_t *p_this )
                                 p_attachment );
                     }
                 }
-                else msg_Warn( p_demux, "unsupported attachment type (%u) in ffmpeg demux", cc->codec_id );
+                else msg_Warn( p_demux, "unsupported attachment type (%u) in avformat demux", cc->codec_id );
             }
-            break;
+            else
 #endif
+            {
+                if( cc->codec_type == AVMEDIA_TYPE_DATA )
+                    psz_type = "data";
 
-            if( cc->codec_type == AVMEDIA_TYPE_DATA )
-                psz_type = "data";
-
-            msg_Warn( p_demux, "unsupported track type in ffmpeg demux" );
+                msg_Warn( p_demux, "unsupported track type (%u:%u) in avformat demux", cc->codec_type, cc->codec_id );
+            }
             break;
         }
 
@@ -390,9 +390,10 @@ int OpenDemux( vlc_object_t *p_this )
         if( s->disposition & AV_DISPOSITION_DEFAULT )
             fmt.i_priority = 1000;
 
-#ifdef HAVE_FFMPEG_CODEC_ATTACHMENT
+#ifdef HAVE_AVUTIL_CODEC_ATTACHMENT
         if( cc->codec_type != AVMEDIA_TYPE_ATTACHMENT )
 #endif
+        if( cc->codec_type != AVMEDIA_TYPE_DATA )
         {
             const bool    b_ogg = !strcmp( p_sys->fmt->name, "ogg" );
             const uint8_t *p_extra = cc->extradata;
@@ -463,6 +464,8 @@ int OpenDemux( vlc_object_t *p_this )
             TAB_APPEND( p_sys->i_tk, p_sys->tk, es );
         }
     }
+    p_sys->tk_pcr = calloc( p_sys->i_tk, sizeof(*p_sys->tk_pcr) );
+
     if( p_sys->ic->start_time != (int64_t)AV_NOPTS_VALUE )
         i_start_time = p_sys->ic->start_time * 1000000 / AV_TIME_BASE;
 
@@ -494,6 +497,7 @@ int OpenDemux( vlc_object_t *p_this )
         TAB_APPEND( p_sys->p_title->i_seekpoint, p_sys->p_title->seekpoint, s );
     }
 
+    ResetTime( p_demux, 0 );
     return VLC_SUCCESS;
 }
 
@@ -506,6 +510,7 @@ void CloseDemux( vlc_object_t *p_this )
     demux_sys_t *p_sys = p_demux->p_sys;
 
     FREENULL( p_sys->tk );
+    free( p_sys->tk_pcr );
 
     if( p_sys->ic ) av_close_input_stream( p_sys->ic );
 
@@ -596,19 +601,28 @@ static int Demux( demux_t *p_demux )
     msg_Dbg( p_demux, "tk[%d] dts=%"PRId64" pts=%"PRId64,
              pkt.stream_index, p_frame->i_dts, p_frame->i_pts );
 #endif
+    if( p_frame->i_dts > VLC_TS_INVALID )
+        p_sys->tk_pcr[pkt.stream_index] = p_frame->i_dts;
 
-    if( p_frame->i_dts > VLC_TS_INVALID  &&
-        ( pkt.stream_index == p_sys->i_pcr_tk || p_sys->i_pcr_tk < 0 ) )
+    int64_t i_ts_max = INT64_MIN;
+    for( int i = 0; i < p_sys->i_tk; i++ )
+        i_ts_max = __MAX( i_ts_max, p_sys->tk_pcr[i] );
+
+    int64_t i_ts_min = INT64_MAX;
+    for( int i = 0; i < p_sys->i_tk; i++ )
     {
-        p_sys->i_pcr_tk = pkt.stream_index;
-        p_sys->i_pcr = p_frame->i_dts;
-
-        es_out_Control( p_demux->out, ES_OUT_SET_PCR, (int64_t)p_sys->i_pcr );
+        if( p_sys->tk_pcr[i] > VLC_TS_INVALID && p_sys->tk_pcr[i] + 10 * CLOCK_FREQ >= i_ts_max )
+            i_ts_min = __MIN( i_ts_min, p_sys->tk_pcr[i] );
+    }
+    if( i_ts_min >= p_sys->i_pcr )
+    {
+        p_sys->i_pcr = i_ts_min;
+        es_out_Control( p_demux->out, ES_OUT_SET_PCR, p_sys->i_pcr );
+        UpdateSeekPoint( p_demux, p_sys->i_pcr );
     }
 
     es_out_Send( p_demux->out, p_sys->tk[pkt.stream_index], p_frame );
 
-    UpdateSeekPoint( p_demux, p_sys->i_pcr);
     av_free_packet( &pkt );
     return 1;
 }
@@ -632,6 +646,26 @@ static void UpdateSeekPoint( demux_t *p_demux, int64_t i_time )
     {
         p_demux->info.i_seekpoint = i;
         p_demux->info.i_update |= INPUT_UPDATE_SEEKPOINT;
+    }
+}
+
+static void ResetTime( demux_t *p_demux, int64_t i_time )
+{
+    demux_sys_t *p_sys = p_demux->p_sys;
+
+    if( p_sys->ic->start_time == (int64_t)AV_NOPTS_VALUE || i_time < 0 )
+        i_time = VLC_TS_INVALID;
+    else if( i_time == 0 )
+        i_time = 1;
+
+    p_sys->i_pcr = i_time;
+    for( int i = 0; i < p_sys->i_tk; i++ )
+        p_sys->tk_pcr[i] = i_time;
+
+    if( i_time > VLC_TS_INVALID )
+    {
+        es_out_Control( p_demux->out, ES_OUT_SET_NEXT_DISPLAY_TIME, i_time );
+        UpdateSeekPoint( p_demux, i_time );
     }
 }
 
@@ -675,6 +709,7 @@ static block_t *BuildSsaFrame( const AVPacket *p_pkt, unsigned i_order )
 static int Control( demux_t *p_demux, int i_query, va_list args )
 {
     demux_sys_t *p_sys = p_demux->p_sys;
+    const int64_t i_start_time = p_sys->ic->start_time != (int64_t)AV_NOPTS_VALUE ? p_sys->ic->start_time : 0;
     double f, *pf;
     int64_t i64, *pi64;
 
@@ -698,31 +733,27 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 
         case DEMUX_SET_POSITION:
             f = (double) va_arg( args, double );
-            if( p_sys->i_pcr > 0 )
+            i64 = p_sys->ic->duration * f + i_start_time;
+
+            msg_Warn( p_demux, "DEMUX_SET_POSITION: %"PRId64, i64 );
+
+            /* If we have a duration, we prefer to seek by time
+               but if we don't, or if the seek fails, try BYTE seeking */
+            if( p_sys->ic->duration == (int64_t)AV_NOPTS_VALUE ||
+                (av_seek_frame( p_sys->ic, -1, i64, AVSEEK_FLAG_BACKWARD ) < 0) )
             {
-                i64 = p_sys->ic->duration * f;
-                if( p_sys->ic->start_time != (int64_t)AV_NOPTS_VALUE )
-                    i64 += p_sys->ic->start_time;
+                int64_t i_size = stream_Size( p_demux->s );
+                i64 = (i_size * f);
 
-                msg_Warn( p_demux, "DEMUX_SET_POSITION: %"PRId64, i64 );
+                msg_Warn( p_demux, "DEMUX_SET_BYTE_POSITION: %"PRId64, i64 );
+                if( av_seek_frame( p_sys->ic, -1, i64, AVSEEK_FLAG_BYTE ) < 0 )
+                    return VLC_EGENERIC;
 
-                /* If we have a duration, we prefer to seek by time
-                   but if we don't, or if the seek fails, try BYTE seeking */
-                if( p_sys->ic->duration == (int64_t)AV_NOPTS_VALUE ||
-                    (av_seek_frame( p_sys->ic, -1, i64, 0 ) < 0) )
-                {
-                    int64_t i_size = stream_Size( p_demux->s );
-                    i64 = (i_size * f);
-
-                    msg_Warn( p_demux, "DEMUX_SET_BYTE_POSITION: %"PRId64, i64 );
-                    if( av_seek_frame( p_sys->ic, -1, i64, AVSEEK_FLAG_BYTE ) < 0 )
-                        return VLC_EGENERIC;
-                }
-                else
-                {
-                    UpdateSeekPoint( p_demux, i64 );
-                }
-                p_sys->i_pcr = -1; /* Invalidate time display */
+                ResetTime( p_demux, -1 );
+            }
+            else
+            {
+                ResetTime( p_demux, i64 - i_start_time );
             }
             return VLC_SUCCESS;
 
@@ -740,20 +771,19 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
             return VLC_SUCCESS;
 
         case DEMUX_SET_TIME:
+        {
             i64 = (int64_t)va_arg( args, int64_t );
-            i64 = i64 *AV_TIME_BASE / 1000000;
-            if( p_sys->ic->start_time != (int64_t)AV_NOPTS_VALUE )
-                i64 += p_sys->ic->start_time;
+            i64 = i64 *AV_TIME_BASE / 1000000 + i_start_time;
 
             msg_Warn( p_demux, "DEMUX_SET_TIME: %"PRId64, i64 );
 
-            if( av_seek_frame( p_sys->ic, -1, i64, 0 ) < 0 )
+            if( av_seek_frame( p_sys->ic, -1, i64, AVSEEK_FLAG_BACKWARD ) < 0 )
             {
                 return VLC_EGENERIC;
             }
-            p_sys->i_pcr = -1; /* Invalidate time display */
-            UpdateSeekPoint( p_demux, i64 );
+            ResetTime( p_demux, i64 - i_start_time );
             return VLC_SUCCESS;
+        }
 
         case DEMUX_HAS_UNSUPPORTED_META:
         {
@@ -833,18 +863,16 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
             if( !p_sys->p_title )
                 return VLC_EGENERIC;
 
-            i64 = p_sys->p_title->seekpoint[i_seekpoint]->i_time_offset *AV_TIME_BASE / 1000000;
-            if( p_sys->ic->start_time != (int64_t)AV_NOPTS_VALUE )
-                i64 += p_sys->ic->start_time;
+            i64 = p_sys->p_title->seekpoint[i_seekpoint]->i_time_offset *
+                  AV_TIME_BASE / 1000000 + i_start_time;
 
             msg_Warn( p_demux, "DEMUX_SET_TIME: %"PRId64, i64 );
 
-            if( av_seek_frame( p_sys->ic, -1, i64, 0 ) < 0 )
+            if( av_seek_frame( p_sys->ic, -1, i64, AVSEEK_FLAG_BACKWARD ) < 0 )
             {
                 return VLC_EGENERIC;
             }
-            p_sys->i_pcr = -1; /* Invalidate time display */
-            UpdateSeekPoint( p_demux, i64 );
+            ResetTime( p_demux, i64 - i_start_time );
             return VLC_SUCCESS;
         }
 

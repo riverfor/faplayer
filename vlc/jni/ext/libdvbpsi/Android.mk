@@ -60,5 +60,7 @@ LOCAL_SRC_FILES := \
     src/tables/sis.c \
     src/tables/tot.c
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
+
 include $(BUILD_STATIC_LIBRARY)
 

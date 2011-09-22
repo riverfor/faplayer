@@ -2,7 +2,7 @@
  * modules.h : Module descriptor and load functions
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id: 68160d73392713de14923b3580ec552856aa1574 $
+ * $Id: 06aefc01edd09dcfbf53afb468b3dfaae4aea960 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -45,16 +45,14 @@ VLC_API void module_unneed( vlc_object_t *, module_t * );
 VLC_API bool module_exists(const char *) VLC_USED;
 VLC_API module_t * module_find(const char *) VLC_USED;
 
-int module_start(vlc_object_t *, module_t *);
+int module_start(vlc_object_t *, const module_t *);
 #define module_start(o, m) module_start(VLC_OBJECT(o),m)
-void module_stop(vlc_object_t *, module_t *);
+void module_stop(vlc_object_t *, const module_t *);
 #define module_stop(o, m) module_stop(VLC_OBJECT(o),m)
 
 VLC_API module_config_t * module_config_get( const module_t *, unsigned * ) VLC_USED;
 VLC_API void module_config_free( module_config_t * );
 
-VLC_API module_t * module_hold(module_t *module);
-VLC_API void module_release(module_t *module);
 VLC_API void module_list_free(module_t **);
 VLC_API module_t ** module_list_get(size_t *n) VLC_USED;
 

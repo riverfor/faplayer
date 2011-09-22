@@ -67,10 +67,13 @@
       && ((p_first)->i_physical_channels == (p_second)->i_physical_channels)\
       && ((p_first)->i_original_channels == (p_second)->i_original_channels) )
 
+#define AOUT_FMT_LINEAR( p_format ) \
+    (aout_BitsPerSample((p_format)->i_format) != 0)
+
 #define VLC_CODEC_SPDIFL VLC_FOURCC('s','p','d','i')
 #define VLC_CODEC_SPDIFB VLC_FOURCC('s','p','d','b')
 
-#define AOUT_FMT_NON_LINEAR( p_format )                 \
+#define AOUT_FMT_SPDIF( p_format ) \
     ( ((p_format)->i_format == VLC_CODEC_SPDIFL)       \
        || ((p_format)->i_format == VLC_CODEC_SPDIFB)   \
        || ((p_format)->i_format == VLC_CODEC_A52)       \
@@ -153,67 +156,26 @@ typedef int32_t vlc_fixed_t;
 /* Number of samples in an A/52 frame. */
 #define A52_FRAME_NB 1536
 
-/* Max input rate factor (1/4 -> 4) */
-#define AOUT_MAX_INPUT_RATE (4)
-
-/** audio output buffer FIFO */
-struct aout_fifo_t
-{
-    aout_buffer_t *         p_first;
-    aout_buffer_t **        pp_last;
-    date_t                  end_date;
-};
-
 /* FIXME to remove once aout.h is cleaned a bit more */
 #include <vlc_block.h>
 
-#define AOUT_RESAMPLING_NONE     0
-#define AOUT_RESAMPLING_UP       1
-#define AOUT_RESAMPLING_DOWN     2
+typedef int (*aout_volume_cb) (audio_output_t *, float, bool);
 
-/** an output stream for the audio output */
-typedef struct aout_output_t
-{
-    audio_sample_format_t   output;
-    /* Indicates whether the audio output is currently starving, to avoid
-     * printing a 1,000 "output is starving" messages. */
-    bool              b_starving;
-
-    /* post-filters */
-    filter_t *              pp_filters[AOUT_MAX_FILTERS];
-    int                     i_nb_filters;
-
-    aout_fifo_t             fifo;
-
-    struct module_t *       p_module;
-    struct aout_sys_t *     p_sys;
-    void (*pf_play)( aout_instance_t * );
-    void (* pf_pause)( aout_instance_t *, bool, mtime_t );
-    int (* pf_volume_set )( aout_instance_t *, float, bool );
-    int                     i_nb_samples;
-} aout_output_t;
-
-struct aout_mixer_t;
-
-/** audio output thread descriptor */
-struct aout_instance_t
+/** Audio output object */
+struct audio_output
 {
     VLC_COMMON_MEMBERS
 
-    /* Lock for volume variables (FIXME: should be in input manager) */
-    vlc_mutex_t             volume_lock;
-    vlc_mutex_t             lock;
+    audio_sample_format_t format; /**< Output format (plugin can modify it
+        only when succesfully probed and not afterward) */
 
-    /* Input streams & pre-filters */
-    aout_input_t *          p_input;
-
-    /* Mixer */
-    audio_sample_format_t   mixer_format;
-    float                   mixer_multiplier;
-    struct aout_mixer_t    *p_mixer;
-
-    /* Output plug-in */
-    aout_output_t           output;
+    struct aout_sys_t *sys; /**< Output plugin private data */
+    void (*pf_play)(audio_output_t *, block_t *); /**< Audio buffer callback */
+    void (* pf_pause)( audio_output_t *, bool, mtime_t ); /**< Pause/resume
+        callback (optional, may be NULL) */
+    void (* pf_flush)( audio_output_t *, bool ); /**< Flush/drain callback
+        (optional, may be NULL) */
+    aout_volume_cb          pf_volume_set; /**< Volume setter (or NULL) */
 };
 
 /**
@@ -230,8 +192,6 @@ static const uint32_t pi_vlc_chan_order_wg4[] =
 /*****************************************************************************
  * Prototypes
  *****************************************************************************/
-
-VLC_API aout_buffer_t * aout_OutputNextBuffer( aout_instance_t *, mtime_t, bool ) VLC_USED;
 
 /**
  * This function computes the reordering needed to go from pi_chan_order_in to
@@ -277,18 +237,51 @@ static inline unsigned aout_FormatNbChannels(const audio_sample_format_t *fmt)
 
 VLC_API unsigned int aout_BitsPerSample( vlc_fourcc_t i_format ) VLC_USED;
 VLC_API void aout_FormatPrepare( audio_sample_format_t * p_format );
-VLC_API void aout_FormatPrint( aout_instance_t * p_aout, const char * psz_text, const audio_sample_format_t * p_format );
+VLC_API void aout_FormatPrint(vlc_object_t *, const char *,
+                              const audio_sample_format_t *);
+#define aout_FormatPrint(o, t, f) aout_FormatPrint(VLC_OBJECT(o), t, f)
 VLC_API const char * aout_FormatPrintChannels( const audio_sample_format_t * ) VLC_USED;
 
-VLC_API mtime_t aout_FifoFirstDate( const aout_fifo_t * ) VLC_USED;
-VLC_API aout_buffer_t *aout_FifoPop( aout_fifo_t * p_fifo ) VLC_USED;
+VLC_API void aout_VolumeNoneInit( audio_output_t * );
+VLC_API void aout_VolumeSoftInit( audio_output_t * );
+VLC_API void aout_VolumeHardInit( audio_output_t *, aout_volume_cb );
+VLC_API void aout_VolumeHardSet( audio_output_t *, float, bool );
 
-/* From intf.c : */
-VLC_API void aout_VolumeSoftInit( aout_instance_t * );
-VLC_API void aout_VolumeNoneInit( aout_instance_t * );
+VLC_API void aout_TimeReport(audio_output_t *, mtime_t);
+
 VLC_API int aout_ChannelsRestart( vlc_object_t *, const char *, vlc_value_t, vlc_value_t, void * );
 
 /* */
 VLC_API vout_thread_t * aout_filter_RequestVout( filter_t *, vout_thread_t *p_vout, video_format_t *p_fmt ) VLC_USED;
+
+/** Audio output buffer FIFO */
+struct aout_fifo_t
+{
+    aout_buffer_t *         p_first;
+    aout_buffer_t **        pp_last;
+    date_t                  end_date;
+};
+
+/* Legacy packet-oriented audio output helpers */
+typedef struct
+{
+    vlc_mutex_t lock;
+    aout_fifo_t partial; /**< Audio blocks before packetization */
+    aout_fifo_t fifo; /**< Packetized audio blocks */
+    mtime_t pause_date; /**< Date when paused or VLC_TS_INVALID */
+    mtime_t time_report; /**< Desynchronization estimate or VLC_TS_INVALID */
+    unsigned samples; /**< Samples per packet */
+    bool starving; /**< Whether currently starving (to limit error messages) */
+} aout_packet_t;
+
+VLC_API void aout_PacketInit(audio_output_t *, aout_packet_t *, unsigned);
+VLC_API void aout_PacketDestroy(audio_output_t *);
+
+VLC_API void aout_PacketPlay(audio_output_t *, block_t *);
+VLC_API void aout_PacketPause(audio_output_t *, bool, mtime_t);
+VLC_API void aout_PacketFlush(audio_output_t *, bool);
+
+VLC_API block_t *aout_PacketNext(audio_output_t *, mtime_t) VLC_USED;
+
 
 #endif /* VLC_AOUT_H */

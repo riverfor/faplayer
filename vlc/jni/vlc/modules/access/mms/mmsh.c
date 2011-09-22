@@ -2,7 +2,7 @@
  * mmsh.c:
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id: 7deb1bc852c1201baf17754fc80a8cc0aeb05091 $
+ * $Id: 27f632be042890dc5cf506f7436b982de2b103f0 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -248,7 +248,8 @@ static int Control( access_t *p_access, int i_query, va_list args )
         /* */
         case ACCESS_GET_PTS_DELAY:
             pi_64 = (int64_t*)va_arg( args, int64_t * );
-            *pi_64 = var_GetInteger( p_access, "mms-caching" ) * INT64_C(1000);
+            *pi_64 = INT64_C(1000)
+                   * var_InheritInteger( p_access, "network-caching" );
             break;
 
         case ACCESS_GET_PRIVATE_ID_STATE:

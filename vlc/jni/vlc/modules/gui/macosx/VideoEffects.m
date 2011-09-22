@@ -2,7 +2,7 @@
  * VideoEffects.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 2b8abaf497d37779a5f38eb25fb4c4e56e491e5c $
+ * $Id: 357f59517debb51b12d77c9ac21fffa4f998dbd3 $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -21,6 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
+#import "CompatibilityFixes.h"
 #import "intf.h"
 #import <vlc_common.h>
 #import "VideoEffects.h"
@@ -60,12 +61,14 @@ static VLCVideoEffects *_o_sharedInstance = nil;
 {
     [o_window setTitle: _NS("Video Effects")];
     [o_window setExcludedFromWindowsMenu:YES];
+    if (OSX_LION)
+        [o_window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenAuxiliary];
+
     [[o_tableView tabViewItemAtIndex:[o_tableView indexOfTabViewItemWithIdentifier:@"basic"]] setLabel:_NS("Basic")];
     [[o_tableView tabViewItemAtIndex:[o_tableView indexOfTabViewItemWithIdentifier:@"crop"]] setLabel:_NS("Crop")];
     [[o_tableView tabViewItemAtIndex:[o_tableView indexOfTabViewItemWithIdentifier:@"geometry"]] setLabel:_NS("Geometry")];
     [[o_tableView tabViewItemAtIndex:[o_tableView indexOfTabViewItemWithIdentifier:@"color"]] setLabel:_NS("Color")];
-    [[o_tableView tabViewItemAtIndex:[o_tableView indexOfTabViewItemWithIdentifier:@"overlay"]] setLabel:_NS("Video output/Overlay")];
-    [[o_tableView tabViewItemAtIndex:[o_tableView indexOfTabViewItemWithIdentifier:@"logo"]] setLabel:_NS("Logo")];
+    [[o_tableView tabViewItemAtIndex:[o_tableView indexOfTabViewItemWithIdentifier:@"misc"]] setLabel:_NS("Miscellaneous")];
 
     [o_adjust_ckb setTitle:_NS("Image Adjust")];
     [o_adjust_hue_lbl setStringValue:_NS("Hue")];
@@ -160,16 +163,11 @@ static VLCVideoEffects *_o_sharedInstance = nil;
     [[o_addtext_pos_pop lastItem] setTag: 9];
     [o_addtext_pos_pop addItemWithTitle: _NS("Bottom-Right")];
     [[o_addtext_pos_pop lastItem] setTag: 10];
-
     [o_addlogo_ckb setTitle:_NS("Add logo")];
     [o_addlogo_logo_lbl setStringValue:_NS("Logo")];
     [o_addlogo_top_lbl setStringValue:_NS("Top")];
     [o_addlogo_left_lbl setStringValue:_NS("Left")];
     [o_addlogo_transparency_lbl setStringValue:_NS("Transparency")];
-    [o_eraselogo_ckb setTitle:_NS("Logo erase")];
-    [o_eraselogo_mask_lbl setStringValue:_NS("Mask")];
-    [o_eraselogo_top_lbl setStringValue:_NS("Top")];
-    [o_eraselogo_left_lbl setStringValue:_NS("Left")];
 
     [o_tableView selectFirstTabViewItem:self];
 
@@ -179,6 +177,7 @@ static VLCVideoEffects *_o_sharedInstance = nil;
 - (void)resetValues
 {
     NSString *tmpString;
+    char *tmpChar;
     /* do we have any filter enabled? if yes, show it. */
     char * psz_vfilters;
     psz_vfilters = config_GetPsz( p_intf, "video-filter" );
@@ -244,13 +243,15 @@ static VLCVideoEffects *_o_sharedInstance = nil;
     [o_crop_sync_top_bottom_ckb setState: NSOffState];
     [o_crop_sync_left_right_ckb setState: NSOffState];
 
-    tmpString = [NSString stringWithUTF8String: config_GetPsz( p_intf, "transform-type" )];
+    tmpChar = config_GetPsz( p_intf, "transform-type" );
+    tmpString = [NSString stringWithUTF8String: tmpChar];
     if( [tmpString isEqualToString:@"hflip"] )
         [o_transform_pop selectItemWithTag: 1];
     else if( [tmpString isEqualToString:@"vflip"] )
         [o_transform_pop selectItemWithTag: 2];
     else
         [o_transform_pop selectItemWithTag:[tmpString intValue]];
+    FREENULL( tmpChar );
     [o_transform_pop setEnabled: [o_transform_ckb state]];
     [o_puzzle_rows_fld setIntValue: config_GetInt( p_intf, "puzzle-rows" )];
     [o_puzzle_columns_fld setIntValue: config_GetInt( p_intf, "puzzle-cols" )];
@@ -273,13 +274,15 @@ static VLCVideoEffects *_o_sharedInstance = nil;
     [o_sepia_fld setIntValue: config_GetInt( p_intf, "sepia-intensity" )];
     [o_sepia_fld setEnabled: [o_sepia_ckb state]];
     [o_sepia_lbl setEnabled: [o_sepia_ckb state]];
-    tmpString = [NSString stringWithUTF8String: config_GetPsz( p_intf, "gradient-mode" )];
+    tmpChar = config_GetPsz( p_intf, "gradient-mode" );
+    tmpString = [NSString stringWithUTF8String: tmpChar];
     if( [tmpString isEqualToString:@"hough"] )
         [o_gradient_mode_pop selectItemWithTag: 3];
     else if( [tmpString isEqualToString:@"edge"] )
         [o_gradient_mode_pop selectItemWithTag: 2];
     else
         [o_gradient_mode_pop selectItemWithTag: 1];
+    FREENULL( tmpChar );
     [o_gradient_cartoon_ckb setState: config_GetInt( p_intf, "gradient-cartoon" )];
     [o_gradient_color_ckb setState: config_GetInt( p_intf, "gradient-type" )];
     [o_gradient_mode_pop setEnabled: [o_gradient_ckb state]];
@@ -299,16 +302,24 @@ static VLCVideoEffects *_o_sharedInstance = nil;
     [o_clone_fld setIntValue: config_GetInt( p_intf, "clone-count" )];
     [o_clone_fld setEnabled: [o_clone_ckb state]];
     [o_clone_lbl setEnabled: [o_clone_ckb state]];
-    if( config_GetPsz( p_intf, "marq-marquee" ) )
-        [o_addtext_text_fld setStringValue: [NSString stringWithUTF8String: config_GetPsz( p_intf, "marq-marquee" )]];
+    tmpChar = config_GetPsz( p_intf, "marq-marquee" );
+    if( tmpChar )
+    {
+        [o_addtext_text_fld setStringValue: [NSString stringWithUTF8String: tmpChar]];
+        FREENULL( tmpChar );
+    }
     [o_addtext_pos_pop selectItemWithTag: config_GetInt( p_intf, "marq-position" )];
     [o_addtext_pos_pop setEnabled: [o_addtext_ckb state]];
     [o_addtext_pos_lbl setEnabled: [o_addtext_ckb state]];
     [o_addtext_text_lbl setEnabled: [o_addtext_ckb state]];
     [o_addtext_text_fld setEnabled: [o_addtext_ckb state]];
 
-    if( config_GetPsz( p_intf, "logo-file" ) )
-       [o_addlogo_logo_fld setStringValue: [NSString stringWithUTF8String: config_GetPsz( p_intf, "logo-file" )]];
+    tmpChar = config_GetPsz( p_intf, "logo-file" );
+    if( tmpChar )
+    {
+       [o_addlogo_logo_fld setStringValue: [NSString stringWithUTF8String: tmpChar]];
+        FREENULL( tmpChar );
+    }
     [o_addlogo_top_fld setIntValue: config_GetInt( p_intf, "logo-x" )];
     [o_addlogo_left_fld setIntValue: config_GetInt( p_intf, "logo-y" )];
     [o_addlogo_transparency_sld setIntValue: config_GetInt( p_intf, "logo-opacity" )];
@@ -320,16 +331,6 @@ static VLCVideoEffects *_o_sharedInstance = nil;
     [o_addlogo_top_lbl setEnabled: [o_addlogo_ckb state]];
     [o_addlogo_transparency_sld setEnabled: [o_addlogo_ckb state]];
     [o_addlogo_transparency_lbl setEnabled: [o_addlogo_ckb state]];
-    if( config_GetPsz( p_intf, "erase-mask" ) )
-        [o_eraselogo_mask_fld setStringValue: [NSString stringWithUTF8String: config_GetPsz( p_intf, "erase-mask" )]];
-    [o_eraselogo_top_fld setIntValue: config_GetInt( p_intf, "erase-x" )];
-    [o_eraselogo_left_fld setIntValue: config_GetInt( p_intf, "erase-y" )];
-    [o_eraselogo_mask_fld setEnabled: [o_eraselogo_ckb state]];
-    [o_eraselogo_mask_lbl setEnabled: [o_eraselogo_ckb state]];
-    [o_eraselogo_left_fld setEnabled: [o_eraselogo_ckb state]];
-    [o_eraselogo_left_lbl setEnabled: [o_eraselogo_ckb state]];
-    [o_eraselogo_top_fld setEnabled: [o_eraselogo_ckb state]];
-    [o_eraselogo_top_lbl setEnabled: [o_eraselogo_ckb state]];
 }
 
 - (void)setVideoFilter: (char *)psz_name on:(BOOL)b_on
@@ -755,7 +756,7 @@ static VLCVideoEffects *_o_sharedInstance = nil;
 
 
 #pragma mark -
-#pragma mark video output & overlay
+#pragma mark Miscellaneous
 - (IBAction)enableClone:(id)sender
 {
     msg_Dbg( p_intf, "not yet implemented" );
@@ -776,9 +777,6 @@ static VLCVideoEffects *_o_sharedInstance = nil;
     msg_Dbg( p_intf, "not yet implemented" );
 }
 
-
-#pragma mark -
-#pragma mark logo
 - (IBAction)enableAddLogo:(id)sender
 {
     msg_Dbg( p_intf, "not yet implemented" );
@@ -788,16 +786,5 @@ static VLCVideoEffects *_o_sharedInstance = nil;
 {
     msg_Dbg( p_intf, "not yet implemented" );
 }
-
-- (IBAction)enableEraseLogo:(id)sender
-{
-    msg_Dbg( p_intf, "not yet implemented" );
-}
-
-- (IBAction)eraseLogoModifierChanged:(id)sender
-{
-    msg_Dbg( p_intf, "not yet implemented" );
-}
-
 
 @end

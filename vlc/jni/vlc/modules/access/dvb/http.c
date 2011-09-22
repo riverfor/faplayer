@@ -32,7 +32,6 @@
 #include <vlc_common.h>
 #include <vlc_access.h>
 #include <vlc_httpd.h>
-#include <vlc_acl.h>
 
 #include <sys/types.h>
 
@@ -65,12 +64,8 @@ static int HttpCallback( httpd_file_sys_t *p_args,
 int HTTPOpen( access_t *p_access )
 {
     access_sys_t *p_sys = p_access->p_sys;
-    char          *psz_address, *psz_cert = NULL, *psz_key = NULL,
-                  *psz_ca = NULL, *psz_crl = NULL, *psz_user = NULL,
-                  *psz_password = NULL, *psz_acl = NULL;
-    int           i_port       = 0;
+    char          *psz_user = NULL, *psz_password = NULL;
     char          psz_tmp[10];
-    vlc_acl_t     *p_acl = NULL;
     httpd_file_sys_t *f;
 
     vlc_mutex_init( &p_sys->httpd_mutex );
@@ -78,87 +73,26 @@ int HTTPOpen( access_t *p_access )
     p_sys->b_request_frontend_info = p_sys->b_request_mmi_info = false;
     p_sys->i_httpd_timeout = 0;
 
-    psz_address = var_GetNonEmptyString( p_access, "dvb-http-host" );
-    if( psz_address != NULL )
-    {
-        char *psz_parser = strchr( psz_address, ':' );
-        if( psz_parser )
-        {
-            *psz_parser++ = '\0';
-            i_port = atoi( psz_parser );
-        }
-    }
-    else
-        return VLC_SUCCESS;
-
-    /* determine SSL configuration */
-    psz_cert = var_InheritString( p_access, "dvb-http-intf-cert" );
-    if ( psz_cert != NULL )
-    {
-        msg_Dbg( p_access, "enabling TLS for HTTP interface (cert file: %s)",
-                 psz_cert );
-        psz_key = var_InheritString( p_access, "dvb-http-intf-key" );
-        psz_ca = var_InheritString( p_access, "dvb-http-intf-ca" );
-        psz_crl = var_InheritString( p_access, "dvb-http-intf-crl" );
-
-        if ( i_port <= 0 )
-            i_port = 8443;
-    }
-    else
-    {
-        if ( i_port <= 0 )
-            i_port= 8082;
-    }
-
-    /* Ugly hack to allow to run several HTTP servers on different ports. */
-    sprintf( psz_tmp, ":%d", i_port + 1 );
-    config_PutPsz( p_access, "dvb-http-host", psz_tmp );
-
-    msg_Dbg( p_access, "base %s:%d", psz_address, i_port );
-
-    p_sys->p_httpd_host = httpd_TLSHostNew( VLC_OBJECT(p_access), psz_address,
-                                            i_port, psz_cert, psz_key, psz_ca,
-                                            psz_crl );
-    free( psz_cert );
-    free( psz_key );
-    free( psz_ca );
-    free( psz_crl );
-
+    p_sys->p_httpd_host = vlc_http_HostNew( VLC_OBJECT(p_access) );
     if ( p_sys->p_httpd_host == NULL )
     {
-        msg_Err( p_access, "cannot listen on %s:%d", psz_address, i_port );
-        free( psz_address );
         return VLC_EGENERIC;
     }
     free( psz_address );
 
     psz_user = var_GetNonEmptyString( p_access, "dvb-http-user" );
     psz_password = var_GetNonEmptyString( p_access, "dvb-http-password" );
-    psz_acl = var_GetNonEmptyString( p_access, "dvb-http-acl" );
-
-    if ( psz_acl != NULL )
-    {
-        p_acl = ACL_Create( p_access, false );
-        if( ACL_LoadFile( p_acl, psz_acl ) )
-        {
-            ACL_Destroy( p_acl );
-            p_acl = NULL;
-        }
-    }
 
     /* Declare an index.html file. */
     f = malloc( sizeof(httpd_file_sys_t) );
     f->p_access = p_access;
     f->p_file = httpd_FileNew( p_sys->p_httpd_host, "/index.html",
                                "text/html; charset=UTF-8",
-                               psz_user, psz_password, p_acl,
+                               psz_user, psz_password, NULL,
                                HttpCallback, f );
 
     free( psz_user );
     free( psz_password );
-    free( psz_acl );
-    if ( p_acl != NULL )
-        ACL_Destroy( p_acl );
 
     if ( f->p_file == NULL )
     {

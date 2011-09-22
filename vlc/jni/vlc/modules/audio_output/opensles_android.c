@@ -75,7 +75,7 @@ typedef SLresult (*slCreateEngine_t)(
  *****************************************************************************/
 static int  Open        ( vlc_object_t * );
 static void Close       ( vlc_object_t * );
-static void Play        ( aout_instance_t * );
+static void Play        ( audio_output_t *, block_t * );
 static void PlayedCallback ( SLAndroidSimpleBufferQueueItf caller,  void *pContext);
 
 /*****************************************************************************
@@ -135,15 +135,15 @@ static void Clear( aout_sys_t *p_sys )
  *****************************************************************************/
 static int Open( vlc_object_t * p_this )
 {
-    aout_instance_t     *p_aout = (aout_instance_t *)p_this;
+    audio_output_t     *p_aout = (audio_output_t *)p_this;
     SLresult            result;
 
     /* Allocate structure */
-    p_aout->output.p_sys = malloc( sizeof( aout_sys_t ) );
-    if( unlikely( p_aout->output.p_sys == NULL ) )
+    p_aout->sys = malloc( sizeof( aout_sys_t ) );
+    if( unlikely( p_aout->sys == NULL ) )
         return VLC_ENOMEM;
 
-    aout_sys_t * p_sys = p_aout->output.p_sys;
+    aout_sys_t * p_sys = p_aout->sys;
 
     p_sys->playerObject     = NULL;
     p_sys->engineObject     = NULL;
@@ -204,7 +204,7 @@ static int Open( vlc_object_t * p_this )
     SLDataFormat_PCM format_pcm;
     format_pcm.formatType       = SL_DATAFORMAT_PCM;
     format_pcm.numChannels      = 2;
-    format_pcm.samplesPerSec    = ((SLuint32) p_aout->output.output.i_rate * 1000) ;
+    format_pcm.samplesPerSec    = ((SLuint32) p_aout->format.i_rate * 1000) ;
     format_pcm.bitsPerSample    = SL_PCMSAMPLEFORMAT_FIXED_16;
     format_pcm.containerSize    = SL_PCMSAMPLEFORMAT_FIXED_16;
     format_pcm.channelMask      = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
@@ -256,13 +256,13 @@ static int Open( vlc_object_t * p_this )
     CHECK_OPENSL_ERROR( result, "Failed to switch to playing state" );
 
     // we want 16bit signed data little endian.
-    p_aout->output.output.i_format              = VLC_CODEC_S16L;
-    p_aout->output.i_nb_samples                 = 2048;
-    p_aout->output.output.i_physical_channels   = AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT;
-    p_aout->output.pf_play                      = Play;
-    p_aout->output.pf_pause = NULL;
+    p_aout->format.i_format              = VLC_CODEC_S16L;
+    p_aout->format.i_physical_channels   = AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT;
+    p_aout->pf_play                      = Play;
+    p_aout->pf_pause                     = NULL;
+    p_aout->pf_flush                     = NULL;
 
-    aout_FormatPrepare( &p_aout->output.output );
+    aout_FormatPrepare( &p_aout->format );
 
     return VLC_SUCCESS;
 error:
@@ -275,8 +275,8 @@ error:
  *****************************************************************************/
 static void Close( vlc_object_t * p_this )
 {
-    aout_instance_t *p_aout = (aout_instance_t *)p_this;
-    aout_sys_t      *p_sys = p_aout->output.p_sys;
+    audio_output_t *p_aout = (audio_output_t *)p_this;
+    aout_sys_t      *p_sys = p_aout->sys;
 
     msg_Dbg( p_aout, "Closing OpenSLES" );
 
@@ -290,42 +290,34 @@ static void Close( vlc_object_t * p_this )
 /*****************************************************************************
  * Play: play a sound
  *****************************************************************************/
-static void Play( aout_instance_t * p_aout )
+static void Play( audio_output_t * p_aout, block_t *p_buffer )
 {
-    aout_sys_t * p_sys = p_aout->output.p_sys;
-    aout_buffer_t *p_buffer;
-
+    aout_sys_t * p_sys = p_aout->sys;
     SLresult result;
 
-    p_buffer = aout_FifoPop(&p_aout->output.fifo);
-    if( p_buffer != NULL )
+    for (;;)
     {
-        for (;;)
-        {
-            result = (*p_sys->playerBufferQueue)->Enqueue(
+        result = (*p_sys->playerBufferQueue)->Enqueue(
                             p_sys->playerBufferQueue, p_buffer->p_buffer,
                             p_buffer->i_buffer );
-            if( result == SL_RESULT_SUCCESS )
-                break;
-            if ( result != SL_RESULT_BUFFER_INSUFFICIENT )
-            {
-                msg_Warn( p_aout, "Dropping invalid buffer" );
-                aout_BufferFree( p_buffer );
-                return ;
-            }
-
-            msg_Err( p_aout, "write error (%lu)", result );
-
-            // Wait a bit to retry. might miss calls to *cancel
-            // but this is supposed to be rare anyway
-            msleep(CLOCK_FREQ);
+        if( result == SL_RESULT_SUCCESS )
+            break;
+        if ( result != SL_RESULT_BUFFER_INSUFFICIENT )
+        {
+            msg_Warn( p_aout, "Dropping invalid buffer" );
+            aout_BufferFree( p_buffer );
+            return ;
         }
-        p_sys->p_buffer_array[p_sys->i_toappend_buffer] = p_buffer;
-        if( ++p_sys->i_toappend_buffer == BUFF_QUEUE )
-            p_sys->i_toappend_buffer = 0;
+
+        msg_Err( p_aout, "write error (%lu)", result );
+
+        // Wait a bit to retry. might miss calls to *cancel
+        // but this is supposed to be rare anyway
+        msleep(CLOCK_FREQ);
     }
-    else
-        msg_Err( p_aout, "nothing to play?" );
+    p_sys->p_buffer_array[p_sys->i_toappend_buffer] = p_buffer;
+    if( ++p_sys->i_toappend_buffer == BUFF_QUEUE )
+        p_sys->i_toappend_buffer = 0;
 }
 
 static void PlayedCallback (SLAndroidSimpleBufferQueueItf caller, void *pContext )

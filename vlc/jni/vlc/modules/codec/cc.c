@@ -1,8 +1,7 @@
 /*****************************************************************************
- * cc608.c : CC 608/708 subtitles decoder
+ * cc.c : CC 608/708 subtitles decoder
  *****************************************************************************
- * Copyright (C) 2007 Laurent Aimar
- * $Id: 871583411693797a96005b99062e41e3fae7cd7c $
+ * Copyright © 2007-2010 Laurent Aimar, 2011 VLC authors and VideoLAN
  *
  * Authors: Laurent Aimar < fenrir # via.ecp.fr>
  *
@@ -36,7 +35,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
-#include <string.h>
+
 #include <assert.h>
 
 #include <vlc_common.h>
@@ -750,6 +749,9 @@ static bool Eia608ParsePac( eia608_t *h, uint8_t d1, uint8_t d2 )
     else if( d2 >= 0x40 )
         d2 -= 0x40;
     h->cursor.i_column = pac2_attribs[d2].i_column;
+    h->color = pac2_attribs[d2].i_color;
+    h->font  = pac2_attribs[d2].i_font;
+
     return false;
 }
 
@@ -822,7 +824,7 @@ static void Eia608TextUtf8( char *psz_utf8, uint8_t c ) // Returns number of byt
         E2( 0x86, 0xc2,0xa3), // Pounds sterling
         E3( 0x87, 0xe2,0x99,0xaa), // Music note
         E2( 0x88, 0xc3,0xa0), // lowercase a, grave accent
-        E1( 0x89, 0x20), // transparent space, we make it regular
+        E2( 0x89, 0xc2,0xa0), // transparent space
         E2( 0x8a, 0xc3,0xa8), // lowercase e, grave accent
         E2( 0x8b, 0xc3,0xa2), // lowercase a, circumflex accent
         E2( 0x8c, 0xc3,0xaa), // lowercase e, circumflex accent
@@ -838,15 +840,15 @@ static void Eia608TextUtf8( char *psz_utf8, uint8_t c ) // Returns number of byt
         E2( 0x94, 0xc3,0x9c), // capital letter U with diaresis
         E2( 0x95, 0xc3,0xbc), // lowercase letter U with diaeresis
         E1( 0x96, 0x27), // apostrophe
-        E2( 0x97, 0xc1,0xa1), // inverted exclamation mark
+        E2( 0x97, 0xc2,0xa1), // inverted exclamation mark
         E1( 0x98, 0x2a), // asterisk
         E1( 0x99, 0x27), // apostrophe (yes, duped). See CCADI source code.
         E1( 0x9a, 0x2d), // hyphen-minus
         E2( 0x9b, 0xc2,0xa9), // copyright sign
         E3( 0x9c, 0xe2,0x84,0xa0), // Service mark
         E1( 0x9d, 0x2e), // Full stop (.)
-        E1( 0x9e, 0x22), // Quoatation mark
-        E1( 0x9f, 0x22), // Quoatation mark
+        E3( 0x9e, 0xe2,0x80,0x9c), // Quotation mark
+        E3( 0x9f, 0xe2,0x80,0x9d), // Quotation mark
         E2( 0xa0, 0xc3,0x80), // uppercase A, grave accent
         E2( 0xa1, 0xc3,0x82), // uppercase A, circumflex
         E2( 0xa2, 0xc3,0x87), // uppercase C with cedilla
@@ -974,7 +976,7 @@ static void Eia608TextLine( struct eia608_screen *screen, char *psz_text, int i_
 
             /* Be sure to create valid html */
             b_close_italics |= b_last_italics && b_close_color;
-            b_close_underline = b_last_underline && ( b_close_italics || b_close_color );
+            b_close_underline |= b_last_underline && ( b_close_italics || b_close_color );
 
             if( b_close_underline )
                 CAT( "</u>" );

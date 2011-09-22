@@ -2,7 +2,7 @@
  * httpd.c: HTTPd wrapper
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: 9d218afc9cff6e7b4c1086b56a3b3b8bb59260a7 $
+ * $Id: b4520d913e1d16b63a5c309a37c964ad053d39ab $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -68,20 +68,9 @@ static const luaL_Reg vlclua_httpd_reg[] = {
 static int vlclua_httpd_tls_host_new( lua_State *L )
 {
     vlc_object_t *p_this = vlclua_get_this( L );
-    const char *psz_host = luaL_checkstring( L, 1 );
-    int i_port = luaL_checkint( L, 2 );
-    const char *psz_cert = luaL_optstring( L, 3, NULL );
-    const char *psz_key = luaL_optstring( L, 4, NULL );
-    const char *psz_ca = luaL_optstring( L, 5, NULL );
-    const char *psz_crl = luaL_optstring( L, 6, NULL );
-    httpd_host_t *p_host = httpd_TLSHostNew( p_this, psz_host, i_port,
-                                                   psz_cert, psz_key,
-                                                   psz_ca, psz_crl );
+    httpd_host_t *p_host = vlc_http_HostNew( p_this );
     if( !p_host )
-        return luaL_error( L, "Failed to create HTTP TLS host \"%s:%d\" "
-                           "(cert: \"%s\", key: \"%s\", ca: \"%s\", "
-                           "crl: \"%s\").", psz_host, i_port,
-                           psz_cert, psz_key, psz_ca, psz_crl );
+        return luaL_error( L, "Failed to create HTTP host" );
 
     httpd_host_t **pp_host = lua_newuserdata( L, sizeof( httpd_host_t * ) );
     *pp_host = p_host;

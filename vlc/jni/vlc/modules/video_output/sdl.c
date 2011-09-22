@@ -2,7 +2,7 @@
  * sdl.c: SDL video output display method
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 8bb08dc549236687715066dc981a942f4392c3f5 $
+ * $Id: e431b0a0f42afbf1e207d7aabcbe5faa798a528a $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Pierre Baillet <oct@zoy.org>
@@ -142,10 +142,8 @@ static int Open(vlc_object_t *object)
     /* Win32 SDL implementation doesn't support SDL_INIT_EVENTTHREAD yet*/
     sdl_flags |= SDL_INIT_EVENTTHREAD;
 #endif
-#ifndef NDEBUG
     /* In debug mode you may want vlc to dump a core instead of staying stuck */
     sdl_flags |= SDL_INIT_NOPARACHUTE;
-#endif
 
     /* Initialize library */
     if (SDL_Init(sdl_flags) < 0) {

@@ -2,7 +2,7 @@
  * dialogs_provider.cpp : Dialog Provider
  *****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: 5cad0869128a4f7ce42dad9e7d1928fe3eb648bf $
+ * $Id: 6905c4257a2d915e325a752eff211f177f8f5c33 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -583,7 +583,7 @@ void DialogsProvider::saveAPlaylist()
         return;
 
     for( size_t i = 0; i < sizeof (types) / sizeof (types[0]); i++)
-        if( selected == qfu( vlc_gettext( types[i].filter_name ) ) + " (" + qfu( types[i].filter_patterns ) + ")" )
+        if( selected == qfu( vlc_gettext( types[i].filter_name ) ) + " (*." + qfu( types[i].filter_patterns ) + ")" )
         {
             playlist_Export( THEPL, qtu( toNativeSeparators( file ) ),
                              THEPL->p_playing, types[i].module );
@@ -607,6 +607,7 @@ void DialogsProvider::streamingDialog( QWidget *parent,
     if( !b_transcode_only )
     {
         SoutDialog *s = new SoutDialog( parent, p_intf, mrl );
+        s->setAttribute( Qt::WA_QuitOnClose, false ); // See #4883
         if( s->exec() == QDialog::Accepted )
         {
             soutoption = s->getMrl();
@@ -619,6 +620,7 @@ void DialogsProvider::streamingDialog( QWidget *parent,
     } else {
     /* Convert */
         ConvertDialog *s = new ConvertDialog( parent, p_intf, mrl );
+        s->setAttribute( Qt::WA_QuitOnClose, false ); // See #4883
         if( s->exec() == QDialog::Accepted )
         {
             soutoption = s->getMrl();
@@ -640,7 +642,7 @@ void DialogsProvider::streamingDialog( QWidget *parent,
         p_input = input_item_New( qtu( mrl ), _("Streaming") );
 
         /* Add normal Options */
-        for( int j = 0; j < options.size(); j++ )
+        for( int j = 0; j < options.count(); j++ )
         {
             QString qs = colon_unescape( options[j] );
             if( !qs.isEmpty() )

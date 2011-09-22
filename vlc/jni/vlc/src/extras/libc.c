@@ -2,7 +2,7 @@
  * libc.c: Extra libc function for some systems.
  *****************************************************************************
  * Copyright (C) 2002-2006 the VideoLAN team
- * $Id: 5004480a0b20d23d9c474903d4a9899c20290260 $
+ * $Id: db08691188bee97b95cdbc8acf57c254443f3433 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Samuel Hocevar <sam@zoy.org>
@@ -31,6 +31,12 @@
 
 #include <vlc_common.h>
 #include <vlc_charset.h>
+
+#if defined(HAVE_POSIX_MEMALIGN)
+#   include <stdlib.h>
+#elif defined(HAVE_MEMALIGN) || defined(HAVE_WIN32)
+#   include <malloc.h>
+#endif
 
 #include <errno.h>
 
@@ -418,4 +424,20 @@ bool vlc_ureduce( unsigned *pi_dst_nom, unsigned *pi_dst_den,
     *pi_dst_den = i_den;
 
     return b_exact;
+}
+
+void *vlc_memalign(size_t align, size_t size)
+{
+    void *base;
+#if defined(HAVE_POSIX_MEMALIGN)
+    if (unlikely(posix_memalign(&base, align, size)))
+        base = NULL;
+#elif defined(HAVE_MEMALIGN)
+    base = memalign(align, size);
+#elif defined(HAVE_WIN32)
+    base = __mingw_aligned_malloc(size, align);
+#else
+#   error Unimplemented!
+#endif
+    return base;
 }

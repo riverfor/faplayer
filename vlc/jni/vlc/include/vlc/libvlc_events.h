@@ -45,7 +45,7 @@ extern "C" {
 enum libvlc_event_e {
     /* Append new event types at the end of a category.
      * Do not remove, insert or re-order any entry.
-     * Keep this in sync with src/control/event.c:libvlc_event_type_name(). */
+     * Keep this in sync with lib/event.c:libvlc_event_type_name(). */
     libvlc_MediaMetaChanged=0,
     libvlc_MediaSubItemAdded,
     libvlc_MediaDurationChanged,
@@ -71,6 +71,7 @@ enum libvlc_event_e {
     libvlc_MediaPlayerTitleChanged,
     libvlc_MediaPlayerSnapshotTaken,
     libvlc_MediaPlayerLengthChanged,
+    libvlc_MediaPlayerVout,
 
     libvlc_MediaListItemAdded=0x200,
     libvlc_MediaListWillAddItem,
@@ -162,6 +163,10 @@ typedef struct libvlc_event_t
         {
             int new_pausable;
         } media_player_pausable_changed;
+        struct
+        {
+            int new_count;
+        } media_player_vout;
 
         /* media list */
         struct

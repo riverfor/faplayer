@@ -2,7 +2,7 @@
  * input.c: input thread
  *****************************************************************************
  * Copyright (C) 1998-2007 the VideoLAN team
- * $Id: 7927480f9224c3a5228ea54a2a5a60d4c087087c $
+ * $Id: 07bb47cf5929cdee0bc940548e6b463e41ea7c7f $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -617,6 +617,7 @@ static void MainLoopDemux( input_thread_t *p_input, bool *pb_changed, bool *pb_d
     {
         msg_Dbg( p_input, "EOF reached" );
         p_input->p->input.b_eof = true;
+        es_out_Eos(p_input->p->p_es_out);
     }
     else if( i_ret < 0 )
     {
@@ -3115,24 +3116,24 @@ static void MRLSections( input_thread_t *p_input, char *psz_source,
     /* Check we are really dealing with a title/chapter section */
     psz_check = psz + 1;
     if( !*psz_check ) return;
-    if( isdigit(*psz_check) )
+    if( isdigit((unsigned char)*psz_check) )
         if(!next(&psz_check)) return;
     if( *psz_check != ':' && *psz_check != '-' && *psz_check ) return;
     if( *psz_check == ':' && ++psz_check )
     {
-        if( isdigit(*psz_check) )
+        if( isdigit((unsigned char)*psz_check) )
             if(!next(&psz_check)) return;
     }
     if( *psz_check != '-' && *psz_check ) return;
     if( *psz_check == '-' && ++psz_check )
     {
-        if( isdigit(*psz_check) )
+        if( isdigit((unsigned char)*psz_check) )
             if(!next(&psz_check)) return;
     }
     if( *psz_check != ':' && *psz_check ) return;
     if( *psz_check == ':' && ++psz_check )
     {
-        if( isdigit(*psz_check) )
+        if( isdigit((unsigned char)*psz_check) )
             if(!next(&psz_check)) return;
     }
     if( *psz_check ) return;

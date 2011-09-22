@@ -2,7 +2,7 @@
  * ml_model.cpp: the media library's model
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id: a8e7a359ce3121c88ab0b36ef65ba3bef1bf3dff $
+ * $Id: b8486b77d0f34103e6f4b6df6464f994606c80e8 $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -235,7 +235,7 @@ void MLModel::remove( MLItem *item )
 
 void MLModel::doDelete( QModelIndexList list )
 {
-    for (int i = 0; i < list.size(); ++i)
+    for (int i = 0; i < list.count(); ++i)
     {
         int id = getId( list.at(i) );
         ml_DeleteSimple( p_ml, id );
@@ -562,7 +562,7 @@ void MLModel::popupInfo()
 QStringList MLModel::selectedURIs()
 {
     QStringList list;
-    for( int i = 0; i < current_selection.size(); i++ )
+    for( int i = 0; i < current_selection.count(); i++ )
     {
         QModelIndex idx = current_selection.value(i);
         MLItem *item = static_cast< MLItem* >( idx.internalPointer() );

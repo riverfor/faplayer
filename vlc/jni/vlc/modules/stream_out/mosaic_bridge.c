@@ -2,7 +2,7 @@
  * mosaic_bridge.c:
  *****************************************************************************
  * Copyright (C) 2004-2007 the VideoLAN team
- * $Id: 266f608894ea1cc00f29bd3b4df0475d23166e74 $
+ * $Id: b2e07a7439526587bcc0552b90a13cfa99e370c9 $
  *
  * Authors: Antoine Cellerier <dionoea@videolan.org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -178,7 +178,6 @@ static int Open( vlc_object_t *p_this )
 {
     sout_stream_t        *p_stream = (sout_stream_t *)p_this;
     sout_stream_sys_t    *p_sys;
-    vlc_object_t         *p_libvlc = VLC_OBJECT( p_this->p_libvlc );
     vlc_value_t           val;
 
     config_ChainParse( p_stream, CFG_PREFIX, ppsz_sout_options,

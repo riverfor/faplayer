@@ -2,7 +2,7 @@
  * hotkeys.c: Hotkey handling for vlc
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: d199497019fa042cb34885a300d5215eef428933 $
+ * $Id: 9919bbaca523f1c2cbc46092d9accc46d16c724a $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *          Jean-Paul Saman <jpsaman #_at_# m2x.nl>
@@ -224,6 +224,10 @@ static int PutAction( intf_thread_t *p_intf, int i_action )
 
         case ACTIONID_INTF_HIDE:
             var_SetBool( p_intf->p_libvlc, "intf-show", false );
+            break;
+
+        case ACTIONID_INTF_BOSS:
+            var_TriggerCallback( p_intf->p_libvlc, "intf-boss" );
             break;
 
         /* Video Output actions */
@@ -1035,11 +1039,8 @@ static void DisplayVolume( intf_thread_t *p_intf, vout_thread_t *p_vout,
         vout_OSDSlider( p_vout, VOLUME_WIDGET_CHAN,
             i_vol*100/AOUT_VOLUME_MAX, OSD_VERT_SLIDER );
     }
-    else
-    {
-        DisplayMessage( p_vout, VOLUME_TEXT_CHAN, _( "Volume %d%%" ),
-                        i_vol*400/AOUT_VOLUME_MAX );
-    }
+    DisplayMessage( p_vout, VOLUME_TEXT_CHAN, _( "Volume %d%%" ),
+                    i_vol*100/AOUT_VOLUME_DEFAULT );
 }
 
 static void DisplayRate( vout_thread_t *p_vout, float f_rate )

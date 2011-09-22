@@ -2,7 +2,7 @@
  * Controller.cpp : Controller for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: 6a75784ce33022120c10429c6af76bca9f0f4a5b $
+ * $Id: c83af0f888565a408793bfa6e5feff6c7ea19e10 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -112,10 +112,10 @@ void AbstractController::parseAndCreate( const QString& config,
                                          QBoxLayout *controlLayout )
 {
     QStringList list = config.split( ";", QString::SkipEmptyParts ) ;
-    for( int i = 0; i < list.size(); i++ )
+    for( int i = 0; i < list.count(); i++ )
     {
         QStringList list2 = list.at( i ).split( "-" );
-        if( list2.size() < 1 )
+        if( list2.count() < 1 )
         {
             msg_Warn( p_intf, "Parsing error 1. Please, report this." );
             continue;
@@ -130,7 +130,7 @@ void AbstractController::parseAndCreate( const QString& config,
             continue;
         }
 
-        if( list2.size() > 1 )
+        if( list2.count() > 1 )
         {
             i_option = list2.at( 1 ).toInt( &ok );
             if( !ok )
@@ -433,9 +433,10 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
     case LOOP_BUTTON:{
         LoopButton *loopButton = new LoopButton;
         setupButton( loopButton );
-        loopButton->setToolTip( qtr( "Click to toggle between loop one, loop all" ) );
+        loopButton->setToolTip( qtr( "Click to toggle between loop all, loop one and no loop") );
         loopButton->setCheckable( true );
-        loopButton->updateButtonIcons( NORMAL );
+        int i_state = 2 * var_GetBool( THEPL, "loop" ) + var_GetBool( THEPL, "repeat" );
+        loopButton->updateButtonIcons( i_state );
         CONNECT( THEMIM, repeatLoopChanged( int ), loopButton, updateButtonIcons( int ) );
         CONNECT( loopButton, clicked(), THEMIM, loopRepeatLoopStatus() );
         widget = loopButton;
@@ -471,7 +472,7 @@ QWidget *AbstractController::createWidget( buttonType_e button, int options )
         if( frame )
         {
             QList<QToolButton *> allTButtons = frame->findChildren<QToolButton *>();
-            for( int i = 0; i < allTButtons.size(); i++ )
+            for( int i = 0; i < allTButtons.count(); i++ )
                 applyAttributes( allTButtons[i], b_flat, b_big );
         }
         else
@@ -622,12 +623,12 @@ ControlsWidget::ControlsWidget( intf_thread_t *_p_i,
                                 QWidget *_parent ) :
                                 AbstractController( _p_i, _parent )
 {
+    RTL_UNAFFECTED_WIDGET
     /* advanced Controls handling */
     b_advancedVisible = b_advControls;
-#if DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT
     setStyleSheet( "background: red ");
 #endif
-
     setAttribute( Qt::WA_MacBrushedMetal);
     QVBoxLayout *controlLayout = new QVBoxLayout( this );
     controlLayout->setContentsMargins( 4, 1, 0, 0 );
@@ -674,10 +675,11 @@ void ControlsWidget::toggleAdvanced()
 AdvControlsWidget::AdvControlsWidget( intf_thread_t *_p_i, QWidget *_parent ) :
                                      AbstractController( _p_i, _parent )
 {
+    RTL_UNAFFECTED_WIDGET
     controlLayout = new QHBoxLayout( this );
     controlLayout->setMargin( 0 );
     controlLayout->setSpacing( 0 );
-#if DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT
     setStyleSheet( "background: orange ");
 #endif
 
@@ -690,10 +692,11 @@ AdvControlsWidget::AdvControlsWidget( intf_thread_t *_p_i, QWidget *_parent ) :
 InputControlsWidget::InputControlsWidget( intf_thread_t *_p_i, QWidget *_parent ) :
                                      AbstractController( _p_i, _parent )
 {
+    RTL_UNAFFECTED_WIDGET
     controlLayout = new QHBoxLayout( this );
     controlLayout->setMargin( 0 );
     controlLayout->setSpacing( 0 );
-#if DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT
     setStyleSheet( "background: green ");
 #endif
 
@@ -706,6 +709,7 @@ InputControlsWidget::InputControlsWidget( intf_thread_t *_p_i, QWidget *_parent 
 FullscreenControllerWidget::FullscreenControllerWidget( intf_thread_t *_p_i, QWidget *_parent )
                            : AbstractController( _p_i, _parent )
 {
+    RTL_UNAFFECTED_WIDGET
     i_mouse_last_x      = -1;
     i_mouse_last_y      = -1;
     b_mouse_over        = false;
@@ -887,7 +891,7 @@ void FullscreenControllerWidget::customEvent( QEvent *event )
 {
     bool b_fs;
 
-    switch( event->type() )
+    switch( (int)event->type() )
     {
         /* This is used when the 'i' hotkey is used, to force quick toggle */
         case FullscreenControlToggle_Type:

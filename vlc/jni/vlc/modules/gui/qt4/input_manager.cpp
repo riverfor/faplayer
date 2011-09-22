@@ -2,7 +2,7 @@
  * input_manager.cpp : Manage an input and interact with its GUI elements
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 2500bb4e46af603a140654e03aa9987f2bae511b $
+ * $Id: 1b4bb1b48e1a21804bef465752108635b96e6585 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakka  <ileoo@videolan.org>
@@ -24,6 +24,7 @@
  *****************************************************************************/
 
 #define __STDC_FORMAT_MACROS 1
+#define __STDC_CONSTANT_MACROS 1
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -34,6 +35,7 @@
 #include <vlc_url.h>
 #include <vlc_strings.h>
 #include <vlc_aout.h>
+#include <vlc_aout_intf.h>
 
 #include <QApplication>
 
@@ -407,7 +409,7 @@ void InputManager::UpdatePosition()
     int i_length;
     int64_t i_time;
     float f_pos;
-    i_length = var_GetTime(  p_input , "length" ) / 1000000;
+    i_length = var_GetTime(  p_input , "length" ) / CLOCK_FREQ;
     i_time = var_GetTime(  p_input , "time");
     f_pos = var_GetFloat(  p_input , "position" );
     emit positionUpdated( f_pos, i_time, i_length );
@@ -515,7 +517,7 @@ bool InputManager::hasVisualisation()
     if( !p_input )
         return false;
 
-    aout_instance_t *aout = input_GetAout( p_input );
+    audio_output_t *aout = input_GetAout( p_input );
     if( !aout )
         return false;
 
@@ -882,7 +884,7 @@ void InputManager::jumpFwd()
     int i_interval = var_InheritInteger( p_input, "short-jump-size" );
     if( i_interval > 0 )
     {
-        mtime_t val = (mtime_t)(i_interval) * 1000000L;
+        mtime_t val = CLOCK_FREQ * i_interval;
         var_SetTime( p_input, "time-offset", val );
     }
 }
@@ -892,7 +894,7 @@ void InputManager::jumpBwd()
     int i_interval = var_InheritInteger( p_input, "short-jump-size" );
     if( i_interval > 0 )
     {
-        mtime_t val = -1 *(mtime_t)(i_interval) * 1000000L;
+        mtime_t val = -CLOCK_FREQ * i_interval;
         var_SetTime( p_input, "time-offset", val );
     }
 }
@@ -984,6 +986,13 @@ MainInputManager::~MainInputManager()
     var_DelCallback( THEPL, "repeat", RepeatChanged, this );
     var_DelCallback( THEPL, "loop", LoopChanged, this );
 
+    /* Save some interface state in configuration, at module quit */
+    config_PutInt( p_intf, "random", var_GetBool( THEPL, "random" ) );
+    config_PutInt( p_intf, "loop", var_GetBool( THEPL, "loop" ) );
+    config_PutInt( p_intf, "repeat", var_GetBool( THEPL, "repeat" ) );
+
+    if( var_InheritBool( p_intf, "qt-autosave-volume" ) )
+        config_PutInt( p_intf, "volume", aout_VolumeGet( THEPL ) );
 }
 
 vout_thread_t* MainInputManager::getVout()
@@ -991,7 +1000,7 @@ vout_thread_t* MainInputManager::getVout()
     return p_input ? input_GetVout( p_input ) : NULL;
 }
 
-aout_instance_t * MainInputManager::getAout()
+audio_output_t * MainInputManager::getAout()
 {
     return p_input ? input_GetAout( p_input ) : NULL;
 }

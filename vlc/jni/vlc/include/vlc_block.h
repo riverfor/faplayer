@@ -2,7 +2,7 @@
  * vlc_block.h: Data blocks management functions
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: ce8d8e4d4dd24191613e0bb3a32e3755a7832f2d $
+ * $Id: 746310da9c21e40df8fb2bb0db42e53b3c0d7930 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -40,7 +40,6 @@
  * - i_dts/i_pts could be VLC_TS_INVALID, it means no pts/dts
  * - i_length: length in microseond of the packet, can be null except in the
  *      sout where it is mandatory.
- * - i_rate 0 or a valid input rate, look at vlc_input.h
  *
  * - i_buffer number of valid data pointed by p_buffer
  *      you can freely decrease it but never increase it yourself
@@ -104,17 +103,15 @@ struct block_t
 {
     block_t     *p_next;
 
+    uint8_t     *p_buffer;
+    size_t      i_buffer;
+
     uint32_t    i_flags;
+    unsigned    i_nb_samples; /* Used for audio */
 
     mtime_t     i_pts;
     mtime_t     i_dts;
     mtime_t     i_length;
-
-    unsigned    i_nb_samples; /* Used for audio */
-    int         i_rate;
-
-    size_t      i_buffer;
-    uint8_t     *p_buffer;
 
     /* Rudimentary support for overloading block (de)allocation. */
     block_free_t pf_release;
@@ -149,12 +146,11 @@ static inline block_t *block_Duplicate( block_t *p_block )
     if( p_dup == NULL )
         return NULL;
 
+    p_dup->i_flags   = p_block->i_flags;
+    p_dup->i_nb_samples = p_block->i_nb_samples;
     p_dup->i_dts     = p_block->i_dts;
     p_dup->i_pts     = p_block->i_pts;
-    p_dup->i_flags   = p_block->i_flags;
     p_dup->i_length  = p_block->i_length;
-    p_dup->i_rate    = p_block->i_rate;
-    p_dup->i_nb_samples = p_block->i_nb_samples;
     memcpy( p_dup->p_buffer, p_block->p_buffer, p_block->i_buffer );
 
     return p_dup;

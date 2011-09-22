@@ -2,7 +2,7 @@
 * simple_prefs.m: Simple Preferences for Mac OS X
 *****************************************************************************
 * Copyright (C) 2008-2011 the VideoLAN team
-* $Id: 227c5844ce8572f006cb2b45c213ba047743c66e $
+* $Id: 49b7f1b445ae962c574eeb946f1f63fbf1b80f9b $
 *
 * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
 *
@@ -21,6 +21,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
 *****************************************************************************/
 
+#import "CompatibilityFixes.h"
 #import "simple_prefs.h"
 #import "prefs.h"
 #import <vlc_keys.h>
@@ -103,6 +104,11 @@ static VLCSimplePrefs *_o_sharedInstance = nil;
     [o_sprefs_toolbar setSizeMode: NSToolbarSizeModeRegular];
     [o_sprefs_toolbar setDelegate: self];
     [o_sprefs_win setToolbar: o_sprefs_toolbar];
+
+    if (OSX_LION)
+        [o_sprefs_win setCollectionBehavior: NSWindowCollectionBehaviorFullScreenAuxiliary];
+    else
+        [o_intf_nativefullscreen_ckb setEnabled:NO];
 
     /* setup useful stuff */
     o_hotkeysNonUseableKeys = [[NSArray arrayWithObjects: @"Command-c", @"Command-x", @"Command-v", @"Command-a", @"Command-," , @"Command-h", @"Command-Alt-h", @"Command-Shift-o", @"Command-o", @"Command-d", @"Command-n", @"Command-s", @"Command-z", @"Command-l", @"Command-r", @"Command-3", @"Command-m", @"Command-w", @"Command-Shift-w", @"Command-Shift-c", @"Command-Shift-p", @"Command-i", @"Command-e", @"Command-Shift-e", @"Command-b", @"Command-Shift-m", @"Command-Ctrl-m", @"Command-?", @"Command-Alt-?", nil] retain];
@@ -208,6 +214,9 @@ create_toolbar_item( NSString * o_itemIdent, NSString * o_name, NSString * o_des
     [[[o_hotkeys_listbox tableColumnWithIdentifier: @"shortcut"] headerCell] setStringValue: _NS("Shortcut")];
 
     /* input */
+    [o_input_record_box setTitle: _NS("Record directory or filename")];
+    [o_input_record_btn setTitle: _NS("Browse...")];
+    [o_input_record_btn setToolTip: _NS("Directory or filename where the records will be stored")];
     [o_input_avi_txt setStringValue: _NS("Repair AVI Files")];
     [o_input_cachelevel_txt setStringValue: _NS("Default Caching Level")];
     [o_input_caching_box setTitle: _NS("Caching")];
@@ -219,14 +228,14 @@ create_toolbar_item( NSString * o_itemIdent, NSString * o_name, NSString * o_des
     [o_input_postproc_txt setStringValue: _NS("Post-Processing Quality")];
     [o_input_rtsp_ckb setTitle: _NS("Use RTP over RTSP (TCP)")];
     [o_input_skipLoop_txt setStringValue: _NS("Skip the loop filter for H.264 decoding")];
-    [o_input_serverport_txt setStringValue: _NS("Default Server Port")];
 
     /* interface */
     [o_intf_style_txt setStringValue: _NS("Interface style")];
     [o_intf_style_dark_bcell setTitle: _NS("Dark")];
     [o_intf_style_bright_bcell setTitle: _NS("Bright")];
     [o_intf_art_txt setStringValue: _NS("Album art download policy")];
-    [o_intf_embedded_ckb setTitle: _NS("Add controls to the video window")];
+    [o_intf_embedded_ckb setTitle: _NS("Show video within the main window")];
+    [o_intf_nativefullscreen_ckb setTitle: _NS("Use the native fullscreen mode on OS X Lion")];
     [o_intf_fspanel_ckb setTitle: _NS("Show Fullscreen Controller")];
     [o_intf_lang_txt setStringValue: _NS("Language")];
     [o_intf_network_box setTitle: _NS("Privacy / Network Interaction")];
@@ -268,8 +277,7 @@ create_toolbar_item( NSString * o_itemIdent, NSString * o_name, NSString * o_des
     [o_video_snap_seqnum_ckb setTitle: _NS("Sequential numbering")];
 
     /* generic stuff */
-    [[o_sprefs_basicFull_matrix cellAtRow: 0 column: 0] setTitle: _NS("Basic")];
-    [[o_sprefs_basicFull_matrix cellAtRow: 0 column: 1] setTitle: _NS("All")];
+    [o_sprefs_showAll_btn setTitle: _NS("Show All")];
     [o_sprefs_cancel_btn setTitle: _NS("Cancel")];
     [o_sprefs_reset_btn setTitle: _NS("Reset All")];
     [o_sprefs_save_btn setTitle: _NS("Save")];
@@ -412,9 +420,6 @@ static inline char * __config_GetLabel( vlc_object_t *p_this, const char *psz_na
     int i, y = 0;
     char *psz_tmp;
 
-    [[o_sprefs_basicFull_matrix cellAtRow:0 column:0] setState: NSOnState];
-    [[o_sprefs_basicFull_matrix cellAtRow:0 column:1] setState: NSOffState];
-
     /**********************
      * interface settings *
      **********************/
@@ -422,6 +427,7 @@ static inline char * __config_GetLabel( vlc_object_t *p_this, const char *psz_na
     [self setupButton: o_intf_art_pop forIntList: "album-art"];
 
     [self setupButton: o_intf_fspanel_ckb forBoolValue: "macosx-fspanel"];
+    [self setupButton: o_intf_nativefullscreen_ckb forBoolValue: "macosx-nativefullscreenmode"];
     [self setupButton: o_intf_embedded_ckb forBoolValue: "embedded-video"];
 	[self setupButton: o_intf_appleremote_ckb forBoolValue: "macosx-appleremote"];
 	[self setupButton: o_intf_mediakeys_ckb forBoolValue: "macosx-mediakeys"];
@@ -437,9 +443,15 @@ static inline char * __config_GetLabel( vlc_object_t *p_this, const char *psz_na
     else
         [o_intf_enableGrowl_ckb setState: NSOffState];
     if (config_GetInt( p_intf, "macosx-interfacestyle" ))
+    {
         [o_intf_style_dark_bcell setState: YES];
+        [o_intf_style_bright_bcell setState: NO];
+    }
     else
+    {
         [o_intf_style_dark_bcell setState: NO];
+        [o_intf_style_bright_bcell setState: YES];
+    }
 
     /******************
      * audio settings *
@@ -516,8 +528,7 @@ static inline char * __config_GetLabel( vlc_object_t *p_this, const char *psz_na
     /***************************
      * input & codecs settings *
      ***************************/
-    [o_input_serverport_fld setIntValue: config_GetInt( p_intf, "server-port")];
-    [o_input_serverport_fld setToolTip: [NSString stringWithUTF8String: config_GetLabel( p_intf, "server-port")]];
+    [self setupField: o_input_record_fld forOption:"input-record-path"];
     [self setupField: o_input_httpproxy_fld forOption:"http-proxy"];
     [self setupField: o_input_httpproxypwd_sfld forOption:"http-proxy-pwd"];
     [o_input_postproc_fld setIntValue: config_GetInt( p_intf, "postproc-q")];
@@ -551,21 +562,9 @@ static inline char * __config_GetLabel( vlc_object_t *p_this, const char *psz_na
     bool b_cache_equal = true;
     int i_cache = config_GetInt( p_intf, "file-caching");
 
-    TestCaC( "udp-caching" );
-    if( module_exists ("dvdread") )
-        TestCaC( "dvdread-caching" );
-    if( module_exists ("dvdnav") )
-        TestCaC( "dvdnav-caching" );
-    TestCaC( "tcp-caching" );
-    TestCaC( "cdda-caching" );
-    TestCaC( "screen-caching" );
-    TestCaC( "vcd-caching" );
-    TestCaCi( "rtsp-caching", 4 );
-    TestCaCi( "ftp-caching", 2 );
-    TestCaCi( "http-caching", 4 );
-    if(module_exists ("access_realrtsp"))
-        TestCaCi( "realrtsp-caching", 10 );
-    TestCaCi( "mms-caching", 19 );
+    TestCaC( "network-caching" );
+    TestCaC( "disc-caching" );
+    TestCaC( "live-caching" );
     if( b_cache_equal )
     {
         [o_input_cachelevel_pop selectItemWithTag: i_cache];
@@ -629,8 +628,7 @@ static inline char * __config_GetLabel( vlc_object_t *p_this, const char *psz_na
         }
     }
     module_config_free (p_config);
-    module_release (p_main);
-                  
+
     [o_hotkeyDescriptions release];
     o_hotkeyDescriptions = [[NSArray alloc] initWithArray: o_tempArray_desc copyItems: YES];
     [o_tempArray_desc release];
@@ -670,11 +668,9 @@ static inline char * __config_GetLabel( vlc_object_t *p_this, const char *psz_na
                                         @selector(sheetDidEnd: returnCode: contextInfo:), NULL, nil,
                                         _NS("Beware this will reset the VLC media player preferences.\n"
                                             "Are you sure you want to continue?") );
-    else if( sender == o_sprefs_basicFull_matrix )
+    else if( sender == o_sprefs_showAll_btn )
     {
         [o_sprefs_win orderOut: self];
-        [[o_sprefs_basicFull_matrix cellAtRow:0 column:0] setState: NSOffState];
-        [[o_sprefs_basicFull_matrix cellAtRow:0 column:1] setState: NSOnState];
         [[[VLCMain sharedInstance] preferences] showPrefs];
     }
     else
@@ -768,6 +764,7 @@ static inline void save_module_list( intf_thread_t * p_intf, id object, const ch
 		config_PutInt( p_intf, "macosx-appleremote", [o_intf_appleremote_ckb state] );
         config_PutInt( p_intf, "macosx-mediakeys", [o_intf_mediakeys_ckb state] );
         config_PutInt( p_intf, "macosx-interfacestyle", [o_intf_style_dark_bcell state] );
+        config_PutInt( p_intf, "macosx-nativefullscreenmode", [o_intf_nativefullscreen_ckb state] );
         if( [o_intf_enableGrowl_ckb state] == NSOnState )
         {
             tmpString = getString( "control" );
@@ -858,7 +855,7 @@ static inline void save_module_list( intf_thread_t * p_intf, id object, const ch
      ***************************/
     if( b_inputSettingChanged )
     {
-        config_PutInt( p_intf, "server-port", [o_input_serverport_fld intValue] );
+        config_PutPsz( p_intf, "input-record-path", [[o_input_record_fld stringValue] UTF8String] );
         config_PutPsz( p_intf, "http-proxy", [[o_input_httpproxy_fld stringValue] UTF8String] );
         config_PutPsz( p_intf, "http-proxy-pwd", [[o_input_httpproxypwd_sfld stringValue] UTF8String] );
         config_PutInt( p_intf, "postproc-q", [o_input_postproc_fld intValue] );
@@ -871,19 +868,9 @@ static inline void save_module_list( intf_thread_t * p_intf, id object, const ch
         #define CaCi( name, int ) config_PutInt( p_intf, name, int * [[o_input_cachelevel_pop selectedItem] tag] )
         #define CaC( name ) CaCi( name, 1 )
         msg_Dbg( p_intf, "Adjusting all cache values to: %i", (int)[[o_input_cachelevel_pop selectedItem] tag] );
-        CaC( "udp-caching" );
-        if( module_exists ( "dvdread" ) )
-            CaC( "dvdread-caching" );
-        if( module_exists ( "dvdnav" ) )
-            CaC( "dvdnav-caching" );
-        CaC( "tcp-caching" ); CaC( "vcd-caching" );
-        CaC( "cdda-caching" ); CaC( "file-caching" );
-        CaC( "screen-caching" );
-        CaCi( "rtsp-caching", 4 ); CaCi( "ftp-caching", 2 );
-        CaCi( "http-caching", 4 );
-        if( module_exists ( "access_realrtsp" ) )
-            CaCi( "realrtsp-caching", 10 );
-        CaCi( "mms-caching", 19 );
+        CaC( "network-caching" );
+        CaC( "disc-caching" );
+        CaC( "live-caching" );
         b_inputSettingChanged = NO;
     }
 
@@ -914,7 +901,8 @@ static inline void save_module_list( intf_thread_t * p_intf, id object, const ch
      ********************/
     if( b_hotkeyChanged )
     {
-        for( NSUInteger i = 0; i < [o_hotkeySettings count]; i++ )
+        NSUInteger hotKeyCount = [o_hotkeySettings count];
+        for( NSUInteger i = 0; i < hotKeyCount; i++ )
             config_PutPsz( p_intf, [[o_hotkeyNames objectAtIndex:i] UTF8String], [[o_hotkeySettings objectAtIndex:i]UTF8String] );
         b_hotkeyChanged = NO;
     }
@@ -939,26 +927,28 @@ static inline void save_module_list( intf_thread_t * p_intf, id object, const ch
         o_old_view_rect = [o_currentlyShownCategoryView frame];
         o_win_rect.size.height = o_win_rect.size.height - o_old_view_rect.size.height;
         o_win_rect.origin.y = ( o_win_rect.origin.y + o_old_view_rect.size.height ) - o_view_rect.size.height;
-
-        /* remove our previous category view */
-        [o_currentlyShownCategoryView removeFromSuperviewWithoutNeedingDisplay];
     }
 
     o_win_rect.size.height = o_win_rect.size.height + o_view_rect.size.height;
-
-    [o_sprefs_win displayIfNeeded];
-    [o_sprefs_win setFrame: o_win_rect display:YES animate: YES];
 
     [o_new_category_view setFrame: NSMakeRect( 0,
                                                [o_sprefs_controls_box frame].size.height,
                                                o_view_rect.size.width,
                                                o_view_rect.size.height )];
-    [o_new_category_view setNeedsDisplay: YES];
     [o_new_category_view setAutoresizesSubviews: YES];
-    [[o_sprefs_win contentView] addSubview: o_new_category_view];
+    if (o_currentlyShownCategoryView)
+    {
+        [[[o_sprefs_win contentView] animator] replaceSubview: o_currentlyShownCategoryView with: o_new_category_view];
+        [o_currentlyShownCategoryView release];
+        [[o_sprefs_win animator] setFrame: o_win_rect display:YES];
+    }
+    else
+    {
+        [[o_sprefs_win contentView] addSubview: o_new_category_view];
+        [o_sprefs_win setFrame: o_win_rect display:YES animate:NO];
+    }
 
     /* keep our current category for further reference */
-    [o_currentlyShownCategoryView release];
     o_currentlyShownCategoryView = o_new_category_view;
     [o_currentlyShownCategoryView retain];
 }
@@ -1033,6 +1023,11 @@ static inline void save_module_list( intf_thread_t * p_intf, id object, const ch
             [o_video_snap_folder_fld setStringValue: [[o_selectFolderPanel URL] path]];
             b_videoSettingChanged = YES;
         }
+        else if( contextInfo == o_input_record_btn )
+        {
+            [o_input_record_fld setStringValue: [[o_selectFolderPanel URL] path]];
+            b_inputSettingChanged = YES;
+        }
     }
 
     [o_selectFolderPanel release];
@@ -1089,6 +1084,22 @@ static inline void save_module_list( intf_thread_t * p_intf, id object, const ch
             [o_input_cachelevel_custom_txt setHidden: NO];
         else
             [o_input_cachelevel_custom_txt setHidden: YES];
+    }
+    else if( sender == o_input_record_btn )
+    {
+        o_selectFolderPanel = [[NSOpenPanel alloc] init];
+        [o_selectFolderPanel setCanChooseDirectories: YES];
+        [o_selectFolderPanel setCanChooseFiles: YES];
+        [o_selectFolderPanel setResolvesAliases: YES];
+        [o_selectFolderPanel setAllowsMultipleSelection: NO];
+        [o_selectFolderPanel setMessage: _NS("Choose the directory or filename where the records will be stored.")];
+        [o_selectFolderPanel setCanCreateDirectories: YES];
+        [o_selectFolderPanel setPrompt: _NS("Choose")];
+        [o_selectFolderPanel beginSheetForDirectory: nil file: nil modalForWindow: o_sprefs_win
+                                      modalDelegate: self
+                                     didEndSelector: @selector(savePanelDidEnd:returnCode:contextInfo:)
+                                        contextInfo: o_input_record_btn];
+        return;
     }
 
     b_inputSettingChanged = YES;

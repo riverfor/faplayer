@@ -2,7 +2,7 @@
  * EPGView.h : EPGView
  ****************************************************************************
  * Copyright © 2009-2010 VideoLAN
- * $Id: ed5b44d77d0a7999446fea2e295f0a67395e2392 $
+ * $Id: 738857d9916166b94059b52790ff2201bc8d1355 $
  *
  * Authors: Ludovic Fauvet <etix@l0cal.com>
  *
@@ -66,7 +66,7 @@ public:
     void            updateDuration();
     void            reset();
     void            cleanup();
-    bool            hasValidData();
+    bool            hasValidData() const;
 
 signals:
     void            startTimeChanged( const QDateTime& startTime );

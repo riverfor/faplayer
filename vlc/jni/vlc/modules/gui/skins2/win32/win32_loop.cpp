@@ -2,7 +2,7 @@
  * win32_loop.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 5af8a8943f630851d1d65dcbdbba866f715ae9f9 $
+ * $Id: fdd9a0dc05ea2bc6f45d8e662618c3d505d858f2 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -262,7 +262,7 @@ LRESULT CALLBACK Win32Loop::processEvent( HWND hwnd, UINT msg,
             if( !key )
             {
                 // This appears to be a "normal" (ascii) key
-                key = tolower( MapVirtualKey( wParam, 2 ) );
+                key = tolower( (unsigned char)MapVirtualKey( wParam, 2 ) );
             }
 
             if( key )

@@ -2,7 +2,7 @@
  * menus.cpp : Qt menus
  *****************************************************************************
  * Copyright © 2006-2011 the VideoLAN team
- * $Id: 221f35ede65376a2ceac51cb6a4261670e8e3bb7 $
+ * $Id: 88e807889fd76ed24925966aa2fec03ce0c1b1c6 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -154,7 +154,7 @@ void EnableStaticEntries( QMenu *menu, bool enable = true )
     if( !menu ) return;
 
     QList< QAction* > actions = menu->actions();
-    for( int i = 0; i < actions.size(); ++i )
+    for( int i = 0; i < actions.count(); ++i )
     {
         actions[i]->setEnabled( actions[i]->data().toString()
                                 == ENTRY_ALWAYS_ENABLED ||
@@ -173,7 +173,7 @@ inline int DeleteNonStaticEntries( QMenu *menu )
     int i_ret = 0;
 
     QList< QAction* > actions = menu->actions();
-    for( int i = 0; i < actions.size(); ++i )
+    for( int i = 0; i < actions.count(); ++i )
     {
         if( actions[i]->data().toString() != STATIC_ENTRY )
             delete actions[i];
@@ -189,7 +189,7 @@ inline int DeleteNonStaticEntries( QMenu *menu )
 static QAction * FindActionWithVar( QMenu *menu, const char *psz_var )
 {
     QList< QAction* > actions = menu->actions();
-    for( int i = 0; i < actions.size(); ++i )
+    for( int i = 0; i < actions.count(); ++i )
     {
         if( actions[i]->data().toString() == psz_var )
             return actions[i];
@@ -200,15 +200,15 @@ static QAction * FindActionWithVar( QMenu *menu, const char *psz_var )
 /*****************************************************************************
  * Definitions of variables for the dynamic menus
  *****************************************************************************/
-#define PUSH_VAR( var ) varnames.push_back( var ); \
-    objects.push_back( VLC_OBJECT(p_object) )
+#define PUSH_VAR( var ) varnames.append( var ); \
+    objects.append( VLC_OBJECT(p_object) )
 
-#define PUSH_INPUTVAR( var ) varnames.push_back( var ); \
-    objects.push_back( VLC_OBJECT(p_input) );
+#define PUSH_INPUTVAR( var ) varnames.append( var ); \
+    objects.append( VLC_OBJECT(p_input) );
 
 static int InputAutoMenuBuilder( input_thread_t *p_object,
-        vector<vlc_object_t *> &objects,
-        vector<const char *> &varnames )
+        QVector<vlc_object_t *> &objects,
+        QVector<const char *> &varnames )
 {
     PUSH_VAR( "bookmark" );
     PUSH_VAR( "title" );
@@ -220,8 +220,8 @@ static int InputAutoMenuBuilder( input_thread_t *p_object,
 
 static int VideoAutoMenuBuilder( vout_thread_t *p_object,
         input_thread_t *p_input,
-        vector<vlc_object_t *> &objects,
-        vector<const char *> &varnames )
+        QVector<vlc_object_t *> &objects,
+        QVector<const char *> &varnames )
 {
     PUSH_INPUTVAR( "video-es" );
     PUSH_INPUTVAR( "spu-es" );
@@ -243,10 +243,10 @@ static int VideoAutoMenuBuilder( vout_thread_t *p_object,
     return VLC_SUCCESS;
 }
 
-static int AudioAutoMenuBuilder( aout_instance_t *p_object,
+static int AudioAutoMenuBuilder( audio_output_t *p_object,
         input_thread_t *p_input,
-        vector<vlc_object_t *> &objects,
-        vector<const char *> &varnames )
+        QVector<vlc_object_t *> &objects,
+        QVector<const char *> &varnames )
 {
     PUSH_INPUTVAR( "audio-es" );
     PUSH_VAR( "audio-channels" );
@@ -528,10 +528,10 @@ QMenu *QVLCMenu::ViewMenu( intf_thread_t *p_intf, QMenu *current, MainInterface 
  **/
 QMenu *QVLCMenu::InterfacesMenu( intf_thread_t *p_intf, QMenu *current )
 {
-    vector<vlc_object_t *> objects;
-    vector<const char *> varnames;
-    varnames.push_back( "intf-add" );
-    objects.push_back( VLC_OBJECT(p_intf) );
+    QVector<vlc_object_t *> objects;
+    QVector<const char *> varnames;
+    varnames.append( "intf-add" );
+    objects.append( VLC_OBJECT(p_intf) );
 
     return Populate( p_intf, current, varnames, objects );
 }
@@ -565,9 +565,9 @@ void QVLCMenu::ExtensionsMenu( intf_thread_t *p_intf, QMenu *extMenu )
  **/
 QMenu *QVLCMenu::AudioMenu( intf_thread_t *p_intf, QMenu * current )
 {
-    vector<vlc_object_t *> objects;
-    vector<const char *> varnames;
-    aout_instance_t *p_aout;
+    QVector<vlc_object_t *> objects;
+    QVector<const char *> varnames;
+    audio_output_t *p_aout;
     input_thread_t *p_input;
 
     if( current->isEmpty() )
@@ -624,8 +624,8 @@ QMenu *QVLCMenu::VideoMenu( intf_thread_t *p_intf, QMenu *current, bool b_subtit
 {
     vout_thread_t *p_vout;
     input_thread_t *p_input;
-    vector<vlc_object_t *> objects;
-    vector<const char *> varnames;
+    QVector<vlc_object_t *> objects;
+    QVector<const char *> varnames;
 
     if( current->isEmpty() )
     {
@@ -634,25 +634,32 @@ QMenu *QVLCMenu::VideoMenu( intf_thread_t *p_intf, QMenu *current, bool b_subtit
             SubtitleMenu( current );
 
         current->addSeparator();
-
+        /* Surface modifiers */
         addActionWithCheckbox( current, "fullscreen", qtr( "&Fullscreen" ) );
         addActionWithCheckbox( current, "autoscale", qtr( "Always Fit &Window" ) );
         addActionWithCheckbox( current, "video-on-top", qtr( "Always &on Top" ) );
 #ifdef WIN32
         addActionWithCheckbox( current, "direct3d-desktop", qtr( "Display on &Desktop" ) );
 #endif
-        addAction( current, "video-snapshot", qtr( "Take &Snapshot" ) );
+
 #ifdef WIN32
         addActionWithCheckbox( current, "video-wallpaper", qtr( "Set as Wall&paper" ) );
 #endif
         current->addSeparator();
-
+        /* Size modifiers */
         addActionWithSubmenu( current, "zoom", qtr( "&Zoom" ) );
         addActionWithSubmenu( current, "aspect-ratio", qtr( "&Aspect Ratio" ) );
         addActionWithSubmenu( current, "crop", qtr( "&Crop" ) );
+
+        current->addSeparator();
+        /* Rendering modifiers */
         addActionWithSubmenu( current, "deinterlace", qtr( "&Deinterlace" ) );
         addActionWithSubmenu( current, "deinterlace-mode", qtr( "&Deinterlace mode" ) );
         addActionWithSubmenu( current, "postprocess", qtr( "&Post processing" ) );
+
+        current->addSeparator();
+        /* Other actions */
+        addAction( current, "video-snapshot", qtr( "Take &Snapshot" ) );
     }
 
     p_input = THEMIM->getInput();
@@ -702,8 +709,8 @@ QMenu *QVLCMenu::RebuildNavigMenu( intf_thread_t *p_intf, QMenu *menu )
 {
     /* */
     input_thread_t *p_object;
-    vector<vlc_object_t *> objects;
-    vector<const char *> varnames;
+    QVector<vlc_object_t *> objects;
+    QVector<const char *> varnames;
 
     /* Get the input and hold it */
     p_object = THEMIM->getInput();
@@ -748,8 +755,8 @@ QMenu *QVLCMenu::HelpMenu( QWidget *parent )
     delete menu; menu = NULL; \
     if( !show ) \
         return; \
-    vector<vlc_object_t *> objects; \
-    vector<const char *> varnames; \
+    QVector<vlc_object_t *> objects; \
+    QVector<const char *> varnames; \
     input_thread_t *p_input = THEMIM->getInput();
 
 #define CREATE_POPUP \
@@ -899,7 +906,7 @@ void QVLCMenu::AudioPopupMenu( intf_thread_t *p_intf, bool show )
     POPUP_BOILERPLATE
     if( p_input )
     {
-        aout_instance_t *p_aout = THEMIM->getAout();
+        audio_output_t *p_aout = THEMIM->getAout();
         AudioAutoMenuBuilder( p_aout, p_input, objects, varnames );
         if( p_aout )
             vlc_object_release( p_aout );
@@ -914,7 +921,7 @@ void QVLCMenu::MiscPopupMenu( intf_thread_t *p_intf, bool show )
 
     if( p_input )
     {
-        varnames.push_back( "audio-es" );
+        varnames.append( "audio-es" );
         InputAutoMenuBuilder( p_input, objects, varnames );
         menu->addSeparator();
     }
@@ -1020,13 +1027,13 @@ void QVLCMenu::PopupMenu( intf_thread_t *p_intf, bool show )
                 vlc_object_t* p_object = p_intf->p_parent;
 
                 objects.clear(); varnames.clear();
-                objects.push_back( p_object );
-                varnames.push_back( "intf-skins" );
+                objects.append( p_object );
+                varnames.append( "intf-skins" );
                 Populate( p_intf, submenu, varnames, objects );
 
                 objects.clear(); varnames.clear();
-                objects.push_back( p_object );
-                varnames.push_back( "intf-skins-interactive" );
+                objects.append( p_object );
+                varnames.append( "intf-skins-interactive" );
                 Populate( p_intf, submenu, varnames, objects );
             }
             else
@@ -1105,15 +1112,15 @@ void QVLCMenu::updateSystrayMenu( MainInterface *mi,
  *************************************************************************/
 QMenu * QVLCMenu::Populate( intf_thread_t *p_intf,
                             QMenu *current,
-                            vector< const char *> & varnames,
-                            vector<vlc_object_t *> & objects )
+                            QVector< const char *> & varnames,
+                            QVector<vlc_object_t *> & objects )
 {
     QMenu *menu = current;
     assert( menu );
 
     currentGroup = NULL;
 
-    for( int i = 0; i < (int)objects.size() ; i++ )
+    for( int i = 0; i < (int)objects.count() ; i++ )
     {
         if( !varnames[i] || !*varnames[i] )
         {
@@ -1478,14 +1485,14 @@ void QVLCMenu::updateRecents( intf_thread_t *p_intf )
 
         recentsMenu->clear();
 
-        if( !l.size() )
+        if( !l.count() )
         {
             action = recentsMenu->addAction( qtr(" - Empty - ") );
             action->setEnabled( false );
         }
         else
         {
-            for( int i = 0; i < l.size(); ++i )
+            for( int i = 0; i < l.count(); ++i )
             {
                 char *psz_temp = decode_URI_duplicate( qtu( l.at( i ) ) );
 

@@ -2,7 +2,7 @@
  * main_interface.cpp : Main interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: cdb3f0e5e5395ea0e8cb46e87d4d0056f16216b6 $
+ * $Id: 2b819072332a257b8cfd9dce8c439bc98c80889a $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -155,7 +155,7 @@ bool MainInterface::winEvent ( MSG * msg, long * result )
 {
     if (msg->message == taskbar_wmsg)
     {
-        //We received the taskbarbuttoncreated, now we can really create th buttons
+        //We received the taskbarbuttoncreated, now we can really create the buttons
         createTaskBarButtons();
     }
 
@@ -237,8 +237,11 @@ bool MainInterface::winEvent ( MSG * msg, long * result )
     return false;
 }
 
-void MainInterface::changeThumbbarButtons( int i_status)
+void MainInterface::changeThumbbarButtons( int i_status )
 {
+    if( p_taskbl == NULL )
+        return;
+
     // Define an array of three buttons. These buttons provide images through an
     // image list and also provide tooltips.
     DWORD dwMask = THB_BITMAP | THB_FLAGS;

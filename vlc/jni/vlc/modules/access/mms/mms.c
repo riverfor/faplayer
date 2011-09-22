@@ -2,7 +2,7 @@
  * mms.c: MMS over tcp, udp and http access plug-in
  *****************************************************************************
  * Copyright (C) 2002-2004 the VideoLAN team
- * $Id: 2a8bcce67fdf15755696006037ef3bca4c6e2784 $
+ * $Id: f01c1ed694cf69cd803ffc7c3d8a025464aaca8f $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -46,11 +46,6 @@
 static int  Open ( vlc_object_t * );
 static void Close( vlc_object_t * );
 
-#define CACHING_TEXT N_("Caching value in ms")
-#define CACHING_LONGTEXT N_( \
-    "Caching value for MMS streams. This " \
-    "value should be set in milliseconds." )
-
 #define ALL_TEXT N_("Force selection of all streams")
 #define ALL_LONGTEXT N_( \
     "MMS streams can contain several elementary streams, with different " \
@@ -75,9 +70,6 @@ vlc_module_begin ()
     set_capability( "access", -1 )
     set_category( CAT_INPUT )
     set_subcategory( SUBCAT_INPUT_ACCESS )
-
-    add_integer( "mms-caching", 19 * DEFAULT_PTS_DELAY / 1000,
-                 CACHING_TEXT, CACHING_LONGTEXT, true )
 
     add_integer( "mms-timeout", 5000, TIMEOUT_TEXT, TIMEOUT_LONGTEXT,
                  true )
@@ -106,9 +98,6 @@ struct access_sys_t
 static int Open( vlc_object_t *p_this )
 {
     access_t *p_access = (access_t*)p_this;
-
-    /* mms-caching */
-    var_Create( p_access, "mms-caching", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT );
 
     /* use specified method */
     if( *p_access->psz_access )

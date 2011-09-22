@@ -19,12 +19,29 @@ libfilesystem_plugin_la_SOURCES = \
 	fs.c
 libfilesystem_plugin_la_CFLAGS = $(AM_CFLAGS)
 libfilesystem_plugin_la_LIBADD = $(AM_LIBADD)
+if HAVE_WIN32
+libfilesystem_plugin_la_LIBADD += -lshlwapi
+endif
 libfilesystem_plugin_la_DEPENDENCIES =
+
+libidummy_plugin_la_SOURCES = idummy.c
+libidummy_plugin_la_CFLAGS = $(AM_CFLAGS)
+libidummy_plugin_la_LIBADD = $(AM_LIBADD)
+libidummy_plugin_la_DEPENDENCIES =
 
 libsdp_plugin_la_SOURCES = sdp.c
 libsdp_plugin_la_CFLAGS = $(AM_CFLAGS)
 libsdp_plugin_la_LIBADD = $(AM_LIBADD)
 libsdp_plugin_la_DEPENDENCIES =
+
+libaccess_smb_plugin_la_SOURCES = smb.c
+libaccess_smb_plugin_la_CFLAGS = $(AM_CFLAGS)
+libaccess_smb_plugin_la_LIBADD = $(AM_LIBADD)
+if HAVE_WIN32
+libaccess_smb_plugin_la_LIBADD += -lmpr
+endif
+libaccess_smb_plugin_la_DEPENDENCIES =
+libvlc_LTLIBRARIES += $(LTLIBaccess_smb)
 
 SOURCES_access_directory = directory.c
 SOURCES_access_dv = dv.c
@@ -32,14 +49,12 @@ SOURCES_access_udp = udp.c
 SOURCES_access_tcp = tcp.c
 SOURCES_access_http = http.c
 SOURCES_access_ftp = ftp.c
-SOURCES_access_smb = smb.c
 SOURCES_access_gnomevfs = gnomevfs.c
 SOURCES_access_eyetv = eyetv.m
 SOURCES_dvdnav = dvdnav.c
 SOURCES_dvdread = dvdread.c
 SOURCES_dc1394 = dc1394.c
 SOURCES_pvr = pvr.c
-SOURCES_v4l2 = v4l2.c
 SOURCES_qtcapture = qtcapture.m
 SOURCES_linsys_sdi = linsys/linsys_sdi.c linsys/linsys_sdi.h
 SOURCES_linsys_hdsdi = \
@@ -80,6 +95,7 @@ libaccess_rtmp_plugin_la_DEPENDENCIES =
 
 libvlc_LTLIBRARIES += \
 	libfilesystem_plugin.la \
+	libidummy_plugin.la \
 	libaccess_udp_plugin.la \
 	libaccess_tcp_plugin.la \
 	libaccess_http_plugin.la \
@@ -93,6 +109,7 @@ libvlc_LTLIBRARIES += \
 	$(NULL)
 
 libaccess_oss_plugin_la_SOURCES = oss.c
+libaccess_oss_plugin_la_CFLAGS = $(AM_CFLAGS)
 libaccess_oss_plugin_la_LIBADD = $(AM_LIBADD) $(OSS_LIBS)
 libaccess_oss_plugin_la_DEPENDENCIES =
 if HAVE_OSS
@@ -112,6 +129,19 @@ libaccess_shm_plugin_la_CFLAGS = $(AM_CFLAGS)
 libaccess_shm_plugin_la_LIBADD = $(AM_LIBADD)
 libaccess_shm_plugin_la_DEPENDENCIES =
 libvlc_LTLIBRARIES += $(LTLIBaccess_shm)
+
+libv4l2_plugin_la_SOURCES = \
+	v4l2/video.c \
+	v4l2/demux.c \
+	v4l2/access.c \
+	v4l2/controls.c \
+	v4l2/v4l2.h
+libv4l2_plugin_la_CFLAGS = $(AM_CFLAGS) $(LIBV4L2_CFLAGS)
+libv4l2_plugin_la_LIBADD = $(AM_LIBADD) $(LIBV4L2_LIBS) $(LIBM)
+libv4l2_plugin_la_DEPENDENCIES =
+if HAVE_V4L2
+libvlc_LTLIBRARIES += libv4l2_plugin.la
+endif
 
 libxcb_screen_plugin_la_SOURCES = screen/xcb.c
 libxcb_screen_plugin_la_CFLAGS = $(AM_CFLAGS) \
@@ -133,7 +163,7 @@ libdtv_plugin_la_CFLAGS = $(AM_CFLAGS)
 libdtv_plugin_la_LIBADD = $(AM_LIBADD)
 libdtv_plugin_la_DEPENDENCIES =
 
-if HAVE_LINUX
+if HAVE_LINUX_DVB
 libdtv_plugin_la_SOURCES += dtv/linux.c
 if HAVE_DVBPSI
 libdtv_plugin_la_SOURCES += dtv/en50221.c dtv/en50221.h
@@ -158,7 +188,8 @@ libvlc_LTLIBRARIES += libdtv_plugin.la
 endif
 
 
-
 EXTRA_LTLIBRARIES += \
 	libaccess_rtmp_plugin.la \
-	libaccess_shm_plugin.la
+	libaccess_shm_plugin.la \
+	libaccess_smb_plugin.la \
+	$(NULL)

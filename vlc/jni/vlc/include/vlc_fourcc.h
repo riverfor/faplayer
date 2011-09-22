@@ -2,7 +2,7 @@
  * vlc_fourcc.h: Definition of various FOURCC and helpers
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 9aebbba27368eaecd225ab390c994eaa52cdd2ba $
+ * $Id: 83ad3d3b5840df1eb70e7d1cb1b6deabff425228 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ com>
  *
@@ -48,6 +48,7 @@
 #define VLC_CODEC_WMV3      VLC_FOURCC('W','M','V','3')
 #define VLC_CODEC_WMVA      VLC_FOURCC('W','M','V','A')
 #define VLC_CODEC_WMVP      VLC_FOURCC('W','M','V','P')
+#define VLC_CODEC_WMVP2     VLC_FOURCC('W','V','P','2')
 #define VLC_CODEC_VC1       VLC_FOURCC('V','C','-','1')
 #define VLC_CODEC_THEORA    VLC_FOURCC('t','h','e','o')
 #define VLC_CODEC_TARKIN    VLC_FOURCC('t','a','r','k')
@@ -116,7 +117,8 @@
 #define VLC_CODEC_VP8       VLC_FOURCC('V','P','8','0')
 #define VLC_CODEC_JPEG2000  VLC_FOURCC('J','P','2','K')
 #define VLC_CODEC_LAGARITH  VLC_FOURCC('L','A','G','S')
-
+#define VLC_CODEC_FLASHSV2  VLC_FOURCC('F','S','V','2')
+#define VLC_CODEC_PRORES    VLC_FOURCC('a','p','c','n')
 
 /* Planar YUV 4:1:0 Y:V:U */
 #define VLC_CODEC_YV9       VLC_FOURCC('Y','V','U','9')
@@ -200,8 +202,14 @@
 #define VLC_CODEC_CYUV      VLC_FOURCC('c','y','u','v')
 /* 10-bit 4:2:2 Component YCbCr */
 #define VLC_CODEC_V210      VLC_FOURCC('v','2','1','0')
-/* Planar Y Packet UV (420) */
+/* 2 planes Y/UV 4:2:0 */
 #define VLC_CODEC_NV12      VLC_FOURCC('N','V','1','2')
+/* 2 planes Y/VU 4:2:0 */
+#define VLC_CODEC_NV21      VLC_FOURCC('N','V','2','1')
+/* 2 planes Y/UV 4:2:2 */
+#define VLC_CODEC_NV16      VLC_FOURCC('N','V','1','6')
+/* 2 planes Y/VU 4:2:2 */
+#define VLC_CODEC_NV61      VLC_FOURCC('N','V','6','1')
 
 /* Image codec (video) */
 #define VLC_CODEC_PNG       VLC_FOURCC('p','n','g',' ')
@@ -373,7 +381,7 @@
  * It returns the codec associated to a fourcc within a ES category.
  *
  * If not found, it will return the given fourcc.
- * If found, it will allways be one of the VLC_CODEC_ defined above.
+ * If found, it will always be one of the VLC_CODEC_ defined above.
  *
  * You may use UNKNOWN_ES for the ES category if you don't have the information.
  */

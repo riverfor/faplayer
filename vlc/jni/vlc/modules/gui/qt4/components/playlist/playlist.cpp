@@ -2,7 +2,7 @@
  * playlist.cpp : Custom widgets for the playlist
  ****************************************************************************
  * Copyright © 2007-2010 the VideoLAN team
- * $Id: 3c3816d9507f58988508a9dadd2918125af86a44 $
+ * $Id: 7193040926a74128851f2f375af32ee43894104b $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -110,11 +110,15 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
     CONNECT( locationBar, invoked( const QModelIndex & ),
              mainView, browseInto( const QModelIndex & ) );
 
+    QHBoxLayout *topbarLayout = new QHBoxLayout();
+    layout->addLayout( topbarLayout, 0, 1 );
+    topbarLayout->setSpacing( 10 );
+
     /* Button to switch views */
     QToolButton *viewButton = new QToolButton( this );
     viewButton->setIcon( style()->standardIcon( QStyle::SP_FileDialogDetailedView ) );
     viewButton->setToolTip( qtr("Change playlistview") );
-    layout->addWidget( viewButton, 0, 2 );
+    topbarLayout->addWidget( viewButton );
 
     /* View selection menu */
     QSignalMapper *viewSelectionMapper = new QSignalMapper( this );
@@ -122,7 +126,12 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
 
     QActionGroup *actionGroup = new QActionGroup( this );
 
-    for( int i = 0; i < StandardPLPanel::VIEW_COUNT; i++ )
+#ifndef NDEBUG
+# define MAX_VIEW StandardPLPanel::VIEW_COUNT
+#else
+# define MAX_VIEW StandardPLPanel::VIEW_COUNT - 1
+#endif
+    for( int i = 0; i < MAX_VIEW; i++ )
     {
         viewActions[i] = actionGroup->addAction( viewNames[i] );
         viewActions[i]->setCheckable( true );
@@ -140,15 +149,24 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
     searchEdit = new SearchLineEdit( this );
     searchEdit->setMaximumWidth( 250 );
     searchEdit->setMinimumWidth( 80 );
-    layout->addWidget( searchEdit, 0, 3 );
-    CONNECT( searchEdit, textEdited( const QString& ),
+    searchEdit->setToolTip( qtr("Search the playlist") );
+    topbarLayout->addWidget( searchEdit );
+    CONNECT( searchEdit, textChanged( const QString& ),
              mainView, search( const QString& ) );
     CONNECT( searchEdit, searchDelayedChanged( const QString& ),
              mainView, searchDelayed( const QString & ) );
 
     CONNECT( mainView, viewChanged( const QModelIndex& ),
              this, changeView( const QModelIndex &) );
-    layout->setColumnStretch( 3, 3 );
+
+    /* Zoom */
+    QSlider *zoomSlider = new QSlider( Qt::Horizontal, this );
+    zoomSlider->setRange( -10, 10);
+    zoomSlider->setPageStep( 3 );
+    zoomSlider->setValue( model->getZoom() );
+    zoomSlider->setToolTip( qtr("Zoom playlist") );
+    CONNECT( zoomSlider, valueChanged( int ), model, changeZoom( int ) );
+    topbarLayout->addWidget( zoomSlider );
 
     /* Connect the activation of the selector to a redefining of the PL */
     DCONNECT( selector, categoryActivated( playlist_item_t *, bool ),
@@ -179,15 +197,6 @@ PlaylistWidget::PlaylistWidget( intf_thread_t *_p_i, QWidget *_par )
     getSettings()->endGroup();
 
     layout->addWidget( split, 1, 0, 1, -1 );
-
-    /* Zoom */
-    QSlider *zoomSlider = new QSlider( Qt::Horizontal, this );
-    zoomSlider->setRange( -10, 10);
-    zoomSlider->setPageStep( 3 );
-    zoomSlider->setValue( model->getZoom() );
-    CONNECT( zoomSlider, valueChanged( int ), model, changeZoom( int ) );
-
-    layout->addWidget( zoomSlider, 1, 3, ( Qt::AlignBottom | Qt::AlignRight ) );
 
     setAcceptDrops( true );
     setWindowTitle( qtr( "Playlist" ) );

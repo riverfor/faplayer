@@ -2,7 +2,7 @@
  * prefs_widgets.m: Preferences controls
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: 7d9d68eccf01216c1c2a2c20702c87d46d160e05 $
+ * $Id: 232d9813fa3c22459072b86adf3aee78cbf684b4 $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan.org>
  *          Jérôme Decoodt <djc at videolan.org>
@@ -2308,8 +2308,8 @@ o_textfield = [[[NSSecureTextField alloc] initWithFrame: s_rc] retain];       \
 - (IBAction)tableChanged:(id)sender
 {
     NSString *o_newstring = @"";
-    unsigned int i;
-    for( i = 0 ; i < [o_modulearray count] ; i++ )
+    NSUInteger count = [o_modulearray count];
+    for( NSUInteger i = 0 ; i < count ; i++ )
         if( [[[o_modulearray objectAtIndex:i] objectAtIndex:2]
             boolValue] != NO )
         {

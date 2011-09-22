@@ -2,7 +2,7 @@
  * switcher.c: MPEG2 video switcher module
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id: 18f281ea2d1fada2d04def8ec575b1155c6287cb $
+ * $Id: 9909040280cdf519e91e99c276696df3aa0c8fcf $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -56,6 +56,8 @@
 #else
 #   include <libpostproc/postprocess.h>
 #endif
+
+#include "../codec/avcodec/avcodec.h"
 
 #define SOUT_CFG_PREFIX "sout-switcher-"
 #define MAX_PICTURES 10
@@ -360,20 +362,23 @@ static sout_stream_id_t *Add( sout_stream_t *p_stream, es_format_t *p_fmt )
         id->ff_enc_c->dsp_mask = 0;
         if( !(i_cpu & CPU_CAPABILITY_MMX) )
         {
-            id->ff_enc_c->dsp_mask |= FF_MM_MMX;
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_MMX;
         }
         if( !(i_cpu & CPU_CAPABILITY_MMXEXT) )
         {
-            id->ff_enc_c->dsp_mask |= FF_MM_MMXEXT;
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_MMX2;
         }
         if( !(i_cpu & CPU_CAPABILITY_3DNOW) )
         {
-            id->ff_enc_c->dsp_mask |= FF_MM_3DNOW;
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_3DNOW;
         }
         if( !(i_cpu & CPU_CAPABILITY_SSE) )
         {
-            id->ff_enc_c->dsp_mask |= FF_MM_SSE;
-            id->ff_enc_c->dsp_mask |= FF_MM_SSE2;
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_SSE;
+        }
+        if( !(i_cpu & CPU_CAPABILITY_SSE2) )
+        {
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_SSE2;
         }
 
         id->ff_enc_c->sample_rate = p_fmt->audio.i_rate;
@@ -749,20 +754,23 @@ static mtime_t VideoCommand( sout_stream_t *p_stream, sout_stream_id_t *id )
         id->ff_enc_c->dsp_mask = 0;
         if( !(i_cpu & CPU_CAPABILITY_MMX) )
         {
-            id->ff_enc_c->dsp_mask |= FF_MM_MMX;
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_MMX;
         }
         if( !(i_cpu & CPU_CAPABILITY_MMXEXT) )
         {
-            id->ff_enc_c->dsp_mask |= FF_MM_MMXEXT;
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_MMX2;
         }
         if( !(i_cpu & CPU_CAPABILITY_3DNOW) )
         {
-            id->ff_enc_c->dsp_mask |= FF_MM_3DNOW;
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_3DNOW;
         }
         if( !(i_cpu & CPU_CAPABILITY_SSE) )
         {
-            id->ff_enc_c->dsp_mask |= FF_MM_SSE;
-            id->ff_enc_c->dsp_mask |= FF_MM_SSE2;
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_SSE;
+        }
+        if( !(i_cpu & CPU_CAPABILITY_SSE2) )
+        {
+            id->ff_enc_c->dsp_mask |= AV_CPU_FLAG_SSE2;
         }
 
         id->ff_enc_c->width = p_sys->p_pictures[p_sys->i_cmd-1].format.i_width;
@@ -914,7 +922,6 @@ static block_t *VideoGetBuffer( sout_stream_t *p_stream, sout_stream_id_t *id,
     p_out->i_length = p_buffer->i_length;
     p_out->i_pts = p_buffer->i_dts;
     p_out->i_dts = p_buffer->i_dts;
-    p_out->i_rate = p_buffer->i_rate;
 
     switch ( id->ff_enc_c->coded_frame->pict_type )
     {
@@ -958,7 +965,6 @@ static block_t *AudioGetBuffer( sout_stream_t *p_stream, sout_stream_id_t *id,
     p_out->i_length = p_buffer->i_length;
     p_out->i_pts = p_buffer->i_dts;
     p_out->i_dts = p_buffer->i_dts;
-    p_out->i_rate = p_buffer->i_rate;
 
     block_Release( p_buffer );
 

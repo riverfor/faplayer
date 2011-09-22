@@ -1,8 +1,7 @@
 /*****************************************************************************
  * open.cpp : Advanced open dialog
  *****************************************************************************
- * Copyright © 2006-2009 the VideoLAN team
- * $Id: 4cc1c7b33d4d1fa792ce6285d2fed699627aa4e8 $
+ * Copyright © 2006-2011 the VideoLAN team
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -26,9 +25,7 @@
 #endif
 
 #include "dialogs/open.hpp"
-
 #include "dialogs_provider.hpp"
-
 #include "recents.hpp"
 #include "util/qt_dirs.hpp"
 
@@ -37,7 +34,9 @@
 #include <QRegExp>
 #include <QMenu>
 
-#define DEBUG_QT 1
+#ifndef NDEBUG
+# define DEBUG_QT 1
+#endif
 
 OpenDialog *OpenDialog::instance = NULL;
 
@@ -157,7 +156,7 @@ OpenDialog::OpenDialog( QWidget *parent,
     CONNECT( ui.slaveCheckbox, toggled( bool ), this, updateMRL() );
     CONNECT( ui.slaveText, textChanged( const QString& ), this, updateMRL() );
     CONNECT( ui.cacheSpinBox, valueChanged( int ), this, updateMRL() );
-    CONNECT( ui.startTimeTimeEdit, 	timeChanged ( const QTime& ), this, updateMRL() );
+    CONNECT( ui.startTimeTimeEdit, timeChanged ( const QTime& ), this, updateMRL() );
     BUTTONACT( ui.advancedCheckBox, toggleAdvancedPanel() );
     BUTTONACT( ui.slaveBrowseButton, browseInputSlave() );
 
@@ -185,27 +184,6 @@ OpenDialog::OpenDialog( QWidget *parent,
     setMinimumSize( sizeHint() );
     setMaximumWidth( 900 );
     resize( getSettings()->value( "opendialog-size", QSize( 500, 400 ) ).toSize() );
-}
-
-OpenDialog::~OpenDialog()
-{
-    getSettings()->setValue( "opendialog-size", size() -
-                 ( ui.advancedFrame->isEnabled() ?
-                   QSize(0, ui.advancedFrame->height()) : QSize(0, 0) ) );
-    getSettings()->setValue( "opendialog-advanced", ui.advancedFrame->isVisible() );
-}
-
-/* Used by VLM dialog and inputSlave selection */
-QString OpenDialog::getMRL( bool b_all )
-{
-    if( itemsMRL.size() == 0 ) return "";
-    return b_all ? itemsMRL[0] + ui.advancedLineInput->text()
-                 : itemsMRL[0];
-}
-
-QString OpenDialog::getOptions()
-{
-    return ui.advancedLineInput->text();
 }
 
 /* Finish the dialog and decide if you open another one after */
@@ -239,6 +217,27 @@ void OpenDialog::setMenuAction()
     }
 }
 
+OpenDialog::~OpenDialog()
+{
+    getSettings()->setValue( "opendialog-size", size() -
+                 ( ui.advancedFrame->isEnabled() ?
+                   QSize(0, ui.advancedFrame->height()) : QSize(0, 0) ) );
+    getSettings()->setValue( "opendialog-advanced", ui.advancedFrame->isVisible() );
+}
+
+/* Used by VLM dialog and inputSlave selection */
+QString OpenDialog::getMRL( bool b_all )
+{
+    if( itemsMRL.count() == 0 ) return "";
+    return b_all ? itemsMRL[0] + ui.advancedLineInput->text()
+                 : itemsMRL[0];
+}
+
+QString OpenDialog::getOptions()
+{
+    return ui.advancedLineInput->text();
+}
+
 void OpenDialog::showTab( int i_tab )
 {
     if( i_tab == OPEN_CAPTURE_TAB ) captureOpenPanel->initialize();
@@ -249,19 +248,6 @@ void OpenDialog::showTab( int i_tab )
         OpenPanel *panel = dynamic_cast<OpenPanel *>( ui.Tab->currentWidget() );
         assert( panel );
         panel->onFocus();
-    }
-}
-
-/* Function called on signal currentChanged triggered */
-void OpenDialog::signalCurrent( int i_tab )
-{
-    if( i_tab == OPEN_CAPTURE_TAB ) captureOpenPanel->initialize();
-    if( ui.Tab->currentWidget() != NULL )
-    {
-        OpenPanel *panel = dynamic_cast<OpenPanel *>( ui.Tab->currentWidget() );
-        assert( panel );
-        panel->onFocus();
-        panel->updateMRL();
     }
 }
 
@@ -282,6 +268,27 @@ void OpenDialog::toggleAdvancedPanel()
         if( size().isValid() )
             resize( size().width(), size().height()
                     + ui.advancedFrame->height() );
+    }
+}
+
+void OpenDialog::browseInputSlave()
+{
+    OpenDialog *od = new OpenDialog( this, p_intf, true, SELECT );
+    od->exec();
+    ui.slaveText->setText( od->getMRL( false ) );
+    delete od;
+}
+
+/* Function called on signal currentChanged triggered */
+void OpenDialog::signalCurrent( int i_tab )
+{
+    if( i_tab == OPEN_CAPTURE_TAB ) captureOpenPanel->initialize();
+    if( ui.Tab->currentWidget() != NULL )
+    {
+        OpenPanel *panel = dynamic_cast<OpenPanel *>( ui.Tab->currentWidget() );
+        assert( panel );
+        panel->onFocus();
+        panel->updateMRL();
     }
 }
 
@@ -334,18 +341,14 @@ void OpenDialog::selectSlots()
     }
 }
 
+/* Play Action, called from selectSlots or play Menu */
 void OpenDialog::play()
 {
-    finish( false );
+    enqueue( false );
 }
 
-void OpenDialog::enqueue()
-{
-    finish( true );
-}
-
-
-void OpenDialog::finish( bool b_enqueue = false )
+/* Enqueue Action, called from selectSlots or enqueue Menu */
+void OpenDialog::enqueue( bool b_enqueue )
 {
     toggleVisible();
 
@@ -355,11 +358,14 @@ void OpenDialog::finish( bool b_enqueue = false )
         return;
     }
 
+    for( int i = 0; i < OPEN_TAB_MAX; i++ )
+        dynamic_cast<OpenPanel*>( ui.Tab->widget( i ) )->onAccept();
+
     /* Sort alphabetically */
     itemsMRL.sort();
 
     /* Go through the item list */
-    for( int i = 0; i < itemsMRL.size(); i++ )
+    for( int i = 0; i < itemsMRL.count(); i++ )
     {
         bool b_start = !i && !b_enqueue;
 
@@ -374,7 +380,7 @@ void OpenDialog::finish( bool b_enqueue = false )
             QStringList optionsList = ui.advancedLineInput->text().split( " :" );
 
             /* Insert options */
-            for( int j = 0; j < optionsList.size(); j++ )
+            for( int j = 0; j < optionsList.count(); j++ )
             {
                 QString qs = colon_unescape( optionsList[j] );
                 if( !qs.isEmpty() )
@@ -417,7 +423,7 @@ void OpenDialog::stream( bool b_transcode_only )
                             ui.advancedLineInput->text().split( " :" ) );
 }
 
-/* Update the MRL */
+/* Update the MRL items from the panels */
 void OpenDialog::updateMRL( const QStringList& item, const QString& tempMRL )
 {
     optionsMRL = tempMRL;
@@ -425,6 +431,7 @@ void OpenDialog::updateMRL( const QStringList& item, const QString& tempMRL )
     updateMRL();
 }
 
+/* Update the complete MRL */
 void OpenDialog::updateMRL() {
     QString mrl = optionsMRL;
     if( ui.slaveCheckbox->isChecked() ) {
@@ -444,6 +451,7 @@ void OpenDialog::updateMRL() {
     ui.mrlLine->setText( itemsMRL.join( " " ) );
 }
 
+/* Change the caching combobox */
 void OpenDialog::newCachingMethod( const QString& method )
 {
     if( method != storedMethod ) {
@@ -453,6 +461,8 @@ void OpenDialog::newCachingMethod( const QString& method )
     }
 }
 
+/* Split the entries
+ * FIXME! */
 QStringList OpenDialog::SeparateEntries( const QString& entries )
 {
     bool b_quotes_mode = false;
@@ -461,10 +471,10 @@ QStringList OpenDialog::SeparateEntries( const QString& entries )
     QString entry;
 
     int index = 0;
-    while( index < entries.size() )
+    while( index < entries.count() )
     {
         int delim_pos = entries.indexOf( QRegExp( "\\s+|\"" ), index );
-        if( delim_pos < 0 ) delim_pos = entries.size() - 1;
+        if( delim_pos < 0 ) delim_pos = entries.count() - 1;
         entry += entries.mid( index, delim_pos - index + 1 );
         index = delim_pos + 1;
 
@@ -473,22 +483,22 @@ QStringList OpenDialog::SeparateEntries( const QString& entries )
         if( !b_quotes_mode && entry.endsWith( "\"" ) )
         {
             /* Enters quotes mode */
-            entry.truncate( entry.size() - 1 );
+            entry.truncate( entry.count() - 1 );
             b_quotes_mode = true;
         }
         else if( b_quotes_mode && entry.endsWith( "\"" ) )
         {
             /* Finished the quotes mode */
-            entry.truncate( entry.size() - 1 );
+            entry.truncate( entry.count() - 1 );
             b_quotes_mode = false;
         }
         else if( !b_quotes_mode && !entry.endsWith( "\"" ) )
         {
             /* we found a non-quoted standalone string */
-            if( index < entries.size() ||
+            if( index < entries.count() ||
                 entry.endsWith( " " ) || entry.endsWith( "\t" ) ||
                 entry.endsWith( "\r" ) || entry.endsWith( "\n" ) )
-                entry.truncate( entry.size() - 1 );
+                entry.truncate( entry.count() - 1 );
             if( !entry.isEmpty() ) entries_array.append( entry );
             entry.clear();
         }
@@ -501,10 +511,3 @@ QStringList OpenDialog::SeparateEntries( const QString& entries )
     return entries_array;
 }
 
-void OpenDialog::browseInputSlave()
-{
-    OpenDialog *od = new OpenDialog( this, p_intf, true, SELECT );
-    od->exec();
-    ui.slaveText->setText( od->getMRL( false ) );
-    delete od;
-}

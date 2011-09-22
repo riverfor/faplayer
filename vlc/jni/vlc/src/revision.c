@@ -1,1 +1,1 @@
-const char psz_vlc_changeset[] = "\\^_^/ - 4dcdc8c4025ea580a69a0b2a512f859b66284c6d";
+const char psz_vlc_changeset[] = "1.1.0-pre1-6445-g0ad141d";

@@ -2,7 +2,7 @@
  * vlc_keys.h: keycode defines
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: ca394fda571e73410e2ada001ef3b82f11ff71d9 $
+ * $Id: b95b8c8e01a6bed2d2f0c8ea2915b6578ca25abc $
  *
  * Authors: Sigmund Augdal Helberg <dnumgis@videolan.org>
  *
@@ -149,6 +149,7 @@ typedef enum vlc_action {
     ACTIONID_SUBTITLE_TRACK,
     ACTIONID_INTF_SHOW,
     ACTIONID_INTF_HIDE,
+    ACTIONID_INTF_BOSS,
     /* chapter and title navigation */
     ACTIONID_TITLE_PREV,
     ACTIONID_TITLE_NEXT,

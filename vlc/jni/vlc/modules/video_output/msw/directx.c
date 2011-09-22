@@ -2,7 +2,7 @@
  * directx.c: Windows DirectDraw video output
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: ca7fed40f98c1c4e84513149ef04ef1172e70133 $
+ * $Id: b4797d11ece32a2db771d9468949e1501b25ba0f $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -66,7 +66,7 @@
 #define SYSMEM_TEXT N_("Use video buffers in system memory")
 #define SYSMEM_LONGTEXT N_(\
     "Create video buffers in system memory instead of video memory. This " \
-    "isn't recommended as usually using video memory allows to benefit from " \
+    "isn't recommended as usually using video memory allows benefiting from " \
     "more hardware acceleration (like rescaling or YUV->RGB conversions). " \
     "This option doesn't have any effect when using overlays.")
 

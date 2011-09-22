@@ -2,7 +2,7 @@
  * libvlc-module.c: Options for the main (libvlc itself) module
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 67297968e7e4fe37e622d980ca0c2b6cd726e8d0 $
+ * $Id: df722abf9c41d12e444fe333cb99c36da97b7d0b $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -27,7 +27,6 @@
 // Pretend we are a builtin module
 #define MODULE_NAME main
 #define MODULE_PATH main
-#define __BUILTIN__
 
 
 #ifdef HAVE_CONFIG_H
@@ -39,6 +38,7 @@
 #include <vlc_cpu.h>
 #include <vlc_aout_intf.h>
 #include "libvlc.h"
+#include "modules/modules.h"
 
 //#define Nothing here, this is just to prevent update-po from being stupid
 #include "vlc_keys.h"
@@ -203,7 +203,7 @@ static const char *const ppsz_snap_formats[] =
 #define VERBOSE_OBJECTS_LONGTEXT N_( \
     "This is a ',' separated string, each objects should be prefixed by " \
     "a '+' or a '-' to respectively enable or disable it. The keyword " \
-    "'all' refers to all objects. Objects can be refered to by their " \
+    "'all' refers to all objects. Objects can be referred to by their " \
     "type or module name. Rules applying to named objects take precedence " \
     "over rules applying to object types. Note that you still need to " \
     "use -vvv to actually display debug message.")
@@ -275,6 +275,7 @@ static const char *const ppsz_snap_formats[] =
 #define VOLUME_STEP_LONGTEXT N_( \
     "The step size of the volume is adjustable using this option, " \
     "in a range from 0 to 1024." )
+#define AOUT_VOLUME_STEP 32
 
 #define AOUT_RATE_TEXT N_("Audio output frequency (Hz)")
 #define AOUT_RATE_LONGTEXT N_( \
@@ -348,7 +349,7 @@ static const char *const ppsz_force_dolby_descriptions[] = {
 #define AUDIO_TIME_STRETCH_TEXT N_( \
     "Enable time stretching audio" )
 #define AUDIO_TIME_STRETCH_LONGTEXT N_( \
-    "This allows to play audio at lower or higher speed without " \
+    "This allows playing audio at lower or higher speed without " \
     "affecting the audio pitch" )
 
 
@@ -626,6 +627,22 @@ static const char *const ppsz_pos_descriptions[] =
     "subsystem, such as the DVD or VCD device, the network interface " \
     "settings or the subtitle channel.")
 
+#define CACHING_TEXT N_("File caching (ms)")
+#define CACHING_LONGTEXT N_( \
+    "Caching value for local files, in milliseconds." )
+
+#define CAPTURE_CACHING_TEXT N_("Live capture caching (ms)")
+#define CAPTURE_CACHING_LONGTEXT N_( \
+    "Caching value for cameras and microphones, in milliseconds." )
+
+#define DISC_CACHING_TEXT N_("Disc caching (ms)")
+#define DISC_CACHING_LONGTEXT N_( \
+    "Caching value for optical media, in milliseconds." )
+
+#define NETWORK_CACHING_TEXT N_("Network caching (ms)")
+#define NETWORK_CACHING_LONGTEXT N_( \
+    "Caching value for network resources, in milliseconds." )
+
 #define CR_AVERAGE_TEXT N_("Clock reference average counter")
 #define CR_AVERAGE_LONGTEXT N_( \
     "When using the PVR input (or a very irregular source), you should " \
@@ -651,10 +668,6 @@ static const int pi_clock_values[] = { -1, 0, 1 };
 static const char *const ppsz_clock_descriptions[] =
 { N_("Default"), N_("Disable"), N_("Enable") };
 
-#define SERVER_PORT_TEXT N_("UDP port")
-#define SERVER_PORT_LONGTEXT N_( \
-    "This is the default port used for UDP streams. Default is 1234." )
-
 #define MTU_TEXT N_("MTU of the network interface")
 #define MTU_LONGTEXT N_( \
     "This is the maximum application-layer packet size that can be " \
@@ -671,11 +684,6 @@ static const char *const ppsz_clock_descriptions[] =
 #define MIFACE_TEXT N_("Multicast output interface")
 #define MIFACE_LONGTEXT N_( \
     "Default multicast interface. This overrides the routing table.")
-
-#define MIFACE_ADDR_TEXT N_("IPv4 multicast output interface address")
-#define MIFACE_ADDR_LONGTEXT N_( \
-    "IPv4 address for the default multicast interface. This overrides " \
-    "the routing table.")
 
 #define DSCP_TEXT N_("DiffServ Code Point")
 #define DSCP_LONGTEXT N_("Differentiated Services Code Point " \
@@ -724,6 +732,19 @@ static const char *const ppsz_clock_descriptions[] =
 #define INPUT_SUBTRACK_ID_TEXT N_("Subtitles track ID")
 #define INPUT_SUBTRACK_ID_LONGTEXT N_( \
     "Stream ID of the subtitle track to use.")
+
+#define INPUT_PREFERREDRESOLUTION_TEXT N_("Preferred video resolution")
+#define INPUT_PREFERREDRESOLUTION_LONGTEXT N_( \
+    "When several video formats are available, select one whose " \
+    "resolution is closest to (but not higher than) this setting, " \
+    "in number of lines. Use this option if you don't have enough CPU " \
+    "power or network bandwith to play higher resolutions.")
+static const int pi_prefres[] = { -1, 1080, 720, 576, 320 };
+static const char *const ppsz_prefres[] = {
+    N_("Best available"), N_("Full HD (1080p)"), N_("HD (720p)"),
+    N_("Standard Definition (576 or 480 lines)"),
+    N_("Low definition (320 lines)")
+};
 
 #define INPUT_REPEAT_TEXT N_("Input repetitions")
 #define INPUT_REPEAT_LONGTEXT N_( \
@@ -893,6 +914,52 @@ static const char *const ppsz_clock_descriptions[] =
 #define TIMEOUT_LONGTEXT N_( \
     "Default TCP connection timeout (in milliseconds). " )
 
+#define HTTP_HOST_TEXT N_( "HTTP server address" )
+#define RTSP_HOST_TEXT N_( "RTSP server address" )
+#define HOST_LONGTEXT N_( \
+    "By default, the server will listen on any local IP address. " \
+    "Specify an IP address (e.g. ::1 or 127.0.0.1) or a host name " \
+    "(e.g. localhost) to restrict them to a specific network interface." )
+
+#define HTTP_PORT_TEXT N_( "HTTP server port" )
+#define HTTP_PORT_LONGTEXT N_( \
+    "The HTTP server will listen on this TCP port. " \
+    "The standard HTTP port number is 80. " \
+    "However allocation of port numbers below 1025 is usually restricted " \
+    "by the operating system." )
+
+#define HTTPS_PORT_TEXT N_( "HTTPS server port" )
+#define HTTPS_PORT_LONGTEXT N_( \
+    "The HTTPS server will listen on this TCP port. " \
+    "The standard HTTPS port number is 443. " \
+    "However allocation of port numbers below 1025 is usually restricted " \
+    "by the operating system." )
+
+#define RTSP_PORT_TEXT N_( "RTSP server port" )
+#define RTSP_PORT_LONGTEXT N_( \
+    "The HTTPS server will listen on this TCP port. " \
+    "The standard RTSP port number is 554. " \
+    "However allocation of port numbers below 1025 is usually restricted " \
+    "by the operating system." )
+
+#define HTTP_CERT_TEXT N_("HTTP/TLS server certificate")
+#define CERT_LONGTEXT N_( \
+   "This X.509 certicate file (PEM format) is used for server-side TLS." )
+
+#define HTTP_KEY_TEXT N_("HTTP/TLS server private key")
+#define KEY_LONGTEXT N_( \
+   "This private key file (PEM format) is used for server-side TLS.")
+
+#define HTTP_CA_TEXT N_("HTTP/TLS Certificate Authority")
+#define CA_LONGTEXT N_( \
+   "This X.509 certificate file (PEM format) can optionally be used " \
+   "to authenticate remote clients in TLS sessions.")
+
+#define HTTP_CRL_TEXT N_("HTTP/TLS Certificate Revocation List")
+#define CRL_LONGTEXT N_( \
+   "This file countains an optional CRL to prevent remove clients " \
+   "from using revoked certificates in TLS sessions.")
+
 #define SOCKS_SERVER_TEXT N_("SOCKS server")
 #define SOCKS_SERVER_LONGTEXT N_( \
     "SOCKS proxy server to use. This must be of the form " \
@@ -1037,56 +1104,6 @@ static const char *const ppsz_clock_descriptions[] =
 #define CPU_CAT_LONGTEXT N_( \
     "These options allow you to enable special CPU optimizations. " \
     "You should always leave all these enabled." )
-
-#define MMX_TEXT N_("Enable CPU MMX support")
-#define MMX_LONGTEXT N_( \
-    "If your processor supports the MMX instructions set, VLC can take " \
-    "advantage of them.")
-
-#define THREE_DN_TEXT N_("Enable CPU 3D Now! support")
-#define THREE_DN_LONGTEXT N_( \
-    "If your processor supports the 3D Now! instructions set, VLC can take " \
-    "advantage of them.")
-
-#define MMXEXT_TEXT N_("Enable CPU MMX EXT support")
-#define MMXEXT_LONGTEXT N_( \
-    "If your processor supports the MMX EXT instructions set, VLC can take " \
-    "advantage of them.")
-
-#define SSE_TEXT N_("Enable CPU SSE support")
-#define SSE_LONGTEXT N_( \
-    "If your processor supports the SSE instructions set, VLC can take " \
-    "advantage of them.")
-
-#define SSE2_TEXT N_("Enable CPU SSE2 support")
-#define SSE2_LONGTEXT N_( \
-    "If your processor supports the SSE2 instructions set, VLC can take " \
-    "advantage of them.")
-
-#define SSE3_TEXT N_("Enable CPU SSE3 support")
-#define SSE3_LONGTEXT N_( \
-    "If your processor supports the SSE3 instructions set, VLC can take " \
-    "advantage of them.")
-
-#define SSSE3_TEXT N_("Enable CPU SSSE3 support")
-#define SSSE3_LONGTEXT N_( \
-    "If your processor supports the SSSE3 instructions set, VLC can take " \
-    "advantage of them.")
-
-#define SSE4_1_TEXT N_("Enable CPU SSE4.1 support")
-#define SSE4_1_LONGTEXT N_( \
-    "If your processor supports the SSE4.1 instructions set, VLC can take " \
-    "advantage of them.")
-
-#define SSE4_2_TEXT N_("Enable CPU SSE4.2 support")
-#define SSE4_2_LONGTEXT N_( \
-    "If your processor supports the SSE4.2 instructions set, VLC can take " \
-    "advantage of them.")
-
-#define ALTIVEC_TEXT N_("Enable CPU AltiVec support")
-#define ALTIVEC_LONGTEXT N_( \
-    "If your processor supports the AltiVec instructions set, VLC can take " \
-    "advantage of them.")
 
 // DEPRECATED
 #define MISC_CAT_LONGTEXT N_( \
@@ -1470,6 +1487,8 @@ static const char *const ppsz_albumart_descriptions[] =
 #define INTF_SHOW_KEY_LONGTEXT N_("Raise the interface above all other windows.")
 #define INTF_HIDE_KEY_TEXT N_("Hide interface")
 #define INTF_HIDE_KEY_LONGTEXT N_("Lower the interface below all other windows.")
+#define INTF_BOSS_KEY_TEXT N_("Boss key")
+#define INTF_BOSS_KEY_LONGTEXT N_("Hide the interface and pause playback.")
 #define SNAP_KEY_TEXT N_("Take video snapshot")
 #define SNAP_KEY_LONGTEXT N_("Takes a video snapshot and writes it to disk.")
 
@@ -1534,37 +1553,6 @@ static const char *const ppsz_albumart_descriptions[] =
 
 #define AUDI_DEVICE_CYCLE_KEY_TEXT N_("Cycle through audio devices")
 #define AUDI_DEVICE_CYCLE_KEY_LONGTEXT N_("Cycle through available audio devices")
-const char vlc_usage[] = N_(
-    "Usage: %s [options] [stream] ..."
-    "\nYou can specify multiple streams on the commandline. They will be enqueued in the playlist."
-    "\nThe first item specified will be played first."
-    "\n"
-    "\nOptions-styles:"
-    "\n  --option  A global option that is set for the duration of the program."
-    "\n   -option  A single letter version of a global --option."
-    "\n   :option  An option that only applies to the stream directly before it"
-    "\n            and that overrides previous settings."
-    "\n"
-    "\nStream MRL syntax:"
-    "\n  [[access][/demux]://]URL[@[title][:chapter][-[title][:chapter]]] [:option=value ...]"
-    "\n"
-    "\n  Many of the global --options can also be used as MRL specific :options."
-    "\n  Multiple :option=value pairs can be specified."
-    "\n"
-    "\nURL syntax:"
-    "\n  [file://]filename              Plain media file"
-    "\n  http://ip:port/file            HTTP URL"
-    "\n  ftp://ip:port/file             FTP URL"
-    "\n  mms://ip:port/file             MMS URL"
-    "\n  screen://                      Screen capture"
-    "\n  [dvd://][device][@raw_device]  DVD device"
-    "\n  [vcd://][device]               VCD device"
-    "\n  [cdda://][device]              Audio CD device"
-    "\n  udp://[[<source address>]@[<bind address>][:<bind port>]]"
-    "\n                                 UDP stream sent by a streaming server"
-    "\n  vlc://pause:<seconds>          Special item to pause the playlist for a certain time"
-    "\n  vlc://quit                     Special item to quit VLC"
-    "\n");
 
 /*
  * Quick usage guide for the configuration options:
@@ -1592,14 +1580,13 @@ vlc_module_begin ()
 
     add_bool( "audio", 1, AUDIO_TEXT, AUDIO_LONGTEXT, false )
         change_safe ()
-    add_integer_with_range( "volume", AOUT_VOLUME_DEFAULT, AOUT_VOLUME_MIN,
+    add_integer_with_range( "volume", AOUT_VOLUME_DEFAULT, 0,
                             AOUT_VOLUME_MAX, VOLUME_TEXT,
                             VOLUME_LONGTEXT, false )
-    add_integer_with_range( "volume-step", AOUT_VOLUME_STEP, AOUT_VOLUME_MIN,
+    add_integer_with_range( "volume-step", AOUT_VOLUME_STEP, 0,
                             AOUT_VOLUME_MAX, VOLUME_STEP_TEXT,
                             VOLUME_STEP_LONGTEXT, true )
-    add_integer( "aout-rate", 0, AOUT_RATE_TEXT,
-                 AOUT_RATE_LONGTEXT, true )
+    add_obsolete_integer( "aout-rate" ) /* since 1.2.0 */
 #if HAVE_FPU && !defined( __APPLE__ )
     add_bool( "hq-resampling", 1, AOUT_RESAMP_TEXT,
               AOUT_RESAMP_LONGTEXT, true )
@@ -1839,6 +1826,10 @@ vlc_module_begin ()
     add_integer( "sub-track-id", -1,
                  INPUT_SUBTRACK_ID_TEXT, INPUT_SUBTRACK_ID_LONGTEXT, true )
         change_safe ()
+    add_integer( "preferred-resolution", -1, INPUT_PREFERREDRESOLUTION_TEXT,
+                 INPUT_PREFERREDRESOLUTION_LONGTEXT, false )
+        change_safe ()
+        change_integer_list( pi_prefres, ppsz_prefres )
 
     set_section( N_( "Playback control" ) , NULL)
     add_integer( "input-repeat", 0,
@@ -1879,13 +1870,28 @@ vlc_module_begin ()
 
     set_section( N_( "Network settings" ), NULL )
 
-    add_integer( "server-port", 1234,
-                 SERVER_PORT_TEXT, SERVER_PORT_LONGTEXT, false )
     add_integer( "mtu", MTU_DEFAULT, MTU_TEXT, MTU_LONGTEXT, true )
     add_obsolete_bool( "ipv6" ) /* since 1.2.0 */
     add_obsolete_bool( "ipv4" ) /* since 1.2.0 */
     add_integer( "ipv4-timeout", 5 * 1000, TIMEOUT_TEXT,
                  TIMEOUT_LONGTEXT, true )
+
+    add_string( "http-host", NULL, HTTP_HOST_TEXT, HOST_LONGTEXT, true )
+    add_integer( "http-port", 8080, HTTP_PORT_TEXT, HTTP_PORT_LONGTEXT, true )
+        change_integer_range( 1, 65535 )
+    add_integer( "https-port", 8443, HTTPS_PORT_TEXT, HTTPS_PORT_LONGTEXT, true )
+        change_integer_range( 1, 65535 )
+    add_string( "rtsp-host", NULL, RTSP_HOST_TEXT, HOST_LONGTEXT, true )
+    add_integer( "rtsp-port", 8554, RTSP_PORT_TEXT, RTSP_PORT_LONGTEXT, true )
+        change_integer_range( 1, 65535 )
+    add_loadfile( "http-cert", NULL, HTTP_CERT_TEXT, CERT_LONGTEXT, true )
+        add_deprecated_alias( "sout-http-cert" ) /* since 1.2.0 */
+    add_loadfile( "http-key", NULL, HTTP_KEY_TEXT, KEY_LONGTEXT, true )
+        add_deprecated_alias( "sout-http-key" ) /* since 1.2.0 */
+    add_loadfile( "http-ca", NULL, HTTP_CA_TEXT, CA_LONGTEXT, true )
+        add_deprecated_alias( "sout-http-ca" ) /* since 1.2.0 */
+    add_loadfile( "http-crl", NULL, HTTP_CRL_TEXT, CRL_LONGTEXT, true )
+        add_deprecated_alias( "sout-http-crl" ) /* since 1.2.0 */
 
     set_section( N_( "Socks proxy") , NULL )
     add_string( "socks", NULL,
@@ -1923,6 +1929,30 @@ vlc_module_begin ()
         change_safe()
 
     set_section( N_( "Advanced" ), NULL )
+
+    add_integer( "file-caching", DEFAULT_PTS_DELAY / 1000,
+                 CACHING_TEXT, CACHING_LONGTEXT, true )
+        change_integer_range( 0, 60000 )
+        change_safe()
+    add_integer( "live-caching", DEFAULT_PTS_DELAY / 1000,
+                 CAPTURE_CACHING_TEXT, CAPTURE_CACHING_LONGTEXT, true )
+        change_integer_range( 0, 60000 )
+        change_safe()
+#if defined (__linux__)
+        add_deprecated_alias( "v4l2-caching" ) /* 1.2.0 */
+#elif defined (WIN32)
+        add_deprecated_alias( "dshow-caching" ) /* 1.2.0 */
+#endif
+    add_integer( "disc-caching", DEFAULT_PTS_DELAY / 1000,
+                 DISC_CACHING_TEXT, DISC_CACHING_LONGTEXT, true )
+        change_integer_range( 0, 60000 )
+        change_safe()
+        add_deprecated_alias( "dvdnav-caching" ) /* 1.2.0 */
+    add_integer( "network-caching", CLOCK_FREQ / 1000,
+                 NETWORK_CACHING_TEXT, NETWORK_CACHING_LONGTEXT, true )
+        change_integer_range( 0, 60000 )
+        change_safe()
+        add_deprecated_alias( "http-caching" ) /* 1.2.0 */
 
     add_integer( "cr-average", 40, CR_AVERAGE_TEXT,
                  CR_AVERAGE_LONGTEXT, true )
@@ -2006,7 +2036,7 @@ vlc_module_begin ()
                 ACCESS_OUTPUT_TEXT, ACCESS_OUTPUT_LONGTEXT, true )
     add_integer( "ttl", -1, TTL_TEXT, TTL_LONGTEXT, true )
     add_string( "miface", NULL, MIFACE_TEXT, MIFACE_LONGTEXT, true )
-    add_string( "miface-addr", NULL, MIFACE_ADDR_TEXT, MIFACE_ADDR_LONGTEXT, true )
+    add_obsolete_string( "miface-addr" )
     add_integer( "dscp", 0, DSCP_TEXT, DSCP_LONGTEXT, true )
 
     set_subcategory( SUBCAT_SOUT_PACKETIZER )
@@ -2025,18 +2055,18 @@ vlc_module_begin ()
     add_category_hint( N_("CPU"), CPU_CAT_LONGTEXT, true )
     add_obsolete_bool( "fpu" )
 #if defined( __i386__ ) || defined( __x86_64__ )
-    add_bool( "mmx", 1, MMX_TEXT, MMX_LONGTEXT, true )
-    add_bool( "3dn", 1, THREE_DN_TEXT, THREE_DN_LONGTEXT, true )
-    add_bool( "mmxext", 1, MMXEXT_TEXT, MMXEXT_LONGTEXT, true )
-    add_bool( "sse", 1, SSE_TEXT, SSE_LONGTEXT, true )
-    add_bool( "sse2", 1, SSE2_TEXT, SSE2_LONGTEXT, true )
-    add_bool( "sse3", 1, SSE3_TEXT, SSE3_LONGTEXT, true )
-    add_bool( "ssse3", 1, SSSE3_TEXT, SSSE3_LONGTEXT, true )
-    add_bool( "sse41", 1, SSE4_1_TEXT, SSE4_1_LONGTEXT, true )
-    add_bool( "sse42", 1, SSE4_2_TEXT, SSE4_2_LONGTEXT, true )
+    add_obsolete_bool( "mmx" ) /* since 1.2.0 */
+    add_obsolete_bool( "3dn" ) /* since 1.2.0 */
+    add_obsolete_bool( "mmxext" ) /* since 1.2.0 */
+    add_obsolete_bool( "sse" ) /* since 1.2.0 */
+    add_obsolete_bool( "sse2" ) /* since 1.2.0 */
+    add_obsolete_bool( "sse3" ) /* since 1.2.0 */
+    add_obsolete_bool( "ssse3" ) /* since 1.2.0 */
+    add_obsolete_bool( "sse41" ) /* since 1.2.0 */
+    add_obsolete_bool( "sse42" ) /* since 1.2.0 */
 #endif
 #if defined( __powerpc__ ) || defined( __ppc__ ) || defined( __ppc64__ )
-    add_bool( "altivec", 1, ALTIVEC_TEXT, ALTIVEC_LONGTEXT, true )
+    add_obsolete_bool( "altivec" ) /* since 1.2.0 */
 #endif
 
 /* Misc options */
@@ -2266,6 +2296,7 @@ vlc_module_begin ()
 #   define KEY_DEINTERLACE        "d"
 #   define KEY_INTF_SHOW          "i"
 #   define KEY_INTF_HIDE          "Shift+i"
+#   define KEY_INTF_BOSS          NULL
 #   define KEY_DISC_MENU          "Ctrl+m"
 #   define KEY_TITLE_PREV         "Ctrl+p"
 #   define KEY_TITLE_NEXT         "Ctrl+n"
@@ -2383,6 +2414,7 @@ vlc_module_begin ()
 #   define KEY_DEINTERLACE        "d"
 #   define KEY_INTF_SHOW          "i"
 #   define KEY_INTF_HIDE          "Shift+i"
+#   define KEY_INTF_BOSS          NULL
 #   define KEY_DISC_MENU          "Shift+m"
 #   define KEY_TITLE_PREV         "Shift+o"
 #   define KEY_TITLE_NEXT         "Shift+b"
@@ -2556,6 +2588,8 @@ vlc_module_begin ()
              INTF_SHOW_KEY_TEXT, INTF_SHOW_KEY_LONGTEXT, true )
     add_key( "key-intf-hide", KEY_INTF_HIDE,
              INTF_HIDE_KEY_TEXT, INTF_HIDE_KEY_LONGTEXT, true )
+    add_key( "key-intf-boss", KEY_INTF_BOSS,
+             INTF_BOSS_KEY_TEXT, INTF_BOSS_KEY_LONGTEXT, true )
     add_key( "key-snapshot", KEY_SNAPSHOT,
         SNAP_KEY_TEXT, SNAP_KEY_LONGTEXT, true )
     add_key( "key-record", KEY_RECORD,
@@ -2755,7 +2789,6 @@ vlc_module_begin ()
     /* add_usage_hint( PLAYLIST_USAGE ) */
 
     set_description( N_("main program") )
-    set_capability( "main", 100 )
 vlc_module_end ()
 
 /*****************************************************************************

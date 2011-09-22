@@ -2,7 +2,7 @@
  * cdg.c: CDG decoder module
  *****************************************************************************
  * Copyright (C) 2007 Laurent Aimar
- * $Id: 322600a17a5f05f4a919b6a9dde7f7707afc537d $
+ * $Id: a340576241cd0099277dc6fd88fcd5ceb4dc696c $
  *
  * Authors: Laurent Aimar <fenrir # via.ecp.fr>
  *
@@ -324,8 +324,8 @@ static int DecodeScroll( decoder_sys_t *p_cdg, const uint8_t *p_data, int b_copy
 
             if( b_copy )
             {
-                dy %= CDG_SCREEN_HEIGHT;
-                dx %= CDG_SCREEN_WIDTH;
+                dy = (dy + CDG_SCREEN_HEIGHT) % CDG_SCREEN_HEIGHT;
+                dx = (dx + CDG_SCREEN_WIDTH ) % CDG_SCREEN_WIDTH;
             }
             else
             {

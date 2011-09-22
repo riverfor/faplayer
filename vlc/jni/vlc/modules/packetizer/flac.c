@@ -2,7 +2,7 @@
  * flac.c: flac packetizer module.
  *****************************************************************************
  * Copyright (C) 1999-2001 the VideoLAN team
- * $Id: d45fb5a94433f7141d5173319983d6837ad0abc9 $
+ * $Id: 1fef09abde9ef38f3e51e1bc0d6dff266fb5ffeb $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *          Sigmund Augdal Helberg <dnumgis@videolan.org>
@@ -36,6 +36,7 @@
 
 #include <vlc_block_helper.h>
 #include <vlc_bits.h>
+#include "packetizer_helper.h"
 
 /*****************************************************************************
  * Module descriptor
@@ -89,16 +90,6 @@ struct decoder_sys_t
     unsigned int i_rate, i_channels, i_bits_per_sample;
 };
 
-enum
-{
-    STATE_NOSYNC,
-    STATE_SYNC,
-    STATE_HEADER,
-    STATE_NEXT_SYNC,
-    STATE_GET_DATA,
-    STATE_SEND_DATA
-};
-
 /*****************************************************************************
  * Local prototypes
  *****************************************************************************/
@@ -127,7 +118,7 @@ static int Open( vlc_object_t *p_this )
     p_sys->i_state       = STATE_NOSYNC;
     p_sys->b_stream_info = false;
     p_sys->i_pts         = VLC_TS_INVALID;
-    p_sys->bytestream    = block_BytestreamInit();
+    block_BytestreamInit( &p_sys->bytestream );
 
     /* */
     es_format_Copy( &p_dec->fmt_out, &p_dec->fmt_in );

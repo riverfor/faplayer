@@ -1,8 +1,8 @@
 /*****************************************************************************
  * Messages.cpp : Information about an item
  ****************************************************************************
- * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 5c356be7d034c4efd85e56e06ec164fcbeb82d34 $
+ * Copyright (C) 2006-2011 the VideoLAN team
+ * $Id: 862222f558c3415b8f5b831cab1ee8311404e196 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *
@@ -25,6 +25,7 @@
 #endif
 
 #include "dialogs/messages.hpp"
+#include <vlc_atomic.h>
 
 #include <QTextEdit>
 #include <QTextCursor>
@@ -47,7 +48,7 @@ enum {
 class MsgEvent : public QEvent
 {
 public:
-    MsgEvent( const msg_item_t * );
+    MsgEvent( int, const msg_item_t *, const char * );
 
     int priority;
     uintptr_t object_id;
@@ -57,23 +58,16 @@ public:
     QString text;
 };
 
-MsgEvent::MsgEvent( const msg_item_t *msg )
+MsgEvent::MsgEvent( int type, const msg_item_t *msg, const char *text )
     : QEvent( (QEvent::Type)MsgEvent_Type ),
-      priority( msg->i_type ),
+      priority( type ),
       object_id( msg->i_object_id ),
       object_type( qfu(msg->psz_object_type) ),
       header( qfu(msg->psz_header) ),
       module( qfu(msg->psz_module) ),
-      text( qfu(msg->psz_msg) )
+      text( qfu(text) )
 {
 }
-
-struct msg_cb_data_t
-{
-    MessagesDialog *self;
-};
-
-static void MsgCallback( msg_cb_data_t *, const msg_item_t * );
 
 MessagesDialog::MessagesDialog( intf_thread_t *_p_intf)
                : QVLCFrame( _p_intf )
@@ -92,9 +86,17 @@ MessagesDialog::MessagesDialog( intf_thread_t *_p_intf)
     /* Buttons and general layout */
     ui.saveLogButton->setToolTip( qtr( "Saves all the displayed logs to a file" ) );
 
-    ui.verbosityBox->setValue( var_InheritInteger( p_intf, "verbose" ) );
+    int verbosity = var_InheritInteger( p_intf, "verbose" );
+    vlc_atomic_set( &this->verbosity, verbosity );
+    ui.verbosityBox->setValue( verbosity );
 
-    ui.vbobjectsEdit->setText(config_GetPsz( p_intf, "verbose-objects"));
+    char *objs = var_InheritString( p_intf, "verbose-objects" );
+    if( objs != NULL )
+    {
+        ui.vbobjectsEdit->setText( qfu(objs) );
+        free( objs );
+    }
+    updateConfig();
     ui.vbobjectsEdit->setToolTip( "verbose-objects usage: \n"
                             "--verbose-objects=+printthatobject,-dontprintthatone\n"
                             "(keyword 'all' to applies to all objects)");
@@ -119,57 +121,58 @@ MessagesDialog::MessagesDialog( intf_thread_t *_p_intf)
     readSettings( "Messages", QSize( 600, 450 ) );
 
     /* Hook up to LibVLC messaging */
-    cbData = new msg_cb_data_t;
-    cbData->self = this;
-    sub = msg_Subscribe( p_intf->p_libvlc, MsgCallback, cbData );
-    changeVerbosity( ui.verbosityBox->value() );
+    sub = vlc_Subscribe( MsgCallback, this );
 }
 
 MessagesDialog::~MessagesDialog()
 {
     writeSettings( "Messages" );
-    msg_Unsubscribe( sub );
-    delete cbData;
+    vlc_Unsubscribe( sub );
 };
 
 void MessagesDialog::changeVerbosity( int verbosity )
 {
-    msg_SubscriptionSetVerbosity( sub , verbosity );
+    vlc_atomic_set( &this->verbosity, verbosity );
 }
 
 void MessagesDialog::updateConfig()
 {
-    config_PutPsz(p_intf, "verbose-objects", qtu(ui.vbobjectsEdit->text()));
-    //vbobjectsEdit->setText("vbEdit changed!");
+    const QString& objects = ui.vbobjectsEdit->text();
+    /* FIXME: config item should be part of Qt4 module */
+    config_PutPsz(p_intf, "verbose-objects", qtu(objects));
 
-    if( !ui.vbobjectsEdit->text().isEmpty() )
+    QStringList filterOut, filterIn;
+    /* If a filter is set, disable by default */
+    /* If no filters are set, enable */
+    filterDefault = objects.isEmpty();
+    foreach( const QString& elem, objects.split(QChar(',')) )
     {
-        /* if user sets filter, go with the idea that user just wants that to be shown,
-           so disable all by default and enable those that user wants */
-        msg_DisableObjectPrinting( p_intf, "all");
-        char * psz_verbose_objects = strdup(qtu(ui.vbobjectsEdit->text()));
-        char * psz_object, * iter =  psz_verbose_objects;
-        while( (psz_object = strsep( &iter, "," )) )
+        QString object = elem;
+        bool add = true;
+
+        if( elem.startsWith(QChar('-')) )
         {
-            switch( psz_object[0] )
-            {
-                printf("%s\n", psz_object+1);
-                case '+': msg_EnableObjectPrinting(p_intf, psz_object+1); break;
-                case '-': msg_DisableObjectPrinting(p_intf, psz_object+1); break;
-                /* user can but just 'lua,playlist' on filter */
-                default: msg_EnableObjectPrinting(p_intf, psz_object); break;
-             }
+            add = false;
+            object.remove( 0, 1 );
         }
-        free( psz_verbose_objects );
+        else if( elem.startsWith(QChar('+')) )
+            object.remove( 0, 1 );
+
+        if( object.compare(qfu("all"), Qt::CaseInsensitive) == 0 )
+            filterDefault = add;
+        else
+            (add ? &filterIn : &filterOut)->append( object );
     }
-    else
-    {
-        msg_EnableObjectPrinting( p_intf, "all");
-    }
+    filter = filterDefault ? filterOut : filterIn;
+    filter.removeDuplicates();
 }
 
-void MessagesDialog::sinkMessage( MsgEvent *msg )
+void MessagesDialog::sinkMessage( const MsgEvent *msg )
 {
+    if( (filter.contains(msg->module) || filter.contains(msg->object_type))
+                                                            == filterDefault )
+        return;
+
     QTextEdit *messages = ui.messages;
     /* Only scroll if the viewport is at the end.
        Don't bug user by auto-changing/loosing viewport on insert(). */
@@ -296,11 +299,19 @@ void MessagesDialog::tabChanged( int i )
     updateButton->setVisible( i == 1 );
 }
 
-static void MsgCallback( msg_cb_data_t *data, const msg_item_t *item )
+void MessagesDialog::MsgCallback( void *self, int type, const msg_item_t *item,
+                                  const char *format, va_list ap )
 {
+    MessagesDialog *dialog = (MessagesDialog *)self;
+    char *str;
+    int verbosity = vlc_atomic_get( &dialog->verbosity );
+
+    if( verbosity < 0 || verbosity < (type - VLC_MSG_ERR)
+     || unlikely(vasprintf( &str, format, ap ) == -1) )
+        return;
+
     int canc = vlc_savecancel();
-
-    QApplication::postEvent( data->self, new MsgEvent( item ) );
-
+    QApplication::postEvent( dialog, new MsgEvent( type, item, str ) );
     vlc_restorecancel( canc );
+    free( str );
 }

@@ -4,7 +4,7 @@
  * Copyright (C) 2007-2009 the VideoLAN team
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
- * $Id: ed37d64959fd57102c006845ed9683429a40d616 $
+ * $Id: ebf952a642eb551c4be88b4baa3f426277f22062 $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Pierre-Luc Beaudoin <pierre-luc.beaudoin@savoirfairelinux.com>
@@ -80,8 +80,8 @@ void SoutInputBox::setMRL( const QString& mrl )
     sourceValueLabel->setText( type );
 }
 
-#define CT( x ) connect( x, SIGNAL( textChanged( const QString& ) ), this, SIGNAL( mrlUpdated() ) );
-#define CS( x ) connect( x, SIGNAL( valueChanged( int ) ), this, SIGNAL( mrlUpdated() ) );
+#define CT( x ) connect( x, SIGNAL(textChanged(QString)), this, SIGNAL(mrlUpdated()) );
+#define CS( x ) connect( x, SIGNAL(valueChanged(int)), this, SIGNAL(mrlUpdated()) );
 
 /* FileDest Box */
 FileDestBox::FileDestBox( QWidget *_parent ) : VirtualDestBox( _parent )

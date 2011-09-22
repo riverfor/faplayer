@@ -2,7 +2,7 @@
  * interface_widgets.cpp : Custom widgets for the main interface
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id: 1d855325a184a1f976d1df8b0ef834c126cbb2cc $
+ * $Id: 86d6ad64a392cba82806825ea77972ca613e57ae $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -144,10 +144,6 @@ WId VideoWidget::request( int *pi_x, int *pi_y,
     XSelectInput( dpy, w, attr.your_event_mask );
 #endif
     sync();
-#ifndef NDEBUG
-    msg_Dbg( p_intf, "embedded video ready (handle %p)",
-             (void *)stable->winId() );
-#endif
     return stable->winId();
 }
 
@@ -235,8 +231,8 @@ void BackgroundWidget::paintEvent( QPaintEvent *e )
     QBitmap pMask;
     float f_alpha = 1.0;
 
-    i_maxwidth = std::min( maximumWidth(), width() ) - MARGIN * 2;
-    i_maxheight = std::min( maximumHeight(), height() ) - MARGIN * 2;
+    i_maxwidth  = __MIN( maximumWidth(), width() ) - MARGIN * 2;
+    i_maxheight = __MIN( maximumHeight(), height() ) - MARGIN * 2;
 
     if ( height() > MARGIN * 2 )
     {

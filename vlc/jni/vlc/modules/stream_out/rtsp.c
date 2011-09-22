@@ -4,7 +4,7 @@
  * Copyright (C) 2003-2004, 2010 the VideoLAN team
  * Copyright © 2007 Rémi Denis-Courmont
  *
- * $Id: 6a8534a81cfb13de3eacdee728e6db4721132c6d $
+ * $Id: 1426ab58d08472844e8f56b5b1942f1f28c4c97f $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Pierre Ynard
@@ -64,7 +64,6 @@ struct rtsp_stream_t
     httpd_url_t    *url;
     char           *psz_path;
     unsigned        track_id;
-    unsigned        port;
 
     int             sessionc;
     rtsp_session_t **sessionv;
@@ -112,16 +111,13 @@ rtsp_stream_t *RtspSetup( vlc_object_t *owner, vod_media_t *media,
             goto error;
     }
 
-    rtsp->port = (url->i_port > 0) ? url->i_port : 554;
     rtsp->psz_path = strdup( ( url->psz_path != NULL ) ? url->psz_path : "/" );
     if( rtsp->psz_path == NULL )
         goto error;
 
-    msg_Dbg( owner, "RTSP stream: host %s port %d at %s",
-             url->psz_host, rtsp->port, rtsp->psz_path );
+    msg_Dbg( owner, "RTSP stream at %s", rtsp->psz_path );
 
-    rtsp->host = httpd_HostNew( VLC_OBJECT(owner), url->psz_host,
-                                rtsp->port );
+    rtsp->host = vlc_rtsp_HostNew( VLC_OBJECT(owner) );
     if( rtsp->host == NULL )
         goto error;
 
@@ -619,18 +615,17 @@ static int RtspHandler( rtsp_stream_t *rtsp, rtsp_stream_id_t *id,
     {
         /* Build self-referential control URL */
         char ip[NI_MAXNUMERICHOST], *ptr;
+        int port;
 
-        httpd_ServerIP( cl, ip );
+        httpd_ServerIP( cl, ip, &port );
         ptr = strchr( ip, '%' );
         if( ptr != NULL )
             *ptr = '\0';
 
         if( strchr( ip, ':' ) != NULL )
-            sprintf( control, "rtsp://[%s]:%u%s", ip, rtsp->port,
-                     rtsp->psz_path );
+            sprintf( control, "rtsp://[%s]:%d%s", ip, port, rtsp->psz_path );
         else
-            sprintf( control, "rtsp://%s:%u%s", ip, rtsp->port,
-                     rtsp->psz_path );
+            sprintf( control, "rtsp://%s:%d%s", ip, port, rtsp->psz_path );
     }
 
     /* */
@@ -811,7 +806,7 @@ static int RtspHandler( rtsp_stream_t *rtsp, rtsp_stream_id_t *id,
                     int fd, sport;
                     uint32_t ssrc;
 
-                    if( httpd_ClientIP( cl, ip ) == NULL )
+                    if( httpd_ClientIP( cl, ip, NULL ) == NULL )
                     {
                         answer->i_status = 500;
                         continue;
@@ -904,7 +899,7 @@ static int RtspHandler( rtsp_stream_t *rtsp, rtsp_stream_id_t *id,
                     }
                     vlc_mutex_unlock( &rtsp->lock );
 
-                    httpd_ServerIP( cl, ip );
+                    httpd_ServerIP( cl, ip, NULL );
 
                     /* Specify source IP only if it is different from the
                      * RTSP control connection server address */

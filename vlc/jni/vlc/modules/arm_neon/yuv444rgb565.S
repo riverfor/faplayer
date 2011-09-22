@@ -1,950 +1,328 @@
-@ YUV-> RGB conversion code Copyright (C) 2008 Robin Watts (robin;wss.co.uk).
-@
-@ Licensed under the GPL. If you need it under another license, contact me
-@ and ask.
-@
-@  This program is free software ; you can redistribute it and/or modify
-@  it under the terms of the GNU General Public License as published by
-@  the Free Software Foundation ; either version 2 of the License, or
-@  (at your option) any later version.
-@
-@  This program is distributed in the hope that it will be useful,
-@  but WITHOUT ANY WARRANTY ; without even the implied warranty of
-@  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-@  GNU General Public License for more details.
-@
-@  You should have received a copy of the GNU General Public License
-@  along with this program ; if not, write to the Free Software
-@  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-@
-@
-@ The algorithm used here is based heavily on one created by Sophie Wilson
-@ of Acorn/e-14/Broadcomm. Many thanks.
-@
-@ Additional tweaks (in the fast fixup code) are from Paul Gardiner.
-@
-@ The old implementation of YUV -> RGB did:
-@
-@ R = CLAMP((Y-16)*1.164 +           1.596*V)
-@ G = CLAMP((Y-16)*1.164 - 0.391*U - 0.813*V)
-@ B = CLAMP((Y-16)*1.164 + 2.018*U          )
-@
-@ Were going to bend that here as follows:
-@
-@ R = CLAMP(y +           1.596*V)
-@ G = CLAMP(y - 0.383*U - 0.813*V)
-@ B = CLAMP(y + 1.976*U          )
-@
-@ where y = 0               for       Y <=  16,
-@       y = (  Y-16)*1.164, for  16 < Y <= 239,
-@       y = (239-16)*1.164, for 239 < Y
-@
-@ i.e. We clamp Y to the 16 to 239 range (which it is supposed to be in
-@ anyway). We then pick the B_U factor so that B never exceeds 511. We then
-@ shrink the G_U factor in line with that to avoid a colour shift as much as
-@ possible.
-@
-@ Were going to use tables to do it faster, but rather than doing it using
-@ 5 tables as as the above suggests, were going to do it using just 3.
-@
-@ We do this by working in parallel within a 32 bit word, and using one
-@ table each for Y U and V.
-@
-@ Source Y values are    0 to 255, so    0.. 260 after scaling
-@ Source U values are -128 to 127, so  -49.. 49(G), -253..251(B) after
-@ Source V values are -128 to 127, so -204..203(R), -104..103(G) after
-@
-@ So total summed values:
-@ -223 <= R <= 481, -173 <= G <= 431, -253 <= B < 511
-@
-@ We need to pack R G and B into a 32 bit word, and because of Bs range we
-@ need 2 bits above the valid range of B to detect overflow, and another one
-@ to detect the sense of the overflow. We therefore adopt the following
-@ representation:
-@
-@ osGGGGGgggggosBBBBBbbbosRRRRRrrr
-@
-@ Each such word breaks down into 3 ranges.
-@
-@ osGGGGGggggg   osBBBBBbbb   osRRRRRrrr
-@
-@ Thus we have 8 bits for each B and R table entry, and 10 bits for G (good
-@ as G is the most noticable one). The s bit for each represents the sign,
-@ and o represents the overflow.
-@
-@ For R and B we pack the table by taking the 11 bit representation of their
-@ values, and toggling bit 10 in the U and V tables.
-@
-@ For the green case we calculate 4*G (thus effectively using 10 bits for the
-@ valid range) truncate to 12 bits. We toggle bit 11 in the Y table.
+/*------------------------------------------------------------------------
+* jdcolor-armv7.s
+*
+*  Copyright (c) 2010, Code Aurora Forum. All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions are
+*  met:
+*      * Redistributions of source code must retain the above copyright
+*        notice, this list of conditions and the following disclaimer.
+*      * Redistributions in binary form must reproduce the above
+*        copyright notice, this list of conditions and the following
+*        disclaimer in the documentation and/or other materials provided
+*        with the distribution.
+*      * Neither the name of Code Aurora Forum, Inc. nor the names of its
+*        contributors may be used to endorse or promote products derived
+*        from this software without specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+*  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+*  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+*  ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+*  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+*  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+*  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+*  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+*  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+*  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+*  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*--------------------------------------------------------------------------
 
-@ Theorarm library
-@ Copyright (C) 2009 Robin Watts for Pinknoise Productions Ltd
+*--------------------------------------------------------------------------
+*                         FUNCTION LIST
+*--------------------------------------------------------------------------
+*
+* - yvup2rgb565_venum
+* - yyvup2rgb565_venum
+*
+*--------------------------------------------------------------------------
+*/
 
-    .text
+    .section yvu_plain_to_rgb565, "x"  @ AREA
+    .text                              @ |.text|, CODE, READONLY
+    .align 2
+    .code  32                          @ CODE32
 
-	.global	yuv444_2_rgb565
+/*-----------------------------------------------------------------------------
+ *   ARM Registers
+ * ---------------------------------------------------------------------------- */
+p_y       .req r0
+p_cr      .req r1
+p_cb      .req r2
+p_rgb     .req r3
+p_bgr     .req r3
+length    .req r12
 
-@ void yuv444_2_rgb565
-@  uint8_t *dst_ptr
-@  uint8_t *y_ptr
-@  uint8_t *u_ptr
-@  uint8_t *v_ptr
-@  int      width
-@  int      height
-@  int      y_span
-@  int      uv_span
-@  int      dst_span
-@  int     *tables
-@  int      dither
+    .global yvup2rgb565_venum
 
- .set DITH1,	7
- .set DITH2,	6
+@ coefficients in color conversion matrix multiplication
+.equ COEFF_Y,          256             @ contribution of Y
+.equ COEFF_V_RED,      359             @ contribution of V for red
+.equ COEFF_U_GREEN,    -88             @ contribution of U for green
+.equ COEFF_V_GREEN,   -183             @ contribution of V for green
+.equ COEFF_U_BLUE,     454             @ contribution of U for blue
 
-CONST_mask:
-	.word	0x07E0F81F
-CONST_flags:
-	.word	0x40080100
-yuv444_2_rgb565:
-	@ r0 = dst_ptr
-	@ r1 = y_ptr
-	@ r2 = u_ptr
-	@ r3 = v_ptr
-	@ <> = width
-	@ <> = height
-	@ <> = y_span
-	@ <> = uv_span
-	@ <> = dst_span
-	@ <> = y_table
-	@ <> = dither
-	STMFD	r13!,{r4-r11,r14}
+@ Clamping constants 0x0 and 0xFF
+.equ COEFF_0,          0
+.equ COEFF_255,        255
 
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r8, [r13,#10*4]		@ r8 = height
-	LDR	r14,[r13,#14*4]		@ r14= y_table
-	LDR	r6, [r13,#15*4]		@ r11= dither
-	LDR	r4, CONST_mask
-	LDR	r5, CONST_flags
-	ADD	r9, r14,#256*4		@ r9 = u_table
-	ADD	r10,r14,#512*4		@ r10= v_table
-	ANDS	r6, r6, #3
-	BEQ	asm0
-	CMP	r6, #2
-	BEQ	asm3
-	BGT	asm2
-asm1:
-	@  Dither: 1 3
-	@          2 0
-yloop1:
-	SUB	r8, r8, r11,LSL #16	@ r8 = height-(width<<16)
-	ADDS	r8, r8, #1<<16		@ if (width == 1)
-	BGE	trail_pix10		@    just do 1 column
-xloop10:
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u  = u_table[u0]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v  = v_table[v0]
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12
-	ADD	r6, r6, r5, LSR #DITH1	@ r6 = y0 + u0 + v0 + dither1
+@ Bias coefficients for red, green and blue
+.equ COEFF_BIAS_R,   -45824            @ Red   bias =     -359*128 + 128
+.equ COEFF_BIAS_G,    34816            @ Green bias = (88+183)*128 + 128
+.equ COEFF_BIAS_B,   -57984            @ Blue  bias =     -454*128 + 128
 
-	LDRB	r7, [r1], #1		@ r7  = y1 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u1 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v1 = *v_ptr++
-	LDR	r7, [r14,r7, LSL #2]	@ r7  = y1 = y_table[y1]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u1 = u_table[u1]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v1 = v_table[v1]
-	ADD	r7, r7, r5, LSR #DITH1
-	ADD	r7, r7, r11
-	ADD	r7, r7, r12
-	ADD	r7, r7, r5, LSR #DITH2	@ r7 = y0 + u0 + v0 + dither3
 
-	ANDS	r12,r7, r5
-	TSTEQ	r6, r5
-	BNE	fix101
-return101:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	AND	r7, r4, r7, LSR #3
-	ORR	r7, r7, r7, LSR #16
-	STRH	r7, [r0], #2
-	ADDS	r8, r8, #2<<16
-	BLT	xloop10
-	MOVS	r8, r8, LSL #16		@ Clear the top 16 bits of r8
-	MOV	r8, r8, LSR #16		@ If the C bit is clear we still have
-	BCC	trail_pix10		@ 1 more pixel to do
-trail_pix10ret:
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r7, [r13,#11*4]		@ r7 = y_span
-	LDR	r12,[r13,#12*4]		@ r12= uv_stride
-	LDR	r6, [r13,#13*4]		@ r6 = dst_span
-	SUB	r0, r0, r11,LSL #1
-	ADD	r1, r1, r7
-	ADD	r0, r0, r6
-	SUB	r1, r1, r11
-	SUB	r2, r2, r11
-	SUB	r3, r3, r11
-	ADD	r2, r2, r12
-	ADD	r3, r3, r12
+/*--------------------------------------------------------------------------
+* FUNCTION     : yvup2rgb565_venum
+*--------------------------------------------------------------------------
+* DESCRIPTION  : Perform YVU planar to RGB565 conversion.
+*--------------------------------------------------------------------------
+* C PROTOTYPE  : void yvup2rgb565_venum(uint8_t  *p_y,
+*                                 uint8_t  *p_cr,
+*                                 uint8_t  *p_cb,
+*                                 uint8_t  *p_rgb565,
+*                                 uint32_t  length)
+*--------------------------------------------------------------------------
+* REG INPUT    : R0: uint8_t  *p_y
+*                      pointer to the input Y Line
+*                R1: uint8_t  *p_cr
+*                      pointer to the input Cr Line
+*                R2: uint8_t  *p_cb
+*                      pointer to the input Cb Line
+*                R3: uint8_t  *p_rgb565
+*                      pointer to the output RGB Line
+*                R12: uint32_t  length
+*                      width of Line
+*--------------------------------------------------------------------------
+* STACK ARG    : None
+*--------------------------------------------------------------------------
+* REG OUTPUT   : None
+*--------------------------------------------------------------------------
+* MEM INPUT    : p_y      - a line of Y pixels
+*                p_cr     - a line of Cr pixels
+*                p_cb     - a line of Cb pixels
+*                length   - the width of the input line
+*--------------------------------------------------------------------------
+* MEM OUTPUT   : p_rgb565 - the converted rgb pixels
+*--------------------------------------------------------------------------
+* REG AFFECTED : ARM:  R0-R4, R12
+*                NEON: Q0-Q15
+*--------------------------------------------------------------------------
+* STACK USAGE  : none
+*--------------------------------------------------------------------------
+* CYCLES       : none
+*
+*--------------------------------------------------------------------------
+* NOTES        :
+*--------------------------------------------------------------------------
+*/
+.type yvup2rgb565_venum, %function
+yvup2rgb565_venum:
+    /*-------------------------------------------------------------------------
+     *  Store stack registers
+     * ------------------------------------------------------------------------ */
+    STMFD SP!, {LR}
 
-	SUBS	r8, r8, #1
-	BEQ	end
+    PLD [R0, R3]                       @ preload luma line
 
-	@ Now we do the second row
-	SUB	r8, r8, r11,LSL #16	@ r8 = height-(width<<16)
-	ADDS	r8, r8, #1<<16		@ if (width == 1)
-	BGE	trail_pix11		@    just do 1 column
-xloop11:
-	LDRB	r7, [r1], #1		@ r6  = y2 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u2 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v2 = *v_ptr++
-	LDR	r7, [r14,r7, LSL #2]	@ r6  = y2 = y_table[y2]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u2 = u_table[u2]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v2 = v_table[v2]
-	LDRB	r6, [r1], #1		@ r6  = y3 = *y_ptr++
-	ADD	r7, r7, r11
-	ADD	r7, r7, r12		@ r7 = y2 + u2 + v2 + dither2
+    ADR   R12, constants
 
-	LDRB	r11,[r2], #1		@ r11 = u3 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v3 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y3 = y_table[y1]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u3 = u_table[u1]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v3 = v_table[v1]
-	ADD	r7, r7, r5, LSR #DITH2
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12
+    VLD1.S16  {D6, D7}, [R12]!         @ D6, D7: 359 |  -88 | -183 | 454 | 256 | 0 | 255 | 0
+    VLD1.S32  {D30, D31}, [R12]        @ Q15   :  -45824    |    34816   |  -57984 |     X
 
-	ANDS	r12,r7, r5
-	TSTEQ	r6, r5
-	BNE	fix102
-return102:
-	AND	r7, r4, r7, LSR #3
-	ORR	r7, r7, r7, LSR #16
-	STRH	r7, [r0], #2
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	ADDS	r8, r8, #2<<16
-	BLT	xloop11
-	MOVS	r8, r8, LSL #16		@ Clear the top 16 bits of r8
-	MOV	r8, r8, LSR #16		@ If the C bit is clear we still have
-	BCC	trail_pix11		@ 1 more pixel to do
-trail_pix11ret:
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r7, [r13,#11*4]		@ r7 = y_span
-	LDR	r12,[r13,#12*4]		@ r12= uv_stride
-	LDR	r6, [r13,#13*4]		@ r6 = dst_span
-	SUB	r0, r0, r11,LSL #1
-	ADD	r1, r1, r7
-	ADD	r0, r0, r6
-	SUB	r1, r1, r11
-	SUB	r2, r2, r11
-	SUB	r3, r3, r11
-	ADD	r2, r2, r12
-	ADD	r3, r3, r12
+    /*-------------------------------------------------------------------------
+     *  Load the 5th parameter via stack
+     *  R0 ~ R3 are used to pass the first 4 parameters, the 5th and above
+     *  parameters are passed via stack
+     * ------------------------------------------------------------------------ */
+    LDR R12, [SP, #4]                  @ LR is the only one that has been pushed
+                                       @ into stack, increment SP by 4 to
+                                       @ get the parameter.
+                                       @ LDMIB SP, {R12} is an equivalent
+                                       @ instruction in this case, where only
+                                       @ one register was pushed into stack.
 
-	SUBS	r8, r8, #1
-	BNE	yloop1
-end:
-	LDMFD	r13!,{r4-r11,pc}
-trail_pix10:
-	@ We have a single extra pixel to do
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u0 = u_table[u]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v0 = v_table[v]
-	ADD	r6, r6, r5, LSR #DITH1
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6  = y0 + uv + dither1
-	ANDS	r12,r6, r5
-	BNE	fix103
-return103:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	B	trail_pix10ret
-trail_pix11:
-	@ We have a single extra pixel to do
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u0 = u_table[u]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v0 = v_table[v]
-	ADD	r6, r6, r5, LSR #DITH2
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6  = y0 + uv + dither2
+    /*-------------------------------------------------------------------------
+     *  Load clamping parameters to duplicate vector elements
+     * ------------------------------------------------------------------------ */
+    VDUP.S16  Q4,  D7[1]               @ Q4:  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0
+    VDUP.S16  Q5,  D7[2]               @ Q5: 255 | 255 | 255 | 255 | 255 | 255 | 255 | 255
 
-	ANDS	r12,r6, r5
-	BNE	fix104
-return104:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	B	trail_pix11ret
+    /*-------------------------------------------------------------------------
+     *  Read bias
+     * ------------------------------------------------------------------------ */
+    VDUP.S32  Q0,   D30[0]             @ Q0:  -45824 | -45824 | -45824 | -45824
+    VDUP.S32  Q1,   D30[1]             @ Q1:   34816 |  34816 |  34816 |  34816
+    VDUP.S32  Q2,   D31[0]             @ Q2:  -70688 | -70688 | -70688 | -70688
 
-	LDMFD	r13!,{r4-r11,pc}
 
-fix101:
-	@ r7 and r6 are the values, at least one of which has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r7, r7, r12		@ r7 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r7, LSR #1	@ r12 = .o......o......o......
-	ADD	r7, r7, r12,LSR #8	@ r7  = fixed value
+    /*-------------------------------------------------------------------------
+     *  The main loop
+     * ------------------------------------------------------------------------ */
+loop_yvup2rgb565:
 
-	AND	r12, r6, r5		@ r12 = .S......S......S......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return101
-fix102:
-	@ r7 and r6 are the values, at least one of which has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r7, r7, r12		@ r7 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r7, LSR #1	@ r12 = .o......o......o......
-	ADD	r7, r7, r12,LSR #8	@ r7  = fixed value
+    /*-------------------------------------------------------------------------
+     *  Load input from Y, V and U
+     *  D12  : Y0  Y1  Y2  Y3  Y4  Y5  Y6  Y7
+     *  D14  : V0  V1  V2  V3  V4  V5  V6  V7
+     *  D15  : U0  U1  U2  U3  U4  U5  U6  U7
+     * ------------------------------------------------------------------------ */
+    VLD1.U8  {D12},  [p_y]!            @ Load 8 Y  elements (uint8) to D12
+    VLD1.U8  {D14},  [p_cr]!           @ Load 8 Cr elements (uint8) to D14
+    VLD1.U8  {D15},  [p_cb]!           @ Load 8 Cb elements (uint8) to D15
 
-	AND	r12, r6, r5		@ r12 = .S......S......S......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS..SSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS..SSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return102
-fix103:
-	@ r6 is the value, which has has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return103
-fix104:
-	@ r6 is the value, which has has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return104
+    /*-------------------------------------------------------------------------
+     *  Expand uint8 value to uint16
+     *  D18, D19: Y0 Y1 Y2 Y3 Y4 Y5 Y6 Y7
+     *  D20, D21: V0 V1 V2 V3 V4 V5 V6 V7
+     *  D22, D23: U0 U1 U2 U3 U4 U5 U6 U7
+     * ------------------------------------------------------------------------ */
+    VMOVL.U8 Q9,  D12
+    VMOVL.U8 Q10, D14
+    VMOVL.U8 Q11, D15
 
-@------------------------------------------------------------------------
-asm0:
-	@  Dither: 0 2
-	@          3 1
-yloop0:
-	SUB	r8, r8, r11,LSL #16	@ r8 = height-(width<<16)
-	ADDS	r8, r8, #1<<16		@ if (width == 1)
-	BGE	trail_pix00		@    just do 1 column
-xloop00:
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u  = u_table[u0]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v  = v_table[v0]
-	LDRB	r7, [r1], #1		@ r7  = y1 = *y_ptr++
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12
+    /*-------------------------------------------------------------------------
+     *  Multiply contribution from chrominance, results are in 32-bit
+     * ------------------------------------------------------------------------ */
+    VMULL.S16  Q12, D20, D6[0]         @ Q12:  359*(V0,V1,V2,V3)     Red
+    VMULL.S16  Q13, D22, D6[1]         @ Q13:  -88*(U0,U1,U2,U3)     Green
+    VMLAL.S16  Q13, D20, D6[2]         @ Q13:  -88*(U0,U1,U2,U3) - 183*(V0,V1,V2,V3)
+    VMULL.S16  Q14, D22, D6[3]         @ Q14:  454*(U0,U1,U2,U3)     Blue
 
-	LDRB	r11,[r2], #1		@ r11 = u1 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v1 = *v_ptr++
-	LDR	r7, [r14,r7, LSL #2]	@ r7  = y1 = y_table[y1]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u1 = u_table[u1]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v1 = v_table[v1]
-	ADD	r7, r7, r5, LSR #DITH2
-	ADD	r7, r7, r11
-	ADD	r7, r7, r12		@ r7 = y0 + u0 + v0 + dither2
+    /*-------------------------------------------------------------------------
+     *  Add bias
+     * ------------------------------------------------------------------------ */
+    VADD.S32  Q12, Q0                  @ Q12 add Red   bias -45824
+    VADD.S32  Q13, Q1                  @ Q13 add Green bias  34816
+    VADD.S32  Q14, Q2                  @ Q14 add Blue  bias -57984
 
-	ANDS	r12,r7, r5
-	TSTEQ	r6, r5
-	BNE	fix001
-return001:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	AND	r7, r4, r7, LSR #3
-	ORR	r7, r7, r7, LSR #16
-	STRH	r7, [r0], #2
-	ADDS	r8, r8, #2<<16
-	BLT	xloop00
-	MOVS	r8, r8, LSL #16		@ Clear the top 16 bits of r8
-	MOV	r8, r8, LSR #16		@ If the C bit is clear we still have
-	BCC	trail_pix00		@ 1 more pixel to do
-trail_pix00ret:
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r7, [r13,#11*4]		@ r7 = y_span
-	LDR	r12,[r13,#12*4]		@ r12= uv_stride
-	LDR	r6, [r13,#13*4]		@ r6 = dst_span
-	SUB	r0, r0, r11,LSL #1
-	ADD	r1, r1, r7
-	ADD	r0, r0, r6
-	SUB	r1, r1, r11
-	SUB	r2, r2, r11
-	SUB	r3, r3, r11
-	ADD	r2, r2, r12
-	ADD	r3, r3, r12
+    /*-------------------------------------------------------------------------
+     *  Calculate Red, Green, Blue
+     * ------------------------------------------------------------------------ */
+    VMLAL.S16  Q12, D18, D7[0]         @ Q12: R0, R1, R2, R3 in 32-bit Q8 format
+    VMLAL.S16  Q13, D18, D7[0]         @ Q13: G0, G1, G2, G3 in 32-bit Q8 format
+    VMLAL.S16  Q14, D18, D7[0]         @ Q14: B0, B1, B2, B3 in 32-bit Q8 format
 
-	SUBS	r8, r8, #1
-	BEQ	end0
+    /*-------------------------------------------------------------------------
+     *  Right shift eight bits with rounding
+     * ------------------------------------------------------------------------ */
+    VSHRN.S32   D18 , Q12, #8          @ D18: R0, R1, R2, R3 in 16-bit Q0 format
+    VSHRN.S32   D20 , Q13, #8          @ D20: G0, G1, G2, G3 in 16-bit Q0 format
+    VSHRN.S32   D22,  Q14, #8          @ D22: B0, B1, B2, B3 in 16-bit Q0 format
 
-	@ Now we do the second row
-	SUB	r8, r8, r11,LSL #16	@ r8 = height-(width<<16)
-	ADDS	r8, r8, #1<<16		@ if (width == 1)
-	BGE	trail_pix01		@    just do 1 column
-xloop01:
-	LDRB	r7, [r1], #1		@ r6  = y2 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u2 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v2 = *v_ptr++
-	LDR	r7, [r14,r7, LSL #2]	@ r6  = y2 = y_table[y2]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u2 = u_table[u2]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v2 = v_table[v2]
-	ADD	r7, r7, r5, LSR #DITH1
-	ADD	r7, r7, r5, LSR #DITH2
-	ADD	r7, r7, r11
-	ADD	r7, r7, r12		@ r7 = y2 + u2 + v2 + dither3
+    /*-------------------------------------------------------------------------
+     *  Done with the first 4 elements, continue on the next 4 elements
+     * ------------------------------------------------------------------------ */
 
-	LDRB	r6, [r1], #1		@ r6  = y3 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u3 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v3 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y3 = y_table[y1]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u3 = u_table[u1]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v3 = v_table[v1]
-	ADD	r6, r6, r5, LSR #DITH1
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6 = y3 + u3 + v3 + dither1
+    /*-------------------------------------------------------------------------
+     *  Multiply contribution from chrominance, results are in 32-bit
+     * ------------------------------------------------------------------------ */
+    VMULL.S16  Q12, D21, D6[0]         @ Q12:  359*(V0,V1,V2,V3)     Red
+    VMULL.S16  Q13, D23, D6[1]         @ Q13:  -88*(U0,U1,U2,U3)     Green
+    VMLAL.S16  Q13, D21, D6[2]         @ Q13:  -88*(U0,U1,U2,U3) - 183*(V0,V1,V2,V3)
+    VMULL.S16  Q14, D23, D6[3]         @ Q14:  454*(U0,U1,U2,U3)     Blue
 
-	ANDS	r12,r7, r5
-	TSTEQ	r6, r5
-	BNE	fix002
-return002:
-	AND	r7, r4, r7, LSR #3
-	ORR	r7, r7, r7, LSR #16
-	STRH	r7, [r0], #2
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	ADDS	r8, r8, #2<<16
-	BLT	xloop01
-	MOVS	r8, r8, LSL #16		@ Clear the top 16 bits of r8
-	MOV	r8, r8, LSR #16		@ If the C bit is clear we still have
-	BCC	trail_pix01		@ 1 more pixel to do
-trail_pix01ret:
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r7, [r13,#11*4]		@ r7 = y_span
-	LDR	r12,[r13,#12*4]		@ r12= uv_stride
-	LDR	r6, [r13,#13*4]		@ r6 = dst_span
-	SUB	r0, r0, r11,LSL #1
-	ADD	r1, r1, r7
-	ADD	r0, r0, r6
-	SUB	r1, r1, r11
-	SUB	r2, r2, r11
-	SUB	r3, r3, r11
-	ADD	r2, r2, r12
-	ADD	r3, r3, r12
+    /*-------------------------------------------------------------------------
+     *  Add bias
+     * ------------------------------------------------------------------------ */
+    VADD.S32  Q12, Q0                  @ Q12 add Red   bias -45824
+    VADD.S32  Q13, Q1                  @ Q13 add Green bias  34816
+    VADD.S32  Q14, Q2                  @ Q14 add Blue  bias -57984
 
-	SUBS	r8, r8, #1
-	BNE	yloop0
-end0:
-	LDMFD	r13!,{r4-r11,pc}
-trail_pix00:
-	@ We have a single extra pixel to do
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u0 = u_table[u]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v0 = v_table[v]
-	@ Stall on Xscale
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6  = y0 + uv
-	ANDS	r12,r6, r5
-	BNE	fix003
-return003:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	B	trail_pix00ret
-trail_pix01:
-	@ We have a single extra pixel to do
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u0 = u_table[u]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v0 = v_table[v]
-	ADD	r6, r6, r5, LSR #DITH1
-	ADD	r6, r6, r5, LSR #DITH2
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6  = y0 + uv + dither3
+    /*-------------------------------------------------------------------------
+     *  Calculate Red, Green, Blue
+     * ------------------------------------------------------------------------ */
+    VMLAL.S16  Q12, D19, D7[0]         @ Q12: R0, R1, R2, R3 in 32-bit Q8 format
+    VMLAL.S16  Q13, D19, D7[0]         @ Q13: G0, G1, G2, G3 in 32-bit Q8 format
+    VMLAL.S16  Q14, D19, D7[0]         @ Q14: B0, B1, B2, B3 in 32-bit Q8 format
 
-	ANDS	r12,r6, r5
-	BNE	fix004
-return004:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	B	trail_pix01ret
+    /*-------------------------------------------------------------------------
+     *  Right shift eight bits with rounding
+     * ------------------------------------------------------------------------ */
+    VSHRN.S32   D19 , Q12, #8          @ D18: R0, R1, R2, R3 in 16-bit Q0 format
+    VSHRN.S32   D21 , Q13, #8          @ D20: G0, G1, G2, G3 in 16-bit Q0 format
+    VSHRN.S32   D23,  Q14, #8          @ D22: B0, B1, B2, B3 in 16-bit Q0 format
 
-	LDMFD	r13!,{r4-r11,pc}
+    /*-------------------------------------------------------------------------
+     *  Clamp the value to be within [0~255]
+     * ------------------------------------------------------------------------ */
+    VMAX.S16  Q9, Q9, Q4               @ if Q9 <   0, Q9 =   0
+    VMIN.S16  Q9, Q9, Q5               @ if Q9 > 255, Q9 = 255
+    VQMOVUN.S16  D28, Q9               @ store Red to D28, narrow the value from int16 to int8
 
-fix001:
-	@ r7 and r6 are the values, at least one of which has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r7, r7, r12		@ r7 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r7, LSR #1	@ r12 = .o......o......o......
-	ADD	r7, r7, r12,LSR #8	@ r7  = fixed value
+    VMAX.S16  Q10, Q10, Q4             @ if Q10 <   0, Q10 =   0
+    VMIN.S16  Q10, Q10, Q5             @ if Q10 > 255, Q10 = 255
+    VQMOVUN.S16   D27, Q10             @ store Green to D27, narrow the value from int16 to int8
 
-	AND	r12, r6, r5		@ r12 = .S......S......S......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return001
-fix002:
-	@ r7 and r6 are the values, at least one of which has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r7, r7, r12		@ r7 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r7, LSR #1	@ r12 = .o......o......o......
-	ADD	r7, r7, r12,LSR #8	@ r7  = fixed value
+    VMAX.S16  Q11, Q11, Q4             @ if Q11 <   0, Q11 =   0
+    VMIN.S16  Q11, Q11, Q5             @ if Q11 > 255, Q11 = 255
+    VQMOVUN.S16   D26, Q11             @ store Blue to D26, narrow the value from int16 to int8.
 
-	AND	r12, r6, r5		@ r12 = .S......S......S......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS..SSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS..SSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return002
-fix003:
-	@ r6 is the value, which has has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return003
-fix004:
-	@ r6 is the value, which has has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return004
-@------------------------------------------------------------------------
-asm2:
-	@  Dither: 2 0
-	@          1 3
-yloop2:
-	SUB	r8, r8, r11,LSL #16	@ r8 = height-(width<<16)
-	ADDS	r8, r8, #1<<16		@ if (width == 1)
-	BGE	trail_pix20		@    just do 1 column
-xloop20:
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u  = u_table[u0]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v  = v_table[v0]
-	LDRB	r7, [r1], #1		@ r7  = y1 = *y_ptr++
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12
+    /*-------------------------------------------------------------------------
+     *  D27:  3 bits of Green + 5 bits of Blue
+     *  D28:  5 bits of Red   + 3 bits of Green
+     * ------------------------------------------------------------------------ */
+    VSRI.8   D28, D27, #5              @ right shift G by 5 and insert to R
+    VSHL.U8  D27, D27, #3              @ left  shift G by 3
+    VSRI.8   D27, D26, #3              @ right shift B by 3 and insert to G
 
-	LDRB	r11,[r2], #1		@ r11 = u1 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v1 = *v_ptr++
-	LDR	r7, [r14,r7, LSL #2]	@ r7  = y1 = y_table[y1]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u1 = u_table[u1]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v1 = v_table[v1]
-	ADD	r6, r6, r5, LSR #DITH2	@ r6 = y0 + u0 + v0 + dither2
-	ADD	r7, r7, r11
-	ADD	r7, r7, r12
+    SUBS length, length, #8            @ check if the length is less than 8
 
-	ANDS	r12,r7, r5
-	TSTEQ	r6, r5
-	BNE	fix201
-return201:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	AND	r7, r4, r7, LSR #3
-	ORR	r7, r7, r7, LSR #16
-	STRH	r7, [r0], #2
-	ADDS	r8, r8, #2<<16
-	BLT	xloop20
-	MOVS	r8, r8, LSL #16		@ Clear the top 16 bits of r8
-	MOV	r8, r8, LSR #16		@ If the C bit is clear we still have
-	BCC	trail_pix20		@ 1 more pixel to do
-trail_pix20ret:
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r7, [r13,#11*4]		@ r7 = y_span
-	LDR	r12,[r13,#12*4]		@ r12= uv_stride
-	LDR	r6, [r13,#13*4]		@ r6 = dst_span
-	SUB	r0, r0, r11,LSL #1
-	ADD	r1, r1, r7
-	ADD	r0, r0, r6
-	SUB	r1, r1, r11
-	SUB	r2, r2, r11
-	SUB	r3, r3, r11
-	ADD	r2, r2, r12
-	ADD	r3, r3, r12
+    BMI  trailing_yvup2rgb565          @ jump to trailing processing if remaining length is less than 8
 
-	SUBS	r8, r8, #1
-	BEQ	end2
+    VST2.U8  {D27, D28}, [p_rgb]!      @ vector store Red, Green, Blue to destination
+                                       @ Blue at LSB
 
-	@ Now we do the second row
-	SUB	r8, r8, r11,LSL #16	@ r8 = height-(width<<16)
-	ADDS	r8, r8, #1<<16		@ if (width == 1)
-	BGE	trail_pix21		@    just do 1 column
-xloop21:
-	LDRB	r7, [r1], #1		@ r6  = y2 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u2 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v2 = *v_ptr++
-	LDR	r7, [r14,r7, LSL #2]	@ r6  = y2 = y_table[y2]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u2 = u_table[u2]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v2 = v_table[v2]
-	ADD	r7, r7, r5, LSR #DITH1
-	ADD	r7, r7, r11
-	ADD	r7, r7, r12		@ r7 = y2 + u2 + v2 + dither1
+    BHI loop_yvup2rgb565               @ loop if more than 8 pixels left
 
-	LDRB	r6, [r1], #1		@ r6  = y3 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u3 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v3 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y3 = y_table[y1]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u3 = u_table[u1]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v3 = v_table[v1]
-	ADD	r6, r6, r5, LSR #DITH1
-	ADD	r6, r6, r5, LSR #DITH2
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6 = y3 + u3 + v3 + dither3
+    BEQ  end_yvup2rgb565               @ done if exactly 8 pixel processed in the loop
 
-	ANDS	r12,r7, r5
-	TSTEQ	r6, r5
-	BNE	fix202
-return202:
-	AND	r7, r4, r7, LSR #3
-	ORR	r7, r7, r7, LSR #16
-	STRH	r7, [r0], #2
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	ADDS	r8, r8, #2<<16
-	BLT	xloop21
-	MOVS	r8, r8, LSL #16		@ Clear the top 16 bits of r8
-	MOV	r8, r8, LSR #16		@ If the C bit is clear we still have
-	BCC	trail_pix21		@ 1 more pixel to do
-trail_pix21ret:
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r7, [r13,#11*4]		@ r7 = y_span
-	LDR	r12,[r13,#12*4]		@ r12= uv_stride
-	LDR	r6, [r13,#13*4]		@ r6 = dst_span
-	SUB	r0, r0, r11,LSL #1
-	ADD	r1, r1, r7
-	ADD	r0, r0, r6
-	SUB	r1, r1, r11
-	SUB	r2, r2, r11
-	SUB	r3, r3, r11
-	ADD	r2, r2, r12
-	ADD	r3, r3, r12
 
-	SUBS	r8, r8, #1
-	BNE	yloop2
-end2:
-	LDMFD	r13!,{r4-r11,pc}
-trail_pix20:
-	@ We have a single extra pixel to do
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u0 = u_table[u]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v0 = v_table[v]
-	ADD	r6, r6, r5, LSR #DITH2
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6  = y0 + uv + dither2
-	ANDS	r12,r6, r5
-	BNE	fix203
-return203:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	B	trail_pix20ret
-trail_pix21:
-	@ We have a single extra pixel to do
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u0 = u_table[u]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v0 = v_table[v]
-	ADD	r6, r6, r5, LSR #DITH1
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6  = y0 + uv + dither1
+trailing_yvup2rgb565:
+    /*-------------------------------------------------------------------------
+     *  There are from 1 ~ 7 pixels left in the trailing part.
+     *  First adding 7 to the length so the length would be from 0 ~ 6.
+     *  eg: 1 pixel left in the trailing part, so 1-8+7 = 0.
+     *  Then save 1 pixel unconditionally since at least 1 pixels left in the
+     *  trailing part.
+     * ------------------------------------------------------------------------ */
+    ADDS length, length, #7            @ there are 7 or less in the trailing part
 
-	ANDS	r12,r6, r5
-	BNE	fix204
-return204:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	B	trail_pix21ret
+    VST2.U8 {D27[0], D28[0]}, [p_rgb]! @ at least 1 pixel left in the trailing part
+    BEQ  end_yvup2rgb565               @ done if 0 pixel left
 
-	LDMFD	r13!,{r4-r11,pc}
+    SUBS length, length, #1            @ update length counter
+    VST2.U8 {D27[1], D28[1]}, [p_rgb]! @ store one more pixel
+    BEQ  end_yvup2rgb565               @ done if 0 pixel left
 
-fix201:
-	@ r7 and r6 are the values, at least one of which has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r7, r7, r12		@ r7 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r7, LSR #1	@ r12 = .o......o......o......
-	ADD	r7, r7, r12,LSR #8	@ r7  = fixed value
+    SUBS length, length, #1            @ update length counter
+    VST2.U8 {D27[2], D28[2]}, [p_rgb]! @ store one more pixel
+    BEQ  end_yvup2rgb565               @ done if 0 pixel left
 
-	AND	r12, r6, r5		@ r12 = .S......S......S......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return201
-fix202:
-	@ r7 and r6 are the values, at least one of which has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r7, r7, r12		@ r7 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r7, LSR #1	@ r12 = .o......o......o......
-	ADD	r7, r7, r12,LSR #8	@ r7  = fixed value
+    SUBS length, length, #1            @ update length counter
+    VST2.U8 {D27[3], D28[3]}, [p_rgb]! @ store one more pixel
+    BEQ  end_yvup2rgb565               @ done if 0 pixel left
 
-	AND	r12, r6, r5		@ r12 = .S......S......S......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS..SSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS..SSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return202
-fix203:
-	@ r6 is the value, which has has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return203
-fix204:
-	@ r6 is the value, which has has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return204
-@------------------------------------------------------------------------
-asm3:
-	@  Dither: 3 1
-	@          0 2
-yloop3:
-	SUB	r8, r8, r11,LSL #16	@ r8 = height-(width<<16)
-	ADDS	r8, r8, #1<<16		@ if (width == 1)
-	BGE	trail_pix30		@    just do 1 column
-xloop30:
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u  = u_table[u0]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v  = v_table[v0]
-	ADD	r6, r6, r5, LSR #DITH2
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12
-	ADD	r6, r6, r5, LSR #DITH1	@ r6 = y0 + u0 + v0 + dither3
+    SUBS length, length, #1            @ update length counter
+    VST2.U8 {D27[4], D28[4]}, [p_rgb]! @ store one more pixel
+    BEQ  end_yvup2rgb565               @ done if 0 pixel left
 
-	LDRB	r7, [r1], #1		@ r7  = y1 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u1 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v1 = *v_ptr++
-	LDR	r7, [r14,r7, LSL #2]	@ r7  = y1 = y_table[y1]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u1 = u_table[u1]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v1 = v_table[v1]
-	ADD	r7, r7, r5, LSR #DITH1	@ r7 = y1 + u1 + v1 + dither1
-	ADD	r7, r7, r11
-	ADD	r7, r7, r12
+    SUBS length, length, #1            @ update length counter
+    VST2.U8 {D27[5], D28[5]}, [p_rgb]! @ store one more pixel
+    BEQ  end_yvup2rgb565               @ done if 0 pixel left
 
-	ANDS	r12,r7, r5
-	TSTEQ	r6, r5
-	BNE	fix301
-return301:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	AND	r7, r4, r7, LSR #3
-	ORR	r7, r7, r7, LSR #16
-	STRH	r7, [r0], #2
-	ADDS	r8, r8, #2<<16
-	BLT	xloop30
-	MOVS	r8, r8, LSL #16		@ Clear the top 16 bits of r8
-	MOV	r8, r8, LSR #16		@ If the C bit is clear we still have
-	BCC	trail_pix30		@ 1 more pixel to do
-trail_pix30ret:
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r7, [r13,#11*4]		@ r7 = y_span
-	LDR	r12,[r13,#12*4]		@ r12= uv_stride
-	LDR	r6, [r13,#13*4]		@ r6 = dst_span
-	SUB	r0, r0, r11,LSL #1
-	ADD	r1, r1, r7
-	ADD	r0, r0, r6
-	SUB	r1, r1, r11
-	SUB	r2, r2, r11
-	SUB	r3, r3, r11
-	ADD	r2, r2, r12
-	ADD	r3, r3, r12
+    SUBS length, length, #1            @ update length counter
+    VST2.U8 {D27[6], D28[6]}, [p_rgb]! @ store one more pixel
 
-	SUBS	r8, r8, #1
-	BEQ	end3
+end_yvup2rgb565:
+    LDMFD SP!, {PC}
 
-	@ Now we do the second row
-	SUB	r8, r8, r11,LSL #16	@ r8 = height-(width<<16)
-	ADDS	r8, r8, #1<<16		@ if (width == 1)
-	BGE	trail_pix31		@    just do 1 column
-xloop31:
-	LDRB	r7, [r1], #1		@ r6  = y2 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u2 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v2 = *v_ptr++
-	LDR	r7, [r14,r7, LSL #2]	@ r6  = y2 = y_table[y2]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u2 = u_table[u2]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v2 = v_table[v2]
-	LDRB	r6, [r1], #1		@ r6  = y3 = *y_ptr++
-	ADD	r7, r7, r11
-	ADD	r7, r7, r12		@ r7 = y2 + u2 + v2
+                                       @ end of yvup2rgb565
 
-	LDRB	r11,[r2], #1		@ r11 = u3 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v3 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y3 = y_table[y1]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u3 = u_table[u1]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v3 = v_table[v1]
-	ADD	r6, r6, r5, LSR #DITH2
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6 = y3 + u3 + v3 + dither2
+constants:
+    .hword (COEFF_V_RED),  (COEFF_U_GREEN), (COEFF_V_GREEN), (COEFF_U_BLUE) @   359  | -88   |  -183  | 454
+    .hword (COEFF_Y),      (COEFF_0),       (COEFF_255)    , (COEFF_0)      @   256  |   0   |   255  |  0
+    .word  (COEFF_BIAS_R), (COEFF_BIAS_G),  (COEFF_BIAS_B)                  @ -45824 | 34816 | -57984 |  X
 
-	ANDS	r12,r7, r5
-	TSTEQ	r6, r5
-	BNE	fix302
-return302:
-	AND	r7, r4, r7, LSR #3
-	ORR	r7, r7, r7, LSR #16
-	STRH	r7, [r0], #2
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	ADDS	r8, r8, #2<<16
-	BLT	xloop31
-	MOVS	r8, r8, LSL #16		@ Clear the top 16 bits of r8
-	MOV	r8, r8, LSR #16		@ If the C bit is clear we still have
-	BCC	trail_pix31		@ 1 more pixel to do
-trail_pix31ret:
-	LDR	r11,[r13,#9*4]		@ r11= width
-	LDR	r7, [r13,#11*4]		@ r7 = y_span
-	LDR	r12,[r13,#12*4]		@ r12= uv_stride
-	LDR	r6, [r13,#13*4]		@ r6 = dst_span
-	SUB	r0, r0, r11,LSL #1
-	ADD	r1, r1, r7
-	ADD	r0, r0, r6
-	SUB	r1, r1, r11
-	SUB	r2, r2, r11
-	SUB	r3, r3, r11
-	ADD	r2, r2, r12
-	ADD	r3, r3, r12
-
-	SUBS	r8, r8, #1
-	BNE	yloop3
-end3:
-	LDMFD	r13!,{r4-r11,pc}
-trail_pix30:
-	@ We have a single extra pixel to do
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u0 = u_table[u]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v0 = v_table[v]
-	ADD	r6, r6, r5, LSR #DITH1
-	ADD	r6, r6, r5, LSR #DITH2
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6  = y0 + uv + dither3
-	ANDS	r12,r6, r5
-	BNE	fix303
-return303:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	B	trail_pix30ret
-trail_pix31:
-	@ We have a single extra pixel to do
-	LDRB	r6, [r1], #1		@ r6  = y0 = *y_ptr++
-	LDRB	r11,[r2], #1		@ r11 = u0 = *u_ptr++
-	LDRB	r12,[r3], #1		@ r12 = v0 = *v_ptr++
-	LDR	r6, [r14,r6, LSL #2]	@ r6  = y0 = y_table[y0]
-	LDR	r11,[r9, r11,LSL #2]	@ r11 = u0 = u_table[u]
-	LDR	r12,[r10,r12,LSL #2]	@ r12 = v0 = v_table[v]
-	@ Stall on Xscale
-	ADD	r6, r6, r11
-	ADD	r6, r6, r12		@ r6  = y0 + uv
-
-	ANDS	r12,r6, r5
-	BNE	fix304
-return304:
-	AND	r6, r4, r6, LSR #3
-	ORR	r6, r6, r6, LSR #16
-	STRH	r6, [r0], #2
-	B	trail_pix31ret
-
-	LDMFD	r13!,{r4-r11,pc}
-
-fix301:
-	@ r7 and r6 are the values, at least one of which has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r7, r7, r12		@ r7 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r7, LSR #1	@ r12 = .o......o......o......
-	ADD	r7, r7, r12,LSR #8	@ r7  = fixed value
-
-	AND	r12, r6, r5		@ r12 = .S......S......S......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return301
-fix302:
-	@ r7 and r6 are the values, at least one of which has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r7, r7, r12		@ r7 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r7, LSR #1	@ r12 = .o......o......o......
-	ADD	r7, r7, r12,LSR #8	@ r7  = fixed value
-
-	AND	r12, r6, r5		@ r12 = .S......S......S......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS..SSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS..SSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return302
-fix303:
-	@ r6 is the value, which has has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return303
-fix304:
-	@ r6 is the value, which has has overflowed
-	@ r12 = r7 & mask = .s......s......s......
-	SUB	r12,r12,r12,LSR #8	@ r12 = ..SSSSSS.SSSSSS.SSSSSS
-	ORR	r6, r6, r12		@ r6 |= ..SSSSSS.SSSSSS.SSSSSS
-	BIC	r12,r5, r6, LSR #1	@ r12 = .o......o......o......
-	ADD	r6, r6, r12,LSR #8	@ r6  = fixed value
-	B	return304
-
-	@ END
+.end

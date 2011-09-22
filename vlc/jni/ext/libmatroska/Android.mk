@@ -30,5 +30,9 @@ LOCAL_SRC_FILES := \
     src/KaxTracks.cpp \
     src/KaxVersion.cpp
 
+LOCAL_STATIC_LIBRARIES += libebml
+
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
+
 include $(BUILD_STATIC_LIBRARY)
 

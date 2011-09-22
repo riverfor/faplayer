@@ -2,7 +2,7 @@
  * nsc.c: NSC file demux and encoding decoder
  *****************************************************************************
  * Copyright (C) 2005 the VideoLAN team
- * $Id: da1f9f6bf7cdc79a1b90494f219a3be0fd7f23ab $
+ * $Id: c7b4ed6049a2bd37918080bb88a0e67764e8908f $
  *
  * Authors: Jon Lech Johansen <jon@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videolan dot org>
@@ -77,21 +77,21 @@ static int load_byte( unsigned char encoding_type,
 
     if( encoding_type == 1 )
     {
-        if( isxdigit( **input ) == 0 )
+        if( isxdigit( (unsigned char)**input ) == 0 )
             return -1;
 
-        if( isdigit( **input ) == 0 )
-            *output = (toupper( **input ) - 7) * 16;
+        if( isdigit( (unsigned char)**input ) == 0 )
+            *output = (toupper( (unsigned char)**input ) - 7) * 16;
         else
             *output = **input * 16;
 
         (*input)++;
 
-        if( isxdigit( **input ) == 0 )
+        if( isxdigit( (unsigned char)**input ) == 0 )
             return -1;
 
-        if( isdigit( **input ) == 0 )
-            *output |= toupper( **input ) - 0x37;
+        if( isdigit( (unsigned char)**input ) == 0 )
+            *output |= toupper( (unsigned char)**input ) - 0x37;
         else
             *output |= **input - 0x30;
 

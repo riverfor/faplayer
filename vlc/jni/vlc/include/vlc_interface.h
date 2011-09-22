@@ -4,7 +4,7 @@
  * interface, such as message output.
  *****************************************************************************
  * Copyright (C) 1999, 2000 the VideoLAN team
- * $Id: 55cebe696eb4d6c8c11564101eff9c45f16a5b73 $
+ * $Id: 2e02f6baa604a903f50ffda753df8ba00758c1bb $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -114,7 +114,7 @@ VLC_API void libvlc_Quit( libvlc_int_t * );
  *****************************************************************************/
 #if defined( WIN32 ) && !defined( UNDER_CE )
 #    define CONSOLE_INTRO_MSG \
-         if( !getenv( "PWD" ) || !getenv( "PS1" ) ) /* detect cygwin shell */ \
+         if( !getenv( "PWD" ) ) /* detect Cygwin shell or Wine */ \
          { \
          AllocConsole(); \
          freopen( "CONOUT$", "w", stdout ); \
@@ -128,7 +128,7 @@ VLC_API void libvlc_Quit( libvlc_int_t * );
                              "directory where you installed VLC and run " \
                              "\"vlc -I qt\"\n") )
 #else
-#    define CONSOLE_INTRO_MSG
+#    define CONSOLE_INTRO_MSG (void)0
 #endif
 
 /* Interface dialog ids for dialog providers */

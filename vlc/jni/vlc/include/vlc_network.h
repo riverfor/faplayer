@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2002-2005 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: b2a2a619a7a36db0dae312e03de7f3c9e923bff7 $
+ * $Id: 96216f86fe64cdffc44e83819a6b11b253d41ab6 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir@via.ecp.fr>
@@ -126,13 +126,13 @@ static inline int net_ConnectUDP (vlc_object_t *obj, const char *host, int port,
     return net_ConnectDgram (obj, host, port, hlim, IPPROTO_UDP);
 }
 
-VLC_API int net_OpenDgram( vlc_object_t *p_this, const char *psz_bind, int i_bind, const char *psz_server, int i_server, int family, int proto );
-#define net_OpenDgram( a, b, c, d, e, g, h ) \
-        net_OpenDgram(VLC_OBJECT(a), b, c, d, e, g, h)
+VLC_API int net_OpenDgram( vlc_object_t *p_this, const char *psz_bind, int i_bind, const char *psz_server, int i_server, int proto );
+#define net_OpenDgram( a, b, c, d, e, g ) \
+        net_OpenDgram(VLC_OBJECT(a), b, c, d, e, g)
 
 static inline int net_ListenUDP1 (vlc_object_t *obj, const char *host, int port)
 {
-    return net_OpenDgram (obj, host, port, NULL, 0, 0, IPPROTO_UDP);
+    return net_OpenDgram (obj, host, port, NULL, 0, IPPROTO_UDP);
 }
 
 VLC_API void net_ListenClose( int *fd );

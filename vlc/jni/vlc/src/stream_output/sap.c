@@ -2,7 +2,7 @@
  * sap.c : SAP announce handler
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: 4a3b7c258cb480747eb5a134712011edaae39fa2 $
+ * $Id: 181a423aa5bdf94e1cdde0df34922a184216a8fd $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Rémi Denis-Courmont <rem # videolan.org>
@@ -170,6 +170,7 @@ static void AddressDestroy (sap_address_t *addr)
  * \param p_this the SAP Handler object
  * \return nothing
  */
+VLC_NORETURN
 static void *RunThread (void *self)
 {
     sap_address_t *addr = self;

@@ -2,7 +2,7 @@
  * variables.c: test for variables
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 15e7fc5d0df865ecee61f43b1601b1ec3ad618e1 $
+ * $Id: e710e1ed6fdb7463f1c713f00bc67d60ed899a94 $
  *
  * Authors: Rémi Duraffort <ivoire@videolan.org>
  *
@@ -24,7 +24,7 @@
 #include <limits.h>
 
 #include "../../libvlc/test.h"
-#include <../src/control/libvlc_internal.h>
+#include "../lib/libvlc_internal.h"
 
 const char *psz_var_name[] = { "a", "abcdef", "abcdefg", "abc123", "abc-123", "é€!!" };
 const int i_var_count = 6;

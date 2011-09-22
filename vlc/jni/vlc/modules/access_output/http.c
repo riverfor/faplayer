@@ -2,7 +2,7 @@
  * http.c
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: b1f85f5889eab863f4038107f881048c5c22e33b $
+ * $Id: 43aa6c5fce6f1c4a39da464d0184f2ed6fae3b9a $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Jon Lech Johansen <jon@nanocrew.net>
@@ -71,22 +71,6 @@ static void Close( vlc_object_t * );
 #define MIME_TEXT N_("Mime")
 #define MIME_LONGTEXT N_("MIME returned by the server (autodetected " \
                         "if not specified)." )
-#define CERT_TEXT N_( "Certificate file" )
-#define CERT_LONGTEXT N_( "Path to the x509 PEM certificate file that will "\
-                          "be used for HTTPS." )
-#define KEY_TEXT N_( "Private key file" )
-#define KEY_LONGTEXT N_( "Path to the x509 PEM private key file that will " \
-                         "be used for HTTPS. Leave " \
-                         "empty if you don't have one." )
-#define CA_TEXT N_( "Root CA file" )
-#define CA_LONGTEXT N_( "Path to the x509 PEM trusted root CA certificates " \
-                        "(certificate authority) file that will be used for " \
-                        "HTTPS. Leave empty if you " \
-                        "don't have one." )
-#define CRL_TEXT N_( "CRL file" )
-#define CRL_LONGTEXT N_( "Path to the x509 PEM Certificates Revocation List " \
-                         "file that will be used for SSL. Leave " \
-                         "empty if you don't have one." )
 #define BONJOUR_TEXT N_( "Advertise with Bonjour")
 #define BONJOUR_LONGTEXT N_( "Advertise the stream with the Bonjour protocol." )
 
@@ -104,14 +88,6 @@ vlc_module_begin ()
                   PASS_TEXT, PASS_LONGTEXT, true )
     add_string( SOUT_CFG_PREFIX "mime", "",
                 MIME_TEXT, MIME_LONGTEXT, true )
-    add_loadfile( SOUT_CFG_PREFIX "cert", "vlc.pem",
-                CERT_TEXT, CERT_LONGTEXT, true )
-    add_loadfile( SOUT_CFG_PREFIX "key", NULL,
-                KEY_TEXT, KEY_LONGTEXT, true )
-    add_loadfile( SOUT_CFG_PREFIX "ca", NULL,
-                CA_TEXT, CA_LONGTEXT, true )
-    add_loadfile( SOUT_CFG_PREFIX "crl", NULL,
-                CRL_TEXT, CRL_LONGTEXT, true )
 #if 0 //def HAVE_AVAHI_CLIENT
     add_bool( SOUT_CFG_PREFIX "bonjour", false,
               BONJOUR_TEXT, BONJOUR_LONGTEXT, true);
@@ -124,7 +100,7 @@ vlc_module_end ()
  * Exported prototypes
  *****************************************************************************/
 static const char *const ppsz_sout_options[] = {
-    "user", "pwd", "mime", "cert", "key", "ca", "crl", NULL
+    "user", "pwd", "mime", NULL
 };
 
 static ssize_t Write( sout_access_out_t *, block_t * );
@@ -158,16 +134,10 @@ static int Open( vlc_object_t *p_this )
     sout_access_out_t       *p_access = (sout_access_out_t*)p_this;
     sout_access_out_sys_t   *p_sys;
 
-    char                *psz_parser;
-
-    char                *psz_bind_addr;
-    int                 i_bind_port;
     char                *psz_file_name;
     char                *psz_user;
     char                *psz_pwd;
     char                *psz_mime;
-    char                *psz_cert = NULL, *psz_key = NULL, *psz_ca = NULL,
-                        *psz_crl = NULL;
 
     if( !( p_sys = p_access->p_sys =
                 malloc( sizeof( sout_access_out_sys_t ) ) ) )
@@ -175,78 +145,26 @@ static int Open( vlc_object_t *p_this )
 
     config_ChainParse( p_access, SOUT_CFG_PREFIX, ppsz_sout_options, p_access->p_cfg );
 
-    /* p_access->psz_path = "hostname:port/filename" */
-    psz_bind_addr = strdup( p_access->psz_path );
-
-    i_bind_port = 0;
-
-    psz_parser = strchr( psz_bind_addr, '/' );
+    /* Skip everything before / - backward compatibiltiy with VLC 1.1 */
+    const char *psz_parser = strchr( p_access->psz_path, '/' );
     if( psz_parser )
-    {
         psz_file_name = strdup( psz_parser );
-        *psz_parser = '\0';
-    }
     else
         psz_file_name = strdup( "/" );
 
-    if( psz_bind_addr[0] == '[' )
-    {
-        psz_bind_addr++;
-        psz_parser = strstr( psz_bind_addr, "]:" );
-        if( psz_parser )
-        {
-            *psz_parser = '\0';
-            i_bind_port = atoi( psz_parser + 2 );
-        }
-        psz_parser = psz_bind_addr - 1;
-    }
-    else
-    {
-        psz_parser = strrchr( psz_bind_addr, ':' );
-        if( psz_parser )
-        {
-            *psz_parser = '\0';
-            i_bind_port = atoi( psz_parser + 1 );
-        }
-        psz_parser = psz_bind_addr;
-    }
-
-    /* SSL support */
+    /* TLS support */
     if( p_access->psz_access && !strcmp( p_access->psz_access, "https" ) )
-    {
-        psz_cert = var_CreateGetNonEmptyString( p_this, SOUT_CFG_PREFIX"cert" );
-        psz_key = var_CreateGetNonEmptyString( p_this, SOUT_CFG_PREFIX"key" );
-        psz_ca = var_CreateGetNonEmptyString( p_this, SOUT_CFG_PREFIX"ca" );
-        psz_crl = var_CreateGetNonEmptyString( p_this, SOUT_CFG_PREFIX"crl" );
-
-        if( i_bind_port <= 0 )
-            i_bind_port = DEFAULT_SSL_PORT;
-    }
+        p_sys->p_httpd_host = vlc_https_HostNew( VLC_OBJECT(p_access) );
     else
-    {
-        if( i_bind_port <= 0 )
-            i_bind_port = DEFAULT_PORT;
-    }
-
-    p_sys->p_httpd_host = httpd_TLSHostNew( VLC_OBJECT(p_access),
-                                            psz_bind_addr, i_bind_port,
-                                            psz_cert, psz_key, psz_ca,
-                                            psz_crl );
-    free( psz_cert );
-    free( psz_key );
-    free( psz_ca );
-    free( psz_crl );
+        p_sys->p_httpd_host = vlc_http_HostNew( VLC_OBJECT(p_access) );
 
     if( p_sys->p_httpd_host == NULL )
     {
-        msg_Err( p_access, "cannot listen on %s port %d",
-                 psz_bind_addr, i_bind_port );
+        msg_Err( p_access, "cannot start HTTP server" );
         free( psz_file_name );
-        free( psz_parser );
         free( p_sys );
         return VLC_EGENERIC;
     }
-    free( psz_parser );
 
     psz_user = var_GetNonEmptyString( p_access, SOUT_CFG_PREFIX "user" );
     psz_pwd = var_GetNonEmptyString( p_access, SOUT_CFG_PREFIX "pwd" );

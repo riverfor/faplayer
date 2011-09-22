@@ -2,7 +2,7 @@
  * fspanel.m: MacOS X full screen panel
  *****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: 6a3748d036dfefabbab0400d98243bee33cda102 $
+ * $Id: 9cb5fd4824826a83b544ed2484217135283d8fa4 $
  *
  * Authors: Jérôme Decoodt <djc at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -27,10 +27,10 @@
  *****************************************************************************/
 #import "intf.h"
 #import "CoreInteraction.h"
-#import "vout.h"
+#import "MainWindow.h"
 #import "misc.h"
 #import "fspanel.h"
-#import "MainWindow.h"
+#import "CompatibilityFixes.h"
 
 @interface VLCFSPanel ()
 - (void)hideMouse;
@@ -50,7 +50,9 @@
     [win setOpaque:NO];
     [win setHasShadow: NO];
     [win setBackgroundColor:[NSColor clearColor]];
-    
+    if (OSX_LION)
+        [win setCollectionBehavior: NSWindowCollectionBehaviorFullScreenAuxiliary];
+
     /* let the window sit on top of everything else and start out completely transparent */
     [win setLevel:NSModalPanelWindowLevel];
     i_device = 0;
@@ -179,14 +181,8 @@
 
 - (void)setActive:(id)noData
 {
-    if( [[VLCCoreInteraction sharedInstance] voutView] != nil )
-    {
-        if( [[[VLCCoreInteraction sharedInstance] voutView] isFullscreen] )
-        {
-            b_nonActive = NO;
-            [self fadeIn];
-        }
-    }
+    b_nonActive = NO;
+    [[VLCMain sharedInstance] showFullscreenController];
 }
 
 /* This routine is called repeatedly to fade in the window */
@@ -248,8 +244,13 @@
 - (void)mouseExited:(NSEvent *)theEvent
 {
     /* give up our focus, so the vout may show us again without letting the user clicking it */
-    if( [[[VLCCoreInteraction sharedInstance] voutView] isFullscreen] )
-        [[[[VLCCoreInteraction sharedInstance] voutView] window] makeKeyWindow];
+    vout_thread_t *p_vout = getVout();
+    if (p_vout)
+    {
+        if (var_GetBool( p_vout, "fullscreen" ))
+            [[[[VLCMainWindow sharedInstance] videoView] window] makeKeyWindow];
+        vlc_object_release( p_vout );
+    }
 }
 
 - (void)hideMouse
@@ -423,7 +424,7 @@
     addButton( o_play, @"fs_play"          , @"fs_play_highlight"         , 267, 10, play );
     addButton( o_fwd, @"fs_forward"       , @"fs_forward_highlight"      , 313, 14, forward );
     addButton( o_next, @"fs_skip_next"     , @"fs_skip_next_highlight"    , 365, 15, next );
-    addButton( o_fullscreen, @"fs_exit_fullscreen", @"fs_exit_fullscreen_hightlight", 507, 13, windowAction );
+    addButton( o_fullscreen, @"fs_exit_fullscreen", @"fs_exit_fullscreen_hightlight", 507, 13, toggleFullscreen );
 /*
     addButton( o_button, @"image (off state)", @"image (on state)", 38, 51, something );
  */
@@ -431,7 +432,7 @@
     /* time slider */
     s_rc = [self frame];
     s_rc.origin.x = 15;
-    s_rc.origin.y = 53;
+    s_rc.origin.y = 55;
     s_rc.size.width = 518;
     s_rc.size.height = 9;
     o_fs_timeSlider = [[VLCFSTimeSlider alloc] initWithFrame: s_rc];
@@ -446,7 +447,7 @@
     /* volume slider */
     s_rc = [self frame];
     s_rc.origin.x = 26;
-    s_rc.origin.y = 17.5;
+    s_rc.origin.y = 18.5;
     s_rc.size.width = 95;
     s_rc.size.height = 10;
     o_fs_volumeSlider = [[VLCFSVolumeSlider alloc] initWithFrame: s_rc];
@@ -525,37 +526,47 @@
 
 - (IBAction)play:(id)sender
 {
-    [[[VLCMain sharedInstance] controls] play: sender];
+    [[VLCCoreInteraction sharedInstance] play];
 }
 
 - (IBAction)forward:(id)sender
 {
-    [[[VLCMain sharedInstance] controls] forward: sender];
+    [[VLCCoreInteraction sharedInstance] forward];
 }
 
 - (IBAction)backward:(id)sender
 {
-    [[[VLCMain sharedInstance] controls] backward: sender];
+    [[VLCCoreInteraction sharedInstance] backward];
 }
 
 - (IBAction)prev:(id)sender
 {
-    [[[VLCMain sharedInstance] controls] prev: sender];
+    [[VLCCoreInteraction sharedInstance] previous];
 }
 
 - (IBAction)next:(id)sender
 {
-    [[[VLCMain sharedInstance] controls] next: sender];
+    [[VLCCoreInteraction sharedInstance] next];
 }
 
-- (IBAction)windowAction:(id)sender
+- (IBAction)toggleFullscreen:(id)sender
 {
-    [[[VLCMain sharedInstance] controls] windowAction: sender];
+    [[VLCCoreInteraction sharedInstance] toggleFullscreen];
 }
 
 - (IBAction)fsTimeSliderUpdate:(id)sender
 {
-    [[VLCMainWindow sharedInstance] updateTimeSlider];
+    input_thread_t * p_input;
+    p_input = pl_CurrentInput( VLCIntf );
+    if( p_input != NULL )
+    {
+        vlc_value_t pos;
+
+        pos.f_float = [o_fs_timeSlider floatValue] / 10000.;
+        var_Set( p_input, "position", pos );
+        vlc_object_release( p_input );
+    }
+    [[VLCMain sharedInstance] updatePlaybackPosition];
 }
 
 - (IBAction)fsVolumeSliderUpdate:(id)sender

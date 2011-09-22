@@ -2,7 +2,7 @@
  * libvlc_media_list.h:  libvlc_media_list API
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: 66ccca69a1c920f5c541c6af5296760084fd3d53 $
+ * $Id: 58c0fd4c55cfb40c3451d67244555ee83dade2e9 $
  *
  * Authors: Pierre d'Herbemont
  *
@@ -140,6 +140,8 @@ void libvlc_media_list_player_pause(libvlc_media_list_player_t * p_mlp);
  *
  * \param p_mlp media list player instance
  * \return true for playing and false for not playing
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int
     libvlc_media_list_player_is_playing( libvlc_media_list_player_t * p_mlp );

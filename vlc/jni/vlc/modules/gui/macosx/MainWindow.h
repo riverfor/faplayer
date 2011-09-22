@@ -2,7 +2,7 @@
  * MainWindow.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2011 VideoLAN
- * $Id: 682f02370caedaf261f2aae9f4ee22f76a6ddc4c $
+ * $Id: 396f2425b3178dfa409b969923ae0f01faeac52c $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *          Jon Lech Johansen <jon-vl@nanocrew.net>
@@ -25,9 +25,13 @@
  *****************************************************************************/
 
 #import <Cocoa/Cocoa.h>
+#import "CompatibilityFixes.h"
+#import "PXSourceList.h"
 #import <vlc_input.h>
+#import "misc.h"
+#import "fspanel.h"
 
-@interface VLCMainWindow : NSWindow {
+@interface VLCMainWindow : NSWindow <PXSourceListDataSource, PXSourceListDelegate, NSWindowDelegate, NSAnimationDelegate> {
     IBOutlet id o_play_btn;
     IBOutlet id o_bwd_btn;
     IBOutlet id o_fwd_btn;
@@ -43,6 +47,7 @@
     IBOutlet id o_volume_down_btn;
     IBOutlet id o_volume_up_btn;
     IBOutlet id o_time_sld;
+    IBOutlet id o_time_sld_fancygradient_view;
     IBOutlet id o_time_fld;
     IBOutlet id o_progress_bar;
     IBOutlet id o_bottombar_view;
@@ -52,10 +57,21 @@
     // TODO Playlist table, additional ui stuff at the top of the window
     IBOutlet id o_playlist_table;
     IBOutlet id o_video_view;
+    IBOutlet id o_split_view;
+    IBOutlet id o_left_split_view;
+    IBOutlet id o_right_split_view;
+    IBOutlet id o_sidebar_view;
+    IBOutlet id o_chosen_category_lbl;
+
+    IBOutlet id o_dropzone_view;
+    IBOutlet id o_dropzone_btn;
+    IBOutlet id o_dropzone_lbl;
+
+    IBOutlet VLCFSPanel *o_fspanel;
 
     BOOL b_dark_interface;
+    BOOL b_nativeFullscreenMode;
     BOOL b_video_playback_enabled;
-    BOOL b_time_remaining;
     int i_lastShownVolume;
     BOOL b_mute;
     input_state_e cachedInputState;
@@ -74,6 +90,28 @@
     NSImage * o_shuffle_pressed_img;
     NSImage * o_shuffle_on_img;
     NSImage * o_shuffle_on_pressed_img;
+
+    NSTimeInterval last_fwd_event;
+    NSTimeInterval last_bwd_event;
+    BOOL just_triggered_next;
+    BOOL just_triggered_previous;
+    NSMutableArray *o_sidebaritems;
+
+    VLCWindow       * o_nonembedded_window;
+    BOOL              b_nonembedded;
+
+    VLCWindow       * o_fullscreen_window;
+    NSViewAnimation * o_fullscreen_anim1;
+    NSViewAnimation * o_fullscreen_anim2;
+    NSViewAnimation * o_makekey_anim;
+    NSView          * o_temp_view;
+    /* set to yes if we are fullscreen and all animations are over */
+    BOOL              b_fullscreen;
+    BOOL              b_window_is_invisible;
+    NSRecursiveLock * o_animation_lock;
+    NSSize nativeVideoSize;
+
+    NSInteger i_originalLevel;
 }
 + (VLCMainWindow *)sharedInstance;
 
@@ -85,17 +123,50 @@
 - (IBAction)repeat:(id)sender;
 - (IBAction)shuffle:(id)sender;
 - (IBAction)timeSliderAction:(id)sender;
-- (IBAction)timeFieldWasClicked:(id)sender;
 - (IBAction)volumeAction:(id)sender;
 - (IBAction)effects:(id)sender;
 - (IBAction)fullscreen:(id)sender;
+- (IBAction)dropzoneButtonAction:(id)sender;
 
-- (id)videoView;
-- (void)setVideoplayEnabled:(BOOL)b_value;
+- (void)showDropZone;
+- (void)hideDropZone;
 - (void)updateTimeSlider;
 - (void)updateVolumeSlider;
 - (void)updateWindow;
+- (void)updateName;
 - (void)setPause;
 - (void)setPlay;
+- (void)setRepeatOne;
+- (void)setRepeatAll;
+- (void)setRepeatOff;
+- (void)setShuffle;
+
+- (void)drawFancyGradientEffectForTimeSlider;
+
+- (id)videoView;
+- (void)setVideoplayEnabled;
+- (void)resizeWindow;
+- (void)setNativeVideoSize:(NSSize)size;
+
+/* fullscreen handling */
+- (void)showFullscreenController;
+- (BOOL)isFullscreen;
+- (void)lockFullscreenAnimation;
+- (void)unlockFullscreenAnimation;
+- (void)enterFullscreen;
+- (void)leaveFullscreen;
+- (void)leaveFullscreenAndFadeOut: (BOOL)fadeout;
+- (void)hasEndedFullscreen;
+- (void)hasBecomeFullscreen;
+- (void)setFrameOnMainThread:(NSData*)packedargs;
 
 @end
+
+@interface VLCProgressBarGradientEffect : NSView {
+    NSImage * o_time_sld_gradient_left_img;
+    NSImage * o_time_sld_gradient_middle_img;
+    NSImage * o_time_sld_gradient_right_img;
+}
+- (void)loadImagesInDarkStyle:(BOOL)b_value;
+@end
+

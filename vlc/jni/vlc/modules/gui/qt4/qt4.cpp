@@ -2,7 +2,7 @@
  * qt4.cpp : QT4 interface
  ****************************************************************************
  * Copyright © 2006-2009 the VideoLAN team
- * $Id: a6587e176d966fac647e88dd8397953c0ca7b52c $
+ * $Id: 8f3cd21ddd4865b6f1cf1106d7af91efc7259784 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -92,7 +92,7 @@ static void ShowDialog   ( intf_thread_t *, int, int, intf_dialog_args_t * );
 
 #define TITLE_TEXT N_( "Show playing item name in window title" )
 #define TITLE_LONGTEXT N_( "Show the name of the song or video in the " \
-                           "controler window title." )
+                           "controller window title." )
 
 #define NOTIFICATION_TEXT N_( "Show notification popup on track change" )
 #define NOTIFICATION_LONGTEXT N_( \
@@ -158,7 +158,7 @@ static void ShowDialog   ( intf_thread_t *, int, int, intf_dialog_args_t * );
 #define QT_NATIVEOPEN_TEXT N_( "Embed the file browser in open dialog" )
 
 #define FULLSCREEN_NUMBER_TEXT N_( "Define which screen fullscreen goes" )
-#define FULLSCREEN_NUMBER_LONGTEXT N_( "Screennumber of fullscreen, instead of" \
+#define FULLSCREEN_NUMBER_LONGTEXT N_( "Screennumber of fullscreen, instead of " \
                                        "same screen where interface is" )
 
 #define QT_AUTOLOAD_EXTENSIONS_TEXT N_( "Load extensions on startup" )
@@ -322,7 +322,7 @@ static bool active = false;
 
 #ifdef Q_WS_MAC
 /* Used to abort the app.exec() on OSX after libvlc_Quit is called */
-#include "../../../src/control/libvlc_internal.h" /* libvlc_SetExitHandler */
+#include "../../../lib/libvlc_internal.h" /* libvlc_SetExitHandler */
 static void Abort( void *obj )
 {
     QVLCApp::triggerQuit();

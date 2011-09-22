@@ -2,7 +2,7 @@
  * open.h: Open dialogues for VLC's MacOS X port
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: f671c6074f4bb0ecab421bb0ca274a13539707fb $
+ * $Id: d766e6010baa805f87c49bd3b14c12c31d8bd8d6 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -60,7 +60,6 @@
     IBOutlet id o_file_subtitles_icon_well;
 
     /* open disc */
-    IBOutlet id o_disc_icon_well;
     IBOutlet id o_disc_selector_pop;
 
     IBOutlet id o_disc_nodisc_view;
@@ -137,7 +136,9 @@
     IBOutlet id o_file_sub_ckbox;
     IBOutlet id o_file_sub_btn_settings;
     IBOutlet id o_file_sub_sheet;
-    IBOutlet id o_file_sub_path;
+    IBOutlet id o_file_sub_path_lbl;
+    IBOutlet id o_file_sub_path_fld;
+    IBOutlet id o_file_sub_icon_view;
     IBOutlet id o_file_sub_btn_browse;
     IBOutlet id o_file_sub_override;
     IBOutlet id o_file_sub_delay;
@@ -214,11 +215,13 @@
     BOOL b_autoplay;
     BOOL b_nodvdmenus;
     id o_currentOpticalMediaView;
+    id o_currentOpticalMediaIconView;
     NSMutableArray *o_opticalDevices;
     NSMutableArray *o_specialMediaFolders;
     NSString *o_file_path;
     id o_currentCaptureView;
     NSString *o_file_slave_path;
+    NSString *o_sub_path;
     NSString *o_mrl;
     intf_thread_t * p_intf;
 }

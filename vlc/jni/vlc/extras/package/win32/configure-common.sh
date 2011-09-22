@@ -1,7 +1,7 @@
 [ -z $CONTRIB_DIR ] && export CONTRIB_DIR=/usr/win32
 
   $CONFIGURE \
-      --with-contrib \
+      --with-contrib="$CONTRIB_DIR" \
       --enable-update-check \
       --enable-lua \
       --enable-faad \
@@ -25,6 +25,7 @@
       --disable-portaudio \
       --disable-sdl \
       --enable-qt4 \
+      --enable-skins2 \
       --enable-sse --enable-mmx \
       --enable-libcddb \
       --enable-zvbi --disable-telx \

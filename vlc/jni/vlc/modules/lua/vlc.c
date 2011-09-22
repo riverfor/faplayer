@@ -2,7 +2,7 @@
  * vlc.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: 88e23e8a01d12b134be36a99102bec4a5e303e3f $
+ * $Id: fd90076fc4194b0b8c718af7bbbc4be1a8e35fba $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -59,12 +59,6 @@
 
 #define CONFIG_TEXT N_("Lua interface configuration")
 #define CONFIG_LONGTEXT N_("Lua interface configuration string. Format is: '[\"<interface module name>\"] = { <option> = <value>, ...}, ...'.")
-#define HOST_TEXT N_( "Host address" )
-#define HOST_LONGTEXT N_( \
-    "Address and port the HTTP interface will listen on. It defaults to " \
-    "all network interfaces (0.0.0.0)." \
-    " If you want the HTTP interface to be available only on the local " \
-    "machine, enter 127.0.0.1" )
 #define SRC_TEXT N_( "Source directory" )
 #define SRC_LONGTEXT N_( "Source directory" )
 #define INDEX_TEXT N_( "Directory index" )
@@ -108,7 +102,6 @@ vlc_module_begin ()
 
     add_submodule ()
         set_section( N_("Lua HTTP"), 0 )
-            add_string ( "http-host", NULL, HOST_TEXT, HOST_LONGTEXT, true )
             add_string ( "http-src",  NULL, SRC_TEXT,  SRC_LONGTEXT,  true )
             add_bool   ( "http-index", false, INDEX_TEXT, INDEX_LONGTEXT, true )
         set_capability( "interface", 0 )

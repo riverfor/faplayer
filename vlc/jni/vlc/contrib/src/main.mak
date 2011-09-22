@@ -129,7 +129,7 @@ ifeq ($(shell curl --version >/dev/null 2>&1 || echo FAIL),)
 download = curl -f -L -- "$(1)" > "$@"
 else ifeq ($(shell wget --version >/dev/null 2>&1 || echo FAIL),)
 download = rm -f $@.tmp && \
-	wget --passive -c -p -O $@.tmp $(1) && \
+	wget --passive -c -p -O $@.tmp "$(1)" && \
 	touch $@.tmp && \
 	mv $@.tmp $@
 else
@@ -147,18 +147,6 @@ endif
 #
 # Common helpers
 #
-HOSTVARS := CPPFLAGS="$(CPPFLAGS)"
-HOSTVARS += CC="$(CC)"
-HOSTVARS += CFLAGS="$(CFLAGS)"
-HOSTVARS += CXX="$(CXX)"
-HOSTVARS += CXXFLAGS="$(CXXFLAGS)"
-HOSTVARS += LD="$(LD)"
-HOSTVARS += LDFLAGS="$(LDFLAGS)"
-HOSTVARS += AR="$(AR)"
-HOSTVARS += RANLIB="$(RANLIB)"
-HOSTVARS += STRIP="$(STRIP)"
-HOSTVARS_AR += AR="$(AR) rcvu"
-
 HOSTCONF := --prefix="$(PREFIX)"
 HOSTCONF += --build="$(BUILD)" --host="$(HOST)" --target="$(HOST)"
 HOSTCONF += --program-prefix=""
@@ -166,9 +154,26 @@ HOSTCONF += --program-prefix=""
 HOSTCONF += --enable-static --disable-shared --disable-dependency-tracking
 ifdef HAVE_WIN32
 HOSTCONF += --without-pic
+PIC :=
 else
 HOSTCONF += --with-pic
+PIC := -fPIC
 endif
+
+HOSTTOOLS := \
+	CC="$(CC)" CXX="$(CXX)" LD="$(LD)" \
+	AR="$(AR)" RANLIB="$(RANLIB)" STRIP="$(STRIP)" \
+	PATH="$(PREFIX)/bin:$(PATH)"
+HOSTVARS := $(HOSTTOOLS) \
+	CPPFLAGS="$(CPPFLAGS)" \
+	CFLAGS="$(CFLAGS)" \
+	CXXFLAGS="$(CXXFLAGS)" \
+	LDFLAGS="$(LDFLAGS)"
+HOSTVARS_PIC := $(HOSTTOOLS) \
+	CPPFLAGS="$(CPPFLAGS) $(PIC)" \
+	CFLAGS="$(CFLAGS) $(PIC)" \
+	CXXFLAGS="$(CXXFLAGS) $(PIC)" \
+	LDFLAGS="$(LDFLAGS)"
 
 download_git = \
 	rm -Rf $(@:.tar.xz=) && \

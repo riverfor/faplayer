@@ -2,7 +2,7 @@
  * qt4.hpp : QT4 interface
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: d587657fd6cf9e1e7002e3a1d3aaa478eca5f0c8 $
+ * $Id: 8ea99e09fe9ef8ce5dfc180ccdf35325e4445b84 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -91,10 +91,10 @@ struct intf_sys_t
 #define qtu( i ) ((i).toUtf8().constData())
 
 #define CONNECT( a, b, c, d ) \
-        connect( a, SIGNAL( b ), c, SLOT(d) )
+        connect( a, SIGNAL(b), c, SLOT(d) )
 #define DCONNECT( a, b, c, d ) \
-        connect( a, SIGNAL( b ), c, SLOT(d), Qt::DirectConnection )
-#define BUTTONACT( b, a ) connect( b, SIGNAL( clicked() ), this, SLOT(a) )
+        connect( a, SIGNAL(b), c, SLOT(d), Qt::DirectConnection )
+#define BUTTONACT( b, a ) connect( b, SIGNAL(clicked()), this, SLOT(a) )
 
 #define BUTTON_SET( button, text, tooltip )  \
     button->setText( text );                 \
@@ -116,6 +116,9 @@ struct intf_sys_t
 
 #define TOGGLEV( x ) { if( x->isVisible() ) x->hide();          \
             else  x->show(); }
+
+/* for widgets which must not follow the RTL auto layout changes */
+#define RTL_UNAFFECTED_WIDGET setLayoutDirection( Qt::LeftToRight );
 
 #define getSettings() p_intf->p_sys->mainSettings
 

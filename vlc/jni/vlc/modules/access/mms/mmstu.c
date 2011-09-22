@@ -2,7 +2,7 @@
  * mms.c: MMS access plug-in
  *****************************************************************************
  * Copyright (C) 2001, 2002 the VideoLAN team
- * $Id: 4ea1cca33589e705d1a544c1043679fa157a5370 $
+ * $Id: 15586cc9a48145a6008bef926ca12851695f20a7 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -253,7 +253,8 @@ static int Control( access_t *p_access, int i_query, va_list args )
         /* */
         case ACCESS_GET_PTS_DELAY:
             pi_64 = (int64_t*)va_arg( args, int64_t * );
-            *pi_64 = var_GetInteger( p_access, "mms-caching" ) * INT64_C(1000);
+            *pi_64 = INT64_C(1000)
+                   * var_InheritInteger( p_access, "network-caching" );
             break;
 
         case ACCESS_GET_PRIVATE_ID_STATE:
@@ -1554,6 +1555,7 @@ static int mms_HeaderMediaRead( access_t *p_access, int i_type )
     return -1;
 }
 
+VLC_NORETURN
 static void *KeepAliveThread( void *p_data )
 {
     access_t *p_access = p_data;

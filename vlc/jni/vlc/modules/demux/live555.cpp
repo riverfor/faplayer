@@ -2,7 +2,7 @@
  * live555.cpp : LIVE555 Streaming Media support.
  *****************************************************************************
  * Copyright (C) 2003-2007 the VideoLAN team
- * $Id: 9fc040bcedec6153e0eed2f63ae9d3cdb9c61c08 $
+ * $Id: a3357d696e98b492ebbe5683445273e9902bf5aa $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Derk-Jan Hartman <hartman at videolan. org>
@@ -73,18 +73,13 @@ using namespace std;
 static int  Open ( vlc_object_t * );
 static void Close( vlc_object_t * );
 
-#define CACHING_TEXT N_("Caching value (ms)")
-#define CACHING_LONGTEXT N_( \
-    "Allows you to modify the default caching value for RTSP streams. This " \
-    "value should be set in millisecond units." )
-
 #define KASENNA_TEXT N_( "Kasenna RTSP dialect")
 #define KASENNA_LONGTEXT N_( "Kasenna servers use an old and nonstandard " \
     "dialect of RTSP. With this parameter VLC will try this dialect, but "\
     "then it cannot connect to normal RTSP servers." )
 
 #define WMSERVER_TEXT N_("WMServer RTSP dialect")
-#define WMSERVER_LONGTEXT N_("WMServer uses an unstandard dialect " \
+#define WMSERVER_LONGTEXT N_("WMServer uses a nonstandard dialect " \
     "of RTSP. Selecting this parameter will tell VLC to assume some " \
     "options contrary to RFC 2326 guidelines.")
 
@@ -128,9 +123,6 @@ vlc_module_begin ()
                   N_("HTTP tunnel port"),
                   N_("Port to use for tunneling the RTSP/RTP over HTTP."),
                   true )
-        add_integer("rtsp-caching", 4 * DEFAULT_PTS_DELAY / 1000,
-                    CACHING_TEXT, CACHING_LONGTEXT, true )
-            change_safe()
         add_bool(   "rtsp-kasenna", false, KASENNA_TEXT,
                     KASENNA_LONGTEXT, true )
             change_safe()
@@ -292,7 +284,6 @@ static int  Open ( vlc_object_t *p_this )
             return VLC_EGENERIC;
         }
     }
-    var_Create( p_demux, "rtsp-caching", VLC_VAR_INTEGER|VLC_VAR_DOINHERIT );
 
     p_demux->pf_demux  = Demux;
     p_demux->pf_control= Control;
@@ -1552,7 +1543,8 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 
         case DEMUX_GET_PTS_DELAY:
             pi64 = (int64_t*)va_arg( args, int64_t * );
-            *pi64 = var_GetInteger( p_demux, "rtsp-caching" ) * 1000;
+            *pi64 = INT64_C(1000)
+                  * var_GetInteger( p_demux, "network-caching" );
             return VLC_SUCCESS;
 
         default:
@@ -1645,7 +1637,6 @@ static block_t *StreamParseAsf( demux_t *p_demux, live_track_t *tk,
         unsigned i_length_offset = (p_data[1] << 16) |
                                    (p_data[2] <<  8) |
                                    (p_data[3]      );
-        bool b_key = i_flags & 0x80;
         bool b_length = i_flags & 0x40;
         bool b_relative_ts = i_flags & 0x20;
         bool b_duration = i_flags & 0x10;
@@ -1963,6 +1954,7 @@ static void TaskInterruptData( void *p_private )
 /*****************************************************************************
  *
  *****************************************************************************/
+VLC_NORETURN
 static void* TimeoutPrevention( void *p_data )
 {
     timeout_thread_t *p_timeout = (timeout_thread_t *)p_data;

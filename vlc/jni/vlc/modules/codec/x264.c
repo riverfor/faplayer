@@ -2,7 +2,7 @@
  * x264.c: h264 video encoder
  *****************************************************************************
  * Copyright (C) 2004-2010 the VideoLAN team
- * $Id: 68d3dca49f7aa2043e9361dc8ed46ea063bf938d $
+ * $Id: 128ccfe0fd839c9e76ea73f940229e15f1bf3c86 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Ilkka Ollakka <ileoo (at)videolan org>
@@ -135,7 +135,7 @@ static void Close( vlc_object_t * );
 #define FILTER_LONGTEXT N_( "Loop filter AlphaC0 and Beta parameters. " \
     "Range -6 to 6 for both alpha and beta parameters. -6 means light " \
     "filter, 6 means strong.")
- 
+
 #define LEVEL_TEXT N_("H.264 level")
 #define LEVEL_LONGTEXT N_( "Specify H.264 level (as defined by Annex A " \
     "of the standard). Levels are not enforced; it's up to the user to select " \
@@ -143,7 +143,7 @@ static void Close( vlc_object_t * );
     "(10 to 51 is also allowed). Set to 0 for letting x264 set level.")
 
 #define PROFILE_TEXT N_("H.264 profile")
-#define PROFILE_LONGTEXT N_("Specify H.264 profile which limits are enforced over" \
+#define PROFILE_LONGTEXT N_("Specify H.264 profile which limits are enforced over " \
         "other settings" )
 
 /* In order to play an interlaced output stream encoded by x264, a decoder needs
@@ -159,7 +159,7 @@ static void Close( vlc_object_t * );
 #define MBTREE_LONGTEXT N_("You can disable use of Macroblock-tree on ratecontrol")
 
 #define SLICE_COUNT N_("Force number of slices per frame")
-#define SLICE_COUNT_LONGTEXT N_("Force rectangular slices and is overridden by other slicing optinos")
+#define SLICE_COUNT_LONGTEXT N_("Force rectangular slices and is overridden by other slicing options")
 
 #define SLICE_MAX_SIZE N_("Limit the size of each slice in bytes")
 #define SLICE_MAX_SIZE_LONGTEXT N_("Sets a maximum slice size in bytes, Includes NAL overhead in size")
@@ -209,7 +209,7 @@ static void Close( vlc_object_t * );
 
 #define AQ_STRENGTH_TEXT N_("Strength of AQ")
 #define AQ_STRENGTH_LONGTEXT N_("Strength to reduce blocking and blurring in flat\n"\
-        "and textured areas, default 1.0 recommented to be between 0..2\n"\
+        "and textured areas, default 1.0 recommended to be between 0..2\n"\
         " - 0.5: weak AQ\n"\
         " - 1.5: strong AQ")
 
@@ -238,7 +238,7 @@ static void Close( vlc_object_t * );
     "before curve compression. Temporally blurs complexity.")
 
 #define QBLUR_TEXT N_("Reduce fluctuations in QP")
-#define QBLUR_LONGTEXT N_( "This reduces the fluctations in QP " \
+#define QBLUR_LONGTEXT N_( "This reduces the fluctuations in QP " \
     "after curve compression. Temporally blurs quants.")
 
 /* Analysis */
@@ -852,7 +852,7 @@ static int  Open ( vlc_object_t *p_this )
     else if ( i_val )
         p_sys->param.rc.i_vbv_max_bitrate = i_val;
 
-    
+
     if( !var_GetBool( p_enc, SOUT_CFG_PREFIX "cabac" ) )
         p_sys->param.b_cabac = var_GetBool( p_enc, SOUT_CFG_PREFIX "cabac" );
 
@@ -1041,7 +1041,7 @@ static int  Open ( vlc_object_t *p_this )
 
     p_sys->param.analyse.b_psnr = var_GetBool( p_enc, SOUT_CFG_PREFIX "psnr" );
     p_sys->param.analyse.b_ssim = var_GetBool( p_enc, SOUT_CFG_PREFIX "ssim" );
-    if( !var_GetBool( p_enc, SOUT_CFG_PREFIX "weightb" ) ) 
+    if( !var_GetBool( p_enc, SOUT_CFG_PREFIX "weightb" ) )
        p_sys->param.analyse.b_weighted_bipred = var_GetBool( p_enc,
                                     SOUT_CFG_PREFIX "weightb" );
     if( var_GetInteger( p_enc, SOUT_CFG_PREFIX "weightp" ) != 2 )
@@ -1239,7 +1239,7 @@ static int  Open ( vlc_object_t *p_this )
         p_sys->param.rc.b_stat_read = i_val & 2;
     }
 
-    if( !var_GetBool( p_enc, SOUT_CFG_PREFIX "mbtree" ) ) 
+    if( !var_GetBool( p_enc, SOUT_CFG_PREFIX "mbtree" ) )
        p_sys->param.rc.b_mb_tree = var_GetBool( p_enc, SOUT_CFG_PREFIX "mbtree" );
 
     /* We need to initialize pthreadw32 before we open the encoder,
@@ -1366,28 +1366,24 @@ static block_t *Encode( encoder_t *p_enc, picture_t *p_pict )
 
 
     /* Get size of block we need */
-    i_out = p_sys->i_sei_size;
     for( i = 0; i < i_nal; i++ )
         i_out += nal[i].i_payload;
 
-    p_block = block_New( p_enc, i_out );
+    p_block = block_New( p_enc, i_out + p_sys->i_sei_size );
     if( !p_block ) return NULL;
 
-    /* copy encoded data directly to block */
-    for( i = 0, i_out = 0; i < i_nal; i++ )
+    unsigned int i_offset = 0;
+    if( unlikely( p_sys->i_sei_size ) )
     {
-        if( p_sys->i_sei_size && nal[i].i_type == NAL_SLICE )
-        {
-            /* insert x264 headers SEI nal before first SLICE nal */
-            memcpy( p_block->p_buffer, p_sys->p_sei, p_sys->i_sei_size );
-            i_out += p_sys->i_sei_size;
-            p_sys->i_sei_size = 0;
-            free( p_sys->p_sei );
-            p_sys->p_sei = NULL;
-        }
-        memcpy( p_block->p_buffer + i_out, nal[i].p_payload, nal[i].i_payload );
-        i_out += nal[i].i_payload;
+       /* insert x264 headers SEI nal into the first picture block at the start */
+       memcpy( p_block->p_buffer, p_sys->p_sei, p_sys->i_sei_size );
+       i_offset = p_sys->i_sei_size;
+       p_sys->i_sei_size = 0;
+       free( p_sys->p_sei );
+       p_sys->p_sei = NULL;
     }
+    /* copy encoded data directly to block */
+    memcpy( p_block->p_buffer + i_offset, nal[0].p_payload, i_out );
 
     if( pic.b_keyframe )
         p_block->i_flags |= BLOCK_FLAG_TYPE_I;

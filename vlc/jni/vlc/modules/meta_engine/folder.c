@@ -2,7 +2,7 @@
  * folder.c
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: 88279db90ae9b8b3470174179021043cd3dd9e21 $
+ * $Id: 46337908c49728e8d524b96397a3de288edac661 $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -114,7 +114,7 @@ static int FindMeta( vlc_object_t *p_this )
         if( asprintf( &filepath, "%s%s", psz_path, filename ) == -1 )
             filepath = NULL;
         free( filebuf );
-        if( unlikely(filepath != NULL) )
+        if( unlikely(filepath == NULL) )
             continue;
 
         struct stat dummy;

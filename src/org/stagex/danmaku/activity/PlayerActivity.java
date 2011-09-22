@@ -57,6 +57,9 @@ public class PlayerActivity extends Activity implements
 	private static final int MEDIA_PLAYER_PROGRESS_UPDATE = 0x4006;
 	private static final int MEDIA_PLAYER_VIDEO_SIZE_CHANGED = 0x4007;
 
+	private static final int USE_DEF_MEDIA_PLAYER = 1;
+	private static final int USE_VLC_MEDIA_PLAYER = 2;
+
 	/* the media player */
 	private AbsMediaPlayer mMediaPlayer = null;
 	/* the message player */
@@ -232,7 +235,8 @@ public class PlayerActivity extends Activity implements
 		mSurfaceHolderVlc.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
-				createMediaPlayer(false, mMediaPath, mSurfaceHolderVlc);
+				createMediaPlayer(AbsMediaPlayer.MEDIA_PLAYER_TYPE_VLC,
+						mMediaPath, mSurfaceHolderVlc);
 			}
 
 			@Override
@@ -256,7 +260,8 @@ public class PlayerActivity extends Activity implements
 		mSurfaceHolderDef.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceCreated(SurfaceHolder holder) {
-				createMediaPlayer(true, mMediaPath, mSurfaceHolderDef);
+				createMediaPlayer(AbsMediaPlayer.MEDIA_PLAYER_TYPE_DEF,
+						mMediaPath, mSurfaceHolderDef);
 			}
 
 			@Override
@@ -378,13 +383,12 @@ public class PlayerActivity extends Activity implements
 		mSurfaceViewVlc.setVisibility(useDefault ? View.GONE : View.VISIBLE);
 	}
 
-	protected void createMediaPlayer(boolean useDefault, String uri,
-			SurfaceHolder holder) {
+	protected void createMediaPlayer(int type, String uri, SurfaceHolder holder) {
 		Log.d(LOGTAG, "createMediaPlayer() " + uri);
 		/* */
 		resetMediaPlayer();
 		/* */
-		mMediaPlayer = AbsMediaPlayer.getMediaPlayer(this, useDefault);
+		mMediaPlayer = AbsMediaPlayer.getMediaPlayer(this, type);
 		mMediaPlayer.setOnBufferingUpdateListener(this);
 		mMediaPlayer.setOnCompletionListener(this);
 		mMediaPlayer.setOnErrorListener(this);

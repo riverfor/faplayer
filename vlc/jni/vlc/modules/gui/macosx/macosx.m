@@ -2,7 +2,7 @@
  * macosx.m: Mac OS X module for vlc
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id: 93615f721f616a437db8c568bfbff859118c842b $
+ * $Id: 1befa97664489f3cf213c00a91b60701e8ecc64e $
  *
  * Authors: Colin Delacroix <colin@zoy.org>
  *          Eugenio Jarosiewicz <ej0@cise.ufl.edu>
@@ -49,9 +49,6 @@ void CloseIntf    ( vlc_object_t * );
 int  WindowOpen   ( vout_window_t *, const vout_window_cfg_t * );
 void WindowClose  ( vout_window_t * );
 
-int  OpenVideoGL  ( vlc_object_t * );
-void CloseVideoGL ( vlc_object_t * );
-
 /*****************************************************************************
  * Module descriptor
  *****************************************************************************/
@@ -64,18 +61,9 @@ void CloseVideoGL ( vlc_object_t * );
 #define OPAQUENESS_LONGTEXT N_( "Set the transparency of the video output. 1 is non-transparent (default) " \
                                 "0 is fully transparent.")
 
-#define STRETCH_TEXT N_("Stretch video to fill window")
-#define STRETCH_LONGTEXT N_("Stretch the video to fill the entire window when "\
-                            "resizing the video instead of keeping the aspect ratio and "\
-                            "displaying black borders.")
-
 #define BLACK_TEXT N_("Black screens in fullscreen")
 #define BLACK_LONGTEXT N_("In fullscreen mode, keep screen where there is no " \
                           "video displayed black" )
-
-#define BACKGROUND_TEXT N_("Use as Desktop Background")
-#define BACKGROUND_LONGTEXT N_("Use the video as the Desktop Background " \
-                               "Desktop icons cannot be interacted with in this mode." )
 
 #define FSPANEL_TEXT N_("Show Fullscreen controller")
 #define FSPANEL_LONGTEXT N_("Shows a lucent controller when moving the mouse " \
@@ -89,10 +77,6 @@ void CloseVideoGL ( vlc_object_t * );
 #define RECENT_ITEMS_LONGTEXT N_("By default, VLC keeps a list of the last 10 items. " \
                                  "This feature can be disabled here.")
 
-#define EQ_KEEP_TEXT N_("Keep current Equalizer settings")
-#define EQ_KEEP_LONGTEXT N_("By default, VLC keeps the last equalizer settings before " \
-                            "termination. This feature can be disabled here.")
-
 #define USE_APPLE_REMOTE_TEXT N_("Control playback with the Apple Remote")
 #define USE_APPLE_REMOTE_LONGTEXT N_("By default, VLC can be remotely controlled with the Apple Remote.")
 
@@ -103,6 +87,9 @@ void CloseVideoGL ( vlc_object_t * );
 #define INTERFACE_STYLE_TEXT N_("Run VLC with dark or bright interface style")
 #define INTERFACE_STYLE_LONGTEXT N_("By default, VLC will use the dark interface style.")
 
+#define NATIVE_FULLSCREEN_MODE_ON_LION_TEXT N_("Use the native fullscreen mode on OS X Lion")
+#define NATIVE_FULLSCREEN_MODE_ON_LION_LONGTEXT N_("By default, VLC uses the native fullscreen mode on Mac OS X 10.7 and later. It can also use the custom mode known from previous Mac OS X releases.")
+
 vlc_module_begin ()
     set_description( N_("Mac OS X interface") )
     set_capability( "interface", 200 )
@@ -110,35 +97,24 @@ vlc_module_begin ()
     set_category( CAT_INTERFACE )
     set_subcategory( SUBCAT_INTERFACE_MAIN )
     cannot_unload_broken_library( )
-    add_bool( "macosx-autoplay", true, AUTOPLAY_OSX_TEST, AUTOPLAY_OSX_LONGTEXT,
-              false )
-    add_bool( "macosx-recentitems", true, RECENT_ITEMS_TEXT, RECENT_ITEMS_LONGTEXT,
-              false )
-    add_bool( "macosx-eq-keep", true, EQ_KEEP_TEXT, EQ_KEEP_LONGTEXT,
-              false )
-    add_bool( "macosx-fspanel", true, FSPANEL_TEXT, FSPANEL_LONGTEXT,
-              false )
-    add_bool( "macosx-appleremote", true, USE_APPLE_REMOTE_TEXT, USE_APPLE_REMOTE_LONGTEXT,
-             false )
-    add_bool( "macosx-mediakeys", true, USE_MEDIAKEYS_TEXT, USE_MEDIAKEYS_LONGTEXT,
-             false )
-    add_bool( "macosx-interfacestyle", true, INTERFACE_STYLE_TEXT, INTERFACE_STYLE_LONGTEXT,
-             false )
+    add_bool( "macosx-autoplay", true, AUTOPLAY_OSX_TEST, AUTOPLAY_OSX_LONGTEXT, false )
+    add_bool( "macosx-recentitems", true, RECENT_ITEMS_TEXT, RECENT_ITEMS_LONGTEXT, false )
+    add_bool( "macosx-fspanel", true, FSPANEL_TEXT, FSPANEL_LONGTEXT, false )
+    add_bool( "macosx-appleremote", true, USE_APPLE_REMOTE_TEXT, USE_APPLE_REMOTE_LONGTEXT, false )
+    add_bool( "macosx-mediakeys", true, USE_MEDIAKEYS_TEXT, USE_MEDIAKEYS_LONGTEXT, false )
+    add_bool( "macosx-interfacestyle", true, INTERFACE_STYLE_TEXT, INTERFACE_STYLE_LONGTEXT, false )
+    add_bool( "macosx-nativefullscreenmode", true, NATIVE_FULLSCREEN_MODE_ON_LION_TEXT, NATIVE_FULLSCREEN_MODE_ON_LION_LONGTEXT, false )
+    add_obsolete_bool( "macosx-stretch" ) /* since 1.2.0 */
+    add_obsolete_bool( "macosx-background" ) /* since 1.2.0 */
+    add_obsolete_bool( "macosx-eq-keep" ) /* since 1.2.0 */
 
     add_submodule ()
         set_description( "Mac OS X Video Output Provider" )
         set_capability( "vout window nsobject", 100 )
         set_callbacks( WindowOpen, WindowClose )
 
-        add_integer( "macosx-vdev", 0, VDEV_TEXT, VDEV_LONGTEXT,
-                     false )
-        add_bool( "macosx-stretch", false, STRETCH_TEXT, STRETCH_LONGTEXT,
-                  false )
-        add_float_with_range( "macosx-opaqueness", 1, 0, 1,
-                              OPAQUENESS_TEXT, OPAQUENESS_LONGTEXT, true );
-        add_bool( "macosx-black", true, BLACK_TEXT, BLACK_LONGTEXT,
-                  false )
-        add_bool( "macosx-background", false, BACKGROUND_TEXT, BACKGROUND_LONGTEXT,
-                  false )
+        add_integer( "macosx-vdev", 0, VDEV_TEXT, VDEV_LONGTEXT, false )
+        add_float_with_range( "macosx-opaqueness", 1, 0, 1, OPAQUENESS_TEXT, OPAQUENESS_LONGTEXT, true );
+        add_bool( "macosx-black", true, BLACK_TEXT, BLACK_LONGTEXT, false )
 vlc_module_end ()
 

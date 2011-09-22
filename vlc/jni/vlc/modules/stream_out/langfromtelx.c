@@ -2,7 +2,7 @@
  * langfromtelx.c: dynamic language setting from telx
  *****************************************************************************
  * Copyright (C) 2009, 2011 VideoLAN
- * $Id: bc5871d917335230737c5919718d22fa09c973d0 $
+ * $Id: 8156cea05278b7c97c74f3b6f973b37559a592cf $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -190,7 +190,7 @@ static void SetLanguage( sout_stream_t *p_stream, char *psz_language )
     if ( strncmp( p_sys->psz_language, psz_language, 3 ) )
         msg_Dbg( p_stream, "changing language to %s", psz_language );
 
-    strncpy( p_sys->psz_language, psz_language, 3 );
+    strncpy( p_sys->psz_language, (const char *)psz_language, 3 );
 }
 
 /*****************************************************************************

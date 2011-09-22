@@ -1,8 +1,8 @@
 /*****************************************************************************
- * sepia.c : Sepia video plugin for vlc
+ * subsdelay.c : Subsdelay plugin for vlc
  *****************************************************************************
  * Copyright © 2011 VideoLAN
- * $Id: 18c05c495f49984ff2f234f6b7b947652fe54be0 $
+ * $Id: 974518dce62e7088b34f55f93bb2d4800cc05b03 $
  *
  * Authors: Yuval Tze <yuvaltze@gmail.com>
  *
@@ -287,7 +287,7 @@ vlc_module_begin()
 
         add_integer_with_range( CFG_OVERLAP, 3, 1, 4, OVERLAP_TEXT, OVERLAP_LONGTEXT, false )
 
-        add_integer_with_range( CFG_MIN_ALPHA, 125, 0, 255, MIN_ALPHA_TEXT, MIN_ALPHA_LONGTEXT, false )
+        add_integer_with_range( CFG_MIN_ALPHA, 70, 0, 255, MIN_ALPHA_TEXT, MIN_ALPHA_LONGTEXT, false )
 
         set_section( N_("Overlap fix"), NULL )
 

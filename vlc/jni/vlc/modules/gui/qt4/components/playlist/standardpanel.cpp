@@ -2,7 +2,7 @@
  * standardpanel.cpp : The "standard" playlist panel : just a treeview
  ****************************************************************************
  * Copyright © 2000-2010 VideoLAN
- * $Id: 76d7e25596faba1bb6f51dd59bc9d9b30a4dc4c5 $
+ * $Id: 023ecf07687412b040f116308d23e56dd07a1665 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -188,6 +188,8 @@ void StandardPLPanel::setRoot( playlist_item_t *p_item, bool b )
         currentView->setModel( mlmodel );
     }
     else
+#else
+    Q_UNUSED( b );
 #endif
     {
         msg_Dbg( p_intf, "Normal PL/ML or SD" );
@@ -351,6 +353,7 @@ void StandardPLPanel::changeModel( bool b_ml )
     if( currentView->model() != mod )
         currentView->setModel( mod );
 #else
+    Q_UNUSED( b_ml );
     if( currentView->model() != model )
         currentView->setModel( model );
 #endif
@@ -418,8 +421,10 @@ void StandardPLPanel::cycleViews()
     else if( currentView == treeView )
         showView( LIST_VIEW );
     else if( currentView == listView )
+#ifndef NDEBUG
         showView( PICTUREFLOW_VIEW  );
     else if( currentView == picFlowView )
+#endif
         showView( ICON_VIEW );
     else
         assert( 0 );

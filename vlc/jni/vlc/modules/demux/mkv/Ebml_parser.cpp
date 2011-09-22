@@ -3,7 +3,7 @@
  * EbmlParser for the matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: 8abe76c138cbcb9b0cc664b5d6ed7aae2cf2090c $
+ * $Id: cd81d8de9f14c21e21762372eab3610bb702adcf $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -24,6 +24,7 @@
  *****************************************************************************/
 
 #include "Ebml_parser.hpp"
+#include "stream_io_callback.hpp"
 
 /*****************************************************************************
  * Ebml Stream parser
@@ -77,7 +78,7 @@ EbmlElement* EbmlParser::UnGet( uint64 i_block_pos, uint64 i_cluster_pos )
     }
     m_got = NULL;
     mb_keep = false;
-    if ( m_el[1]->GetElementPosition() == i_cluster_pos )
+    if ( m_el[1] && m_el[1]->GetElementPosition() == i_cluster_pos )
     {
         m_es->I_O().setFilePointer( i_block_pos, seek_beginning );
         return (EbmlMaster*) m_el[1];
@@ -161,8 +162,9 @@ EbmlElement *EbmlParser::Get( void )
         }
         mb_keep = false;
     }
-
-    m_el[mi_level] = m_es->FindNextElement( EBML_CONTEXT(m_el[mi_level - 1]), i_ulev, 0xFFFFFFFFL, mb_dummy != 0, 1 );
+    vlc_stream_io_callback & io_stream = (vlc_stream_io_callback &) m_es->I_O();
+    uint64 i_size = io_stream.toRead();
+    m_el[mi_level] = m_es->FindNextElement( EBML_CONTEXT(m_el[mi_level - 1]), i_ulev, i_size, mb_dummy != 0, 1 );
 //    mi_remain_size[mi_level] = m_el[mi_level]->GetSize();
     if( i_ulev > 0 )
     {

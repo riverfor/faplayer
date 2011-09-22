@@ -20,5 +20,7 @@ LOCAL_SRC_FILES := \
 	liba52/imdct.c \
 	liba52/parse.c
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+
 include $(BUILD_STATIC_LIBRARY)
 

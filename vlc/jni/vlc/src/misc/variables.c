@@ -2,7 +2,7 @@
  * variables.c: routines for object variables handling
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 4e7fe09e28ee8c7c29a9d2984027311e1b7b8507 $
+ * $Id: e3d480e7235983b04c88472f568abb3a30323017 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -42,6 +42,9 @@
 #include <assert.h>
 #include <math.h>
 #include <limits.h>
+#ifdef __GLIBC__
+# include <dlfcn.h>
+#endif
 
 /*****************************************************************************
  * Private types
@@ -167,6 +170,25 @@ static void Destroy( variable_t *p_var )
         free( p_var->choices.p_values );
         free( p_var->choices_text.p_values );
     }
+#if 0 // ndef NDEBUG
+    for (int i = 0; i < p_var->i_entries; i++)
+    {
+        const char *file = "?", *symbol = "?";
+        const void *addr = p_var->p_entries[i].pf_callback;
+# ifdef __GLIBC__
+        Dl_info info;
+
+        if (dladdr (addr, &info))
+        {
+            if (info.dli_fname) file = info.dli_fname;
+            if (info.dli_sname) symbol = info.dli_sname;
+        }
+# endif
+        fprintf (stderr, "Error: callback on \"%s\" dangling %s(%s)[%p]\n",
+                 p_var->psz_name, file, symbol, addr);
+    }
+#endif
+
     free( p_var->psz_name );
     free( p_var->psz_text );
     free( p_var->p_entries );

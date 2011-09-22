@@ -5,7 +5,7 @@
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
  *
- * $Id: 6e10465549ab9496528e9d0527bcd380c8a0a98f $
+ * $Id: 8c3b50b0e9e589c32baadf4661628c86d5fead17 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -289,8 +289,8 @@ void FileOpenPanel::updateMRL()
         mrl.append( " :sub-file=" + colon_escape( ui.subInput->text() ) );
     }
 
-    emit mrlUpdated( fileList, mrl );
     emit methodChanged( "file-caching" );
+    emit mrlUpdated( fileList, mrl );
 }
 
 /* Function called by Open Dialog when clicke on Play/Enqueue */
@@ -494,11 +494,6 @@ void DiscOpenPanel::updateMRL()
         else
             mrl = "dvdsimple://" LOCALHOST + discPath;
 
-        if( !ui.dvdsimple->isChecked() )
-            emit methodChanged( "dvdnav-caching" );
-        else
-            emit methodChanged( "dvdread-caching" );
-
         if ( ui.titleSpin->value() > 0 ) {
             mrl += QString("@%1").arg( ui.titleSpin->value() );
             if ( ui.chapterSpin->value() > 0 ) {
@@ -509,7 +504,6 @@ void DiscOpenPanel::updateMRL()
     /* VCD */
     } else if ( ui.vcdRadioButton->isChecked() ) {
         mrl = "vcd://" LOCALHOST + discPath;
-        emit methodChanged( "vcd-caching" );
 
         if( ui.titleSpin->value() > 0 ) {
             mrl += QString("@E%1").arg( ui.titleSpin->value() );
@@ -518,8 +512,8 @@ void DiscOpenPanel::updateMRL()
     /* CDDA */
     } else {
         mrl = "cdda://" LOCALHOST + discPath;
-        emit methodChanged( "cdda-caching" );
     }
+    emit methodChanged( "disc-caching" );
 
     fileList << mrl; mrl = "";
 
@@ -571,40 +565,50 @@ NetOpenPanel::NetOpenPanel( QWidget *_parent, intf_thread_t *_p_intf ) :
                                 OpenPanel( _parent, _p_intf )
 {
     ui.setupUi( this );
+    CONNECT( ui.urlComboBox, editTextChanged( const QString& ), this, updateMRL());
 
-    /* CONNECTs */
-    CONNECT( ui.urlComboBox->lineEdit(), textChanged( const QString& ), this, updateMRL());
-    CONNECT( ui.urlComboBox, currentIndexChanged( const QString& ), this, updateMRL());
-
+    /* */
     if( var_InheritBool( p_intf, "qt-recentplay" ) )
     {
-        mrlList = new QStringListModel(
-                getSettings()->value( "Open/netMRL" ).toStringList() );
-        ui.urlComboBox->setModel( mrlList );
-        ui.urlComboBox->clearEditText();
-        CONNECT( ui.urlComboBox->lineEdit(), editingFinished(), this, updateModel() );
+        b_recentList = true;
+        ui.urlComboBox->addItems( getSettings()->value( "Open/netMRL" ).toStringList() );
+        ui.urlComboBox->setMaxCount( 10 );
     }
     else
-        mrlList = NULL;
+        b_recentList = false;
 
+    /* Use a simple validator for URLs */
     ui.urlComboBox->setValidator( new UrlValidator( this ) );
     ui.urlComboBox->setFocus();
 }
 
 NetOpenPanel::~NetOpenPanel()
 {
-    if( !mrlList ) return;
+    if( !b_recentList ) return;
 
-    QStringList tempL = mrlList->stringList();
-    while( tempL.size() > 8 ) tempL.removeFirst();
+    /* Create the list with the current items */
+    QStringList mrlList;
+    for( int i = 0; i < ui.urlComboBox->count(); i++ )
+        mrlList << ui.urlComboBox->itemText( i );
 
-    getSettings()->setValue( "Open/netMRL", tempL );
-
-    delete mrlList;
+    /* Clean the list... */
+#if HAS_QT45
+    mrlList.removeDuplicates();
+#endif
+    /* ...and save the 8 last entries */
+    getSettings()->setValue( "Open/netMRL", mrlList );
 }
 
 void NetOpenPanel::clear()
-{}
+{
+    ui.urlComboBox->clear();
+}
+
+void NetOpenPanel::onAccept()
+{
+    if( ui.urlComboBox->findText( ui.urlComboBox->currentText() ) == -1 )
+        ui.urlComboBox->insertItem( 0, ui.urlComboBox->currentText());
+}
 
 void NetOpenPanel::onFocus()
 {
@@ -612,65 +616,18 @@ void NetOpenPanel::onFocus()
     ui.urlComboBox->lineEdit()->selectAll();
 }
 
-static int strcmp_void( const void *k, const void *e )
-{
-    return strcmp( (const char *)k, (const char *)e );
-}
-
 void NetOpenPanel::updateMRL()
 {
-    static const struct caching_map
-    {
-        char proto[6];
-        char caching[6];
-    } schemes[] =
-    {   /* KEEP alphabetical order on first column!! */
-        { "dccp",  "rtp"   },
-        { "ftp",   "ftp"   },
-        { "ftps",  "ftp"   },
-        { "http",  "http"  },
-        { "https", "http"  },
-        { "mms",   "mms"   },
-        { "mmsh",  "mms"   },
-        { "mmst",  "mms"   },
-        { "mmsu",  "mms"   },
-        { "sftp",  "sftp"  },
-        { "smb",   "smb"   },
-        { "rtmp",  "rtmp"  },
-        { "rtp",   "rtp"   },
-        { "rtsp",  "rtsp"  },
-        { "udp",   "udp"   },
-    };
-
     QString url = ui.urlComboBox->lineEdit()->text();
-    if( !url.contains( "://") )
-        return; /* nothing to do this far */
 
-    /* Match the correct item in the comboBox */
-    QString proto = url.section( ':', 0, 0 );
-    const struct caching_map *r = (const struct caching_map *)
-        bsearch( qtu(proto), schemes, sizeof(schemes) / sizeof(schemes[0]),
-                 sizeof(schemes[0]), strcmp_void );
-    if( r )
-        emit methodChanged( qfu( r->caching ) + qfu( "-caching" ) );
+    if( url.isEmpty() )
+        return;
+
+    emit methodChanged( qfu( "network-caching" ) );
 
     QStringList qsl;
     qsl << url;
     emit mrlUpdated( qsl, "" );
-}
-
-void NetOpenPanel::updateModel()
-{
-    assert( mrlList );
-    QStringList tempL = mrlList->stringList();
-    if( !tempL.contains( ui.urlComboBox->lineEdit()->text() ) )
-        tempL.append( ui.urlComboBox->lineEdit()->text() );
-    mrlList->setStringList( tempL );
-}
-
-void UrlValidator::fixup( QString& str ) const
-{
-    str = str.trimmed();
 }
 
 QValidator::State UrlValidator::validate( QString& str, int& ) const
@@ -680,6 +637,11 @@ QValidator::State UrlValidator::validate( QString& str, int& ) const
     if( !str.contains( "://" ) )
         return QValidator::Intermediate;
     return QValidator::Acceptable;
+}
+
+void UrlValidator::fixup( QString& str ) const
+{
+    str = str.trimmed();
 }
 
 /**************************************************************************
@@ -839,27 +801,16 @@ void CaptureOpenPanel::initialize()
 
     /* Jack Props panel */
 
-    /* Caching */
-    QLabel *jackCachingLabel = new QLabel( qtr( "Input caching:" ) );
-    jackPropLayout->addWidget( jackCachingLabel, 1 , 0 );
-    jackCaching = new QSpinBox;
-    setSpinBoxFreq( jackCaching );
-    jackCaching->setSuffix( " ms" );
-    jackCaching->setValue(1000);
-    jackCaching->setAlignment( Qt::AlignRight );
-    jackPropLayout->addWidget( jackCaching, 1 , 2 );
-
     /* Pace */
     jackPace = new QCheckBox(qtr( "Use VLC pace" ));
-    jackPropLayout->addWidget( jackPace, 2, 1 );
+    jackPropLayout->addWidget( jackPace, 1, 1 );
 
     /* Auto Connect */
     jackConnect = new QCheckBox( qtr( "Auto connection" ));
-    jackPropLayout->addWidget( jackConnect, 2, 2 );
+    jackPropLayout->addWidget( jackConnect, 1, 2 );
 
     /* Jack CONNECTs */
     CuMRL( jackChannels, valueChanged( int ) );
-    CuMRL( jackCaching, valueChanged( int ) );
     CuMRL( jackPace, stateChanged( int ) );
     CuMRL( jackConnect, stateChanged( int ) );
     CuMRL( jackPortsSelected, textChanged( const QString& ) );
@@ -1101,13 +1052,13 @@ void CaptureOpenPanel::updateMRL()
             colon_escape( QString("%1").arg( adevDshowW->getValue() ) )+" ";
         if( dshowVSizeLine->isModified() )
             mrl += ":dshow-size=" + dshowVSizeLine->text();
-        emit methodChanged( "dshow-caching" );
         break;
 #else
     case V4L2_DEVICE:
         fileList << "v4l2://" + v4l2VideoDevice->currentText();
+        mrl += ":v4l2-standard="
+            + v4l2StdBox->itemData( v4l2StdBox->currentIndex() ).toString();
         mrl += " :input-slave=alsa://" + v4l2AudioDevice->currentText();
-        mrl += " :v4l2-standard=" + QString::number( v4l2StdBox->currentIndex() );
         break;
     case JACK_DEVICE:
         mrl = "jack://";
@@ -1115,7 +1066,6 @@ void CaptureOpenPanel::updateMRL()
         mrl += ":ports=" + jackPortsSelected->text();
         fileList << mrl; mrl = "";
 
-        mrl += " :jack-input-caching=" + QString::number( jackCaching->value() );
         if ( jackPace->isChecked() )
         {
                 mrl += " :jack-input-use-vlc-pace";
@@ -1172,10 +1122,10 @@ void CaptureOpenPanel::updateMRL()
     case SCREEN_DEVICE:
         fileList << "screen://";
         mrl = " :screen-fps=" + QString::number( screenFPS->value(), 'f' );
-        emit methodChanged( "screen-caching" );
         updateButtons();
         break;
     }
+    emit methodChanged( "live-caching" );
 
     if( !advMRL.isEmpty() ) mrl += advMRL;
 
@@ -1303,7 +1253,7 @@ void CaptureOpenPanel::advancedDialog()
     if( adv->exec() )
     {
         QString tempMRL = "";
-        for( int i = 0; i < controls.size(); i++ )
+        for( int i = 0; i < controls.count(); i++ )
         {
             ConfigControl *control = controls[i];
 
@@ -1339,6 +1289,5 @@ void CaptureOpenPanel::advancedDialog()
     qDeleteAll( controls );
     delete adv;
     module_config_free( p_config );
-    module_release (p_module);
 }
 

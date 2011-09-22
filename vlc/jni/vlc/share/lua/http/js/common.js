@@ -1,7 +1,7 @@
 var intv	=	0;
 var ccmd	=	"";
-var video_types			=	new Array('avi','mp4','wmv','mov','swf','vob','mkv','mpg');
-var audio_types			=	new Array('mp3','wav');
+var video_types			=	['avi','mp4','wmv','mov','swf','vob','mkv','mpg'];
+var audio_types			=	['mp3','wav'];
 var stream_server		=	window.location.hostname;
 function format_time( s ){
     var hours	= Math.floor(s/3600);
@@ -12,12 +12,16 @@ function format_time( s ){
 	seconds		=	seconds<10 ? "0"+seconds : seconds;
     return hours+":"+minutes+":"+seconds;
 }
+function toFloat(text)
+{
+	return parseFloat(text.replace(',','.'));
+}
 function setIntv(){
 	if(intv>0){
 		intv++;
 		setTimeout(setIntv,500);
 	}else{
-		intv=0
+		intv=0;
 	}
 	if(intv>5){
 		var nt	=	0;

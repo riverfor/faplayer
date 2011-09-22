@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
  * Copyright (C) 2008 Laurent Aimar
- * $Id: 435afdcca6740d39f4db2d760da0680a1b2c2e80 $
+ * $Id: abb9f6679ff7224c3c6d09b7f759860cd53b8a51 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -29,6 +29,7 @@
 #include <vlc_codec.h>
 
 #define BLOCK_FLAG_CORE_FLUSH (1 <<BLOCK_FLAG_CORE_PRIVATE_SHIFT)
+#define BLOCK_FLAG_CORE_EOS   (1 <<(BLOCK_FLAG_CORE_PRIVATE_SHIFT + 1))
 
 decoder_t *input_DecoderNew( input_thread_t *, es_format_t *, input_clock_t *,
                              sout_instance_t * ) VLC_USED;
@@ -108,6 +109,6 @@ size_t input_DecoderGetFifoSize( decoder_t *p_dec );
  *
  * They must be released using vlc_object_release().
  */
-void input_DecoderGetObjects( decoder_t *, vout_thread_t **, aout_instance_t ** );
+void input_DecoderGetObjects( decoder_t *, vout_thread_t **, audio_output_t ** );
 
 #endif

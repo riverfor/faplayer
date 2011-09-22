@@ -30,7 +30,6 @@
 
 #include <vlc_common.h>
 #include <vlc_demux.h>
-#include <vlc_aout.h>
 #include <vlc_network.h>
 #include <vlc_plugin.h>
 
@@ -40,10 +39,6 @@
 # include <gcrypt.h>
 # include <vlc_gcrypt.h>
 #endif
-
-#define RTP_CACHING_TEXT N_("RTP de-jitter buffer length (msec)")
-#define RTP_CACHING_LONGTEXT N_( \
-    "How long to wait for late RTP packets (and delay the performance)." )
 
 #define RTCP_PORT_TEXT N_("RTCP (local) port")
 #define RTCP_PORT_LONGTEXT N_( \
@@ -101,10 +96,6 @@ vlc_module_begin ()
     set_capability ("access_demux", 0)
     set_callbacks (Open, Close)
 
-    add_integer ("rtp-caching", 1000, RTP_CACHING_TEXT,
-                 RTP_CACHING_LONGTEXT, true)
-        change_integer_range (0, 65535)
-        change_safe ()
     add_integer ("rtcp-port", 0, RTCP_PORT_TEXT,
                  RTCP_PORT_LONGTEXT, false)
         change_integer_range (0, 65535)
@@ -217,13 +208,11 @@ static int Open (vlc_object_t *obj)
     {
         case IPPROTO_UDP:
         case IPPROTO_UDPLITE:
-            fd = net_OpenDgram (obj, dhost, dport,
-                                shost, sport, AF_UNSPEC, tp);
+            fd = net_OpenDgram (obj, dhost, dport, shost, sport, tp);
             if (fd == -1)
                 break;
             if (rtcp_dport > 0) /* XXX: source port is unknown */
-                rtcp_fd = net_OpenDgram (obj, dhost, rtcp_dport, shost, 0,
-                                         AF_UNSPEC, tp);
+                rtcp_fd = net_OpenDgram (obj, dhost, rtcp_dport, shost, 0, tp);
             break;
 
          case IPPROTO_DCCP:
@@ -266,7 +255,6 @@ static int Open (vlc_object_t *obj)
 #endif
     p_sys->fd           = fd;
     p_sys->rtcp_fd      = rtcp_fd;
-    p_sys->caching      = var_CreateGetInteger (obj, "rtp-caching");
     p_sys->max_src      = var_CreateGetInteger (obj, "rtp-max-src");
     p_sys->timeout      = var_CreateGetInteger (obj, "rtp-timeout")
                         * CLOCK_FREQ;
@@ -381,8 +369,6 @@ static int extract_port (char **phost)
  */
 static int Control (demux_t *demux, int i_query, va_list args)
 {
-    demux_sys_t *p_sys = demux->p_sys;
-
     switch (i_query)
     {
         case DEMUX_GET_POSITION:
@@ -403,7 +389,7 @@ static int Control (demux_t *demux, int i_query, va_list args)
         case DEMUX_GET_PTS_DELAY:
         {
             int64_t *v = va_arg (args, int64_t *);
-            *v = (int64_t)p_sys->caching * 1000;
+            *v = INT64_C(1000) * var_InheritInteger (demux, "network-caching");
             return VLC_SUCCESS;
         }
 

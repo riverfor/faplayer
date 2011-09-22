@@ -2,7 +2,7 @@
  * prefs.m: MacOS X module for vlc
  *****************************************************************************
  * Copyright (C) 2002-2006 the VideoLAN team
- * $Id: 3cb744acd7c003a8a0f1f8f3c60a417ac9248e7c $
+ * $Id: 8237e06d7cb261e7aa6b6f5b62fbca0ae501d73d $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videolan dot org>
@@ -52,6 +52,7 @@
 #include <vlc_common.h>
 #include <vlc_config_cat.h>
 
+#import "CompatibilityFixes.h"
 #import "intf.h"
 #import "prefs.h"
 #import "simple_prefs.h"
@@ -175,6 +176,9 @@ static VLCPrefs *_o_sharedMainInstance = nil;
 {
     p_intf = VLCIntf;
 
+    if (OSX_LION)
+        [o_prefs_window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenAuxiliary];
+
     [self initStrings];
     [o_prefs_view setBorderType: NSGrooveBorder];
     [o_prefs_view setHasVerticalScroller: YES];
@@ -190,9 +194,6 @@ static VLCPrefs *_o_sharedMainInstance = nil;
 
 - (void)showPrefs
 {
-    [[o_basicFull_matrix cellAtRow:0 column:0] setState: NSOffState];
-    [[o_basicFull_matrix cellAtRow:0 column:1] setState: NSOnState];
-    
     [o_prefs_window center];
     [o_prefs_window makeKeyAndOrderFront:self];
     [_rootTreeItem resetView];
@@ -204,8 +205,7 @@ static VLCPrefs *_o_sharedMainInstance = nil;
     [o_save_btn setTitle: _NS("Save")];
     [o_cancel_btn setTitle: _NS("Cancel")];
     [o_reset_btn setTitle: _NS("Reset All")];
-    [[o_basicFull_matrix cellAtRow: 0 column: 0] setStringValue: _NS("Basic")];
-    [[o_basicFull_matrix cellAtRow: 0 column: 1] setStringValue: _NS("All")];
+    [o_showBasic_btn setTitle: _NS("Show Basic")];
 }
 
 - (IBAction)savePrefs: (id)sender
@@ -243,8 +243,6 @@ static VLCPrefs *_o_sharedMainInstance = nil;
 - (IBAction)buttonAction: (id)sender
 {
     [o_prefs_window orderOut: self];
-    [[o_basicFull_matrix cellAtRow:0 column:0] setState: NSOnState];
-    [[o_basicFull_matrix cellAtRow:0 column:1] setState: NSOffState];
     [[[VLCMain sharedInstance] simplePreferences] showSimplePrefs];
 }
 
@@ -295,7 +293,8 @@ static VLCPrefs *_o_sharedMainInstance = nil;
 
 - (VLCTreeCategoryItem *)itemRepresentingCategory:(int)category
 {
-    for( int i = 0; i < [[self children] count]; i++ )
+    NSUInteger childrenCount = [[self children] count];
+    for( int i = 0; i < childrenCount; i++ )
     {
         VLCTreeCategoryItem * categoryItem = [[self children] objectAtIndex:i];
         if( [categoryItem category] == category )
@@ -433,7 +432,8 @@ static VLCPrefs *_o_sharedMainInstance = nil;
 - (VLCTreeSubCategoryItem *)itemRepresentingSubCategory:(int)subCategory
 {
     assert( [self isKindOfClass:[VLCTreeCategoryItem class]] );
-    for( int i = 0; i < [[self children] count]; i++ )
+    NSUInteger childrenCount = [[self children] count];
+    for( NSUInteger i = 0; i < childrenCount; i++ )
     {
         VLCTreeSubCategoryItem * subCategoryItem = [[self children] objectAtIndex:i];
         if( [subCategoryItem subCategory] == subCategory )
@@ -584,8 +584,8 @@ static VLCPrefs *_o_sharedMainInstance = nil;
     {
         _subviews = [[NSMutableArray alloc] initWithCapacity:10];
 
-        long i;
-        for( i = 0; i < [[self options] count]; i++)
+        NSUInteger count = [[self options] count];
+        for( NSUInteger i = 0; i < count; i++)
         {
             VLCTreeLeafItem * item = [[self options] objectAtIndex:i];
 
@@ -638,24 +638,29 @@ static VLCPrefs *_o_sharedMainInstance = nil;
 
 - (void)applyChanges
 {
-    unsigned int i;
-    for( i = 0 ; i < [_subviews count] ; i++ )
+    NSUInteger i;
+    NSUInteger count = [_subviews count];
+    for( i = 0 ; i < count ; i++ )
         [[_subviews objectAtIndex:i] applyChanges];
 
-    for( i = 0 ; i < [_children count] ; i++ )
+    count = [_children count];
+    for( i = 0 ; i < count ; i++ )
         [[_children objectAtIndex:i] applyChanges];
 }
 
 - (void)resetView
 {
-    unsigned int i;
-    for( i = 0 ; i < [_subviews count] ; i++ )
+    NSUInteger i;
+    NSUInteger count = [_subviews count];
+    for( i = 0 ; i < count ; i++ )
         [[_subviews objectAtIndex:i] resetValues];
 
-    for( i = 0 ; i < [_options count] ; i++ )
+    count = [_options count];
+    for( i = 0 ; i < count ; i++ )
         [[_options objectAtIndex:i] resetView];
 
-    for( i = 0 ; i < [_children count] ; i++ )
+    count = [_children count];
+    for( i = 0 ; i < count ; i++ )
         [[_children objectAtIndex:i] resetView];
 
 }

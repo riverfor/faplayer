@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2004-2005 the VideoLAN team
  * Copyright © 2007 Rémi Denis-Courmont
- * $Id: 493783c43648040bafbed3e63c3cd0f5267a4411 $
+ * $Id: a44cd6d88482636c1929febf9f7e64173d06f39c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Rémi Denis-Courmont
@@ -593,7 +593,7 @@ static void *Run( void *data )
         }
 
         if( !p_sd->p_sys->i_announces )
-            timeout = -1; /* We can safely poll indefinitly. */
+            timeout = -1; /* We can safely poll indefinitely. */
         else if( timeout < 200 )
             timeout = 200; /* Don't wakeup too fast. */
     }

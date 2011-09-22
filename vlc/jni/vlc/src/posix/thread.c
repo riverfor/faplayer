@@ -98,6 +98,23 @@ static clockid_t vlc_clock_id;
 
 # endif /* _POSIX_MONOTONIC_CLOKC */
 
+#ifdef __ANDROID__
+#include <android/api-level.h>
+#if __ANDROID_API__ < 8
+#define pthread_condattr_init(a) 0
+#define pthread_condattr_destroy(a)
+#endif
+#define PTHREAD_CANCEL_DISABLE 1
+extern int pthread_create_cancel(pthread_t *thread, pthread_attr_t const * attr,
+                   void *(*start_routine)(void *), void * arg);
+extern int pthread_cond_timedwait_cancel(pthread_cond_t *cond,
+                           pthread_mutex_t * mutex,
+                           const struct timespec *abstime);
+extern int pthread_cancel(pthread_t thread);
+extern void pthread_testcancel();
+extern int pthread_setcancelstate(int state, int *old);
+#endif
+
 static void vlc_clock_setup_once (void)
 {
 # if (_POSIX_MONOTONIC_CLOCK == 0)
@@ -135,23 +152,6 @@ static struct timespec mtime_to_ts (mtime_t date)
 
     return ts;
 }
-
-#ifdef ANDROID
-#include <android/api-level.h>
-#if __ANDROID_API__ < 8
-#define pthread_condattr_init(a) 0
-#define pthread_condattr_destroy(a)
-#endif
-#define PTHREAD_CANCEL_DISABLE 1
-int pthread_create_cancel(pthread_t *thread, pthread_attr_t const * attr,
-                   void *(*start_routine)(void *), void * arg);
-int pthread_cond_timedwait_cancel(pthread_cond_t *cond,
-                           pthread_mutex_t * mutex,
-                           const struct timespec *abstime);
-int pthread_cancel(pthread_t thread);
-void pthread_testcancel();
-int pthread_setcancelstate(int state, int *old);
-#endif
 
 /**
  * Print a backtrace to the standard error for debugging purpose.
@@ -489,10 +489,10 @@ int vlc_cond_timedwait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex,
 #endif
 
     struct timespec ts = mtime_to_ts (deadline);
-#ifndef ANDROID
+#ifndef __ANDROID__
     int val = pthread_cond_timedwait (p_condvar, p_mutex, &ts);
 #else
-	int val = pthread_cond_timedwait_cancel (p_condvar, p_mutex, &ts);
+    int val = pthread_cond_timedwait_cancel (p_condvar, p_mutex, &ts);
 #endif
     if (val != ETIMEDOUT)
         VLC_THREAD_ASSERT ("timed-waiting on condition");
@@ -555,14 +555,6 @@ int vlc_sem_post (vlc_sem_t *sem)
     val = errno;
 #endif
 
-#ifdef ANDROID
-    /* Bionic is so broken that it will return EBUSY on sem_destroy
-     * if the semaphore has never been used...
-     */
-    if (likely(val == EBUSY))
-        return; // It may be a real error, but there's no way to know
-#endif
-
     if (unlikely(val != EOVERFLOW))
         VLC_THREAD_ASSERT ("unlocking semaphore");
     return val;
@@ -591,19 +583,22 @@ void vlc_sem_wait (vlc_sem_t *sem)
     VLC_THREAD_ASSERT ("locking semaphore");
 }
 
-#ifdef ANDROID
-/* SRW (Slim Read Write) locks are available in Vista+ only */
 /**
  * Initializes a read/write lock.
  */
 void vlc_rwlock_init (vlc_rwlock_t *lock)
 {
+#ifndef __ANDROID__
+    if (unlikely(pthread_rwlock_init (lock, NULL)))
+        abort ();
+#else
     vlc_mutex_init (&lock->mutex);
     vlc_cond_init (&lock->read_wait);
     vlc_cond_init (&lock->write_wait);
     lock->readers = 0; /* active readers */
     lock->writers = 0; /* waiting or active writers */
     lock->writer = 0; /* ID of active writer */
+#endif
 }
 
 /**
@@ -611,9 +606,14 @@ void vlc_rwlock_init (vlc_rwlock_t *lock)
  */
 void vlc_rwlock_destroy (vlc_rwlock_t *lock)
 {
+#ifndef __ANDROID__
+    int val = pthread_rwlock_destroy (lock);
+    VLC_THREAD_ASSERT ("destroying R/W lock");
+#else
     vlc_cond_destroy (&lock->read_wait);
     vlc_cond_destroy (&lock->write_wait);
     vlc_mutex_destroy (&lock->mutex);
+#endif
 }
 
 /**
@@ -621,6 +621,10 @@ void vlc_rwlock_destroy (vlc_rwlock_t *lock)
  */
 void vlc_rwlock_rdlock (vlc_rwlock_t *lock)
 {
+#ifndef __ANDROID__
+    int val = pthread_rwlock_rdlock (lock);
+    VLC_THREAD_ASSERT ("acquiring R/W lock for reading");
+#else
     vlc_mutex_lock (&lock->mutex);
     while (lock->writer != 0)
         vlc_cond_wait (&lock->read_wait, &lock->mutex);
@@ -628,6 +632,7 @@ void vlc_rwlock_rdlock (vlc_rwlock_t *lock)
         abort ();
     lock->readers++;
     vlc_mutex_unlock (&lock->mutex);
+#endif
 }
 
 /**
@@ -635,6 +640,10 @@ void vlc_rwlock_rdlock (vlc_rwlock_t *lock)
  */
 void vlc_rwlock_wrlock (vlc_rwlock_t *lock)
 {
+#ifndef __ANDROID__
+    int val = pthread_rwlock_wrlock (lock);
+    VLC_THREAD_ASSERT ("acquiring R/W lock for writing");
+#else
     vlc_mutex_lock (&lock->mutex);
     if (lock->writers == ULONG_MAX)
         abort ();
@@ -644,6 +653,7 @@ void vlc_rwlock_wrlock (vlc_rwlock_t *lock)
     lock->writers--;
     lock->writer = 1;//GetCurrentThreadId ();
     vlc_mutex_unlock (&lock->mutex);
+#endif
 }
 
 /**
@@ -651,6 +661,10 @@ void vlc_rwlock_wrlock (vlc_rwlock_t *lock)
  */
 void vlc_rwlock_unlock (vlc_rwlock_t *lock)
 {
+#ifndef __ANDROID__
+    int val = pthread_rwlock_unlock (lock);
+    VLC_THREAD_ASSERT ("releasing R/W lock");
+#else
     vlc_mutex_lock (&lock->mutex);
     if (lock->readers > 0)
         lock->readers--; /* Read unlock */
@@ -665,53 +679,8 @@ void vlc_rwlock_unlock (vlc_rwlock_t *lock)
     else
         vlc_cond_broadcast (&lock->read_wait);
     vlc_mutex_unlock (&lock->mutex);
-}
-#else
-/**
- * Initializes a read/write lock.
- */
-void vlc_rwlock_init (vlc_rwlock_t *lock)
-{
-    if (unlikely(pthread_rwlock_init (lock, NULL)))
-        abort ();
-}
-
-/**
- * Destroys an initialized unused read/write lock.
- */
-void vlc_rwlock_destroy (vlc_rwlock_t *lock)
-{
-    int val = pthread_rwlock_destroy (lock);
-    VLC_THREAD_ASSERT ("destroying R/W lock");
-}
-
-/**
- * Acquires a read/write lock for reading. Recursion is allowed.
- */
-void vlc_rwlock_rdlock (vlc_rwlock_t *lock)
-{
-    int val = pthread_rwlock_rdlock (lock);
-    VLC_THREAD_ASSERT ("acquiring R/W lock for reading");
-}
-
-/**
- * Acquires a read/write lock for writing. Recursion is not allowed.
- */
-void vlc_rwlock_wrlock (vlc_rwlock_t *lock)
-{
-    int val = pthread_rwlock_wrlock (lock);
-    VLC_THREAD_ASSERT ("acquiring R/W lock for writing");
-}
-
-/**
- * Releases a read/write lock.
- */
-void vlc_rwlock_unlock (vlc_rwlock_t *lock)
-{
-    int val = pthread_rwlock_unlock (lock);
-    VLC_THREAD_ASSERT ("releasing R/W lock");
-}
 #endif
+}
 
 /**
  * Allocates a thread-specific variable.
@@ -847,10 +816,10 @@ static int vlc_clone_attr (vlc_thread_t *th, pthread_attr_t *attr,
     assert (ret == 0); /* fails iif VLC_STACKSIZE is invalid */
 #endif
 
-#ifdef ANDROID
-    ret = pthread_create_cancel (th, attr, entry, data);
-#else
+#ifndef __ANDROID__
     ret = pthread_create (th, attr, entry, data);
+#else
+    ret = pthread_create_cancel (th, attr, entry, data);
 #endif
     pthread_sigmask (SIG_SETMASK, &oldset, NULL);
     pthread_attr_destroy (attr);
@@ -1078,7 +1047,7 @@ mtime_t mdate (void)
  */
 void mwait (mtime_t deadline)
 {
-#if (_POSIX_TIMERS > 0)
+#if (_POSIX_CLOCK_SELECTION > 0)
     vlc_clock_setup ();
     /* If the deadline is already elapsed, or within the clock precision,
      * do not even bother the system timer. */
@@ -1105,8 +1074,8 @@ void msleep (mtime_t delay)
 {
     struct timespec ts = mtime_to_ts (delay);
 
+#if (_POSIX_CLOCK_SELECTION > 0)
     vlc_clock_setup ();
-#if (_POSIX_TIMERS > 0)
     while (clock_nanosleep (vlc_clock_id, 0, &ts, &ts) == EINTR);
 
 #else
@@ -1128,6 +1097,7 @@ struct vlc_timer
     vlc_atomic_t overruns;
 };
 
+VLC_NORETURN
 static void *vlc_timer_thread (void *data)
 {
     struct vlc_timer *timer = data;

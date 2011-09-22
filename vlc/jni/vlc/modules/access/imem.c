@@ -2,7 +2,7 @@
  * imem.c : Memory input for VLC
  *****************************************************************************
  * Copyright (C) 2009-2010 Laurent Aimar
- * $Id: 4a42613bc010a03ba3a3f1c187e85afb8381dba9 $
+ * $Id: 8442a430a30d73eef8886a424b32a07aac150d2b $
  *
  * Author: Laurent Aimar <fenrir _AT_ videolan _DOT org>
  *
@@ -45,11 +45,6 @@ static void CloseAccess(vlc_object_t *);
 
 static int  OpenDemux (vlc_object_t *);
 static void CloseDemux(vlc_object_t *);
-
-#define CACHING_TEXT N_("Caching value in ms")
-#define CACHING_LONGTEXT N_(\
-    "Caching value for imem streams. This " \
-    "value should be set in milliseconds.")
 
 #define ID_TEXT N_("ID")
 #define ID_LONGTEXT N_(\
@@ -125,8 +120,6 @@ vlc_module_begin()
     set_category(CAT_INPUT)
     set_subcategory(SUBCAT_INPUT_ACCESS)
 
-    add_integer("imem-caching", DEFAULT_PTS_DELAY / 1000, CACHING_TEXT, CACHING_LONGTEXT, true)
-        change_private()
     add_string ("imem-get", "0", GET_TEXT, GET_LONGTEXT, true)
         change_volatile()
     add_string ("imem-release", "0", RELEASE_TEXT, RELEASE_LONGTEXT, true)
@@ -224,8 +217,6 @@ typedef struct {
 
     es_out_id_t  *es;
 
-    mtime_t      pts_delay;
-
     mtime_t      dts;
 
     mtime_t      deadline;
@@ -288,7 +279,6 @@ static int OpenCommon(vlc_object_t *object, imem_sys_t **sys_ptr, const char *ps
             sys->source.cookie ? sys->source.cookie : "(null)");
 
     /* */
-    sys->pts_delay = var_InheritInteger(object, "imem-caching") * INT64_C(1000);
     sys->dts       = 0;
     sys->deadline  = VLC_TS_INVALID;
 
@@ -339,8 +329,7 @@ static void CloseAccess(vlc_object_t *object)
  */
 static int ControlAccess(access_t *access, int i_query, va_list args)
 {
-    imem_sys_t *sys = (imem_sys_t*)access->p_sys;
-
+    (void) access;
     switch (i_query)
     {
     case ACCESS_CAN_SEEK:
@@ -357,7 +346,7 @@ static int ControlAccess(access_t *access, int i_query, va_list args)
     }
     case ACCESS_GET_PTS_DELAY: {
         int64_t *delay = va_arg(args, int64_t *);
-        *delay = sys->pts_delay;
+        *delay = DEFAULT_PTS_DELAY; /* FIXME? */
         return VLC_SUCCESS;
     }
     case ACCESS_SET_PAUSE_STATE:
@@ -533,7 +522,7 @@ static int ControlDemux(demux_t *demux, int i_query, va_list args)
 
     case DEMUX_GET_PTS_DELAY: {
         int64_t *delay = va_arg(args, int64_t *);
-        *delay = sys->pts_delay;
+        *delay = DEFAULT_PTS_DELAY; /* FIXME? */
         return VLC_SUCCESS;
     }
     case DEMUX_GET_POSITION: {
@@ -628,7 +617,6 @@ static void ParseMRL(vlc_object_t *object, const char *psz_path)
         const char *name;
         int        type;
     } options[] = {
-        { "caching",    VLC_VAR_INTEGER },
         { "id",         VLC_VAR_INTEGER },
         { "group",      VLC_VAR_INTEGER },
         { "cat",        VLC_VAR_INTEGER },

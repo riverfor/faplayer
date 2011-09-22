@@ -110,8 +110,9 @@ typedef pthread_mutex_t vlc_mutex_t;
 #define VLC_STATIC_MUTEX PTHREAD_MUTEX_INITIALIZER
 typedef pthread_cond_t  vlc_cond_t;
 #define VLC_STATIC_COND  PTHREAD_COND_INITIALIZER
-#ifndef ANDROID
+#ifndef __ANDROID__
 typedef pthread_rwlock_t vlc_rwlock_t;
+#define VLC_STATIC_RWLOCK PTHREAD_RWLOCK_INITIALIZER
 #else
 typedef struct
 {
@@ -122,6 +123,7 @@ typedef struct
     unsigned long writers;
     unsigned long writer;
 } vlc_rwlock_t;
+#define VLC_STATIC_RWLOCK { VLC_STATIC_MUTEX, VLC_STATIC_COND, VLC_STATIC_COND, 0, 0, 0 }
 #endif
 typedef pthread_key_t   vlc_threadvar_t;
 typedef struct vlc_timer *vlc_timer_t;
@@ -155,18 +157,20 @@ typedef struct
     HANDLE   handle;
     unsigned clock;
 } vlc_cond_t;
+#define VLC_STATIC_COND { 0, 0 }
 
 typedef HANDLE  vlc_sem_t;
 
 typedef struct
 {
     vlc_mutex_t   mutex;
-    vlc_cond_t    read_wait;
-    vlc_cond_t    write_wait;
+    vlc_cond_t    wait;
     unsigned long readers;
     unsigned long writers;
     DWORD         writer;
 } vlc_rwlock_t;
+#define VLC_STATIC_RWLOCK \
+    { VLC_STATIC_MUTEX, VLC_STATIC_COND, 0, 0, 0 }
 
 typedef struct vlc_threadvar *vlc_threadvar_t;
 typedef struct vlc_timer *vlc_timer_t;
@@ -219,8 +223,7 @@ VLC_API void msleep(mtime_t delay);
 #define VLC_HARD_MIN_SLEEP   10000 /* 10 milliseconds = 1 tick at 100Hz */
 #define VLC_SOFT_MIN_SLEEP 9000000 /* 9 seconds */
 
-#if defined (__GNUC__) \
- && ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))
+#if VLC_GCC_VERSION(4,3)
 /* Linux has 100, 250, 300 or 1000Hz
  *
  * HZ=100 by default on FreeBSD, but some architectures use a 1000Hz timer

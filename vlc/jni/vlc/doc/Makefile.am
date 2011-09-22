@@ -1,6 +1,19 @@
 NULL =
 
+LIBVLC_SAMPLES = \
+	libvlc/gtk_player.c \
+	libvlc/libvlc_DVD_ripper.c \
+	libvlc/QtPlayer/LICENSE \
+	libvlc/QtPlayer/main.cpp \
+	libvlc/QtPlayer/player.cpp \
+	libvlc/QtPlayer/player.h \
+	libvlc/QtPlayer/QtVLC.pro \
+	libvlc/vlc-thumb.c \
+	libvlc/wx_player.cpp \
+	$(NULL)
+
 doc_DATA = \
+	$(LIBVLC_SAMPLES) \
 	bugreport-howto.txt \
 	fortunes.txt \
 	intf-vcd.txt \
@@ -24,12 +37,12 @@ CHANGELOGS = \
 
 man1_MANS = \
 	   vlc.1 \
-	   vlc-wrapper.1 \
-	   vlc-config.1
+	   vlc-wrapper.1
 
 EXTRA_DIST = \
 	$(CHANGELOGS) \
 	$(man1_MANS) \
+	$(LIBVLC_SAMPLES) \
 	bugreport-howto.txt \
 	fortunes.txt \
 	intf-vcd.txt \

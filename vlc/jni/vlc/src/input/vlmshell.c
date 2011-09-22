@@ -2,7 +2,7 @@
  * vlm.c: VLM interface plugin
  *****************************************************************************
  * Copyright (C) 2000-2005 the VideoLAN team
- * $Id: 1273b1bab5bc4b7c7b89826957d84dfe7df0f7ad $
+ * $Id: 07b911304745926e3791211f0929c88ba9088c05 $
  *
  * Authors: Simon Latapie <garf@videolan.org>
  *          Laurent Aimar <fenrir@videolan.org>
@@ -80,7 +80,7 @@ static const char quotes[] = "\"'";
  */
 static const char *FindCommandEnd( const char *psz_sent )
 {
-    char c, quote = 0;
+    unsigned char c, quote = 0;
 
     while( (c = *psz_sent) != '\0' )
     {
@@ -127,7 +127,7 @@ static const char *FindCommandEnd( const char *psz_sent )
  */
 static int Unescape( char *out, const char *in )
 {
-    char c, quote = 0;
+    unsigned char c, quote = 0;
     bool param = false;
 
     while( (c = *in++) != '\0' )
@@ -856,7 +856,7 @@ int ExecuteCommand( vlm_t *p_vlm, const char *psz_command,
     {
         const char *psz_temp;
 
-        if(isspace (*psz_command))
+        if(isspace ((unsigned char)*psz_command))
         {
             psz_command++;
             continue;

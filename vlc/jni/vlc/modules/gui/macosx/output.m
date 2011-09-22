@@ -2,7 +2,7 @@
  * output.m: MacOS X Output Dialog
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: 51b2bcf2007f40158d5073d053004a2ed32afc45 $
+ * $Id: 77d05804ce9b3cc3b79d3ece4b39501ff3051a75 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -416,27 +416,21 @@
             /* split up the hostname and the following path to paste the
              * port correctly. Not need, if there isn't any path following the
              * hostname. */
-            NSArray * o_urlItems = [[o_stream_address stringValue] \
-                componentsSeparatedByString: @"/"];
+            NSArray * o_urlItems = [[o_stream_address stringValue] componentsSeparatedByString: @"/"];
             NSMutableString * o_finalStreamAddress;
             o_finalStreamAddress = [[NSMutableString alloc] init];
  
             if ([o_urlItems count] == 1)
             {
-                [o_finalStreamAddress appendFormat: @"\"%@:%@\"", \
-                    [o_stream_address stringValue],[o_stream_port stringValue]];
+                [o_finalStreamAddress appendFormat: @"\"%@:%@\"", [o_stream_address stringValue],[o_stream_port stringValue]];
             }
             else
             {
-                [o_finalStreamAddress appendFormat: @"\"%@:%@", [o_urlItems \
-                    objectAtIndex: 0], [o_stream_port stringValue]];
-                unsigned int x;
-                x = 1;
-                while (x != [o_urlItems count])
+                [o_finalStreamAddress appendFormat: @"\"%@:%@", [o_urlItems objectAtIndex: 0], [o_stream_port stringValue]];
+                NSUInteger itemCount = [o_urlItems count];
+                for (NSUInteger x = 0; x < itemCount; x++)
                 {
-                    [o_finalStreamAddress appendFormat: @"/%@", [o_urlItems \
-                        objectAtIndex: x]];
-                    x = (x + 1);
+                    [o_finalStreamAddress appendFormat: @"/%@", [o_urlItems objectAtIndex: x]];
                 }
                 [o_finalStreamAddress appendString: @"\""];
             }

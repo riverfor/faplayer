@@ -2,7 +2,7 @@
  * simple_preferences.cpp : "Simple preferences"
  ****************************************************************************
  * Copyright (C) 2006-2010 the VideoLAN team
- * $Id: 229c27111fb7d8398f1b0d662dbf3c429bef23f3 $
+ * $Id: dfe137687cd22ebe1ddd03993e07377edac46894 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -491,43 +491,16 @@ SPrefsPanel::SPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
 #define TestCaC( name ) \
     b_cache_equal =  b_cache_equal && \
      ( i_cache == config_GetInt( p_intf, name ) )
-
-#define TestCaCi( name, int ) \
-    b_cache_equal = b_cache_equal &&  \
-    ( ( i_cache * int ) == config_GetInt( p_intf, name ) )
             /* Select the accurate value of the ComboBox */
             bool b_cache_equal = true;
             int i_cache = config_GetInt( p_intf, "file-caching");
 
-            TestCaC( "udp-caching" );
-            if (module_exists ("dvdread"))
-                TestCaC( "dvdread-caching" );
-            if (module_exists ("dvdnav"))
-                TestCaC( "dvdnav-caching" );
-            TestCaC( "tcp-caching" );
-            TestCaC( "cdda-caching" );
-            TestCaC( "screen-caching" ); TestCaC( "vcd-caching" );
-            #ifdef WIN32
-            TestCaC( "dshow-caching" );
-            #else
-            if (module_exists ("access_jack"))
-                TestCaC( "jack-input-caching" );
-            if (module_exists ("v4l2"))
-                TestCaC( "v4l2-caching" );
-            if (module_exists ("pvr"))
-                TestCaC( "pvr-caching" );
-            #endif
-            if (module_exists ("livedotcom"))
-                TestCaCi( "rtsp-caching", 4 );
-            TestCaCi( "ftp-caching", 2 );
-            TestCaCi( "http-caching", 2 );
-            if (module_exists ("access_realrtsp"))
-                TestCaCi( "realrtsp-caching", 10 );
-            TestCaCi( "mms-caching", 10 );
+            TestCaC( "network-caching" );
+            TestCaC( "disc-caching" );
+            TestCaC( "live-caching" );
             if( b_cache_equal == 1 )
                 ui.cachingCombo->setCurrentIndex(
                 ui.cachingCombo->findData( QVariant( i_cache ) ) );
-#undef TestCaCi
 #undef TestCaC
 
         END_SPREFS_CAT;
@@ -574,6 +547,8 @@ SPrefsPanel::SPrefsPanel( intf_thread_t *_p_intf, QWidget *_parent,
             ui.stylesCombo->setCurrentIndex( ui.stylesCombo->findText(
                         getSettings()->value( "MainWindow/QtStyle", "" ).toString() ) );
             ui.stylesCombo->insertSeparator( 1 );
+            if ( ui.stylesCombo->currentIndex() < 0 )
+                ui.stylesCombo->setCurrentIndex( 0 ); /* default */
 
             CONNECT( ui.stylesCombo, currentIndexChanged( QString ), this, changeStyle( QString ) );
             optionWidgets.append( ui.stylesCombo );
@@ -771,7 +746,7 @@ void SPrefsPanel::updateAudioVolume( int volume )
 void SPrefsPanel::apply()
 {
     /* Generic save for ever panel */
-    QList<ConfigControl *>::Iterator i;
+    QList<ConfigControl *>::const_iterator i;
     for( i = controls.begin() ; i != controls.end() ; ++i )
     {
         ConfigControl *c = qobject_cast<ConfigControl *>(*i);
@@ -792,41 +767,18 @@ void SPrefsPanel::apply()
             config_PutPsz( p_intf, "cd-audio", devicepath );
         }
 
-#define CaCi( name, int ) config_PutInt( p_intf, name, int * i_comboValue )
-#define CaC( name ) CaCi( name, 1 )
+#define CaC( name ) config_PutInt( p_intf, name, i_comboValue )
         /* Caching */
         QComboBox *cachingCombo = qobject_cast<QComboBox *>(optionWidgets[cachingCoB]);
         int i_comboValue = cachingCombo->itemData( cachingCombo->currentIndex() ).toInt();
         if( i_comboValue )
         {
-            CaC( "udp-caching" );
-            if (module_exists ("dvdread" ))
-                CaC( "dvdread-caching" );
-            if (module_exists ("dvdnav" ))
-                CaC( "dvdnav-caching" );
-            CaC( "tcp-caching" ); CaC( "vcd-caching" );
-            CaC( "cdda-caching" ); CaC( "file-caching" );
-            CaC( "screen-caching" ); CaC( "bd-caching" );
-            CaCi( "rtsp-caching", 2 ); CaCi( "ftp-caching", 2 );
-            CaCi( "http-caching", 2 );
-            if (module_exists ("access_realrtsp" ))
-                CaCi( "realrtsp-caching", 10 );
-            CaCi( "mms-caching", 10 );
-            #ifdef WIN32
-            CaC( "dshow-caching" );
-            #else
-            if (module_exists ( "access_jack" ))
-            CaC( "jack-input-caching" );
-            if (module_exists ( "v4l2" ))
-                CaC( "v4l2-caching" );
-            if (module_exists ( "pvr" ))
-                CaC( "pvr-caching" );
-            #endif
-            //CaCi( "dv-caching" ) too short...
+            CaC( "network-caching" );
+            CaC( "disc-caching" );
+            CaC( "live-caching" );
         }
         break;
 #undef CaC
-#undef CaCi
     }
 
     /* Interfaces */
@@ -903,7 +855,6 @@ void SPrefsPanel::configML()
 #ifdef WIN32
 #include <QDialogButtonBox>
 #include "util/registry.hpp"
-#include <string>
 
 bool SPrefsPanel::addType( const char * psz_ext, QTreeWidgetItem* current,
                            QTreeWidgetItem* parent, QVLCRegistry *qvReg )
@@ -1026,8 +977,8 @@ void SPrefsPanel::assoDialog()
 
 void addAsso( QVLCRegistry *qvReg, const char *psz_ext )
 {
-    std::string s_path( "VLC" ); s_path += psz_ext;
-    std::string s_path2 = s_path;
+    QString s_path( "VLC" ); s_path += psz_ext;
+    QString s_path2 = s_path;
 
     /* Save a backup if already assigned */
     char *psz_value = qvReg->ReadRegistryString( psz_ext, "", ""  );
@@ -1037,27 +988,26 @@ void addAsso( QVLCRegistry *qvReg, const char *psz_ext )
     delete psz_value;
 
     /* Put a "link" to VLC.EXT as default */
-    qvReg->WriteRegistryString( psz_ext, "", s_path.c_str() );
+    qvReg->WriteRegistryString( psz_ext, "", qtu( s_path ) );
 
     /* Create the needed Key if they weren't done in the installer */
-    if( !qvReg->RegistryKeyExists( s_path.c_str() ) )
+    if( !qvReg->RegistryKeyExists( qtu( s_path ) ) )
     {
-        qvReg->WriteRegistryString( psz_ext, "", s_path.c_str() );
-        qvReg->WriteRegistryString( s_path.c_str(), "", "Media file" );
-        qvReg->WriteRegistryString( s_path.append( "\\shell" ).c_str() , "", "Play" );
+        qvReg->WriteRegistryString( psz_ext, "", qtu( s_path ) );
+        qvReg->WriteRegistryString( qtu( s_path ), "", "Media file" );
+        qvReg->WriteRegistryString( qtu( s_path.append( "\\shell" ) ), "", "Play" );
 
         /* Get the installer path */
         QVLCRegistry *qvReg2 = new QVLCRegistry( HKEY_LOCAL_MACHINE );
-        std::string str_temp; str_temp.assign(
-            qvReg2->ReadRegistryString( "Software\\VideoLAN\\VLC", "", "" ) );
+        QString str_temp = qvReg2->ReadRegistryString( "Software\\VideoLAN\\VLC", "", "" );
 
         if( str_temp.size() )
         {
-            qvReg->WriteRegistryString( s_path.append( "\\Play\\command" ).c_str(),
-                "", str_temp.append(" --started-from-file \"%1\"" ).c_str() );
+            qvReg->WriteRegistryString( qtu( s_path.append( "\\Play\\command" ) ),
+                "", qtu( str_temp.append(" --started-from-file \"%1\"" ) ) );
 
-            qvReg->WriteRegistryString( s_path2.append( "\\DefaultIcon" ).c_str(),
-                        "", str_temp.append(",0").c_str() );
+            qvReg->WriteRegistryString( qtu( s_path2.append( "\\DefaultIcon" ) ),
+                        "", qtu( str_temp.append(",0") ) );
         }
         delete qvReg2;
     }

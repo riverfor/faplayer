@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2004-2005, 2007 the VideoLAN team
  * Copyright © 2005-2006 Rémi Denis-Courmont
- * $Id: 7280bc69d641092440c14a58f0b351f269f08295 $
+ * $Id: 8f92852a44875e1c80a3a5a97cf0f60f71e59bc3 $
  *
  * Authors: Laurent Aimar <fenrir@videolan.org>
  *          Rémi Denis-Courmont <rem # videolan.org>
@@ -136,12 +136,14 @@ int *net_Listen (vlc_object_t *p_this, const char *psz_host,
     hints.ai_protocol = protocol;
     hints.ai_flags = AI_PASSIVE;
 
-    msg_Dbg (p_this, "net: listening to %s port %d", psz_host, i_port);
+    msg_Dbg (p_this, "net: listening to %s port %d",
+             (psz_host != NULL) ? psz_host : "*", i_port);
 
     int i_val = vlc_getaddrinfo (p_this, psz_host, i_port, &hints, &res);
     if (i_val)
     {
-        msg_Err (p_this, "Cannot resolve %s port %d : %s", psz_host, i_port,
+        msg_Err (p_this, "Cannot resolve %s port %d : %s",
+                 (psz_host != NULL) ? psz_host : "", i_port,
                  gai_strerror (i_val));
         return NULL;
     }

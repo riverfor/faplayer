@@ -2,7 +2,7 @@
  * prefs_widgets.h: Preferences controls
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: a1467476e28bb19622211fbb9f4b2fbcfcfccba1 $
+ * $Id: bc0e3ebaac9129deb70e8cc334fb3f51b495cdda $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan.org>
  *
@@ -68,7 +68,7 @@ static NSMenu   *o_keys_menu = nil;
 
 @end
 
-@interface StringListConfigControl : VLCConfigControl
+@interface StringListConfigControl : VLCConfigControl <NSComboBoxDataSource>
 {
     NSComboBox      *o_combo;
 }
@@ -103,7 +103,7 @@ static NSMenu   *o_keys_menu = nil;
 
 @end
 
-@interface IntegerConfigControl : VLCConfigControl
+@interface IntegerConfigControl : VLCConfigControl <NSTextFieldDelegate>
 {
     NSTextField     *o_textfield;
     NSStepper       *o_stepper;
@@ -117,7 +117,7 @@ static NSMenu   *o_keys_menu = nil;
 
 @end
 
-@interface IntegerListConfigControl : VLCConfigControl
+@interface IntegerListConfigControl : VLCConfigControl <NSComboBoxDataSource>
 {
     NSComboBox      *o_combo;
 }
@@ -127,7 +127,7 @@ static NSMenu   *o_keys_menu = nil;
 
 @end
 
-@interface RangedIntegerConfigControl : VLCConfigControl
+@interface RangedIntegerConfigControl : VLCConfigControl <NSTextFieldDelegate>
 {
     NSSlider        *o_slider;
     NSTextField     *o_textfield;
@@ -153,7 +153,7 @@ static NSMenu   *o_keys_menu = nil;
 
 @end
 
-@interface FloatConfigControl : VLCConfigControl
+@interface FloatConfigControl : VLCConfigControl <NSTextFieldDelegate>
 {
     NSTextField     *o_textfield;
     NSStepper       *o_stepper;
@@ -167,7 +167,7 @@ static NSMenu   *o_keys_menu = nil;
 
 @end
 
-@interface RangedFloatConfigControl : VLCConfigControl
+@interface RangedFloatConfigControl : VLCConfigControl <NSTextFieldDelegate>
 {
     NSSlider        *o_slider;
     NSTextField     *o_textfield;
@@ -193,7 +193,7 @@ static NSMenu   *o_keys_menu = nil;
 
 @end
 
-@interface ModuleListConfigControl : VLCConfigControl
+@interface ModuleListConfigControl : VLCConfigControl <NSTableViewDataSource>
 {
     NSTextField     *o_textfield;
     NSScrollView    *o_scrollview;

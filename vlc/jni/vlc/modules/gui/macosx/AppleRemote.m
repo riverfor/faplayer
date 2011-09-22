@@ -1,7 +1,7 @@
 /*****************************************************************************
  * AppleRemote.m
  * AppleRemote
- * $Id: 3fa3d45f21f333239f97f0c43f8b596f49ccbd6f $
+ * $Id: da335c8f2e1c477088e132fa6b6a8b5a59abd5e4 $
  *
  * Created by Martin Kahr on 11.03.06 under a MIT-style license.
  * Copyright (c) 2006 martinkahr.com. All rights reserved.
@@ -55,6 +55,7 @@
 
 /* this was added by the VideoLAN team to ensure Leopard-compatibility and is VLC-only */
 #import "intf.h"
+#import "CompatibilityFixes.h"
 
 const char* AppleRemoteDeviceName = "AppleIRController";
 const int REMOTE_SWITCH_COOKIE=19;
@@ -99,9 +100,9 @@ static AppleRemote *_o_sharedInstance = nil;
             [cookieToButtonMapping setObject:[NSNumber numberWithInt:kRemoteButtonPlay_Sleep]   forKey:@"35_31_18_35_31_18_"];
             [cookieToButtonMapping setObject:[NSNumber numberWithInt:kRemoteControl_Switched]   forKey:@"19_"];
         }
-        else if( NSAppKitVersionNumber >= 1115.2 )
+        else if( OSX_LION )
         {
-            /* omg, keys from the future */
+            /* Lion cookies */
             msg_Dbg( VLCIntf, "using future AR cookies" );
             [cookieToButtonMapping setObject:[NSNumber numberWithInt:kRemoteButtonVolume_Plus]    forKey:@"33_31_30_21_20_2_"];
             [cookieToButtonMapping setObject:[NSNumber numberWithInt:kRemoteButtonVolume_Minus]   forKey:@"33_32_30_21_20_2_"];
@@ -119,7 +120,7 @@ static AppleRemote *_o_sharedInstance = nil;
         }
         else
         {
-            /* current Snow Leopard cookies */
+            /* 10.6.2+ Snow Leopard cookies */
             msg_Dbg( VLCIntf, "using Snow Leopard AR cookies" );
             [cookieToButtonMapping setObject:[NSNumber numberWithInt:kRemoteButtonVolume_Plus]    forKey:@"33_31_30_21_20_2_"];
             [cookieToButtonMapping setObject:[NSNumber numberWithInt:kRemoteButtonVolume_Minus]   forKey:@"33_32_30_21_20_2_"];
@@ -627,8 +628,8 @@ static void QueueCallbackFunction(void* target,  IOReturn result, void* refcon, 
         memset(cookies, 0, sizeof(IOHIDElementCookie) * NUMBER_OF_APPLE_REMOTE_ACTIONS);
         */
         allCookies = [[NSMutableArray alloc] init];
-        unsigned int i;
-        for (i=0; i< [elements count]; i++) {
+        NSUInteger elementCount = [elements count];
+        for (NSUInteger i=0; i< elementCount; i++) {
             element = [elements objectAtIndex:i];
 
             //Get cookie
@@ -668,8 +669,8 @@ static void QueueCallbackFunction(void* target,  IOReturn result, void* refcon, 
         if (queue) {
             result = (*queue)->create(queue, 0, 12);    //depth: maximum number of elements in queue before oldest elements in queue begin to be lost.
 
-            unsigned int i=0;
-            for(i=0; i<[allCookies count]; i++) {
+            NSUInteger cookieCount = [allCookies count];
+            for(NSUInteger i=0; i<cookieCount; i++) {
                 IOHIDElementCookie cookie = (IOHIDElementCookie)[[allCookies objectAtIndex:i] intValue];
                 (*queue)->addElement(queue, cookie, 0);
             }

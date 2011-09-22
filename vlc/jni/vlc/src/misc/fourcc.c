@@ -1,10 +1,10 @@
 /*****************************************************************************
  * fourcc.c: fourcc helpers functions
  *****************************************************************************
- * Copyright (C) 2009 Laurent Aimar
- * $Id: 9293335486970b343ee99852c4215901a17adbcb $
+ * Copyright © 2009-2011 Laurent Aimar
  *
  * Authors: Laurent Aimar <fenrir@videolan.org>
+ *          Jean-Baptiste Kempf <jb@videolan.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,42 +79,45 @@ static const entry_t p_list_video[] = {
         E("hdv6", "HDV 1080p24 (MPEG-2 Video)"),
         E("hdv7", "HDV 1080p25 (MPEG-2 Video)"),
         E("hdv8", "HDV 1080p30 (MPEG-2 Video)"),
-        E("hdv9", "JVC HDV (MPEG-2 Video)"),
+        E("hdv9", "HDV 720p60 JVC (MPEG-2 Video)"),
+        E("hdva", "HDV 720p50 (MPEG-2 Video)"),
 
-        E("mx5n", "MPEG2 IMX NTSC 525/60 50mb/s (FCP)"),
-        E("mx5p", "MPEG2 IMX PAL 625/60 50mb/s (FCP)"),
-        E("mx4n", "MPEG2 IMX NTSC 525/60 40mb/s (FCP)"),
-        E("mx4p", "MPEG2 IMX PAL 625/50 40mb/s (FCP)"),
-        E("mx3n", "MPEG2 IMX NTSC 525/60 30mb/s (FCP)"),
-        E("mx3p", "MPEG2 IMX NTSC 625/50 30mb/s (FCP)"),
+        E("mx5n", "MPEG2 IMX NTSC 525/60 50Mb/s (FCP)"),
+        E("mx5p", "MPEG2 IMX PAL 625/60 50Mb/s (FCP)"),
+        E("mx4n", "MPEG2 IMX NTSC 525/60 40Mb/s (FCP)"),
+        E("mx4p", "MPEG2 IMX PAL 625/50 40Mb/s (FCP)"),
+        E("mx3n", "MPEG2 IMX NTSC 525/60 30Mb/s (FCP)"),
+        E("mx3p", "MPEG2 IMX NTSC 625/50 30Mb/s (FCP)"),
 
-        E("xdv1", "XDCAM HD"),
-        E("xdv2", "XDCAM HD 1080i60 35mb/s"),
-        E("xdv3", "XDCAM HD 1080i50 35mb/s"),
-        E("xdv4", "XDCAM HD"),
-        E("xdv5", "XDCAM HD"),
-        E("xdv6", "XDCAM HD 1080p24 35mb/s"),
-        E("xdv7", "XDCAM HD 1080p25 35mb/s"),
-        E("xdv8", "XDCAM HD 1080p30 35mb/s"),
-        E("xdv9", "XDCAM HD"),
+        E("xdv1", "XDCAM HD 720p30 35Mb/s"),
+        E("xdv2", "XDCAM HD 1080i60 35Mb/s"),
+        E("xdv3", "XDCAM HD 1080i50 35Mb/s"),
+        E("xdv4", "XDCAM HD 720p24 35Mb/s"),
+        E("xdv5", "XDCAM HD 720p25 35Mb/s"),
+        E("xdv6", "XDCAM HD 1080p24 35Mb/s"),
+        E("xdv7", "XDCAM HD 1080p25 35Mb/s"),
+        E("xdv8", "XDCAM HD 1080p30 35Mb/s"),
+        E("xdv9", "XDCAM HD 720p60 35Mb/s"),
+        E("xdva", "XDCAM HD 720p50 35Mb/s"),
 
-        E("xdva", "XDCAM"),
-        E("xdvb", "XDCAM"),
-        E("xdvc", "XDCAM"),
-        E("xdvd", "XDCAM"),
-        E("xdve", "XDCAM"),
-        E("xdvf", "XDCAM"),
+        E("xdvb", "XDCAM EX 1080i60 50Mb/s CBR"),
+        E("xdvc", "XDCAM EX 1080i50 50Mb/s CBR"),
+        E("xdvd", "XDCAM EX 1080p24 50Mb/s CBR"),
+        E("xdve", "XDCAM EX 1080p25 50Mb/s CBR"),
+        E("xdvf", "XDCAM EX 1080p30 50Mb/s CBR"),
 
-        E("xd54", "XDCAM HD422 720p24 CBR"),
-        E("xd55", "XDCAM HD422 720p25 CBR"),
-        E("xd59", "XDCAM HD422 720p60 CBR"),
-        E("xd5a", "XDCAM HD422 720p50 CBR"),
-        E("xd5b", "XDCAM HD422 1080i60 CBR"),
-        E("xd5c", "XDCAM"),
-        E("xd5d", "XDCAM"),
-        E("xd5e", "XDCAM"),
-        E("xd5f", "XDCAM"),
-        E("xd59", "XDCAM"),
+        E("xd54", "XDCAM HD422 720p24 50Mb/s CBR"),
+        E("xd55", "XDCAM HD422 720p25 50Mb/s CBR"),
+        E("xd59", "XDCAM HD422 720p60 50Mb/s CBR"),
+        E("xd5a", "XDCAM HD422 720p50 50Mb/s CBR"),
+        E("xd5b", "XDCAM HD422 1080i60 50Mb/s CBR"),
+        E("xd5c", "XDCAM HD422 1080i50 50Mb/s CBR"),
+        E("xd5d", "XDCAM HD422 1080p24 50Mb/s CBR"),
+        E("xd5e", "XDCAM HD422 1080p25 50Mb/s CBR"),
+        E("xd5f", "XDCAM HD422 1080p30 50Mb/s CBR"),
+
+        E("xdhd", "XDCAM HD 540p"),
+        E("xdh2", "XDCAM HD422 540p"),
 
         E("AVmp", "AVID IMX PAL"),
         E("MMES", "Matrox MPEG-2"),
@@ -150,6 +153,7 @@ static const entry_t p_list_video[] = {
         A("INMC"),
         A("SN40"),
         A("EPHV"),
+        A("DM4V"),
         /* XVID flavours */
         E("xvid", "Xvid MPEG-4 Video"),
         E("XVID", "Xvid MPEG-4 Video"),
@@ -161,6 +165,7 @@ static const entry_t p_list_video[] = {
         E("dx50", "DivX MPEG-4 Video"),
         E("BLZ0", "Blizzard MPEG-4 Video"),
         E("DXGM", "Electronic Arts Game MPEG-4 Video"),
+        E("DreX", "DreX Mpeg-4"),
         /* 3ivx delta 4 */
         E("3IV2", "3ivx MPEG-4 Video"),
         E("3iv2", "3ivx MPEG-4 Video"),
@@ -168,6 +173,7 @@ static const entry_t p_list_video[] = {
         E("UMP4", "UB MPEG-4 Video"),
         E("SEDG", "Samsung MPEG-4 Video"),
         E("RMP4", "REALmagic MPEG-4 Video"),
+        E("LMP4", "Lead MPEG-4 Video"),
         E("HDX4", "Jomigo HDX4 (MPEG-4 Video)"),
         E("hdx4", "Jomigo HDX4 (MPEG-4 Video)"),
         E("SMP4", "Samsung SMP4 (MPEG-4 Video)"),
@@ -176,6 +182,7 @@ static const entry_t p_list_video[] = {
         E("FVFW", "FFmpeg MPEG-4"),
         E("FFDS", "FFDShow MPEG-4"),
         E("VIDM", "vidm 4.01 codec"),
+        E("DP02", "DynaPel MPEG-4 codec"),
         /* 3ivx delta 3.5 Unsupported
          * putting it here gives extreme distorted images */
         //E("3IV1", "3ivx delta 3.5 MPEG-4 Video"),
@@ -226,6 +233,7 @@ static const entry_t p_list_video[] = {
         /* who knows? */
         A("3VID"),
         A("3vid"),
+        A("DVX1"),
         A("DVX3"),
 
     /* Sorenson v1 */
@@ -247,11 +255,24 @@ static const entry_t p_list_video[] = {
         /* avc1: special case h264 */
         A("avc1"),
         A("AVC1"),
+        E("ai5p", "AVC-Intra  50M 720p24/30/60"),
+        E("ai5q", "AVC-Intra  50M 720p25/50"),
+        E("ai52", "AVC-Intra  50M 1080p25/50"),
+        E("ai53", "AVC-Intra  50M 1080p24/30/60"),
+        E("ai55", "AVC-Intra  50M 1080i50"),
+        E("ai56", "AVC-Intra  50M 1080i60"),
+        E("ai1p", "AVC-Intra 100M 720p24/30/60"),
+        E("ai1q", "AVC-Intra 100M 720p25/50"),
+        E("ai12", "AVC-Intra 100M 1080p25/50"),
+        E("ai13", "AVC-Intra 100M 1080p24/30/60"),
+        E("ai15", "AVC-Intra 100M 1080i50"),
+        E("ai16", "AVC-Intra 100M 1080i60"),
         E("VSSH", "Vanguard VSS H264"),
         E("VSSW", "Vanguard VSS H264"),
         E("vssh", "Vanguard VSS H264"),
         E("DAVC", "Dicas MPEGable H.264/MPEG-4 AVC"),
         E("davc", "Dicas MPEGable H.264/MPEG-4 AVC"),
+        E("x3eV", "DreX H.264"),
 
     /* H263 and H263i */
     /* H263(+) is also known as Real Video 1.0 */
@@ -266,6 +287,7 @@ static const entry_t p_list_video[] = {
         A("U263"),
         A("u263"),
         E("D263", "DEC H263"),
+        E("d263", "DEC H263"),
         E("L263", "LEAD H263"),
         E("M263", "Microsoft H263"),
         E("X263", "Xirlink H263"),
@@ -283,6 +305,7 @@ static const entry_t p_list_video[] = {
         E("viv1", "H263+"),
         E("vivO", "H263+"),
         E("viv2", "H263+"),
+        E("VIVO", "H263+"),
         E("U263", "UB H263+"),
 
     /* Flash (H263) variant */
@@ -301,7 +324,9 @@ static const entry_t p_list_video[] = {
     /* MJPEG */
     B(VLC_CODEC_MJPG, "Motion JPEG Video"),
         A("MJPG"),
+        A("MJPx"),
         A("mjpg"),
+        A("mJPG"),
         A("mjpa"),
         A("jpeg"),
         A("JPEG"),
@@ -309,12 +334,15 @@ static const entry_t p_list_video[] = {
         A("JPGL"),
         A("AVDJ"),
         A("MMJP"),
+        A("FLJP"),
+        A("FMJP"),
+        A("SJPG"),
         A("QIVG"),
-        /* AVID MJPEG */
         E("AVRn", "Avid Motion JPEG"),
         E("AVDJ", "Avid Motion JPEG"),
         E("ADJV", "Avid Motion JPEG"),
         E("dmb1", "Motion JPEG OpenDML Video"),
+        E("DMB1", "Motion JPEG OpenDML Video"),
         E("ijpg", "Intergraph JPEG Video"),
         E("IJPG", "Intergraph JPEG Video"),
         E("ACDV", "ACD Systems Digital"),
@@ -325,6 +353,7 @@ static const entry_t p_list_video[] = {
 
     B(VLC_CODEC_LJPG, "Lead Motion JPEG Video"),
         A("LJPG"),
+        E("Ljpg", "Lead Motion JPEG"),
 
     // ? from avcodec/fourcc.c but makes not sense.
     //{ VLC_FOURCC( 'L','J','P','G' ), CODEC_ID_MJPEG,       VIDEO_ES, "Lead Motion JPEG Video" },
@@ -348,23 +377,32 @@ static const entry_t p_list_video[] = {
         A("DVCS"),
         A("dvcs"),
         A("dvhd"),
-        A("dvhp"),
         A("dvhq"),
-        A("dvh3"),
-        A("dvh5"),
-        A("dvh6"),
-        A("dv1n"),
-        A("dv1p"),
-        A("dvc "),
-        A("dv25"),
         A("dvh1"),
+        E("dvh2", "DV Video 720p24"),
+        E("dvh3", "DV Video 720p25"),
+        E("dvh4", "DV Video 720p30"),
+        A("dv25"),
+        A("dc25"),
         A("dvs1"),
+        A("dvis"),
+        A("CDV2"),
+        A("CDVP"),
+        A("PDVC"),
+        A("IPDV"),
+        A("ipdv"),
         E("dvcp", "DV Video PAL"),
+        E("dvc ", "DV Video NTSC" ),
         E("dvp ", "DV Video Pro"),
         E("dvpp", "DV Video Pro PAL"),
         E("dv50", "DV Video C Pro 50"),
         E("dv5p", "DV Video C Pro 50 PAL"),
         E("dv5n", "DV Video C Pro 50 NTSC"),
+        E("dv1p", "DV Video C Pro 100 PAL" ),
+        E("dv1n", "DV Video C Pro 100 NTSC" ),
+        E("dvhp", "DV Video C Pro HD 720p" ),
+        E("dvh5", "DV Video C Pro HD 1080i50" ),
+        E("dvh6", "DV Video C Pro HD 1080i60" ),
         E("AVdv", "AVID DV"),
         E("AVd1", "AVID DV"),
         E("CDVC", "Canopus DV Video"),
@@ -391,8 +429,6 @@ static const entry_t p_list_video[] = {
     B(VLC_CODEC_WMVA, "Windows Media Video Advanced Profile"),
         A("WMVA"),
         A("wmva"),
-        A("WVP2"),
-        A("wvp2"),
 
     B(VLC_CODEC_VC1, "Windows Media Video VC1"),
         A("WVC1"),
@@ -403,6 +439,10 @@ static const entry_t p_list_video[] = {
     B(VLC_CODEC_WMVP, "Windows Media Video Presentation"),
         A("WMVP"),
         A("wmvp"),
+
+    B(VLC_CODEC_WMVP2, "Windows Media Video Presentation, v2"),
+        A("WVP2"),
+        A("wvp2"),
 
     /* Microsoft Video 1 */
     B(VLC_CODEC_MSVIDEO1, "Microsoft Video 1"),
@@ -588,9 +628,12 @@ static const entry_t p_list_video[] = {
         A("IV20"),
         A("RT21"),
 
-        /* Flash Screen Video */
+    /* Flash Screen Video */
     B(VLC_CODEC_FLASHSV, "Flash Screen Video"),
         A("FSV1"),
+    B(VLC_CODEC_FLASHSV2, "Flash Screen Video 2"),
+        A("FSV2"),
+
     B(VLC_CODEC_KMVC, "Karl Morton's Video Codec (Worms)"),
         A("KMVC"),
 
@@ -629,6 +672,11 @@ static const entry_t p_list_video[] = {
         A("IV50"),
         A("iv50"),
 
+    B(VLC_CODEC_PRORES, "Apple ProRes 422"),
+        E("apch", "Apple ProRes 422 HQ"),
+        E("apcs", "Apple ProRes 422 LT"),
+        E("apco", "Apple ProRes 422 Proxy"),
+        E("ap4c", "Apple ProRes 4444"),
 
     /* */
     B(VLC_CODEC_YV12, "Planar 4:2:0 YVU"),
@@ -723,8 +771,14 @@ static const entry_t p_list_video[] = {
     B(VLC_CODEC_V210, "10-bit 4:2:2 Component YCbCr"),
         A("v210"),
 
-    B(VLC_CODEC_NV12, "Planar  Y, Packet UV (420)"),
+    B(VLC_CODEC_NV12, "Biplanar 4:2:0 Y/UV"),
         A("NV12"),
+    B(VLC_CODEC_NV21, "Biplanar 4:2:0 Y/VU"),
+        A("NV21"),
+    B(VLC_CODEC_NV16, "Biplanar 4:2:2 Y/UV"),
+        A("NV16"),
+    B(VLC_CODEC_NV61, "Biplanar 4:2:2 Y/VU"),
+        A("NV61"),
 
     B(VLC_CODEC_I420_9L, "Planar 4:2:0 YUV 9-bit LE"),
         A("I09L"),
@@ -836,6 +890,7 @@ static const entry_t p_list_video[] = {
         A("mjp2"),
         A("MJP2"),
         A("MJ2C"),
+        A("LJ2C"),
 
     B(VLC_CODEC_LAGARITH, "Lagarith Lossless"),
         A("LAGS"),
@@ -1060,6 +1115,7 @@ static const entry_t p_list_audio[] = {
 
     B(VLC_CODEC_NELLYMOSER, "NellyMoser ASAO"),
         A("NELL"),
+        A("nmos"),
 
     B(VLC_CODEC_APE, "Monkey's Audio"),
         A("APE "),
@@ -1741,6 +1797,7 @@ static const struct
     { { VLC_CODEC_I411, 0 },                   PLANAR_8(3, 4, 1) },
     { { VLC_CODEC_YUV_PLANAR_410, 0 },         PLANAR_8(3, 4, 4) },
     { { VLC_CODEC_YUV_PLANAR_420, 0 },         PLANAR_8(3, 2, 2) },
+    { { VLC_CODEC_NV12, VLC_CODEC_NV21, 0 },   PLANAR_8(2, 1, 2) },
     { { VLC_CODEC_YUV_PLANAR_422, 0 },         PLANAR_8(3, 2, 1) },
     { { VLC_CODEC_YUV_PLANAR_440, 0 },         PLANAR_8(3, 1, 2) },
     { { VLC_CODEC_YUV_PLANAR_444, 0 },         PLANAR_8(3, 1, 1) },

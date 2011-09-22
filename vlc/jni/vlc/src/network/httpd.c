@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2004-2006 the VideoLAN team
  * Copyright © 2004-2007 Rémi Denis-Courmont
- * $Id: 469373b1fa69e6d88315e08b46f3de104109e0e4 $
+ * $Id: fee6e7c9e66d549ea3e6d12795abdcd65e5931ae $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Rémi Denis-Courmont <rem # videolan.org>
@@ -88,8 +88,6 @@ struct httpd_host_t
     unsigned    i_ref;
 
     /* address/port and socket for listening at connections */
-    char        *psz_hostname;
-    int         i_port;
     int         *fds;
     unsigned     nfd;
 
@@ -534,7 +532,7 @@ httpd_HandlerCallBack( httpd_callback_sys_t *p_sys, httpd_client_t *cl,
     /* We do it ourselves, thanks */
     answer->i_status = 0;
 
-    if( httpd_ClientIP( cl, psz_remote_addr ) == NULL )
+    if( httpd_ClientIP( cl, psz_remote_addr, NULL ) == NULL )
         *psz_remote_addr = '\0';
 
     uint8_t *psz_args = query->psz_args;
@@ -964,34 +962,84 @@ void httpd_StreamDelete( httpd_stream_t *stream )
  * Low level
  *****************************************************************************/
 static void* httpd_HostThread( void * );
+static httpd_host_t *httpd_HostCreate( vlc_object_t *, const char *,
+                                       const char *, vlc_tls_creds_t * );
 
 /* create a new host */
-httpd_host_t *httpd_HostNew( vlc_object_t *p_this, const char *psz_host,
-                             int i_port )
+httpd_host_t *vlc_http_HostNew( vlc_object_t *p_this )
 {
-    return httpd_TLSHostNew( p_this, psz_host, i_port, NULL, NULL, NULL, NULL
-                           );
+    return httpd_HostCreate( p_this, "http-host", "http-port", NULL );
+}
+
+httpd_host_t *vlc_https_HostNew( vlc_object_t *obj )
+{
+    char *cert = var_InheritString( obj, "http-cert" );
+    if( cert == NULL )
+    {
+        msg_Err( obj, "HTTP/TLS certificate not specified!" );
+        return NULL;
+    }
+
+    char *key = var_InheritString( obj, "http-key" );
+    vlc_tls_creds_t *tls = vlc_tls_ServerCreate( obj, cert, key );
+
+    if( tls == NULL )
+    {
+        msg_Err( obj, "HTTP/TLS certificate error (%s and %s)",
+                 cert, (key != NULL) ? key : cert );
+        free( key );
+        free( cert );
+        return NULL;
+    }
+    free( key );
+    free( cert );
+
+    char *ca = var_InheritString( obj, "http-ca" );
+    if( ca != NULL )
+    {
+        if( vlc_tls_ServerAddCA( tls, ca ) )
+        {
+            msg_Err( obj, "HTTP/TLS CA error (%s)", ca );
+            free( ca );
+            goto error;
+        }
+        free( ca );
+    }
+
+    char *crl = var_InheritString( obj, "http-crl" );
+    if( crl != NULL )
+    {
+        if( vlc_tls_ServerAddCRL( tls, crl ) )
+        {
+            msg_Err( obj, "TLS CRL error (%s)", crl );
+            free( crl );
+            goto error;
+        }
+        free( crl );
+    }
+
+    return httpd_HostCreate( obj, "http-host", "https-port", tls );
+
+error:
+    vlc_tls_ServerDelete( tls );
+    return NULL;
+}
+
+httpd_host_t *vlc_rtsp_HostNew( vlc_object_t *p_this )
+{
+    return httpd_HostCreate( p_this, "rtsp-host", "rtsp-port", NULL );
 }
 
 static vlc_mutex_t httpd_mutex = VLC_STATIC_MUTEX;
 
-httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
-                                int i_port,
-                                const char *psz_cert, const char *psz_key,
-                                const char *psz_ca, const char *psz_crl )
+static httpd_host_t *httpd_HostCreate( vlc_object_t *p_this,
+                                       const char *hostvar,
+                                       const char *portvar,
+                                       vlc_tls_creds_t *p_tls )
 {
     httpd_t      *httpd;
     httpd_host_t *host;
-    vlc_tls_creds_t *p_tls;
-    char *psz_host;
     int i;
-
-    if( psz_hostname == NULL )
-        psz_hostname = "";
-
-    psz_host = strdup( psz_hostname );
-    if( psz_host == NULL )
-        return NULL;
 
     /* to be sure to avoid multiple creation */
     vlc_mutex_lock( &httpd_mutex );
@@ -1005,7 +1053,6 @@ httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
         if( httpd == NULL )
         {
             vlc_mutex_unlock( &httpd_mutex );
-            free( psz_host );
             return NULL;
         }
 
@@ -1021,9 +1068,7 @@ httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
         host = httpd->host[i];
 
         /* cannot mix TLS and non-TLS hosts */
-        if( ( ( httpd->host[i]->p_tls != NULL ) != ( psz_cert != NULL ) )
-         || ( host->i_port != i_port )
-         || strcmp( host->psz_hostname, psz_hostname ) )
+        if( ( httpd->host[i]->p_tls != NULL ) != ( p_tls != NULL ) )
             continue;
 
         /* Increase existing matching host reference count.
@@ -1035,35 +1080,12 @@ httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
         vlc_mutex_unlock( &host->lock );
 
         vlc_mutex_unlock( &httpd_mutex );
+        if( p_tls != NULL )
+            vlc_tls_ServerDelete( p_tls );
         return host;
     }
 
     host = NULL;
-
-    /* determine TLS configuration */
-    if ( psz_cert != NULL )
-    {
-        p_tls = vlc_tls_ServerCreate( p_this, psz_cert, psz_key );
-        if ( p_tls == NULL )
-        {
-            msg_Err( p_this, "TLS initialization error" );
-            goto error;
-        }
-
-        if ( ( psz_ca != NULL) && vlc_tls_ServerAddCA( p_tls, psz_ca ) )
-        {
-            msg_Err( p_this, "TLS CA error" );
-            goto error;
-        }
-
-        if ( ( psz_crl != NULL) && vlc_tls_ServerAddCRL( p_tls, psz_crl ) )
-        {
-            msg_Err( p_this, "TLS CRL error" );
-            goto error;
-        }
-    }
-    else
-        p_tls = NULL;
 
     /* create the new host */
     host = (httpd_host_t *)vlc_custom_create( p_this, sizeof (*host),
@@ -1076,7 +1098,10 @@ httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
     vlc_cond_init( &host->wait );
     host->i_ref = 1;
 
-    host->fds = net_ListenTCP( p_this, psz_host, i_port );
+    char *hostname = var_InheritString( p_this->p_libvlc, hostvar );
+    int port = var_InheritInteger( p_this->p_libvlc, portvar );
+    host->fds = net_ListenTCP( p_this, hostname, port );
+    free( hostname );
     if( host->fds == NULL )
     {
         msg_Err( p_this, "cannot create socket(s) for HTTP host" );
@@ -1090,15 +1115,11 @@ httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
         goto error;
     }
 
-    host->i_port = i_port;
-    host->psz_hostname = psz_host;
-
-    host->i_url     = 0;
-    host->url       = NULL;
-    host->i_client  = 0;
-    host->client    = NULL;
-
-    host->p_tls = p_tls;
+    host->i_url    = 0;
+    host->url      = NULL;
+    host->i_client = 0;
+    host->client   = NULL;
+    host->p_tls    = p_tls;
 
     /* create the thread */
     if( vlc_clone( &host->thread, httpd_HostThread, host,
@@ -1115,7 +1136,6 @@ httpd_host_t *httpd_TLSHostNew( vlc_object_t *p_this, const char *psz_hostname,
     return host;
 
 error:
-    free( psz_host );
     if( httpd->i_host <= 0 )
     {
         libvlc_priv (httpd->p_libvlc)->p_httpd = NULL;
@@ -1187,8 +1207,6 @@ void httpd_HostDelete( httpd_host_t *host )
         vlc_tls_ServerDelete( host->p_tls );
 
     net_ListenClose( host->fds );
-    free( host->psz_hostname );
-
     vlc_cond_destroy( &host->wait );
     vlc_mutex_destroy( &host->lock );
     vlc_object_release( host );
@@ -1414,14 +1432,14 @@ void httpd_ClientModeBidir( httpd_client_t *cl )
     cl->i_mode   = HTTPD_CLIENT_BIDIR;
 }
 
-char* httpd_ClientIP( const httpd_client_t *cl, char *psz_ip )
+char* httpd_ClientIP( const httpd_client_t *cl, char *ip, int *port )
 {
-    return net_GetPeerAddress( cl->fd, psz_ip, NULL ) ? NULL : psz_ip;
+    return net_GetPeerAddress( cl->fd, ip, port ) ? NULL : ip;
 }
 
-char* httpd_ServerIP( const httpd_client_t *cl, char *psz_ip )
+char* httpd_ServerIP( const httpd_client_t *cl, char *ip, int *port )
 {
-    return net_GetSockAddress( cl->fd, psz_ip, NULL ) ? NULL : psz_ip;
+    return net_GetSockAddress( cl->fd, ip, port ) ? NULL : ip;
 }
 
 static void httpd_ClientClean( httpd_client_t *cl )
@@ -2239,7 +2257,7 @@ static void* httpd_HostThread( void *data )
                                 {
                                     char ip[NI_MAXNUMERICHOST];
 
-                                    if( ( httpd_ClientIP( cl, ip ) == NULL )
+                                    if( ( httpd_ClientIP( cl, ip, NULL ) == NULL )
                                      || ACL_Check( url->p_acl, ip ) )
                                     {
                                         b_hosts_failed = true;

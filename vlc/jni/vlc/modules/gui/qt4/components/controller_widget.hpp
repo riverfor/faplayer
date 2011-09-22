@@ -2,7 +2,7 @@
  * Controller_widget.cpp : Controller Widget for the controllers
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: c5d6b883ff31763793f18dc27d69fc04266025bb $
+ * $Id: 623af09f63281815235596bc5d6310bdaae09c7b $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *
@@ -67,7 +67,7 @@ private slots:
     void updateButtonIcons( bool, bool );
 };
 
-#define VOLUME_MAX 200
+#define VOLUME_MAX (QT_VOLUME_MAX * 100 / QT_VOLUME_DEFAULT)
 class SoundWidget : public QWidget
 {
     Q_OBJECT

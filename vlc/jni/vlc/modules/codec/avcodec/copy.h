@@ -2,7 +2,7 @@
  * copy.h: Fast YV12/NV12 copy
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: 93d246af5a131ea004a20b0afac782d955ea74b5 $
+ * $Id: f53fabb194b337106f05b200fff0faa8cb04c36f $
  *
  * Authors: Laurent Aimar <fenrir_AT_ videolan _DOT_ org>
  *
@@ -25,7 +25,6 @@
 #define _VLC_AVCODEC_COPY_H 1
 
 typedef struct {
-    void    *base;
     uint8_t *buffer;
     size_t  size;
 } copy_cache_t;

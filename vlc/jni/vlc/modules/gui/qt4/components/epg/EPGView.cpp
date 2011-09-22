@@ -2,7 +2,7 @@
  * EPGView.cpp: EPGView
  ****************************************************************************
  * Copyright © 2009-2010 VideoLAN
- * $Id: 935fd22c74d36c285cd384d5e4e828843552a2f4 $
+ * $Id: dc8ff62c388311a9ea30f2787064d8dd04320e01 $
  *
  * Authors: Ludovic Fauvet <etix@l0cal.com>
  *
@@ -104,9 +104,9 @@ const QDateTime& EPGView::baseTime()
     return m_baseTime;
 }
 
-bool EPGView::hasValidData()
+bool EPGView::hasValidData() const
 {
-    return !epgitemsByChannel.empty();
+    return !epgitemsByChannel.isEmpty();
 }
 
 static void cleanOverlapped( EPGEventByTimeQMap *epgItemByTime, EPGItem *epgItem, QGraphicsScene *scene )
@@ -207,7 +207,7 @@ void EPGView::removeEPGEvent( vlc_epg_event_t *data, QString channelName )
             delete epgItem;
         }
 
-        if ( epgItemByTime->keys().empty() )
+        if ( epgItemByTime->keys().isEmpty() )
         { /* Now unused channel */
             epgitemsByChannel.remove( channelName );
             delete epgItemByTime;
@@ -275,7 +275,7 @@ void EPGView::cleanup()
             }
         }
 
-        if ( epgItemByTime->keys().empty() )
+        if ( epgItemByTime->keys().isEmpty() )
         { /* Now unused channel */
             epgitemsByChannel.remove( channelName );
             delete epgItemByTime;

@@ -2,7 +2,7 @@
  * crop.c : Crop video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2002, 2003 the VideoLAN team
- * $Id: 9186f25e77e76618b7e6ff9b676e9e9ac4cae219 $
+ * $Id: b5e946097a7e7acbe0c90446d0752ff0f7f706ec $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          mod by Cedric Cocquebert <Cedric.Cocquebert@supelec.fr>
@@ -94,7 +94,7 @@ static int FilterCallback ( vlc_object_t *, char const *,
                         " that the line is black.")
 
 #define SKIP_TEXT N_("Skip percentage (%)")
-#define SKIP_LONGTEXT N_("Percentage of the line to consider while checking for black lines. This allows to skip logos in black borders and crop them anyway.")
+#define SKIP_LONGTEXT N_("Percentage of the line to consider while checking for black lines. This allows skipping logos in black borders and crop them anyway.")
 
 #define LUM_TEXT N_("Luminance threshold ")
 #define LUM_LONGTEXT N_("Maximum luminance to consider a pixel as black (0-255).")

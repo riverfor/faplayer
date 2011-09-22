@@ -7,35 +7,17 @@
 # which have makefiles with distribution information.
 #  - src (libvlc) is nedeed by modules
 #  - libs/* are needed by modules
-BASE_SUBDIRS = po compat src bin modules share doc test
-EXTRA_SUBDIRS = m4 \
-	libs/loader libs/srtp libs/unzip
-DIST_SUBDIRS = $(BASE_SUBDIRS) $(EXTRA_SUBDIRS)
-
-SUBDIRS = po compat src
-if LOADER
-SUBDIRS += libs/loader
-endif
-if HAVE_GCRYPT
-SUBDIRS += libs/srtp
-endif
-if HAVE_ZLIB
-if !HAVE_MINIZIP
-SUBDIRS += libs/unzip
-endif
-endif
+DIST_SUBDIRS = m4 compat doc po share src modules lib bin test
+SUBDIRS = compat doc po share src modules lib
 if BUILD_VLC
 SUBDIRS += bin
 endif
-SUBDIRS += modules share doc test
+SUBDIRS += test
 
 EXTRA_DIST = \
-	HACKING \
-	INSTALL.win32 \
 	extras/package/win32/vlc.exe.manifest \
 	extras/package/win32/libvlc.dll.manifest \
 	extras/package/macosx/README.MacOSX.rtf \
-	vlc-config.in.in \
 	extras/package/rpm/vlc.fedora.spec \
 	extras/package/rpm/vlc.altlinux.spec \
 	extras/package/win32/vlc.win32.nsi.in \
@@ -44,6 +26,7 @@ EXTRA_DIST = \
 	extras/package/win32/UAC.dll \
 	extras/package/win32/languages/declaration.nsh \
 	extras/package/win32/languages/bengali.nsh \
+	extras/package/win32/languages/basque.nsh \
 	extras/package/win32/languages/brazilian_portuguese.nsh \
 	extras/package/win32/languages/bulgarian.nsh \
 	extras/package/win32/languages/catalan.nsh \
@@ -57,6 +40,7 @@ EXTRA_DIST = \
 	extras/package/win32/languages/hungarian.nsh \
 	extras/package/win32/languages/italian.nsh \
 	extras/package/win32/languages/japanese.nsh \
+	extras/package/win32/languages/lithuanian.nsh \
 	extras/package/win32/languages/occitan.nsh \
 	extras/package/win32/languages/polish.nsh \
 	extras/package/win32/languages/punjabi.nsh \
@@ -70,7 +54,7 @@ EXTRA_DIST = \
 dist_noinst_SCRIPTS = bootstrap
 nodist_noinst_SCRIPTS = compile
 
-BUILT_SOURCES_distclean = vlc-config
+BUILT_SOURCES_distclean =
 if HAVE_WIN32
 BUILT_SOURCES_distclean += \
 	extras/package/win32/vlc.win32.nsi extras/package/win32/spad.nsi
@@ -118,35 +102,19 @@ ChangeLog: Makefile.am
 
 EXTRA_DIST += \
 	extras/package/macosx/Resources/about_bg.png \
-	extras/package/macosx/Resources/add_embedded.png \
-	extras/package/macosx/Resources/add_embedded_graphite.png \
 	extras/package/macosx/Resources/dsa_pub.pem \
-	extras/package/macosx/Resources/embedded_vout.png \
-	extras/package/macosx/Resources/English.lproj/About.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/About.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/AudioEffects.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/AudioEffects.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/Bookmarks.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/Bookmarks.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/CoreDialogs.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/CoreDialogs.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/ErrorPanel.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/ErrorPanel.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/InfoPlist.strings.in \
-	extras/package/macosx/Resources/English.lproj/MainMenu.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/MainMenu.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/MediaInfo.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/MediaInfo.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/Open.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/Open.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/Preferences.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/Preferences.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/SyncTracks.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/SyncTracks.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/VideoEffects.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/VideoEffects.nib/keyedobjects.nib \
-	extras/package/macosx/Resources/English.lproj/Wizard.nib/designable.nib \
-	extras/package/macosx/Resources/English.lproj/Wizard.nib/keyedobjects.nib \
+	extras/package/macosx/Resources/English.lproj/About.xib \
+	extras/package/macosx/Resources/English.lproj/AudioEffects.xib \
+	extras/package/macosx/Resources/English.lproj/Bookmarks.xib \
+	extras/package/macosx/Resources/English.lproj/CoreDialogs.xib \
+	extras/package/macosx/Resources/English.lproj/ErrorPanel.xib \
+	extras/package/macosx/Resources/English.lproj/MainMenu.xib \
+	extras/package/macosx/Resources/English.lproj/MediaInfo.xib \
+	extras/package/macosx/Resources/English.lproj/Open.xib \
+	extras/package/macosx/Resources/English.lproj/Preferences.xib \
+	extras/package/macosx/Resources/English.lproj/SyncTracks.xib \
+	extras/package/macosx/Resources/English.lproj/VideoEffects.xib \
+	extras/package/macosx/Resources/English.lproj/Wizard.xib \
 	extras/package/macosx/Resources/fspanel/fs_background.png \
 	extras/package/macosx/Resources/fspanel/fs_exit_fullscreen.png \
 	extras/package/macosx/Resources/fspanel/fs_exit_fullscreen_highlight.png \
@@ -174,6 +142,33 @@ EXTRA_DIST += \
 	extras/package/macosx/Resources/fspanel/fs_volume_slider_bar.png \
 	extras/package/macosx/Resources/fspanel/fs_volume_slider_knob.png \
 	extras/package/macosx/Resources/fspanel/fs_volume_slider_knob_highlight.png \
+	extras/package/macosx/Resources/fspanel/fs_background@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_exit_fullscreen@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_exit_fullscreen_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_forward@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_forward_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_pause@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_pause_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_play@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_play_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_rewind@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_rewind_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_skip_next@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_skip_next_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_skip_previous@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_skip_previous_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_stop@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_stop_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_time_slider@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_time_slider_knob@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_time_slider_knob_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_volume_max@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_volume_max_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_volume_mute@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_volume_mute_highlight@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_volume_slider_bar@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_volume_slider_knob@x1.5.png \
+	extras/package/macosx/Resources/fspanel/fs_volume_slider_knob_highlight@x1.5.png \
 	extras/package/macosx/Resources/icons/aiff.icns \
 	extras/package/macosx/Resources/icons/audio.icns \
 	extras/package/macosx/Resources/icons/avi.icns \
@@ -198,7 +193,9 @@ EXTRA_DIST += \
 	extras/package/macosx/Resources/mainwindow/back-pressed.png \
 	extras/package/macosx/Resources/mainwindow/back.png \
 	extras/package/macosx/Resources/mainwindow/bottom-background.png \
-	extras/package/macosx/Resources/mainwindow/bottom-bar-mini.png \
+	extras/package/macosx/Resources/mainwindow/bottombar-mini.png \
+	extras/package/macosx/Resources/mainwindow/dropzone-background.png \
+	extras/package/macosx/Resources/mainwindow/dropzone.png \
 	extras/package/macosx/Resources/mainwindow/effects-double-buttons-blue.png \
 	extras/package/macosx/Resources/mainwindow/effects-double-buttons-pressed.png \
 	extras/package/macosx/Resources/mainwindow/effects-double-buttons.png \
@@ -236,7 +233,7 @@ EXTRA_DIST += \
 	extras/package/macosx/Resources/mainwindow/repeat-pressed.png \
 	extras/package/macosx/Resources/mainwindow/repeat.png \
 	extras/package/macosx/Resources/mainwindow/shuffle-blue-pressed.png \
-	extras/package/macosx/Resources/mainwindow/shuffle-on.png \
+	extras/package/macosx/Resources/mainwindow/shuffle-blue.png \
 	extras/package/macosx/Resources/mainwindow/shuffle-pressed.png \
 	extras/package/macosx/Resources/mainwindow/shuffle.png \
 	extras/package/macosx/Resources/mainwindow/stop-pressed.png \
@@ -245,10 +242,10 @@ EXTRA_DIST += \
 	extras/package/macosx/Resources/mainwindow/volume-low.png \
 	extras/package/macosx/Resources/mainwindow/volume-slider-knob.png \
 	extras/package/macosx/Resources/mainwindow/volume-slider-track.png \
-	extras/package/macosx/Resources/mainwindow/volumetrack.png \
 	extras/package/macosx/Resources/mainwindow_dark/back-pressed_dark.png \
 	extras/package/macosx/Resources/mainwindow_dark/back_dark.png \
 	extras/package/macosx/Resources/mainwindow_dark/bottom-background_dark.png \
+	extras/package/macosx/Resources/mainwindow_dark/bottombar-mini.png \
 	extras/package/macosx/Resources/mainwindow_dark/effects-double-buttons-blue_dark.png \
 	extras/package/macosx/Resources/mainwindow_dark/effects-double-buttons-pressed_dark.png \
 	extras/package/macosx/Resources/mainwindow_dark/effects-double-buttons_dark.png \
@@ -290,10 +287,6 @@ EXTRA_DIST += \
 	extras/package/macosx/Resources/mainwindow_dark/volume-slider-knob_dark.png \
 	extras/package/macosx/Resources/mainwindow_dark/volume-slider-track_dark.png \
 	extras/package/macosx/Resources/noart.png \
-	extras/package/macosx/Resources/pause_embedded.png \
-	extras/package/macosx/Resources/pause_embedded_graphite.png \
-	extras/package/macosx/Resources/play_embedded.png \
-	extras/package/macosx/Resources/play_embedded_graphite.png \
 	extras/package/macosx/Resources/prefs/spref_cone_Audio_64.png \
 	extras/package/macosx/Resources/prefs/spref_cone_Hotkeys_64.png \
 	extras/package/macosx/Resources/prefs/spref_cone_Input_64.png \
@@ -301,15 +294,13 @@ EXTRA_DIST += \
 	extras/package/macosx/Resources/prefs/spref_cone_Subtitles_64.png \
 	extras/package/macosx/Resources/prefs/spref_cone_Video_64.png \
 	extras/package/macosx/Resources/README \
-	extras/package/macosx/Resources/repeat_embedded.png \
-	extras/package/macosx/Resources/repeat_embedded_graphite.png \
-	extras/package/macosx/Resources/repeat_single_embedded_graphite.png \
-	extras/package/macosx/Resources/shuffle_embedded.png \
-	extras/package/macosx/Resources/shuffle_embedded_graphite.png \
-	extras/package/macosx/Resources/skip_forward_active_embedded.png \
-	extras/package/macosx/Resources/skip_forward_embedded_graphite.png \
-	extras/package/macosx/Resources/skip_previous_active_embedded.png \
-	extras/package/macosx/Resources/skip_previous_embedded_graphite.png \
+	extras/package/macosx/Resources/sidebar-icons/document-music-playlist.png \
+	extras/package/macosx/Resources/sidebar-icons/film-cast.png \
+	extras/package/macosx/Resources/sidebar-icons/film.png \
+	extras/package/macosx/Resources/sidebar-icons/music-beam.png \
+	extras/package/macosx/Resources/sidebar-icons/network-cloud.png \
+	extras/package/macosx/Resources/sidebar-icons/picture.png \
+	extras/package/macosx/Resources/sidebar-icons/README \
 	extras/package/macosx/Resources/vlc.scriptSuite \
 	extras/package/macosx/Resources/vlc.scriptTerminology \
 	extras/package/macosx/fullscreen_panel.svg \
@@ -346,21 +337,18 @@ EXTRA_DIST += \
 	extras/misc/mpris.xml
 
 ###############################################################################
+# Scripts for building dependencies.
+##############################################################################
+EXTRA_DIST += \
+	contrib/bootstrap \
+	contrib/src/
+
+###############################################################################
 # Building libvlc
 ###############################################################################
 
-noinst_SCRIPTS = vlc-config
-vlc-config: $(top_builddir)/config.status $(top_builddir)/vlc-config.in
-	$(SHELL) ./config.status --file=$@
-	chmod 0755 $@
-	touch $@
-
-vlc-config.in: vlc-config.in.in
-	./config.status --recheck
-	touch $@
-
 CLEANFILES = $(BUILT_SOURCES_clean)
-DISTCLEANFILES = $(BUILT_SOURCES_distclean) vlc-config.in compile
+DISTCLEANFILES = $(BUILT_SOURCES_distclean) compile
 MAINTAINERCLEANFILES = ChangeLog
 
 # Shortcut for developers to rebuild the core (libvlc + vlc)
@@ -369,8 +357,11 @@ MAINTAINERCLEANFILES = ChangeLog
 libcompat:
 	cd compat && $(MAKE) $(AM_MAKEFLAGS)
 
-libvlc: libcompat
-	cd src && $(MAKE) $(AM_MAKEFLAGS) libvlc.la
+libvlccore: libcompat
+	cd src && $(MAKE) $(AM_MAKEFLAGS) libvlccore.la
+
+libvlc: libvlccore
+	cd lib && $(MAKE) $(AM_MAKEFLAGS) libvlc.la
 
 core: libvlc vlc$(EXEEXT)
 	cd bin && $(MAKE) $(AM_MAKEFLAGS) vlc$(EXEEXT) vlc-static$(EXEEXT)
@@ -412,7 +403,7 @@ mvlc: make-alias Makefile
 	$(AM_V_GEN)$(MKALIAS) maemo
 
 if BUILD_VLC
-noinst_SCRIPTS += vlc$(EXEEXT)
+noinst_SCRIPTS = vlc$(EXEEXT)
 endif
 
 vlc$(EXEEXT):
@@ -425,6 +416,18 @@ noinst_DATA = VLC.app
 endif
 endif
 
+###############################################################################
+# Installing plugins cache
+###############################################################################
+install-exec-hook:
+	if test "$(build)" = "$(host)"; then \
+		LD_LIBRARY_PATH="$(DESTDIR)$(libdir):$$LD_LIBRARY_PATH" \
+		"$(DESTDIR)$(vlclibdir)/vlc-cache-gen$(EXEEXT)" \
+			 "$(DESTDIR)$(vlclibdir)/plugins" ; \
+	else \
+		echo "Cross-compilation: cache generation skipped!" ; \
+	fi
+
 silentstd = $(silentstd_$(V))
 silentstd_ = $(silentstd_$(AM_DEFAULT_VERBOSITY))
 silentstd_0 = 2>&1 >/dev/null
@@ -433,6 +436,7 @@ silentstd_0 = 2>&1 >/dev/null
 # use package-macosx to get a nice dmg
 VLC-release.app: vlc
 	( cd src && $(MAKE) $(AM_MAKEFLAGS) install $(silentstd) )
+	( cd lib && $(MAKE) $(AM_MAKEFLAGS) install $(silentstd) )
 	rm -Rf "$(top_builddir)/tmp"
 	mkdir -p "$(top_builddir)/tmp/extras/package/macosx"
 	rm -Rf $(top_builddir)/VLC-release.app
@@ -482,19 +486,14 @@ VLC-release.app: vlc
 	    prefs.m \
 	    simple_prefs.h \
 	    simple_prefs.m \
-	    vout.h \
-	    voutgl.m \
 	    wizard.h \
 	    wizard.m \
 	    bookmarks.h \
 	    bookmarks.m \
 	    coredialogs.h \
 	    coredialogs.m \
-	    embeddedwindow.h \
-	    embeddedwindow.m \
 	    fspanel.h \
-	    fspanel.m \
-	    vout.m; do \
+	    fspanel.m; do \
 	  cp "$(srcdir)/modules/gui/macosx/$$i" \
              $(top_builddir)/tmp/modules/gui/macosx; \
 	done
@@ -554,19 +553,19 @@ VLC-release.app: vlc
 	  mkdir -p $(top_builddir)/VLC-release.app/Contents/Resources/$${i}.lproj ; \
 	  $(LN_S) -f ../English.lproj/InfoPlist.strings \
 	      $(top_builddir)/VLC-release.app/Contents/Resources/$${i}.lproj ; \
-	  $(LN_S) -f ../English.lproj/MainMenu.nib \
+	  $(LN_S) -f ../English.lproj/MainMenu.xib \
 	      $(top_builddir)/VLC-release.app/Contents/Resources/$${i}.lproj ; \
 	done
 	printf "APPLVLC#" >| $(top_builddir)/VLC-release.app/Contents/PkgInfo
 	rm -Rf $(top_builddir)/VLC-release.app/Contents/Frameworks/BGHUDAppKit.framework/Resources/
-	find $(top_builddir)/VLC-release.app/Contents/Resources/English.lproj -name designable.nib -delete;
 	find $(top_builddir)/VLC-release.app -type d -exec chmod ugo+rx '{}' \;
 	find $(top_builddir)/VLC-release.app -type f -exec chmod ugo+r '{}' \;
 
 # This is just for development purposes. 
 # The resulting VLC.app will only run in this tree.
-VLC.app: vlc $(top_builddir)/src/.libs/libvlccore.dylib $(top_builddir)/src/.libs/libvlc.dylib
+VLC.app: vlc $(top_builddir)/src/.libs/libvlccore.dylib $(top_builddir)/lib/.libs/libvlc.dylib
 	$(AM_V_GEN)(cd src && make install $(silentstd))
+	$(AM_V_GEN)(cd lib && make install $(silentstd))
 	rm -Rf $(top_builddir)/tmp
 	mkdir -p "$(top_builddir)/tmp/extras/package/macosx"
 	rm -Rf $(top_builddir)/VLC.app
@@ -616,19 +615,14 @@ VLC.app: vlc $(top_builddir)/src/.libs/libvlccore.dylib $(top_builddir)/src/.lib
 	    prefs.m \
 	    simple_prefs.h \
 	    simple_prefs.m \
-	    vout.h \
-	    voutgl.m \
 	    wizard.h \
 	    wizard.m \
 	    bookmarks.h \
 	    bookmarks.m \
 	    coredialogs.h \
 	    coredialogs.m \
-	    embeddedwindow.h \
-	    embeddedwindow.m \
 	    fspanel.h \
-	    fspanel.m \
-	    vout.m; do \
+	    fspanel.m; do \
 	  cp "$(srcdir)/modules/gui/macosx/$$i" \
              $(top_builddir)/tmp/modules/gui/macosx; \
 	done
@@ -652,7 +646,7 @@ VLC.app: vlc $(top_builddir)/src/.libs/libvlccore.dylib $(top_builddir)/src/.lib
 	  mkdir -p $(top_builddir)/VLC.app/Contents/Resources/$${i}.lproj ; \
 	  $(LN_S) -f ../English.lproj/InfoPlist.strings \
 	      $(top_builddir)/VLC.app/Contents/Resources/$${i}.lproj ; \
-	  $(LN_S) -f ../English.lproj/MainMenu.nib \
+	  $(LN_S) -f ../English.lproj/MainMenu.xib \
 	      $(top_builddir)/VLC.app/Contents/Resources/$${i}.lproj ; \
 	done
 	printf "APPLVLC#" >| $(top_builddir)/VLC.app/Contents/PkgInfo
@@ -1027,5 +1021,5 @@ update-po:
 ###############################################################################
 # Enforce Mac OS X deployment target environment variable
 ###############################################################################
-macosx-sdk: Makefile.in $(HEADERS_include) vlc-config
+macosx-sdk: Makefile.in $(HEADERS_include)
 	export MACOSX_DEPLOYMENT_TARGET=$(MACOSX_DEPLOYMENT_TARGET)

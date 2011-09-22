@@ -405,6 +405,7 @@ static const char psz_authors[] =
 "------------\n"
 "Ajith Manjula - Sinhala\n"
 "Alexander Didebulidze - Georgian\n"
+"Alexander Law - Russian\n"
 "Alexey Lugin - Ukrainian\n"
 "Alexey Salmin - Russian\n"
 "Amanpreet Singh Alam - Punjabi\n"

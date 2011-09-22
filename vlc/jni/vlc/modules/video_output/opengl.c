@@ -36,23 +36,7 @@
 #include "opengl.h"
 // Define USE_OPENGL_ES to the GL ES Version you want to select
 
-#if !defined (__APPLE__)
-# if USE_OPENGL_ES == 2
-#  include <GLES2/gl2ext.h>
-# elif USE_OPENGL_ES == 1
-#  include <GLES/glext.h>
-# else
-#   include <GL/glext.h>
-# endif
-#else
-# if USE_OPENGL_ES == 2
-#  include <OpenGLES/ES2/gl.h>
-# elif USE_OPENGL_ES == 1
-#  include <OpenGLES/ES1/gl.h>
-# else
-#  define MACOS_OPENGL
-#  include <OpenGL/glext.h>
-# endif
+#ifdef __APPLE__
 # define PFNGLGENPROGRAMSARBPROC              typeof(glGenProgramsARB)*
 # define PFNGLBINDPROGRAMARBPROC              typeof(glBindProgramARB)*
 # define PFNGLPROGRAMSTRINGARBPROC            typeof(glProgramStringARB)*
@@ -182,12 +166,19 @@ vout_display_opengl_t *vout_display_opengl_New(video_format_t *fmt,
     /* Load extensions */
     bool supports_fp = false;
     if (HasExtension(extensions, "GL_ARB_fragment_program")) {
+#if !defined(MACOS_OPENGL)
         vgl->GenProgramsARB    = (PFNGLGENPROGRAMSARBPROC)vlc_gl_GetProcAddress(vgl->gl, "glGenProgramsARB");
         vgl->BindProgramARB    = (PFNGLBINDPROGRAMARBPROC)vlc_gl_GetProcAddress(vgl->gl, "glBindProgramARB");
         vgl->ProgramStringARB  = (PFNGLPROGRAMSTRINGARBPROC)vlc_gl_GetProcAddress(vgl->gl, "glProgramStringARB");
         vgl->DeleteProgramsARB = (PFNGLDELETEPROGRAMSARBPROC)vlc_gl_GetProcAddress(vgl->gl, "glDeleteProgramsARB");
         vgl->ProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)vlc_gl_GetProcAddress(vgl->gl, "glProgramLocalParameter4fvARB");
-
+#else
+        vgl->GenProgramsARB = glGenProgramsARB;
+        vgl->BindProgramARB = glBindProgramARB;
+        vgl->ProgramStringARB = glProgramStringARB;
+        vgl->DeleteProgramsARB = glDeleteProgramsARB;
+        vgl->ProgramLocalParameter4fvARB = glProgramLocalParameter4fvARB;
+#endif
         supports_fp = vgl->GenProgramsARB &&
                       vgl->BindProgramARB &&
                       vgl->ProgramStringARB &&
@@ -198,9 +189,13 @@ vout_display_opengl_t *vout_display_opengl_New(video_format_t *fmt,
     bool supports_multitexture = false;
     GLint max_texture_units = 0;
     if (HasExtension(extensions, "GL_ARB_multitexture")) {
+#if !defined(MACOS_OPENGL)
         vgl->ActiveTextureARB   = (PFNGLACTIVETEXTUREARBPROC)vlc_gl_GetProcAddress(vgl->gl, "glActiveTextureARB");
         vgl->MultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)vlc_gl_GetProcAddress(vgl->gl, "glMultiTexCoord2fARB");
-
+#else
+        vgl->ActiveTextureARB = glActiveTextureARB;
+        vgl->MultiTexCoord2fARB = glMultiTexCoord2fARB;
+#endif
         supports_multitexture = vgl->ActiveTextureARB &&
                                 vgl->MultiTexCoord2fARB;
         if (supports_multitexture)
@@ -224,16 +219,6 @@ vout_display_opengl_t *vout_display_opengl_New(video_format_t *fmt,
     vgl->tex_format   = GL_RGB;
     vgl->tex_internal = GL_RGB;
     vgl->tex_type     = GL_UNSIGNED_SHORT_5_6_5;
-#elif defined(MACOS_OPENGL)
-#   if defined(WORDS_BIGENDIAN)
-    vgl->fmt.i_chroma = VLC_CODEC_YUYV;
-#   else
-    vgl->fmt.i_chroma = VLC_CODEC_UYVY;
-#   endif
-    vgl->tex_target   = GL_TEXTURE_RECTANGLE_EXT;
-    vgl->tex_format   = GL_YCBCR_422_APPLE;
-    vgl->tex_internal = GL_YCBCR_422_APPLE;
-    vgl->tex_type     = GL_UNSIGNED_SHORT_8_8_APPLE;
 #else
     vgl->fmt.i_chroma = VLC_CODEC_RGB32;
 #   if defined(WORDS_BIGENDIAN)
@@ -287,8 +272,6 @@ vout_display_opengl_t *vout_display_opengl_New(video_format_t *fmt,
 
     bool supports_npot = false;
 #if USE_OPENGL_ES == 2
-    supports_npot = true;
-#elif defined(MACOS_OPENGL)
     supports_npot = true;
 #else
     supports_npot |= HasExtension(extensions, "GL_APPLE_texture_2D_limited_npot") ||
@@ -367,6 +350,7 @@ vout_display_opengl_t *vout_display_opengl_New(video_format_t *fmt,
             vgl->local_count += 4;
         }
         if (code) {
+        // Here you have shaders
             vgl->GenProgramsARB(1, &vgl->program);
             vgl->BindProgramARB(GL_FRAGMENT_PROGRAM_ARB, vgl->program);
             vgl->ProgramStringARB(GL_FRAGMENT_PROGRAM_ARB,
@@ -410,7 +394,7 @@ vout_display_opengl_t *vout_display_opengl_New(video_format_t *fmt,
     *fmt = vgl->fmt;
     if (subpicture_chromas) {
         *subpicture_chromas = NULL;
-#if !defined(MACOS_OPENGL) && !USE_OPENGL_ES
+#if !USE_OPENGL_ES
         if (supports_npot)
             *subpicture_chromas = gl_subpicture_chromas;
 #endif
@@ -443,41 +427,6 @@ void vout_display_opengl_Delete(vout_display_opengl_t *vgl)
     free(vgl);
 }
 
-#ifdef MACOS_OPENGL
-struct picture_sys_t {
-    vout_display_opengl_t *vgl;
-    GLuint *texture;
-};
-
-/* Small helper */
-static inline GLuint PictureGetTexture(picture_t *picture)
-{
-    return *picture->p_sys->texture;
-}
-
-static int PictureLock(picture_t *picture)
-{
-    if (!picture->p_sys)
-        return VLC_SUCCESS;
-
-    vout_display_opengl_t *vgl = picture->p_sys->vgl;
-    if (!vlc_gl_Lock(vgl->gl)) {
-        glBindTexture(vgl->tex_target, PictureGetTexture(picture));
-        glTexSubImage2D(vgl->tex_target, 0,
-                        0, 0, vgl->fmt.i_width, vgl->fmt.i_height,
-                        vgl->tex_format, vgl->tex_type, picture->p[0].p_pixels);
-
-        vlc_gl_Unlock(vgl->gl);
-    }
-    return VLC_SUCCESS;
-}
-
-static void PictureUnlock(picture_t *picture)
-{
-    VLC_UNUSED(picture);
-}
-#endif
-
 picture_pool_t *vout_display_opengl_GetPool(vout_display_opengl_t *vgl, unsigned requested_count)
 {
     if (vgl->pool)
@@ -491,14 +440,6 @@ picture_pool_t *vout_display_opengl_GetPool(vout_display_opengl_t *vgl, unsigned
         picture[count] = picture_NewFromFormat(&vgl->fmt);
         if (!picture[count])
             break;
-
-#ifdef MACOS_OPENGL
-        picture_sys_t *sys = picture[count]->p_sys = malloc(sizeof(*sys));
-        if (sys) {
-            sys->vgl = vgl;
-            sys->texture = vgl->texture[count];
-        }
-#endif
     }
     if (count <= 0)
         return NULL;
@@ -508,10 +449,6 @@ picture_pool_t *vout_display_opengl_GetPool(vout_display_opengl_t *vgl, unsigned
     memset(&cfg, 0, sizeof(cfg));
     cfg.picture_count = count;
     cfg.picture       = picture;
-#ifdef MACOS_OPENGL
-    cfg.lock          = PictureLock;
-    cfg.unlock        = PictureUnlock;
-#endif
     vgl->pool = picture_pool_NewExtended(&cfg);
     if (!vgl->pool)
         goto error;
@@ -537,17 +474,6 @@ picture_pool_t *vout_display_opengl_GetPool(vout_display_opengl_t *vgl, unsigned
             glTexParameteri(vgl->tex_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(vgl->tex_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(vgl->tex_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-#ifdef MACOS_OPENGL
-            /* Tell the driver not to make a copy of the texture but to use
-               our buffer */
-            glEnable(GL_UNPACK_CLIENT_STORAGE_APPLE);
-            glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
-
-            /* Use AGP texturing */
-            glTexParameteri(vgl->tex_target, GL_TEXTURE_STORAGE_HINT_APPLE,
-                             GL_STORAGE_SHARED_APPLE);
-#endif
 
             /* Call glTexImage2D only once, and use glTexSubImage2D later */
             glTexImage2D(vgl->tex_target, 0,
@@ -588,23 +514,19 @@ int vout_display_opengl_Prepare(vout_display_opengl_t *vgl,
     if (vlc_gl_Lock(vgl->gl))
         return VLC_EGENERIC;
 
-#ifdef MACOS_OPENGL
-    /* Bind to the texture for drawing */
-    glBindTexture(vgl->tex_target, PictureGetTexture(picture));
-#else
     /* Update the texture */
     for (unsigned j = 0; j < vgl->chroma->plane_count; j++) {
+        const int plane = vgl->fmt.i_chroma == VLC_CODEC_YV12 && j > 0 ?  (3 - j) : j;
         if (vgl->use_multitexture)
             vgl->ActiveTextureARB(GL_TEXTURE0_ARB + j);
         glBindTexture(vgl->tex_target, vgl->texture[0][j]);
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, picture->p[j].i_pitch / picture->p[j].i_pixel_pitch);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, picture->p[plane].i_pitch / picture->p[plane].i_pixel_pitch);
         glTexSubImage2D(vgl->tex_target, 0,
                         0, 0,
-                        vgl->fmt.i_width  * vgl->chroma->p[j].w.num / vgl->chroma->p[j].w.den,
-                        vgl->fmt.i_height * vgl->chroma->p[j].h.num / vgl->chroma->p[j].h.den,
-                        vgl->tex_format, vgl->tex_type, picture->p[j].p_pixels);
+                        vgl->fmt.i_width  * vgl->chroma->p[plane].w.num / vgl->chroma->p[plane].w.den,
+                        vgl->fmt.i_height * vgl->chroma->p[plane].h.num / vgl->chroma->p[plane].h.den,
+                        vgl->tex_format, vgl->tex_type, picture->p[plane].p_pixels);
     }
-#endif
 
     int         last_count = vgl->region_count;
     gl_region_t *last = vgl->region;
@@ -639,13 +561,13 @@ int vout_display_opengl_Prepare(vout_display_opengl_t *vgl,
 
             glr->texture = 0;
             for (int j = 0; j < last_count; j++) {
-                if (last[i].texture &&
-                    last[i].width  == glr->width &&
-                    last[i].height == glr->height &&
-                    last[i].format == glr->format &&
-                    last[i].type   == glr->type) {
-                    glr->texture = last[i].texture;
-                    memset(&last[i], 0, sizeof(last[i]));
+                if (last[j].texture &&
+                    last[j].width  == glr->width &&
+                    last[j].height == glr->height &&
+                    last[j].format == glr->format &&
+                    last[j].type   == glr->type) {
+                    glr->texture = last[j].texture;
+                    memset(&last[j], 0, sizeof(last[j]));
                     break;
                 }
             }
@@ -750,13 +672,11 @@ int vout_display_opengl_Display(vout_display_opengl_t *vgl,
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 #else
-#if !defined(MACOS_OPENGL)
     for (unsigned j = 0; j < vgl->chroma->plane_count; j++) {
         if (vgl->use_multitexture)
             vgl->ActiveTextureARB(GL_TEXTURE0_ARB + j);
         glBindTexture(vgl->tex_target, vgl->texture[0][j]);
     }
-#endif
     glBegin(GL_POLYGON);
 
     glTexCoord2f(left[0],  top[0]);

@@ -4,7 +4,7 @@
  * Copyright (C) 2006-2009 the VideoLAN team
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
- * $Id: c95e49bd205fb28ba015046a0f4fa874bf27d4ba $
+ * $Id: 6d26855d29eb0ad46d3dccebc1679bf61d6a2de4 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -73,6 +73,7 @@ public:
     virtual ~OpenPanel() {};
     virtual void clear() = 0;
     virtual void onFocus() {}
+    virtual void onAccept() {}
 protected:
     intf_thread_t *p_intf;
 public slots:
@@ -140,13 +141,12 @@ public:
     virtual ~NetOpenPanel();
     virtual void clear() ;
     void onFocus();
+    void onAccept();
 private:
     Ui::OpenNetwork ui;
-    QStringListModel *mrlList;
+    bool b_recentList;
 public slots:
     virtual void updateMRL();
-private slots:
-    void updateModel();
 };
 
 class UrlValidator : public QValidator
@@ -207,7 +207,7 @@ private:
     QComboBox *v4l2VideoDevice, *v4l2AudioDevice;
     QLineEdit *pvrDevice, *pvrRadioDevice;
     QComboBox *v4l2StdBox, *pvrNormBox;
-    QSpinBox *jackChannels, *jackCaching;
+    QSpinBox *jackChannels;
     QCheckBox *jackPace, *jackConnect;
     QLineEdit *jackPortsSelected;
 #endif

@@ -2,7 +2,7 @@
  * sftp.c: SFTP input module
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 573f689bb7fcffa0771094a2c24123e65101ae92 $
+ * $Id: 2e8cc57148a2592e515aa2d434c02413ff493fa4 $
  *
  * Authors: Rémi Duraffort <ivoire@videolan.org>
  *
@@ -48,9 +48,6 @@
 static int  Open ( vlc_object_t* );
 static void Close( vlc_object_t* );
 
-#define CACHING_TEXT N_("Caching value in ms")
-#define CACHING_LONGTEXT N_( \
-  "Caching value for SFTP streams. This value should be set in milliseconds." )
 #define USER_TEXT N_("SFTP user name")
 #define USER_LONGTEXT N_("User name that will be used for the connection.")
 #define PASS_TEXT N_("SFTP password")
@@ -66,8 +63,6 @@ vlc_module_begin ()
     set_capability( "access", 0 )
     set_category( CAT_INPUT )
     set_subcategory( SUBCAT_INPUT_ACCESS )
-    add_integer( "sftp-caching", 2 * DEFAULT_PTS_DELAY / 1000,
-                     CACHING_TEXT, CACHING_LONGTEXT, true );
     add_integer( "sftp-readsize", 8192, MTU_TEXT, MTU_LONGTEXT, true )
     add_integer( "sftp-port", 22, PORT_TEXT, PORT_LONGTEXT, true )
     add_shortcut( "sftp" )
@@ -242,8 +237,6 @@ static int Open( vlc_object_t* p_this )
     }
     p_access->info.i_size = attributes.filesize;
 
-    /* Create the two variables */
-    var_Create( p_access, "sftp-caching", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT );
     p_sys->i_read_size = var_InheritInteger( p_access, "sftp-readsize" );
 
     free( psz_password );
@@ -346,7 +339,8 @@ static int Control( access_t* p_access, int i_query, va_list args )
 
     case ACCESS_GET_PTS_DELAY:
         pi_64 = (int64_t*)va_arg( args, int64_t* );
-        *pi_64 = var_GetInteger( p_access, "sftp-caching" ) * INT64_C(1000);
+        *pi_64 = INT64_C(1000)
+               * var_InheritInteger( p_access, "network-caching" );
         break;
 
     case ACCESS_SET_PAUSE_STATE:

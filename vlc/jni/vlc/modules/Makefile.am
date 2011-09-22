@@ -11,9 +11,11 @@ BASE_SUBDIRS = \
 	meta_engine \
 	misc \
 	media_library \
+	notify \
 	packetizer \
 	services_discovery \
 	stream_filter \
+	text_renderer \
 	video_chroma \
 	video_filter \
 	video_output \
@@ -61,22 +63,3 @@ SUBDIRS += .
 
 dist_noinst_SCRIPTS = genmf list.sh
 dist_noinst_DATA = LIST
-MOSTLYCLEANFILES = plugins.dat*
-
-.PHONY: stamp-cache
-
-stamp-cache:
-	$(AM_V_GEN)if test "$(build)" = "$(host)"; then \
-		../bin/vlc-cache-gen$(EXEEXT) . ; \
-	else \
-		echo "Cross-compilation: cache generation skipped!" ; \
-	fi
-
-install-exec-hook:
-	if test -z "$(DESTDIR)" -a "$(build)" = "$(host)"; then \
-		LD_LIBRARY_PATH="$(libdir)" \
-		"$(vlclibdir)/vlc-cache-gen$(EXEEXT)" \
-			 "$(vlclibdir)/plugins" ; \
-	else \
-		echo "Staged installation: cache generation skipped!" ; \
-	fi

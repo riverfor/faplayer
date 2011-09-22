@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004, 2010 the VideoLAN team
- * $Id: ae3cd8f5d706cedbdb00ae0567bf37c0917421ca $
+ * $Id: 2fff1ef76da356fc0292e95e58c2b018bb41e6e1 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -85,5 +85,20 @@ uint64 vlc_stream_io_callback::getFilePointer( void )
 size_t vlc_stream_io_callback::write(const void *, size_t )
 {
     return 0;
+}
+
+uint64 vlc_stream_io_callback::toRead( void )
+{
+    uint64_t i_size;
+
+    if( s == NULL)
+        return 0;
+
+    stream_Control( s, STREAM_GET_SIZE, &i_size );
+
+    if( i_size == 0 )
+        return 0xFFFFFFFFL;
+
+    return (uint64) i_size - stream_Tell( s );
 }
 

@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1999, 2000, 2001, 2002 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: 6cd275b08031882d40e595491668a1fa25405c90 $
+ * $Id: 34070cee228e17235697dc93a1c02660eeb5fa97 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *
@@ -25,6 +25,8 @@
 #ifndef LIBVLC_LIBVLC_H
 # define LIBVLC_LIBVLC_H 1
 
+extern const char psz_vlc_changeset[];
+
 typedef struct variable_t variable_t;
 
 /* Actions (hot keys) */
@@ -39,7 +41,10 @@ size_t vlc_towc (const char *str, uint32_t *restrict pwc);
  */
 void system_Init      ( void );
 void system_Configure ( libvlc_int_t *, int, const char *const [] );
-void system_End       ( libvlc_int_t * );
+void system_End       ( void );
+
+void vlc_CPU_init(void);
+void vlc_CPU_dump(vlc_object_t *);
 
 /*
  * Threads subsystem
@@ -62,21 +67,6 @@ void vlc_assert_locked (vlc_mutex_t *);
 #else
 # define vlc_assert_locked( m ) (void)m
 #endif
-
-/*
- * CPU capabilities
- */
-extern uint32_t cpu_flags;
-uint32_t CPUCapabilities( void );
-
-/*
- * Message/logging stuff
- */
-
-typedef struct msg_bank_t msg_bank_t;
-
-msg_bank_t *msg_Create (void);
-void msg_Destroy (msg_bank_t *);
 
 /*
  * LibVLC exit event handling
@@ -182,7 +172,6 @@ typedef struct libvlc_priv_t
     bool               playlist_active;
 
     /* Messages */
-    msg_bank_t        *msg_bank;    ///< The message bank
     int                i_verbose;   ///< info messages
     bool               b_color;     ///< color messages?
 

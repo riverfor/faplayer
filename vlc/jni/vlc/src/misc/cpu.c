@@ -2,7 +2,7 @@
  * cpu.c: CPU detection code
  *****************************************************************************
  * Copyright (C) 1998-2004 the VideoLAN team
- * $Id: 20520d20b03186fef2d43fcdda3bd42867398bc9 $
+ * $Id: 15de451c0d3d221c6d43f530b09d676ae8836ba6 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -49,6 +49,8 @@
 
 #include "libvlc.h"
 
+static uint32_t cpu_flags;
+
 #if defined( __i386__ ) || defined( __x86_64__ ) || defined( __powerpc__ ) \
  || defined( __ppc__ ) || defined( __ppc64__ ) || defined( __powerpc64__ )
 # ifndef WIN32
@@ -71,31 +73,30 @@ static bool check_OS_capability( const char *psz_capability, pid_t pid )
     return false;
 }
 
-#  define check_capability(name, flag, code)   \
-     do {                                      \
-        pid_t pid = fork();                    \
-        if( pid == 0 )                         \
-        {                                      \
-            signal(SIGILL, SIG_DFL);           \
-            __asm__ __volatile__ ( code : : ); \
-            _exit(0);                          \
-        }                                      \
-        if( check_OS_capability((name), pid )) \
-            i_capabilities |= (flag);          \
+#  define check_capability(name, flag, code, input)     \
+     do {                                               \
+        pid_t pid = fork();                             \
+        if( pid == 0 )                                  \
+        {                                               \
+            signal(SIGILL, SIG_DFL);                    \
+            __asm__ __volatile__ ( code : : input );    \
+            _exit(0);                                   \
+        }                                               \
+        if( check_OS_capability((name), pid ))          \
+            i_capabilities |= (flag);                   \
      } while(0)
 
 # else /* WIN32 */
-#  define check_capability(name, flag, code)   \
+#  define check_capability(name, flag, code, input)   \
         i_capabilities |= (flag);
 # endif
 #endif
 
-/*****************************************************************************
- * CPUCapabilities: get the CPU capabilities
- *****************************************************************************
- * This function is called to list extensions the CPU may have.
- *****************************************************************************/
-uint32_t CPUCapabilities( void )
+/**
+ * Determines the CPU capabilities and stores them in cpu_flags.
+ * The result can be retrieved with vlc_CPU().
+ */
+void vlc_CPU_init (void)
 {
     uint32_t i_capabilities = 0;
 
@@ -183,7 +184,7 @@ uint32_t CPUCapabilities( void )
 
 #   ifdef CAN_COMPILE_SSE
         check_capability( "SSE", CPU_CAPABILITY_SSE,
-                          "xorps %%xmm0,%%xmm0\n" );
+                          "xorps %%xmm0,%%xmm0\n", );
 #   endif
     }
 # endif
@@ -193,7 +194,7 @@ uint32_t CPUCapabilities( void )
 # elif defined (CAN_COMPILE_SSE2)
     if( i_edx & 0x04000000 )
         check_capability( "SSE2", CPU_CAPABILITY_SSE2,
-                          "movupd %%xmm0, %%xmm0\n" );
+                          "movupd %%xmm0, %%xmm0\n", );
 # endif
 
 # if defined (__SSE3__)
@@ -201,7 +202,7 @@ uint32_t CPUCapabilities( void )
 # elif defined (CAN_COMPILE_SSE3)
     if( i_ecx & 0x00000001 )
         check_capability( "SSE3", CPU_CAPABILITY_SSE3,
-                          "movsldup %%xmm1, %%xmm0\n" );
+                          "movsldup %%xmm1, %%xmm0\n", );
 # endif
 
 # if defined (__SSSE3__)
@@ -209,7 +210,7 @@ uint32_t CPUCapabilities( void )
 # elif defined (CAN_COMPILE_SSSE3)
     if( i_ecx & 0x00000200 )
         check_capability( "SSSE3", CPU_CAPABILITY_SSSE3,
-                          "pabsw %%xmm1, %%xmm0\n" );
+                          "pabsw %%xmm1, %%xmm0\n", );
 # endif
 
 # if defined (__SSE4_1__)
@@ -217,7 +218,7 @@ uint32_t CPUCapabilities( void )
 # elif defined (CAN_COMPILE_SSE4_1)
     if( i_ecx & 0x00080000 )
         check_capability( "SSE4.1", CPU_CAPABILITY_SSE4_1,
-                          "pmaxsb %%xmm1, %%xmm0\n" );
+                          "pmaxsb %%xmm1, %%xmm0\n", );
 # endif
 
 # if defined (__SSE4_2__)
@@ -225,7 +226,7 @@ uint32_t CPUCapabilities( void )
 # elif defined (CAN_COMPILE_SSE4_2)
     if( i_ecx & 0x00100000 )
         check_capability( "SSE4.2", CPU_CAPABILITY_SSE4_2,
-                          "pcmpgtq %%xmm1, %%xmm0\n" );
+                          "pcmpgtq %%xmm1, %%xmm0\n", );
 # endif
 
     /* test for additional capabilities */
@@ -242,7 +243,7 @@ uint32_t CPUCapabilities( void )
 # elif defined (CAN_COMPILE_3DNOW)
     if( i_edx & 0x80000000 )
         check_capability( "3D Now!", CPU_CAPABILITY_3DNOW,
-                          "pfadd %%mm0,%%mm0\n" "femms\n" );
+                          "pfadd %%mm0,%%mm0\n" "femms\n", );
 # endif
 
     if( b_amd && ( i_edx & 0x00400000 ) )
@@ -269,16 +270,18 @@ out:
 
         while (getline (&line, &linelen, info) != -1)
         {
-             const char *cap;
+            const char *cap;
 
-             if (strncmp (line, "Features\t:", 10))
-                 continue;
+            if (strncmp (line, "Features\t:", 10))
+                continue;
+
+            /* TODO: detect other CPU features when we use them */
 #   if defined (CAN_COMPILE_NEON) && !defined (__ARM_NEON__)
-             cap = strstr (line + 10, " neon");
-             if (cap != NULL && (cap[5] == '\0' || cap[5] == ' '))
-                 i_capabilities |= CPU_CAPABILITY_NEON;
+                cap = strstr (line + 10, " neon");
+            if (cap != NULL && (cap[5] == '\0' || cap[5] == ' '))
+                i_capabilities |= CPU_CAPABILITY_NEON;
 #   endif
-             break;
+            break;
         }
         fclose (info);
         free (line);
@@ -305,36 +308,67 @@ out:
         i_capabilities |= CPU_CAPABILITY_ALTIVEC;
 
 #   elif defined( CAN_COMPILE_ALTIVEC )
-    pid_t pid = fork();
-    if( pid == 0 )
-    {
-        signal(SIGILL, SIG_DFL);
-        asm volatile ("mtspr 256, %0\n\t"
-                      "vand %%v0, %%v0, %%v0"
-                      :
-                      : "r" (-1));
-        _exit(0);
-    }
-
-    if( check_OS_capability( "Altivec", pid ) )
-        i_capabilities |= CPU_CAPABILITY_ALTIVEC;
+    check_capability( "Altivec", CPU_CAPABILITY_ALTIVEC,
+        "mtspr 256, %0\n\t"
+        "vand %%v0, %%v0, %%v0",
+                      "r" (-1));
 
 #   endif
 
 #endif
-    return i_capabilities;
+
+    cpu_flags = i_capabilities;
 }
 
-uint32_t cpu_flags = 0;
-
-
-/*****************************************************************************
- * vlc_CPU: get pre-computed CPU capability flags
- ****************************************************************************/
+/**
+ * Retrieves pre-computed CPU capability flags
+ */
 unsigned vlc_CPU (void)
 {
+#ifndef WIN32 /* On Windows, initialized from DllMain() instead */
+    static pthread_once_t once = PTHREAD_ONCE_INIT;
+    pthread_once (&once, vlc_CPU_init);
+#endif
     return cpu_flags;
 }
+
+void vlc_CPU_dump (vlc_object_t *obj)
+{
+    const unsigned flags = vlc_CPU();
+    char buf[200], *p = buf;
+
+#define PRINT_CAPABILITY( capability, string ) \
+    if (flags & (capability)) \
+        p += sprintf (p, "%s ", (string) )
+
+#if defined (__i386__) || defined (__x86_64__)
+    PRINT_CAPABILITY(CPU_CAPABILITY_MMX, "MMX");
+    PRINT_CAPABILITY(CPU_CAPABILITY_3DNOW, "3DNow!");
+    PRINT_CAPABILITY(CPU_CAPABILITY_MMXEXT, "MMXEXT");
+    PRINT_CAPABILITY(CPU_CAPABILITY_SSE, "SSE");
+    PRINT_CAPABILITY(CPU_CAPABILITY_SSE2, "SSE2");
+    PRINT_CAPABILITY(CPU_CAPABILITY_SSE3, "SSE3");
+    PRINT_CAPABILITY(CPU_CAPABILITY_SSSE3, "SSSE3");
+    PRINT_CAPABILITY(CPU_CAPABILITY_SSE4_1, "SSE4.1");
+    PRINT_CAPABILITY(CPU_CAPABILITY_SSE4_2, "SSE4.2");
+    PRINT_CAPABILITY(CPU_CAPABILITY_SSE4A,  "SSE4A");
+
+#elif defined (__powerpc__) || defined (__ppc__) || defined (__ppc64__)
+    PRINT_CAPABILITY(CPU_CAPABILITY_ALTIVEC, "AltiVec");
+
+#elif defined (__arm__)
+    PRINT_CAPABILITY(CPU_CAPABILITY_NEON, "NEONv1");
+
+#endif
+
+#if HAVE_FPU
+    p += sprintf (p, "FPU ");
+#endif
+
+    if (p > buf)
+        msg_Dbg (obj, "CPU has capabilities %s", buf);
+}
+
 
 static vlc_memcpy_t pf_vlc_memcpy = memcpy;
 
@@ -350,32 +384,4 @@ void vlc_fastmem_register (vlc_memcpy_t cpy)
 void *vlc_memcpy (void *tgt, const void *src, size_t n)
 {
     return pf_vlc_memcpy (tgt, src, n);
-}
-
-/**
- * Returned an aligned pointer on newly allocated memory.
- * \param alignment must be a power of 2 and a multiple of sizeof(void*)
- * \param size is the size of the usable memory returned.
- *
- * It must not be freed directly, *base must.
- */
-void *vlc_memalign(void **base, size_t alignment, size_t size)
-{
-    assert(alignment >= sizeof(void*));
-    for (size_t t = alignment; t > 1; t >>= 1)
-        assert((t&1) == 0);
-#if defined(HAVE_POSIX_MEMALIGN)
-    if (posix_memalign(base, alignment, size)) {
-        *base = NULL;
-        return NULL;
-    }
-    return *base;
-#elif defined(HAVE_MEMALIGN)
-    return *base = memalign(alignment, size);
-#else
-    unsigned char *p = *base = malloc(size + alignment - 1);
-    if (!p)
-        return NULL;
-    return (void*)((uintptr_t)(p + alignment - 1) & ~(alignment - 1));
-#endif
 }

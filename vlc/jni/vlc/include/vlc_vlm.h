@@ -2,7 +2,7 @@
  * vlc_vlm.h: VLM core structures
  *****************************************************************************
  * Copyright (C) 2000, 2001 the VideoLAN team
- * $Id: 6c9087685ae767226a0334072c9019b1132610cf $
+ * $Id: cf45439207ef402fd6c4040ba76b6ea9af3cb87f $
  *
  * Authors: Simon Latapie <garf@videolan.org>
  *          Laurent Aimar <fenrir@videolan.org>
@@ -236,9 +236,9 @@ vlm_media_Copy( vlm_media_t *p_dst, const vlm_media_t *p_src )
         p_dst->psz_name = strdup( p_src->psz_name );
 
     for( i = 0; i < p_src->i_input; i++ )
-        TAB_APPEND_CPP( char, p_dst->i_input, p_dst->ppsz_input, strdup(p_src->ppsz_input[i]) );
+        TAB_APPEND_CAST( (char**), p_dst->i_input, p_dst->ppsz_input, strdup(p_src->ppsz_input[i]) );
     for( i = 0; i < p_src->i_option; i++ )
-        TAB_APPEND_CPP( char, p_dst->i_option, p_dst->ppsz_option, strdup(p_src->ppsz_option[i]) );
+        TAB_APPEND_CAST( (char**), p_dst->i_option, p_dst->ppsz_option, strdup(p_src->ppsz_option[i]) );
 
     if( p_src->psz_output )
         p_dst->psz_output = strdup( p_src->psz_output );

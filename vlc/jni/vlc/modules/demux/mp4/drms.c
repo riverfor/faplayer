@@ -2,7 +2,7 @@
  * drms.c: DRMS
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id: b67380637c415d8df0d0f1e635730143f0bba1f3 $
+ * $Id: d816758b55f83a887241bb102d6c608f9f21a356 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Sam Hocevar <sam@zoy.org>
@@ -281,7 +281,7 @@ int drms_init( void *_p_drms, uint32_t i_type,
 
     switch( i_type )
     {
-        case FOURCC_user:
+        case ATOM_user:
             if( i_len < sizeof(p_drms->i_user) )
             {
                 i_ret = -2;
@@ -291,7 +291,7 @@ int drms_init( void *_p_drms, uint32_t i_type,
             p_drms->i_user = U32_AT( p_info );
             break;
 
-        case FOURCC_key:
+        case ATOM_key:
             if( i_len < sizeof(p_drms->i_key) )
             {
                 i_ret = -2;
@@ -301,7 +301,7 @@ int drms_init( void *_p_drms, uint32_t i_type,
             p_drms->i_key = U32_AT( p_info );
             break;
 
-        case FOURCC_iviv:
+        case ATOM_iviv:
             if( i_len < sizeof(p_drms->p_key) )
             {
                 i_ret = -2;
@@ -311,7 +311,7 @@ int drms_init( void *_p_drms, uint32_t i_type,
             memcpy( p_drms->p_iviv, p_info, 16 );
             break;
 
-        case FOURCC_name:
+        case ATOM_name:
             p_drms->p_name = (uint8_t*) strdup( (char *)p_info );
 
             if( p_drms->p_name == NULL )
@@ -320,7 +320,7 @@ int drms_init( void *_p_drms, uint32_t i_type,
             }
             break;
 
-        case FOURCC_priv:
+        case ATOM_priv:
         {
             uint32_t p_priv[ 64 ];
             struct md5_s md5;
@@ -1566,7 +1566,7 @@ static int GetSCIData( char *psz_ipod, uint32_t **pp_sci,
 #ifdef WIN32
         const char *SCIfile =
         "\\Apple Computer\\iTunes\\SC Info\\SC Info.sidb";
-        strncpy(p_tmp, config_GetConfDir(), sizeof(p_tmp -1));
+        strncpy( p_tmp, config_GetConfDir(), sizeof(p_tmp) - 1 );
         if( strlen( p_tmp ) + strlen( SCIfile ) >= PATH_MAX )
             return -1;
         strcat(p_tmp, SCIfile);

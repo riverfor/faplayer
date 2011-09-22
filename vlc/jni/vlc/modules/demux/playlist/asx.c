@@ -2,7 +2,7 @@
  * asx.c : ASX playlist format import
  *****************************************************************************
  * Copyright (C) 2005-2006 the VideoLAN team
- * $Id: eb1539a2e8ceb36f8373578ac3bf3af257a4fef3 $
+ * $Id: 03bac21fe73d80ffda0798ca0664c565484336c6 $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan dot org>
  *
@@ -125,7 +125,7 @@ static int ParseTime(char *s, size_t i_strlen)
     s = SkipBlanks(s, i_strlen);
 
     val = 0;
-    while( (s < end) && isdigit(*s) )
+    while( (s < end) && isdigit((unsigned char)*s) )
     {
         int newval = val*10 + (*s - '0');
         if( newval < val )
@@ -145,7 +145,7 @@ static int ParseTime(char *s, size_t i_strlen)
         s = SkipBlanks(s, end-s);
         result = result * 60;
         val = 0;
-        while( (s < end) && isdigit(*s) )
+        while( (s < end) && isdigit((unsigned char)*s) )
         {
             int newval = val*10 + (*s - '0');
             if( newval < val )
@@ -165,7 +165,7 @@ static int ParseTime(char *s, size_t i_strlen)
             s = SkipBlanks(s, end-s);
             result = result * 60;
             val = 0;
-            while( (s < end) && isdigit(*s) )
+            while( (s < end) && isdigit((unsigned char)*s) )
             {
                 int newval = val*10 + (*s - '0');
                 if( newval < val )

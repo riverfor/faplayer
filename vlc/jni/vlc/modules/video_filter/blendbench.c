@@ -2,7 +2,7 @@
  * blendbench.c : blending benchmark plugin for vlc
  *****************************************************************************
  * Copyright (C) 2007 the VideoLAN team
- * $Id: 6665f016a8c65f7ae48e6b953d4717a2ff4a07db $
+ * $Id: 239751d046f303a6a92a731148241b2968344329 $
  *
  * Author: Søren Bøg <avacore@videolan.org>
  *
@@ -66,7 +66,7 @@ static picture_t *Filter( filter_t *, picture_t * );
 
 #define BLEND_CHROMA_TEXT N_("Chroma for the blend image")
 #define BLEND_CHROMA_LONGTEXT N_("Chroma which the blend image will be loaded" \
-                                 "in")
+                                 " in")
 
 #define CFG_PREFIX "blendbench-"
 

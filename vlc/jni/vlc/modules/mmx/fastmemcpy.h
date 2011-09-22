@@ -1,7 +1,7 @@
 /*****************************************************************************
  * fastmemcpy.h : fast memcpy routines
  *****************************************************************************
- * $Id: e7159b77f5a814e6c54d0a2f9d411a2ad6e2103f $
+ * $Id: 170062d48a440af9d067d409091cd9b3736eac54 $
  *
  * Authors: various Linux kernel hackers
  *          various MPlayer hackers
@@ -225,7 +225,7 @@ static void * fast_memcpy(void * to, const void * from, size_t len)
     else
     /*
        Only if SRC is aligned on 16-byte boundary.
-       It allows to use movaps instead of movups, which required data
+       It allows using movaps instead of movups, which required data
        to be aligned or a general-protection exception (#GP) is generated.
     */
     for(; i>0; i--)

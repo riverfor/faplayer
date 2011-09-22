@@ -33,7 +33,6 @@
 #include <vlc_plugin.h>
 #include <vlc_aout.h>            /* aout_FormatNbChannels, AOUT_FMTS_SIMILAR */
 #include <vlc_vout.h>              /* vout_*Picture, aout_filter_RequestVout */
-#include <vlc_playlist.h>              /* playlist_CurrentInput, input*Title */
 
 #include <goom/goom.h>
 
@@ -64,7 +63,7 @@ vlc_module_begin ()
                  WIDTH_TEXT, RES_LONGTEXT, false )
     add_integer( "goom-height", 640,
                  HEIGHT_TEXT, RES_LONGTEXT, false )
-    add_integer( "goom-speed", 6,
+    add_integer_with_range( "goom-speed", 6, 1, 10,
                  SPEED_TEXT, SPEED_LONGTEXT, false )
     set_callbacks( Open, Close )
     add_shortcut( "goom" )
@@ -84,8 +83,6 @@ typedef struct
     int           i_height;
     vout_thread_t *p_vout;
     int           i_speed;
-
-    char          *psz_title;
 
     vlc_mutex_t   lock;
     vlc_cond_t    wait;
@@ -111,8 +108,6 @@ struct filter_sys_t
 static block_t *DoWork ( filter_t *, block_t * );
 
 static void *Thread( void * );
-
-static char *TitleGet( vlc_object_t * );
 
 /*****************************************************************************
  * Open: open a scope effect plugin
@@ -176,8 +171,6 @@ static int Open( vlc_object_t *p_this )
     date_Set( &p_thread->date, 0 );
     p_thread->i_channels = aout_FormatNbChannels( &p_filter->fmt_in.audio );
 
-    p_thread->psz_title = TitleGet( VLC_OBJECT( p_filter ) );
-
     if( vlc_clone( &p_thread->thread,
                    Thread, p_thread, VLC_THREAD_PRIORITY_LOW ) )
     {
@@ -185,7 +178,6 @@ static int Open( vlc_object_t *p_this )
         vlc_object_release( p_thread->p_vout );
         vlc_mutex_destroy( &p_thread->lock );
         vlc_cond_destroy( &p_thread->wait );
-        free( p_thread->psz_title );
         free( p_thread );
         free( p_sys );
         return VLC_EGENERIC;
@@ -344,10 +336,7 @@ static void *Thread( void *p_thread_data )
         if( date_Get( &i_pts ) + GOOM_DELAY <= mdate() ) continue;
 
         plane = goom_update( p_plugin_info, p_data, 0, 0.0,
-                             p_thread->psz_title, NULL );
-
-        free( p_thread->psz_title );
-        p_thread->psz_title = NULL;
+                             NULL, NULL );
 
         while( !( p_pic = vout_GetPicture( p_thread->p_vout ) ) )
         {
@@ -403,14 +392,3 @@ static void Close( vlc_object_t *p_this )
     free( p_sys );
 }
 
-static char *TitleGet( vlc_object_t *p_this )
-{
-    input_thread_t *p_input = playlist_CurrentInput( pl_Get( p_this ) );
-    if( p_input )
-    {
-        char *psz_title = input_item_GetTitleFbName( input_GetItem( p_input ) );
-        vlc_object_release( p_input );
-        return psz_title;
-    }
-    return NULL;
-}

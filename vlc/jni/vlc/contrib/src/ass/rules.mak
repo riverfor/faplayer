@@ -1,5 +1,5 @@
 # ASS
-ASS_VERSION := 0.9.12
+ASS_VERSION := 0.9.13
 ASS_URL := http://libass.googlecode.com/files/libass-$(ASS_VERSION).tar.gz
 
 PKGS += ass
@@ -14,6 +14,7 @@ $(TARBALLS)/libass-$(ASS_VERSION).tar.gz:
 
 libass: libass-$(ASS_VERSION).tar.gz .sum-ass
 	$(UNPACK)
+	$(APPLY) $(SRC)/ass/libass-pkg-static.patch
 	$(MOVE)
 
 DEPS_ass = freetype2 $(DEPS_freetype2) fontconfig $(DEPS_fontconfig)

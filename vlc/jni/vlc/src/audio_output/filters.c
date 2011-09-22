@@ -2,7 +2,7 @@
  * filters.c : audio output filters management
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: 612d897696cacb5f12e0e15709ba3f36cf887de4 $
+ * $Id: b41dc55679044c41068c653a2851240ae45c8dfd $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -36,26 +36,21 @@
 
 #include <vlc_aout.h>
 #include <vlc_filter.h>
+#include <vlc_cpu.h>
 #include "aout_internal.h"
 #include <libvlc.h>
-
-block_t *aout_FilterBufferNew( filter_t *p_filter, int size )
-{
-    (void) p_filter;
-    return block_Alloc( size );
-}
 
 /*****************************************************************************
  * FindFilter: find an audio filter for a specific transformation
  *****************************************************************************/
-static filter_t * FindFilter( aout_instance_t * p_aout,
+static filter_t * FindFilter( vlc_object_t *obj,
                               const audio_sample_format_t * p_input_format,
                               const audio_sample_format_t * p_output_format )
 {
     static const char typename[] = "audio filter";
     filter_t * p_filter;
 
-    p_filter = vlc_custom_create( p_aout, sizeof(*p_filter), typename );
+    p_filter = vlc_custom_create( obj, sizeof(*p_filter), typename );
 
     if ( p_filter == NULL ) return NULL;
 
@@ -65,7 +60,6 @@ static filter_t * FindFilter( aout_instance_t * p_aout,
     memcpy( &p_filter->fmt_out.audio, p_output_format,
             sizeof(audio_sample_format_t) );
     p_filter->fmt_out.i_codec = p_output_format->i_format;
-    p_filter->pf_audio_buffer_new = aout_FilterBufferNew;
     p_filter->p_owner = NULL;
 
     p_filter->p_module = module_need( p_filter, "audio filter", NULL, false );
@@ -100,12 +94,25 @@ static int SplitConversion( const audio_sample_format_t *restrict infmt,
         midfmt->i_original_channels = infmt->i_original_channels;
     }
     else
-        return -1;
+    {
+        assert( infmt->i_format != outfmt->i_format );
+        if( AOUT_FMT_LINEAR( infmt ) )
+            /* NOTE: Use S16N as intermediate. We have all conversions to S16N,
+             * and all useful conversions from S16N. TODO: FL32 if HAVE_FPU. */
+            midfmt->i_format = VLC_CODEC_S16N;
+        else
+        if( AOUT_FMT_LINEAR( outfmt ) )
+            /* NOTE: our non-linear -> linear filters always output 32-bits */
+            midfmt->i_format = HAVE_FPU ? VLC_CODEC_FL32 : VLC_CODEC_FI32;
+        else
+            return -1; /* no indirect non-linear -> non-linear */
+    }
 
     aout_FormatPrepare( midfmt );
     return AOUT_FMTS_IDENTICAL( infmt, midfmt ) ? -1 : 0;
 }
 
+#undef aout_FiltersCreatePipeline
 /**
  * Allocates audio format conversion filters
  * @param obj parent VLC object for new filters
@@ -115,7 +122,7 @@ static int SplitConversion( const audio_sample_format_t *restrict infmt,
  * @param outfmt output audio format
  * @return 0 on success, -1 on failure
  */
-int aout_FiltersCreatePipeline( aout_instance_t *obj,
+int aout_FiltersCreatePipeline( vlc_object_t *obj,
                                 filter_t **filters,
                                 int *nb_filters,
                                 const audio_sample_format_t *restrict infmt,

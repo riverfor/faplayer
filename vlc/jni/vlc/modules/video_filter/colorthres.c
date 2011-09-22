@@ -2,7 +2,7 @@
  * colorthres.c: Threshold color based on similarity to reference color
  *****************************************************************************
  * Copyright (C) 2000-2009 the VideoLAN team
- * $Id: 0f81424b7eb2d48996edc9c33c7945425ee3f1fa $
+ * $Id: 9b4e34b4d0d7a1d4525b2ffce398afe2bb1b2f0c $
  *
  * Authors: Sigmund Augdal <dnumgis@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -76,7 +76,7 @@ vlc_module_begin ()
                  COLOR_LONGTEXT, false )
         change_integer_list( pi_color_values, ppsz_color_descriptions )
     add_integer( CFG_PREFIX "saturationthres", 20,
-                 N_("Saturaton threshold"), "", false )
+                 N_("Saturation threshold"), "", false )
     add_integer( CFG_PREFIX "similaritythres", 15,
                  N_("Similarity threshold"), "", false )
     set_callbacks( Create, Destroy )

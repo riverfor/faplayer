@@ -2,7 +2,7 @@
  * extract.c : Extract RGB components
  *****************************************************************************
  * Copyright (C) 2000-2006 the VideoLAN team
- * $Id: d317a7011b65abfd653b2a5e9f5ab1e4e7dd042b $
+ * $Id: 4b172a67a9f4ebd0df3fa818050574c9b8bab4a4 $
  *
  * Authors: Antoine Cellerier <dionoea .t videolan d@t org>
  *
@@ -291,9 +291,12 @@ static void make_projection_matrix( filter_t *p_filter, int color, int *matrix )
     double green = ((double)(( 0x00FF00 & color )>>8))/255.;
     double blue = ((double)( 0x0000FF & color ))/255.;
     double norm = sqrt( red*red + green*green + blue*blue );
-    red /= norm;
-    green /= norm;
-    blue /= norm;
+    if( norm > 0 )
+    {
+        red /= norm;
+        green /= norm;
+        blue /= norm;
+    }
     /* XXX: We might still need to norm the rgb_matrix */
     double rgb_matrix[9] =
         { red*red,    red*green,   red*blue,

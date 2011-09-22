@@ -2,7 +2,7 @@
  * preparse.c: Preparser thread.
  *****************************************************************************
  * Copyright © 1999-2009 the VideoLAN team
- * $Id: 232d798bac8c1165ebbf7e630ebed60d0142cad4 $
+ * $Id: d2dbcb5595edeadf6da2ec8522ed273b28141b01 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Clément Stenac <zorglub@videolan.org>
@@ -219,6 +219,7 @@ static void *Thread( void *data )
         Preparse( p_playlist, p_current );
 
         Art( p_preparser, p_current );
+        vlc_gc_decref(p_current);
     }
     return NULL;
 }

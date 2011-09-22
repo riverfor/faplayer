@@ -2,7 +2,7 @@
  * visual.c : Visualisation system
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: 6ec2d2df0da30816030780d23b83494c2ff0ef72 $
+ * $Id: 964924c34be47b15d114a352cffc2a2d421dab37 $
  *
  * Authors: Clément Stenac <zorglub@via.ecp.fr>
  *
@@ -152,8 +152,6 @@ vlc_module_end ()
  * Local prototypes
  *****************************************************************************/
 static block_t *DoWork( filter_t *, block_t * );
-static int FilterCallback( vlc_object_t *, char const *,
-                           vlc_value_t, vlc_value_t, void * );
 static const struct
 {
     const char *psz_name;
@@ -205,7 +203,6 @@ static int Open( vlc_object_t *p_this )
 
     /* Parse the effect list */
     psz_parser = psz_effects = var_CreateGetString( p_filter, "effect-list" );
-    var_AddCallback( p_filter, "effect-list", FilterCallback, NULL );
 
     while( psz_parser && *psz_parser != '\0' )
     {
@@ -398,20 +395,3 @@ static void Close( vlc_object_t *p_this )
     free( p_sys->effect );
     free( p_filter->p_sys );
 }
-
-/*****************************************************************************
- * FilterCallback: called when changing the deinterlace method on the fly.
- *****************************************************************************/
-static int FilterCallback( vlc_object_t *p_this, char const *psz_cmd,
-                           vlc_value_t oldval, vlc_value_t newval,
-                           void *p_data )
-{
-    VLC_UNUSED(psz_cmd); VLC_UNUSED(oldval);
-    VLC_UNUSED(p_data); VLC_UNUSED(newval);
-
-    filter_t     *p_filter = (filter_t *)p_this;
-    /* restart this baby */
-    msg_Dbg( p_filter, "we should restart the visual filter" );
-    return VLC_SUCCESS;
-}
-

@@ -2,7 +2,7 @@
  * vlcproc.cpp
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: 0b563739df38a653d4b0706cb37c62ef45d145bc $
+ * $Id: df0ba84459453a90a63446ed382dd364582d5580 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -573,7 +573,7 @@ void VlcProc::on_intf_event_changed( vlc_object_t* p_obj, vlc_value_t newVal )
 
         case INPUT_EVENT_AOUT:
         {
-            aout_instance_t* pAout = input_GetAout( pInput );
+            audio_output_t* pAout = input_GetAout( pInput );
 
             // end of input or aout reuse (nothing to do)
             if( !pAout || pAout == m_pAout )
@@ -718,7 +718,7 @@ void VlcProc::on_volume_changed( vlc_object_t* p_obj, vlc_value_t newVal )
 void VlcProc::on_audio_filter_changed( vlc_object_t* p_obj, vlc_value_t newVal )
 {
     (void)newVal;
-    aout_instance_t* pAout = (aout_instance_t*) p_obj;
+    audio_output_t* pAout = (audio_output_t*) p_obj;
 
     char *pFilters = newVal.psz_string;
 

@@ -1,8 +1,8 @@
 /*****************************************************************************
- * mux.c: muxer using ffmpeg (libavformat).
+ * mux.c: muxer using libavformat
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: f11c491947fd74b0355da4cc06741896cdb6d660 $
+ * $Id: 9c870737070ddd26e6dc7351487439f9ebe82079 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *

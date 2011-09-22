@@ -2,7 +2,7 @@
  * controls.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: dd5c105b478ea5090a269e5186ceda902175b6eb $
+ * $Id: 0d9aa367bf5b34dfcfc82733d29711d3645cd581 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -24,19 +24,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#import "fspanel.h"
-
 /*****************************************************************************
  * VLCControls interface
  *****************************************************************************/
 @interface VLCControls : NSObject
 {
     IBOutlet id o_main;
-
-    IBOutlet id o_volumeslider;
-
-    IBOutlet id o_btn_repeat;
-    IBOutlet id o_btn_shuffle;
 
     IBOutlet id o_specificTime_cancel_btn;
     IBOutlet id o_specificTime_enter_fld;
@@ -46,21 +39,15 @@
     IBOutlet id o_specificTime_sec_lbl;
     IBOutlet id o_specificTime_stepper;
     IBOutlet id o_specificTime_mi;
-
-    IBOutlet VLCFSPanel *o_fs_panel;
 }
 - (IBAction)play:(id)sender;
 - (IBAction)stop:(id)sender;
-- (IBAction)faster:(id)sender;
-- (IBAction)slower:(id)sender;
-- (IBAction)normalSpeed:(id)sender;
 
 - (IBAction)prev:(id)sender;
 - (IBAction)next:(id)sender;
 - (IBAction)random:(id)sender;
 - (IBAction)repeat:(id)sender;
 - (IBAction)loop:(id)sender;
-- (IBAction)repeatButtonAction:(id)sender;
 - (IBAction)quitAfterPlayback:(id)sender;
 
 - (IBAction)forward:(id)sender;
@@ -72,9 +59,6 @@
 - (IBAction)volumeSliderUpdated:(id)sender;
 
 - (IBAction)showPosition: (id)sender;
-- (IBAction)toogleFullscreen:(id)sender;
-- (BOOL)isFullscreen;
-- (IBAction)windowAction:(id)sender;
 
 - (IBAction)telxTransparent:(id)sender;
 - (IBAction)telxNavLink:(id)sender;
@@ -85,7 +69,5 @@
 - (void)scrollWheel: (NSEvent *)theEvent;
 
 - (IBAction)goToSpecificTime:(id)sender;
-
-- (id)fspanel;
 @end
 

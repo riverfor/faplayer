@@ -2,7 +2,7 @@
  * rc.c : remote control stdin/stdout module for vlc
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: a2a44d808622c5de8a38523b788c042795ade38f $
+ * $Id: 92d8ae49c3beeb3aff3d5fe7c693ae22800c18b5 $
  *
  * Author: Peter Surda <shurdeek@panorama.sth.ac.at>
  *         Jean-Paul Saman <jpsaman #_at_# m2x _replaceWith#dot_ nl>
@@ -87,7 +87,7 @@ static void RegisterCallbacks( intf_thread_t * );
 
 static bool ReadCommand( intf_thread_t *, char *, int * );
 
-static input_item_t *parse_MRL( intf_thread_t *, char * );
+static input_item_t *parse_MRL( const char * );
 
 static int  Input        ( vlc_object_t *, char const *,
                            vlc_value_t, vlc_value_t, void * );
@@ -1360,7 +1360,7 @@ static int Playlist( vlc_object_t *p_this, char const *psz_cmd,
     else if( !strcmp( psz_cmd, "add" ) &&
              newval.psz_string && *newval.psz_string )
     {
-        input_item_t *p_item = parse_MRL( p_intf, newval.psz_string );
+        input_item_t *p_item = parse_MRL( newval.psz_string );
 
         if( p_item )
         {
@@ -1378,7 +1378,7 @@ static int Playlist( vlc_object_t *p_this, char const *psz_cmd,
     else if( !strcmp( psz_cmd, "enqueue" ) &&
              newval.psz_string && *newval.psz_string )
     {
-        input_item_t *p_item = parse_MRL( p_intf, newval.psz_string );
+        input_item_t *p_item = parse_MRL( newval.psz_string );
 
         if( p_item )
         {
@@ -1496,21 +1496,12 @@ static int Volume( vlc_object_t *p_this, char const *psz_cmd,
     {
         /* Set. */
         audio_volume_t i_volume = atoi( newval.psz_string );
-        if ( (i_volume > (audio_volume_t)AOUT_VOLUME_MAX) )
-        {
-            msg_rc( "Volume must be in the range %d-%d.", AOUT_VOLUME_MIN,
-                    AOUT_VOLUME_MAX );
-            i_error = VLC_EBADVAR;
-        }
-        else
-        {
-            if( i_volume == AOUT_VOLUME_MIN )
-                aout_ToggleMute( p_playlist, NULL );
-            if( !aout_VolumeSet( p_playlist, i_volume ) )
-                i_error = VLC_SUCCESS;
-            osd_Volume( p_this );
-            msg_rc( STATUS_CHANGE "( audio volume: %d )", i_volume );
-        }
+        if( i_volume == 0 )
+            aout_ToggleMute( p_playlist, NULL );
+        if( !aout_VolumeSet( p_playlist, i_volume ) )
+            i_error = VLC_SUCCESS;
+        osd_Volume( p_this );
+        msg_rc( STATUS_CHANGE "( audio volume: %d )", i_volume );
     }
     else
     {
@@ -1533,7 +1524,6 @@ static int VolumeMove( vlc_object_t *p_this, char const *psz_cmd,
         playlist_CurrentInput( p_intf->p_sys->p_playlist );
     int i_nb_steps = atoi(newval.psz_string);
     int i_error = VLC_SUCCESS;
-    int i_volume_step = 0;
 
     if( !p_input )
         return VLC_ENOOBJ;
@@ -1546,22 +1536,10 @@ static int VolumeMove( vlc_object_t *p_this, char const *psz_cmd,
         return VLC_EGENERIC;
     }
 
-    i_volume_step = config_GetInt( p_intf->p_libvlc, "volume-step" );
-    if ( i_nb_steps <= 0 || i_nb_steps > (AOUT_VOLUME_MAX/i_volume_step) )
-    {
-        i_nb_steps = 1;
-    }
-
-    if ( !strcmp(psz_cmd, "volup") )
-    {
-        if ( aout_VolumeUp( p_intf->p_sys->p_playlist, i_nb_steps, &i_volume ) < 0 )
-            i_error = VLC_EGENERIC;
-    }
-    else
-    {
-        if ( aout_VolumeDown( p_intf->p_sys->p_playlist, i_nb_steps, &i_volume ) < 0 )
-            i_error = VLC_EGENERIC;
-    }
+    if( !strcmp(psz_cmd, "voldown") )
+        i_nb_steps *= -1;
+    if( aout_VolumeUp( p_intf->p_sys->p_playlist, i_nb_steps, &i_volume ) < 0 )
+        i_error = VLC_EGENERIC;
     osd_Volume( p_this );
 
     if ( !i_error ) msg_rc( STATUS_CHANGE "( audio volume: %d )", i_volume );
@@ -2046,20 +2024,20 @@ bool ReadCommand( intf_thread_t *p_intf, char *p_buffer, int *pi_size )
  * We don't check for '"' or '\'', we just assume that a ':' that follows a
  * space is a new option. Should be good enough for our purpose.
  *****************************************************************************/
-static input_item_t *parse_MRL( intf_thread_t *p_intf, char *psz_mrl )
+static input_item_t *parse_MRL( const char *mrl )
 {
 #define SKIPSPACE( p ) { while( *p == ' ' || *p == '\t' ) p++; }
 #define SKIPTRAILINGSPACE( p, d ) \
     { char *e=d; while( e > p && (*(e-1)==' ' || *(e-1)=='\t') ){e--;*e=0;} }
 
     input_item_t *p_item = NULL;
-    char *psz_item = NULL, *psz_item_mrl = NULL, *psz_orig;
+    char *psz_item = NULL, *psz_item_mrl = NULL, *psz_orig, *psz_mrl;
     char **ppsz_options = NULL;
     int i, i_options = 0;
 
-    if( !psz_mrl ) return 0;
+    if( !mrl ) return 0;
 
-    psz_mrl = psz_orig = strdup( psz_mrl );
+    psz_mrl = psz_orig = strdup( mrl );
     if( !psz_mrl )
         return NULL;
     while( *psz_mrl )

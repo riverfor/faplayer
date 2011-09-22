@@ -2,7 +2,7 @@
  * vlc_httpd.h: builtin HTTP/RTSP server.
  *****************************************************************************
  * Copyright (C) 2004-2006 the VideoLAN team
- * $Id: 6e3c6f1995c443f083ad3fe8792151af40b9711f $
+ * $Id: 67ec505162f47afa5100b2e7e6afb82ecd640acf $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -99,8 +99,9 @@ struct httpd_message_t
 };
 
 /* create a new host */
-VLC_API httpd_host_t * httpd_HostNew( vlc_object_t *, const char *psz_host, int i_port ) VLC_USED;
-VLC_API httpd_host_t * httpd_TLSHostNew( vlc_object_t *, const char *, int, const char *, const char *, const char *, const char * ) VLC_USED;
+VLC_API httpd_host_t *vlc_http_HostNew( vlc_object_t * ) VLC_USED;
+VLC_API httpd_host_t *vlc_https_HostNew( vlc_object_t * ) VLC_USED;
+VLC_API httpd_host_t *vlc_rtsp_HostNew( vlc_object_t * ) VLC_USED;
 
 /* delete a host */
 VLC_API void httpd_HostDelete( httpd_host_t * );
@@ -116,8 +117,8 @@ VLC_API void httpd_UrlDelete( httpd_url_t * );
 /* Default client mode is FILE, use these to change it */
 VLC_API void httpd_ClientModeStream( httpd_client_t *cl );
 VLC_API void httpd_ClientModeBidir( httpd_client_t *cl );
-VLC_API char* httpd_ClientIP( const httpd_client_t *cl, char *psz_ip );
-VLC_API char* httpd_ServerIP( const httpd_client_t *cl, char *psz_ip );
+VLC_API char* httpd_ClientIP( const httpd_client_t *cl, char *, int * );
+VLC_API char* httpd_ServerIP( const httpd_client_t *cl, char *, int * );
 
 /* High level */
 

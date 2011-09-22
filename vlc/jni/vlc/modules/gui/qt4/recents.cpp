@@ -2,7 +2,7 @@
  * recents.cpp : Recents MRL (menu)
  *****************************************************************************
  * Copyright © 2006-2008 the VideoLAN team
- * $Id: 5112c99f7f0d09efb9d7c36a8067b4707bfbaad7 $
+ * $Id: a0bcd43bdd76bdc4557059197a70ba2f1788ccc0 $
  *
  * Authors: Ludovic Fauvet <etix@l0cal.com>
  *
@@ -100,7 +100,7 @@ void RecentsMRL::addRecent( const QString &mrl )
     else
     {
         stack->prepend( mrl );
-        if( stack->size() > RECENTS_LIST_SIZE )
+        if( stack->count() > RECENTS_LIST_SIZE )
             stack->takeLast();
     }
     QVLCMenu::updateRecents( p_intf );
@@ -128,7 +128,7 @@ void RecentsMRL::load()
     QStringList list = getSettings()->value( "RecentsMRL/list" ).toStringList();
 
     /* And filter the regexp on the list */
-    for( int i = 0; i < list.size(); ++i )
+    for( int i = 0; i < list.count(); ++i )
     {
         if ( !filter || filter->indexIn( list.at(i) ) == -1 )
             stack->append( list.at(i) );

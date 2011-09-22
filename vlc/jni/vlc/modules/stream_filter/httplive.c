@@ -83,7 +83,6 @@ typedef struct hls_stream_s
     vlc_array_t *segments;  /* list of segments */
     vlc_url_t   url;        /* uri to m3u8 */
     vlc_mutex_t lock;
-    vlc_cond_t  cond;
     bool        b_cache;    /* allow caching */
 } hls_stream_t;
 
@@ -214,17 +213,12 @@ static hls_stream_t *hls_New(vlc_array_t *hls_stream, const int id, const uint64
     hls->segments = vlc_array_new();
     vlc_array_append(hls_stream, hls);
     vlc_mutex_init(&hls->lock);
-    vlc_cond_init(&hls->cond);
     return hls;
 }
 
 static void hls_Free(hls_stream_t *hls)
 {
-    vlc_mutex_lock(&hls->lock);
-    vlc_cond_signal(&hls->cond);
-    vlc_mutex_unlock(&hls->lock);
     vlc_mutex_destroy(&hls->lock);
-    vlc_cond_destroy(&hls->cond);
 
     if (hls->segments)
     {
@@ -1168,7 +1162,7 @@ static int Download(stream_t *s, hls_stream_t *hls, segment_t *segment, int *cur
     /* check for division by zero */
     double ms = (double)duration / 1000.0; /* ms */
     if (ms <= 0.0)
-        goto success;
+        return VLC_SUCCESS;
 
     uint64_t bw = ((double)(segment->size * 8) / ms) * 1000; /* bits / s */
     p_sys->bandwidth = bw;
@@ -1184,12 +1178,6 @@ static int Download(stream_t *s, hls_stream_t *hls, segment_t *segment, int *cur
             *cur_stream = newstream;
         }
     }
-
-success:
-    vlc_mutex_lock(&hls->lock);
-    vlc_cond_signal(&hls->cond);
-    vlc_mutex_unlock(&hls->lock);
-
     return VLC_SUCCESS;
 }
 
@@ -1240,8 +1228,6 @@ static void* hls_Thread(void *p_this)
         vlc_mutex_lock(&hls->lock);
         segment_t *segment = segment_GetSegment(hls, p_sys->download.segment);
         vlc_mutex_unlock(&hls->lock);
-
-        // msg_Dbg(s, "xxxxx: about to download %p", segment);
 
         if ((segment != NULL) &&
             (Download(s, hls, segment, &p_sys->download.stream) != VLC_SUCCESS))
@@ -1304,7 +1290,8 @@ static void* hls_Reload(void *p_this)
 
             /* determine next time to update playlist */
             p_sys->playlist.last = now;
-            p_sys->playlist.wakeup = now + 5000000;
+            p_sys->playlist.wakeup = now + ((mtime_t)(hls->duration * wait)
+                                                   * (mtime_t)1000000);
         }
 
         mwait(p_sys->playlist.wakeup);
@@ -1340,7 +1327,7 @@ again:
 
     /* Download first 2 segments of this HLS stream */
     stream = *current;
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 2; i++)
     {
         segment_t *segment = segment_GetSegment(hls, p_sys->download.segment);
         if (segment == NULL )
@@ -1618,10 +1605,7 @@ static int Open(vlc_object_t *p_this)
     if (vlc_clone(&p_sys->thread, hls_Thread, s, VLC_THREAD_PRIORITY_INPUT))
     {
         if (p_sys->b_live)
-        {
-            vlc_cancel(p_sys->reload);
             vlc_join(p_sys->reload, NULL);
-        }
         goto fail_thread;
     }
 
@@ -1664,11 +1648,7 @@ static void Close(vlc_object_t *p_this)
 
     /* */
     if (p_sys->b_live)
-    {
-        vlc_cancel(p_sys->reload);
         vlc_join(p_sys->reload, NULL);
-    }
-    vlc_cancel(p_sys->thread);
     vlc_join(p_sys->thread, NULL);
     vlc_mutex_destroy(&p_sys->download.lock_wait);
     vlc_cond_destroy(&p_sys->download.wait);
@@ -1702,25 +1682,7 @@ static segment_t *GetSegment(stream_t *s)
     if (hls != NULL)
     {
         vlc_mutex_lock(&hls->lock);
-#if 0
-        if (p_sys->b_live)
-        {
-            while (true)
-            {
-                /* wait unless download is finished */
-                segment = segment_GetSegment(hls, p_sys->playback.segment);
-                if (!segment || !segment->data)
-                {
-                    // msg_Dbg(s, "xxxxx: waiting for downloading done");
-                    vlc_cond_wait(&hls->cond, &hls->lock);
-                }
-                else
-                    break;
-            }
-        }
-        else
-#endif
-            segment = segment_GetSegment(hls, p_sys->playback.segment);
+        segment = segment_GetSegment(hls, p_sys->playback.segment);
         if (segment != NULL)
         {
             /* This segment is ready? */

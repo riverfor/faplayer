@@ -32,10 +32,6 @@
 
 #include "dtv/dtv.h"
 
-#define CACHING_TEXT N_("Caching value (ms)")
-#define CACHING_LONGTEXT N_( \
-    "The cache size (delay) for digital broadcasts (in milliseconds).")
-
 #define ADAPTER_TEXT N_("DVB adapter")
 #define ADAPTER_LONGTEXT N_( \
     "If there is more than one digital broadcasting adapter, " \
@@ -58,6 +54,9 @@
     "on a given frequency. This is required to tune the receiver.")
 
 #define MODULATION_TEXT N_("Modulation / Constellation")
+#define MODULATION_A_TEXT N_("Layer A modulation")
+#define MODULATION_B_TEXT N_("Layer B modulation")
+#define MODULATION_C_TEXT N_("Layer C modulation")
 #define MODULATION_LONGTEXT N_( \
     "The digital signal can be modulated according with different " \
     "constellations (depending on the delivery system). " \
@@ -90,6 +89,9 @@ static const char *const auto_off_on_user[] = { N_("Automatic"),
 #define CODE_RATE_TEXT N_("FEC code rate")
 #define CODE_RATE_HP_TEXT N_("High-priority code rate")
 #define CODE_RATE_LP_TEXT N_("Low-priority code rate")
+#define CODE_RATE_A_TEXT N_("Layer A code rate")
+#define CODE_RATE_B_TEXT N_("Layer B code rate")
+#define CODE_RATE_C_TEXT N_("Layer C code rate")
 #define CODE_RATE_LONGTEXT N_( \
     "The code rate for Forward Error Correction can be specified.")
 static const char *const code_rate_vlc[] = { "",
@@ -111,10 +113,11 @@ static const char *const transmission_user[] = { N_("Automatic"),
 
 #define BANDWIDTH_TEXT N_("Bandwidth (MHz)")
 const int bandwidth_vlc[] = { 0,
-    8, 7, 6, 5,
+    10, 8, 7, 6, 5, 2
 };
 static const char *const bandwidth_user[] = { N_("Automatic"),
-    N_("8 MHz"), N_("7 MHz"), N_("6 MHz"), N_("5 MHz"),
+    N_("10 MHz"), N_("8 MHz"), N_("7 MHz"), N_("6 MHz"),
+    N_("5 MHz"), N_("1.712 MHz"),
 };
 
 #define GUARD_TEXT N_("Guard interval")
@@ -133,6 +136,14 @@ static const char *const hierarchy_user[] = { N_("Automatic"),
     N_("None"), "1", "2", "4",
 };
 
+#define SEGMENT_COUNT_A_TEXT N_("Layer A segments count")
+#define SEGMENT_COUNT_B_TEXT N_("Layer B segments count")
+#define SEGMENT_COUNT_C_TEXT N_("Layer C segments count")
+
+#define TIME_INTERLEAVING_A_TEXT N_("Layer A time interleaving")
+#define TIME_INTERLEAVING_B_TEXT N_("Layer B time interleaving")
+#define TIME_INTERLEAVING_C_TEXT N_("Layer C time interleaving")
+
 #define PILOT_TEXT N_("Pilot")
 
 #define ROLLOFF_TEXT N_("Roll-off factor")
@@ -142,6 +153,8 @@ const int rolloff_vlc[] = { -1,
 static const char *const rolloff_user[] = { N_("Automatic"),
     N_("0.35 (same as DVB-S)"), N_("0.20"), N_("0.25"),
 };
+
+#define TS_ID_TEXT N_("Transport stream ID")
 
 #define POLARIZATION_TEXT N_("Polarization (Voltage)")
 #define POLARIZATION_LONGTEXT N_( \
@@ -216,18 +229,15 @@ vlc_module_begin ()
     set_capability ("access", 0)
     set_callbacks (Open, Close)
     add_shortcut ("dtv", "tv", "dvb", /* "radio", "dab",*/
-                  "cable", "dvb-c", "satellite", "dvb-s", "dvb-s2",
-                  "terrestrial", "dvb-t", "dvb-t2", "atsc", "cqam")
+                  "cable", "dvb-c", "cqam"
+                  "satellite", "dvb-s", "dvb-s2", "isdb-s",
+                  "terrestrial", "dvb-t", "dvb-t2", "isdb-t", "atsc")
 
     /* All options starting with dvb- can be overridden in the MRL, so they
      * must all be "safe". Nevertheless, we do not mark as safe those that are
      * really specific to the local system (e.g. device ID...).
      * It wouldn't make sense to deliver those through a playlist. */
 
-    add_integer ("dvb-caching", DEFAULT_PTS_DELAY / 1000,
-                 CACHING_TEXT, CACHING_LONGTEXT, true)
-        change_integer_range (0, 60000)
-        change_safe ()
 #ifdef __linux__
     add_integer ("dvb-adapter", 0, ADAPTER_TEXT, ADAPTER_LONGTEXT, false)
         change_integer_range (0, 255)
@@ -252,14 +262,6 @@ vlc_module_begin ()
     add_integer ("dvb-bandwidth", 0, BANDWIDTH_TEXT, BANDWIDTH_TEXT, true)
         change_integer_list (bandwidth_vlc, bandwidth_user)
         change_safe ()
-    add_string ("dvb-code-rate-hp", "",
-                CODE_RATE_HP_TEXT, CODE_RATE_LONGTEXT, false)
-        change_string_list (code_rate_vlc, code_rate_user, NULL)
-        change_safe ()
-    add_string ("dvb-code-rate-lp", "",
-                CODE_RATE_LP_TEXT, CODE_RATE_LONGTEXT, false)
-        change_string_list (code_rate_vlc, code_rate_user, NULL)
-        change_safe ()
     add_integer ("dvb-transmission", 0,
                  TRANSMISSION_TEXT, TRANSMISSION_TEXT, true)
         change_integer_list (transmission_vlc, transmission_user)
@@ -267,12 +269,63 @@ vlc_module_begin ()
     add_string ("dvb-guard", "", GUARD_TEXT, GUARD_TEXT, true)
         change_string_list (guard_vlc, guard_user, NULL)
         change_safe ()
+
+    set_section (N_("DVB-T reception parameters"), NULL)
+    add_string ("dvb-code-rate-hp", "",
+                CODE_RATE_HP_TEXT, CODE_RATE_LONGTEXT, true)
+        change_string_list (code_rate_vlc, code_rate_user, NULL)
+        change_safe ()
+    add_string ("dvb-code-rate-lp", "",
+                CODE_RATE_LP_TEXT, CODE_RATE_LONGTEXT, true)
+        change_string_list (code_rate_vlc, code_rate_user, NULL)
+        change_safe ()
     add_integer ("dvb-hierarchy", -1, HIERARCHY_TEXT, HIERARCHY_TEXT, true)
         change_integer_list (hierarchy_vlc, hierarchy_user)
         change_safe ()
 
+    set_section (N_("ISDB-T reception parameters"), NULL)
+    add_string ("dvb-a-modulation", NULL,
+                MODULATION_A_TEXT, MODULATION_LONGTEXT, true)
+        change_string_list (modulation_vlc, modulation_user, NULL)
+        change_safe ()
+    add_string ("dvb-a-fec", NULL, CODE_RATE_A_TEXT, CODE_RATE_LONGTEXT, true)
+        change_string_list (code_rate_vlc, code_rate_user, NULL)
+        change_safe ()
+    add_integer ("dvb-a-count", 0, SEGMENT_COUNT_A_TEXT, NULL, true)
+        change_integer_range (0, 13)
+        change_safe ()
+    add_integer ("dvb-a-interleaving", 0, TIME_INTERLEAVING_A_TEXT, NULL, true)
+        change_integer_range (0, 3)
+        change_safe ()
+    add_string ("dvb-b-modulation", NULL,
+                MODULATION_B_TEXT, MODULATION_LONGTEXT, true)
+        change_string_list (modulation_vlc, modulation_user, NULL)
+        change_safe ()
+    add_string ("dvb-b-fec", NULL, CODE_RATE_B_TEXT, CODE_RATE_LONGTEXT, true)
+        change_string_list (code_rate_vlc, code_rate_user, NULL)
+        change_safe ()
+    add_integer ("dvb-b-count", 0, SEGMENT_COUNT_B_TEXT, NULL, true)
+        change_integer_range (0, 13)
+        change_safe ()
+    add_integer ("dvb-b-interleaving", 0, TIME_INTERLEAVING_B_TEXT, NULL, true)
+        change_integer_range (0, 3)
+        change_safe ()
+    add_string ("dvb-c-modulation", NULL,
+                MODULATION_C_TEXT, MODULATION_LONGTEXT, true)
+        change_string_list (modulation_vlc, modulation_user, NULL)
+        change_safe ()
+    add_string ("dvb-c-fec", NULL, CODE_RATE_C_TEXT, CODE_RATE_LONGTEXT, true)
+        change_string_list (code_rate_vlc, code_rate_user, NULL)
+        change_safe ()
+    add_integer ("dvb-c-count", 0, SEGMENT_COUNT_C_TEXT, NULL, true)
+        change_integer_range (0, 13)
+        change_safe ()
+    add_integer ("dvb-c-interleaving", 0, TIME_INTERLEAVING_C_TEXT, NULL, true)
+        change_integer_range (0, 3)
+        change_safe ()
+
     set_section (N_("Cable and satellite reception parameters"), NULL)
-    add_string ("dvb-modulation", 0,
+    add_string ("dvb-modulation", NULL,
                  MODULATION_TEXT, MODULATION_LONGTEXT, false)
         change_string_list (modulation_vlc, modulation_user, NULL)
         change_safe ()
@@ -289,6 +342,11 @@ vlc_module_begin ()
         change_safe ()
     add_integer ("dvb-rolloff", -1, ROLLOFF_TEXT, ROLLOFF_TEXT, true)
         change_integer_list (rolloff_vlc, rolloff_user)
+        change_safe ()
+
+    set_section (N_("ISDB-S parameters"), NULL)
+    add_integer ("dvb-ts-id", 0, TS_ID_TEXT, TS_ID_TEXT, false)
+        change_integer_range (0, 0xffff)
         change_safe ()
 
     set_section (N_("Satellite equipment control"), NULL)
@@ -341,11 +399,15 @@ struct access_sys_t
     dvb_device_t *dev;
 };
 
-struct delsys
+typedef struct delsys
 {
-    int (*setup) (vlc_object_t *, dvb_device_t *, unsigned freq);
+    int (*setup) (vlc_object_t *, dvb_device_t *, uint64_t freq);
     /* TODO: scan stuff */
-};
+} delsys_t;
+
+static const delsys_t dvbc, dvbs, dvbs2, dvbt, dvbt2;
+static const delsys_t isdbs, isdbt;
+static const delsys_t atsc, cqam;
 
 static block_t *Read (access_t *);
 static int Control (access_t *, int, va_list);
@@ -454,7 +516,7 @@ static int Control (access_t *access, int query, va_list args)
         case ACCESS_GET_PTS_DELAY:
         {
             int64_t *v = va_arg (args, int64_t *);
-            *v = var_InheritInteger (access, "dvb-caching") * INT64_C(1000);
+            *v = var_InheritInteger (access, "live-caching") * INT64_C(1000);
             return VLC_SUCCESS;
         }
 
@@ -553,6 +615,10 @@ static const delsys_t *GuessSystem (const char *scheme, dvb_device_t *dev)
         return &dvbt;
     if (!strcasecmp (scheme, "dvb-t2"))
         return &dvbt2;
+    if (!strcasecmp (scheme, "isdb-s"))
+        return &isdbs;
+    if (!strcasecmp (scheme, "isdb-t"))
+        return &isdbt;
 
     unsigned systems = dvb_enum_systems (dev);
     if (systems & ATSC)
@@ -624,9 +690,9 @@ static int modcmp (const void *a, const void *b)
     return strcasecmp (a, *(const char *const *)b);
 }
 
-static const char *var_InheritModulation (vlc_object_t *obj)
+static const char *var_InheritModulation (vlc_object_t *obj, const char *var)
 {
-    char *mod = var_InheritString (obj, "dvb-modulation");
+    char *mod = var_InheritString (obj, var);
     if (mod == NULL)
         return "";
 
@@ -686,36 +752,36 @@ static unsigned var_InheritGuardInterval (vlc_object_t *obj)
 
 
 /*** ATSC ***/
-static int atsc_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
+static int atsc_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
 {
-    const char *mod = var_InheritModulation (obj);
+    const char *mod = var_InheritModulation (obj, "dvb-modulation");
 
     return dvb_set_atsc (dev, freq, mod);
 }
 
-const delsys_t atsc = { .setup = atsc_setup };
+static const delsys_t atsc = { .setup = atsc_setup };
 
-static int cqam_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
+static int cqam_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
 {
-    const char *mod = var_InheritModulation (obj);
+    const char *mod = var_InheritModulation (obj, "dvb-modulation");
 
     return dvb_set_cqam (dev, freq, mod);
 }
 
-const delsys_t cqam = { .setup = cqam_setup };
+static const delsys_t cqam = { .setup = cqam_setup };
 
 
 /*** DVB-C ***/
-static int dvbc_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
+static int dvbc_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
 {
-    const char *mod = var_InheritModulation (obj);
+    const char *mod = var_InheritModulation (obj, "dvb-modulation");
     uint32_t fec = var_InheritCodeRate (obj, "dvb-fec");
     unsigned srate = var_InheritInteger (obj, "dvb-srate");
 
     return dvb_set_dvbc (dev, freq, mod, srate, fec);
 }
 
-const delsys_t dvbc = { .setup = dvbc_setup };
+static const delsys_t dvbc = { .setup = dvbc_setup };
 
 
 /*** DVB-S ***/
@@ -746,7 +812,7 @@ static char var_InheritPolarization (vlc_object_t *obj)
     return pol;
 }
 
-static int sec_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
+static int sec_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
 {
     char pol = var_InheritPolarization (obj);
     unsigned lowf = var_InheritInteger (obj, "dvb-lnb-low");
@@ -756,7 +822,7 @@ static int sec_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
     return dvb_set_sec (dev, freq, pol, lowf, highf, switchf);
 }
 
-static int dvbs_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
+static int dvbs_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
 {
     uint32_t fec = var_InheritCodeRate (obj, "dvb-fec");
     uint32_t srate = var_InheritInteger (obj, "dvb-srate");
@@ -767,9 +833,9 @@ static int dvbs_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
     return ret;
 }
 
-static int dvbs2_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
+static int dvbs2_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
 {
-    const char *mod = var_InheritModulation (obj);
+    const char *mod = var_InheritModulation (obj, "dvb-modulation");
     uint32_t fec = var_InheritCodeRate (obj, "dvb-fec");
     uint32_t srate = var_InheritInteger (obj, "dvb-srate");
     int pilot = var_InheritInteger (obj, "dvb-pilot");
@@ -781,14 +847,14 @@ static int dvbs2_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
     return ret;
 }
 
-const delsys_t dvbs = { .setup = dvbs_setup };
-const delsys_t dvbs2 = { .setup = dvbs2_setup };
+static const delsys_t dvbs = { .setup = dvbs_setup };
+static const delsys_t dvbs2 = { .setup = dvbs2_setup };
 
 
 /*** DVB-T ***/
-static int dvbt_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
+static int dvbt_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
 {
-    const char *mod = var_InheritModulation (obj);
+    const char *mod = var_InheritModulation (obj, "dvb-modulation");
     uint32_t fec_hp = var_InheritCodeRate (obj, "dvb-code-rate-hp");
     uint32_t fec_lp = var_InheritCodeRate (obj, "dvb-code-rate-lp");
     uint32_t guard = var_InheritGuardInterval (obj);
@@ -799,9 +865,9 @@ static int dvbt_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
     return dvb_set_dvbt (dev, freq, mod, fec_hp, fec_lp, bw, tx, guard, h);
 }
 
-static int dvbt2_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
+static int dvbt2_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
 {
-    const char *mod = var_InheritModulation (obj);
+    const char *mod = var_InheritModulation (obj, "dvb-modulation");
     uint32_t fec = var_InheritCodeRate (obj, "dvb-fec");
     uint32_t guard = var_InheritGuardInterval (obj);
     uint32_t bw = var_InheritInteger (obj, "dvb-bandwidth");
@@ -810,5 +876,49 @@ static int dvbt2_setup (vlc_object_t *obj, dvb_device_t *dev, unsigned freq)
     return dvb_set_dvbt2 (dev, freq, mod, fec, bw, tx, guard);
 }
 
-const delsys_t dvbt = { .setup = dvbt_setup };
-const delsys_t dvbt2 = { .setup = dvbt2_setup };
+static const delsys_t dvbt = { .setup = dvbt_setup };
+static const delsys_t dvbt2 = { .setup = dvbt2_setup };
+
+
+/*** ISDB-S ***/
+static int isdbs_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
+{
+    uint16_t ts_id = var_InheritInteger (obj, "dvb-ts-id");
+
+    int ret = dvb_set_isdbs (dev, freq, ts_id);
+    if (ret == 0)
+        ret = sec_setup (obj, dev, freq);
+    return ret;
+}
+
+static const delsys_t isdbs = { .setup = isdbs_setup };
+
+
+/*** ISDB-T ***/
+static int isdbt_setup (vlc_object_t *obj, dvb_device_t *dev, uint64_t freq)
+{
+    isdbt_layer_t layers[3];
+    uint32_t guard = var_InheritGuardInterval (obj);
+    uint32_t bw = var_InheritInteger (obj, "dvb-bandwidth");
+    int tx = var_InheritInteger (obj, "dvb-transmission");
+
+    for (unsigned i = 0; i < 3; i++)
+    {
+        char varname[sizeof ("dvb-X-interleaving")];
+        memcpy (varname, "dvb-X-", 4);
+        varname[4] = 'a' + i;
+
+        strcpy (varname + 6, "modulation");
+        layers[i].modulation = var_InheritModulation (obj, varname);
+        strcpy (varname + 6, "fec");
+        layers[i].code_rate = var_InheritCodeRate (obj, varname);
+        strcpy (varname + 6, "count");
+        layers[i].segment_count = var_InheritInteger (obj, varname);
+        strcpy (varname + 6, "interleaving");
+        layers[i].time_interleaving = var_InheritInteger (obj, varname);
+    }
+
+    return dvb_set_isdbt (dev, freq, bw, tx, guard, layers);
+}
+
+static const delsys_t isdbt = { .setup = isdbt_setup };

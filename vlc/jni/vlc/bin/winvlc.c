@@ -115,7 +115,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     int nCmdShow )
 {
     int argc;
+
 #ifndef UNDER_CE
+#ifdef TOP_BUILDDIR
+    putenv("VLC_PLUGIN_PATH=Z:"TOP_BUILDDIR"/modules");
+#endif
+
     HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
 
     /* SetProcessDEPPolicy */
@@ -123,12 +128,19 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
     if(h_Kernel32)
     {
         BOOL (WINAPI * mySetProcessDEPPolicy)( DWORD dwFlags);
+        BOOL (WINAPI * mySetDllDirectoryA)(const char* lpPathName);
 # define PROCESS_DEP_ENABLE 1
 
         mySetProcessDEPPolicy = (BOOL WINAPI (*)(DWORD))
                             GetProcAddress(h_Kernel32, "SetProcessDEPPolicy");
         if(mySetProcessDEPPolicy)
             mySetProcessDEPPolicy(PROCESS_DEP_ENABLE);
+
+        /* Do NOT load any library from cwd. */
+        mySetDllDirectoryA = (BOOL WINAPI (*)(const char*)) GetProcAddress(h_Kernel32, "SetDllDirectoryA");
+        if(mySetDllDirectoryA)
+            mySetDllDirectoryA("");
+
         FreeLibrary(h_Kernel32);
     }
 
@@ -137,12 +149,15 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
     if (wargv == NULL)
         return 1;
 
-    char *argv[argc + 2];
+    char *argv[argc + 3];
     BOOL crash_handling = TRUE;
     int j = 0;
 
     argv[j++] = FromWide( L"--media-library" );
     argv[j++] = FromWide( L"--no-ignore-config" );
+#ifdef TOP_SRCDIR
+    argv[j++] = FromWide (L"--data-path=Z:"TOP_SRCDIR"/share");
+#endif
     for (int i = 1; i < argc; i++)
     {
         if(!wcscmp(wargv[i], L"--no-crashdump"))
@@ -249,7 +264,8 @@ static void check_crashdump()
                     MessageBox( NULL, L"There was an error while connecting to the FTP server. "\
                                     "Thanks a lot for the help anyway.",
                                     L"Report sending failed", MB_OK);
-                    fprintf(stderr,"Can't connect to FTP server%d\n",GetLastError());
+                    fprintf(stderr,"Can't connect to FTP server 0x%08lu\n",
+                            (unsigned long)GetLastError());
                 }
                 InternetCloseHandle(Hint);
             }

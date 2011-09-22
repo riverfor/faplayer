@@ -3,7 +3,7 @@
  * darwin_specific.m: Darwin specific features
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: 9dead944acbb58eb1ae504538ba499b64e16abb9 $
+ * $Id: db6f8be124effd606d750e5ff6ee8063d74abc86 $
  *
  * Authors: Sam Hocevar <sam@zoy.org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -166,9 +166,8 @@ void system_Configure( libvlc_int_t *p_this,
 /*****************************************************************************
  * system_End: free the program path.
  *****************************************************************************/
-void system_End( libvlc_int_t *p_this )
+void system_End( void )
 {
-    (void)p_this;
     free( psz_vlcpath );
     psz_vlcpath = NULL;
 }

@@ -2,7 +2,7 @@
  * coredialogs.h: Mac OS X Core Dialogs
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: 66b2f8ba8404082c039d21c84b822657f6432a6f $
+ * $Id: ea3829c0b9d602949af2d2bd63f866cc25c6214d $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -78,7 +78,7 @@
 }
 + (VLCCoreDialogProvider *)sharedInstance;
 
--(void)performDialogEvent: (NSNotification *)o_notification;
+-(void)performEventWithObject: (NSValue *)o_value ofType: (const char*)type;
 
 -(void)showFatalDialog: (NSValue *)o_value;
 -(void)showFatalWaitDialog: (NSValue *)o_value;

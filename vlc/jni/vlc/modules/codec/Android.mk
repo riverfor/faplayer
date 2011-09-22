@@ -12,6 +12,7 @@ LOCAL_MODULE := a52_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"a52\" \
     -DMODULE_NAME=a52
 
@@ -23,7 +24,11 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     a52.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_STATIC_LIBRARIES += liba52
+
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -36,6 +41,7 @@ LOCAL_MODULE := dts_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"dts\" \
     -DMODULE_NAME=dts
 
@@ -47,7 +53,9 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     dts.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -60,21 +68,23 @@ LOCAL_MODULE := liblibass_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"libass\" \
     -DMODULE_NAME=libass
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src \
-    $(EXTROOT)/iconv/include \
-    $(EXTROOT)/freetype/include \
-    $(EXTROOT)/libass/include
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     libass.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+LOCAL_STATIC_LIBRARIES += libass libiconv libfreetype
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -87,6 +97,7 @@ LOCAL_MODULE := mpeg_audio_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"mpeg_audio\" \
     -DMODULE_NAME=mpeg_audio
 
@@ -98,7 +109,9 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     mpeg_audio.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -111,6 +124,7 @@ LOCAL_MODULE := subsdec_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"subsdec\" \
     -DMODULE_NAME=subsdec
 
@@ -122,7 +136,9 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     subsdec.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -135,6 +151,7 @@ LOCAL_MODULE := subsusf_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"subsusf\" \
     -DMODULE_NAME=subsusf
 
@@ -146,7 +163,9 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     subsusf.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 

@@ -2,7 +2,7 @@
  * modules.h : Module management functions.
  *****************************************************************************
  * Copyright (C) 2001 the VideoLAN team
- * $Id: fd2e31ded6d5be9c3b16826dcff1cbc412a00be6 $
+ * $Id: 91c29614a25f890f5bb4d7ec6e23d075d6e900e0 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -27,25 +27,6 @@
 typedef struct module_cache_t module_cache_t;
 
 /*****************************************************************************
- * module_bank_t: the module bank
- *****************************************************************************
- * This variable is accessed by any function using modules.
- *****************************************************************************/
-typedef struct module_bank_t
-{
-    unsigned         i_usage;
-
-    /* Plugins cache */
-    int            i_cache;
-    module_cache_t **pp_cache;
-
-    int            i_loaded_cache;
-    module_cache_t **pp_loaded_cache;
-
-    module_t       *head;
-} module_bank_t;
-
-/*****************************************************************************
  * Module cache description structure
  *****************************************************************************/
 struct module_cache_t
@@ -62,28 +43,20 @@ struct module_cache_t
 
 #define MODULE_SHORTCUT_MAX 20
 
-/* The module handle type. */
-#if defined(HAVE_DL_DYLD) && !defined(__x86_64__)
-#   if defined (HAVE_MACH_O_DYLD_H)
-#       include <mach-o/dyld.h>
-#   endif
-typedef NSModule module_handle_t;
-#elif defined(HAVE_IMAGE_H)
-typedef int module_handle_t;
-#elif defined(WIN32) || defined(UNDER_CE) || defined(__SYMBIAN32__)
-typedef void * module_handle_t;
-#elif defined(HAVE_DL_DLOPEN)
-typedef void * module_handle_t;
-#endif
+/** The module handle type */
+typedef void *module_handle_t;
+
+/** Plugin entry point prototype */
+typedef int (*vlc_plugin_cb) (int (*)(void *, void *, int, ...), void *);
+
+/** Main module */
+int vlc_entry__main (int (*)(void *, void *, int, ...), void *);
 
 /**
  * Internal module descriptor
  */
 struct module_t
 {
-    char       *psz_object_name;
-    gc_object_t vlc_gc_data;
-
     module_t   *next;
     module_t   *parent;
     module_t   *submodule;
@@ -103,7 +76,6 @@ struct module_t
     char    *psz_capability;                                 /**< Capability */
     int      i_score;                          /**< Score for the capability */
 
-    bool          b_builtin;  /* Set to true if the module is built in */
     bool          b_loaded;        /* Set to true if the dll is loaded */
     bool b_unloadable;                        /**< Can we be dlclosed? */
 
@@ -128,15 +100,15 @@ struct module_t
     char *              domain;                            /* gettext domain */
 };
 
-module_t *vlc_module_create (void);
-module_t *vlc_submodule_create (module_t *module);
+module_t *vlc_plugin_describe (vlc_plugin_cb);
+module_t *vlc_module_create (module_t *);
+void vlc_module_destroy (module_t *);
 
-void  module_InitBank( vlc_object_t * );
-#define module_InitBank(a) module_InitBank(VLC_OBJECT(a))
-void module_LoadPlugins( vlc_object_t *, const void ** );
-#define module_LoadPlugins(a,b) module_LoadPlugins(VLC_OBJECT(a),b)
-void module_EndBank( vlc_object_t *, bool );
-#define module_EndBank(a,b) module_EndBank(VLC_OBJECT(a), b)
+void module_InitBank (void);
+size_t module_LoadPlugins( vlc_object_t * );
+#define module_LoadPlugins(a) module_LoadPlugins(VLC_OBJECT(a))
+void module_EndBank (bool);
+int module_Map (vlc_object_t *, module_t *);
 
 int vlc_bindtextdomain (const char *);
 
@@ -148,8 +120,11 @@ void module_Unload (module_handle_t);
 /* Plugins cache */
 void   CacheMerge (vlc_object_t *, module_t *, module_t *);
 void   CacheDelete(vlc_object_t *, const char *);
-size_t CacheLoad  (vlc_object_t *, const char *, module_cache_t ***);
-void   CacheSave  (vlc_object_t *, const char *, module_cache_t *const *, size_t);
-module_t * CacheFind (module_bank_t *, const char *, time_t, off_t);
+size_t CacheLoad  (vlc_object_t *, const char *, module_cache_t **);
+int CacheAdd (module_cache_t **, size_t *,
+              const char *, const struct stat *, module_t *);
+void CacheSave  (vlc_object_t *, const char *, module_cache_t *, size_t);
+module_t *CacheFind (module_cache_t *, size_t,
+                     const char *, const struct stat *);
 
 #endif /* !LIBVLC_MODULES_H */

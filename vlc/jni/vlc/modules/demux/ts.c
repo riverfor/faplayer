@@ -2,7 +2,7 @@
  * ts.c: Transport Stream input module for VLC.
  *****************************************************************************
  * Copyright (C) 2004-2005 the VideoLAN team
- * $Id: 9a7611ad905222ef33cb67eb30eb7ed1a4e07f4c $
+ * $Id: 441fb9bae3469b07d5dc97e866dd1c18bfc38f2c $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Jean-Paul Saman <jpsaman #_at_# m2x.nl>
@@ -35,15 +35,14 @@
 
 #include <assert.h>
 
-#include <vlc_access.h> /* DVB-specific things */
+#include <vlc_access.h>    /* DVB-specific things */
 #include <vlc_demux.h>
 #include <vlc_meta.h>
 #include <vlc_epg.h>
+#include <vlc_charset.h>   /* FromCharset, for EIT */
 
-#include <vlc_iso_lang.h>
-#include <vlc_network.h>
-#include <vlc_charset.h>
-#include <vlc_fs.h>
+#include <vlc_network.h>   /* net_ for ts-out mode */
+#include <vlc_fs.h>        /* vlc_fopen for file-dump mode */
 
 #include "../mux/mpeg/csa.h"
 

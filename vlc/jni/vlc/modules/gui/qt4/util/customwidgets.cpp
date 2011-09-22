@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2004 Daniel Molkentin <molkentin@kde.org>
- * $Id: 12f99319257ec6f0fade5c1e7f5538982a667735 $
+ * $Id: 76f2a353c9913ff6e15d372141b69916b12300ab $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  * The "ClickLineEdit" control is based on code by  Daniel Molkentin
@@ -327,7 +327,7 @@ void AnimatedIcon::addFrame( const QPixmap &pxm, int index )
         return;
     }
     QPixmap *copy = new QPixmap( pxm );
-    mFrames.insert( ( index < 0 || index > mFrames.size() ) ? mFrames.size() :
+    mFrames.insert( ( index < 0 || index > mFrames.count() ) ? mFrames.count() :
                     index, copy );
     if( !pixmap() )
         setPixmap( *copy );
@@ -337,18 +337,11 @@ void AnimatedIcon::play( int loops, int interval )
 {
     if( interval < 20 )
     {
-#ifndef NDEBUG
-        printf( "AnimatedIcon::play(): interval is too short (%d ms)",
-                interval );
-#endif
         interval = 20;
     }
 
-    if( !mIdleFrame && (mFrames.empty() || loops != 0 ) )
+    if( !mIdleFrame && (mFrames.isEmpty() || loops != 0 ) )
     {
-#ifndef NDEBUG
-        printf( "AnimatedIcon::play(): no frames to display" );
-#endif
         return;
     }
 
@@ -373,8 +366,8 @@ void AnimatedIcon::play( int loops, int interval )
 // private slot
 void AnimatedIcon::onTimerTick()
 {
-    //assert( !mFrames.empty() );
-    if( ++mCurrentFrame > mFrames.size() )
+    //assert( !mFrames.isEmpty() );
+    if( ++mCurrentFrame > mFrames.count() )
     {
         if( mRemainingLoops != -1 )
         {
@@ -387,7 +380,7 @@ void AnimatedIcon::onTimerTick()
         }
         mCurrentFrame = 1;
     }
-    //assert( mCurrentFrame >= 1 && mCurrentFrame <= mFrames.size() );
+    //assert( mCurrentFrame >= 1 && mCurrentFrame <= mFrames.count() );
     setPixmap( *mFrames.at( mCurrentFrame - 1 ) );
 }
 

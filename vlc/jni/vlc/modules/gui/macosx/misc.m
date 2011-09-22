@@ -2,7 +2,7 @@
  * misc.m: code not specific to vlc
  *****************************************************************************
  * Copyright (C) 2003-2011 the VideoLAN team
- * $Id: 899cf3f18d2479298458eace42241417e6a5354b $
+ * $Id: df621ed682dce18202d493e6ef3a7b694eb8311d $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -25,6 +25,7 @@
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
 
+#import "CompatibilityFixes.h"
 #import "intf.h"                                          /* VLCApplication */
 #import "MainWindow.h"
 #import "misc.h"
@@ -32,59 +33,6 @@
 #import "controls.h"
 #import <vlc_url.h>
 
-/*****************************************************************************
- * NSImage (VLCAdditions)
- *
- *  Addition to NSImage
- *****************************************************************************/
-@implementation NSImage (VLCAdditions)
-+ (id)imageWithSystemName:(int)name
-{
-    /* ugly Carbon stuff following...
-     * regrettably, you can't get the icons through clean Cocoa */
-
-    /* retrieve our error icon */
-    NSImage * icon;
-    IconRef ourIconRef;
-    int returnValue;
-    returnValue = GetIconRef(kOnSystemDisk, 'macs', name, &ourIconRef);
-    icon = [[[NSImage alloc] initWithSize:NSMakeSize(32,32)] autorelease];
-    [icon lockFocus];
-    CGRect rect = CGRectMake(0,0,32,32);
-    PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext]
-        graphicsPort],
-        &rect,
-        kAlignNone,
-        kTransformNone,
-        NULL /*inLabelColor*/,
-        kPlotIconRefNormalFlags,
-        (IconRef)ourIconRef);
-    [icon unlockFocus];
-    returnValue = ReleaseIconRef(ourIconRef);
-    return icon;
-}
-
-+ (id)imageWithWarningIcon
-{
-    static NSImage * imageWithWarningIcon = nil;
-    if( !imageWithWarningIcon )
-    {
-        imageWithWarningIcon = [[[self class] imageWithSystemName:'caut'] retain];
-    }
-    return imageWithWarningIcon;
-}
-
-+ (id)imageWithErrorIcon
-{
-    static NSImage * imageWithErrorIcon = nil;
-    if( !imageWithErrorIcon )
-    {
-        imageWithErrorIcon = [[[self class] imageWithSystemName:'stop'] retain];
-    }
-    return imageWithErrorIcon;
-}
-
-@end
 /*****************************************************************************
  * NSAnimation (VLCAdditions)
  *
@@ -136,9 +84,9 @@ static NSMutableArray *blackoutWindows = NULL;
 
 + (NSScreen *)screenWithDisplayID: (CGDirectDisplayID)displayID
 {
-    int i;
+    NSUInteger count = [[NSScreen screens] count];
 
-    for( i = 0; i < [[NSScreen screens] count]; i++ )
+    for( NSUInteger i = 0; i < count; i++ )
     {
         NSScreen *screen = [[NSScreen screens] objectAtIndex: i];
         if([screen displayID] == displayID)
@@ -164,13 +112,12 @@ static NSMutableArray *blackoutWindows = NULL;
 
 - (void)blackoutOtherScreens
 {
-    unsigned int i;
-
     /* Free our previous blackout window (follow blackoutWindow alloc strategy) */
     [blackoutWindows makeObjectsPerformSelector:@selector(close)];
     [blackoutWindows removeAllObjects];
 
-    for(i = 0; i < [[NSScreen screens] count]; i++)
+    NSUInteger screenCount = [[NSScreen screens] count];
+    for(NSUInteger i = 0; i < screenCount; i++)
     {
         NSScreen *screen = [[NSScreen screens] objectAtIndex: i];
         VLCWindow *blackoutWindow;
@@ -198,21 +145,32 @@ static NSMutableArray *blackoutWindows = NULL;
         [blackoutWindow release];
 
         if( [screen isMainScreen ] )
-           SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
+        {
+            if ([screen isMainScreen])
+            {
+                if (OSX_LEOPARD)
+                    SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
+                else
+                    [NSApp setPresentationOptions:(NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)];
+            }
+        }
     }
 }
 
 + (void)unblackoutScreens
 {
-    unsigned int i;
+    NSUInteger blackoutWindowCount = [blackoutWindows count];
 
-    for(i = 0; i < [blackoutWindows count]; i++)
+    for(NSUInteger i = 0; i < blackoutWindowCount; i++)
     {
         VLCWindow *blackoutWindow = [blackoutWindows objectAtIndex: i];
         [blackoutWindow closeAndAnimate: YES];
     }
 
-   SetSystemUIMode( kUIModeNormal, 0);
+    if (OSX_LEOPARD)
+        SetSystemUIMode( kUIModeNormal, kUIOptionAutoShowMenuBar);
+    else
+        [NSApp setPresentationOptions:(NSApplicationPresentationDefault)];
 }
 
 @end
@@ -232,7 +190,7 @@ static NSMutableArray *blackoutWindows = NULL;
     {
         b_isset_canBecomeKeyWindow = NO;
         /* we don't want this window to be restored on relaunch */
-        if ([self respondsToSelector:@selector(setRestorable:)])
+        if (OSX_LION)
             [self setRestorable:NO];
     }
     return self;
@@ -451,12 +409,11 @@ static NSMutableArray *blackoutWindows = NULL;
     {
         if ([o_desired_type isEqualToString:NSFilenamesPboardType])
         {
-            int i;
             NSArray *o_array = [NSArray array];
-            NSArray *o_values = [[o_paste propertyListForType: NSFilenamesPboardType]
-                        sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+            NSArray *o_values = [[o_paste propertyListForType: NSFilenamesPboardType] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+            NSUInteger count = [o_values count];
 
-            for( i = 0; i < (int)[o_values count]; i++)
+            for( NSUInteger i = 0; i < count; i++)
             {
                 NSDictionary *o_dic;
                 char *psz_uri = make_URI([[o_values objectAtIndex:i] UTF8String], NULL);
@@ -536,12 +493,11 @@ static NSMutableArray *blackoutWindows = NULL;
     {
         if ([o_desired_type isEqualToString:NSFilenamesPboardType])
         {
-            int i;
             NSArray *o_array = [NSArray array];
-            NSArray *o_values = [[o_paste propertyListForType: NSFilenamesPboardType]
-                        sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+            NSArray *o_values = [[o_paste propertyListForType: NSFilenamesPboardType] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+            NSUInteger count = [o_values count];
 
-            for( i = 0; i < (int)[o_values count]; i++)
+            for( NSUInteger i = 0; i < count; i++)
             {
                 NSDictionary *o_dic;
                 char *psz_uri = make_URI([[o_values objectAtIndex:i] UTF8String], NULL);
@@ -711,11 +667,48 @@ void _drawFrameInRect(NSRect frameRect)
  *****************************************************************************/
 
 @implementation VLCTimeField
++ (void)initialize{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *appDefaults = [NSDictionary dictionaryWithObject:@"NO" forKey:@"DisplayTimeAsTimeRemaining"];
+
+    [defaults registerDefaults:appDefaults];
+}
+
 - (void)mouseDown: (NSEvent *)ourEvent
 {
     if( [ourEvent clickCount] > 1 )
         [[[VLCMain sharedInstance] controls] goToSpecificTime: nil];
     else
-        [[VLCMainWindow sharedInstance] timeFieldWasClicked: self];
+    {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DisplayTimeAsTimeRemaining"])
+            [[NSUserDefaults standardUserDefaults] setObject:@"NO" forKey:@"DisplayTimeAsTimeRemaining"];
+        else
+            [[NSUserDefaults standardUserDefaults] setObject:@"YES" forKey:@"DisplayTimeAsTimeRemaining"];
+    }
+}
+
+- (BOOL)timeRemaining
+{
+    return [[NSUserDefaults standardUserDefaults] boolForKey:@"DisplayTimeAsTimeRemaining"];
+}
+@end
+
+/*****************************************************************************
+ * VLCMainWindowSplitView implementation
+ * comments taken from NSSplitView.h (10.7 SDK)
+ *****************************************************************************/
+@implementation VLCMainWindowSplitView : NSSplitView
+/* Return the color of the dividers that the split view is drawing between subviews. The default implementation of this method returns [NSColor clearColor] for the thick divider style. It will also return [NSColor clearColor] for the thin divider style when the split view is in a textured window. All other thin dividers are drawn with a color that looks good between two white panes. You can override this method to change the color of dividers.
+ */
+- (NSColor *)dividerColor
+{
+    return [NSColor colorWithCalibratedRed:.60 green:.60 blue:.60 alpha:1.];
+}
+
+/* Return the thickness of the dividers that the split view is drawing between subviews. The default implementation returns a value that depends on the divider style. You can override this method to change the size of dividers.
+ */
+- (CGFloat)dividerThickness
+{
+    return .01;
 }
 @end

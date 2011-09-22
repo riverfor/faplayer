@@ -12,18 +12,26 @@ LOCAL_MODULE := avformat_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"avformat\" \
     -DMODULE_NAME=avformat
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src \
-    $(EXTROOT)/ffmpeg
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     avformat.c \
-    demux.c
+    demux.c \
+    ../../codec/avcodec/chroma.c \
+    ../../codec/avcodec/fourcc.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_STATIC_LIBRARIES += libavformat libavcodec libavutil
+
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+LOCAL_LDLIBS += -lz
+
+include $(BUILD_SHARED_LIBRARY)
 

@@ -31,19 +31,54 @@ local function stripslashes(s)
   return string.gsub(s,"\\(.)","%1")
 end
 
+--Round the number to the specified precision
+function round(what, precision)
+  if what then return math.floor(what*math.pow(10,precision)+0.5) / math.pow(10,precision) else return "" end
+end
+
+--split text where it matches the delimiter
+function strsplit(text, delimiter)
+	local strfind = string.find
+	local strsub = string.sub
+	local tinsert = table.insert
+	local list = {}
+	local pos = 1
+	if strfind("", delimiter, 1) then -- this would result in endless loops
+		error("delimiter matches empty string!")
+	end
+	local i=1
+	while 1 do
+		i=i+1
+		local first, last = strfind(text, delimiter, pos)
+		if first then -- found?
+			tinsert(list,i, strsub(text, pos, first-1))
+			pos = last+1
+		else
+			tinsert(list,i, strsub(text, pos))
+		break
+		end
+	end
+	return list
+end
+
+function round(what, precision)
+if what then return math.floor(what*math.pow(10,precision)+0.5) / math.pow(10,precision) else return "" end
+end
+
 --main function to process commands sent with the request
 
 processcommands = function ()
-	
+
 	local input = _GET['input']
 	local command = _GET['command']
 	local id = tonumber(_GET['id'] or -1)
 	local val = _GET['val']
 	local options = _GET['option']
+	local band = _GET['band']
 	if type(options) ~= "table" then -- Deal with the 0 or 1 option case
 	  options = { options }
 	end
-	
+
 	if command == "in_play" then
 	  --[[
 	  vlc.msg.err( "<options>" )
@@ -53,6 +88,8 @@ processcommands = function ()
 	  vlc.msg.err( "</options>" )
 	  --]]
 	  vlc.playlist.add({{path=stripslashes(input),options=options}})
+	elseif command == "addsubtitle" then
+	  vlc.input.add_subtitle (stripslashes(val))
 	elseif command == "in_enqueue" then
 	  vlc.playlist.enqueue({{path=stripslashes(input),options=options}})
 	elseif command == "pl_play" then
@@ -94,9 +131,15 @@ processcommands = function ()
 	elseif command == "pl_random" then
 	  vlc.playlist.random()
 	elseif command == "pl_loop" then
-	  vlc.playlist.loop()
+	--if loop is set true, then repeat needs to be set false
+	  if vlc.playlist.loop() then
+		vlc.playlist.repeat_("off")
+	  end
 	elseif command == "pl_repeat" then
-	  vlc.playlist.repeat_()
+	--if repeat is set true, then loop needs to be set false
+	  if vlc.playlist.repeat_() then
+		vlc.playlist.loop("off")
+	  end
 	elseif command == "pl_sd" then
 	  if vlc.sd.is_loaded(val) then
 		vlc.sd.remove(val)
@@ -125,8 +168,20 @@ processcommands = function ()
 	  if vlc.object.input() then
 	   vlc.var.set(vlc.object.input(),"spu-delay",val)
 	  end
+	elseif command == "aspectratio" then
+	  if vlc.object.vout() then
+	   vlc.var.set(vlc.object.vout(),"aspect-ratio",val)
+	  end
+	elseif command == "preamp" then
+	  vlc.equalizer.preampset(val)
+	elseif command == "equalizer" then
+	  vlc.equalizer.equalizerset(band,val)
+	elseif command == "enableeq" then
+	  if val == '0' then vlc.equalizer.enable(false) else vlc.equalizer.enable(true) end
+	elseif command == "setpreset" then 
+	  vlc.equalizer.setpreset(val)
 	end
-	
+
 	local input = nil
 	local command = nil
 	local id = nil
@@ -150,18 +205,18 @@ local printJsonKeyValue = function (k,v,indent)
 	if (k) then
 		print("\""..k.."\":")
 	end
-	
+
 	if (type(v)=="number") then
 		print(xmlString(v))
-	elseif (type(v)=="table") then 
-		 if (v._array==NULL) then         		
+	elseif (type(v)=="table") then
+		 if (v._array==NULL) then
           	print("{\n")
     		printTableAsJson(v,indent+2)
-    		print("\n}")  
-          else 
+    		print("\n}")
+          else
           	print("[")
           	printArrayAsJson(v._array,indent+2)
-          	print("\n]") 
+          	print("\n]")
           end
 	else
     	print("\""..xmlString(v).."\"")
@@ -173,7 +228,7 @@ printArrayAsJson = function(array,indent)
 	first=true
 	for i,v in ipairs(array) do
 		if not first then print(",") end
-		printJsonKeyValue(NULL,v,indent)	
+		printJsonKeyValue(NULL,v,indent)
 		first=false
 	end
 end
@@ -193,13 +248,13 @@ local printXmlKeyValue = function (k,v,indent)
 	if (k) then
 		print("<"..k..">")
 	end
-	
+
 	if (type(v)=="table") then
 		printTableAsXml(v,indent+2)
 	else
     	print(xmlString(v))
     end
-    
+
     if (k) then
 		print("</"..k..">")
 	end
@@ -227,7 +282,7 @@ end
 
 getplaylist = function ()
 	local p
-	
+
 	if _GET["search"] then
 	  if _GET["search"] ~= "" then
 		_G.search_key = _GET["search"]
@@ -239,54 +294,54 @@ getplaylist = function ()
 	else
 	  p = vlc.playlist.get()
 	end
-	
+
 	--logTable(p) --Uncomment to debug
-	
+
 	return p
 end
 
 parseplaylist = function (item)
 	if item.flags.disabled then return end
-	
+
 	if (item.children) then
 		local result={}
 		local name = vlc.strings.convert_xml_special_chars(item.name or "")
-		
+
 		result["type"]="node"
 		result.id=tostring(item.id)
 		result.name=tostring(name)
 		result.ro=item.flags.ro and "ro" or "rw"
-		
+
 		--store children in an array
 		--we use _array as a proxy for arrays
 		result.children={}
 		result.children._array={}
-		
+
 		for _, child in ipairs(item.children) do
 			local nextChild=parseplaylist(child)
             table.insert(result.children._array,nextChild)
-        end 
-		
+        end
+
 		return result
 	else
 		local result={}
 		local name, path = vlc.strings.convert_xml_special_chars(item.name or "", item.path or "")
 		local current_item = vlc.input.item()
-		
+
 		-- Is the item the one currently played
 		if(current_item ~= nil) then
             if(vlc.input.item().uri(current_item) == path) then
                 result.current = "current"
             end
         end
-		
+
 		result["type"]="leaf"
 		result.id=tostring(item.id)
 		result.uri=tostring(path)
 		result.name=name
 		result.ro=item.flags.ro and "ro" or "rw"
 		result.duration=math.floor(item.duration)
-		
+
 		return result
 	end
 
@@ -295,7 +350,7 @@ end
 playlisttable = function ()
 
 	local basePlaylist=getplaylist()
-	
+
 	return parseplaylist(basePlaylist)
 end
 
@@ -306,23 +361,24 @@ getstatus = function (includecategories)
 local input = vlc.object.input()
 local item = vlc.input.item()
 local playlist = vlc.object.playlist()
-local vout = input and vlc.object.find(input,'vout','child')
+local vout = vlc.object.vout()
+local aout = vlc.object.aout()
 
 	local s ={}
-	
+
 	--update api version when new data/commands added
 	s.apiversion=1
 	s.version=vlc.misc.version()
 	s.volume=vlc.volume.get()
-	
-	if input then 
+
+	if input then
 		s.length=math.floor(vlc.var.get(input,"length"))
 		s.time=math.floor(vlc.var.get(input,"time"))
 		s.position=vlc.var.get(input,"position")
 		s.audiodelay=vlc.var.get(input,"audio-delay")
 		s.rate=vlc.var.get(input,"rate")
 		s.subtitledelay=vlc.var.get(input,"spu-delay")
-	else 
+	else
 		s.length=0
 		s.time=0
 		s.position=0
@@ -330,23 +386,51 @@ local vout = input and vlc.object.find(input,'vout','child')
 		s.rate=1
 		s.subtitledelay=0
 	end
-	
+
 	if vout then
 		s.fullscreen=vlc.var.get(vout,"fullscreen")
+		s.aspectratio=vlc.var.get(vout,"aspect-ratio");
+		if s.aspectratio=="" then s.aspectratio = "default" end
 	else
 		s.fullscreen=0
 	end
-	
+
+	if aout then
+		local filters=vlc.var.get(aout,"audio-filter")
+		local temp=strsplit(filters,":")
+		s.audiofilters={}
+		local id=0
+		for i,j in pairs(temp) do
+			s.audiofilters['filter_'..id]=j
+			id=id+1
+		end
+	end
+
+	s.videoeffects={}
+	s.videoeffects.hue=round(vlc.config.get("hue"),2)
+	s.videoeffects.brightness=round(vlc.config.get("brightness"),2)
+	s.videoeffects.contrast=round(vlc.config.get("contrast"),2)
+	s.videoeffects.saturation=round(vlc.config.get("saturation"),2)
+	s.videoeffects.gamma=round(vlc.config.get("gamma"),2)
+
 	s.state=vlc.playlist.status()
 	s.random=vlc.var.get(playlist,"random")
 	s.loop=vlc.var.get(playlist,"loop")
 	s["repeat"]=vlc.var.get(playlist,"repeat")
-	
+
+        s.equalizer={}
+		s.equalizer.preamp=round(vlc.equalizer.preampget(),2)
+		s.equalizer.bands=vlc.equalizer.equalizerget()
+	        if s.equalizer.bands ~= null then
+		        for k,i in pairs(s.equalizer.bands) do s.equalizer.bands[k]=round(i,2) end
+		        s.equalizer.presets=vlc.equalizer.presets()
+		end
+
 	if (includecategories and item) then
 		s.information={}
 		s.information.category={}
 		s.information.category.meta=item:metas()
-		
+
 		local info = item:info()
 		for k, v in pairs(info) do
 			local streamTable={}
@@ -354,20 +438,18 @@ local vout = input and vlc.object.find(input,'vout','child')
 				local tag = string.gsub(k2," ","_")
 				streamTable[xmlString(tag)]=xmlString(v2)
 			end
-			
+
 			s.information.category[xmlString(k)]=streamTable
 		end
-		
+
 		s.stats={}
-		
+
 		local statsdata = item:stats()
       	for k,v in pairs(statsdata) do
         	local tag = string.gsub(k,"_","")
         s.stats[tag]=xmlString(v)
       end
-		
-		
 	end
-
 	return s
 end
+

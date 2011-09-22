@@ -2,7 +2,7 @@
  * intf.c: Generic lua interface functions
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: 9a4510a8663e488f88fbef4f0c3dc38a0261356b $
+ * $Id: 22b974a6bc668c03b3a269a0578349ecde7fc1af $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -203,16 +203,8 @@ static int Start_LuaIntf( vlc_object_t *p_this, const char *name )
     {
         if( !strcmp( name, "http" ) )
         {
-            char *psz_http_host = var_CreateGetNonEmptyString( p_intf, "http-host" );
             char *psz_http_src = var_CreateGetNonEmptyString( p_intf, "http-src" );
             bool b_http_index = var_CreateGetBool( p_intf, "http-index" );
-            if( psz_http_host )
-            {
-                char *psz_esc = config_StringEscape( psz_http_host );
-                asprintf( &psz_config, "http={host='%s'", psz_esc );
-                free( psz_esc );
-                free( psz_http_host );
-            }
             if( psz_http_src )
             {
                 char *psz_esc = config_StringEscape( psz_http_src );

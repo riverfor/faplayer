@@ -35,11 +35,11 @@ enum {
     DVB_S2 = 0x00000080,
     DVB_T  = 0x00000100,
     DVB_T2 = 0x00000200,
+
+    ISDB_C = 0x00001000,
+    ISDB_S = 0x00002000,
+    ISDB_T = 0x00004000,
 };
-
-typedef struct delsys delsys_t;
-
-extern const delsys_t dvbc, dvbs, dvbs2, dvbt, dvbt2, atsc, cqam;
 
 typedef struct dvb_device dvb_device_t;
 
@@ -90,24 +90,29 @@ int dvb_set_dvbt2 (dvb_device_t *, uint32_t freq, const char *mod,
 int dvb_set_atsc (dvb_device_t *, uint32_t freq, const char *mod);
 int dvb_set_cqam (dvb_device_t *, uint32_t freq, const char *mod);
 
+/* ISDB-S */
+/* TODO: modulation? */
+int dvb_set_isdbs (dvb_device_t *, uint64_t freq, uint16_t ts_id);
+
 /* ISDB-T */
 typedef struct isdbt_layer
 {
     const char *modulation;
-    const char *code_rate;
+    uint32_t code_rate;
     uint8_t segment_count;
     uint8_t time_interleaving;
 } isdbt_layer_t;
 
+int dvb_set_isdbt (dvb_device_t *, uint32_t freq, uint32_t bandwith,
+                   int transmission, uint32_t guard, const isdbt_layer_t[3]);
+
 typedef struct isdbt_sound
 {
     uint8_t subchannel_id;
-    uint8_t segment_index;    uint8_t segment_cound;
+    uint8_t segment_index;
+    uint8_t segment_count;
 } isdbt_sound_t;
 
-int dvb_set_isdbt (dvb_device_t *, uint32_t freq, const isdbt_layer_t *a,
-                   const isdbt_layer_t *b, const isdbt_layer_t *c,
-                   const isdbt_sound_t *sb);
 # ifdef __cplusplus
 }
 # endif

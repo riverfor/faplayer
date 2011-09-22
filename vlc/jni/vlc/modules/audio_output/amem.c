@@ -55,26 +55,44 @@ struct aout_sys_t
 {
     void *opaque;
     void (*play) (void *opaque, const void *data, unsigned count, int64_t pts);
+    void (*pause) (void *opaque, int64_t pts);
+    void (*resume) (void *opaque, int64_t pts);
+    void (*flush) (void *opaque);
+    void (*drain) (void *opaque);
     int (*set_volume) (void *opaque, float vol, bool mute);
     void (*cleanup) (void *opaque);
 };
 
-static void Play (aout_instance_t *aout)
+static void Play (audio_output_t *aout, block_t *block)
 {
-    aout_sys_t *sys = aout->output.p_sys;
-    block_t *block;
+    aout_sys_t *sys = aout->sys;
 
-    while ((block = aout_FifoPop(&aout->output.fifo)) != NULL)
-    {
-        sys->play (sys->opaque, block->p_buffer, block->i_nb_samples,
-                   block->i_pts);
-        block_Release (block);
-    }
+    sys->play (sys->opaque, block->p_buffer, block->i_nb_samples,
+               block->i_pts);
+    block_Release (block);
 }
 
-static int VolumeSet (aout_instance_t *aout, float vol, bool mute)
+static void Pause (audio_output_t *aout, bool paused, mtime_t date)
 {
-    aout_sys_t *sys = aout->output.p_sys;
+    aout_sys_t *sys = aout->sys;
+    void (*cb) (void *, int64_t) = paused ? sys->pause : sys->resume;
+
+    if (cb != NULL)
+        cb (sys->opaque, date);
+}
+
+static void Flush (audio_output_t *aout, bool wait)
+{
+    aout_sys_t *sys = aout->sys;
+    void (*cb) (void *) = wait ? sys->drain : sys->flush;
+
+    if (cb != NULL)
+        cb (sys->opaque);
+}
+
+static int VolumeSet (audio_output_t *aout, float vol, bool mute)
+{
+    aout_sys_t *sys = aout->sys;
 
     return sys->set_volume (sys->opaque, vol, mute) ? -1 : 0;
 }
@@ -83,14 +101,18 @@ typedef int (*vlc_audio_format_cb) (void **, char *, unsigned *, unsigned *);
 
 static int Open (vlc_object_t *obj)
 {
-    aout_instance_t *aout = (aout_instance_t *)obj;
+    audio_output_t *aout = (audio_output_t *)obj;
     aout_sys_t *sys = malloc (sizeof (*sys));
     if (unlikely(sys == NULL))
         return VLC_ENOMEM;
 
-    aout->output.p_sys = sys;
+    aout->sys = sys;
     sys->opaque = var_InheritAddress (obj, "amem-data");
     sys->play = var_InheritAddress (obj, "amem-play");
+    sys->pause = var_InheritAddress (obj, "amem-pause");
+    sys->resume = var_InheritAddress (obj, "amem-resume");
+    sys->flush = var_InheritAddress (obj, "amem-flush");
+    sys->drain = var_InheritAddress (obj, "amem-drain");
     sys->set_volume = var_InheritAddress (obj, "amem-set-volume");
     sys->cleanup = NULL; /* defer */
     if (sys->play == NULL)
@@ -102,12 +124,12 @@ static int Open (vlc_object_t *obj)
 
     if (setup != NULL)
     {
-        rate = aout->output.output.i_rate;
-        channels = aout_FormatNbChannels(&aout->output.output);
+        rate = aout->format.i_rate;
+        channels = aout_FormatNbChannels(&aout->format);
 
         if (setup (&sys->opaque, format, &rate, &channels))
             goto error;
-        /* Only call this callback if setup succeeded */ 
+        /* Only call this callback if setup succeeded */
         sys->cleanup = var_InheritAddress (obj, "amem-cleanup");
     }
     else
@@ -122,18 +144,19 @@ static int Open (vlc_object_t *obj)
 
     /* TODO: amem-format */
     /* FIXME/TODO channel mapping */
-    if (strcmp(format, "S16N") || aout->output.output.i_channels != channels)
+    if (strcmp(format, "S16N") || aout->format.i_channels != channels)
     {
         msg_Err (aout, "format not supported");
         goto error;
     }
-    aout->output.output.i_format = VLC_CODEC_S16N;
-    aout->output.output.i_rate = rate;
+    aout->format.i_format = VLC_CODEC_S16N;
+    aout->format.i_rate = rate;
 
-    aout->output.pf_play = Play;
-    aout->output.pf_pause = NULL;
+    aout->pf_play = Play;
+    aout->pf_pause = Pause;
+    aout->pf_flush = Flush;
     if (sys->set_volume != NULL)
-        aout->output.pf_volume_set = VolumeSet;
+        aout->pf_volume_set = VolumeSet;
     else
         aout_VolumeSoftInit (aout);
     return VLC_SUCCESS;
@@ -145,8 +168,8 @@ error:
 
 static void Close (vlc_object_t *obj)
 {
-    aout_instance_t *aout = (aout_instance_t *)obj;
-    aout_sys_t *sys = aout->output.p_sys;
+    audio_output_t *aout = (audio_output_t *)obj;
+    aout_sys_t *sys = aout->sys;
 
     if (sys->cleanup != NULL)
         sys->cleanup (sys->opaque);

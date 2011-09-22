@@ -2,7 +2,7 @@
  * intf.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: a64637dfde51ce224b6242425842a90fb3fea38d $
+ * $Id: 97a2437066fd71a7e6d7a17efc897aa159999ba8 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -28,15 +28,18 @@
 #   include "config.h"
 #endif
 
-#include <vlc_common.h>
-#include <vlc_interface.h>
-#include <vlc_playlist.h>
-#include <vlc_vout.h>
-#include <vlc_aout.h>
-#include <vlc_input.h>
+#import <vlc_common.h>
+#import <vlc_interface.h>
+#import <vlc_playlist.h>
+#import <vlc_vout.h>
+#import <vlc_aout.h>
+#import <vlc_input.h>
 
-#include <Cocoa/Cocoa.h>
+#import <Cocoa/Cocoa.h>
+#import "CompatibilityFixes.h"
 #import "SPMediaKeyTap.h"                   /* for the media key support */
+#import "misc.h"
+#import "MainWindow.h"
 
 /*****************************************************************************
  * Local prototypes.
@@ -59,25 +62,13 @@ unsigned int CocoaKeyToVLC( unichar i_key );
 // You need to release those objects after use
 input_thread_t *getInput(void);
 vout_thread_t *getVout(void);
-aout_instance_t *getAout(void);
+audio_output_t *getAout(void);
 
 /*****************************************************************************
  * intf_sys_t: description and status of the interface
  *****************************************************************************/
 struct intf_sys_t
 {
-    /* special actions */
-    int i_play_status;
-    int i_old_play_status;
-
-    /* interface update */
-    bool b_intf_update;
-    bool b_playlist_update;
-    bool b_playmode_update;
-    bool b_current_title_update;
-    bool b_fullscreen_update;
-    bool b_intf_show;
-
     /* menus handlers */
     bool b_input_update;
     bool b_aout_update;
@@ -95,7 +86,7 @@ struct intf_sys_t
 @class VLCEmbeddedWindow;
 @class VLCControls;
 @class VLCPlaylist;
-@interface VLCMain : NSObject
+@interface VLCMain : NSObject <NSWindowDelegate>
 {
     intf_thread_t *p_intf;      /* The main intf object */
     id o_mainmenu;              /* VLCMainMenu */
@@ -105,7 +96,7 @@ struct intf_sys_t
     id o_wizard;                /* VLCWizard      */
     id o_embedded_list;         /* VLCEmbeddedList*/
     id o_coredialogs;           /* VLCCoreDialogProvider */
-    VLCInformation * o_info;    /* VLCInformation */
+    id o_info;                  /* VLCInformation */
     id o_eyetv;                 /* VLCEyeTVController */
     id o_bookmarks;             /* VLCBookmarks */
     id o_coreinteraction;       /* VLCCoreInteraction */
@@ -117,8 +108,10 @@ struct intf_sys_t
     BOOL nib_info_loaded;       /* information panel nibfile */
     BOOL nib_coredialogs_loaded; /* CoreDialogs nibfile */
     BOOL nib_bookmarks_loaded;   /* Bookmarks nibfile */
+    BOOL b_active_videoplayback;
+    BOOL b_nativeFullscreenMode;
 
-    IBOutlet id o_mainwindow;            /* VLCMainWindow */
+    VLCMainWindow *o_mainwindow;            /* VLCMainWindow */
 
     IBOutlet VLCControls * o_controls;     /* VLCControls    */
     IBOutlet VLCPlaylist * o_playlist;     /* VLCPlaylist    */
@@ -140,15 +133,6 @@ struct intf_sys_t
     IBOutlet NSWindow * o_crashrep_win;
     IBOutlet NSButton * o_crashrep_includeEmail_ckb;
     IBOutlet NSTextField * o_crashrep_includeEmail_txt;
-
-    input_state_e cachedInputState;
-
-    /* the manage thread */
-    pthread_t manage_thread;
-
-    /* The timer that update the interface */
-    NSTimer * interfaceTimer;
-
     NSURLConnection * crashLogURLConnection;
 
     AppleRemote * o_remote;
@@ -178,9 +162,12 @@ struct intf_sys_t
 - (id)wizard;
 - (id)embeddedList;
 - (id)getVideoViewAtPositionX: (int *)pi_x Y: (int *)pi_y withWidth: (unsigned int*)pi_width andHeight: (unsigned int*)pi_height;
+- (void)setNativeVideoSize:(NSSize)size;
 - (id)coreDialogProvider;
 - (id)eyeTVController;
 - (id)appleRemoteController;
+- (void)setActiveVideoPlayback:(BOOL)b_value;
+- (BOOL)activeVideoPlayback;
 - (void)applicationWillTerminate:(NSNotification *)notification;
 - (NSString *)localizedString:(const char *)psz;
 - (char *)delocalizeString:(NSString *)psz;
@@ -189,23 +176,32 @@ struct intf_sys_t
 - (NSString *)VLCKeyToString:(NSString *)theString;
 - (unsigned int)VLCModifiersToCocoa:(NSString *)theString;
 - (void)updateCurrentlyUsedHotkeys;
-
+- (void)fullscreenChanged;
+- (void)PlaylistItemChanged;
+- (void)playbackStatusUpdated;
+- (void)playbackModeUpdated;
+- (void)updateVolume;
+- (void)updatePlaybackPosition;
+- (void)updateName;
+- (void)playlistUpdated;
+- (void)updateRecordState: (BOOL)b_value;
+- (void)updateInfoandMetaPanel;
+- (void)updateMainMenu;
+- (void)updateMainWindow;
+- (void)showFullscreenController;
+- (void)updateDelays;
 - (void)initStrings;
 - (BOOL)application:(NSApplication *)o_app openFile:(NSString *)o_filename;
 
-- (void)manage;
-- (void)manageIntf:(NSTimer *)o_timer;
-
 - (void)updateMessageDisplay;
-- (void)playStatusUpdated:(int) i_status;
-- (IBAction)showController:(id)sender;
 
 - (IBAction)crashReporterAction:(id)sender;
 - (IBAction)openCrashLog:(id)sender;
 - (IBAction)saveDebugLog:(id)sender;
 - (IBAction)showMessagesPanel:(id)sender;
 
-- (IBAction)togglePlaylist:(id)sender;
+- (void)processReceivedlibvlcMessage:(const msg_item_t *) item ofType: (int)type withStr: (char *)str;
+
 - (void)updateTogglePlaylistState;
 
 - (void)windowDidBecomeKey:(NSNotification *)o_notification;

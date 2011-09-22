@@ -12,6 +12,7 @@ LOCAL_MODULE := android_surface_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"android_surface\" \
     -DMODULE_NAME=android_surface
 
@@ -23,7 +24,9 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     androidsurface.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -36,6 +39,7 @@ LOCAL_MODULE := vmem_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"vmem\" \
     -DMODULE_NAME=vmem
 
@@ -47,5 +51,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     vmem.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 

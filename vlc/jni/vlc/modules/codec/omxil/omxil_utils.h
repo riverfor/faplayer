@@ -2,7 +2,7 @@
  * omxil_utils.h: helper functions
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: 959f9345aa7f5d6dd17647593fe6fc038c1115e7 $
+ * $Id: 5667bf4f2267070065163baf5081e2e0392e0eb3 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -119,7 +119,7 @@ OMX_ERRORTYPE WaitForSpecificOmxEvent(decoder_t *p_dec,
 /*****************************************************************************
  * Picture utility functions
  *****************************************************************************/
-void CopyOmxPicture( decoder_t *, picture_t *, OMX_BUFFERHEADERTYPE * );
+void CopyOmxPicture( decoder_t *, picture_t *, OMX_BUFFERHEADERTYPE *, int );
 void CopyVlcPicture( decoder_t *, OMX_BUFFERHEADERTYPE *, picture_t * );
 
 /*****************************************************************************
@@ -167,3 +167,4 @@ OMX_ERRORTYPE GetAudioParameters(OMX_HANDLETYPE handle,
     OmxFormatParam *param, OMX_U32 i_port, OMX_AUDIO_CODINGTYPE encoding,
     uint8_t *pi_channels, unsigned int *pi_samplerate,
     unsigned int *pi_bitrate, unsigned int *pi_bps, unsigned int *pi_blocksize);
+unsigned int GetAudioParamSize(OMX_INDEXTYPE index);

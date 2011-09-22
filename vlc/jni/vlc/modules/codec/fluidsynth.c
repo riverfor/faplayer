@@ -1,8 +1,8 @@
 /*****************************************************************************
- * fluidsynth.c: Software MIDI synthetizer using libfluidsynth
+ * fluidsynth.c: Software MIDI synthesizer using libfluidsynth
  *****************************************************************************
  * Copyright © 2007 Rémi Denis-Courmont
- * $Id: 79ed0da3b30ecf05530cced6b69e284f1e72f6a9 $
+ * $Id: 4a967c270ef576e954cd99192f3f9f7b898807d1 $
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ static int  Open  (vlc_object_t *);
 static void Close (vlc_object_t *);
 
 vlc_module_begin ()
-    set_description (N_("FluidSynth MIDI synthetizer"))
+    set_description (N_("FluidSynth MIDI synthesizer"))
     set_capability ("decoder", 100)
     set_shortname (N_("FluidSynth"))
     set_category (CAT_INPUT)

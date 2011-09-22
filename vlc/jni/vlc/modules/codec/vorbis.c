@@ -5,7 +5,7 @@
  * Copyright (C) 2007 Société des arts technologiques
  * Copyright (C) 2007 Savoir-faire Linux
  *
- * $Id: 8ec8c1ba3287af8f7abd306319b3fd9b5a4cd41a $
+ * $Id: 6b42f9882c63ea96f002a9a0471e252d282bddae $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -141,7 +141,7 @@ static const uint32_t pi_3channels_in[] =
 static int  OpenDecoder   ( vlc_object_t * );
 static int  OpenPacketizer( vlc_object_t * );
 static void CloseDecoder  ( vlc_object_t * );
-static void *DecodeBlock  ( decoder_t *, block_t ** );
+static block_t *DecodeBlock  ( decoder_t *, block_t ** );
 
 static int  ProcessHeaders( decoder_t * );
 static void *ProcessPacket ( decoder_t *, ogg_packet *, block_t ** );
@@ -261,10 +261,8 @@ static int OpenDecoder( vlc_object_t *p_this )
 #endif
 
     /* Set callbacks */
-    p_dec->pf_decode_audio = (aout_buffer_t *(*)(decoder_t *, block_t **))
-        DecodeBlock;
-    p_dec->pf_packetize    = (block_t *(*)(decoder_t *, block_t **))
-        DecodeBlock;
+    p_dec->pf_decode_audio = DecodeBlock;
+    p_dec->pf_packetize    = DecodeBlock;
 
     return VLC_SUCCESS;
 }
@@ -289,7 +287,7 @@ static int OpenPacketizer( vlc_object_t *p_this )
  ****************************************************************************
  * This function must be fed with ogg packets.
  ****************************************************************************/
-static void *DecodeBlock( decoder_t *p_dec, block_t **pp_block )
+static block_t *DecodeBlock( decoder_t *p_dec, block_t **pp_block )
 {
     decoder_sys_t *p_sys = p_dec->p_sys;
     ogg_packet oggpacket;
@@ -569,6 +567,10 @@ static void ParseVorbisComments( decoder_t *p_dec )
         {
             *psz_value = '\0';
             psz_value++;
+
+            /* Don't add empty values */
+            if( *psz_value == '\0' )
+                break;
 
             if( !p_dec->p_description )
                 p_dec->p_description = vlc_meta_New();

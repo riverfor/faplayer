@@ -27,7 +27,10 @@ function probe()
 	header = vlc.peek( 2048 )
 	return string.match( header, "FILE.*WAVE%s[\r\n]+" ) or
 	       string.match( header, "FILE.*AIFF%s[\r\n]+" ) or
-	       string.match( header, "FILE.*MP3%s[\r\n]+" )
+	       string.match( header, "FILE.*MP3%s[\r\n]+" ) or
+	       string.match( header, "FILE.*WAVE%s*[\n]+" ) or
+	       string.match( header, "FILE.*AIFF%s*[\n]+" ) or
+	       string.match( header, "FILE.*MP3%s*[\n]+" )
 end
 
 -- Helpers
@@ -46,7 +49,7 @@ function cue_path( src )
 		return src
 	end
 
-	local path = string.gsub( vlc.path, '\\', '/' )
+	local path = string.gsub( vlc.strings.decode_uri(vlc.path), '\\', '/' )
 	local slash = string.find( string.reverse( path ), '/' )
 	if( path == nil ) then
 		return src

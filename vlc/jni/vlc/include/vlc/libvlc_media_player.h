@@ -2,7 +2,7 @@
  * libvlc_media_player.h:  libvlc_media_player external API
  *****************************************************************************
  * Copyright (C) 1998-2010 the VideoLAN team
- * $Id: 70c4b9137c6d3383d9e379215be4b7241bc7e278 $
+ * $Id: 5233ecb79ae210887d9369bcaaf1262acd90466c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -179,6 +179,8 @@ LIBVLC_API libvlc_event_manager_t * libvlc_media_player_event_manager ( libvlc_m
  *
  * \param p_mi the Media Player
  * \return 1 if the media player is playing, 0 otherwise
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int libvlc_media_player_is_playing ( libvlc_media_player_t *p_mi );
 
@@ -474,9 +476,39 @@ typedef void (*libvlc_audio_play_cb)(void *data, const void *samples,
                                      unsigned count, int64_t pts);
 
 /**
+ * Callback prototype for audio pause.
+ * \note The pause callback is never called if the audio is already paused.
+ * \param data data pointer as passed to libvlc_audio_set_callbacks() [IN]
+ * \param pts time stamp of the pause request (should be elapsed already)
+ */
+typedef void (*libvlc_audio_pause_cb)(void *data, int64_t pts);
+
+/**
+ * Callback prototype for audio resumption (i.e. restart from pause).
+ * \note The resume callback is never called if the audio is not paused.
+ * \param data data pointer as passed to libvlc_audio_set_callbacks() [IN]
+ * \param pts time stamp of the resumption request (should be elapsed already)
+ */
+typedef void (*libvlc_audio_resume_cb)(void *data, int64_t pts);
+
+/**
+ * Callback prototype for audio buffer flush
+ * (i.e. discard all pending buffers and stop playback as soon as possible).
+ * \param data data pointer as passed to libvlc_audio_set_callbacks() [IN]
+ */
+typedef void (*libvlc_audio_flush_cb)(void *data, int64_t pts);
+
+/**
+ * Callback prototype for audio buffer drain
+ * (i.e. wait for pending buffers to be played).
+ * \param data data pointer as passed to libvlc_audio_set_callbacks() [IN]
+ */
+typedef void (*libvlc_audio_drain_cb)(void *data);
+
+/**
  * Callback prototype for audio volume change.
  * \param data data pointer as passed to libvlc_audio_set_callbacks() [IN]
- * \param volume linear volume (1. = nominal, 0. = mute)
+ * \param volume software volume (1. = nominal, 0. = mute)
  * \param mute muted flag
  */
 typedef void (*libvlc_audio_set_volume_cb)(void *data,
@@ -489,15 +521,35 @@ typedef void (*libvlc_audio_set_volume_cb)(void *data,
  *
  * \param mp the media player
  * \param play callback to play audio samples (must not be NULL)
- * \param set_volume callback to set audio volume, or NULL for software volume
- * \param opaque private pointer for the two callbacks (as first parameter)
+ * \param pause callback to pause playback (or NULL to ignore)
+ * \param resume callback to resume playback (or NULL to ignore)
+ * \param flush callback to flush audio buffers (or NULL to ignore)
+ * \param drain callback to drain audio buffers (or NULL to ignore)
+ * \param opaque private pointer for the audio callbacks (as first parameter)
  * \version LibVLC 1.2.0 or later
  */
 LIBVLC_API
 void libvlc_audio_set_callbacks( libvlc_media_player_t *mp,
                                  libvlc_audio_play_cb play,
-                                 libvlc_audio_set_volume_cb set_volume,
+                                 libvlc_audio_pause_cb pause,
+                                 libvlc_audio_resume_cb resume,
+                                 libvlc_audio_flush_cb flush,
+                                 libvlc_audio_drain_cb drain,
                                  void *opaque );
+
+/**
+ * Set callbacks and private data for decoded audio.
+ * Use libvlc_audio_set_format() or libvlc_audio_set_format_callbacks()
+ * to configure the decoded audio format.
+ *
+ * \param mp the media player
+ * \param set_volume callback to apply audio volume,
+ *                   or NULL to apply volume in software
+ * \version LibVLC 1.2.0 or later
+ */
+LIBVLC_API
+void libvlc_audio_set_volume_callback( libvlc_media_player_t *mp,
+                                       libvlc_audio_set_volume_cb set_volume );
 
 /**
  * Callback prototype to setup the audio playback.
@@ -622,6 +674,8 @@ LIBVLC_API int libvlc_media_player_get_chapter_count( libvlc_media_player_t *p_m
  *
  * \param p_mi the Media Player
  * \return boolean
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int libvlc_media_player_will_play( libvlc_media_player_t *p_mi );
 
@@ -724,6 +778,8 @@ LIBVLC_API unsigned libvlc_media_player_has_vout( libvlc_media_player_t *p_mi );
  *
  * \param p_mi the media player
  * \return true if the media player can seek
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int libvlc_media_player_is_seekable( libvlc_media_player_t *p_mi );
 
@@ -732,6 +788,8 @@ LIBVLC_API int libvlc_media_player_is_seekable( libvlc_media_player_t *p_mi );
  *
  * \param p_mi the media player
  * \return true if the media player can pause
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int libvlc_media_player_can_pause( libvlc_media_player_t *p_mi );
 
@@ -794,6 +852,8 @@ LIBVLC_API void libvlc_set_fullscreen( libvlc_media_player_t *p_mi, int b_fullsc
  *
  * \param p_mi the media player
  * \return the fullscreen status (boolean)
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int libvlc_get_fullscreen( libvlc_media_player_t *p_mi );
 
@@ -1379,6 +1439,8 @@ LIBVLC_API void libvlc_audio_toggle_mute( libvlc_media_player_t *p_mi );
  *
  * \param p_mi media player
  * \return the mute status (boolean)
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int libvlc_audio_get_mute( libvlc_media_player_t *p_mi );
 
@@ -1391,18 +1453,19 @@ LIBVLC_API int libvlc_audio_get_mute( libvlc_media_player_t *p_mi );
 LIBVLC_API void libvlc_audio_set_mute( libvlc_media_player_t *p_mi, int status );
 
 /**
- * Get current audio level.
+ * Get current software audio volume.
  *
  * \param p_mi media player
- * \return the audio level (int)
+ * \return the software volume in percents
+ * (0 = mute, 100 = nominal / 0dB)
  */
 LIBVLC_API int libvlc_audio_get_volume( libvlc_media_player_t *p_mi );
 
 /**
- * Set current audio level.
+ * Set current software audio volume.
  *
  * \param p_mi media player
- * \param i_volume the volume (int)
+ * \param i_volume the volume in percents (0 = mute, 100 = 0dB)
  * \return 0 if the volume was set, -1 if it was out of range
  */
 LIBVLC_API int libvlc_audio_set_volume( libvlc_media_player_t *p_mi, int i_volume );

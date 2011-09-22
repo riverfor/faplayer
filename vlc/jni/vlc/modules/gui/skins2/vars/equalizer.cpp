@@ -2,7 +2,7 @@
  * equalizer.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 40449e272649b6ec1fb5f33a7e0d3ad66d1109e0 $
+ * $Id: 8ef6004296377c8915a6806b12aff6a9f77803b4 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *
@@ -84,7 +84,7 @@ VariablePtr EqualizerBands::getBand( int band )
 void EqualizerBands::onUpdate( Subject<VarPercent> &rBand, void *arg )
 {
     (void)rBand; (void)arg;
-    aout_instance_t *pAout = NULL;
+    audio_output_t *pAout = NULL;
 
     playlist_t *pPlaylist = getIntf()->p_sys->p_playlist;
     input_thread_t *pInput = playlist_CurrentInput( pPlaylist );
@@ -134,7 +134,7 @@ EqualizerPreamp::EqualizerPreamp( intf_thread_t *pIntf ): VarPercent( pIntf )
 
 void EqualizerPreamp::set( float percentage, bool updateVLC )
 {
-    aout_instance_t *pAout = NULL;
+    audio_output_t *pAout = NULL;
 
     playlist_t *pPlaylist = getIntf()->p_sys->p_playlist;
     input_thread_t *pInput = playlist_CurrentInput( pPlaylist );

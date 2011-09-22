@@ -2,7 +2,7 @@
  * preferences_widgets.cpp : Widgets for preferences displays
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 4ef44ea8f9cd5a95d7157d92e07d986784c01d68 $
+ * $Id: 2c52eb665cf421e65c7c149172237eee9a37a4c0 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -58,6 +58,9 @@
 
 QString formatTooltip(const QString & tooltip)
 {
+    QString text = tooltip;
+    text.replace("\n", "<br/>");
+
     QString formatted =
     "<html><head><meta name=\"qrichtext\" content=\"1\" />"
     "<style type=\"text/css\"> p, li { white-space: pre-wrap; } </style></head>"
@@ -65,8 +68,7 @@ QString formatTooltip(const QString & tooltip)
     "font-style:normal; text-decoration:none;\">"
     "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; "
     "margin-right:0px; -qt-block-indent:0; text-indent:0px;\">" +
-    tooltip +
-    "</p></body></html>";
+    text + "</p></body></html>";
     return formatted;
 }
 
@@ -478,17 +480,17 @@ void StringListConfigControl::finish(module_config_t *p_module_config )
 
     if( p_module_config->pf_update_list )
     {
-       vlc_value_t val;
-       val.psz_string = strdup(p_module_config->value.psz);
+        vlc_value_t val;
+        val.psz_string = strdup(p_module_config->value.psz);
 
-       p_module_config->pf_update_list(p_this, p_item->psz_name, val, val, NULL);
+        p_module_config->pf_update_list(p_this, p_item->psz_name, val, val, NULL);
 
-       // assume in any case that dirty was set to true
-       // because lazy programmes will use the same callback for
-       // this, like the one behind the refresh push button?
-       p_module_config->b_dirty = false;
+        // assume in any case that dirty was set to true
+        // because lazy programmes will use the same callback for
+        // this, like the one behind the refresh push button?
+        p_module_config->b_dirty = false;
 
-       free( val.psz_string );
+        free( val.psz_string );
     }
 
     for( int i_index = 0; i_index < p_module_config->i_list; i_index++ )
@@ -527,13 +529,21 @@ QString StringListConfigControl::getValue() const
 }
 
 void setfillVLCConfigCombo( const char *configname, intf_thread_t *p_intf,
-                        QComboBox *combo )
+                            QComboBox *combo )
 {
     module_config_t *p_config =
                       config_FindConfig( VLC_OBJECT(p_intf), configname );
     if( p_config )
     {
-       if(p_config->pf_update_list)
+        QVariant def;
+        bool string = (p_config->i_type & 0xF0) == CONFIG_ITEM_STRING;
+
+        if( string )
+            def = QVariant( qfu(p_config->value.psz) );
+        else
+            def = QVariant( qlonglong( p_config->value.i ) );
+
+        if(p_config->pf_update_list)
         {
             vlc_value_t val;
             val.i_int = p_config->value.i;
@@ -546,12 +556,15 @@ void setfillVLCConfigCombo( const char *configname, intf_thread_t *p_intf,
 
         for ( int i_index = 0; i_index < p_config->i_list; i_index++ )
         {
-            combo->addItem( qtr(p_config->ppsz_list_text[i_index]),
-                    QVariant( p_config->pi_list[i_index] ) );
-            if( p_config->value.i == p_config->pi_list[i_index] )
-            {
+            QVariant value;
+
+            if( string )
+                value = QVariant( qfu(p_config->ppsz_list[i_index]) );
+            else
+                value =QVariant( p_config->pi_list[i_index] );
+            combo->addItem( qtr(p_config->ppsz_list_text[i_index]), value );
+            if( def == value )
                 combo->setCurrentIndex( i_index );
-            }
         }
 
         if( p_config->psz_longtext )
@@ -610,7 +623,7 @@ void ModuleConfigControl::finish( bool bycat )
             module_config_t *p_config;
 
             p_config = module_config_get (p_parser, &confsize);
-             for (size_t i = 0; i < confsize; i++)
+            for (size_t i = 0; i < confsize; i++)
             {
                 /* Hack: required subcategory is stored in i_min */
                 const module_config_t *p_cfg = p_config + i;
@@ -658,6 +671,7 @@ ModuleListConfigControl::ModuleListConfigControl( vlc_object_t *_p_this,
     VStringConfigControl( _p_this, _p_item, _parent )
 {
     groupBox = NULL;
+
     /* Special Hack */
     if( !p_item->psz_text ) return;
 
@@ -669,8 +683,12 @@ ModuleListConfigControl::ModuleListConfigControl( vlc_object_t *_p_this,
 
     int boxline = 0;
     foreach ( checkBoxListItem *it, modules )
-        layoutGroupBox->addWidget( it->checkBox, boxline++, 0 );
-    layoutGroupBox->addWidget( text, boxline, 0 );
+    {
+        layoutGroupBox->addWidget( it->checkBox, boxline / 2, boxline % 2 );
+        boxline++;
+    }
+
+    layoutGroupBox->addWidget( text, boxline, 0, 1, 2 );
 
     if( !l )
     {
@@ -696,19 +714,19 @@ ModuleListConfigControl::~ModuleListConfigControl()
 
 #define CHECKBOX_LISTS \
 { \
-       QCheckBox *cb = new QCheckBox( qtr( module_GetLongName( p_parser ) ) );\
-       checkBoxListItem *cbl = new checkBoxListItem; \
+        QCheckBox *cb = new QCheckBox( qtr( module_GetLongName( p_parser ) ) );\
+        checkBoxListItem *cbl = new checkBoxListItem; \
 \
-       CONNECT( cb, stateChanged( int ), this, onUpdate() );\
-       const char *help = module_get_help( p_parser ); \
-       if( help != NULL ) \
-           cb->setToolTip( formatTooltip( qtr( help ) ) ); \
-       cbl->checkBox = cb; \
+        CONNECT( cb, stateChanged( int ), this, onUpdate() );\
+        const char *help = module_get_help( p_parser ); \
+        if( help != NULL ) \
+            cb->setToolTip( formatTooltip( qtr( help ) ) ); \
+        cbl->checkBox = cb; \
 \
-       cbl->psz_module = strdup( module_get_object( p_parser ) ); \
-       modules.push_back( cbl ); \
+        cbl->psz_module = strdup( module_get_object( p_parser ) ); \
+        modules.append( cbl ); \
 \
-       if( p_item->value.psz && strstr( p_item->value.psz, cbl->psz_module ) ) \
+        if( p_item->value.psz && strstr( p_item->value.psz, cbl->psz_module ) ) \
             cbl->checkBox->setChecked( true ); \
 }
 
@@ -1294,7 +1312,6 @@ void KeySelectorControl::finish()
         }
     }
     module_config_free (p_config);
-    module_release (p_main);
 
     table->resizeColumnToContents( 0 );
 
@@ -1451,7 +1468,7 @@ void KeyInputDialog::checkForConflicts( int i_vlckey )
          table->findItems( VLCKeyToString( i_vlckey ), Qt::MatchExactly,
                            b_global ? 2 : 1 );
 
-    if( conflictList.size() &&
+    if( conflictList.count() &&
         conflictList[0]->data( b_global ? 2 : 1, Qt::UserRole ).toInt() > 1 )
         /* Avoid 0 or -1 that are the "Unset" states */
     {

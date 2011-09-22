@@ -2,7 +2,7 @@
  * video.c: video decoder using the ffmpeg library
  *****************************************************************************
  * Copyright (C) 1999-2001 the VideoLAN team
- * $Id: 2d869b51fe7e514f78d54dd38c81bfc898891672 $
+ * $Id: 6595b062d07949bdeca5740ff5db5f2ef18a6526 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -77,15 +77,6 @@ struct decoder_sys_t
     int     i_late_frames;
     mtime_t i_late_frames_start;
 
-#ifdef ANDROID
-    int i_decode_called_count;
-    mtime_t i_decode_total_time;
-    mtime_t i_decode_average_time;
-    mtime_t i_decode_last_time;
-    mtime_t i_display_date_head;
-    int i_decode_may_suck;
-#endif
-
     /* for direct rendering */
     bool b_direct_rendering;
     int  i_direct_rendering_used;
@@ -105,6 +96,16 @@ struct decoder_sys_t
     vlc_va_t *p_va;
 
     vlc_sem_t sem_mt;
+
+#ifdef __ANDROID__
+    int i_decode_called_count;
+    mtime_t i_decode_total_time;
+    mtime_t i_decode_average_time;
+    mtime_t i_decode_last_time;
+    mtime_t i_display_date_head;
+    int i_decode_may_suck;
+#endif
+
 };
 
 #ifdef HAVE_AVCODEC_MT
@@ -428,7 +429,7 @@ int InitVideoDec( decoder_t *p_dec, AVCodecContext *p_context,
         return VLC_EGENERIC;
     }
 
-#ifdef ANDROID
+#ifdef __ANDROID__
     p_sys->i_decode_called_count = 0;
     p_sys->i_decode_total_time = 0;
     p_sys->i_decode_average_time = 0;
@@ -492,7 +493,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         p_sys->i_late_frames = 0;
     }
 
-#ifndef ANDROID
+#ifndef __ANDROID__
     if( !p_dec->b_pace_control && (p_sys->i_late_frames > 0) &&
         (mdate() - p_sys->i_late_frames_start > INT64_C(5000000)) )
     {
@@ -612,7 +613,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
 
         post_mt( p_sys );
 
-#ifdef ANDROID
+#ifdef __ANDROID__
         mtime_t i_decode_start = mdate();
 #endif
 
@@ -633,7 +634,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
                                            &b_gotpicture, &pkt );
         }
 
-#ifdef ANDROID
+#ifdef __ANDROID__
         mtime_t i_decode_end = mdate();
         mtime_t i_decode_time = i_decode_end - i_decode_start;
         p_sys->i_decode_called_count += 1;
@@ -744,7 +745,7 @@ picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         if( !(p_block->i_flags & BLOCK_FLAG_PREROLL) )
             i_display_date = decoder_GetDisplayDate( p_dec, i_pts );
 
-#ifdef ANDROID
+#ifdef __ANDROID__
         p_sys->i_display_date_head = i_display_date;
 #endif
 
@@ -1001,8 +1002,8 @@ static int ffmpeg_GetFrameBuf( struct AVCodecContext *p_context,
 #ifdef HAVE_AVCODEC_VA
         /* hwaccel_context is not present in old ffmpeg version */
         if( vlc_va_Setup( p_sys->p_va,
-                          &p_sys->p_context->hwaccel_context, &p_dec->fmt_out.video.i_chroma,
-                          p_sys->p_context->width, p_sys->p_context->height ) )
+                          &p_context->hwaccel_context, &p_dec->fmt_out.video.i_chroma,
+                          p_context->width, p_context->height ) )
         {
             msg_Err( p_dec, "vlc_va_Setup failed" );
             return -1;
@@ -1157,10 +1158,10 @@ static void ffmpeg_ReleaseFrameBuf( struct AVCodecContext *p_context,
 }
 
 #ifdef HAVE_AVCODEC_VA
-static enum PixelFormat ffmpeg_GetFormat( AVCodecContext *p_codec,
+static enum PixelFormat ffmpeg_GetFormat( AVCodecContext *p_context,
                                           const enum PixelFormat *pi_fmt )
 {
-    decoder_t *p_dec = p_codec->opaque;
+    decoder_t *p_dec = p_context->opaque;
     decoder_sys_t *p_sys = p_dec->p_sys;
 
     if( p_sys->p_va )
@@ -1213,14 +1214,14 @@ static enum PixelFormat ffmpeg_GetFormat( AVCodecContext *p_codec,
 #endif
 
         if( p_sys->p_va &&
-            p_sys->p_context->width > 0 && p_sys->p_context->height > 0 )
+            p_context->width > 0 && p_context->height > 0 )
         {
             /* We try to call vlc_va_Setup when possible to detect errors when
              * possible (later is too late) */
             if( vlc_va_Setup( p_sys->p_va,
-                              &p_sys->p_context->hwaccel_context,
+                              &p_context->hwaccel_context,
                               &p_dec->fmt_out.video.i_chroma,
-                              p_sys->p_context->width, p_sys->p_context->height ) )
+                              p_context->width, p_context->height ) )
             {
                 msg_Err( p_dec, "vlc_va_Setup failed" );
                 vlc_va_Delete( p_sys->p_va );
@@ -1237,13 +1238,13 @@ static enum PixelFormat ffmpeg_GetFormat( AVCodecContext *p_codec,
              * even if a new pixel format is renegociated
              */
             p_sys->b_direct_rendering = false;
-            p_sys->p_context->draw_horiz_band = NULL;
+            p_context->draw_horiz_band = NULL;
             return pi_fmt[i];
         }
     }
 
     /* Fallback to default behaviour */
-    return avcodec_default_get_format( p_codec, pi_fmt );
+    return avcodec_default_get_format( p_context, pi_fmt );
 }
 #endif
 

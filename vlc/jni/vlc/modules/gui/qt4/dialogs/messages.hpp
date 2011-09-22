@@ -2,7 +2,7 @@
  * Messages.hpp : Information about a stream
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 3b9f66cd754df8e2d5bc315b3f40a17195ed3d57 $
+ * $Id: 9243b23093a1181b7d368579a19c0478f5cab610 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *
@@ -27,6 +27,7 @@
 #include "util/qvlcframe.hpp"
 #include "util/singleton.hpp"
 #include "ui/messages_panel.h"
+#include <stdarg.h>
 
 class QTabWidget;
 class QPushButton;
@@ -48,10 +49,16 @@ private:
 
     Ui::messagesPanelWidget ui;
     msg_subscription_t *sub;
-    msg_cb_data_t *cbData;
-    static void sinkMessage( msg_cb_data_t *, msg_item_t *, unsigned );
+    static void sinkMessage( void *, msg_item_t *, unsigned );
     void customEvent( QEvent * );
-    void sinkMessage( MsgEvent * );
+    void sinkMessage( const MsgEvent * );
+
+    vlc_atomic_t verbosity;
+    static void MsgCallback( void *, int, const msg_item_t *, const char *,
+                             va_list );
+
+    QStringList filter;
+    bool filterDefault;
 
 private slots:
     bool save();

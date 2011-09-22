@@ -2,7 +2,7 @@
  * dialogProvider.m: Minimal Dialog Provider for Mac OS X
  *****************************************************************************
  * Copyright (C) 2009-2011 the VideoLAN team
- * $Id: 4e24853ec0df042a5622a41206565d682c992eb5 $
+ * $Id: 1605740d8453f9514bea95bb450df1e3db21341a $
  *
  * Authors: Felix Paul Kühne <fkuehne at videolan dot org>
  *          Pierre d'Herbemont <pdherbemont # videolan dot>
@@ -79,7 +79,7 @@ struct intf_sys_t
 
     vlc_mutex_t lock;
     vlc_cond_t wait;
-    bool is_hidding_noaction_dialogs;
+    bool is_hiding_noaction_dialogs;
 };
 
 
@@ -126,7 +126,7 @@ int OpenIntf(vlc_object_t *p_this)
     [p_intf->p_sys->displayer setIntf:p_intf];
 
     bool hide = var_CreateGetBool(p_intf, prefix "hide-no-user-action-dialogs");
-    p_intf->p_sys->is_hidding_noaction_dialogs = hide;
+    p_intf->p_sys->is_hiding_noaction_dialogs = hide;
 
     /* subscribe to various interactive dialogues */
 
@@ -169,7 +169,7 @@ void CloseIntf(vlc_object_t *p_this)
     /* unsubscribe from the interactive dialogues */
     dialog_Unregister(p_intf);
 
-    if (!p_intf->p_sys->is_hidding_noaction_dialogs)
+    if (!p_intf->p_sys->is_hiding_noaction_dialogs)
     {
         var_DelCallback(p_intf,"dialog-error",DisplayError,p_intf);
         var_DelCallback(p_intf,"dialog-critical",DisplayCritical,p_intf);

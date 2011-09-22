@@ -2,7 +2,7 @@
  * volume.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: cea7cd296b4b2d2585f65aba753e1d368a51b75f $
+ * $Id: 6882c1467048e21008aaf7b00658ec5c161a5a22 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -36,13 +36,13 @@ Volume::Volume( intf_thread_t *pIntf ): VarPercent( pIntf )
     m_step = (float)config_GetInt( pIntf, "volume-step" ) / AOUT_VOLUME_MAX;
     if( var_InheritBool( pIntf, "qt-volume-complete" ) )
     {
-        m_max = 400;
+        m_max = AOUT_VOLUME_MAX * 100 / AOUT_VOLUME_DEFAULT;
         m_volumeMax = AOUT_VOLUME_MAX;
     }
     else
     {
         m_max = 200;
-        m_volumeMax = AOUT_VOLUME_MAX / 2;
+        m_volumeMax = AOUT_VOLUME_DEFAULT * 2;
     }
 
     // Initial value

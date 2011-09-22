@@ -2,7 +2,7 @@
  * libvlc_media_list.h:  libvlc_media_list API
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
- * $Id: 893b94539267c2bb8ed8fcb5f55e7c22ac52cfef $
+ * $Id: 46474a9fc08d18c9cd4bdcc4ed78c6ce670eac15 $
  *
  * Authors: Pierre d'Herbemont
  *
@@ -110,7 +110,7 @@ libvlc_media_list_add_media( libvlc_media_list_t *p_ml, libvlc_media_t *p_md );
  * \param p_ml a media list instance
  * \param p_md a media instance
  * \param i_pos position in array where to insert
- * \return 0 on success, -1 if the media list si read-only
+ * \return 0 on success, -1 if the media list is read-only
  */
 LIBVLC_API int
 libvlc_media_list_insert_media( libvlc_media_list_t *p_ml,
@@ -156,7 +156,7 @@ LIBVLC_API libvlc_media_t *
  *
  * \param p_ml a media list instance
  * \param p_md media instance
- * \return position of media instance
+ * \return position of media instance or -1 if media not found
  */
 LIBVLC_API int
     libvlc_media_list_index_of_item( libvlc_media_list_t *p_ml,
@@ -166,7 +166,9 @@ LIBVLC_API int
  * This indicates if this media list is read-only from a user point of view
  *
  * \param p_ml media list instance
- * \return 0 on readonly, 1 on readwrite
+ * \return 1 on readonly, 0 on readwrite
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int
     libvlc_media_list_is_readonly( libvlc_media_list_t * p_ml );

@@ -2,7 +2,7 @@
  * theme_loader.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: b6553fe5bdfdb1a5211cfa60cc16fe9f153dd095 $
+ * $Id: 546b15c46117566963bf7cefdded8e54c0933c85 $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -191,7 +191,7 @@ bool ThemeLoader::extractFileInZip( unzFile file, const string &rootDir,
     // use the wrong case...
     if( isWsz )
         for( size_t i = 0; i < strlen( filenameInZip ); i++ )
-            filenameInZip[i] = tolower( filenameInZip[i] );
+            filenameInZip[i] = tolower( (unsigned char)filenameInZip[i] );
 
     // Allocate the buffer
     void *pBuffer = malloc( ZIP_BUFFER_SIZE );

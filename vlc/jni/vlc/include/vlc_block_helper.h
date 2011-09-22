@@ -2,7 +2,7 @@
  * vlc_block_helper.h: Helper functions for data blocks management.
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: d7b2763cd384f17858bf191e414e11330ba7b5f1 $
+ * $Id: f7129f9b07e94d4574fe90d1ee334dc630eb0da1 $
  *
  * Authors: Gildas Bazin <gbazin@netcourrier.com>
  *
@@ -28,37 +28,30 @@
 
 typedef struct block_bytestream_t
 {
-    block_t             *p_chain;
-    block_t             *p_block;
-    size_t              i_offset;
-
+    block_t *p_chain;  /**< byte stream head block */
+    block_t *p_block;  /**< byte stream read pointer block */
+    size_t   i_offset; /**< byte stream read pointer offset within block */
+    /* TODO? add tail pointer for faster push? */
 } block_bytestream_t;
 
 /*****************************************************************************
  * block_bytestream_t management
  *****************************************************************************/
-VLC_USED
-static inline block_bytestream_t block_BytestreamInit( void )
+static inline void block_BytestreamInit( block_bytestream_t *p_bytestream )
 {
-    block_bytestream_t bytestream;
-
-    bytestream.i_offset = 0;
-    bytestream.p_chain = bytestream.p_block = NULL;
-
-    return bytestream;
+    p_bytestream->p_chain = p_bytestream->p_block = NULL;
+    p_bytestream->i_offset = 0;
 }
 
 static inline void block_BytestreamRelease( block_bytestream_t *p_bytestream )
 {
-    while( p_bytestream->p_chain )
+    for( block_t *block = p_bytestream->p_chain; block != NULL; )
     {
-        block_t *p_next;
-        p_next = p_bytestream->p_chain->p_next;
-        p_bytestream->p_chain->pf_release( p_bytestream->p_chain );
-        p_bytestream->p_chain = p_next;
+        block_t *p_next = block->p_next;
+
+        block_Release( block );
+        block = p_next;
     }
-    p_bytestream->i_offset = 0;
-    p_bytestream->p_chain = p_bytestream->p_block = NULL;
 }
 
 /**
@@ -67,8 +60,7 @@ static inline void block_BytestreamRelease( block_bytestream_t *p_bytestream )
 static inline void block_BytestreamEmpty( block_bytestream_t *p_bytestream )
 {
     block_BytestreamRelease( p_bytestream );
-
-    *p_bytestream = block_BytestreamInit();
+    block_BytestreamInit( p_bytestream );
 }
 
 /**
@@ -76,22 +68,26 @@ static inline void block_BytestreamEmpty( block_bytestream_t *p_bytestream )
  */
 static inline void block_BytestreamFlush( block_bytestream_t *p_bytestream )
 {
-    while( p_bytestream->p_chain != p_bytestream->p_block )
+    block_t *block = p_bytestream->p_chain;
+
+    while( block != p_bytestream->p_block )
     {
-        block_t *p_next;
-        p_next = p_bytestream->p_chain->p_next;
-        p_bytestream->p_chain->pf_release( p_bytestream->p_chain );
-        p_bytestream->p_chain = p_next;
+        block_t *p_next = block->p_next;
+
+        block_Release( block );
+        block = p_next;
     }
-    while( p_bytestream->p_block &&
-           (p_bytestream->p_block->i_buffer - p_bytestream->i_offset) == 0 )
+
+    while( block != NULL && block->i_buffer == p_bytestream->i_offset )
     {
-        block_t *p_next;
-        p_next = p_bytestream->p_chain->p_next;
-        p_bytestream->p_chain->pf_release( p_bytestream->p_chain );
-        p_bytestream->p_chain = p_bytestream->p_block = p_next;
+        block_t *p_next = block->p_next;
+
+        block_Release( block );
+        block = p_next;
         p_bytestream->i_offset = 0;
     }
+
+    p_bytestream->p_chain = p_bytestream->p_block = block;
 }
 
 static inline void block_BytestreamPush( block_bytestream_t *p_bytestream,

@@ -53,7 +53,7 @@
 /* #undef CAN_COMPILE_SSSE3 */
 
 /* The ./configure command line */
-#define CONFIGURE_LINE "./../../../configure  '--host=arm-eabi-linux' '--build=x86_64-unknown-linux' '--enable-static-modules' '--disable-a52' '--disable-vlc' '--disable-vlm' '--disable-sout' '--disable-httpd' '--disable-dbus' '--disable-lua' '--disable-libgcrypt' '--enable-live555' '--enable-realrtsp' '--disable-vcd' '--disable-v4l2' '--disable-gnomevfs' '--disable-dvdread' '--disable-dvdnav' '--disable-bluray' '--disable-linsys' '--disable-decklink' '--enable-avformat' '--enable-swscale' '--enable-avcodec' '--disable-postproc' '--disable-libva' '--enable-mkv' '--disable-dv' '--disable-mod' '--disable-sid' '--disable-x264' '--disable-mad' '--disable-schroedinger' '--disable-dirac' '--disable-sdl-image' '--disable-zvbi' '--disable-fluidsynth' '--enable-opensles' '--disable-jack' '--disable-pulse' '--disable-alsa' '--disable-portaudio' '--disable-sdl' '--disable-xcb' '--disable-atmo' '--disable-qt4' '--disable-skins2' '--disable-mtp' '--disable-taglib' '--disable-notify' '--enable-freetype' '--enable-libass' '--disable-svg' '--disable-sqlite' '--disable-udev' '--disable-libxml2' '--enable-android-surface' '--disable-caca' '--disable-glx' '--disable-egl' '--disable-gl' '--disable-gles1' '--disable-gles2' '--disable-goom' '--disable-projectm' 'build_alias=x86_64-unknown-linux' 'host_alias=arm-eabi-linux' 'CC=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-gcc' 'CFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2' 'LDFLAGS=-Wl,-rpath-link=/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib,-Bdynamic,-dynamic-linker=/system/bin/linker -Wl,--no-undefined -Wl,-shared -L/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/lib -Wl,--fix-cortex-a8' 'LIBS=-lc -ldl -lgcc' 'CPPFLAGS=-I/opt/android/android-ndk-r5c/platforms/android-9/arch-arm/usr/include -I./../../../extras/contrib/hosts/arm-eabi/include         -I/opt/android/android-ndk-r5c/sources/cxx-stl/gnu-libstdc++/include         -I/opt/android/android-ndk-r5c/sources/cxx-stl/gnu-libstdc++/libs/armeabi-v7a/include/' 'CXX=/opt/android/android-ndk-r5c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/*-x86/bin//arm-linux-androideabi-g++' 'CXXFLAGS=-nostdlib -mlong-calls -fstrict-aliasing -fprefetch-loop-arrays -ffast-math -mfpu=neon -mtune=cortex-a8 -ftree-vectorize -mvectorize-with-neon-quad -O2 -D__STDC_VERSION__=199901L -D__STDC_CONSTANT_MACROS' 'PKG_CONFIG_LIBDIR=./../../../extras/contrib/hosts/arm-eabi/lib/pkgconfig'"
+#define CONFIGURE_LINE "nothing special (vlc-0ad141d394dd86e930d1f27be2ea6ea7e698fddf)"
 
 /* Copyright string */
 #define COPYRIGHT_MESSAGE "Copyright © 1996-2011 the VideoLAN team"
@@ -81,7 +81,7 @@
 /* #undef ENABLE_VLM */
 
 /* Define to 1 if you have the <a52dec/a52.h> header file. */
-/* #undef HAVE_A52DEC_A52_H */
+#define HAVE_A52DEC_A52_H 1
 
 /* Define to 1 if you have the `accept4' function. */
 /* #undef HAVE_ACCEPT4 */
@@ -128,9 +128,6 @@
    the CoreFoundation framework. */
 /* #undef HAVE_CFPREFERENCESCOPYAPPVALUE */
 
-/* Define to 1 if you have the `connect' function. */
-#define HAVE_CONNECT 1
-
 /* Define to 1 if you have the <CoreAudio/CoreAudio.h> header file. */
 /* #undef HAVE_COREAUDIO_COREAUDIO_H */
 
@@ -166,12 +163,6 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
-/* Define if you have the dlopen API */
-#define HAVE_DL_DLOPEN 1
-
-/* Define if you have Windows' LoadLibrary */
-/* #undef HAVE_DL_WINDOWS */
-
 /* Define to 1 if you have the <dshow.h> header file. */
 /* #undef HAVE_DSHOW_H */
 
@@ -184,7 +175,7 @@
 /* Define to 1 if you have the <dxva2api.h> header file. */
 /* #undef HAVE_DXVA2API_H */
 
-/* Define if dynamic plugins are supported */
+/* Define to 1 if dynamic plugins are supported. */
 #define HAVE_DYNAMIC_PLUGINS 1
 
 /* Define to 1 if you have the <ebml/EbmlVersion.h> header file. */
@@ -244,8 +235,8 @@
 /* Define if the GNU gettext() function is already present or preinstalled. */
 /* #undef HAVE_GETTEXT */
 
-/* Define to 1 if you have the <GL/gl.h> header file. */
-/* #undef HAVE_GL_GL_H */
+/* Define to 1 if you have the <GL/glext.h> header file. */
+/* #undef HAVE_GL_GLEXT_H */
 
 /* Define to 1 if you have the `gmtime_r' function. */
 #define HAVE_GMTIME_R 1
@@ -331,7 +322,7 @@
 /* Define to 1 if you have the <libtar.h> header file. */
 /* #undef HAVE_LIBTAR_H */
 
-/* Define if libv4l2 is available */
+/* Define to 1 if libv4l2 is available */
 /* #undef HAVE_LIBV4L2 */
 
 /* Define to 1 if you have the <linux/dccp.h> header file. */
@@ -347,10 +338,10 @@
 #define HAVE_LINUX_VERSION_H 1
 
 /* Define to 1 if you have the <linux/videodev2.h> header file. */
-/* #undef HAVE_LINUX_VIDEODEV2_H */
+#define HAVE_LINUX_VIDEODEV2_H 1
 
 /* Define to 1 if you have the <liveMedia_version.hh> header file. */
-/* #undef HAVE_LIVEMEDIA_VERSION_HH */
+#define HAVE_LIVEMEDIA_VERSION_HH 1
 
 /* Define to 1 if you have the `lldiv' function. */
 #define HAVE_LLDIV 1
@@ -425,12 +416,12 @@
 /* #undef HAVE_OPENGL_GL_H */
 
 /* Define to 1 if you have the `pipe2' function. */
-/* #undef HAVE_PIPE2 */
+#define HAVE_PIPE2 1
 
 /* Define to 1 if you have the <png.h> header file. */
 /* #undef HAVE_PNG_H */
 
-/* Define to 1 if the OS is usabl... err, has poll(). */
+/* Define to 1 if the OS has poll(). */
 #define HAVE_POLL 1
 
 /* Define to 1 if you have the `posix_fadvise' function. */
@@ -474,9 +465,6 @@
 
 /* Define to 1 if you have the <search.h> header file. */
 /* #undef HAVE_SEARCH_H */
-
-/* Define to 1 if you have the `send' function. */
-#define HAVE_SEND 1
 
 /* Define to 1 if you have the `setenv' function. */
 #define HAVE_SETENV 1
@@ -551,14 +539,14 @@
 /* Define to 1 if you have the `strtoll' function. */
 #define HAVE_STRTOLL 1
 
+/* Define to 1 if the system has the type `struct pollfd'. */
+#define HAVE_STRUCT_POLLFD 1
+
 /* Define to 1 if you have the `swab' function. */
 /* #undef HAVE_SWAB */
 
 /* Define to 1 if you have the <syslog.h> header file. */
 #define HAVE_SYSLOG_H 1
-
-/* Define to 1 if you have the <sys/dl.h> header file. */
-/* #undef HAVE_SYS_DL_H */
 
 /* Define to 1 if you have the <sys/eventfd.h> header file. */
 /* #undef HAVE_SYS_EVENTFD_H */
@@ -611,9 +599,6 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #define HAVE_VASPRINTF 1
 
-/* Define if <stdarg.h> defines va_copy. */
-#define HAVE_VA_COPY 1
-
 /* Define to 1 if you have the `vmsplice' function. */
 /* #undef HAVE_VMSPLICE */
 
@@ -629,11 +614,8 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #define HAVE_ZLIB_H 1
 
-/* Define if <stdarg.h> defines __va_copy. */
-#define HAVE___VA_COPY 1
-
 /* Define as const if the declaration of iconv() needs const. */
-#define ICONV_CONST 
+#define ICONV_CONST
 
 /* Dynamic object extension */
 #define LIBEXT ".so"
@@ -737,7 +719,7 @@
 #define VLC_COMPILER "gcc version 4.4.3 (GCC) "
 
 /* user who ran configure */
-#define VLC_COMPILE_BY "tewilove"
+#define VLC_COMPILE_BY "luka"
 
 /* host which ran configure */
 #define VLC_COMPILE_HOST "localhost"
@@ -755,7 +737,7 @@
 #endif
 
 /* Define to 1 if the X Window System is missing or not being used. */
-#define X_DISPLAY_MISSING 1
+/* #undef X_DISPLAY_MISSING */
 
 /* Define if the zvbi module is built */
 /* #undef ZVBI_COMPILED */
@@ -782,10 +764,10 @@
 /* Same as _REENTANT for some other OSes. */
 #define _THREAD_SAFE /**/
 
-/* Define to '0x0501' for IE 5.01 (and shell) APIs. */
+/* Define to '0x0600' for IE 6.0 (and shell) APIs. */
 /* #undef _WIN32_IE */
 
-/* Define to '0x0501' for Windows XP APIs. */
+/* Define to '0x0502' for Windows XP SP2 APIs. */
 /* #undef _WIN32_WINNT */
 
 /* Define within the LibVLC source code tree. */

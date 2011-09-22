@@ -165,5 +165,11 @@ LOCAL_SRC_FILES := \
     liveMedia/our_md5hl.c \
     liveMedia/rtcp_from_spec.c
 
+LOCAL_EXPORT_C_INCLUDES := \
+    $(LOCAL_PATH)/BasicUsageEnvironment/include \
+    $(LOCAL_PATH)/UsageEnvironment/include \
+    $(LOCAL_PATH)/groupsock/include \
+    $(LOCAL_PATH)/liveMedia/include
+
 include $(BUILD_STATIC_LIBRARY)
 

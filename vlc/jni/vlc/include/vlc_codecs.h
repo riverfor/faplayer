@@ -2,7 +2,7 @@
  * codecs.h: codec related structures needed by the demuxers and decoders
  *****************************************************************************
  * Copyright (C) 1999-2001 the VideoLAN team
- * $Id: 6fad0e2df412edbca45940a50602746ab2ca58c9 $
+ * $Id: 9fafdd4a3e6d7a7b0f24beeff855d15d44ba3f91 $
  *
  * Author: Gildas Bazin <gbazin@videolan.org>
  *
@@ -42,6 +42,8 @@ typedef struct _GUID
     uint8_t  Data4[8];
 } GUID, *REFGUID, *LPGUID;
 #endif /* GUID_DEFINED */
+
+typedef GUID guid_t;
 
 #ifdef HAVE_ATTRIBUTE_PACKED
 #   define ATTR_PACKED __attribute__((__packed__))

@@ -1,10 +1,10 @@
 /*****************************************************************************
  * dbus-player.h : dbus control module (mpris v1.0) - /Player object
  *****************************************************************************
- * Copyright © 2006-2008 Rafaël Carré
- * Copyright © 2007-2010 Mirsal Ennaime
- * Copyright © 2009-2010 The VideoLAN team
- * $Id: b59602c25a844ddea2c29bbfde5924c86b2a0db5 $
+ * Copyright © 2006-2011 Rafaël Carré
+ * Copyright © 2007-2011 Mirsal Ennaime
+ * Copyright © 2009-2011 The VideoLAN team
+ * $Id: c13e09b7f100f1ef0d2e607af33ade589a5f1bc1 $
  *
  * Authors:    Mirsal Ennaime <mirsal at mirsal fr>
  *             Rafaël Carré <funman at videolanorg>
@@ -127,7 +127,7 @@ DBUS_METHOD( SetPosition )
 DBUS_METHOD( Seek )
 {
     REPLY_INIT;
-    dbus_int32_t i_step;
+    dbus_int64_t i_step;
     vlc_value_t  newpos;
     mtime_t      i_pos;
 
@@ -135,7 +135,7 @@ DBUS_METHOD( Seek )
     dbus_error_init( &error );
 
     dbus_message_get_args( p_from, &error,
-            DBUS_TYPE_INT32, &i_step,
+            DBUS_TYPE_INT64, &i_step,
             DBUS_TYPE_INVALID );
 
     if( dbus_error_is_set( &error ) )
@@ -170,7 +170,7 @@ MarshalVolume( intf_thread_t *p_intf, DBusMessageIter *container )
     audio_volume_t i_vol = aout_VolumeGet( p_intf->p_sys->p_playlist );
 
     /* A volume of 1.0 represents a sensible maximum, ie: 0dB */
-    double d_vol = (double) i_vol / ( AOUT_VOLUME_MAX >> 2 );
+    double d_vol = (double) i_vol / AOUT_VOLUME_DEFAULT;
 
     dbus_message_iter_append_basic( container, DBUS_TYPE_DOUBLE, &d_vol );
 }
@@ -201,14 +201,12 @@ DBUS_METHOD( VolumeSet )
     if( VLC_SUCCESS != DemarshalSetPropertyValue( p_from, &d_dbus_vol ) )
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 
-    if( d_dbus_vol > 1. )
-        d_dbus_vol = 1.;
-    else if( d_dbus_vol < 0. )
+    d_dbus_vol *= AOUT_VOLUME_DEFAULT;
+    if( d_dbus_vol < 0. )
         d_dbus_vol = 0.;
-
-    double d_vol = d_dbus_vol * AOUT_VOLUME_MAX;
-    audio_volume_t i_vol = round( d_vol );
-    aout_VolumeSet( PL, i_vol );
+    if( d_dbus_vol > AOUT_VOLUME_MAX )
+        d_dbus_vol = AOUT_VOLUME_MAX;
+    aout_VolumeSet( PL, lround(d_dbus_vol) );
 
     REPLY_SEND;
 }

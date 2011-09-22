@@ -21,5 +21,7 @@ LOCAL_SRC_FILES := \
     libdca/downmix.c \
     libdca/parse.c
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+
 include $(BUILD_STATIC_LIBRARY)
 

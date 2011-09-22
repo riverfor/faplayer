@@ -2,7 +2,7 @@
  * generic_layout.cpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: 54d12195f8d90465437f897af170322df96ee73f $
+ * $Id: 5f5cfa00fc9287627b88fc0fc0465bf96960bb1c $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -219,7 +219,6 @@ void GenericLayout::refreshRect( int x, int y, int width, int height )
 
     // Draw all the controls of the layout
     list<LayeredControl>::const_iterator iter;
-    list<LayeredControl>::const_iterator iterVideo = m_controlList.end();
     for( iter = m_controlList.begin(); iter != m_controlList.end(); ++iter )
     {
         CtrlGeneric *pCtrl = (*iter).m_pControl;

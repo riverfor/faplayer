@@ -24,16 +24,12 @@ LOCAL_CFLAGS += -DCAN_COMPILE_NEON=1
 endif
 
 LOCAL_C_INCLUDES += \
-    $(EXTROOT)/iconv/include
-
-LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
     $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     src/libvlc.c \
-    src/libvlcjni.c \
     src/libvlc-module.c \
     src/missing.c \
     src/revision.c \
@@ -51,22 +47,9 @@ LOCAL_SRC_FILES := \
     src/config/dirs.c \
     src/config/file.c \
     src/config/getopt.c \
+    src/config/help.c \
     src/config/intf.c \
     src/config/keys.c \
-    src/control/audio.c \
-    src/control/core.c \
-    src/control/error.c \
-    src/control/event.c \
-    src/control/event_async.c \
-    src/control/log.c \
-    src/control/media.c \
-    src/control/media_discoverer.c \
-    src/control/media_library.c \
-    src/control/media_list.c \
-    src/control/media_list_player.c \
-    src/control/media_player.c \
-    src/control/playlist.c \
-    src/control/video.c \
     src/extras/libc.c \
     src/extras/tdestroy.c \
     src/input/access.c \
@@ -123,6 +106,7 @@ LOCAL_SRC_FILES := \
     src/misc/update_crypto.c \
     src/misc/variables.c \
     src/misc/xml.c \
+    src/modules/bank.c \
     src/modules/cache.c \
     src/modules/entry.c \
     src/modules/modules.c \
@@ -173,16 +157,31 @@ LOCAL_SRC_FILES := \
     src/video_output/vout_intf.c \
     src/video_output/vout_subpictures.c \
     src/video_output/vout_wrapper.c \
-    src/video_output/window.c
+    src/video_output/window.c \
+    lib/audio.c \
+    lib/core.c \
+    lib/error.c \
+    lib/event_async.c \
+    lib/event.c \
+    lib/log.c \
+    lib/media.c \
+    lib/media_discoverer.c \
+    lib/media_library.c \
+    lib/media_list.c \
+    lib/media_list_player.c \
+    lib/media_player.c \
+    lib/playlist.c \
+    lib/video.c \
+    libvlcjni.c
 
 LOCAL_LDLIBS += -ldl -llog -lz
 
-include $(LOCAL_PATH)/Modules.mk
-
 LOCAL_STATIC_LIBRARIES += compat
 
+LOCAL_STATIC_LIBRARIES += libiconv libcharset
+
 ifeq ($(BUILD_WITH_ARM_NEON),1)
-LOCAL_STATIC_LIBRARIES += libneon
+LOCAL_STATIC_LIBRARIES += arm_neon
 endif
 
 include $(BUILD_SHARED_LIBRARY)

@@ -2,7 +2,7 @@
  * omxil.c: Video decoder module making use of OpenMAX IL components.
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: edd7617e60c2b134d1c1c3e58b8a0ad712ca5a0c $
+ * $Id: a1a9bb609258c56818c5d5d753a8470a094d18e2 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -28,8 +28,15 @@
 # include "config.h"
 #endif
 
-#if defined(HAVE_DL_DLOPEN)
-# include <dlfcn.h>
+#include <dlfcn.h>
+#if defined(USE_IOMX)
+#include "iomx.h"
+#define dll_open(name) iomx_dlopen(name)
+#define dll_close(handle) iomx_dlclose(handle)
+#define dlsym(handle, name) iomx_dlsym(handle, name)
+#else
+#define dll_open(name) dlopen( name, RTLD_NOW )
+#define dll_close(handle) dlclose(handle)
 #endif
 
 #include <vlc_common.h>
@@ -49,20 +56,10 @@
 static const char *ppsz_dll_list[] =
 {
     "libOMX_Core.so", /* TI OMAP IL core */
+    "libOmxCore.so", /* Qualcomm IL core */
     "libomxil-bellagio.so",  /* Bellagio IL core */
     0
 };
-
-/*****************************************************************************
- * defines
- *****************************************************************************/
-#if defined(HAVE_DL_DLOPEN)
-# define dll_open(name) dlopen( name, RTLD_NOW )
-# define dll_close(handle) dlclose(handle)
-#else
-# define dll_open(name) (NULL)
-# define dll_close(handle) (void)0
-#endif
 
 /*****************************************************************************
  * Local prototypes
@@ -91,7 +88,7 @@ vlc_module_begin ()
     set_category( CAT_INPUT )
     set_subcategory( SUBCAT_INPUT_VCODEC )
     set_section( N_("Decoding") , NULL )
-#ifdef HAVE_MAEMO
+#if defined(HAVE_MAEMO) || defined(__ANDROID__)
     set_capability( "decoder", 80 )
 #else
     set_capability( "decoder", 0 )
@@ -507,25 +504,25 @@ static OMX_ERRORTYPE DeinitialiseComponent(decoder_t *p_dec,
     if(!omx_handle) return OMX_ErrorNone;
 
     omx_error = OMX_GetState(omx_handle, &state);
-    CHECK_ERROR(omx_error, "ONX_GetState failed (%x)", omx_error );
+    CHECK_ERROR(omx_error, "OMX_GetState failed (%x)", omx_error );
 
     if(state == OMX_StateExecuting)
     {
         omx_error = OMX_SendCommand( omx_handle, OMX_CommandStateSet,
                                      OMX_StateIdle, 0 );
-        CHECK_ERROR(omx_error, "ONX_CommandStateSet Idle failed (%x)", omx_error );
+        CHECK_ERROR(omx_error, "OMX_CommandStateSet Idle failed (%x)", omx_error );
         omx_error = WaitForSpecificOmxEvent(p_dec, OMX_EventCmdComplete, 0, 0, 0);
         CHECK_ERROR(omx_error, "Wait for Idle failed (%x)", omx_error );
     }
 
     omx_error = OMX_GetState(omx_handle, &state);
-    CHECK_ERROR(omx_error, "ONX_GetState failed (%x)", omx_error );
+    CHECK_ERROR(omx_error, "OMX_GetState failed (%x)", omx_error );
 
     if(state == OMX_StateIdle)
     {
         omx_error = OMX_SendCommand( omx_handle, OMX_CommandStateSet,
                                      OMX_StateLoaded, 0 );
-        CHECK_ERROR(omx_error, "ONX_CommandStateSet Loaded failed (%x)", omx_error );
+        CHECK_ERROR(omx_error, "OMX_CommandStateSet Loaded failed (%x)", omx_error );
 
         for(i = 0; i < p_sys->ports; i++)
         {
@@ -540,7 +537,7 @@ static OMX_ERRORTYPE DeinitialiseComponent(decoder_t *p_dec,
 
                 if(omx_error != OMX_ErrorNone) break;
             }
-            CHECK_ERROR(omx_error, "ONX_FreeBuffer failed (%x, %i, %i)",
+            CHECK_ERROR(omx_error, "OMX_FreeBuffer failed (%x, %i, %i)",
                         omx_error, (int)p_port->i_port_index, j );
         }
 
@@ -587,8 +584,11 @@ static OMX_ERRORTYPE InitialiseComponent(decoder_t *p_dec,
     }
     strncpy(p_sys->psz_component, psz_component, OMX_MAX_STRINGNAME_SIZE-1);
 
-    OMX_ComponentRoleEnum(omx_handle, psz_role, 0);
-    msg_Dbg(p_dec, "loaded component %s of role %s", psz_component, psz_role);
+    omx_error = OMX_ComponentRoleEnum(omx_handle, psz_role, 0);
+    if(omx_error == OMX_ErrorNone)
+        msg_Dbg(p_dec, "loaded component %s of role %s", psz_component, psz_role);
+    else
+        msg_Dbg(p_dec, "loaded component %s", psz_component);
     PrintOmx(p_dec, omx_handle, OMX_ALL);
 
     /* Set component role */
@@ -664,7 +664,7 @@ static OMX_ERRORTYPE InitialiseComponent(decoder_t *p_dec,
         {
             omx_error = OMX_SendCommand( omx_handle, OMX_CommandPortEnable,
                                          p_port->i_port_index, NULL);
-            CHECK_ERROR(omx_error, "ONX_CommandPortEnable on %i failed (%x)",
+            CHECK_ERROR(omx_error, "OMX_CommandPortEnable on %i failed (%x)",
                         (int)p_port->i_port_index, omx_error );
             omx_error = WaitForSpecificOmxEvent(p_dec, OMX_EventCmdComplete, 0, 0, 0);
             CHECK_ERROR(omx_error, "Wait for PortEnable on %i failed (%x)",
@@ -848,7 +848,7 @@ static int OpenGeneric( vlc_object_t *p_this, bool b_encode )
 
     /* Move component to Idle then Executing state */
     OMX_SendCommand( p_sys->omx_handle, OMX_CommandStateSet, OMX_StateIdle, 0 );
-    CHECK_ERROR(omx_error, "ONX_CommandStateSet Idle failed (%x)", omx_error );
+    CHECK_ERROR(omx_error, "OMX_CommandStateSet Idle failed (%x)", omx_error );
 
     /* Allocate omx buffers */
     for(i = 0; i < p_sys->ports; i++)
@@ -879,7 +879,7 @@ static int OpenGeneric( vlc_object_t *p_this, bool b_encode )
             OMX_FIFO_PUT(&p_port->fifo, p_port->pp_buffers[j]);
         }
         p_port->i_buffers = j;
-        CHECK_ERROR(omx_error, "ONX_UseBuffer failed (%x, %i, %i)",
+        CHECK_ERROR(omx_error, "OMX_UseBuffer failed (%x, %i, %i)",
                     omx_error, (int)p_port->i_port_index, j );
     }
 
@@ -888,7 +888,7 @@ static int OpenGeneric( vlc_object_t *p_this, bool b_encode )
 
     omx_error = OMX_SendCommand( p_sys->omx_handle, OMX_CommandStateSet,
                                  OMX_StateExecuting, 0);
-    CHECK_ERROR(omx_error, "ONX_CommandStateSet Executing failed (%x)", omx_error );
+    CHECK_ERROR(omx_error, "OMX_CommandStateSet Executing failed (%x)", omx_error );
     omx_error = WaitForSpecificOmxEvent(p_dec, OMX_EventCmdComplete, 0, 0, 0);
     CHECK_ERROR(omx_error, "Wait for Executing failed (%x)", omx_error );
 
@@ -961,7 +961,7 @@ static OMX_ERRORTYPE PortReconfigure(decoder_t *p_dec, OmxPort *p_port)
 
     omx_error = OMX_SendCommand( p_sys->omx_handle, OMX_CommandPortDisable,
                                  p_port->i_port_index, NULL);
-    CHECK_ERROR(omx_error, "ONX_CommandPortDisable on %i failed (%x)",
+    CHECK_ERROR(omx_error, "OMX_CommandPortDisable on %i failed (%x)",
                 (int)p_port->i_port_index, omx_error );
 
     for(i = 0; i < p_port->i_buffers; i++)
@@ -972,7 +972,7 @@ static OMX_ERRORTYPE PortReconfigure(decoder_t *p_dec, OmxPort *p_port)
 
         if(omx_error != OMX_ErrorNone) break;
     }
-    CHECK_ERROR(omx_error, "ONX_FreeBuffer failed (%x, %i, %i)",
+    CHECK_ERROR(omx_error, "OMX_FreeBuffer failed (%x, %i, %i)",
                 omx_error, (int)p_port->i_port_index, i );
 
     omx_error = WaitForSpecificOmxEvent(p_dec, OMX_EventCmdComplete, 0, 0, 0);
@@ -988,9 +988,19 @@ static OMX_ERRORTYPE PortReconfigure(decoder_t *p_dec, OmxPort *p_port)
 
     omx_error = OMX_SendCommand( p_sys->omx_handle, OMX_CommandPortEnable,
                                  p_port->i_port_index, NULL);
-    CHECK_ERROR(omx_error, "ONX_CommandPortEnable on %i failed (%x)",
+    CHECK_ERROR(omx_error, "OMX_CommandPortEnable on %i failed (%x)",
                 (int)p_port->i_port_index, omx_error );
 
+    if (p_port->definition.nBufferCountActual > p_port->i_buffers) {
+        free(p_port->pp_buffers);
+        p_port->pp_buffers = malloc(p_port->definition.nBufferCountActual * sizeof(OMX_BUFFERHEADERTYPE*));
+        if(!p_port->pp_buffers)
+        {
+            omx_error = OMX_ErrorInsufficientResources;
+            CHECK_ERROR(omx_error, "memory allocation failed");
+        }
+    }
+    p_port->i_buffers = p_port->definition.nBufferCountActual;
     for(i = 0; i < p_port->i_buffers; i++)
     {
         if(0 && p_port->b_direct)
@@ -1008,7 +1018,7 @@ static OMX_ERRORTYPE PortReconfigure(decoder_t *p_dec, OmxPort *p_port)
         OMX_FIFO_PUT(&p_port->fifo, p_port->pp_buffers[i]);
     }
     p_port->i_buffers = i;
-    CHECK_ERROR(omx_error, "ONX_UseBuffer failed (%x, %i, %i)",
+    CHECK_ERROR(omx_error, "OMX_UseBuffer failed (%x, %i, %i)",
                 omx_error, (int)p_port->i_port_index, i );
 
     omx_error = WaitForSpecificOmxEvent(p_dec, OMX_EventCmdComplete, 0, 0, 0);
@@ -1076,7 +1086,7 @@ static picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
                 p_pic = decoder_NewPicture( p_dec );
                 if( !p_pic ) break; /* No picture available */
 
-                CopyOmxPicture(p_dec, p_pic, p_header);
+                CopyOmxPicture(p_dec, p_pic, p_header, p_sys->out.definition.format.video.nSliceHeight);
             }
 
             p_pic->date = p_header->nTimeStamp;
@@ -1108,6 +1118,10 @@ static picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
 
     /* Send the input buffer to the component */
     OMX_FIFO_GET(&p_sys->in.fifo, p_header);
+
+    if (p_header && p_header->nFlags & OMX_BUFFERFLAG_EOS)
+        goto reconfig;
+
     if(p_header)
     {
         p_header->nFilledLen = p_block->i_buffer;
@@ -1144,6 +1158,7 @@ static picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
         *pp_block = NULL; /* Avoid being fed the same packet again */
     }
 
+reconfig:
     /* Handle the PortSettingsChanged events */
     for(i = 0; i < p_sys->ports; i++)
     {
@@ -1450,6 +1465,9 @@ static OMX_ERRORTYPE OmxEventHandler( OMX_HANDLETYPE omx_handle,
         for(i = 0; i < p_sys->ports; i++)
             if(p_sys->p_ports[i].definition.eDir == OMX_DirOutput)
                 p_sys->p_ports[i].b_reconfigure = true;
+        memset(&p_sys->sentinel_buffer, 0, sizeof(p_sys->sentinel_buffer));
+        p_sys->sentinel_buffer.nFlags = OMX_BUFFERFLAG_EOS;
+        OMX_FIFO_PUT(&p_sys->in.fifo, &p_sys->sentinel_buffer);
         break;
 
     default:

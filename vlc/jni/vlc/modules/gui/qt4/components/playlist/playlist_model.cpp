@@ -2,7 +2,7 @@
  * playlist_model.cpp : Manage playlist model
  ****************************************************************************
  * Copyright (C) 2006-2011 the VideoLAN team
- * $Id: 606069fb697e1a760a0616eb3419fb7966a917bc $
+ * $Id: 1985a2d208ca2a9e8c2e72f61280b45f9ec9e32a $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakkka <ileoo (at) videolan dot org>
@@ -232,7 +232,7 @@ void PLModel::dropMove( const PlMimeData * plMimeData, PLItem *target, int row )
 {
     QList<input_item_t*> inputItems = plMimeData->inputItems();
     QList<PLItem*> model_items;
-    playlist_item_t *pp_items[inputItems.size()];
+    playlist_item_t *pp_items[inputItems.count()];
 
     PL_LOCK;
 
@@ -370,7 +370,7 @@ QVariant PLModel::data( const QModelIndex &index, const int role ) const
     else if( role == Qt::FontRole )
     {
         QFont f;
-        f.setPointSize( f.pointSize() - 1 + i_zoom );
+        f.setPointSize( __MAX( f.pointSize() - 1 + i_zoom, 4 ) );
         if( isCurrent( index ) )
             f.setBold( true );
         return QVariant( f );
@@ -510,7 +510,7 @@ int PLModel::rowCount( const QModelIndex &parent ) const
 QStringList PLModel::selectedURIs()
 {
     QStringList lst;
-    for( int i = 0; i < current_selection.size(); i++ )
+    for( int i = 0; i < current_selection.count(); i++ )
     {
         const PLItem *item = getItem( current_selection[i] );
         if( item )
@@ -690,7 +690,7 @@ void PLModel::takeItem( PLItem *item )
 void PLModel::insertChildren( PLItem *node, QList<PLItem*>& items, int i_pos )
 {
     assert( node );
-    int count = items.size();
+    int count = items.count();
     if( !count ) return;
     printf( "Here I am\n");
     beginInsertRows( index( node, 0 ), i_pos, i_pos + count - 1 );
@@ -783,7 +783,7 @@ void PLModel::doDelete( QModelIndexList selected )
 
 void PLModel::recurseDelete( QList<PLItem*> children, QModelIndexList *fullList )
 {
-    for( int i = children.size() - 1; i >= 0 ; i-- )
+    for( int i = children.count() - 1; i >= 0 ; i-- )
     {
         PLItem *item = children[i];
         if( item->childCount() )

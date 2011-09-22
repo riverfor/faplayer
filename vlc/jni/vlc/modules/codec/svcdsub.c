@@ -2,7 +2,7 @@
  * svcdsub.c : Overlay Graphics Text (SVCD subtitles) decoder
  *****************************************************************************
  * Copyright (C) 2003, 2004 the VideoLAN team
- * $Id: 5fcc74de2e04a4e18cf6900502ed4677cb60655a $
+ * $Id: 5467c0e78987d05eb104882df1f9c206813ac747 $
  *
  * Authors: Rocky Bernstein
  *          Gildas Bazin <gbazin@videolan.org>
@@ -394,20 +394,18 @@ static void ParseHeader( decoder_t *p_dec, block_t *p_block )
     p_sys->metadata_length = p_sys->i_image_offset;
 
 #ifndef NDEBUG
-    {
-        msg_Dbg( p_dec, "x-start: %d, y-start: %d, width: %d, height %d, "
-                "spu size: %zu, duration: %"PRIu64" (d:%zu p:%"PRIu16")",
-                p_sys->i_x_start, p_sys->i_y_start,
-                p_sys->i_width, p_sys->i_height,
-                p_sys->i_spu_size, p_sys->i_duration,
-                p_sys->i_image_length, p_sys->i_image_offset);
+    msg_Dbg( p_dec, "x-start: %d, y-start: %d, width: %d, height %d, "
+             "spu size: %zu, duration: %"PRIu64" (d:%zu p:%"PRIu16")",
+             p_sys->i_x_start, p_sys->i_y_start,
+             p_sys->i_width, p_sys->i_height,
+             p_sys->i_spu_size, p_sys->i_duration,
+             p_sys->i_image_length, p_sys->i_image_offset);
 
-        for( i = 0; i < 4; i++ )
-        {
-            msg_Dbg( p_dec, "palette[%d]= T: %2x, Y: %2x, u: %2x, v: %2x", i,
-                    p_sys->p_palette[i][3], p_sys->p_palette[i][0],
-                    p_sys->p_palette[i][1], p_sys->p_palette[i][2] );
-        }
+    for( i = 0; i < 4; i++ )
+    {
+        msg_Dbg( p_dec, "palette[%d]= T: %2x, Y: %2x, u: %2x, v: %2x", i,
+                 p_sys->p_palette[i][3], p_sys->p_palette[i][0],
+                 p_sys->p_palette[i][1], p_sys->p_palette[i][2] );
     }
 #endif
 }

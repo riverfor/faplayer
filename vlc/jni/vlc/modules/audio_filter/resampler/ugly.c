@@ -2,7 +2,7 @@
  * ugly.c : ugly resampler (changes pitch)
  *****************************************************************************
  * Copyright (C) 2002, 2006 the VideoLAN team
- * $Id: 616d836ca8dae5a32ce6ff8ce68727b1f8464bed $
+ * $Id: 3eef48ecc50b6b384e0bb4d5caa5c23fd4accaf1 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -65,7 +65,7 @@ static int Create( vlc_object_t *p_this )
                                  != p_filter->fmt_out.audio.i_physical_channels
      || p_filter->fmt_in.audio.i_original_channels
                                  != p_filter->fmt_out.audio.i_original_channels
-     || AOUT_FMT_NON_LINEAR( &p_filter->fmt_in.audio ) )
+     || !AOUT_FMT_LINEAR( &p_filter->fmt_in.audio ) )
         return VLC_EGENERIC;
 
     p_filter->pf_audio_filter = DoWork;

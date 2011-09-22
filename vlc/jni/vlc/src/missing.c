@@ -32,9 +32,9 @@
 #ifndef ENABLE_HTTPD
 # include <vlc_httpd.h>
 
-char *httpd_ClientIP (const httpd_client_t *cl, char *psz_ip)
+char *httpd_ClientIP (const httpd_client_t *cl, char *psz_ip, int *port)
 {
-    (void) cl; (void) psz_ip;
+    (void) cl; (void) psz_ip; (void) port;
     assert (0);
 }
 
@@ -93,9 +93,22 @@ void httpd_HostDelete (httpd_host_t *h)
     assert (0);
 }
 
-httpd_host_t *httpd_HostNew (vlc_object_t *obj, const char *host, int port)
+httpd_host_t *vlc_http_HostNew (vlc_object_t *obj)
 {
-    return httpd_TLSHostNew (obj, host, port, NULL, NULL, NULL, NULL);
+    msg_Err (obj, "HTTP server not compiled-in!");
+    return NULL;
+}
+
+httpd_host_t *vlc_https_HostNew (vlc_object_t *obj)
+{
+    msg_Err (obj, "HTTPS server not compiled-in!");
+    return NULL;
+}
+
+httpd_host_t *vlc_rtsp_HostNew (vlc_object_t *obj)
+{
+    msg_Err (obj, "RTSP server not compiled-in!");
+    return NULL;
 }
 
 void httpd_MsgAdd (httpd_message_t *m, const char *name, const char *fmt, ...)
@@ -123,9 +136,9 @@ httpd_redirect_t *httpd_RedirectNew (httpd_host_t *host,
     assert (0);
 }
 
-char *httpd_ServerIP (const httpd_client_t *client, char *ip)
+char *httpd_ServerIP (const httpd_client_t *client, char *ip, int *port)
 {
-    (void) client; (void) ip;
+    (void) client; (void) ip; (void) port;
     assert (0);
 }
 
@@ -155,16 +168,6 @@ int httpd_StreamSend (httpd_stream_t *stream, uint8_t *data, int count)
 {
     (void) stream; (void) data; (void) count;
     assert (0);
-}
-
-httpd_host_t *httpd_TLSHostNew (vlc_object_t *obj, const char *host, int port,
-                                const char *cert, const char *key,
-                                const char *ca, const char *crl)
-{
-     (void) host; (void) port;
-     (void) cert; (void) key; (void) ca; (void) crl;
-     msg_Err (obj, "VLC httpd support not compiled-in!");
-     return NULL;
 }
 
 int httpd_UrlCatch (httpd_url_t *url, int request, httpd_callback_t cb,

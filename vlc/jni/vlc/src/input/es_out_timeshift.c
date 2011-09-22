@@ -2,7 +2,7 @@
  * es_out_timeshift.c: Es Out timeshift.
  *****************************************************************************
  * Copyright (C) 2008 Laurent Aimar
- * $Id: d2d9b43838c65d4abb3f7f00516dd27907b7e2dd $
+ * $Id: fc45bd92d529cab5a672c56f14b772edc0b85864 $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org>
  *
@@ -606,6 +606,7 @@ static int ControlLocked( es_out_t *p_out, int i_query, va_list args )
     case ES_OUT_SET_ES_FMT:
     case ES_OUT_SET_TIMES:
     case ES_OUT_SET_JITTER:
+    case ES_OUT_SET_EOS:
     {
         ts_cmd_t cmd;
         if( CmdInitControl( &cmd, i_query, args, p_sys->b_delayed ) )
@@ -1190,7 +1191,6 @@ static void TsStoragePopCmd( ts_storage_t *p_storage, ts_cmd_t *p_cmd, bool b_fl
                 p_block->i_pts      = block.i_pts;
                 p_block->i_flags    = block.i_flags;
                 p_block->i_length   = block.i_length;
-                p_block->i_rate     = block.i_rate;
                 p_block->i_nb_samples = block.i_nb_samples;
                 p_block->i_buffer = fread( p_block->p_buffer, 1, block.i_buffer, p_storage->p_filer );
             }
@@ -1328,6 +1328,7 @@ static int CmdInitControl( ts_cmd_t *p_cmd, int i_query, va_list args, bool b_co
         break;
 
     case ES_OUT_RESET_PCR:           /* no arg */
+    case ES_OUT_SET_EOS:
         break;
 
     case ES_OUT_SET_META:        /* arg1=const vlc_meta_t* */
@@ -1463,6 +1464,7 @@ static int CmdExecuteControl( es_out_t *p_out, ts_cmd_t *p_cmd )
                                                p_cmd->u.control.u.int_i64.i_i64 );
 
     case ES_OUT_RESET_PCR:           /* no arg */
+    case ES_OUT_SET_EOS:
         return es_out_Control( p_out, i_query );
 
     case ES_OUT_SET_GROUP_META:  /* arg1=int i_group arg2=const vlc_meta_t* */

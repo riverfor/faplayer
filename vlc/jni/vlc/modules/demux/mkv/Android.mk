@@ -10,15 +10,22 @@ endif
 LOCAL_MODULE := libmkv_plugin
 
 LOCAL_CFLAGS += \
+    -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
+    -DMODULE_STRING=\"mkv\" \
+    -DMODULE_NAME=mkv
+
+LOCAL_CPPFLAGS += \
+    -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"mkv\" \
     -DMODULE_NAME=mkv
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(EXTROOT)/libebml \
-    $(EXTROOT)/libmatroska
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
 	chapter_command.cpp \
@@ -30,7 +37,15 @@ LOCAL_SRC_FILES := \
 	mkv.cpp \
 	stream_io_callback.cpp \
 	util.cpp \
-	virtual_segment.cpp
+	virtual_segment.cpp \
+	../mp4/libmp4.c \
+	../mp4/drms.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+LOCAL_STATIC_LIBRARIES += libmatroska libebml
+
+LOCAL_LDLIBS += -lz
+
+include $(BUILD_SHARED_LIBRARY)
 

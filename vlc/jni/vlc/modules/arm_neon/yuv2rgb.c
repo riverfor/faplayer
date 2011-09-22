@@ -7,14 +7,12 @@
 #include <vlc_plugin.h>
 #include <vlc_filter.h>
 
-#include "yuv2rgb.h"
-
 static int Activate(vlc_object_t *);
 static void Deactivate(vlc_object_t *);
 
 vlc_module_begin ()
     set_description(("YUV to RGB conversions using yuv2rgb from theorarm, qcomm and mozilla"))
-#ifdef ANDROID
+#ifdef __ANDROID__
     set_capability("video filter2", 160)
 #else
     set_capability("video filter2", 0)
@@ -53,8 +51,6 @@ static int Activate(vlc_object_t *p_this) {
 
 static void Deactivate( vlc_object_t *p_this ) {
 }
-
-#if HAVE_NEON
 
 void yvup2rgb565_venum(uint8_t  *p_y,
                     uint8_t  *p_cr,
@@ -126,8 +122,6 @@ void yuv420_2_rgb565_mozilla(uint8_t  *dst_ptr,
     }
 }
 
-#endif
-
 // static mtime_t total = 0;
 // static int count = 0;
 
@@ -148,7 +142,6 @@ static picture_t *yuv420_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
     width = p_filter->fmt_in.video.i_width;
     height = p_filter->fmt_in.video.i_height;
 
-#ifdef HAVE_NEON
     yuv420_2_rgb565_mozilla(
         p_dst->p[0].p_pixels,   // dst ptr
         p_pic->Y_PIXELS,        // y
@@ -160,21 +153,6 @@ static picture_t *yuv420_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
         p_pic->U_PITCH,         // uv stride
         p_dst->p[0].i_pitch     // dst stride
         );
-#else
-    yuv420_2_rgb565(
-        p_dst->p[0].p_pixels,   // dst ptr
-        p_pic->Y_PIXELS,        // y
-        p_pic->U_PIXELS,        // u
-        p_pic->V_PIXELS,        // v
-        width,                  // width
-        height,                 // height
-        p_pic->Y_PITCH,         // y stride
-        p_pic->U_PITCH,         // uv stride
-        p_dst->p[0].i_pitch,    // dst stride
-        yuv2rgb565_table,       // table
-        0                       // dither
-    );
-#endif
 
     picture_CopyProperties(p_dst, p_pic);
     picture_Release(p_pic);
@@ -202,7 +180,6 @@ static picture_t *yuv422_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
     width = p_filter->fmt_in.video.i_width;
     height = p_filter->fmt_in.video.i_height;
 
-#ifdef HAVE_NEON
     yuv422_2_rgb565_aurora(
         p_dst->p[0].p_pixels,   // dst ptr
         p_pic->Y_PIXELS,        // y
@@ -214,21 +191,6 @@ static picture_t *yuv422_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
         p_pic->U_PITCH,         // uv stride
         p_dst->p[0].i_pitch     // dst stride
         );
-#else
-    yuv422_2_rgb565(
-        p_dst->p[0].p_pixels,   // dst ptr
-        p_pic->Y_PIXELS,        // y
-        p_pic->U_PIXELS,        // u
-        p_pic->V_PIXELS,        // v
-        width,                  // width
-        height,                 // height
-        p_pic->Y_PITCH,         // y stride
-        p_pic->U_PITCH,         // uv stride
-        p_dst->p[0].i_pitch,    // dst stride
-        yuv2rgb565_table,       // table
-        0                       // dither
-    );
-#endif
 
     picture_CopyProperties(p_dst, p_pic);
     picture_Release(p_pic);
@@ -252,7 +214,6 @@ static picture_t *yuv444_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
     width = p_filter->fmt_in.video.i_width;
     height = p_filter->fmt_in.video.i_height;
 
-#ifdef HAVE_NEON
     yuv444_2_rgb565_aurora(
         p_dst->p[0].p_pixels,   // dst ptr
         p_pic->Y_PIXELS,        // y
@@ -264,21 +225,6 @@ static picture_t *yuv444_rgb565_filter(filter_t *p_filter, picture_t *p_pic) {
         p_pic->U_PITCH,         // uv stride
         p_dst->p[0].i_pitch     // dst stride
         );
-#else
-    yuv444_2_rgb565(
-        p_dst->p[0].p_pixels,   // dst ptr
-        p_pic->Y_PIXELS,        // y
-        p_pic->U_PIXELS,        // u
-        p_pic->V_PIXELS,        // v
-        width,                  // width
-        height,                 // height
-        p_pic->Y_PITCH,         // y stride
-        p_pic->U_PITCH,         // uv stride
-        p_dst->p[0].i_pitch,    // dst stride
-        yuv2rgb565_table,       // table
-        0                       // dither
-    );
-#endif
 
     picture_CopyProperties(p_dst, p_pic);
     picture_Release(p_pic);

@@ -2,7 +2,7 @@
  * display.c: "vout display" managment
  *****************************************************************************
  * Copyright (C) 2009 Laurent Aimar
- * $Id: a25c3bef72d3474a1dfd98a054b617dc973af2ba $
+ * $Id: c743836a01572a096808b021322771019164e883 $
  *
  * Authors: Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
  *
@@ -538,9 +538,7 @@ static void VoutDisplayEventMouse(vout_display_t *vd, int event, va_list args)
     vlc_mutex_unlock(&osys->lock);
 }
 
-#ifdef __GNUC__
-static void *VoutDisplayEventKeyDispatch(void *data) __attribute__((noreturn));
-#endif
+VLC_NORETURN
 static void *VoutDisplayEventKeyDispatch(void *data)
 {
     vout_display_owner_sys_t *osys = data;

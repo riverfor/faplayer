@@ -2,7 +2,7 @@
  * ToolbarEdit.cpp : ToolbarEdit dialog
  ****************************************************************************
  * Copyright (C) 2008-2009 the VideoLAN team
- * $Id: f1c8302abdcc10a526cfeef28c6ac255abbaf430 $
+ * $Id: 483f4e1b942dcff460867214f8268e43750c2bf0 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *
@@ -490,6 +490,7 @@ DroppingController::DroppingController( intf_thread_t *_p_intf,
                                         QWidget *_parent )
                    : AbstractController( _p_intf, _parent )
 {
+    RTL_UNAFFECTED_WIDGET
     rubberband = NULL;
     b_draging = false;
     setAcceptDrops( true );

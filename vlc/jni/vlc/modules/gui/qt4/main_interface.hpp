@@ -2,7 +2,7 @@
  * main_interface.hpp : Main Interface
  ****************************************************************************
  * Copyright (C) 2006-2010 VideoLAN and AUTHORS
- * $Id: d96d6cb9baedc25bb5b028d0d794401ac4702c18 $
+ * $Id: cfac21f77e278daa1cd2a37df194a083abde9c05 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -203,6 +203,8 @@ public slots:
                        unsigned *pi_width, unsigned *pi_height );
     void releaseVideoSlot( void );
 
+    void emitBoss();
+
 private slots:
     void debug();
     void destroyPopupMenu();
@@ -240,6 +242,7 @@ private slots:
     void setVideoSize( unsigned int, unsigned int );
     void setVideoFullScreen( bool );
     void setVideoOnTop( bool );
+    void setBoss();
 
 signals:
     void askGetVideo( WId *p_id, int *pi_x, int *pi_y,
@@ -251,6 +254,7 @@ signals:
     void minimalViewToggled( bool );
     void fullscreenInterfaceToggled( bool );
     void askToQuit();
+    void askBoss();
 
 };
 

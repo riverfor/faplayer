@@ -37,6 +37,7 @@ $Id$
  * access_vdr: VDR access module
  * adjust: Contrast/Hue/saturation/Brightness adjust module
  * adpcm: ADPCM audio decoder
+ * adummy: dummy audio output
  * aes3: aes3 decoder/packetizer
  * aiff: AIFF demuxer
  * alphamask: Alpha layer mask video filter
@@ -46,7 +47,6 @@ $Id$
  * antiflicker: anti-flicker video filter
  * aout_directx: audio output module using the DirectX API
  * aout_file: Audio output to write to a file
- * aout_sdl: audio output module using the SDL library
  * araw: Pseudo audio decoder for raw PCM
  * asf: ASF demuxer
  * atmo: Ambilight-like video-output
@@ -86,6 +86,7 @@ $Id$
  * cvdsub: CVD subtitles decoder
  * dbus: D-Bus control interface
  * dc1394: firewire input module
+ * ddummy: dummy decoder
  * decklink: input module to read from a Blackmagic SDI card
  * decomp: Decompression module
  * deinterlace: naive deinterlacing filter
@@ -105,12 +106,13 @@ $Id$
  * dtstofloat32: DTS Audio converter
  * dtstospdif: Audio converter that encapsulates DTS into S/PDIF
  * dtv: DVB support (superseds bda module for Windows)
- * dummy: dummy audio output, video output, interface and input modules
+ * dummy: dummy interface
  * dvb: input module for DVB-S/C/T streaming using v4l2 API
  * dvbsub: decoder module for subs in dvb streams
  * dvdnav: access module for DVDs with libdvdnav
  * dvdread: input module for accessing DVDs, uses libdvdread
  * dynamicoverlay: subpicture filter using shared memory that can be written to by external applications
+ * edummy: dummy encoder
  * egl: EGL video output
  * equalizer: a equalizer audio filter
  * erase: Logo erase video filter
@@ -160,6 +162,7 @@ $Id$
  * i422_yuy2: planar 4:2:2 YUV to packed YUV conversion functions
  * i422_yuy2_mmx: MMX accelerated version of i422_yuy2
  * i422_yuy2_sse2: sse2 accelerated version of i422_yuy2
+ * idummy: dummy input
  * image: Image file video output
  * inhibit: preventing the computer from suspending
  * invert: inverse video filter
@@ -183,6 +186,7 @@ $Id$
  * mash: OpenMash based decoder
  * media_library: a sql based media library
  * mediadirs: Picture/Music/Video user directories as service discoveries
+ * memcpy: default unaccelerated memcpy
  * memcpy3dn: 3D Now! accelerated version of memcpy
  * memcpyaltivec: Altivec accelerated version of memcpy
  * memcpymmx: MMX accelerated version of memcpy
@@ -271,6 +275,7 @@ $Id$
  * rss: Display a RSS feed on the video output
  * rtp: rtp demux module
  * rv32: RV32 image format conversion module
+ * samplerate: Secret Rabbit Code (libsamplerate) audio resampler
  * sap: Interface module to read SAP/SDP announcements
  * scale: Images rescaler
  * scaletempo: Scale audio tempo in sync with playback rate
@@ -324,13 +329,13 @@ $Id$
  * swscale: Video scaling filter
  * t140: T.140 text encoder
  * taglib: Taglib tags parser and writer
+ * tdummy: dummy text renderer
  * telepathy: Telepathy Presence information using MissionControl notification
  * telx: teletext subtitles decoder
  * theora: a theora video decoder/packetizer/encoder using the libtheora library
  * transform: filter for horizontal and vertical image flips and 90° rotations
  * tremor: a vorbis audio decoder using the libvorbisidec (aka tremor) library
  * trivial_channel_mixer: Simple channel mixer plugin
- * trivial_mixer: Trivial audio mixer plugin
  * ts: MPEG-TS demuxer
  * tta: Lossless True Audio parser
  * twolame: a mp1 mp2 audio encoder based on twolame
@@ -342,6 +347,7 @@ $Id$
  * vc1: VC-1 Video demuxer
  * vcd: input module for accessing Video CDs
  * vcdx: input module for accessing Video CDs with navigation & stills
+ * vdummy: dummy video display
  * visual: visualisation system
  * vmem: memory video driver
  * vobsub: VobSUB subtitles demuxer

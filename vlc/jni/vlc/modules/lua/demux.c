@@ -2,7 +2,7 @@
  * demux.c :  Lua playlist demux module
  *****************************************************************************
  * Copyright (C) 2007-2008 the VideoLAN team
- * $Id: 5f3d1e98598eaadc7fcfeb82074d1a50ac3e63e4 $
+ * $Id: b55015adb8825a943bb62faba7d82631a52a8b79 $
  *
  * Authors: Antoine Cellerier <dionoea at videolan tod org>
  *
@@ -151,6 +151,7 @@ static int probe_luascript( vlc_object_t *p_this, const char * psz_filename,
     luaopen_msg( L );
     luaopen_strings( L );
     luaopen_stream( L );
+    luaopen_variables( L );
     luaopen_xml( L );
     luaopen_md5( L );
     lua_pushstring( L, p_demux->psz_location );

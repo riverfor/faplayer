@@ -8,6 +8,10 @@ public abstract class AbsMediaPlayer {
 
 	private static final String LOGTAG = "DANMAKU-AbsMediaPlayer";
 
+	public static final int MEDIA_PLAYER_TYPE_DEF = 1;
+	public static final int MEDIA_PLAYER_TYPE_VLC = 2;
+	public static final int MEDIA_PLAYER_TYPE_MSG = 4;
+
 	public interface OnBufferingUpdateListener {
 		public void onBufferingUpdate(AbsMediaPlayer mp, int percent);
 	}
@@ -117,16 +121,27 @@ public abstract class AbsMediaPlayer {
 		return VlcMediaPlayer.getInstance(context);
 	}
 
-	// TODO: lock
-	public static AbsMediaPlayer getMediaPlayer(Context context,
-			boolean useDefault) {
-		return useDefault ? getDefMediaPlayer(context)
-				: getVlcMediaPlayer(context);
-	}
-
 	public static AbsMediaPlayer getMessagePlayer(Context context) {
 		/* this is not needed to be singleton */
 		return MsgMediaPlayer.getInstance(context);
+	}
+
+	// TODO: lock
+	public static AbsMediaPlayer getMediaPlayer(Context context, int type) {
+		switch (type) {
+		case MEDIA_PLAYER_TYPE_DEF: {
+			return getDefMediaPlayer(context);
+		}
+		case MEDIA_PLAYER_TYPE_VLC: {
+			return getVlcMediaPlayer(context);
+		}
+		case MEDIA_PLAYER_TYPE_MSG: {
+			return getMessagePlayer(context);
+		}
+		default:
+			break;
+		}
+		return null;
 	}
 
 }

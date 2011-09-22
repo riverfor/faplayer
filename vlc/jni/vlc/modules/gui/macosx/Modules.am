@@ -4,6 +4,7 @@
 LIBTOOL=@LIBTOOL@ --tag=CC
 
 SOURCES_macosx = \
+	CompatibilityFixes.h \
 	AppleRemote.h \
 	AppleRemote.m \
 	SPInvocationGrabbing.h \
@@ -53,18 +54,17 @@ SOURCES_macosx = \
 	VideoEffects.m \
 	bookmarks.h \
 	bookmarks.m \
-	embeddedwindow.h \
-	embeddedwindow.m \
-	sidebarview.h \
-	sidebarview.m \
-	sidestatusview.h \
-	sidestatusview.m \
+	PXSourceList.h \
+	PXSourceList.m \
+	PXSourceListDataSource.h \
+	PXSourceListDelegate.h \
+	SideBarItem.h \
+	SideBarItem.m \
 	fspanel.m \
 	fspanel.h \
 	eyetv.h \
 	eyetv.m \
-	vout.h \
-	vout.m \
-	voutgl.m \
+	VideoView.h \
+	VideoView.m \
 	$(NULL)
 

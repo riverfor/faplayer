@@ -2,7 +2,7 @@
  * udp.c
  *****************************************************************************
  * Copyright (C) 2001-2007 the VideoLAN team
- * $Id: 482c391a4891203cce03cce1d85c8b3d9d307426 $
+ * $Id: d996d749279694007e17d2158912c6ed7ec60c0e $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Eric Petit <titer@videolan.org>
@@ -102,7 +102,6 @@ static const char *const ppsz_core_options[] = {
     "dscp",
     "ttl",
     "miface",
-    "miface-addr",
     NULL
 };
 

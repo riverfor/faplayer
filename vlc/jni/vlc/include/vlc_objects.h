@@ -2,7 +2,7 @@
  * vlc_objects.h: vlc_object_t definition and manipulation methods
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: 1758d1e1227cea4e95017c4baa3e644c159f572d $
+ * $Id: b59bbc07bb87c2a8b1892074fe4ef81c4345bf20 $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -32,7 +32,6 @@
  */
 
 /* Object flags */
-#define OBJECT_FLAGS_NODBG       0x0001
 #define OBJECT_FLAGS_QUIET       0x0002
 #define OBJECT_FLAGS_NOINTERACT  0x0004
 

@@ -2,7 +2,7 @@
  * ml_item.cpp: the media library's result item
  *****************************************************************************
  * Copyright (C) 2008-2011 the VideoLAN Team and AUTHORS
- * $Id: 8e72f7e3982da7b236b5fc77df92bb7676ac803b $
+ * $Id: 3dd7db944caeb7d83685bfd15904e70f9819e93e $
  *
  * Authors: Antoine Lejeune <phytos@videolan.org>
  *          Jean-Philippe André <jpeg@videolan.org>
@@ -124,14 +124,14 @@ MLItem* MLItem::child( int row ) const
 void MLItem::addChild( MLItem *child, int row )
 {
     assert( child );
-    children.insert( row==-1 ? children.size() : row, child );
+    children.insert( row==-1 ? children.count() : row, child );
 }
 
 void MLItem::delChild( int row )
 {
     if( !childCount() ) return; // assert ?
     MLItem *item =
-            children.takeAt( ( row!=-1 ) ? row : ( children.size()-1 ) );
+            children.takeAt( ( row!=-1 ) ? row : ( children.count()-1 ) );
     assert( item );
     delete item;
 }
@@ -143,7 +143,7 @@ int MLItem::rowOfChild( MLItem *item ) const
 
 int MLItem::childCount() const
 {
-    return children.size();
+    return children.count();
 }
 
 MLItem* MLItem::parent() const

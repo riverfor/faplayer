@@ -2,7 +2,7 @@
  * applescript.h: MacOS X AppleScript support
  *****************************************************************************
  * Copyright (C) 2002-2003, 2005, 2007 the VideoLAN team
- * $Id: 1aece89e71bf52d16ccd5de34f611e18a450c874 $
+ * $Id: b4be026c8bae1022f8f0e7162a44f59a860951dc $
  *
  * Authors: Derk-Jan Hartman <thedj@users.sourceforge.net>
  *
@@ -20,6 +20,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
+
+#import <Cocoa/Cocoa.h>
 
 /*****************************************************************************
  * VLGetURLScriptCommand interface
@@ -40,4 +42,15 @@
 
 - (BOOL)scriptFullscreenMode;
 - (void)setScriptFullscreenMode: (BOOL)mode;
+
+- (double)audioVolume;
+- (void)setAudioVolume: (double)mode;
+
+- (int)currentTime;
+- (void)setCurrentTime: (int)mode;
+
+- (int) durationOfCurrentItem;
+- (NSString*) pathOfCurrentItem;
+- (NSString*) nameOfCurrentItem;
+
 @end

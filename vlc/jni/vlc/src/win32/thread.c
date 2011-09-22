@@ -61,44 +61,9 @@ struct vlc_thread
     void          *data;
 };
 
-#ifdef UNDER_CE
-static void CALLBACK vlc_cancel_self (ULONG_PTR dummy);
-
-DWORD WaitForMultipleObjectsEx (DWORD nCount, const HANDLE *lpHandles,
-                                BOOL bWaitAll, DWORD dwMilliseconds,
-                                BOOL bAlertable)
-{
-    HANDLE handles[nCount + 1];
-    DWORD ret;
-
-    memcpy(handles, lpHandles, count * sizeof(HANDLE));
-    if (bAlertable)
-    {
-        struct vlc_thread *th = vlc_threadvar_get (thread_key);
-        if (th != NULL)
-        {
-            handles[nCount] = th->cancel_event;
-            /* bWaitAll not implemented and not used by VLC... */
-            assert (!bWaitAll);
-        }
-        else
-            bAltertable = FALSE;
-    }
-
-    ret = WaitForMultipleObjects (nCount + bAlertable, handles, bWaitAll,
-                                  dwMilliseconds);
-    if (ret == WAIT_OBJECT_0 + nCount)
-    {
-        assert (bAlertable);
-        vlc_cancel_self ((uintptr_t)th);
-        ret = WAIT_IO_COMPLETION;
-    }
-    return ret;
-}
-#endif
-
 static vlc_mutex_t super_mutex;
 static vlc_cond_t  super_variable;
+extern vlc_rwlock_t config_lock, msg_lock;
 
 BOOL WINAPI DllMain (HINSTANCE, DWORD, LPVOID);
 
@@ -113,9 +78,14 @@ BOOL WINAPI DllMain (HINSTANCE hinstDll, DWORD fdwReason, LPVOID lpvReserved)
             vlc_mutex_init (&super_mutex);
             vlc_cond_init (&super_variable);
             vlc_threadvar_create (&thread_key, NULL);
+            vlc_rwlock_init (&config_lock);
+            vlc_rwlock_init (&msg_lock);
+            vlc_CPU_init ();
             break;
 
         case DLL_PROCESS_DETACH:
+            vlc_rwlock_destroy (&msg_lock);
+            vlc_rwlock_destroy (&config_lock);
             vlc_threadvar_delete (&thread_key);
             vlc_cond_destroy (&super_variable);
             vlc_mutex_destroy (&super_mutex);
@@ -124,18 +94,52 @@ BOOL WINAPI DllMain (HINSTANCE hinstDll, DWORD fdwReason, LPVOID lpvReserved)
     return TRUE;
 }
 
+static void CALLBACK vlc_cancel_self (ULONG_PTR);
+
 static DWORD vlc_WaitForMultipleObjects (DWORD count, const HANDLE *handles,
                                          DWORD delay)
 {
-    DWORD ret = WaitForMultipleObjectsEx (count, handles, FALSE, delay, TRUE);
+    DWORD ret;
+#ifdef UNDER_CE
+    HANDLE buf[count + 1];
 
-   /* We do not abandon objects... this would be a bug */
-   assert (ret < WAIT_ABANDONED_0 || WAIT_ABANDONED_0 + count - 1 < ret);
+    struct vlc_thread *th = vlc_threadvar_get (thread_key);
+    if (th != NULL)
+    {
+        memcpy (buf, handles, count * sizeof(HANDLE));
+        buf[count++] = th->cancel_event;
+        handles = buf;
+    }
 
-   if (unlikely(ret == WAIT_FAILED))
-       abort (); /* We are screwed! */
+    if (count == 0)
+    {
+         Sleep (delay);
+         ret = WAIT_TIMEOUT;
+    }
+    else
+        ret = WaitForMultipleObjects (count, handles, FALSE, delay);
 
-   return ret;
+    if ((th != NULL) && (ret == WAIT_OBJECT_0 + count - 1))
+    {
+        vlc_cancel_self ((uintptr_t)th);
+        ret = WAIT_IO_COMPLETION;
+    }
+#else
+    if (count == 0)
+    {
+        ret = SleepEx (delay, TRUE);
+        if (ret == 0)
+            ret = WAIT_TIMEOUT;
+    }
+    else
+        ret = WaitForMultipleObjectsEx (count, handles, FALSE, delay, TRUE);
+#endif
+    /* We do not abandon objects... this would be a bug */
+    assert (ret < WAIT_ABANDONED_0 || WAIT_ABANDONED_0 + count - 1 < ret);
+
+    if (unlikely(ret == WAIT_FAILED))
+        abort (); /* We are screwed! */
+    return ret;
 }
 
 static DWORD vlc_WaitForSingleObject (HANDLE handle, DWORD delay)
@@ -146,9 +150,7 @@ static DWORD vlc_WaitForSingleObject (HANDLE handle, DWORD delay)
 static DWORD vlc_Sleep (DWORD delay)
 {
     DWORD ret = vlc_WaitForMultipleObjects (0, NULL, delay);
-    if (ret == WAIT_TIMEOUT)
-        ret = 0;
-    return ret;
+    return (ret != WAIT_TIMEOUT) ? ret : 0;
 }
 
 
@@ -238,8 +240,8 @@ void vlc_mutex_unlock (vlc_mutex_t *p_mutex)
 /*** Condition variables ***/
 enum
 {
+    CLOCK_REALTIME=0, /* must be zero for VLC_STATIC_COND */
     CLOCK_MONOTONIC,
-    CLOCK_REALTIME,
 };
 
 static void vlc_cond_init_common (vlc_cond_t *p_condvar, unsigned clock)
@@ -268,16 +270,19 @@ void vlc_cond_destroy (vlc_cond_t *p_condvar)
 
 void vlc_cond_signal (vlc_cond_t *p_condvar)
 {
-    /* NOTE: This will cause a broadcast, that is wrong.
-     * This will also wake up the next waiting thread if no threads are yet
-     * waiting, which is also wrong. However both of these issues are allowed
-     * by the provision for spurious wakeups. Better have too many wakeups
-     * than too few (= deadlocks). */
-    SetEvent (p_condvar->handle);
+    if (!p_condvar->handle)
+        return;
+
+    /* This is suboptimal but works. */
+    vlc_cond_broadcast (p_condvar);
 }
 
 void vlc_cond_broadcast (vlc_cond_t *p_condvar)
 {
+    if (!p_condvar->handle)
+        return;
+
+    /* Wake all threads up (as the event HANDLE has manual reset) */
     SetEvent (p_condvar->handle);
 }
 
@@ -285,13 +290,18 @@ void vlc_cond_wait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex)
 {
     DWORD result;
 
-    assert (p_mutex->dynamic); /* TODO */
+    if (!p_condvar->handle)
+    {   /* FIXME FIXME FIXME */
+        msleep (50000);
+        return;
+    }
+
     do
     {
         vlc_testcancel ();
-        LeaveCriticalSection (&p_mutex->mutex);
+        vlc_mutex_unlock (p_mutex);
         result = vlc_WaitForSingleObject (p_condvar->handle, INFINITE);
-        EnterCriticalSection (&p_mutex->mutex);
+        vlc_mutex_lock (p_mutex);
     }
     while (result == WAIT_IO_COMPLETION);
 
@@ -303,7 +313,12 @@ int vlc_cond_timedwait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex,
 {
     DWORD result;
 
-    assert (p_mutex->dynamic); /* TODO */
+    if (!p_condvar->handle)
+    {   /* FIXME FIXME FIXME */
+        msleep (50000);
+        return 0;
+    }
+
     do
     {
         vlc_testcancel ();
@@ -324,9 +339,9 @@ int vlc_cond_timedwait (vlc_cond_t *p_condvar, vlc_mutex_t *p_mutex,
             total = 0;
 
         DWORD delay = (total > 0x7fffffff) ? 0x7fffffff : total;
-        LeaveCriticalSection (&p_mutex->mutex);
+        vlc_mutex_unlock (p_mutex);
         result = vlc_WaitForSingleObject (p_condvar->handle, delay);
-        EnterCriticalSection (&p_mutex->mutex);
+        vlc_mutex_lock (p_mutex);
     }
     while (result == WAIT_IO_COMPLETION);
 
@@ -371,8 +386,7 @@ void vlc_sem_wait (vlc_sem_t *sem)
 void vlc_rwlock_init (vlc_rwlock_t *lock)
 {
     vlc_mutex_init (&lock->mutex);
-    vlc_cond_init (&lock->read_wait);
-    vlc_cond_init (&lock->write_wait);
+    vlc_cond_init (&lock->wait);
     lock->readers = 0; /* active readers */
     lock->writers = 0; /* waiting writers */
     lock->writer = 0; /* ID of active writer */
@@ -380,8 +394,7 @@ void vlc_rwlock_init (vlc_rwlock_t *lock)
 
 void vlc_rwlock_destroy (vlc_rwlock_t *lock)
 {
-    vlc_cond_destroy (&lock->read_wait);
-    vlc_cond_destroy (&lock->write_wait);
+    vlc_cond_destroy (&lock->wait);
     vlc_mutex_destroy (&lock->mutex);
 }
 
@@ -398,7 +411,7 @@ void vlc_rwlock_rdlock (vlc_rwlock_t *lock)
     while (lock->writer != 0)
     {
         assert (lock->readers == 0);
-        vlc_cond_wait (&lock->read_wait, &lock->mutex);
+        vlc_cond_wait (&lock->wait, &lock->mutex);
     }
     if (unlikely(lock->readers == ULONG_MAX))
         abort ();
@@ -413,7 +426,7 @@ static void vlc_rwlock_rdunlock (vlc_rwlock_t *lock)
 
     /* If there are no readers left, wake up a writer. */
     if (--lock->readers == 0 && lock->writers > 0)
-        vlc_cond_signal (&lock->write_wait);
+        vlc_cond_signal (&lock->wait);
     vlc_mutex_unlock (&lock->mutex);
 }
 
@@ -425,7 +438,7 @@ void vlc_rwlock_wrlock (vlc_rwlock_t *lock)
     lock->writers++;
     /* Wait until nobody owns the lock in either way. */
     while ((lock->readers > 0) || (lock->writer != 0))
-        vlc_cond_wait (&lock->write_wait, &lock->mutex);
+        vlc_cond_wait (&lock->wait, &lock->mutex);
     lock->writers--;
     assert (lock->writer == 0);
     lock->writer = GetCurrentThreadId ();
@@ -440,9 +453,7 @@ static void vlc_rwlock_wrunlock (vlc_rwlock_t *lock)
     lock->writer = 0; /* Write unlock */
 
     /* Let reader and writer compete. Scheduler decides who wins. */
-    if (lock->writers > 0)
-        vlc_cond_signal (&lock->write_wait);
-    vlc_cond_broadcast (&lock->read_wait);
+    vlc_cond_broadcast (&lock->wait);
     vlc_mutex_unlock (&lock->mutex);
 }
 
@@ -636,7 +647,7 @@ void vlc_join (vlc_thread_t th, void **result)
 {
     do
         vlc_testcancel ();
-    while (WaitForSingleObjectEx (th->id, INFINITE, TRUE)
+    while (vlc_WaitForSingleObject (th->id, INFINITE)
                                                         == WAIT_IO_COMPLETION);
 
     if (result != NULL)

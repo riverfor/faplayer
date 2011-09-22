@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2011 VideoLAN
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 62997f2c9f1f9d1ddce4b1a171b0e854d5eb3119 $
+ * $Id: b465b260c39df9fedc27f86a2a0e2627201cb87a $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -22,6 +22,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
+#import "CompatibilityFixes.h"
 #import "intf.h"
 #import <vlc_common.h>
 #import "TrackSynchronization.h"
@@ -61,6 +62,9 @@ static VLCTrackSynchronization *_o_sharedInstance = nil;
     [o_sv_speed_lbl setStringValue: _NS("Speed of the subtitles:")];
     [[o_sv_speed_value_fld formatter] setFormat:[NSString stringWithFormat:@"#,##0.000 %@", _NS("fps")]];
 
+    if (OSX_LION)
+        [o_window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenAuxiliary];
+
     [self resetValues:self];
 }
 
@@ -85,6 +89,19 @@ static VLCTrackSynchronization *_o_sharedInstance = nil;
         var_SetTime( p_input, "audio-delay", 0.0 );
         var_SetTime( p_input, "spu-delay", 0.0 );
         var_SetFloat( p_input, "sub-fps", 1.0 );
+        vlc_object_release( p_input );
+    }
+}
+
+- (void)updateValues
+{
+    input_thread_t * p_input = pl_CurrentInput( p_intf );
+
+    if( p_input )
+    {
+        [o_av_value_fld setFloatValue: var_GetTime( p_input, "audio-delay" ) / 1000000];
+        [o_sv_advance_value_fld setFloatValue: var_GetTime( p_input, "spu-delay" ) / 1000000];
+        [o_sv_speed_value_fld setFloatValue: var_GetFloat( p_input, "sub-fps" )];
         vlc_object_release( p_input );
     }
 }

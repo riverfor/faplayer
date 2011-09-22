@@ -82,6 +82,9 @@ static char *config_GetHomeDir (void)
     }
 #endif
 
+    if (!home)
+        return NULL;
+
     return FromLocaleDup (home);
 }
 
@@ -114,7 +117,6 @@ static char *config_GetTypeDir (const char *xdg_name)
 {
     const size_t namelen = strlen (xdg_name);
     const char *home = getenv ("HOME");
-    const size_t homelen = strlen (home);
     const char *dir = getenv ("XDG_CONFIG_HOME");
     const char *file = "user-dirs.dirs";
 
@@ -171,6 +173,7 @@ static char *config_GetTypeDir (const char *xdg_name)
             }
             else
             {   /* Prefix with $HOME */
+                const size_t homelen = strlen (home);
                 ptr += 5;
                 path = malloc (homelen + linelen - 5);
                 if (path == NULL)
@@ -204,7 +207,7 @@ static char *config_GetTypeDir (const char *xdg_name)
         if (strcmp (xdg_name, "DESKTOP") == 0)
         {
             if (asprintf (&path, "%s/Desktop", home) == -1)
-                path = NULL;
+                return NULL;
         }
         else
             path = strdup (home);

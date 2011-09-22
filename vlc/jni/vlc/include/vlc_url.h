@@ -2,7 +2,7 @@
  * vlc_url.h: URL related macros
  *****************************************************************************
  * Copyright (C) 2002-2006 the VideoLAN team
- * $Id: 4884ff8b3778336e36a40e58e128efb3efd70dc1 $
+ * $Id: e1d698b65a31863030f2cff71787098adb53270d $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Rémi Denis-Courmont <rem # videolan.org>
@@ -204,11 +204,12 @@ static inline int vlc_UrlIsNotEncoded( const char *psz_url )
 
     for( ptr = psz_url; *ptr; ptr++ )
     {
-        char c = *ptr;
+        unsigned char c = *ptr;
 
         if( c == '%' )
         {
-            if( !isxdigit( ptr[1] ) || !isxdigit( ptr[2] ) )
+            if( !isxdigit( (unsigned char)ptr[1] )
+             || !isxdigit( (unsigned char)ptr[2] ) )
                 return 1; /* not encoded */
             ptr += 2;
         }

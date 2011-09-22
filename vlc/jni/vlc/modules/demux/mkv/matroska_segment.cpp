@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2010 the VideoLAN team
- * $Id: efa2c5558cbb0274521d2852cf35163da38daa60 $
+ * $Id: c4cd2b7a151f2f7b3fb08a34a3f082960fb4c7e3 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -692,7 +692,7 @@ void matroska_segment_c::Seek( mtime_t i_date, mtime_t i_time_offset, int64_t i_
                 {
                     IndexAppendCluster( cluster );
                 }
-                if( es.I_O().getFilePointer() >= i_global_position )
+                if( es.I_O().getFilePointer() >= (unsigned) i_global_position )
                 {
                     ParseCluster();
                     msg_Dbg( &sys.demuxer, "we found a cluster that is in the neighbourhood" );
@@ -769,9 +769,9 @@ void matroska_segment_c::Seek( mtime_t i_date, mtime_t i_time_offset, int64_t i_
         }
 
         if( simpleblock )
-            sys.i_pts = (sys.i_chapter_time + simpleblock->GlobalTimecode()) / (mtime_t) 1000;
+            sys.i_pts = sys.i_chapter_time + simpleblock->GlobalTimecode() / (mtime_t) 1000;
         else
-            sys.i_pts = (sys.i_chapter_time + block->GlobalTimecode()) / (mtime_t) 1000;
+            sys.i_pts = sys.i_chapter_time + block->GlobalTimecode() / (mtime_t) 1000;
 
         if( i_track < tracks.size() )
         {

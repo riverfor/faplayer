@@ -2,7 +2,7 @@
  * float32.c : precise float32 audio mixer implementation
  *****************************************************************************
  * Copyright (C) 2002 the VideoLAN team
- * $Id: 27cc1de0daab28ee01d42f6b2ae7640b5077c8e2 $
+ * $Id: f148b33bb45f23f1583d250f5eed4236e4890682 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -39,7 +39,7 @@
  * Local prototypes
  *****************************************************************************/
 static int Create( vlc_object_t * );
-static void DoWork( aout_mixer_t *, aout_buffer_t *, float );
+static void DoWork( audio_mixer_t *, aout_buffer_t *, float );
 
 /*****************************************************************************
  * Module descriptor
@@ -57,9 +57,9 @@ vlc_module_end ()
  */
 static int Create( vlc_object_t *p_this )
 {
-    aout_mixer_t * p_mixer = (aout_mixer_t *)p_this;
+    audio_mixer_t *p_mixer = (audio_mixer_t *)p_this;
 
-    if ( p_mixer->fmt.i_format != VLC_CODEC_FL32 )
+    if (p_mixer->format != VLC_CODEC_FL32)
         return -1;
 
     p_mixer->mix = DoWork;
@@ -69,15 +69,15 @@ static int Create( vlc_object_t *p_this )
 /**
  * Mixes a new output buffer
  */
-static void DoWork( aout_mixer_t * p_mixer, aout_buffer_t *p_buffer,
+static void DoWork( audio_mixer_t * p_mixer, aout_buffer_t *p_buffer,
                     float f_multiplier )
 {
-    f_multiplier *= p_mixer->input->multiplier;
-
     if( f_multiplier == 1.0 )
         return; /* nothing to do */
 
     float *p = (float *)p_buffer->p_buffer;
     for( size_t i = p_buffer->i_buffer / sizeof(float); i > 0; i-- )
         *(p++) *= f_multiplier;
+
+    (void) p_mixer;
 }

@@ -2,7 +2,7 @@
  * vlcproc.hpp
  *****************************************************************************
  * Copyright (C) 2003 the VideoLAN team
- * $Id: a7ea0004041ece77c5380424e0f26497a5754393 $
+ * $Id: b004c0b8cf40aededcb27293627cd6bcb111e08b $
  *
  * Authors: Cyril Deguet     <asmax@via.ecp.fr>
  *          Olivier Teulière <ipkiss@via.ecp.fr>
@@ -42,7 +42,6 @@
 
 class OSTimer;
 class VarBool;
-struct aout_instance_t;
 struct vout_window_t;
 
 
@@ -160,7 +159,7 @@ private:
     /// Vout thread
     vout_thread_t *m_pVout;
     /// Audio output
-    aout_instance_t *m_pAout;
+    audio_output_t *m_pAout;
     bool m_bEqualizer_started;
 
     /**

@@ -2,7 +2,7 @@
  * bridge.c: bridge stream output module
  *****************************************************************************
  * Copyright (C) 2005-2008 the VideoLAN team
- * $Id: 33811970b65635ecf0cd6e7058b262474c3315cc $
+ * $Id: 26927316b983f454389fce978fa1c4775edf4c54 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -73,7 +73,7 @@
 #define PLACEHOLDER_DELAY_LONGTEXT N_( \
     "Delay (in ms) before the placeholder kicks in." )
 
-#define PLACEHOLDER_IFRAME_TEXT N_( "Wait for I frame before toggling placholder" )
+#define PLACEHOLDER_IFRAME_TEXT N_( "Wait for I frame before toggling placeholder" )
 #define PLACEHOLDER_IFRAME_LONGTEXT N_( \
     "If enabled, switching between the placeholder and the normal stream " \
     "will only occur on I frames. This will remove artifacts on stream " \

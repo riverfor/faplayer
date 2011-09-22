@@ -2,7 +2,7 @@
  * ts.c: MPEG-II TS Muxer
  *****************************************************************************
  * Copyright (C) 2001-2005 the VideoLAN team
- * $Id: ab692f957c18d8ac2593b9f2d39635d9b2a66e50 $
+ * $Id: 0ba3a21402651e46dc12c2555435a149b26b5ba0 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Eric Petit <titer@videolan.org>
@@ -111,7 +111,7 @@ static void    Close  ( vlc_object_t * );
 
 #define PID_TEXT N_("Set PID to ID of ES")
 #define PID_LONGTEXT N_("Sets PID to the ID if the incoming ES. This is for " \
-  "use with --ts-es-id-pid, and allows to have the same PIDs in the input " \
+  "use with --ts-es-id-pid, and allows having the same PIDs in the input " \
   "and output streams.")
 
 #define ALIGNMENT_TEXT N_("Data alignment")

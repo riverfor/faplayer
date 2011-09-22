@@ -2,7 +2,7 @@
  * es_out.c: Es Out handler for input.
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: fb9c289e47526f946a8764bdfd8675193fcdb5d9 $
+ * $Id: dd29f63978615970dbf2862a841248931cee3715 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Jean-Paul Saman <jpsaman #_at_# m2x dot nl>
@@ -1960,8 +1960,6 @@ static int EsOutSend( es_out_t *out, es_out_id_t *es, block_t *p_block )
             p_block->i_flags |= BLOCK_FLAG_PREROLL;
     }
 
-    p_block->i_rate = 0;
-
     if( !es->p_dec )
     {
         block_Release( p_block );
@@ -2523,7 +2521,7 @@ static int EsOutControlLocked( es_out_t *out, int i_query, va_list args )
 
             vlc_object_t    **pp_decoder = va_arg( args, vlc_object_t ** );
             vout_thread_t   **pp_vout    = va_arg( args, vout_thread_t ** );
-            aout_instance_t **pp_aout    = va_arg( args, aout_instance_t ** );
+            audio_output_t **pp_aout    = va_arg( args, audio_output_t ** );
             if( p_es->p_dec )
             {
                 if( pp_decoder )
@@ -2687,6 +2685,22 @@ static int EsOutControlLocked( es_out_t *out, int i_query, va_list args )
             const bool    b_absolute = va_arg( args, int );
             const mtime_t i_system   = va_arg( args, mtime_t );
             input_clock_ChangeSystemOrigin( p_pgrm->p_clock, b_absolute, i_system );
+            return VLC_SUCCESS;
+        }
+        case ES_OUT_SET_EOS:
+        {
+            for (int i = 0; i < p_sys->i_es; i++) {
+                es_out_id_t *id = p_sys->es[i];
+                decoder_t *p_dec = id->p_dec;
+                if (!p_dec)
+                    continue;
+                block_t *p_block = block_Alloc(0);
+                if( !p_block )
+                    break;
+
+                p_block->i_flags |= BLOCK_FLAG_CORE_EOS;
+                input_DecoderDecode(p_dec, p_block, false);
+            }
             return VLC_SUCCESS;
         }
 
@@ -2990,6 +3004,15 @@ static void EsOutUpdateInfo( es_out_t *out, es_out_id_t *es, const es_format_t *
                info_category_AddInfo( p_cat, _("Frame rate"), "%"PRId64,
                                       div.quot );
        }
+       if( fmt->i_codec != p_fmt_es->i_codec )
+       {
+           const char *psz_chroma_description =
+                vlc_fourcc_GetDescription( VIDEO_ES, fmt->i_codec );
+           if( psz_chroma_description )
+               info_category_AddInfo( p_cat, _("Decoded format"), "%s",
+                                      psz_chroma_description );
+       }
+
        break;
 
     case SPU_ES:
@@ -3019,4 +3042,3 @@ static void EsOutUpdateInfo( es_out_t *out, es_out_id_t *es, const es_format_t *
     /* */
     input_Control( p_input, INPUT_REPLACE_INFOS, p_cat );
 }
-

@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2008-2009 Rémi Denis-Courmont
- * $Id: 0666cfd9b6948609f7354117edd3ac1e2357ac39 $
+ * $Id: 4b967914ba81e595782f05e17cfdc9c699e0b97b $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Daniel Stranger <vlc at schmaller dot de>
@@ -1079,7 +1079,7 @@ char *make_URI (const char *path, const char *scheme)
     char *buf;
 #if defined( WIN32 ) || defined( __OS2__ )
     /* Drive letter */
-    if (isalpha (path[0]) && (path[1] == ':'))
+    if (isalpha ((unsigned char)path[0]) && (path[1] == ':'))
     {
         if (asprintf (&buf, "%s:///%c:", scheme ? scheme : "file",
                       path[0]) == -1)
@@ -1206,23 +1206,24 @@ char *make_path (const char *url)
 
     if (schemelen == 4 && !strncasecmp (url, "file", 4))
     {
-#if (DIR_SEP_CHAR != '/')
-        for (char *p = strchr (path, '/'); p; p = strchr (p + 1, '/'))
-            *p = DIR_SEP_CHAR;
-#endif
-        /* Leading slash => local path */
-        if (*path == DIR_SEP_CHAR)
 #if (!defined (WIN32) && !defined (__OS2__)) || defined (UNDER_CE)
+        /* Leading slash => local path */
+        if (*path == '/')
             return path;
-#else
-            return memmove (path, path + 1, strlen (path + 1) + 1);
-#endif
-
-        /* Local path disguised as a remote one (MacOS X) */
-        if (!strncasecmp (path, "localhost"DIR_SEP, 10))
+        /* Local path disguised as a remote one */
+        if (!strncasecmp (path, "localhost/", 10))
             return memmove (path, path + 9, strlen (path + 9) + 1);
+#else
+        for (char *p = strchr (path, '/'); p; p = strchr (p + 1, '/'))
+            *p = '\\';
 
-#if defined( WIN32 ) || defined( __OS2__ )
+        /* Leading backslash => local path */
+        if (*path == '\\')
+            return memmove (path, path + 1, strlen (path + 1) + 1);
+        /* Local path disguised as a remote one */
+        if (!strncasecmp (path, "localhost\\", 10))
+            return memmove (path, path + 10, strlen (path + 10) + 1);
+        /* UNC path */
         if (*path && asprintf (&ret, "\\\\%s", path) == -1)
             ret = NULL;
 #endif

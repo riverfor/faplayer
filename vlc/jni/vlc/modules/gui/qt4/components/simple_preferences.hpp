@@ -2,7 +2,7 @@
  * simple_preferences.hpp : Simple prefs
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: 1765247aabf6a769a0811c332a7062d6a9ff1605 $
+ * $Id: b6807901fbdaf1a6a42b8c1c65b25b9335e7c289 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -119,7 +119,7 @@ private:
 
     int number;
 
-    QList<QWidget *> optionWidgets;
+    QWidgetList optionWidgets;
     QStringList qs_filter;
     QButtonGroup *radioGroup;
 

@@ -2,7 +2,7 @@
  * http.c: HTTP input module
  *****************************************************************************
  * Copyright (C) 2001-2008 the VideoLAN team
- * $Id: 4e2d393b7ca987fe9a1d9ae92e13d5525486f4f9 $
+ * $Id: 58262ebde4dbccdb4462dfeb903054c7b9d6268e $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -53,6 +53,7 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
 
 #ifdef HAVE_LIBPROXY
 #    include <proxy.h>
@@ -77,11 +78,6 @@ static void Close( vlc_object_t * );
 #define PROXY_PASS_TEXT N_("HTTP proxy password")
 #define PROXY_PASS_LONGTEXT N_( \
     "If your HTTP proxy requires a password, set it here." )
-
-#define CACHING_TEXT N_("Caching value in ms")
-#define CACHING_LONGTEXT N_( \
-    "Caching value for HTTP streams. This " \
-    "value should be set in milliseconds." )
 
 #define RECONNECT_TEXT N_("Auto re-connect")
 #define RECONNECT_LONGTEXT N_( \
@@ -114,9 +110,6 @@ vlc_module_begin ()
                 false )
     add_password( "http-proxy-pwd", NULL,
                   PROXY_PASS_TEXT, PROXY_PASS_LONGTEXT, false )
-    add_integer( "http-caching", 4 * DEFAULT_PTS_DELAY / 1000,
-                 CACHING_TEXT, CACHING_LONGTEXT, true )
-        change_safe()
     add_string( "http-referrer", NULL, REFERER_TEXT, REFERER_LONGTEXT, false )
         change_safe()
     add_string( "http-user-agent", NULL, UA_TEXT, UA_LONGTEXT, false )
@@ -328,15 +321,39 @@ static int OpenWithCookies( vlc_object_t *p_this, const char *psz_access,
     }
 
     /* Determine the HTTP user agent */
-    /* See RFC2616 §2.2 token definition and §3.8 user-agent header */
+    /* See RFC2616 §2.2 token and comment definition, and §3.8 and
+     * §14.43 user-agent header */
     p_sys->psz_user_agent = var_InheritString( p_access, "http-user-agent" );
     if (p_sys->psz_user_agent)
     {
+        unsigned comment_level = 0;
         for( char *p = p_sys->psz_user_agent; *p; p++ )
         {
             uint8_t c = *p;
-            if( c < 32 || strchr( "()<>@,;:\\\"[]?={}", c ) )
-                *p = '_'; /* remove potentially harmful characters */
+            if (comment_level == 0)
+            {
+                if( c < 32 || strchr( ")<>@,;:\\\"[]?={}", c ) )
+                    *p = '_'; /* remove potentially harmful characters */
+            }
+            else
+            {
+                if (c == ')')
+                    comment_level--;
+                else if( c < 32 && strchr( "\t\r\n", c ) == NULL)
+                    *p = '_'; /* remove potentially harmful characters */
+            }
+            if (c == '(')
+            {
+                if (comment_level == UINT_MAX)
+                    break;
+                comment_level++;
+            }
+        }
+        /* truncate evil unclosed comments */
+        if (comment_level > 0)
+        {
+            char *p = strchr(p_sys->psz_user_agent, '(');
+            *p = '\0';
         }
     }
 
@@ -498,14 +515,11 @@ connect:
             if( !vlc_object_alive (p_access) || Connect( p_access, 0 ) )
                 goto error;
 
-#ifndef NDEBUG
         case 0:
             break;
 
         default:
-            msg_Err( p_access, "You should not be here" );
-            abort();
-#endif
+            assert(0);
     }
 
     if( p_sys->i_code == 401 )
@@ -659,9 +673,6 @@ connect:
     }
 
     if( p_sys->b_reconnect ) msg_Dbg( p_access, "auto re-connect enabled" );
-
-    /* PTS delay */
-    var_Create( p_access, "http-caching", VLC_VAR_INTEGER |VLC_VAR_DOINHERIT );
 
     return VLC_SUCCESS;
 
@@ -1047,7 +1058,8 @@ static int Control( access_t *p_access, int i_query, va_list args )
         /* */
         case ACCESS_GET_PTS_DELAY:
             pi_64 = (int64_t*)va_arg( args, int64_t * );
-            *pi_64 = var_GetInteger( p_access, "http-caching" ) * 1000;
+            *pi_64 = INT64_C(1000)
+                * var_InheritInteger( p_access, "network-caching" );
             break;
 
         /* */

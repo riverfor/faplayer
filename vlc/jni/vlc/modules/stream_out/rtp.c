@@ -887,7 +887,8 @@ char *SDPGenerate( sout_stream_t *p_stream, const char *rtsp_url )
                 sdp_AddAttribute( &psz_sdp, "setup", "passive" );
             if( p_sys->proto == IPPROTO_DCCP )
                 sdp_AddAttribute( &psz_sdp, "dccp-service-code",
-                                  "SC:RTP%c", toupper( mime_major[0] ) );
+                                  "SC:RTP%c",
+                                  toupper( (unsigned char)mime_major[0] ) );
         }
     }
 out:
@@ -1320,8 +1321,7 @@ static int HttpSetup( sout_stream_t *p_stream, const vlc_url_t *url)
 {
     sout_stream_sys_t *p_sys = p_stream->p_sys;
 
-    p_sys->p_httpd_host = httpd_HostNew( VLC_OBJECT(p_stream), url->psz_host,
-                                         url->i_port > 0 ? url->i_port : 80 );
+    p_sys->p_httpd_host = vlc_http_HostNew( VLC_OBJECT(p_stream) );
     if( p_sys->p_httpd_host )
     {
         p_sys->p_httpd_file = httpd_FileNew( p_sys->p_httpd_host,

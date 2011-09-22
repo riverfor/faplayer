@@ -2,7 +2,7 @@
  * sort.c : Playlist sorting functions
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id: e125b0d112cc639e5b3af8ebdf644526092cf565 $
+ * $Id: bf0f88eb45b22f91482d1ac5b524a88457f5e3b9 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Ilkka Ollakka <ileoo@videolan.org>
@@ -119,9 +119,9 @@ typedef int (*sortfn_t)(const void *,const void *);
 static const sortfn_t sorting_fns[NUM_SORT_FNS][2];
 static inline sortfn_t find_sorting_fn( unsigned i_mode, unsigned i_type )
 {
-  if( i_mode>=NUM_SORT_FNS || i_type>1 )
-      return 0;
-  return sorting_fns[i_mode][i_type];
+    if( i_mode>=NUM_SORT_FNS || i_type>1 )
+        return 0;
+    return sorting_fns[i_mode][i_type];
 }
 
 /**

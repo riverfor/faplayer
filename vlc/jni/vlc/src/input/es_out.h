@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 1998-2008 the VideoLAN team
  * Copyright (C) 2008 Laurent Aimar
- * $Id: 4f9a7fd79674e58934ad239762c2b45790a498f6 $
+ * $Id: f42dbf573a1c380eecb90a1029f1893e0cd49212 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -48,7 +48,7 @@ enum es_out_query_private_e
     ES_OUT_SET_ES_BY_ID,
     ES_OUT_RESTART_ES_BY_ID,
     ES_OUT_SET_ES_DEFAULT_BY_ID,
-    ES_OUT_GET_ES_OBJECTS_BY_ID,                    /* arg1=int id, vlc_object_t **dec, vout_thread_t **, aout_instance_t ** res=can fail*/
+    ES_OUT_GET_ES_OBJECTS_BY_ID,                    /* arg1=int id, vlc_object_t **dec, vout_thread_t **, audio_output_t ** res=can fail*/
 
     /* Get buffering state */
     ES_OUT_GET_BUFFERING,                           /* arg1=bool*               res=cannot fail */
@@ -79,6 +79,9 @@ enum es_out_query_private_e
 
     /* Get forced group */
     ES_OUT_GET_GROUP_FORCED,                        /* arg1=int * res=cannot fail */
+
+    /* Set End Of Stream */
+    ES_OUT_SET_EOS,                                 /* res=cannot fail */
 };
 
 static inline void es_out_SetMode( es_out_t *p_out, int i_mode )
@@ -148,7 +151,7 @@ static inline void es_out_SetJitter( es_out_t *p_out,
     assert( !i_ret );
 }
 static inline int es_out_GetEsObjects( es_out_t *p_out, int i_id,
-                                       vlc_object_t **pp_decoder, vout_thread_t **pp_vout, aout_instance_t **pp_aout )
+                                       vlc_object_t **pp_decoder, vout_thread_t **pp_vout, audio_output_t **pp_aout )
 {
     return es_out_Control( p_out, ES_OUT_GET_ES_OBJECTS_BY_ID, i_id, pp_decoder, pp_vout, pp_aout );
 }
@@ -158,6 +161,11 @@ static inline int es_out_GetGroupForced( es_out_t *p_out )
     int i_ret = es_out_Control( p_out, ES_OUT_GET_GROUP_FORCED, &i_group );
     assert( !i_ret );
     return i_group;
+}
+static inline void es_out_Eos( es_out_t *p_out )
+{
+    int i_ret = es_out_Control( p_out, ES_OUT_SET_EOS );
+    assert( !i_ret );
 }
 
 es_out_t  *input_EsOutNew( input_thread_t *, int i_rate );

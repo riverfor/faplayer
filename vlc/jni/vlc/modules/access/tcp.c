@@ -2,7 +2,7 @@
  * tcp.c: TCP input module
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: e5543102ae77c8da63a7048d9bddda93d3551a01 $
+ * $Id: bed738df358a7fb20ad7a85fcd9113f8d6e2a41d $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -38,11 +38,6 @@
 /*****************************************************************************
  * Module descriptor
  *****************************************************************************/
-#define CACHING_TEXT N_("Caching value in ms")
-#define CACHING_LONGTEXT N_( \
-    "Caching value for TCP streams. This " \
-    "value should be set in milliseconds." )
-
 static int  Open ( vlc_object_t * );
 static void Close( vlc_object_t * );
 
@@ -51,10 +46,6 @@ vlc_module_begin ()
     set_description( N_("TCP input") )
     set_category( CAT_INPUT )
     set_subcategory( SUBCAT_INPUT_ACCESS )
-
-    add_integer( "tcp-caching", DEFAULT_PTS_DELAY / 1000, CACHING_TEXT,
-                 CACHING_LONGTEXT, true )
-        change_safe()
 
     set_capability( "access", 0 )
     add_shortcut( "tcp" )
@@ -121,9 +112,6 @@ static int Open( vlc_object_t *p_this )
         return VLC_EGENERIC;
     }
 
-    /* Update default_pts to a suitable value for udp access */
-    var_Create( p_access, "tcp-caching", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT );
-
     return VLC_SUCCESS;
 }
 
@@ -187,7 +175,8 @@ static int Control( access_t *p_access, int i_query, va_list args )
 
         case ACCESS_GET_PTS_DELAY:
             pi_64 = (int64_t*)va_arg( args, int64_t * );
-            *pi_64 = var_GetInteger( p_access, "tcp-caching" ) * INT64_C(1000);
+            *pi_64 = INT64_C(1000)
+                   * var_InheritInteger( p_access, "network-caching" );
             break;
 
         /* */

@@ -2,7 +2,7 @@
  * libvlc.h:  libvlc external API
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: 856e21816c65f70c32e4ba2a6fd602e2afff6919 $
+ * $Id: bab44d54579a28d1ffda36fee2d5bdc19147c795 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -378,6 +378,8 @@ LIBVLC_API libvlc_state_t libvlc_media_get_state(
  * \param p_stats: structure that contain the statistics about the media
  *                 (this structure must be allocated by the caller)
  * \return true if the statistics are available, false otherwise
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int libvlc_media_get_stats( libvlc_media_t *p_md,
                                            libvlc_media_stats_t *p_stats );
@@ -459,6 +461,8 @@ libvlc_media_parse_async( libvlc_media_t *p_md );
  *
  * \param p_md media descriptor object
  * \return true if media object has been parsed otherwise it returns false
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int
    libvlc_media_is_parsed( libvlc_media_t *p_md );

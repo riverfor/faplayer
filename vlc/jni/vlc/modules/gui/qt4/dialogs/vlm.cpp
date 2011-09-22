@@ -2,7 +2,7 @@
  * vlm.cpp : VLM Management
  ****************************************************************************
  * Copyright © 2008 the VideoLAN team
- * $Id: 44f3f77c439c1354b96096eaab827daf989d51fd $
+ * $Id: 30669d2ac86fefdabc250e96b64d301fdcde0a8a $
  *
  * Authors: Jean-Baptiste Kempf <jb@videolan.org>
  *          Jean-François Massol <jf.massol -at- gmail.com>
@@ -186,7 +186,7 @@ void VLMDialog::selectVLMItem( int i )
 
 bool VLMDialog::isNameGenuine( const QString& name )
 {
-    for( int i = 0; i < vlmItems.size(); i++ )
+    for( int i = 0; i < vlmItems.count(); i++ )
     {
         if( vlmItems.at( i )->name == name )
             return false;
@@ -196,7 +196,7 @@ bool VLMDialog::isNameGenuine( const QString& name )
 
 void VLMDialog::addVLMItem()
 {
-    int vlmItemCount = vlmItems.size();
+    int vlmItemCount = vlmItems.count();
 
     /* Take the name and Check it */
     QString name = ui.nameLedit->text();
@@ -295,7 +295,7 @@ void VLMDialog::mediasPopulator()
         for( int i = 0; i < i_nMedias; i++ )
         {
             VLMAWidget * vlmAwidget;
-            vlmItemCount = vlmItems.size();
+            vlmItemCount = vlmItems.count();
 
             QString mediaName = qfu( (*ppp_dsc)[i]->psz_name );
             /* It may have several inputs, we take the first one by default
@@ -694,7 +694,7 @@ void VLMWrapper::EditBroadcast( const QString& name, const QString& input,
         vlm_MessageDelete( message );
 
         QStringList options = inputOptions.split( " :", QString::SkipEmptyParts );
-        for( int i = 0; i < options.size(); i++ )
+        for( int i = 0; i < options.count(); i++ )
         {
             command = "setup \"" + name + "\" option \"" + options[i].trimmed() + "\"";
             vlm_ExecuteCommand( p_vlm, qtu( command ), &message );
@@ -781,7 +781,7 @@ void VLMWrapper::EditVod( const QString& name, const QString& input,
         vlm_MessageDelete( message );
 
         QStringList options = inputOptions.split( " :", QString::SkipEmptyParts );
-        for( int i = 0; i < options.size(); i++ )
+        for( int i = 0; i < options.count(); i++ )
         {
             command = "setup \"" + name + "\" option \"" + options[i].trimmed() + "\"";
             vlm_ExecuteCommand( p_vlm, qtu( command ), &message );
@@ -840,7 +840,7 @@ void VLMWrapper::EditSchedule( const QString& name, const QString& input,
         vlm_MessageDelete( message );
 
         QStringList options = inputOptions.split( " :", QString::SkipEmptyParts );
-        for( int i = 0; i < options.size(); i++ )
+        for( int i = 0; i < options.count(); i++ )
         {
             command = "setup \"" + name + "\" option \"" + options[i].trimmed() + "\"";
             vlm_ExecuteCommand( p_vlm, qtu( command ), &message );
@@ -892,14 +892,9 @@ void VLMWrapper::EditSchedule( const QString& name, const QString& input,
 
 void VLMDialog::toggleVisible()
 {
-    QList<VLMAWidget *>::iterator it;
-    for( it = vlmItems.begin(); it != vlmItems.end(); ++it )
-    {
-        VLMAWidget *item =  *it;
-        delete item;
-        item = NULL;
-    }
+    qDeleteAll( vlmItems );
     vlmItems.clear();
+
     ui.vlmListItem->clear();
     mediasPopulator();
     QVLCDialog::toggleVisible();

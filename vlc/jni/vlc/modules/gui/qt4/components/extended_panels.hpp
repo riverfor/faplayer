@@ -2,7 +2,7 @@
  * extended_panels.hpp : Exentended Panels
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
- * $Id: 19362219a4d4b727a3fd7fb19c313cd56e210517 $
+ * $Id: 9964aef52651e0e794237fcadd60c752d647fe31 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea at videolan dot org>
@@ -168,6 +168,21 @@ private slots:
     void setInitValues();
 };
 
+class SyncWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    SyncWidget( QWidget * );
+    void setValue( double d );
+signals:
+    void valueChanged( double );
+private slots:
+    void valueChangedHandler( double d );
+private:
+    QDoubleSpinBox spinBox;
+    QLabel spinLabel;
+};
+
 class SyncControls : public QWidget
 {
     Q_OBJECT
@@ -177,8 +192,8 @@ public:
     virtual ~SyncControls();
 private:
     intf_thread_t *p_intf;
-    QDoubleSpinBox *AVSpin;
-    QDoubleSpinBox *subsSpin;
+    SyncWidget *AVSpin;
+    SyncWidget *subsSpin;
     QDoubleSpinBox *subSpeedSpin;
     QDoubleSpinBox *subDurationSpin;
 

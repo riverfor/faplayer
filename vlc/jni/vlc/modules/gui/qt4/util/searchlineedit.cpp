@@ -3,7 +3,7 @@
  ****************************************************************************
  * Copyright (C) 2006 the VideoLAN team
  * Copyright (C) 2004 Daniel Molkentin <molkentin@kde.org>
- * $Id: 9b3abdb1899d60b0ec8f4b379c3895649e049726 $
+ * $Id: 9cce9396d6d20255db2829a051eb41428db1f3e4 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  * The "ClickLineEdit" control is based on code by  Daniel Molkentin
@@ -107,7 +107,7 @@ void ClickLineEdit::focusOutEvent( QFocusEvent *ev )
 SearchLineEdit::SearchLineEdit( QWidget *parent ) : QLineEdit( parent )
 {
     clearButton = new QFramelessButton( this );
-    clearButton->setIcon( QIcon( ":/toolbar/clear" ) );
+    clearButton->setIcon( QIcon( ":/search_clear" ) );
     clearButton->setIconSize( QSize( 16, 16 ) );
     clearButton->setCursor( Qt::ArrowCursor );
     clearButton->setToolTip( qfu(vlc_pgettext("Tooltip|Clear", "Clear")) );
@@ -123,7 +123,7 @@ SearchLineEdit::SearchLineEdit( QWidget *parent ) : QLineEdit( parent )
                                   "padding-bottom: 1px; "
                                   "padding-right: %2px;" )
                                   .arg( metrics.height() + ( 2 * frameWidth ) )
-                                  .arg( clearButton->sizeHint().width() + 1 );
+                                  .arg( clearButton->sizeHint().width() + 6 );
     setStyleSheet( styleSheet );
 
     setMessageVisible( true );
@@ -160,7 +160,8 @@ void SearchLineEdit::resizeEvent ( QResizeEvent * event )
     QLineEdit::resizeEvent( event );
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth,0,this);
     clearButton->resize( clearButton->sizeHint().width(), height() );
-    clearButton->move( width() - clearButton->width() - frameWidth, 0 );
+    clearButton->move( width() - clearButton->width() - frameWidth - 3,
+                      ( height() - clearButton->height() + 2 ) / 2 );
 }
 
 void SearchLineEdit::focusInEvent( QFocusEvent *event )
@@ -191,7 +192,7 @@ void SearchLineEdit::paintEvent( QPaintEvent *event )
         .adjusted( 3, 0, clearButton->width() + 1, 0 );
     QPainter painter( this );
     painter.setPen( palette().color( QPalette::Disabled, QPalette::Text ) );
-    painter.drawText( rect, Qt::AlignLeft | Qt::AlignVCenter, qtr( I_PL_FILTER ) );
+    painter.drawText( rect, Qt::AlignLeft | Qt::AlignVCenter, qtr( I_PL_SEARCH ) );
 }
 
 void SearchLineEdit::searchEditingFinished()

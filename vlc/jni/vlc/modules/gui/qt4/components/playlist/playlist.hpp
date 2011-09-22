@@ -2,7 +2,7 @@
  * interface_widgets.hpp : Playlist Widgets
  ****************************************************************************
  * Copyright (C) 2006-2009 the VideoLAN team
- * $Id: bfac66b9eeed4e7a4867a8ee519336a5bff98699 $
+ * $Id: c94a84fd51d56e71167c1c08e95c2c70afac0fd2 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste Kempf <jb@videolan.org>
@@ -130,7 +130,7 @@ private:
 
     PLModel *model;
     QSignalMapper *mapper;
-    QList<QWidget*> buttons;
+    QWidgetList buttons;
     QList<QAction*> actions;
     LocationButton *btnMore;
     QMenu *menuMore;

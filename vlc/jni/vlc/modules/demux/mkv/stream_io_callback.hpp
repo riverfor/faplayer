@@ -2,7 +2,7 @@
  * mkv.cpp : matroska demuxer
  *****************************************************************************
  * Copyright (C) 2003-2004 the VideoLAN team
- * $Id: c67faeb838e4ec504cdc5a83d0d264594c766e14 $
+ * $Id: 11566daa034958cdd463499093afa16c59185225 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Steve Lhomme <steve.lhomme@free.fr>
@@ -47,5 +47,6 @@ class vlc_stream_io_callback: public IOCallback
     virtual size_t   write           ( const void *p_buffer, size_t i_size);
     virtual uint64   getFilePointer  ( void );
     virtual void     close           ( void ) { return; }
+    uint64           toRead          ( void );
 };
 

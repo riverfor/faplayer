@@ -1,8 +1,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-ifeq ($(BUILD_WITH_ARM),1)
-
 ifeq ($(BUILD_WITH_ARM_NEON),1)
 
 include $(CLEAR_VARS)
@@ -16,6 +14,7 @@ LOCAL_MODULE := audio_format_neon_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -fasm \
     -DMODULE_STRING=\"audio_format_neon\" \
     -DMODULE_NAME=audio_format_neon
@@ -29,25 +28,25 @@ LOCAL_SRC_FILES := \
     audio_format.c \
     s32_s16.S
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
 
-endif
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
 LOCAL_ARM_MODE := arm
-ifeq ($(BUILD_WITH_ARM_NEON),1)
 LOCAL_ARM_NEON := true
-endif
 
-LOCAL_MODULE := yuv2rgb_plugin
+#@ armeabi-v7a neon
+LOCAL_MODULE := yuv2rgb_neon_plugin
 
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -fasm \
-    -DMODULE_STRING=\"yuv2rgb\" \
-    -DMODULE_NAME=yuv2rgb
+    -DMODULE_STRING=\"yuv2rgb_neon\" \
+    -DMODULE_NAME=yuv2rgb_neon
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
@@ -56,17 +55,13 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES := \
     yuv2rgb.c \
-    yuv2rgb16tab.c \
-    yuv420rgb565.S \
+    yuv420rgb565.c \
     yuv422rgb565.S \
     yuv444rgb565.S
 
-ifeq ($(BUILD_WITH_ARM_NEON),1)
-LOCAL_CFLAGS += -DHAVE_NEON=1
-LOCAL_SRC_FILES += yuv2rgb.444565.S yuv2rgb.422565.S yuv2rgb.420565.c
-endif
+LOCAL_SHARED_LIBRARIES += libvlccore
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 endif
 

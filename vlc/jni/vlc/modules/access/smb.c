@@ -2,7 +2,7 @@
  * smb.c: SMB input module
  *****************************************************************************
  * Copyright (C) 2001-2009 the VideoLAN team
- * $Id: d2e44b1b52bbf482bf796129741684e120a7fc5e $
+ * $Id: c9b931477a697a5b694e9036c56f73ab34ad87a1 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -58,10 +58,6 @@
 static int  Open ( vlc_object_t * );
 static void Close( vlc_object_t * );
 
-#define CACHING_TEXT N_("Caching value in ms")
-#define CACHING_LONGTEXT N_( \
-    "Caching value for SMB streams. This " \
-    "value should be set in milliseconds." )
 #define USER_TEXT N_("SMB user name")
 #define USER_LONGTEXT N_("User name that will " \
     "be used for the connection.")
@@ -80,9 +76,6 @@ vlc_module_begin ()
     set_capability( "access", 0 )
     set_category( CAT_INPUT )
     set_subcategory( SUBCAT_INPUT_ACCESS )
-    add_integer( "smb-caching", 2 * DEFAULT_PTS_DELAY / 1000,
-                 CACHING_TEXT, CACHING_LONGTEXT, true )
-        change_safe()
     add_string( "smb-user", NULL, USER_TEXT, USER_LONGTEXT,
                 false )
     add_password( "smb-pwd", NULL, PASS_TEXT,
@@ -252,9 +245,6 @@ static int Open( vlc_object_t *p_this )
 
     p_sys->i_smb = i_smb;
 
-    /* Update default_pts to a suitable value for smb access */
-    var_Create( p_access, "smb-caching", VLC_VAR_INTEGER | VLC_VAR_DOINHERIT );
-
     return VLC_SUCCESS;
 }
 
@@ -334,8 +324,8 @@ static int Control( access_t *p_access, int i_query, va_list args )
         break;
 
     case ACCESS_GET_PTS_DELAY:
-        *va_arg( args, int64_t * )
-                  = var_GetInteger( p_access, "smb-caching" ) * 1000;
+        *va_arg( args, int64_t * ) = INT64_C(1000)
+            * var_InheritInteger( p_access, "network-caching" );
         break;
 
     case ACCESS_SET_PAUSE_STATE:
@@ -363,27 +353,11 @@ static void Win32AddConnection( access_t *p_access, char *psz_path,
                                 char *psz_user, char *psz_pwd,
                                 char *psz_domain )
 {
-    DWORD WINAPI (*OurWNetAddConnection2)( LPNETRESOURCE, LPCTSTR, LPCTSTR, DWORD );
     char psz_remote[MAX_PATH], psz_server[MAX_PATH], psz_share[MAX_PATH];
     NETRESOURCE net_resource;
     DWORD i_result;
     char *psz_parser;
     VLC_UNUSED( psz_domain );
-
-    HINSTANCE hdll = LoadLibrary(_T("MPR.DLL"));
-    if( !hdll )
-    {
-        msg_Warn( p_access, "couldn't load mpr.dll" );
-        return;
-    }
-
-    OurWNetAddConnection2 =
-      (void *)GetProcAddress( hdll, _T("WNetAddConnection2A") );
-    if( !OurWNetAddConnection2 )
-    {
-        msg_Warn( p_access, "couldn't find WNetAddConnection2 in mpr.dll" );
-        return;
-    }
 
     memset( &net_resource, 0, sizeof(net_resource) );
     net_resource.dwType = RESOURCETYPE_DISK;
@@ -402,7 +376,7 @@ static void Win32AddConnection( access_t *p_access, char *psz_path,
     snprintf( psz_remote, sizeof( psz_remote ), "\\\\%s\\%s", psz_server, psz_share );
     net_resource.lpRemoteName = psz_remote;
 
-    i_result = OurWNetAddConnection2( &net_resource, psz_pwd, psz_user, 0 );
+    i_result = WNetAddConnection2( &net_resource, psz_pwd, psz_user, 0 );
 
     if( i_result != NO_ERROR )
     {
@@ -417,7 +391,5 @@ static void Win32AddConnection( access_t *p_access, char *psz_path,
     {
         msg_Dbg( p_access, "failed to connect to %s", psz_remote );
     }
-
-    FreeLibrary( hdll );
 }
 #endif // WIN32

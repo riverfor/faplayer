@@ -2,7 +2,7 @@
  * libvlc.h:  libvlc external API
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: bcf9bdca2112a5da2389b26948224d30b5e6bec2 $
+ * $Id: 500fea1ec33efa69d1d95917a68057a6da85e7ea $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -136,39 +136,6 @@ const char *libvlc_printerr (const char *fmt, ...);
  */
 LIBVLC_API libvlc_instance_t *
 libvlc_new( int argc , const char *const *argv );
-
-/**
- * \return a static entry point for a module, suitable for passing to
- * libvlc_new_with_builtins. This is to be used when you want to statically
- * link to a module.
- *
- * Note, statically linking to a module will results in nearly zero speed gain
- * and increased memory usage. Use with caution.
- */
-
-#define vlc_plugin(module) & vlc_plugin_entry(module)
-
-#define vlc_plugin_entry(module) vlc_entry__ ## module
-#define vlc_declare_plugin(module) extern void *vlc_plugin_entry(module);
-
-/**
- * Create and initialize a libvlc instance.
- *
- * \param argc the number of arguments
- * \param argv command-line-type arguments
- * \param builtins a NULL terminated array of \see vlc_plugin.
- * \return the libvlc instance or NULL in case of error
- * @begincode
- * {
- *     vlc_declare_plugin(mp4);
- *     vlc_declare_plugin(dummy);
- *     const void **builtins = { vlc_plugin(mp4), vlc_plugin(dummy), NULL };
- *     libvlc_instance_t *vlc = libvlc_new_with_builtins(argc, argv, builtins);
- * }
- * @endcode
- */
-LIBVLC_API libvlc_instance_t *
-libvlc_new_with_builtins( int argc , const char *const *argv, const void **builtins);
 
 /**
  * Decrement the reference count of a libvlc instance, and destroy it
@@ -345,88 +312,101 @@ LIBVLC_API const char * libvlc_event_type_name( libvlc_event_type_t event_type )
  */
 
 /**
- * Return the VLC messaging verbosity level.
+ * Always returns minus one.
+ * This function is only provided for backward compatibility.
  *
- * \param p_instance libvlc instance
- * \return verbosity level for messages
+ * \param p_instance ignored
+ * \return always -1
  */
+LIBVLC_DEPRECATED
 LIBVLC_API unsigned libvlc_get_log_verbosity( const libvlc_instance_t *p_instance );
 
 /**
- * Set the VLC messaging verbosity level.
+ * This function does nothing.
+ * It is only provided for backward compatibility.
  *
- * \param p_instance libvlc log instance
- * \param level log level
+ * \param p_instance ignored
+ * \param level ignored
  */
+LIBVLC_DEPRECATED
 LIBVLC_API void libvlc_set_log_verbosity( libvlc_instance_t *p_instance, unsigned level );
 
 /**
- * Open a VLC message log instance.
+ * This function does nothing useful.
+ * It is only provided for backward compatibility.
  *
  * \param p_instance libvlc instance
- * \return log message instance or NULL on error
+ * \return an unique pointer or NULL on error
  */
+LIBVLC_DEPRECATED
 LIBVLC_API libvlc_log_t *libvlc_log_open( libvlc_instance_t *p_instance );
 
 /**
- * Close a VLC message log instance.
+ * Frees memory allocated by libvlc_log_open().
  *
  * \param p_log libvlc log instance or NULL
  */
+LIBVLC_DEPRECATED
 LIBVLC_API void libvlc_log_close( libvlc_log_t *p_log );
 
 /**
- * Returns the number of messages in a log instance.
+ * Always returns zero.
+ * This function is only provided for backward compatibility.
  *
- * \param p_log libvlc log instance or NULL
- * \return number of log messages, 0 if p_log is NULL
+ * \param p_log ignored
+ * \return always zero
  */
+LIBVLC_DEPRECATED
 LIBVLC_API unsigned libvlc_log_count( const libvlc_log_t *p_log );
 
 /**
- * Clear a log instance.
+ * This function does nothing.
+ * It is only provided for backward compatibility.
  *
- * All messages in the log are removed. The log should be cleared on a
- * regular basis to avoid clogging.
- *
- * \param p_log libvlc log instance or NULL
+ * \param p_log ignored
  */
+LIBVLC_DEPRECATED
 LIBVLC_API void libvlc_log_clear( libvlc_log_t *p_log );
 
 /**
- * Allocate and returns a new iterator to messages in log.
+ * This function does nothing useful.
+ * It is only provided for backward compatibility.
  *
- * \param p_log libvlc log instance
- * \return log iterator object or NULL on error
+ * \param p_log ignored
+ * \return an unique pointer or NULL on error or if the parameter was NULL
  */
+LIBVLC_DEPRECATED
 LIBVLC_API libvlc_log_iterator_t *libvlc_log_get_iterator( const libvlc_log_t *p_log );
 
 /**
- * Release a previoulsy allocated iterator.
+ * Frees memory allocated by libvlc_log_get_iterator().
  *
  * \param p_iter libvlc log iterator or NULL
  */
+LIBVLC_DEPRECATED
 LIBVLC_API void libvlc_log_iterator_free( libvlc_log_iterator_t *p_iter );
 
 /**
- * Return whether log iterator has more messages.
+ * Always returns zero.
+ * This function is only provided for backward compatibility.
  *
- * \param p_iter libvlc log iterator or NULL
- * \return true if iterator has more message objects, else false
+ * \param p_iter ignored
+ * \return always zero
  */
+LIBVLC_DEPRECATED
 LIBVLC_API int libvlc_log_iterator_has_next( const libvlc_log_iterator_t *p_iter );
 
 /**
- * Return the next log message.
- *
- * The message contents must not be freed
+ * Always returns NULL.
+ * This function is only provided for backward compatibility.
  *
  * \param p_iter libvlc log iterator or NULL
- * \param p_buffer log buffer
- * \return log message object or NULL if none left
+ * \param p_buffer ignored
+ * \return always NULL
  */
+LIBVLC_DEPRECATED
 LIBVLC_API libvlc_log_message_t *libvlc_log_iterator_next( libvlc_log_iterator_t *p_iter,
-                                                               libvlc_log_message_t *p_buffer );
+                                                           libvlc_log_message_t *p_buffer );
 
 /** @} */
 

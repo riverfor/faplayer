@@ -2,10 +2,11 @@
  * adjust.c : Contrast/Hue/Saturation/Brightness video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2000-2006 the VideoLAN team
- * $Id: db5e2be476f466f99f9f0f045ee21a72619e1a74 $
+ * $Id: c2f6649e1f706cebf21e2616d9a6e64aa555d0d4 $
  *
  * Authors: Simon Latapie <garf@via.ecp.fr>
  *          Antoine Cellerier <dionoea -at- videolan d0t org>
+ *          Martin Briza <gamajun@seznam.cz> (SSE)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,10 +35,11 @@
 
 #include <vlc_common.h>
 #include <vlc_plugin.h>
-#include <vlc_sout.h>
 
 #include <vlc_filter.h>
 #include "filter_picture.h"
+
+#include "adjust_sat_hue.h"
 
 #ifndef M_PI
 #   define M_PI 3.14159265358979323846
@@ -63,7 +65,7 @@ static int AdjustCallback( vlc_object_t *p_this, char const *psz_var,
 
 #define THRES_TEXT N_("Brightness threshold")
 #define THRES_LONGTEXT N_("When this mode is enabled, pixels will be " \
-        "shown as black or white. The threshold value will be the brighness " \
+        "shown as black or white. The threshold value will be the brightness " \
         "defined below." )
 #define CONT_TEXT N_("Image contrast (0-2)")
 #define CONT_LONGTEXT N_("Set the image contrast, between 0 and 2. Defaults to 1.")
@@ -117,7 +119,11 @@ struct filter_sys_t
     int        i_hue;
     double     f_saturation;
     double     f_gamma;
-    bool b_brightness_threshold;
+    bool       b_brightness_threshold;
+    int        (* pf_process_sat_hue)( picture_t *, picture_t *, int, int, int,
+                                       int, int );
+    int        (* pf_process_sat_hue_clip)( picture_t *, picture_t *, int, int,
+                                            int, int, int );
 };
 
 /*****************************************************************************
@@ -127,24 +133,6 @@ static int Create( vlc_object_t *p_this )
 {
     filter_t *p_filter = (filter_t *)p_this;
     filter_sys_t *p_sys;
-
-    switch( p_filter->fmt_in.video.i_chroma )
-    {
-        CASE_PLANAR_YUV
-            /* Planar YUV */
-            p_filter->pf_video_filter = FilterPlanar;
-            break;
-
-        CASE_PACKED_YUV_422
-            /* Packed YUV 4:2:2 */
-            p_filter->pf_video_filter = FilterPacked;
-            break;
-
-        default:
-            msg_Err( p_filter, "Unsupported input chroma (%4.4s)",
-                     (char*)&(p_filter->fmt_in.video.i_chroma) );
-            return VLC_EGENERIC;
-    }
 
     if( p_filter->fmt_in.video.i_chroma != p_filter->fmt_out.video.i_chroma )
     {
@@ -170,6 +158,30 @@ static int Create( vlc_object_t *p_this )
     p_sys->f_gamma = var_CreateGetFloatCommand( p_filter, "gamma" );
     p_sys->b_brightness_threshold =
         var_CreateGetBoolCommand( p_filter, "brightness-threshold" );
+
+    /* Choose Planar/Packed function and pointer to a Hue/Saturation processing
+     * function*/
+    switch( p_filter->fmt_in.video.i_chroma )
+    {
+        CASE_PLANAR_YUV
+            /* Planar YUV */
+            p_filter->pf_video_filter = FilterPlanar;
+            p_sys->pf_process_sat_hue_clip = planar_sat_hue_clip_C;
+            p_sys->pf_process_sat_hue = planar_sat_hue_C;
+            break;
+
+        CASE_PACKED_YUV_422
+            /* Packed YUV 4:2:2 */
+            p_filter->pf_video_filter = FilterPacked;
+            p_sys->pf_process_sat_hue_clip = packed_sat_hue_clip_C;
+            p_sys->pf_process_sat_hue = packed_sat_hue_C;
+            break;
+
+        default:
+            msg_Err( p_filter, "Unsupported input chroma (%4.4s)",
+                     (char*)&(p_filter->fmt_in.video.i_chroma) );
+            return VLC_EGENERIC;
+    }
 
     vlc_mutex_init( &p_sys->lock );
     var_AddCallback( p_filter, "contrast",   AdjustCallback, p_sys );
@@ -212,8 +224,8 @@ static picture_t *FilterPlanar( filter_t *p_filter, picture_t *p_pic )
     int pi_gamma[256];
 
     picture_t *p_outpic;
-    uint8_t *p_in, *p_in_v, *p_in_end, *p_line_end;
-    uint8_t *p_out, *p_out_v;
+    uint8_t *p_in, *p_in_end, *p_line_end;
+    uint8_t *p_out;
 
     bool b_thres;
     double  f_hue;
@@ -322,14 +334,6 @@ static picture_t *FilterPlanar( filter_t *p_filter, picture_t *p_pic )
      * Do the U and V planes
      */
 
-    p_in = p_pic->p[U_PLANE].p_pixels;
-    p_in_v = p_pic->p[V_PLANE].p_pixels;
-    p_in_end = p_in + p_pic->p[U_PLANE].i_visible_lines
-                      * p_pic->p[U_PLANE].i_pitch - 8;
-
-    p_out = p_outpic->p[U_PLANE].p_pixels;
-    p_out_v = p_outpic->p[V_PLANE].p_pixels;
-
     i_sin = sin(f_hue) * 256;
     i_cos = cos(f_hue) * 256;
 
@@ -338,85 +342,17 @@ static picture_t *FilterPlanar( filter_t *p_filter, picture_t *p_pic )
 
     if ( i_sat > 256 )
     {
-#define WRITE_UV_CLIP() \
-    i_u = *p_in++ ; i_v = *p_in_v++ ; \
-    *p_out++ = clip_uint8_vlc( (( ((i_u * i_cos + i_v * i_sin - i_x) >> 8) \
-                           * i_sat) >> 8) + 128); \
-    *p_out_v++ = clip_uint8_vlc( (( ((i_v * i_cos - i_u * i_sin - i_y) >> 8) \
-                           * i_sat) >> 8) + 128)
-
-        uint8_t i_u, i_v;
-
-        for( ; p_in < p_in_end ; )
-        {
-            p_line_end = p_in + p_pic->p[U_PLANE].i_visible_pitch - 8;
-
-            for( ; p_in < p_line_end ; )
-            {
-                /* Do 8 pixels at a time */
-                WRITE_UV_CLIP(); WRITE_UV_CLIP();
-                WRITE_UV_CLIP(); WRITE_UV_CLIP();
-                WRITE_UV_CLIP(); WRITE_UV_CLIP();
-                WRITE_UV_CLIP(); WRITE_UV_CLIP();
-            }
-
-            p_line_end += 8;
-
-            for( ; p_in < p_line_end ; )
-            {
-                WRITE_UV_CLIP();
-            }
-
-            p_in += p_pic->p[U_PLANE].i_pitch
-                  - p_pic->p[U_PLANE].i_visible_pitch;
-            p_in_v += p_pic->p[V_PLANE].i_pitch
-                    - p_pic->p[V_PLANE].i_visible_pitch;
-            p_out += p_outpic->p[U_PLANE].i_pitch
-                   - p_outpic->p[U_PLANE].i_visible_pitch;
-            p_out_v += p_outpic->p[V_PLANE].i_pitch
-                     - p_outpic->p[V_PLANE].i_visible_pitch;
-        }
-#undef WRITE_UV_CLIP
+        /* Currently no errors are implemented in the function, if any are added
+         * check them here */
+        p_sys->pf_process_sat_hue_clip( p_pic, p_outpic, i_sin, i_cos, i_sat,
+                                        i_x, i_y );
     }
     else
     {
-#define WRITE_UV() \
-    i_u = *p_in++ ; i_v = *p_in_v++ ; \
-    *p_out++ = (( ((i_u * i_cos + i_v * i_sin - i_x) >> 8) \
-                       * i_sat) >> 8) + 128; \
-    *p_out_v++ = (( ((i_v * i_cos - i_u * i_sin - i_y) >> 8) \
-                       * i_sat) >> 8) + 128
-
-        uint8_t i_u, i_v;
-
-        for( ; p_in < p_in_end ; )
-        {
-            p_line_end = p_in + p_pic->p[U_PLANE].i_visible_pitch - 8;
-
-            for( ; p_in < p_line_end ; )
-            {
-                /* Do 8 pixels at a time */
-                WRITE_UV(); WRITE_UV(); WRITE_UV(); WRITE_UV();
-                WRITE_UV(); WRITE_UV(); WRITE_UV(); WRITE_UV();
-            }
-
-            p_line_end += 8;
-
-            for( ; p_in < p_line_end ; )
-            {
-                WRITE_UV();
-            }
-
-            p_in += p_pic->p[U_PLANE].i_pitch
-                  - p_pic->p[U_PLANE].i_visible_pitch;
-            p_in_v += p_pic->p[V_PLANE].i_pitch
-                    - p_pic->p[V_PLANE].i_visible_pitch;
-            p_out += p_outpic->p[U_PLANE].i_pitch
-                   - p_outpic->p[U_PLANE].i_visible_pitch;
-            p_out_v += p_outpic->p[V_PLANE].i_pitch
-                     - p_outpic->p[V_PLANE].i_visible_pitch;
-        }
-#undef WRITE_UV
+        /* Currently no errors are implemented in the function, if any are added
+         * check them here */
+        p_sys->pf_process_sat_hue( p_pic, p_outpic, i_sin, i_cos, i_sat,
+                                        i_x, i_y );
     }
 
     return CopyInfoAndRelease( p_outpic, p_pic );
@@ -576,81 +512,29 @@ static picture_t *FilterPacked( filter_t *p_filter, picture_t *p_pic )
 
     if ( i_sat > 256 )
     {
-#define WRITE_UV_CLIP() \
-    i_u = *p_in; p_in += 4; i_v = *p_in_v; p_in_v += 4; \
-    *p_out = clip_uint8_vlc( (( ((i_u * i_cos + i_v * i_sin - i_x) >> 8) \
-                           * i_sat) >> 8) + 128); \
-    p_out += 4; \
-    *p_out_v = clip_uint8_vlc( (( ((i_v * i_cos - i_u * i_sin - i_y) >> 8) \
-                           * i_sat) >> 8) + 128); \
-    p_out_v += 4
-
-        uint8_t i_u, i_v;
-
-        for( ; p_in < p_in_end ; )
+        if ( p_sys->pf_process_sat_hue_clip( p_pic, p_outpic, i_sin, i_cos, i_sat,
+                                             i_x, i_y ) != VLC_SUCCESS )
         {
-            p_line_end = p_in + i_visible_pitch - 8 * 4;
-
-            for( ; p_in < p_line_end ; )
-            {
-                /* Do 8 pixels at a time */
-                WRITE_UV_CLIP(); WRITE_UV_CLIP();
-                WRITE_UV_CLIP(); WRITE_UV_CLIP();
-                WRITE_UV_CLIP(); WRITE_UV_CLIP();
-                WRITE_UV_CLIP(); WRITE_UV_CLIP();
-            }
-
-            p_line_end += 8 * 4;
-
-            for( ; p_in < p_line_end ; )
-            {
-                WRITE_UV_CLIP();
-            }
-
-            p_in += i_pitch - i_visible_pitch;
-            p_in_v += i_pitch - i_visible_pitch;
-            p_out += i_pitch - i_visible_pitch;
-            p_out_v += i_pitch - i_visible_pitch;
+            /* Currently only one error can happen in the function, but if there
+             * will be more of them, this message must go away */
+            msg_Warn( p_filter, "Unsupported input chroma (%4.4s)",
+                      (char*)&(p_pic->format.i_chroma) );
+            picture_Release( p_pic );
+            return NULL;
         }
-#undef WRITE_UV_CLIP
     }
     else
     {
-#define WRITE_UV() \
-    i_u = *p_in; p_in += 4; i_v = *p_in_v; p_in_v += 4; \
-    *p_out = (( ((i_u * i_cos + i_v * i_sin - i_x) >> 8) \
-                       * i_sat) >> 8) + 128; \
-    p_out += 4; \
-    *p_out_v = (( ((i_v * i_cos - i_u * i_sin - i_y) >> 8) \
-                       * i_sat) >> 8) + 128; \
-    p_out_v += 4
-
-        uint8_t i_u, i_v;
-
-        for( ; p_in < p_in_end ; )
+        if ( p_sys->pf_process_sat_hue( p_pic, p_outpic, i_sin, i_cos, i_sat,
+                                        i_x, i_y ) != VLC_SUCCESS )
         {
-            p_line_end = p_in + i_visible_pitch - 8 * 4;
-
-            for( ; p_in < p_line_end ; )
-            {
-                /* Do 8 pixels at a time */
-                WRITE_UV(); WRITE_UV(); WRITE_UV(); WRITE_UV();
-                WRITE_UV(); WRITE_UV(); WRITE_UV(); WRITE_UV();
-            }
-
-            p_line_end += 8 * 4;
-
-            for( ; p_in < p_line_end ; )
-            {
-                WRITE_UV();
-            }
-
-            p_in += i_pitch - i_visible_pitch;
-            p_in_v += i_pitch - i_visible_pitch;
-            p_out += i_pitch - i_visible_pitch;
-            p_out_v += i_pitch - i_visible_pitch;
+            /* Currently only one error can happen in the function, but if there
+             * will be more of them, this message must go away */
+            msg_Warn( p_filter, "Unsupported input chroma (%4.4s)",
+                      (char*)&(p_pic->format.i_chroma) );
+            picture_Release( p_pic );
+            return NULL;
         }
-#undef WRITE_UV
     }
 
     return CopyInfoAndRelease( p_outpic, p_pic );

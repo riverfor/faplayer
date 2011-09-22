@@ -26,6 +26,7 @@ $(TARBALLS)/musepack_src_r$(MUSE_REV).tar.gz:
 
 musepack: musepack_src_r$(MUSE_REV).tar.gz .sum-mpcdec
 	$(UNPACK)
+	$(APPLY) $(SRC)/mpcdec/musepack-no-cflags-clobber.patch
 	sed -i.orig \
 		-e 's,^add_subdirectory(mpcgain),,g' \
 		-e 's,^add_subdirectory(mpcchap),,g' \
@@ -38,7 +39,7 @@ endif
 	touch $@
 
 .mpcdec: musepack toolchain.cmake
-	cd $< && $(CMAKE) -DSHARED=OFF .
+	cd $< && $(HOSTVARS_PIC) $(CMAKE) -DSHARED=OFF .
 	cd $< && $(MAKE) install
 	mkdir -p -- "$(PREFIX)/lib"
 	cd $< && cp libmpcdec/libmpcdec_static.a "$(PREFIX)/lib/libmpcdec.a"

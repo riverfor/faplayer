@@ -4,7 +4,7 @@
  * interface, such as message output.
  *****************************************************************************
  * Copyright (C) 1999, 2000, 2001, 2002 the VideoLAN team
- * $Id: a8782ab46131c48c63bf1afb65fac3633f3dab0e $
+ * $Id: 8460bff1ed6e9c3e1ea0e638782b730d9df45d25 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -42,49 +42,25 @@
  * @{
  */
 
+/** Message types */
+enum msg_item_type
+{
+    VLC_MSG_INFO=0, /**< Important information */
+    VLC_MSG_ERR,    /**< Error */
+    VLC_MSG_WARN,   /**< Warning */
+    VLC_MSG_DBG,    /**< Debug */
+};
+
 /**
- * Store a single message sent to user.
+ * Log message
  */
 typedef struct
 {
-    int     i_type;                             /**< message type, see below */
-    uintptr_t   i_object_id;
-    const char *psz_object_type;
-    const char *psz_module;
-    const char *psz_header;                     /**< Additional header */
-    char *  psz_msg;                            /**< the message itself */
+    uintptr_t   i_object_id; /**< Emitter (temporaly) unique object ID or 0 */
+    const char *psz_object_type; /**< Emitter object type name */
+    const char *psz_module; /**< Emitter module (source code) */
+    const char *psz_header; /**< Additional header (used by VLM media) */
 } msg_item_t;
-
-/* Message types */
-/** standard messages */
-#define VLC_MSG_INFO  0
-/** error messages */
-#define VLC_MSG_ERR   1
-/** warning messages */
-#define VLC_MSG_WARN  2
-/** debug messages */
-#define VLC_MSG_DBG   3
-
-VLC_MALLOC VLC_USED
-static inline msg_item_t *msg_Copy (const msg_item_t *msg)
-{
-    msg_item_t *copy = (msg_item_t *)xmalloc (sizeof (*copy));
-    copy->i_type = msg->i_type;
-    copy->i_object_id = msg->i_object_id;
-    copy->psz_object_type = msg->psz_object_type;
-    copy->psz_module = strdup (msg->psz_module);
-    copy->psz_msg = strdup (msg->psz_msg);
-    copy->psz_header = msg->psz_header ? strdup (msg->psz_header) : NULL;
-    return copy;
-}
-
-static inline void msg_Free (msg_item_t *msg)
-{
-    free ((char *)msg->psz_module);
-    free ((char *)msg->psz_header);
-    free (msg->psz_msg);
-    free (msg);
-}
 
 /**
  * Used by interface plugins which subscribe to the message bank.
@@ -94,41 +70,30 @@ typedef struct msg_subscription_t msg_subscription_t;
 /*****************************************************************************
  * Prototypes
  *****************************************************************************/
-VLC_API void msg_Generic( vlc_object_t *, int, const char *, const char *, ... ) VLC_FORMAT( 4, 5 );
-VLC_API void msg_GenericVa( vlc_object_t *, int, const char *, const char *, va_list args );
-#define msg_GenericVa(a, b, c, d, e) msg_GenericVa(VLC_OBJECT(a), b, c, d, e)
+VLC_API void vlc_Log(vlc_object_t *, int,
+                     const char *, const char *, ...) VLC_FORMAT( 4, 5 );
+VLC_API void vlc_vaLog(vlc_object_t *, int,
+                       const char *, const char *, va_list);
+#define msg_GenericVa(a, b, c, d, e) vlc_vaLog(VLC_OBJECT(a), b, c, d, e)
 
 #define msg_Info( p_this, ... ) \
-        msg_Generic( VLC_OBJECT(p_this), VLC_MSG_INFO, \
-                     MODULE_STRING, __VA_ARGS__ )
+    vlc_Log( VLC_OBJECT(p_this), VLC_MSG_INFO, MODULE_STRING, __VA_ARGS__ )
 #define msg_Err( p_this, ... ) \
-        msg_Generic( VLC_OBJECT(p_this), VLC_MSG_ERR, \
-                     MODULE_STRING, __VA_ARGS__ )
+    vlc_Log( VLC_OBJECT(p_this), VLC_MSG_ERR,  MODULE_STRING, __VA_ARGS__ )
 #define msg_Warn( p_this, ... ) \
-        msg_Generic( VLC_OBJECT(p_this), VLC_MSG_WARN, \
-                     MODULE_STRING, __VA_ARGS__ )
+    vlc_Log( VLC_OBJECT(p_this), VLC_MSG_WARN, MODULE_STRING, __VA_ARGS__ )
 #define msg_Dbg( p_this, ... ) \
-        msg_Generic( VLC_OBJECT(p_this), VLC_MSG_DBG, \
-                     MODULE_STRING, __VA_ARGS__ )
-
-typedef struct msg_cb_data_t msg_cb_data_t;
+    vlc_Log( VLC_OBJECT(p_this), VLC_MSG_DBG,  MODULE_STRING, __VA_ARGS__ )
 
 /**
  * Message logging callback signature.
  * Accepts one private data pointer, the message, and an overrun counter.
  */
-typedef void (*msg_callback_t) (msg_cb_data_t *, const msg_item_t *);
+typedef void (*msg_callback_t) (void *, int, const msg_item_t *,
+                                const char *, va_list);
 
-VLC_API msg_subscription_t* msg_Subscribe( libvlc_int_t *, msg_callback_t, msg_cb_data_t * ) VLC_USED;
-VLC_API void msg_Unsubscribe( msg_subscription_t * );
-VLC_API void msg_SubscriptionSetVerbosity( msg_subscription_t *, const int);
-
-/* Enable or disable a certain object debug messages */
-VLC_API void msg_EnableObjectPrinting( vlc_object_t *, const char * psz_object );
-#define msg_EnableObjectPrinting(a,b) msg_EnableObjectPrinting(VLC_OBJECT(a),b)
-VLC_API void msg_DisableObjectPrinting( vlc_object_t *, const char * psz_object );
-#define msg_DisableObjectPrinting(a,b) msg_DisableObjectPrinting(VLC_OBJECT(a),b)
-
+VLC_API msg_subscription_t *vlc_Subscribe(msg_callback_t, void *) VLC_USED;
+VLC_API void vlc_Unsubscribe(msg_subscription_t *);
 
 /**
  * @}

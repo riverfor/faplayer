@@ -2,7 +2,7 @@
  * smem.c: stream output to memory buffer module
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 64d92c1c7c647e3e95a1aae5f84cffdb905a7c77 $
+ * $Id: 5587c2f2d3e0dd2140a454166c94a384750f9fbb $
  *
  * Authors: Christophe Courtaut <christophe.courtaut@gmail.com>
  *
@@ -58,20 +58,20 @@
  *****************************************************************************/
 
 #define T_VIDEO_PRERENDER_CALLBACK N_( "Video prerender callback" )
-#define LT_VIDEO_PRERENDER_CALLBACK N_( "Address of the video prerender callback function" \
-                                "this function will set the buffer where render will be done" )
+#define LT_VIDEO_PRERENDER_CALLBACK N_( "Address of the video prerender callback function. " \
+                                "This function will set the buffer where render will be done." )
 
 #define T_AUDIO_PRERENDER_CALLBACK N_( "Audio prerender callback" )
-#define LT_AUDIO_PRERENDER_CALLBACK N_( "Address of the audio prerender callback function." \
-                                        "this function will set the buffer where render will be done" )
+#define LT_AUDIO_PRERENDER_CALLBACK N_( "Address of the audio prerender callback function. " \
+                                        "This function will set the buffer where render will be done." )
 
 #define T_VIDEO_POSTRENDER_CALLBACK N_( "Video postrender callback" )
-#define LT_VIDEO_POSTRENDER_CALLBACK N_( "Address of the video postrender callback function." \
-                                        "this function will be called when the render is into the buffer" )
+#define LT_VIDEO_POSTRENDER_CALLBACK N_( "Address of the video postrender callback function. " \
+                                        "This function will be called when the render is into the buffer." )
 
 #define T_AUDIO_POSTRENDER_CALLBACK N_( "Audio postrender callback" )
-#define LT_AUDIO_POSTRENDER_CALLBACK N_( "Address of the audio postrender callback function." \
-                                        "this function will be called when the render is into the buffer" )
+#define LT_AUDIO_POSTRENDER_CALLBACK N_( "Address of the audio postrender callback function. " \
+                                        "This function will be called when the render is into the buffer." )
 
 #define T_VIDEO_DATA N_( "Video Callback data" )
 #define LT_VIDEO_DATA N_( "Data for the video callback function." )
@@ -392,6 +392,13 @@ static int SendAudio( sout_stream_t *p_stream, sout_stream_id_t *id,
     int i_samples = 0;
 
     i_size = p_buffer->i_buffer;
+    if (id->format->audio.i_channels <= 0)
+    {
+        msg_Warn( p_stream, "No buffer given!" );
+        block_ChainRelease( p_buffer );
+        return VLC_EGENERIC;
+    }
+
     i_samples = i_size / ( ( id->format->audio.i_bitspersample / 8 ) * id->format->audio.i_channels );
     /* Calling the prerender callback to get user buffer */
     p_sys->pf_audio_prerender_callback( id->p_data, &p_pcm_buffer, i_size );

@@ -2,7 +2,7 @@
  * podcast.c:  Podcast services discovery module
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: 5c936cfca87711cd103d92426db7f66705de9945 $
+ * $Id: 2ad6356170fc1cc0d8c6aa1eaa4e5a5291cf17eb $
  *
  * Authors: Antoine Cellerier <dionoea -at- videolan -dot- org>
  *
@@ -200,6 +200,7 @@ static void Close( vlc_object_t *p_this )
 /*****************************************************************************
  * Run: main thread
  *****************************************************************************/
+VLC_NORETURN
 static void *Run( void *data )
 {
     services_discovery_t *p_sd = data;

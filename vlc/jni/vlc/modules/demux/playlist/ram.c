@@ -2,7 +2,7 @@
  * ram.c : RAM playlist format import
  *****************************************************************************
  * Copyright (C) 2009 the VideoLAN team
- * $Id: 78ad7784a61bd4d5ec047fb0a643fcfaa8ab097d $
+ * $Id: 0ed37722f72ac03b189db8e4c0df9bb759f92c95 $
  *
  * Authors: Srikanth Raju <srikiraju@gmail.com>
  *
@@ -138,7 +138,7 @@ static int ParseTime( const char *s, size_t i_strlen)
     s = SkipBlanks(s, i_strlen);
 
     val = 0;
-    while( (s < end) && isdigit(*s) )
+    while( (s < end) && isdigit((unsigned char)*s) )
     {
         int newval = val*10 + (*s - '0');
         if( newval < val )
@@ -158,7 +158,7 @@ static int ParseTime( const char *s, size_t i_strlen)
         s = SkipBlanks(s, end-s);
         result = result * 60;
         val = 0;
-        while( (s < end) && isdigit(*s) )
+        while( (s < end) && isdigit((unsigned char)*s) )
         {
             int newval = val*10 + (*s - '0');
             if( newval < val )
@@ -178,7 +178,7 @@ static int ParseTime( const char *s, size_t i_strlen)
             s = SkipBlanks(s, end-s);
             result = result * 60;
             val = 0;
-            while( (s < end) && isdigit(*s) )
+            while( (s < end) && isdigit((unsigned char)*s) )
             {
                 int newval = val*10 + (*s - '0');
                 if( newval < val )

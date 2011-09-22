@@ -2,7 +2,7 @@
  * logger.c : file logging plugin for vlc
  *****************************************************************************
  * Copyright (C) 2002-2008 the VideoLAN team
- * $Id: 0fe5459a0cf6871cc02099eaf2a3ca126950475c $
+ * $Id: 6500d07d4090d6ab80693b844c913d66b5b0653e $
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *
@@ -35,6 +35,7 @@
 #include <vlc_fs.h>
 #include <vlc_charset.h>
 
+#include <stdarg.h>
 #include <assert.h>
 
 #define MODE_TEXT 0
@@ -72,20 +73,14 @@
 #include <syslog.h>
 #endif
 
-struct msg_cb_data_t
-{
-    intf_thread_t *p_intf;
-    FILE *p_file;
-    int   i_mode;
-};
-
 /*****************************************************************************
  * intf_sys_t: description and status of log interface
  *****************************************************************************/
 struct intf_sys_t
 {
     msg_subscription_t *p_sub;
-    msg_cb_data_t msg;
+    FILE *p_file;
+    const char *footer;
 };
 
 /*****************************************************************************
@@ -94,11 +89,11 @@ struct intf_sys_t
 static int  Open    ( vlc_object_t * );
 static void Close   ( vlc_object_t * );
 
-static void Overflow (msg_cb_data_t *p_sys, const msg_item_t *p_item);
-static void TextPrint         ( const msg_item_t *, FILE * );
-static void HtmlPrint         ( const msg_item_t *, FILE * );
+static void TextPrint(void *, int, const msg_item_t *, const char *, va_list);
+static void HtmlPrint(void *, int, const msg_item_t *, const char *, va_list);
 #ifdef HAVE_SYSLOG_H
-static void SyslogPrint       ( const msg_item_t *);
+static void SyslogPrint(void *, int, const msg_item_t *, const char *,
+                        va_list);
 #endif
 
 /*****************************************************************************
@@ -191,7 +186,6 @@ static int Open( vlc_object_t *p_this )
 {
     intf_thread_t *p_intf = (intf_thread_t *)p_this;
     intf_sys_t *p_sys;
-    char *psz_mode;
 
     CONSOLE_INTRO_MSG;
     msg_Info( p_intf, "using logger." );
@@ -201,94 +195,31 @@ static int Open( vlc_object_t *p_this )
     if( p_sys == NULL )
         return VLC_ENOMEM;
 
-    p_sys->msg.p_intf = p_intf;
-    p_sys->msg.i_mode = MODE_TEXT;
-    psz_mode = var_InheritString( p_intf, "logmode" );
-    if( psz_mode )
+    msg_callback_t cb = TextPrint;
+    const char *filename = LOG_FILE_TEXT, *header = TEXT_HEADER;
+    p_sys->footer = TEXT_FOOTER;
+
+    char *mode = var_InheritString( p_intf, "logmode" );
+    if( mode != NULL )
     {
-        if( !strcmp( psz_mode, "text" ) )
-            ;
-        else if( !strcmp( psz_mode, "html" ) )
+        if( !strcmp( mode, "html" ) )
         {
-            p_sys->msg.i_mode = MODE_HTML;
+            p_sys->footer = HTML_FOOTER;
+            header = HTML_HEADER;
+            cb = HtmlPrint;
         }
 #ifdef HAVE_SYSLOG_H
-        else if( !strcmp( psz_mode, "syslog" ) )
-        {
-            p_sys->msg.i_mode = MODE_SYSLOG;
-        }
+        else if( !strcmp( mode, "syslog" ) )
+            cb = SyslogPrint;
 #endif
-        else
-        {
-            msg_Warn( p_intf, "invalid log mode `%s', using `text'", psz_mode );
-            p_sys->msg.i_mode = MODE_TEXT;
-        }
-        free( psz_mode );
-    }
-    else
-    {
-        msg_Warn( p_intf, "no log mode specified, using `text'" );
+        else if( strcmp( mode, "text" ) )
+            msg_Warn( p_intf, "invalid log mode `%s', using `text'", mode );
+        free( mode );
     }
 
-    if( p_sys->msg.i_mode != MODE_SYSLOG )
-    {
-        char *psz_file = var_InheritString( p_intf, "logfile" );
-        if( !psz_file )
-        {
-#ifdef __APPLE__
-            char *home = config_GetUserDir(VLC_DOCUMENTS_DIR);
-            if( home == NULL
-             || asprintf( &psz_file, "%s/"LOG_DIR"/%s", home,
-                (p_sys->msg.i_mode == MODE_HTML) ? LOG_FILE_HTML
-                                             : LOG_FILE_TEXT ) == -1 )
-                psz_file = NULL;
-            free(home);
-#else
-            switch( p_sys->msg.i_mode )
-            {
-            case MODE_HTML:
-                psz_file = strdup( LOG_FILE_HTML );
-                break;
-            case MODE_TEXT:
-            default:
-                psz_file = strdup( LOG_FILE_TEXT );
-                break;
-            }
-#endif
-            msg_Warn( p_intf, "no log filename provided, using `%s'",
-                               psz_file );
-        }
-
-        /* Open the log file and remove any buffering for the stream */
-        msg_Dbg( p_intf, "opening logfile `%s'", psz_file );
-        p_sys->msg.p_file = vlc_fopen( psz_file, "at" );
-        if( p_sys->msg.p_file == NULL )
-        {
-            msg_Err( p_intf, "error opening logfile `%s'", psz_file );
-            free( p_sys );
-            free( psz_file );
-            return -1;
-        }
-        setvbuf( p_sys->msg.p_file, NULL, _IONBF, 0 );
-
-        free( psz_file );
-
-        switch( p_sys->msg.i_mode )
-        {
-        case MODE_HTML:
-            fputs( HTML_HEADER, p_sys->msg.p_file );
-            break;
-        case MODE_TEXT:
-        default:
-            fputs( TEXT_HEADER, p_sys->msg.p_file );
-            break;
-        }
-
-    }
-    else
-    {
-        p_sys->msg.p_file = NULL;
 #ifdef HAVE_SYSLOG_H
+    if( cb == SyslogPrint )
+    {
         int i_facility;
         char *psz_facility = var_InheritString( p_intf, "syslog-facility" );
         if( psz_facility )
@@ -319,12 +250,45 @@ static int Open( vlc_object_t *p_this )
         }
 
         openlog( "vlc", LOG_PID|LOG_NDELAY, i_facility );
+        p_sys->p_file = NULL;
+    }
+    else
 #endif
+    {
+        char *psz_file = var_InheritString( p_intf, "logfile" );
+        if( !psz_file )
+        {
+#ifdef __APPLE__
+            char *home = config_GetUserDir(VLC_DOCUMENTS_DIR);
+            if( home == NULL
+             || asprintf( &psz_file, "%s/"LOG_DIR"/%s", home,
+                          filename ) == -1 )
+                psz_file = NULL;
+            free(home);
+            filename = psz_file;
+#endif
+            msg_Warn( p_intf, "no log filename provided, using `%s'",
+                      filename );
+        }
+        else
+            filename = psz_file;
+
+        /* Open the log file and remove any buffering for the stream */
+        msg_Dbg( p_intf, "opening logfile `%s'", filename );
+        p_sys->p_file = vlc_fopen( filename, "at" );
+        free( psz_file );
+        if( p_sys->p_file == NULL )
+        {
+            msg_Err( p_intf, "error opening logfile `%s': %m", filename );
+            free( p_sys );
+            return VLC_EGENERIC;
+        }
+        setvbuf( p_sys->p_file, NULL, _IONBF, 0 );
+        fputs( header, p_sys->p_file );
     }
 
-    p_sys->p_sub = msg_Subscribe( p_intf->p_libvlc, Overflow, &p_sys->msg );
-
-    return 0;
+    p_sys->p_sub = vlc_Subscribe( cb, p_intf );
+    return VLC_SUCCESS;
 }
 
 /*****************************************************************************
@@ -336,117 +300,108 @@ static void Close( vlc_object_t *p_this )
     intf_sys_t *p_sys = p_intf->p_sys;
 
     /* Flush the queue and unsubscribe from the message queue */
-    /* FIXME: flush */
-    msg_Unsubscribe( p_sys->p_sub );
-
-    switch( p_sys->msg.i_mode )
-    {
-    case MODE_HTML:
-        fputs( HTML_FOOTER, p_sys->msg.p_file );
-        break;
-#ifdef HAVE_SYSLOG_H
-    case MODE_SYSLOG:
-        closelog();
-        break;
-#endif
-    case MODE_TEXT:
-    default:
-        fputs( TEXT_FOOTER, p_sys->msg.p_file );
-        break;
-    }
+    vlc_Unsubscribe( p_sys->p_sub );
 
     /* Close the log file */
-    if( p_sys->msg.p_file )
-        fclose( p_sys->msg.p_file );
+#ifdef HAVE_SYSLOG_H
+    if( p_sys->p_file == NULL )
+        closelog();
+    else
+#endif
+    {
+        fputs( p_sys->footer, p_sys->p_file );
+        fclose( p_sys->p_file );
+    }
 
     /* Destroy structure */
     free( p_sys );
 }
 
-/**
- * Log a message
- */
-static void Overflow (msg_cb_data_t *p_sys, const msg_item_t *p_item)
+static bool IgnoreMessage( intf_thread_t *p_intf, int type )
 {
-    int verbosity = var_InheritInteger( p_sys->p_intf, "log-verbose" );
+    /* TODO: cache value... */
+    int verbosity = var_InheritInteger( p_intf, "log-verbose" );
     if (verbosity == -1)
-        verbosity = var_InheritInteger( p_sys->p_intf, "verbose" );
+        verbosity = var_InheritInteger( p_intf, "verbose" );
 
-    switch( p_item->i_type )
-    {
-        case VLC_MSG_INFO:
-        case VLC_MSG_ERR:
-            if( verbosity < 0 ) return;
-            break;
-        case VLC_MSG_WARN:
-            if( verbosity < 1 ) return;
-            break;
-        case VLC_MSG_DBG:
-            if( verbosity < 2 ) return;
-            break;
-    }
+    return verbosity < 0 || verbosity < (type - VLC_MSG_ERR);
+}
 
+/*
+ * Logging callbacks
+ */
+
+static const char ppsz_type[4][9] = {
+    "",
+    " error",
+    " warning",
+    " debug",
+};
+
+static void TextPrint( void *opaque, int type, const msg_item_t *item,
+                       const char *fmt, va_list ap )
+{
+    intf_thread_t *p_intf = opaque;
+    FILE *stream = p_intf->p_sys->p_file;
+
+    if( IgnoreMessage( p_intf, type ) )
+        return;
 
     int canc = vlc_savecancel();
-
-    switch( p_sys->i_mode )
-    {
-        case MODE_HTML:
-            HtmlPrint( p_item, p_sys->p_file );
-            break;
-#ifdef HAVE_SYSLOG_H
-        case MODE_SYSLOG:
-            SyslogPrint( p_item );
-            break;
-#endif
-        case MODE_TEXT:
-        default:
-            TextPrint( p_item, p_sys->p_file );
-            break;
-    }
-
+    flockfile( stream );
+    utf8_fprintf( stream, "%s%s: ", item->psz_module, ppsz_type[type] );
+    utf8_fprintf( stream, fmt, ap );
+    putc_unlocked( '\n', stream );
+    funlockfile( stream );
     vlc_restorecancel( canc );
 }
 
-static const char ppsz_type[4][11] = {
-    ": ",
-    " error: ",
-    " warning: ",
-    " debug: ",
-};
-
-static void TextPrint( const msg_item_t *p_msg, FILE *p_file )
-{
-    utf8_fprintf( p_file, "%s%s%s\n", p_msg->psz_module,
-                  ppsz_type[p_msg->i_type], p_msg->psz_msg );
-}
-
 #ifdef HAVE_SYSLOG_H
-static void SyslogPrint( const msg_item_t *p_msg )
+static void SyslogPrint( void *opaque, int type, const msg_item_t *item,
+                         const char *fmt, va_list ap )
 {
     static const int i_prio[4] = { LOG_INFO, LOG_ERR, LOG_WARNING, LOG_DEBUG };
-    int i_priority = i_prio[p_msg->i_type];
 
-    if( p_msg->psz_header )
-        syslog( i_priority, "[%s] %s%s%s", p_msg->psz_header,
-                p_msg->psz_module, ppsz_type[p_msg->i_type], p_msg->psz_msg );
+    intf_thread_t *p_intf = opaque;
+    char *str;
+    int i_priority = i_prio[type];
+
+    if( IgnoreMessage( p_intf, type )
+     || unlikely(vasprintf( &str, fmt, ap ) == -1) )
+        return;
+
+    int canc = vlc_savecancel();
+    if( item->psz_header != NULL )
+        syslog( i_priority, "[%s] %s%s: %s", item->psz_header,
+                item->psz_module, ppsz_type[type], str );
     else
-        syslog( i_priority, "%s%s%s",
-                p_msg->psz_module, ppsz_type[p_msg->i_type], p_msg->psz_msg );
- 
+        syslog( i_priority, "%s%s: %s",
+                item->psz_module, ppsz_type[type], str );
+    vlc_restorecancel( canc );
+    free( str );
 }
 #endif
 
-static void HtmlPrint( const msg_item_t *p_msg, FILE *p_file )
+static void HtmlPrint( void *opaque, int type, const msg_item_t *item,
+                       const char *fmt, va_list ap )
 {
-    static const char ppsz_color[4][30] = {
-        "<span style=\"color: #ffffff\">",
-        "<span style=\"color: #ff6666\">",
-        "<span style=\"color: #ffff66\">",
-        "<span style=\"color: #aaaaaa\">",
+    static const unsigned color[4] = {
+        0xffffff, 0xff6666, 0xffff66, 0xaaaaaa,
     };
 
-    fprintf( p_file, "%s%s%s%s</span>\n", p_msg->psz_module,
-             ppsz_type[p_msg->i_type], ppsz_color[p_msg->i_type],
-             p_msg->psz_msg );
+    intf_thread_t *p_intf = opaque;
+    FILE *stream = p_intf->p_sys->p_file;
+
+    if( IgnoreMessage( p_intf, type ) )
+        return;
+
+    int canc = vlc_savecancel();
+    flockfile( stream );
+    fprintf( stream, "%s%s: <span style=\"color: #%06x\">",
+             item->psz_module, ppsz_type[type], color[type] );
+    /* FIXME: encode special ASCII characters */
+    fprintf( stream, fmt, ap );
+    fputs( "</span>\n", stream );
+    funlockfile( stream );
+    vlc_restorecancel( canc );
 }

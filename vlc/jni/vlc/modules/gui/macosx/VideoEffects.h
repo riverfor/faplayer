@@ -2,7 +2,7 @@
  * VideoEffects.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 75709a76a07e95210c10b20027ea32a3fac363a6 $
+ * $Id: bfb9df9c5fb46b17c3dc85970c8a64695a90962b $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -110,7 +110,7 @@
     IBOutlet id o_waves_ckb;
     IBOutlet id o_psychedelic_ckb;
 
-    /* video output & overlay */
+    /* misc */
     IBOutlet id o_clone_ckb;
     IBOutlet id o_clone_lbl;
     IBOutlet id o_clone_fld;
@@ -119,8 +119,6 @@
     IBOutlet id o_addtext_text_lbl;
     IBOutlet id o_addtext_pos_lbl;
     IBOutlet id o_addtext_pos_pop;
-
-    /* Logo */
     IBOutlet id o_addlogo_ckb;
     IBOutlet id o_addlogo_logo_lbl;
     IBOutlet id o_addlogo_logo_fld;
@@ -130,13 +128,6 @@
     IBOutlet id o_addlogo_left_fld;
     IBOutlet id o_addlogo_transparency_lbl;
     IBOutlet id o_addlogo_transparency_sld;
-    IBOutlet id o_eraselogo_ckb;
-    IBOutlet id o_eraselogo_mask_lbl;
-    IBOutlet id o_eraselogo_mask_fld;
-    IBOutlet id o_eraselogo_top_lbl;
-    IBOutlet id o_eraselogo_top_fld;
-    IBOutlet id o_eraselogo_left_lbl;
-    IBOutlet id o_eraselogo_left_fld;
 }
 
 /* generic */
@@ -190,15 +181,11 @@
 - (IBAction)enableWaves:(id)sender;
 - (IBAction)enablePsychedelic:(id)sender;
 
-/* video output & overlay */
+/* miscellaneous */
 - (IBAction)enableClone:(id)sender;
 - (IBAction)cloneModifierChanged:(id)sender;
 - (IBAction)enableAddText:(id)sender;
 - (IBAction)addTextModifierChanged:(id)sender;
-
-/* logo */
 - (IBAction)enableAddLogo:(id)sender;
 - (IBAction)addLogoModifierChanged:(id)sender;
-- (IBAction)enableEraseLogo:(id)sender;
-- (IBAction)eraseLogoModifierChanged:(id)sender;
 @end

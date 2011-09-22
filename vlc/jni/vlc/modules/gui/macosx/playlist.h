@@ -2,7 +2,7 @@
  * playlist.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2006 the VideoLAN team
- * $Id: 77349edb24c4f9b71892f8cf9c1b77073d09e182 $
+ * $Id: d70db58c1beeda83df6a86c32be92559e0979174 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Derk-Jan Hartman <hartman at videolan dot org>
@@ -22,6 +22,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
+#import "PXSourceList.h"
+
 /*****************************************************************************
  * VLCPlaylistView interface
  *****************************************************************************/
@@ -34,17 +36,17 @@
 /*****************************************************************************
  * VLCPlaylistCommon interface
  *****************************************************************************/
-@interface VLCPlaylistCommon : NSObject
+@interface VLCPlaylistCommon : NSObject <NSOutlineViewDataSource, NSOutlineViewDelegate>
 {
     IBOutlet id o_tc_name;
     IBOutlet id o_tc_author;
     IBOutlet id o_tc_duration;
-    IBOutlet id o_outline_view;
+    IBOutlet VLCPlaylistView* o_outline_view;
 
     IBOutlet id o_tc_name_other;
     IBOutlet id o_tc_author_other;
     IBOutlet id o_tc_duration_other;
-    IBOutlet id o_outline_view_other;
+    IBOutlet VLCPlaylistView* o_outline_view_other;
 
     NSMutableDictionary *o_outline_dict;
 }
@@ -76,7 +78,6 @@
 
     IBOutlet id o_btn_playlist;
     IBOutlet id o_playlist_view;
-    IBOutlet id o_sidebar;
     IBOutlet id o_search_field;
     IBOutlet id o_search_field_other;
     IBOutlet id o_mi_save_playlist;
@@ -124,7 +125,7 @@
 - (IBAction)searchItem:(id)sender;
 
 - (void)playlistUpdated;
-- (void)playModeUpdated;
+- (void)outlineViewSelectionDidChange:(NSNotification *)notification;
 - (void)sortNode:(int)i_mode;
 - (void)updateRowSelection;
 
@@ -142,7 +143,6 @@
 - (IBAction)sortNodeByAuthor:(id)sender;
 - (IBAction)recursiveExpandNode:(id)sender;
 
-- (void)playSidebarItem:(id)item;
 - (id)playingItem;
 
 - (void)appendArray:(NSArray*)o_array atPos:(int)i_position enqueue:(BOOL)b_enqueue;

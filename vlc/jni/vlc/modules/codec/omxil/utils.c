@@ -2,7 +2,7 @@
  * utils.c: helper functions
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: df1c0769d80bfd6494c95e53d952cc1142a40541 $
+ * $Id: 110ea4dc5b31b391ed1f37f8865e46fca1f7dc34 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -28,10 +28,6 @@
 # include "config.h"
 #endif
 
-#if defined(HAVE_DL_DLOPEN)
-# include <dlfcn.h>
-#endif
-
 #include <vlc_common.h>
 #include <vlc_plugin.h>
 #include <vlc_codec.h>
@@ -39,6 +35,8 @@
 #include <vlc_cpu.h>
 
 #include "omxil.h"
+
+#define OMX_QCOM_COLOR_FormatYVU420SemiPlanar 0x7FA30C00
 
 /*****************************************************************************
  * Events utility functions
@@ -123,7 +121,7 @@ OMX_ERRORTYPE WaitForSpecificOmxEvent(decoder_t *p_dec,
  * Picture utility functions
  *****************************************************************************/
 void CopyOmxPicture( decoder_t *p_dec, picture_t *p_pic,
-                     OMX_BUFFERHEADERTYPE *p_header )
+                     OMX_BUFFERHEADERTYPE *p_header, int i_slice_height )
 {
     decoder_sys_t *p_sys = p_dec->p_sys;
     int i_src_stride, i_dst_stride;
@@ -146,6 +144,13 @@ void CopyOmxPicture( decoder_t *p_dec, picture_t *p_pic,
             p_src += i_src_stride;
             p_dst += i_dst_stride;
         }
+        /* Handle plane height, which may be indicated via nSliceHeight in OMX.
+         * The handling for chroma planes currently assumes vertically
+         * subsampled chroma, e.g. 422 planar wouldn't work right. */
+        if( i_plane == 0 && i_slice_height > p_pic->p[i_plane].i_visible_lines )
+            p_src += i_src_stride * (i_slice_height - p_pic->p[i_plane].i_visible_lines);
+        else if ( i_plane > 0 && i_slice_height/2 > p_pic->p[i_plane].i_visible_lines )
+            p_src += i_src_stride * (i_slice_height/2 - p_pic->p[i_plane].i_visible_lines);
     }
 }
 
@@ -344,6 +349,8 @@ static const struct
 {
     { VLC_CODEC_I420, OMX_COLOR_FormatYUV420Planar, 3, 1, 2 },
     { VLC_CODEC_I420, OMX_COLOR_FormatYUV420PackedPlanar, 3, 1, 2 },
+    { VLC_CODEC_NV21, OMX_COLOR_FormatYUV420SemiPlanar, 3, 1, 1 },
+    { VLC_CODEC_NV21, OMX_QCOM_COLOR_FormatYVU420SemiPlanar, 3, 1, 1 },
     { VLC_CODEC_YUYV, OMX_COLOR_FormatYCbYCr, 4, 2, 0 },
     { VLC_CODEC_YVYU, OMX_COLOR_FormatYCrYCb, 4, 2, 0 },
     { VLC_CODEC_UYVY, OMX_COLOR_FormatCbYCrY, 4, 2, 0 },
@@ -569,7 +576,7 @@ static OMX_INDEXTYPE GetAudioParamFormatIndex(OMX_AUDIO_CODINGTYPE encoding)
   return audio_encoding_param[i].index;
 }
 
-static unsigned int GetAudioParamSize(OMX_INDEXTYPE index)
+unsigned int GetAudioParamSize(OMX_INDEXTYPE index)
 {
   int i;
 

@@ -56,6 +56,14 @@
 # include <stdbool.h>
 #endif
 
+/* Helper for GCC version checks */
+#ifdef __GNUC__
+# define VLC_GCC_VERSION(maj,min) \
+    ((__GNUC__ > (maj)) || (__GNUC__ == (maj) && __GNUC_MINOR__ >= (min)))
+#else
+# define VLC_GCC_VERSION(maj,min) (0)
+#endif
+
 /* Try to fix format strings for all versions of mingw and mingw64 */
 #if defined( _WIN32 ) && defined( __USE_MINGW_ANSI_STDIO )
  #undef PRId64
@@ -72,26 +80,35 @@
  #define vsnprintf       __mingw_vsnprintf
 #endif
 
-/* Format string sanity checks */
+/* Function attributes for compiler warnings */
 #ifdef __GNUC__
-#   if defined( _WIN32 ) && (__GNUC__ > 4 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 4 ) )
-#     define VLC_FORMAT(x,y) __attribute__ ((format(gnu_printf,x,y)))
-#   else
-#     define VLC_FORMAT(x,y) __attribute__ ((format(printf,x,y)))
-#   endif
-#   define VLC_FORMAT_ARG(x) __attribute__ ((format_arg(x)))
-#   if __GNUC__ > 3 || (__GNUC__ == 3 && (__GNUC_MINOR__ >= 4))
-#     define VLC_USED __attribute__ ((warn_unused_result))
-#   else
-#     define VLC_USED
-#   endif
-#   define VLC_MALLOC __attribute__ ((malloc))
+# define VLC_DEPRECATED __attribute__((deprecated))
+
+# if defined( _WIN32 ) && VLC_GCC_VERSION(4,4)
+#  define VLC_FORMAT(x,y) __attribute__ ((format(gnu_printf,x,y)))
+# else
+#  define VLC_FORMAT(x,y) __attribute__ ((format(printf,x,y)))
+# endif
+# define VLC_FORMAT_ARG(x) __attribute__ ((format_arg(x)))
+
+# define VLC_MALLOC __attribute__ ((malloc))
+# define VLC_NORETURN __attribute__ ((noreturn))
+
+# if VLC_GCC_VERSION(3,4)
+#  define VLC_USED __attribute__ ((warn_unused_result))
+# else
+#  define VLC_USED
+# endif
+
 #else
-#   define VLC_FORMAT(x,y)
-#   define VLC_FORMAT_ARG(x)
-#   define VLC_USED
-#   define VLC_MALLOC
+# define VLC_DEPRECATED
+# define VLC_FORMAT(x,y)
+# define VLC_FORMAT_ARG(x)
+# define VLC_MALLOC
+# define VLC_NORETURN
+# define VLC_USED
 #endif
+
 
 /* Branch prediction */
 #ifdef __GNUC__
@@ -100,12 +117,6 @@
 #else
 #   define likely(p)   (!!(p))
 #   define unlikely(p) (!!(p))
-#endif
-
-#if defined(__GNUC__) && !defined __cplusplus
-# define VLC_DEPRECATED __attribute__((deprecated))
-#else
-# define VLC_DEPRECATED
 #endif
 
 /* Linkage */
@@ -117,7 +128,7 @@
 
 #if defined (WIN32) && defined (DLL_EXPORT)
 # define VLC_EXPORT __declspec(dllexport)
-#elif defined (__GNUC__) && (__GNUC__ >= 4)
+#elif VLC_GCC_VERSION(4,0)
 # define VLC_EXPORT __attribute__((visibility("default")))
 #else
 # define VLC_EXPORT
@@ -261,7 +272,7 @@ typedef struct es_format_t es_format_t;
 typedef struct video_palette_t video_palette_t;
 
 /* Audio */
-typedef struct aout_instance_t aout_instance_t;
+typedef struct audio_output audio_output_t;
 typedef struct aout_sys_t aout_sys_t;
 typedef struct aout_fifo_t aout_fifo_t;
 typedef struct aout_input_t aout_input_t;
@@ -387,12 +398,12 @@ typedef struct meta_engine_t meta_engine_t;
 
 /* stat/lstat/fstat */
 #ifdef WIN32
-#include <sys/stat.h>
+# include <sys/stat.h>
 
 # ifndef UNDER_CE
 struct _stati64;
-#define stat _stati64
-#define fstat _fstati64
+#  define stat _stati64
+#  define fstat _fstati64
 #endif
 
 /* You should otherwise use vlc_stat and vlc_lstat. */
@@ -461,8 +472,10 @@ typedef int ( * vlc_callback_t ) ( vlc_object_t *,      /* variable's object */
  * OS-specific headers and thread types
  *****************************************************************************/
 #if defined( WIN32 ) || defined( UNDER_CE )
-#   define WIN32_LEAN_AND_MEAN
-#   include <windows.h>
+/* WIN32_LEAN_AND_MEAN is needed to be able to include winsock2.h because else,
+ * windows.h will also include winsock.h and declarations will conflict */
+# define WIN32_LEAN_AND_MEAN
+# include <windows.h>
 #endif
 
 #include "vlc_mtime.h"
@@ -505,7 +518,7 @@ typedef union
 /**@}*/                                                                     \
 
 /* VLC_OBJECT: attempt at doing a clever cast */
-#if defined( __GNUC__ ) && __GNUC__ > 3
+#if VLC_GCC_VERSION(4,0)
 # ifndef __cplusplus
 #  define VLC_OBJECT( x ) \
     __builtin_choose_expr( \
@@ -579,11 +592,11 @@ static inline uint8_t clip_uint8_vlc( int32_t a )
     else           return a;
 }
 
-/* Count leading zeroes */
+/** Count leading zeroes */
 VLC_USED
 static inline unsigned clz (unsigned x)
 {
-#ifdef __GNUC_
+#if VLC_GCC_VERSION(3,4)
     return __builtin_clz (x);
 #else
     unsigned i = sizeof (x) * 8;
@@ -602,11 +615,11 @@ static inline unsigned clz (unsigned x)
 /* XXX: this assumes that int is 32-bits or more */
 #define clz32( x ) (clz(x) - ((sizeof(unsigned) - sizeof (uint32_t)) * 8))
 
-/* Bit weight */
+/** Bit weight */
 VLC_USED
 static inline unsigned popcount (unsigned x)
 {
-#ifdef __GNUC_
+#if VLC_GCC_VERSION(3,4)
     return __builtin_popcount (x);
 #else
     unsigned count = 0;
@@ -619,6 +632,55 @@ static inline unsigned popcount (unsigned x)
 #endif
 }
 
+/** Byte swap (16 bits) */
+VLC_USED
+static inline uint16_t bswap16 (uint16_t x)
+{
+    return (x << 8) | (x >> 8);
+}
+
+/** Byte swap (32 bits) */
+VLC_USED
+static inline uint32_t bswap32 (uint32_t x)
+{
+#if VLC_GCC_VERSION(4,3)
+    return __builtin_bswap32 (x);
+#else
+    return ((x & 0x000000FF) << 24)
+         | ((x & 0x0000FF00) <<  8)
+         | ((x & 0x00FF0000) >>  8)
+         | ((x & 0xFF000000) >> 24);
+#endif
+}
+
+/** Byte swap (64 bits) */
+VLC_USED
+static inline uint64_t bswap64 (uint64_t x)
+{
+#if VLC_GCC_VERSION(4,3)
+    return __builtin_bswap64 (x);
+#elif !defined (__cplusplus)
+    return ((x & 0x00000000000000FF) << 56)
+         | ((x & 0x000000000000FF00) << 40)
+         | ((x & 0x0000000000FF0000) << 24)
+         | ((x & 0x00000000FF000000) <<  8)
+         | ((x & 0x000000FF00000000) >>  8)
+         | ((x & 0x0000FF0000000000) >> 24)
+         | ((x & 0x00FF000000000000) >> 40)
+         | ((x & 0xFF00000000000000) >> 56);
+#else
+    return ((x & 0x00000000000000FFLLU) << 56)
+         | ((x & 0x000000000000FF00LLU) << 40)
+         | ((x & 0x0000000000FF0000LLU) << 24)
+         | ((x & 0x00000000FF000000LLU) <<  8)
+         | ((x & 0x000000FF00000000LLU) >>  8)
+         | ((x & 0x0000FF0000000000LLU) >> 24)
+         | ((x & 0x00FF000000000000LLU) >> 40)
+         | ((x & 0xFF00000000000000LLU) >> 56);
+#endif
+}
+
+
 /* Free and set set the variable to NULL */
 #define FREENULL(a) do { free( a ); a = NULL; } while(0)
 
@@ -630,123 +692,140 @@ VLC_API char const * vlc_error( int ) VLC_USED;
 
 /* MSB (big endian)/LSB (little endian) conversions - network order is always
  * MSB, and should be used for both network communications and files. */
+
+#ifdef WORDS_BIGENDIAN
+# define hton16(i) ((uint16_t)(i))
+# define hton32(i) ((uint32_t)(i))
+# define hton64(i) ((uint64_t)(i))
+#else
+# define hton16(i) bswap16(i)
+# define hton32(i) bswap32(i)
+# define hton64(i) bswap64(i)
+#endif
+#define ntoh16(i) hton16(i)
+#define ntoh32(i) hton32(i)
+#define ntoh64(i) hton64(i)
+
+/** Reads 16 bits in network byte order */
 VLC_USED
-static inline uint16_t U16_AT( const void * _p )
+static inline uint16_t U16_AT (const void *p)
 {
-    const uint8_t * p = (const uint8_t *)_p;
-    return ( ((uint16_t)p[0] << 8) | p[1] );
+    uint16_t x;
+
+    memcpy (&x, p, sizeof (x));
+    return ntoh16 (x);
 }
 
+/** Reads 32 bits in network byte order */
 VLC_USED
-static inline uint32_t U32_AT( const void * _p )
+static inline uint32_t U32_AT (const void *p)
 {
-    const uint8_t * p = (const uint8_t *)_p;
-    return ( ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16)
-              | ((uint32_t)p[2] << 8) | p[3] );
+    uint32_t x;
+
+    memcpy (&x, p, sizeof (x));
+    return ntoh32 (x);
 }
 
+/** Reads 64 bits in network byte order */
 VLC_USED
-static inline uint64_t U64_AT( const void * _p )
+static inline uint64_t U64_AT (const void *p)
 {
-    const uint8_t * p = (const uint8_t *)_p;
-    return ( ((uint64_t)p[0] << 56) | ((uint64_t)p[1] << 48)
-              | ((uint64_t)p[2] << 40) | ((uint64_t)p[3] << 32)
-              | ((uint64_t)p[4] << 24) | ((uint64_t)p[5] << 16)
-              | ((uint64_t)p[6] << 8) | p[7] );
+    uint64_t x;
+
+    memcpy (&x, p, sizeof (x));
+    return ntoh64 (x);
 }
 
+#define GetWBE(p)  U16_AT(p)
+#define GetDWBE(p) U32_AT(p)
+#define GetQWBE(p) U64_AT(p)
+
+/** Reads 16 bits in little-endian order */
 VLC_USED
-static inline uint16_t GetWLE( const void * _p )
+static inline uint16_t GetWLE (const void *p)
 {
-    const uint8_t * p = (const uint8_t *)_p;
-    return ( ((uint16_t)p[1] << 8) | p[0] );
+    uint16_t x;
+
+    memcpy (&x, p, sizeof (x));
+#ifdef WORDS_BIGENDIAN
+    x = bswap16 (x);
+#endif
+    return x;
 }
 
+/** Reads 32 bits in little-endian order */
 VLC_USED
-static inline uint32_t GetDWLE( const void * _p )
+static inline uint32_t GetDWLE (const void *p)
 {
-    const uint8_t * p = (const uint8_t *)_p;
-    return ( ((uint32_t)p[3] << 24) | ((uint32_t)p[2] << 16)
-              | ((uint32_t)p[1] << 8) | p[0] );
+    uint32_t x;
+
+    memcpy (&x, p, sizeof (x));
+#ifdef WORDS_BIGENDIAN
+    x = bswap32 (x);
+#endif
+    return x;
 }
 
+/** Reads 64 bits in little-endian order */
 VLC_USED
-static inline uint64_t GetQWLE( const void * _p )
+static inline uint64_t GetQWLE (const void *p)
 {
-    const uint8_t * p = (const uint8_t *)_p;
-    return ( ((uint64_t)p[7] << 56) | ((uint64_t)p[6] << 48)
-              | ((uint64_t)p[5] << 40) | ((uint64_t)p[4] << 32)
-              | ((uint64_t)p[3] << 24) | ((uint64_t)p[2] << 16)
-              | ((uint64_t)p[1] << 8) | p[0] );
+    uint64_t x;
+
+    memcpy (&x, p, sizeof (x));
+#ifdef WORDS_BIGENDIAN
+    x = bswap64 (x);
+#endif
+    return x;
 }
 
-#define GetWBE( p )     U16_AT( p )
-#define GetDWBE( p )    U32_AT( p )
-#define GetQWBE( p )    U64_AT( p )
-
-/* Helper writer functions */
-#define SetWLE( p, v ) _SetWLE( (uint8_t*)(p), v)
-static inline void _SetWLE( uint8_t *p, uint16_t i_dw )
+/** Writes 16 bits in network byte order */
+static inline void SetWBE (void *p, uint16_t w)
 {
-    p[1] = ( i_dw >>  8 )&0xff;
-    p[0] = ( i_dw       )&0xff;
+    w = hton16 (w);
+    memcpy (p, &w, sizeof (w));
 }
 
-#define SetDWLE( p, v ) _SetDWLE( (uint8_t*)(p), v)
-static inline void _SetDWLE( uint8_t *p, uint32_t i_dw )
+/** Writes 32 bits in network byte order */
+static inline void SetDWBE (void *p, uint32_t dw)
 {
-    p[3] = ( i_dw >> 24 )&0xff;
-    p[2] = ( i_dw >> 16 )&0xff;
-    p[1] = ( i_dw >>  8 )&0xff;
-    p[0] = ( i_dw       )&0xff;
-}
-#define SetQWLE( p, v ) _SetQWLE( (uint8_t*)(p), v)
-static inline void _SetQWLE( uint8_t *p, uint64_t i_qw )
-{
-    SetDWLE( p,   i_qw&0xffffffff );
-    SetDWLE( p+4, ( i_qw >> 32)&0xffffffff );
-}
-#define SetWBE( p, v ) _SetWBE( (uint8_t*)(p), v)
-static inline void _SetWBE( uint8_t *p, uint16_t i_dw )
-{
-    p[0] = ( i_dw >>  8 )&0xff;
-    p[1] = ( i_dw       )&0xff;
+    dw = hton32 (dw);
+    memcpy (p, &dw, sizeof (dw));
 }
 
-#define SetDWBE( p, v ) _SetDWBE( (uint8_t*)(p), v)
-static inline void _SetDWBE( uint8_t *p, uint32_t i_dw )
+/** Writes 64 bits in network byte order */
+static inline void SetQWBE (void *p, uint64_t qw)
 {
-    p[0] = ( i_dw >> 24 )&0xff;
-    p[1] = ( i_dw >> 16 )&0xff;
-    p[2] = ( i_dw >>  8 )&0xff;
-    p[3] = ( i_dw       )&0xff;
-}
-#define SetQWBE( p, v ) _SetQWBE( (uint8_t*)(p), v)
-static inline void _SetQWBE( uint8_t *p, uint64_t i_qw )
-{
-    SetDWBE( p+4,   i_qw&0xffffffff );
-    SetDWBE( p, ( i_qw >> 32)&0xffffffff );
+    qw = hton64 (qw);
+    memcpy (p, &qw, sizeof (qw));
 }
 
-#define hton16(i) htons(i)
-#define hton32(i) htonl(i)
-#define ntoh16(i) ntohs(i)
-#define ntoh32(i) ntohl(i)
-
-VLC_USED
-static inline uint64_t ntoh64 (uint64_t ll)
+/** Writes 16 bits in little endian order */
+static inline void SetWLE (void *p, uint16_t w)
 {
-    union { uint64_t qw; uint8_t b[16]; } v = { ll };
-    return ((uint64_t)v.b[0] << 56)
-         | ((uint64_t)v.b[1] << 48)
-         | ((uint64_t)v.b[2] << 40)
-         | ((uint64_t)v.b[3] << 32)
-         | ((uint64_t)v.b[4] << 24)
-         | ((uint64_t)v.b[5] << 16)
-         | ((uint64_t)v.b[6] <<  8)
-         | ((uint64_t)v.b[7] <<  0);
+#ifdef WORDS_BIGENDIAN
+    w = bswap16 (w);
+#endif
+    memcpy (p, &w, sizeof (w));
 }
-#define hton64(i) ntoh64(i)
+
+/** Writes 32 bits in little endian order */
+static inline void SetDWLE (void *p, uint32_t dw)
+{
+#ifdef WORDS_BIGENDIAN
+    dw = bswap32 (dw);
+#endif
+    memcpy (p, &dw, sizeof (dw));
+}
+
+/** Writes 64 bits in little endian order */
+static inline void SetQWLE (void *p, uint64_t qw)
+{
+#ifdef WORDS_BIGENDIAN
+    qw = bswap64 (qw);
+#endif
+    memcpy (p, &qw, sizeof (qw));
+}
 
 /* */
 #define VLC_UNUSED(x) (void)(x)
@@ -778,7 +857,7 @@ static inline uint64_t ntoh64 (uint64_t ll)
 #       endif
 #   endif
 
-#   if defined( _MSC_VER ) && !defined( __WXMSW__ )
+#   if defined( _MSC_VER )
 #       if !defined( _OFF_T_DEFINED )
             typedef __int64 off_t;
 #           define _OFF_T_DEFINED
@@ -806,7 +885,13 @@ static inline uint64_t ntoh64 (uint64_t ll)
 
 VLC_API bool vlc_ureduce( unsigned *, unsigned *, uint64_t, uint64_t, uint64_t );
 
-VLC_API void * vlc_memalign( void **base, size_t alignment, size_t size ) VLC_USED;
+/* Aligned memory allocator */
+VLC_API void *vlc_memalign(size_t align, size_t size);
+#ifdef WIN32
+# define vlc_aligned_free(base) (__mingw_aligned_free(base))
+#else
+# define vlc_aligned_free(base) free(base)
+#endif
 
 VLC_API void vlc_tdestroy( void *, void (*)(void *) );
 

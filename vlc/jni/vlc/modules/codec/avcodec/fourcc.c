@@ -2,7 +2,7 @@
  * fourcc.c: libavcodec <-> libvlc conversion routines
  *****************************************************************************
  * Copyright (C) 1999-2009 the VideoLAN team
- * $Id: b9d0d73895065337473b2a277751c22bac3ee3aa $
+ * $Id: ccccb2f5cdcf8cc0de3ef701b6496846e23ddd9e $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -222,6 +222,20 @@ static const struct
 
     { VLC_CODEC_AMV, CODEC_ID_AMV, VIDEO_ES },
 
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT( 53, 7, 0 )
+    { VLC_CODEC_FLASHSV2, CODEC_ID_FLASHSV2, VIDEO_ES },
+#endif
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT( 53, 9, 0 )
+    { VLC_CODEC_WMVP, CODEC_ID_WMV3IMAGE, VIDEO_ES },
+    { VLC_CODEC_WMVP2, CODEC_ID_VC1IMAGE, VIDEO_ES },
+#endif
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT( 53, 15, 0 )
+    { VLC_CODEC_PRORES, CODEC_ID_PRORES, VIDEO_ES },
+#endif
+
+
 #if 0
 /*    UNTESTED VideoGames*/
     { VLC_FOURCC('W','C','3','V'), CODEC_ID_XAN_WC3,
@@ -413,6 +427,9 @@ static const struct
     { VLC_CODEC_SUBT, CODEC_ID_TEXT, SPU_ES },
     { VLC_CODEC_XSUB, CODEC_ID_XSUB, SPU_ES },
     { VLC_CODEC_SSA, CODEC_ID_SSA, SPU_ES },
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT( 52, 38, 0 )
+    { VLC_CODEC_TELETEXT, CODEC_ID_DVB_TELETEXT, SPU_ES },
+#endif
 
     { 0, 0, UNKNOWN_ES }
 };

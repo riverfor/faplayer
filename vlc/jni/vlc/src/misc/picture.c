@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2000-2010 the VideoLAN team
  * Copyright (C) 2009-2010 Laurent Aimar
- * $Id: b63f843af09df15c6a5197d6c7713bfefee47417 $
+ * $Id: 3a09685ada7ca3ffe49992087fc2c3e398e4f096 $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
@@ -70,12 +70,13 @@ static int vout_AllocatePicture( picture_t *p_pic,
         i_bytes += p->i_pitch * p->i_lines;
     }
 
-    uint8_t *p_data = vlc_memalign( &p_pic->p_data_orig, 16, i_bytes );
+    uint8_t *p_data = vlc_memalign( 16, i_bytes );
     if( !p_data )
     {
         p_pic->i_planes = 0;
         return VLC_EGENERIC;
     }
+    p_pic->p_data_orig = p_data; /* TODO: get rid of this */
 
     /* Fill the p_pixels field for each plane */
     p_pic->p[0].p_pixels = p_data;
@@ -267,7 +268,7 @@ void picture_Delete( picture_t *p_picture )
     assert( p_picture->p_release_sys == NULL );
 
     free( p_picture->p_q );
-    free( p_picture->p_data_orig );
+    vlc_aligned_free( p_picture->p_data_orig );
     free( p_picture->p_sys );
     free( p_picture );
 }

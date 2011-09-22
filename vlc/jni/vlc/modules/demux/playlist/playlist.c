@@ -2,7 +2,7 @@
  * playlist.c :  Playlist import module
  *****************************************************************************
  * Copyright (C) 2004 the VideoLAN team
- * $Id: 408a76a5c16976e597766a67a6b6b2eb833991c7 $
+ * $Id: 00b44a38787b2dbd2e349423af9287fc8cb2d5b0 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *
@@ -198,7 +198,7 @@ char *ProcessMRL( const char *psz_mrl, const char *psz_prefix )
         goto uri;
 #if defined( WIN32 ) || defined( __OS2__ )
     /* Drive letter (this assumes URL scheme are not a single character) */
-    if( isalpha(psz_mrl[0]) && psz_mrl[1] == ':' )
+    if( isalpha((unsigned char)psz_mrl[0]) && psz_mrl[1] == ':' )
         goto uri;
 #endif
     if( strstr( psz_mrl, "://" ) )

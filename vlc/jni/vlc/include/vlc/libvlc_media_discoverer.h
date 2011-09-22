@@ -2,7 +2,7 @@
  * libvlc.h:  libvlc external API
  *****************************************************************************
  * Copyright (C) 1998-2009 the VideoLAN team
- * $Id: be1e3c291f38b7d886f872b72e1e5e908f809f78 $
+ * $Id: 3a7d6bef2f7f7d6b290ea6573cedd98733207c22 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -96,6 +96,8 @@ LIBVLC_API libvlc_event_manager_t *
  *
  * \param p_mdis media service discover object
  * \return true if running, false if not
+ *
+ * \libvlc_return_bool
  */
 LIBVLC_API int
         libvlc_media_discoverer_is_running( libvlc_media_discoverer_t * p_mdis );

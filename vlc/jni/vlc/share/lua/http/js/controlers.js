@@ -10,7 +10,7 @@ function updateStatus(){
 				$('#mediaTitle').append($('[name="filename"]',data).text());
 				$('#totalTime').append(format_time($('length',data).text()));
 				$('#currentTime').append(format_time($('time',data).text()));
-				$('#seekSlider').slider({value: ($('time',data).text()/$('length',data).text()*100) })
+				$('#seekSlider').slider({value: toFloat($('position',data).text()) * 100 });
 				$('#currentVolume').append(Math.round($('volume',data).text()/5.12)+'%');
 				$('#volumeSlider').slider({value: ($('volume',data).text()/5.12) });
 				$('#rateSlider').slider({value: ($('rate',data).text()) });
@@ -23,13 +23,11 @@ function updateStatus(){
 				$('#buttonPlay').attr('state',$('state',data).text());
 				$('#buttonPlay').attr('mrl',$('[name="filename"]',data).text());
 				if($('state',data).text()=='playing'){
-					$('#buttonPlay').css({
-						'background-image':'url("images/button_pause-48.png")'
-					});
+					$('#buttonPlay').removeClass('paused');
+					$('#buttonPlay').addClass('playing');
 				}else{
-					$('#buttonPlay').css({
-						'background-image':'url("images/button_play-48.png")'
-					});
+					$('#buttonPlay').removeClass('playing');
+					$('#buttonPlay').addClass('paused');
 				}
 				if($('random',data).text()=='true'){
 					$('#buttonShuffle').removeClass('ui-state-default');
@@ -313,13 +311,11 @@ function updateStreams(){
 				$('#seekSlider').attr('totalLength',$('[name="Current"] instance',data).attr('length')/1000000);
 				$('#buttonPlay').attr('state',$('[name="Current"] instance',data).length>0 ? $('[name="Current"] instance',data).attr('state') : 'stopped');
 				if($('[name="Current"] instance',data).attr('state')=='playing'){
-					$('#buttonPlay').css({
-						'background-image':'url("images/button_pause-48.png'
-					});
+					$('#buttonPlay').removeClass('paused');
+					$('#buttonPlay').addClass('playing');
 				}else{
-					$('#buttonPlay').css({
-						'background-image':'url("images/button_play-48.png'
-					});
+					$('#buttonPlay').removeClass('playing');
+					$('#buttonPlay').addClass('paused');
 				}
 				setTimeout( updateStreams, 1000 );
 			}
@@ -436,6 +432,9 @@ $(function(){
 		"themeroller":{
 			"item_leaf":"ui-icon-video"
 		},
+		"core" :{
+			"initially_open": ["plid_1","plid_2","plid_3"]
+		},
 		"plugins" : ["xml_data","ui","themeroller"]
 	}).bind("loaded.jstree", function (event, data) {
 		$('[current]','[id^="plid_"]').each(function(){
@@ -447,6 +446,11 @@ $(function(){
 			$(this).addClass('ui-state-highlight');
 			current_id	=	$(this).attr('id').substr(5);
 		});
+	}).delegate("#plid_2 li.jstree-leaf a", "click",function(event, data){
+		event.preventDefault();
+		current_id	=	$(this).parent().attr('id').substr(5);
+		sendCommand('command=pl_play&id=' + current_id);
+		updatePlayList();
 	});
 	updateStatus();
 	updateStreams();

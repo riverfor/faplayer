@@ -2,7 +2,7 @@
  * CoreInteraction.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 87887a621276bbc94d37ce12f2180ccd7ec33deb $
+ * $Id: b55009be270b6483641a2a0b4c8a336c3583002f $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -23,13 +23,14 @@
 
 #import "CoreInteraction.h"
 #import "intf.h"
-#import "vout.h"
 #import "open.h"
 #import <vlc_playlist.h>
 #import <vlc_input.h>
 #import <vlc_keys.h>
 #import <vlc_osd.h>
 #import <vlc_aout_intf.h>
+#import <vlc/vlc.h>
+#import <vlc_strings.h>
 
 @implementation VLCCoreInteraction
 static VLCCoreInteraction *_o_sharedInstance = nil;
@@ -93,9 +94,6 @@ static VLCCoreInteraction *_o_sharedInstance = nil;
 - (void)stop
 {
     var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_STOP );
-    /* Close the window directly, because we do know that there
-     * won't be anymore video. It's currently waiting a bit. */
-    [[[self voutView] window] orderOut:self];
 }
 
 - (void)faster
@@ -111,6 +109,17 @@ static VLCCoreInteraction *_o_sharedInstance = nil;
 - (void)normalSpeed
 {
     var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_RATE_NORMAL );
+}
+
+- (void)toggleRecord
+{
+    input_thread_t * p_input;
+    p_input = pl_CurrentInput( VLCIntf );
+    if( p_input )
+    {
+        var_ToggleBool( p_input, "record" );
+        vlc_object_release( p_input );
+    }
 }
 
 - (void)setPlaybackRate:(int)i_value
@@ -151,37 +160,183 @@ static VLCCoreInteraction *_o_sharedInstance = nil;
     var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_NEXT );
 }
 
+- (BOOL)isPlaying
+{
+    input_thread_t * p_input = pl_CurrentInput( VLCIntf );
+
+    if (!p_input) return NO;
+
+    input_state_e i_state = ERROR_S;
+    input_Control( p_input, INPUT_GET_STATE, &i_state);
+    vlc_object_release( p_input );
+
+    return ((i_state == OPENING_S) || (i_state == PLAYING_S));
+}
+
+- (int)currentTime
+{
+    input_thread_t * p_input = pl_CurrentInput( VLCIntf );
+    int64_t i_currentTime = -1;
+
+    if (!p_input) return i_currentTime;
+
+    input_Control( p_input, INPUT_GET_TIME, &i_currentTime);
+    vlc_object_release( p_input );
+
+    return (int)( i_currentTime / 1000000 );
+}
+
+- (void)setCurrentTime:(int)i_value
+{
+    int64_t i64_value = (int64_t)i_value;
+    input_thread_t * p_input = pl_CurrentInput( VLCIntf );
+
+    if (!p_input) return;
+
+    input_Control( p_input, INPUT_SET_TIME, (int64_t)(i64_value * 1000000));
+    vlc_object_release( p_input );
+}
+
+- (int)durationOfCurrentPlaylistItem
+{
+    input_thread_t * p_input = pl_CurrentInput( VLCIntf );
+    int64_t i_duration = -1;
+    if (!p_input) return i_duration;
+
+
+    input_Control( p_input, INPUT_GET_LENGTH, &i_duration);
+    vlc_object_release( p_input );
+
+    return (int)(i_duration / 1000000);
+}
+
+- (NSURL*)URLOfCurrentPlaylistItem
+{
+    input_thread_t *p_input = pl_CurrentInput( VLCIntf );
+    if (!p_input) return nil;
+
+    input_item_t *p_item = input_GetItem( p_input );
+    if (!p_item) return nil;
+
+    char *psz_uri = input_item_GetURI( p_item );
+    if (!psz_uri) return nil;
+
+    NSURL *o_url;
+    o_url = [NSURL URLWithString:[NSString stringWithUTF8String:psz_uri]];
+
+    return o_url;
+}
+
+- (NSString*)nameOfCurrentPlaylistItem
+{
+    input_thread_t *p_input = pl_CurrentInput( VLCIntf );
+    if (!p_input) return nil;
+
+    input_item_t *p_item = input_GetItem( p_input );
+    if (!p_item) return nil;
+
+    char *psz_uri = input_item_GetURI( p_item );
+    if (!psz_uri) return nil;
+
+    NSString *o_name;
+    char *format = var_InheritString( VLCIntf, "input-title-format" );
+    char *formated = str_format_meta( p_input, format );
+    free( format );
+    o_name = [NSString stringWithUTF8String:formated];
+    free( formated );
+
+    NSURL * o_url = [NSURL URLWithString: [NSString stringWithUTF8String: psz_uri]];
+    free( psz_uri );
+
+    if ([o_name isEqualToString:@""])
+    {
+        if ([o_url isFileURL]) 
+            o_name = [[NSFileManager defaultManager] displayNameAtPath: [o_url path]];
+        else
+            o_name = [o_url absoluteString];
+    }
+    return o_name;
+}
+
 - (void)forward
 {
-    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_FORWARD_SHORT );
+    //LEGACY SUPPORT
+    [self forwardShort];
 }
 
 - (void)backward
 {
+    //LEGACY SUPPORT
+    [self backwardShort];
+}
+
+- (void)forwardExtraShort
+{
+    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_FORWARD_EXTRASHORT );
+}
+
+- (void)backwardExtraShort
+{
+    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_BACKWARD_EXTRASHORT );
+}
+
+- (void)forwardShort
+{
+    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_FORWARD_SHORT );
+}
+
+- (void)backwardShort
+{
     var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_BACKWARD_SHORT );
+}
+
+- (void)forwardMedium
+{
+    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_FORWARD_MEDIUM );
+}
+
+- (void)backwardMedium
+{
+    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_BACKWARD_MEDIUM );
+}
+
+- (void)forwardLong
+{
+    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_FORWARD_LONG );
+}
+
+- (void)backwardLong
+{
+    var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_JUMP_BACKWARD_LONG );
 }
 
 - (void)shuffle
 {
     vlc_value_t val;
     playlist_t * p_playlist = pl_Get( VLCIntf );
-    
+    vout_thread_t *p_vout = getVout();
+
     var_Get( p_playlist, "random", &val );
     val.b_bool = !val.b_bool;
     var_Set( p_playlist, "random", val );
     if( val.b_bool )
     {
-        //vout_OSDMessage( VLCIntf, SPU_DEFAULT_CHANNEL, "%s", _( "Random On" ) );
+        if (p_vout)
+        {
+            vout_OSDMessage( p_vout, SPU_DEFAULT_CHANNEL, "%s", _( "Random On" ) );
+            vlc_object_release( p_vout );
+        }
         config_PutInt( p_playlist, "random", 1 );
     }
     else
     {
-        //vout_OSDMessage( VLCIntf, SPU_DEFAULT_CHANNEL, "%s", _( "Random Off" ) );
+        if (p_vout)
+        {
+            vout_OSDMessage( p_vout, SPU_DEFAULT_CHANNEL, "%s", _( "Random Off" ) );
+            vlc_object_release( p_vout );
+        }
         config_PutInt( p_playlist, "random", 0 );
     }
-    
-    VLCIntf->p_sys->b_playmode_update = true;
-    VLCIntf->p_sys->b_intf_update = true;
 }
 
 - (void)repeatAll
@@ -193,10 +348,12 @@ static VLCCoreInteraction *_o_sharedInstance = nil;
     config_PutInt( p_playlist, "repeat", NO );
     config_PutInt( p_playlist, "loop", YES );
 
-    //vout_OSDMessage( VLCIntf, SPU_DEFAULT_CHANNEL, "%s", _( "Repeat All" ) );
-
-    VLCIntf->p_sys->b_playmode_update = true;
-    VLCIntf->p_sys->b_intf_update = true;
+    vout_thread_t *p_vout = getVout();
+    if (p_vout)
+    {
+        vout_OSDMessage( p_vout, SPU_DEFAULT_CHANNEL, "%s", _( "Repeat All" ) );
+        vlc_object_release( p_vout );
+    }
 }
 
 - (void)repeatOne
@@ -208,10 +365,12 @@ static VLCCoreInteraction *_o_sharedInstance = nil;
     config_PutInt( p_playlist, "repeat", YES );
     config_PutInt( p_playlist, "loop", NO );
 
-    //vout_OSDMessage( VLCIntf, SPU_DEFAULT_CHANNEL, "%s", _( "Repeat One" ) );
-
-    VLCIntf->p_sys->b_playmode_update = true;
-    VLCIntf->p_sys->b_intf_update = true;
+    vout_thread_t *p_vout = getVout();
+    if (p_vout)
+    {
+        vout_OSDMessage( p_vout, SPU_DEFAULT_CHANNEL, "%s", _( "Repeat One" ) );
+        vlc_object_release( p_vout );
+    }
 }
 
 - (void)repeatOff
@@ -223,13 +382,13 @@ static VLCCoreInteraction *_o_sharedInstance = nil;
     config_PutInt( p_playlist, "repeat", NO );
     config_PutInt( p_playlist, "loop", NO );
 
-    //vout_OSDMessage( VLCIntf, SPU_DEFAULT_CHANNEL, "%s", _( "Repeat Off" ) );
-
-    VLCIntf->p_sys->b_playmode_update = true;
-    VLCIntf->p_sys->b_intf_update = true;
+    vout_thread_t *p_vout = getVout();
+    if (p_vout)
+    {
+        vout_OSDMessage( p_vout, SPU_DEFAULT_CHANNEL, "%s", _( "Repeat Off" ) );
+        vlc_object_release( p_vout );
+    }
 }
-
-// CAVE: [o_main manageVolumeSlider]
 
 - (void)volumeUp
 {
@@ -246,13 +405,30 @@ static VLCCoreInteraction *_o_sharedInstance = nil;
     var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_VOL_MUTE );
 }
 
+- (BOOL)isMuted
+{       
+    playlist_t * p_playlist = pl_Get( VLCIntf );
+    BOOL b_is_muted = NO;
+    b_is_muted = aout_IsMuted( VLC_OBJECT(p_playlist) );
+
+    return b_is_muted;
+}
+
+- (int)volume
+{
+    intf_thread_t * p_intf = VLCIntf;
+    playlist_t * p_playlist = pl_Get( VLCIntf );
+    audio_volume_t i_volume = aout_VolumeGet( p_playlist );
+
+    return (int)i_volume;
+}
+
 - (void)setVolume: (int)i_value
 {
     intf_thread_t * p_intf = VLCIntf;
     playlist_t * p_playlist = pl_Get( VLCIntf );
     audio_volume_t i_volume = (audio_volume_t)i_value;
     int i_volume_step;
-
     i_volume_step = config_GetInt( VLCIntf->p_libvlc, "volume-step" );
     aout_VolumeSet( p_playlist, i_volume * i_volume_step );
 }
@@ -272,46 +448,8 @@ static VLCCoreInteraction *_o_sharedInstance = nil;
 
 - (void)toggleFullscreen
 {
-    input_thread_t * p_input = pl_CurrentInput( VLCIntf );
-    
-    if( p_input != NULL )
-    {
-        vout_thread_t *p_vout = input_GetVout( p_input );
-        if( p_vout != NULL )
-        {
-            id o_vout_view = [self voutView];
-            if( o_vout_view )
-                [o_vout_view toggleFullscreen];
-            vlc_object_release( p_vout );
-        }
-        else
-        {
-            playlist_t * p_playlist = pl_Get( VLCIntf );
-            var_ToggleBool( p_playlist, "fullscreen" );
-        }
-        vlc_object_release( p_input );
-    }
+    playlist_t * p_playlist = pl_Get( VLCIntf );
+    var_ToggleBool( p_playlist, "fullscreen" );
 }
 
-- (id)voutView
-{
-    id o_window;
-    id o_voutView = nil;
-    id o_embeddedViewList = [[VLCMain sharedInstance] embeddedList];
-    NSEnumerator *o_enumerator = [[NSApp orderedWindows] objectEnumerator];
-    while( !o_voutView && ( o_window = [o_enumerator nextObject] ) )
-    {
-        /* We have an embedded vout */
-        if( [o_embeddedViewList windowContainsEmbedded: o_window] )
-        {
-            o_voutView = [o_embeddedViewList viewForWindow: o_window];
-        }
-        /* We have a detached vout */
-        else if( [[o_window className] isEqualToString: @"VLCVoutWindow"] )
-        {
-            o_voutView = [o_window voutView];
-        }
-    }
-    return [[o_voutView retain] autorelease];
-}
 @end

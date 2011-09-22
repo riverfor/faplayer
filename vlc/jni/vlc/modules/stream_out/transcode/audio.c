@@ -2,7 +2,7 @@
  * audio.c: transcoding stream output module (audio)
  *****************************************************************************
  * Copyright (C) 2003-2009 the VideoLAN team
- * $Id: 3537f862d961343c6b2d0446546b79fcdc1eba86 $
+ * $Id: 55ce312e34e4e6e45b0782b2224f9f14b05f07ae $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -62,12 +62,6 @@ static inline void audio_timer_close( encoder_t * p_encoder )
     stats_TimerClean( p_encoder, STATS_TIMER_AUDIO_FRAME_ENCODING );
 }
 
-static block_t *transcode_audio_alloc( filter_t *p_filter, int size )
-{
-    VLC_UNUSED( p_filter );
-    return block_Alloc( size );
-}
-
 static aout_buffer_t *audio_new_buffer( decoder_t *p_dec, int i_samples )
 {
     block_t *p_block;
@@ -94,17 +88,11 @@ static aout_buffer_t *audio_new_buffer( decoder_t *p_dec, int i_samples )
     return p_block;
 }
 
-static void audio_del_buffer( decoder_t *p_dec, aout_buffer_t *p_buffer )
-{
-    VLC_UNUSED(p_dec);
-    block_Release( p_buffer );
-}
-
 static int transcode_audio_filter_allocation_init( filter_t *p_filter,
                                                    void *data )
 {
+    VLC_UNUSED(p_filter);
     VLC_UNUSED(data);
-    p_filter->pf_audio_buffer_new = transcode_audio_alloc;
     return VLC_SUCCESS;
 }
 
@@ -224,7 +212,6 @@ int transcode_audio_new( sout_stream_t *p_stream,
     id->p_decoder->fmt_out.p_extra = 0;
     id->p_decoder->pf_decode_audio = NULL;
     id->p_decoder->pf_aout_buffer_new = audio_new_buffer;
-    id->p_decoder->pf_aout_buffer_del = audio_del_buffer;
     /* id->p_decoder->p_cfg = p_sys->p_audio_cfg; */
 
     id->p_decoder->p_module =
@@ -234,6 +221,8 @@ int transcode_audio_new( sout_stream_t *p_stream,
         msg_Err( p_stream, "cannot find audio decoder" );
         return VLC_EGENERIC;
     }
+    /* decoders don't set audio.i_format, but audio filters use it */
+    id->p_decoder->fmt_out.audio.i_format = id->p_decoder->fmt_out.i_codec;
     id->p_decoder->fmt_out.audio.i_bitspersample =
         aout_BitsPerSample( id->p_decoder->fmt_out.i_codec );
     fmt_last = id->p_decoder->fmt_out;

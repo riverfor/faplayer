@@ -3,7 +3,7 @@
  *         vlc-specific things tend to go here.
  *****************************************************************************
  * Copyright (C) 2000, 2003, 2004, 2005 the VideoLAN team
- * $Id: a13430e95b2b01e544051b6b70239d6895c23eaf $
+ * $Id: 0638533e65a8b2d961ec653eb942d99ddacac42b $
  *
  * Authors: Rocky Bernstein <rocky@panix.com>
  *   Some code is based on the non-libcdio VCD plugin (as there really
@@ -198,8 +198,6 @@ VCDReadBlock( access_t * p_access )
                          p_vcdplayer->i_track, &(p_vcdplayer->play_item));
             // p_vcd->in_still = false;
             dbg_print(INPUT_DBG_STILL, "still wait time done");
-#else
-            vcdIntfStillTime(p_vcdplayer->p_intf, *p_buf);
 #endif
 
             block_Release( p_block );
@@ -953,10 +951,6 @@ VCDOpen ( vlc_object_t *p_this )
         VCDFixupPlayList(p_access,p_vcd,psz_source,&itemid,play_single_item);
 #endif
 
-#ifdef FIXED
-    p_vcdplayer->p_intf = intf_Create( p_access, "vcdx" );
-    p_vcdplayer->p_intf->b_block = false;
-#endif
     p_vcdplayer->p_access = p_access;
 
     free( psz_source );
@@ -1051,7 +1045,7 @@ static int VCDControl( access_t *p_access, int i_query, va_list args )
     /* */
     case ACCESS_GET_PTS_DELAY:
         *(int64_t*)va_arg(args,int64_t *) = INT64_C(1000) *
-                         var_GetInteger( p_access, MODULE_STRING "-caching" );
+                                var_InheritInteger( p_access, "disc-caching" );
         dbg_print( INPUT_DBG_EVENT, "GET PTS DELAY" );
         return VLC_SUCCESS;
 

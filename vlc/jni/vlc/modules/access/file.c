@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2001-2006 the VideoLAN team
  * Copyright © 2006-2007 Rémi Denis-Courmont
- * $Id: 5114f3881c669677b9433189d1b602bbe1c83b83 $
+ * $Id: d13f01de87e2b5a64e7a1127b6cef47689d272da $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Rémi Denis-Courmont <rem # videolan # org>
@@ -71,9 +71,6 @@
 #      undef lseek
 #   endif
 #   define lseek _lseeki64
-#elif defined( UNDER_CE )
-/* FIXME the commandline on wince is a mess */
-# define PathIsNetworkPathW(wpath) (! wcsncmp(wpath, L"\\\\", 2))
 #endif
 
 #include <vlc_fs.h>
@@ -86,11 +83,10 @@ struct access_sys_t
     int fd;
 
     /* */
-    unsigned caching;
     bool b_pace_control;
 };
 
-#if !defined (WIN32) && !defined (__OS2__)
+#ifndef WIN32
 static bool IsRemote (int fd)
 {
 #if defined (HAVE_FSTATVFS) && defined (MNT_LOCAL)
@@ -125,6 +121,21 @@ static bool IsRemote (int fd)
 
 #endif
 }
+# define IsRemote(fd,path) IsRemote(fd)
+
+#else /* WIN32 */
+static bool IsRemote (const char *path)
+{
+# ifndef UNDER_CE
+    wchar_t *wpath = ToWide (path);
+    bool is_remote = (wpath != NULL && PathIsNetworkPathW (wpath));
+    free (wpath);
+    return is_remote;
+# else
+    return (! strncmp(path, "\\\\", 2));
+# endif
+}
+# define IsRemote(fd,path) IsRemote(path)
 #endif
 
 #ifndef HAVE_POSIX_FADVISE
@@ -132,14 +143,11 @@ static bool IsRemote (int fd)
 #endif
 
 /*****************************************************************************
- * Open: open the file
+ * FileOpen: open the file
  *****************************************************************************/
-int Open( vlc_object_t *p_this )
+int FileOpen( vlc_object_t *p_this )
 {
     access_t     *p_access = (access_t*)p_this;
-#ifdef WIN32
-    bool is_remote = false;
-#endif
 
     /* Open file */
     int fd = -1;
@@ -172,16 +180,8 @@ int Open( vlc_object_t *p_this )
         {
             msg_Err (p_access, "cannot open file %s (%m)", path);
             dialog_Fatal (p_access, _("File reading failed"),
-                          _("VLC could not open the file \"%s\"."), path);
+                          _("VLC could not open the file \"%s\". (%m)"), path);
         }
-
-#ifdef WIN32
-        wchar_t *wpath = ToWide (path);
-        if (wpath != NULL && PathIsNetworkPathW (wpath))
-            is_remote = true;
-        free (wpath);
-# define IsRemote( fd ) ((void)fd, is_remote)
-#endif
     }
     if (fd == -1)
         return VLC_EGENERIC;
@@ -218,9 +218,6 @@ int Open( vlc_object_t *p_this )
     p_access->p_sys = p_sys;
     p_sys->i_nb_reads = 0;
     p_sys->fd = fd;
-    p_sys->caching = var_InheritInteger (p_access, "file-caching");
-    if (IsRemote(fd))
-        p_sys->caching += var_InheritInteger (p_access, "network-caching");
     p_sys->b_pace_control = true;
 
     if (S_ISREG (st.st_mode))
@@ -256,9 +253,9 @@ error:
 }
 
 /*****************************************************************************
- * Close: close the target
+ * FileClose: close the target
  *****************************************************************************/
-void Close (vlc_object_t * p_this)
+void FileClose (vlc_object_t * p_this)
 {
     access_t     *p_access = (access_t*)p_this;
 
@@ -303,7 +300,7 @@ ssize_t FileRead( access_t *p_access, uint8_t *p_buffer, size_t i_len )
 
             default:
                 msg_Err (p_access, "failed to read (%m)");
-                dialog_Fatal (p_access, _("File reading failed"), "%s",
+                dialog_Fatal (p_access, _("File reading failed"), "%s (%m)",
                               _("VLC could not read the file."));
                 p_access->info.b_eof = true;
                 return 0;
@@ -380,7 +377,11 @@ int FileControl( access_t *p_access, int i_query, va_list args )
         /* */
         case ACCESS_GET_PTS_DELAY:
             pi_64 = (int64_t*)va_arg( args, int64_t * );
-            *pi_64 = p_sys->caching * INT64_C(1000);
+            if (IsRemote (p_sys->fd, p_access->psz_filepath))
+                *pi_64 = var_InheritInteger (p_access, "network-caching");
+            else
+                *pi_64 = var_InheritInteger (p_access, "file-caching");
+            *pi_64 *= 1000;
             break;
 
         /* */

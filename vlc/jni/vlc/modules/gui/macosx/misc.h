@@ -2,7 +2,7 @@
  * misc.h: code not specific to vlc
  *****************************************************************************
  * Copyright (C) 2003-2011 the VideoLAN team
- * $Id: 570ec799a955e0e2aab5334c3e74017766151e17 $
+ * $Id: 3d8cbf5c790e117239b56716ffb0b4cbdd4fda17 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -24,15 +24,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
-
-/*****************************************************************************
- * NSImage (VLCAddition)
- *****************************************************************************/
-
-@interface NSImage (VLCAdditions)
-+ (id)imageWithWarningIcon;
-+ (id)imageWithErrorIcon;
-@end
+#import "CompatibilityFixes.h"
 
 /*****************************************************************************
  * NSAnimation (VLCAddition)
@@ -65,7 +57,7 @@
  *  Missing extension to NSWindow
  *****************************************************************************/
 
-@interface VLCWindow : NSWindow
+@interface VLCWindow : NSWindow <NSWindowDelegate>
 {
     BOOL b_canBecomeKeyWindow;
     BOOL b_isset_canBecomeKeyWindow;
@@ -155,4 +147,14 @@
 @interface VLCTimeField : NSTextField
 {
 }
+- (BOOL)timeRemaining;
+@end
+
+/*****************************************************************************
+ * VLCMainWindowSplitView interface
+ *****************************************************************************/
+@interface VLCMainWindowSplitView : NSSplitView
+{
+}
+
 @end

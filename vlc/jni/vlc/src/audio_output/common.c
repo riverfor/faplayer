@@ -2,7 +2,7 @@
  * common.c : audio output management of common data structures
  *****************************************************************************
  * Copyright (C) 2002-2007 the VideoLAN team
- * $Id: dae3894ca4a2cb46b5f0f96c17914f72de4f9811 $
+ * $Id: 6dd6e9ed51d23572e9ba1db0ee3e5e4b6062903a $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *
@@ -33,6 +33,7 @@
 
 #include <vlc_common.h>
 #include <vlc_aout.h>
+#include <vlc_modules.h>
 #include "aout_internal.h"
 #include "libvlc.h"
 
@@ -47,41 +48,146 @@ static void aout_Destructor( vlc_object_t * p_this );
 /*****************************************************************************
  * aout_New: initialize aout structure
  *****************************************************************************/
-aout_instance_t *aout_New( vlc_object_t * p_parent )
+audio_output_t *aout_New( vlc_object_t * p_parent )
 {
-    aout_instance_t * p_aout;
-
-    /* Allocate descriptor. */
-    p_aout = vlc_custom_create( p_parent, sizeof( *p_aout ), "audio output" );
-    if( p_aout == NULL )
-    {
+    audio_output_t *aout = vlc_custom_create (p_parent,
+                                              sizeof (aout_instance_t),
+                                              "audio output");
+    if (unlikely(aout == NULL))
         return NULL;
+
+    aout_owner_t *owner = aout_owner (aout);
+
+    vlc_mutex_init (&owner->lock);
+    owner->module = NULL;
+    owner->input = NULL;
+    vlc_mutex_init (&owner->volume.lock);
+    owner->volume.multiplier = 1.0;
+    owner->volume.mixer = NULL;
+
+    aout->pf_play = aout_DecDeleteBuffer;
+    aout_VolumeNoneInit (aout);
+    vlc_object_set_destructor (aout, aout_Destructor);
+
+    /*
+     * Persistent audio output variables
+     */
+    vlc_value_t val, text;
+    char *str;
+
+    var_Create (aout, "intf-change", VLC_VAR_VOID);
+
+    /* Visualizations */
+    var_Create (aout, "visual", VLC_VAR_STRING | VLC_VAR_HASCHOICE);
+    text.psz_string = _("Visualizations");
+    var_Change (aout, "visual", VLC_VAR_SETTEXT, &text, NULL);
+    val.psz_string = (char *)"";
+    text.psz_string = _("Disable");
+    var_Change (aout, "visual", VLC_VAR_ADDCHOICE, &val, &text);
+    val.psz_string = (char *)"spectrometer";
+    text.psz_string = _("Spectrometer");
+    var_Change (aout, "visual", VLC_VAR_ADDCHOICE, &val, &text);
+    val.psz_string = (char *)"scope";
+    text.psz_string = _("Scope");
+    var_Change (aout, "visual", VLC_VAR_ADDCHOICE, &val, &text);
+    val.psz_string = (char *)"spectrum";
+    text.psz_string = _("Spectrum");
+    var_Change (aout, "visual", VLC_VAR_ADDCHOICE, &val, &text);
+    val.psz_string = (char *)"vuMeter";
+    text.psz_string = _("Vu meter");
+    var_Change (aout, "visual", VLC_VAR_ADDCHOICE, &val, &text);
+    /* Look for goom plugin */
+    if (module_exists ("goom"))
+    {
+        val.psz_string = (char *)"goom";
+        text.psz_string = (char *)"Goom";
+        var_Change (aout, "visual", VLC_VAR_ADDCHOICE, &val, &text);
+    }
+    /* Look for libprojectM plugin */
+    if (module_exists ("projectm"))
+    {
+        val.psz_string = (char *)"projectm";
+        text.psz_string = (char*)"projectM";
+        var_Change (aout, "visual", VLC_VAR_ADDCHOICE, &val, &text);
+    }
+    str = var_GetNonEmptyString (aout, "effect-list");
+    if (str != NULL)
+    {
+        var_SetString (aout, "visual", str);
+        free (str);
     }
 
-    /* Initialize members. */
-    vlc_mutex_init( &p_aout->volume_lock );
-    vlc_mutex_init( &p_aout->lock );
-    p_aout->p_input = NULL;
-    p_aout->mixer_multiplier = 1.0;
-    p_aout->p_mixer = NULL;
-    p_aout->output.b_starving = 1;
-    p_aout->output.p_module = NULL;
+    /* Equalizer */
+    var_Create (aout, "equalizer", VLC_VAR_STRING | VLC_VAR_HASCHOICE);
+    text.psz_string = _("Equalizer");
+    var_Change (aout, "equalizer", VLC_VAR_SETTEXT, &text, NULL);
+    val.psz_string = (char*)"";
+    text.psz_string = _("Disable");
+    var_Change (aout, "equalizer", VLC_VAR_ADDCHOICE, &val, &text);
+    {
+        module_config_t *cfg = config_FindConfig (VLC_OBJECT(aout),
+                                                  "equalizer-preset");
+        if (cfg != NULL)
+            for (int i = 0; i < cfg->i_list; i++)
+            {
+                val.psz_string = (char *)cfg->ppsz_list[i];
+                text.psz_string = (char *)cfg->ppsz_list_text[i];
+                var_Change (aout, "equalizer", VLC_VAR_ADDCHOICE, &val, &text);
+            }
+    }
 
-    var_Create( p_aout, "intf-change", VLC_VAR_VOID );
 
-    vlc_object_set_destructor( p_aout, aout_Destructor );
+    var_Create (aout, "audio-filter", VLC_VAR_STRING | VLC_VAR_DOINHERIT);
+    text.psz_string = _("Audio filters");
+    var_Change (aout, "audio-filter", VLC_VAR_SETTEXT, &text, NULL);
 
-    return p_aout;
+
+    var_Create (aout, "audio-visual", VLC_VAR_STRING | VLC_VAR_DOINHERIT);
+    text.psz_string = _("Audio visualizations");
+    var_Change (aout, "audio-visual", VLC_VAR_SETTEXT, &text, NULL);
+
+
+    /* Replay gain */
+    var_Create (aout, "audio-replay-gain-mode",
+                VLC_VAR_STRING | VLC_VAR_DOINHERIT );
+    text.psz_string = _("Replay gain");
+    var_Change (aout, "audio-replay-gain-mode", VLC_VAR_SETTEXT, &text, NULL);
+    {
+        module_config_t *cfg = config_FindConfig (VLC_OBJECT(aout),
+                                                  "audio-replay-gain-mode");
+        if( cfg != NULL )
+            for (int i = 0; i < cfg->i_list; i++)
+            {
+                val.psz_string = (char *)cfg->ppsz_list[i];
+                text.psz_string = (char *)cfg->ppsz_list_text[i];
+                var_Change (aout, "audio-replay-gain-mode", VLC_VAR_ADDCHOICE,
+                            &val, &text);
+            }
+    }
+
+
+    return aout;
+}
+
+void aout_Destroy (audio_output_t *aout)
+{
+    aout_owner_t *owner = aout_owner (aout);
+
+    if (owner->module != NULL)
+        aout_Shutdown (aout);
+    vlc_object_release (aout);
 }
 
 /*****************************************************************************
  * aout_Destructor: destroy aout structure
  *****************************************************************************/
-static void aout_Destructor( vlc_object_t * p_this )
+static void aout_Destructor (vlc_object_t *obj)
 {
-    aout_instance_t * p_aout = (aout_instance_t *)p_this;
-    vlc_mutex_destroy( &p_aout->volume_lock );
-    vlc_mutex_destroy( &p_aout->lock );
+    audio_output_t *aout = (audio_output_t *)obj;
+    aout_owner_t *owner = aout_owner (aout);
+
+    vlc_mutex_destroy (&owner->volume.lock);
+    vlc_mutex_destroy (&owner->lock);
 }
 
 #ifdef AOUT_DEBUG
@@ -133,6 +239,8 @@ unsigned int aout_BitsPerSample( vlc_fourcc_t i_format )
     {
     case VLC_CODEC_U8:
     case VLC_CODEC_S8:
+    case VLC_CODEC_ALAW:
+    case VLC_CODEC_MULAW:
         return 8;
 
     case VLC_CODEC_U16L:
@@ -291,26 +399,28 @@ const char * aout_FormatPrintChannels( const audio_sample_format_t * p_format )
     return "ERROR";
 }
 
-/*****************************************************************************
- * aout_FormatPrint : print a format in a human-readable form
- *****************************************************************************/
-void aout_FormatPrint( aout_instance_t * p_aout, const char * psz_text,
-                       const audio_sample_format_t * p_format )
+#undef aout_FormatPrint
+/**
+ * Prints an audio sample format in a human-readable form.
+ */
+void aout_FormatPrint( vlc_object_t *obj, const char *psz_text,
+                       const audio_sample_format_t *p_format )
 {
-    msg_Dbg( p_aout, "%s '%4.4s' %d Hz %s frame=%d samples/%d bytes", psz_text,
+    msg_Dbg( obj, "%s '%4.4s' %d Hz %s frame=%d samples/%d bytes", psz_text,
              (char *)&p_format->i_format, p_format->i_rate,
              aout_FormatPrintChannels( p_format ),
              p_format->i_frame_length, p_format->i_bytes_per_frame );
 }
 
-/*****************************************************************************
- * aout_FormatsPrint : print two formats in a human-readable form
- *****************************************************************************/
-void aout_FormatsPrint( aout_instance_t * p_aout, const char * psz_text,
+#undef aout_FormatsPrint
+/**
+ * Prints two formats in a human-readable form
+ */
+void aout_FormatsPrint( vlc_object_t *obj, const char * psz_text,
                         const audio_sample_format_t * p_format1,
                         const audio_sample_format_t * p_format2 )
 {
-    msg_Dbg( p_aout, "%s '%4.4s'->'%4.4s' %d Hz->%d Hz %s->%s",
+    msg_Dbg( obj, "%s '%4.4s'->'%4.4s' %d Hz->%d Hz %s->%s",
              psz_text,
              (char *)&p_format1->i_format, (char *)&p_format2->i_format,
              p_format1->i_rate, p_format2->i_rate,
@@ -337,6 +447,7 @@ void aout_FifoInit( vlc_object_t *obj, aout_fifo_t * p_fifo, uint32_t i_rate )
     p_fifo->p_first = NULL;
     p_fifo->pp_last = &p_fifo->p_first;
     date_Init( &p_fifo->end_date, i_rate, 1 );
+    date_Set( &p_fifo->end_date, VLC_TS_INVALID );
 }
 
 /*****************************************************************************
@@ -348,7 +459,7 @@ void aout_FifoPush( aout_fifo_t * p_fifo, aout_buffer_t * p_buffer )
     p_fifo->pp_last = &p_buffer->p_next;
     *p_fifo->pp_last = NULL;
     /* Enforce the continuity of the stream. */
-    if ( date_Get( &p_fifo->end_date ) )
+    if( date_Get( &p_fifo->end_date ) != VLC_TS_INVALID )
     {
         p_buffer->i_pts = date_Get( &p_fifo->end_date );
         p_buffer->i_length = date_Increment( &p_fifo->end_date,
@@ -362,14 +473,13 @@ void aout_FifoPush( aout_fifo_t * p_fifo, aout_buffer_t * p_buffer )
 }
 
 /*****************************************************************************
- * aout_FifoSet : set end_date and trash all buffers (because they aren't
- * properly dated)
+ * aout_FifoReset: trash all buffers
  *****************************************************************************/
-void aout_FifoSet( aout_fifo_t * p_fifo, mtime_t date )
+void aout_FifoReset( aout_fifo_t * p_fifo )
 {
     aout_buffer_t * p_buffer;
 
-    date_Set( &p_fifo->end_date, date );
+    date_Set( &p_fifo->end_date, VLC_TS_INVALID );
     p_buffer = p_fifo->p_first;
     while ( p_buffer != NULL )
     {
@@ -384,34 +494,17 @@ void aout_FifoSet( aout_fifo_t * p_fifo, mtime_t date )
 /*****************************************************************************
  * aout_FifoMoveDates : Move forwards or backwards all dates in the FIFO
  *****************************************************************************/
-void aout_FifoMoveDates( aout_fifo_t * p_fifo, mtime_t difference )
+void aout_FifoMoveDates( aout_fifo_t *fifo, mtime_t difference )
 {
-    aout_buffer_t * p_buffer;
-
-    date_Move( &p_fifo->end_date, difference );
-    p_buffer = p_fifo->p_first;
-    while ( p_buffer != NULL )
+    if( date_Get( &fifo->end_date ) == VLC_TS_INVALID )
     {
-        p_buffer->i_pts += difference;
-        p_buffer = p_buffer->p_next;
+        assert( fifo->p_first == NULL );
+        return;
     }
-}
 
-/*****************************************************************************
- * aout_FifoNextStart : return the current end_date
- *****************************************************************************/
-mtime_t aout_FifoNextStart( const aout_fifo_t *p_fifo )
-{
-    return date_Get( &p_fifo->end_date );
-}
-
-/*****************************************************************************
- * aout_FifoFirstDate : return the playing date of the first buffer in the
- * FIFO
- *****************************************************************************/
-mtime_t aout_FifoFirstDate( const aout_fifo_t *p_fifo )
-{
-    return (p_fifo->p_first != NULL) ? p_fifo->p_first->i_pts : 0;
+    date_Move( &fifo->end_date, difference );
+    for( block_t *block = fifo->p_first; block != NULL; block = block->p_next )
+        block->i_pts += difference;
 }
 
 /*****************************************************************************
@@ -680,7 +773,7 @@ static int FilterOrder( const char *psz_name )
 /* This function will add or remove a a module from a string list (colon
  * separated). It will return true if there is a modification
  * In case p_aout is NULL, we will use configuration instead of variable */
-bool aout_ChangeFilterString( vlc_object_t *p_obj, aout_instance_t *p_aout,
+bool aout_ChangeFilterString( vlc_object_t *p_obj, vlc_object_t *p_aout,
                               const char *psz_variable,
                               const char *psz_name, bool b_add )
 {

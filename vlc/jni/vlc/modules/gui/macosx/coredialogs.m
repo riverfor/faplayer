@@ -2,7 +2,7 @@
  * coredialogs.m: Mac OS X Core Dialogs
  *****************************************************************************
  * Copyright (C) 2005-2009 the VideoLAN team
- * $Id: 078d4ba21d09365f72754492cdd7a2c79cf5541c $
+ * $Id: 7af5e69ab4c864c5bfeaff0d779e222c80f074ba $
  *
  * Authors: Derk-Jan Hartman <hartman at videolan dot org>
  *          Felix Paul Kühne <fkuehne at videolan dot org>
@@ -48,10 +48,6 @@ static VLCCoreDialogProvider *_o_sharedInstance = nil;
     else
     {
         _o_sharedInstance = [super init];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(performDialogEvent:)
-                                                     name: @"VLCNewCoreDialogEventNotification"
-                                                   object:self];
         o_error_panel = [[VLCErrorPanel alloc] init];
         b_progress_cancelled = NO;
     }
@@ -68,25 +64,24 @@ static VLCCoreDialogProvider *_o_sharedInstance = nil;
     [o_prog_cancel_btn setTitle: _NS("Cancel")];
     [o_prog_bar setUsesThreadedAnimation: YES];
 
-}    
+}
 
--(void)performDialogEvent: (NSNotification *)o_notification
+-(void)performEventWithObject: (NSValue *)o_value ofType: (const char*)type
 {
-    NSValue *o_value = [[o_notification userInfo] objectForKey:@"VLCDialogPointer"];
-    NSString *o_type = [[o_notification userInfo] objectForKey:@"VLCDialogType"];
+    NSString *o_type = [NSString stringWithUTF8String:type];
 
     if( [o_type isEqualToString: @"dialog-error"] )
-        [self showFatalDialog: o_value];
+        [self performSelectorOnMainThread:@selector(showFatalDialog:) withObject:o_value waitUntilDone:YES];
     else if( [o_type isEqualToString: @"dialog-critical"] )
-        [self showFatalWaitDialog: o_value];
+        [self performSelectorOnMainThread:@selector(showFatalWaitDialog:) withObject:o_value waitUntilDone:YES];
     else if( [o_type isEqualToString: @"dialog-question"] )
-        [self showQuestionDialog: o_value];
+        [self performSelectorOnMainThread:@selector(showQuestionDialog:) withObject:o_value waitUntilDone:YES];
     else if( [o_type isEqualToString: @"dialog-login"] )
-        [self showLoginDialog: o_value];
+        [self performSelectorOnMainThread:@selector(showLoginDialog:) withObject:o_value waitUntilDone:YES];
     else if( [o_type isEqualToString: @"dialog-progress-bar"] )
-        [self showProgressDialog: o_value];
+        [self performSelectorOnMainThread:@selector(showProgressDialog:) withObject:o_value waitUntilDone:YES];
     else
-        msg_Err( VLCIntf, "unhandled dialog type: '%s'", [o_type UTF8String] );
+        msg_Err( VLCIntf, "unhandled dialog type: '%s'", type );
 }
 
 -(void)showFatalDialog: (NSValue *)o_value
@@ -221,11 +216,6 @@ static VLCCoreDialogProvider *_o_sharedInstance = nil;
     return o_error_panel;
 }
 
--(void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
-}
 @end
 
 /*****************************************************************************
@@ -280,7 +270,7 @@ static VLCCoreDialogProvider *_o_sharedInstance = nil;
     [o_errors addObject: ourError];
     [ourError release];
 
-    [o_icons addObject: [NSImage imageWithErrorIcon]];
+    [o_icons addObject: [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAlertStopIcon)]];
 
     [o_error_table reloadData];
 }

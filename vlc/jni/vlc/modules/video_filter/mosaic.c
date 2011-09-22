@@ -2,7 +2,7 @@
  * mosaic.c : Mosaic video plugin for vlc
  *****************************************************************************
  * Copyright (C) 2004-2008 the VideoLAN team
- * $Id: 9b0ff0680b3d8528ea96f0c4fcc6b1eddcec5aba $
+ * $Id: 203a6e05ccbe29fda59f8e34608eada55353eded $
  *
  * Authors: Antoine Cellerier <dionoea at videolan dot org>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -124,12 +124,12 @@ struct filter_sys_t
 #define ROWS_TEXT N_("Number of rows")
 #define ROWS_LONGTEXT N_( \
         "Number of image rows in the mosaic (only used if " \
-        "positionning method is set to \"fixed\")." )
+        "positioning method is set to \"fixed\")." )
 
 #define COLS_TEXT N_("Number of columns")
 #define COLS_LONGTEXT N_( \
         "Number of image columns in the mosaic (only used if " \
-        "positionning method is set to \"fixed\"." )
+        "positioning method is set to \"fixed\"." )
 
 #define AR_TEXT N_("Keep aspect ratio")
 #define AR_LONGTEXT N_( \
@@ -281,11 +281,9 @@ static int CreateFilter( vlc_object_t *p_this )
 {
     filter_t *p_filter = (filter_t *)p_this;
     filter_sys_t *p_sys;
-    vlc_object_t *p_libvlc = VLC_OBJECT( p_filter->p_libvlc );
     char *psz_order, *_psz_order;
     char *psz_offsets;
     int i_index;
-    vlc_value_t val;
     int i_command;
 
     /* Allocate structure */

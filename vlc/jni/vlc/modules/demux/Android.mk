@@ -9,24 +9,32 @@ endif
 
 LOCAL_MODULE := live555_plugin
 
+LOCAL_CFLAGS += \
+    -std=gnu99 \
+    -DHAVE_CONFIG_H \
+    -D__PLUGIN__
+
 LOCAL_CPPFLAGS += \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"live555\" \
     -DMODULE_NAME=live555
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src \
-    $(EXTROOT)/live555/BasicUsageEnvironment/include \
-    $(EXTROOT)/live555/UsageEnvironment/include \
-    $(EXTROOT)/live555/groupsock/include \
-    $(EXTROOT)/live555/liveMedia/include
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
-    live555.cpp
+    live555.cpp \
+    ../access/mms/asf.c \
+    ../access/mms/buffer.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_STATIC_LIBRARIES += liblive555
+
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -39,17 +47,21 @@ LOCAL_MODULE := subtitle_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"subtitle\" \
     -DMODULE_NAME=subtitle
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
-    $(VLCROOT)/include
+    $(VLCROOT)/include \
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     subtitle.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -62,19 +74,24 @@ LOCAL_MODULE := ts_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"ts\" \
     -DMODULE_NAME=ts
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(EXTROOT)/libdvbpsi
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     ts.c \
     ../mux/mpeg/csa.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_STATIC_LIBRARIES += libdvbpsi
+
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 

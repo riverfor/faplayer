@@ -2,7 +2,7 @@
  * about.m: MacOS X About Panel
  *****************************************************************************
  * Copyright (C) 2001-2011 the VideoLAN team
- * $Id: d2088f9a4957f143e12f516e627f80636122770f $
+ * $Id: e184c3be8dc778ba08a1f4ce2f9f2f184f6582ee $
  *
  * Authors: Derk-Jan Hartman <thedj@users.sourceforge.net>
  *          Felix Paul Kühne <fkuehne -at- videolan.org>
@@ -29,6 +29,7 @@
 #import "about.h"
 #import <vlc_intf_strings.h>
 #import <vlc_about.h>
+#import "CompatibilityFixes.h"
 
 #ifdef __x86_64__
 #define PLATFORM "Intel 64bit"
@@ -65,6 +66,12 @@ static VLAboutBox *_o_sharedInstance = nil;
 {
     [[NSNotificationCenter defaultCenter] removeObserver: self];
     [super dealloc];
+}
+
+- (void)awakeFromNib
+{
+    if (OSX_LION)
+        [o_about_window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenAuxiliary];
 }
 
 /*****************************************************************************
@@ -106,7 +113,8 @@ static VLAboutBox *_o_sharedInstance = nil;
         [o_name_version_field setStringValue: [NSString stringWithFormat:@"Version %s (%s)", VERSION_MESSAGE, PLATFORM]];
         
         NSMutableArray *tmpArray = [NSMutableArray arrayWithArray: [[NSString stringWithUTF8String: psz_authors]componentsSeparatedByString:@"\n\n"]];
-        for( int i = 0; i < [tmpArray count]; i++ )
+        NSUInteger count = [tmpArray count];
+        for( NSUInteger i = 0; i < count; i++ )
         {
             [tmpArray replaceObjectAtIndex:i withObject:[[tmpArray objectAtIndex:i]stringByReplacingOccurrencesOfString:@"\n" withString:@", "]];
             [tmpArray replaceObjectAtIndex:i withObject:[[tmpArray objectAtIndex:i]stringByReplacingOccurrencesOfString:@", -" withString:@"\n-" options:0 range:NSRangeFromString(@"0 30")]];

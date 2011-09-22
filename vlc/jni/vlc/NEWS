@@ -1,6 +1,18 @@
 Changes between 1.1.x and 1.2.0-git:
 ------------------------------------
 
+Important notes:
+ * HTTP server IP address, port, and TLS configuration is now centralized:
+   - The --http-host option sets the address, e.g. "--http-host=2001:db8::1".
+     By default, both :: and 0.0.0.0 are used.
+   - The --http-port and --https-port options set the port numbers.
+     By default, 8080 is used for HTTP, and 8443 for HTTPS.
+   - The TLS credentials are configured with --http-cert (public certificate),
+     --http-key (private key), --http-ca (optional CA) and
+     --http-crl (optional CRL).
+ * RTSP server IP address and port are updated similarly.
+   Use --rtsp-host and --rtsp-port respectively.
+
 Important changes for packagers:
  * The default builds now assume that the operating system uses UTF-8 for
    its file systems and files content (except the Windows port). If this is
@@ -16,7 +28,6 @@ Important changes for packagers:
 
  * The NPAPI webplugin has moved to git://git.videolan.org/npapi-vlc.git
  * The ActiveX webplugin has moved to git://git.videolan.org/activex-vlc.git
-
 
 Core:
  * Major Video Core and Outputs rework and rewrite:
@@ -49,16 +60,24 @@ Codecs:
  * Experimental Hardware decoding using Broadcom CrystalHD cards
  * New module for decoding EBU subtitles (.stl)
  * Support for 9bits and 10bits H.264/AVC decoding
+ * Support for 20-bits PCM and DAT-12 (digital magnetic tapes) from RTP
+ * New module for Dirac encoding, using the faster libschroedinger
+   The Schroedinger module should be prefered to the Dirac one
+ * Support for WMV Images, aka WMVP and WVP2, as used by Photo Story
  * Support for Lagarith Lossless video codec
+ * Support for ProRes 422 video codec in 10bits
+ * EIA-608 closed captions improvements
+ * Support for JPEG 2000 and Motion JPEG 2000 in the Windows and Mac binaries
 
 Demuxers:
  * New images demuxer supporting jpeg, png, targa, xcf, git, tiff, bmp, pcx, lbm
  * C64 SID file playback support using sidplay2
- * Ogg seeking improvements
  * Support for images/cover art in wma/wmv/asf files
  * Improvements in .ape files metadata reading and writing
  * New demuxer module for EBU subtitles (.stl)
  * Support for caf, mtv, awb, f4v, amr, vro (DVD-VR) files
+ * Ogg, flv, mxf, amr seeking improvements
+ * Major improvements in mkv chapters/segments handling
 
 Interfaces:
  * Skins2 / Qt: misc improvements and usability fixes
@@ -68,10 +87,13 @@ Interfaces:
  * Skins2: fullscreen controller support, relative placement support
    and important cleanups and optimisations
  * ncurses: heavy refactor of the complete interface
+ * Mac OS X: re-written Main Window, which also includes the Video Output
  * Mac OS X: new Audio Effects panel adding Compressor and Spatializer filters
  * Mac OS X: new Track Synchronization panel
  * Mac OS X: new Video Effects panel for color and geometry adjustments
  * Mac OS X: re-written Open Disc functionality with automatic media detection
+ * Mac OS X: support for the native fullscreen mode on OS X Lion
+ * Mac OS X: enhanced AppleScript support
  * The rc and telnet lua interfaces were merged into a new "cli" interface
  * dbus: Rewrite of the main loop to use a more efficient poll-based model
  * dbus: Upgrade to an mpris2 compliant interface, see http://www.mpris.org
@@ -88,12 +110,14 @@ Video Output:
    chroma conversion
  * New video output for Android platform, based on Surface
  * Support for 9/10bits output in the OpenGL output
+ * Updated OpenGL video output for Mac, which requires a Quartz Extreme capable Mac
 
 Audio Output:
  * New audio output based on AudioQueue API for iOS
  * New audio output in memory (amem)
  * Important simplification and improvements in the core audio output
  * New audio output based on OpenSL ES API for Android
+ * New audio resampler using the Secret Rabbit Code (a.k.a. libsamplerate)
 
 Video Filter:
  * New gradfun filter for debanding videos using dithering
@@ -152,7 +176,10 @@ Removed modules:
  * upnp: use upnp_intel
  * removal of old telnet interface in favor of the new lua CLI
  * removal of http interface in favor of luahttp
- * remove of the noise filter
+ * removal of the noise filter
+ * removal of the SDL audio output, use the native outputs
+ * growl_udp: use Growl for local notifications on the Mac. UDP support will be
+              removed in Growl's next release, too.
 
 
 Changes between 1.1.10 and 1.1.11:

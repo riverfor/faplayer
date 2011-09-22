@@ -72,7 +72,7 @@ RequestExecutionLevel user
     !insertmacro MUI_PAGE_WELCOME
   ; License page
     !define MUI_LICENSEPAGE_BUTTON $(^NextBtn)
-    !define MUI_LICENSEPAGE_TEXT_BOTTOM $Licence_NextText
+    !define MUI_LICENSEPAGE_TEXT_BOTTOM $License_NextText
     !insertmacro MUI_PAGE_LICENSE "COPYING.txt"
   ; Components page
     !insertmacro MUI_PAGE_COMPONENTS
@@ -128,12 +128,14 @@ RequestExecutionLevel user
   !insertmacro MUI_LANGUAGE "Polish"
   !insertmacro MUI_LANGUAGE "Romanian"
   !insertmacro MUI_LANGUAGE "Slovak"
+  !insertmacro MUI_LANGUAGE "Serbian"
   !insertmacro MUI_LANGUAGE "Czech"
   !insertmacro MUI_LANGUAGE "Hungarian"
   !insertmacro MUI_LANGUAGE "Catalan"
   !insertmacro MUI_LANGUAGE "Bulgarian"
   !insertmacro MUI_LANGUAGE "Estonian"
   !insertmacro MUI_LANGUAGE "Lithuanian"
+  !insertmacro MUI_LANGUAGE "Basque"
 
 ; Reserve files for solid compression
   !insertmacro MUI_RESERVEFILE_LANGDLL
@@ -814,6 +816,8 @@ UAC_Success:
   StrCmp $LANGUAGE ${LANG_SPANISH} Spanish 0
   StrCmp $LANGUAGE ${LANG_ESTONIAN} Estonian 0
   StrCmp $LANGUAGE ${LANG_LITHUANIAN} Lithuanian 0
+  StrCmp $LANGUAGE ${LANG_BASQUE} Basque 0
+  StrCmp $LANGUAGE ${LANG_SERBIAN} Serbian 0
   StrCmp $LANGUAGE ${LANG_PORTUGUESEBR} Brazilian EndLanguageCmp
   French:
   !include "languages\french.nsh"
@@ -875,6 +879,12 @@ UAC_Success:
   Lithuanian:
   !include "languages\lithuanian.nsh"
   Goto EndLanguageCmp
+  Basque:
+  !include "languages\basque.nsh"
+  Goto EndLanguageCmp
+  Serbian:
+  !include "languages\serbian.nsh"
+  Goto EndLanguageCmp
   Brazilian:
   !include "languages\brazilian_portuguese.nsh"
   EndLanguageCmp:
@@ -883,7 +893,7 @@ UAC_Success:
   "UninstallString"
   StrCmp $R0 "" done
 
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION $Message_AlreadyInstalled IDNO done
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION $Message_AlreadyInstalled /SD IDNO IDNO done
 
   ;Run the uninstaller
   ;uninst:
@@ -1156,6 +1166,8 @@ UAC_Success:
   StrCmp $LANGUAGE ${LANG_SPANISH} Spanish 0
   StrCmp $LANGUAGE ${LANG_ESTONIAN} Estonian 0
   StrCmp $LANGUAGE ${LANG_LITHUANIAN} Lithuanian 0
+  StrCmp $LANGUAGE ${LANG_BASQUE} Basque 0
+  StrCmp $LANGUAGE ${LANG_LITHUANIAN} Serbian 0
   StrCmp $LANGUAGE ${LANG_PORTUGUESEBR} Brazilian EndLanguageCmp
   French:
   !include "languages\french.nsh"
@@ -1216,6 +1228,12 @@ UAC_Success:
   Goto EndLanguageCmp
   Lithuanian:
   !include "languages\lithuanian.nsh"
+  Goto EndLanguageCmp
+  Basque:
+  !include "languages\basque.nsh"
+  Goto EndLanguageCmp
+  Serbian:
+  !include "languages\serbian.nsh"
   Goto EndLanguageCmp
   Brazilian:
   !include "languages\brazilian_portuguese.nsh"

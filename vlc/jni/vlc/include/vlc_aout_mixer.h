@@ -2,7 +2,7 @@
  * vlc_aout_mixer.h : audio output mixer interface
  *****************************************************************************
  * Copyright (C) 2002-2009 the VideoLAN team
- * $Id: a38de406fe667fb29c2bcfd2899cee14adc41d89 $
+ * $Id: 2541cd254e21fac7279b2b6513318f2b3f7b1a70 $
  *
  * Authors: Christophe Massiot <massiot@via.ecp.fr>
  *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
@@ -34,46 +34,18 @@
 extern "C" {
 #endif
 
-//#include <vlc_aout.h>
-
-/* */
-typedef struct aout_mixer_sys_t aout_mixer_sys_t;
-typedef struct aout_mixer_t aout_mixer_t;
-
-typedef struct {
-    /* */
-    aout_fifo_t fifo;
-
-    /* Software multiplier */
-    float       multiplier;
-} aout_mixer_input_t;
+typedef struct audio_mixer audio_mixer_t;
 
 /** 
  * audio output mixer
  */
-struct aout_mixer_t {
+struct audio_mixer
+{
     VLC_COMMON_MEMBERS
 
-    /* Module */
-    module_t *module;
-
-    /* Mixer format.
-     *
-     * You cannot modify it.
-     */
-    audio_sample_format_t fmt;
-
-    /* Array of mixer inputs */
-    aout_mixer_input_t    *input;
-
-    /* Mix buffer (mandatory) */
-    void (*mix)(aout_mixer_t *, aout_buffer_t *, float);
-
-    /* Private place holder for the aout_mixer_t module (optional)
-     *
-     * A module is free to use it as it wishes.
-     */
-    aout_mixer_sys_t *sys;
+    module_t *module; /**< Module handle */
+    vlc_fourcc_t format; /**< Audio samples format */
+    void (*mix)(audio_mixer_t *, block_t *, float); /**< Amplifier */
 };
 
 #ifdef __cplusplus

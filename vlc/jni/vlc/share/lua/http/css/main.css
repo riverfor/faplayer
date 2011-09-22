@@ -35,24 +35,78 @@ body{
 #volumeSlider{
 	width: 100px;
 	display: inline-block;
-	margin-bottom: 20px;
 }
 #currentVolume{
 	display: inline-block;
-	margin-left: -110px;
 }
 #mediaTitle{
+	position: absolute;
+	top: 60px;
+	left: 0px;
+	width: 500px;
 	text-align: left;
+	padding: 5px;
+	overflow: hidden;
 }
 #currentTime{
+	float: left;
 	text-align: left;
 }
 #totalTime{
+	float: right;
 	text-align: right;
 }
-#controlButtons{
-	text-align: left;
+#controlTable{
+	position:relative;
+	height: 140px;
 }
+#controlButtons{
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 0;
+	margin: 0;
+	text-align: left;
+	width: 380px;
+}
+
+#buttonszone{
+	position: absolute;
+	top: 5px;
+	left: 388px;
+	width: 42px;
+	vertical-align: top;
+	margin: 0;
+	padding: 0;
+}
+
+#volumesliderzone{
+	position: absolute;
+	top: 20px;
+	left: 440px;
+	width: 205px;
+}
+
+#volumeSlider{
+	width: 200px;
+}
+
+#artszone{
+	position: absolute;
+	top: 0;
+	left: 650px;
+	width: 141px;
+	vertical-align: top;
+}
+
+#seekContainer{
+	position:absolute;
+	left: 0;
+	top: 100px;
+	width: 650px;
+	vertical-align: bottom;
+}
+
 .button48{
 	width: 48px;
 	height: 48px;
@@ -61,37 +115,39 @@ body{
 	border: none;
 	display: inline-block;
 	cursor: pointer;
+	background-image: url("../images/buttons.png");
+	background-repeat: no-repeat;
 }
 .button{
 	cursor: pointer;
 	display: inline-block;
 }
 #buttonOpen{
-	background-image: url("../images/button_eject-48.png");
+	background-position: 0px 0px;
 }
 #buttonStop{
-	background-image: url("../images/button_stop-48.png");
+	background-position: -576px 0px;
 }
-#buttonPlay{
-	background-image: url("../images/button_play-48.png") ;
+.playing {
+	background-position: -336px 0px;
 }
-#buttonPause{
-	background-image: url("../images/button_pause-48.png") ;
+.paused {
+	background-position: -384px 0px;
 }
 #buttonPrev{
-	background-image: url("../images/button_first-48.png") ;
+	background-position: -144px 0px;
 }
 #buttonNext{
-	background-image: url("../images/button_last-48.png") ;
+	background-position: -288px 0px;
 }
 #buttonFull{
-	background-image: url("../images/button_full-48.png") ;
+	background-position: -192px 0px;
 }
 #buttonSout{
-	background-image: url("../images/button_stream-48.png") ;
+	background-position: -624px 0px;
 }
 #buttonEQ{
-	background-image: url("../images/button-equalizer-48.png") ;
+	background-position: -48px 0px;
 }
 #window_browse ol{
 	list-style-type: none;
@@ -130,6 +186,12 @@ body{
 	font-size: 1.5em;
 }
 .footer{
+	margin-top: 30px;
 	text-align: center;
 	font-size: 11px;
+}
+
+div.centered{
+	margin-left: auto;
+	margin-right: auto;
 }

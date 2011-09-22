@@ -293,8 +293,6 @@ if test -z "${DISTRO}" -a "$TARGET" = "$BUILD"; then
         hint_distro fedora
     elif test -f /etc/maemo_version; then
         hint_distro maemo5
-    elif test "$SBOX_UNAME_MACHINE"; then
-        hint_distro maemo6
     elif test -f /etc/debian_version; then
         # NOTE: check for Debian *after* its derivatives
         hint_distro debian
@@ -326,8 +324,8 @@ case "$DISTRO" in
     HAVE_MACOSX_DARWIN_9=1
     EXTRA_LDFLAGS="${EXTRA_LDFLAGS} -isysroot \${MACOSX_SDK} -Wl,-syslibroot,\${MACOSX_SDK} -mmacosx-version-min=\${SDK_TARGET}"
     EXTRA_CFLAGS="${EXTRA_CFLAGS} -D\${ENVP} -isysroot \${MACOSX_SDK} -mmacosx-version-min=\${SDK_TARGET}"
-    CC="/usr/bin/gcc-4.2"
-    CXX="/usr/bin/g++-4.2"
+    CC="/usr/bin/gcc"
+    CXX="/usr/bin/g++"
     LD="ld"
     RANLIB="ranlib"
     AR=
@@ -362,8 +360,8 @@ case "$DISTRO" in
     fi
     # The given host (arm-eabi) is not the real one (arm-linux-androideabi)
     ln -sfn $TARGET hosts/arm-linux-androideabi
-    CC="arm-linux-androideabi-gcc -nostdlib -lc -lgcc"
-    CXX="arm-linux-androideabi-g++ -nostdlib -lc -lgcc"
+    CC="arm-linux-androideabi-gcc --sysroot=$ANDROID_NDK/platforms/android-9/arch-arm"
+    CXX="arm-linux-androideabi-g++ --sysroot=$ANDROID_NDK/platforms/android-9/arch-arm"
     NM=arm-linux-androideabi-nm
     AR=arm-linux-androideabi-ar
     LD=arm-linux-androideabi-ld
@@ -372,10 +370,18 @@ case "$DISTRO" in
     # Add the PATH to the NDK
     add_makefile_cfg "ANDROID_NDK = ${ANDROID_NDK}"
     add_makefile_cfg "PATH = ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/:${PATH}"
+
     add_enabled_makefile_cfg "HAVE_LINUX"
     if test -z "$NO_NEON"; then
         add_enabled_makefile_cfg "HAVE_NEON"
+        ARM_EABI=armeabi-v7a
+    else
+        ARM_EABI=armeabi
     fi
+    # make sure android toolchain can build C++
+    EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -D__STDC_VERSION__=199901L"
+    EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -I${ANDROID_NDK}/sources/cxx-stl/gnu-libstdc++/include"
+    EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -I${ANDROID_NDK}/sources/cxx-stl/gnu-libstdc++/libs/$ARM_EABI/include"
 esac
 
 # Save passed flags
@@ -457,8 +463,8 @@ fi
 
 if test $HAVE_MACOSX_DARWIN_9; then
     add_enabled_makefile_cfg "HAVE_MACOSX_DARWIN_9"
-    if ! /usr/bin/gcc-4.2 --version>/dev/null 2>&1; then
-        error "You do not have GCC-4.2 installed in /usr/bin, compilation WILL FAIL."
+    if ! /usr/bin/gcc --version>/dev/null 2>&1; then
+        error "You do not have GCC installed in /usr/bin, compilation WILL FAIL."
     fi
 fi
 

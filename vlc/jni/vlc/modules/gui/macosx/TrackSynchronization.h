@@ -3,7 +3,7 @@
  *****************************************************************************
  * Copyright (C) 2011 VideoLAN
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 4e263be67e910eec9dcc8e3f964cf85a912d4d95 $
+ * $Id: 119ee979464fdca6193861f587bc9fee1c84081a $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -54,6 +54,7 @@
 + (VLCTrackSynchronization *)sharedInstance;
 - (IBAction)toggleWindow:(id)sender;
 - (IBAction)resetValues:(id)sender;
+- (void)updateValues;
 
 /* Audio / Video */
 - (IBAction)avValueChanged:(id)sender;

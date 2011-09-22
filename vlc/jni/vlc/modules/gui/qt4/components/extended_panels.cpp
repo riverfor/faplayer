@@ -2,7 +2,7 @@
  * extended_panels.cpp : Extended controls panels
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: b46afd20c57bae1c237563c9390d91f7e3fcfe15 $
+ * $Id: f7ab8a337152b374329e4788e9f457c709e6e518 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea .t videolan d@t org>
@@ -116,15 +116,17 @@ ExtVideo::ExtVideo( intf_thread_t *_p_intf, QTabWidget *_parent ) :
         { \
             vlc_object_release( p_obj ); \
             if( checkbox ) checkbox->setChecked( true ); \
-            else groupbox->setChecked( true ); \
+            else if (groupbox) groupbox->setChecked( true ); \
         } \
         else \
         { \
             if( checkbox ) checkbox->setChecked( false ); \
-            else groupbox->setChecked( false ); \
+            else if (groupbox)  groupbox->setChecked( false ); \
         } \
     } \
     CONNECT( ui.widget##Enable, clicked(), this, updateFilters() );
+
+
 #define SETUP_VFILTER_OPTION( widget, signal ) \
     initComboBoxItems( ui.widget ); \
     setWidgetValue( ui.widget ); \
@@ -142,7 +144,6 @@ ExtVideo::ExtVideo( intf_thread_t *_p_intf, QTabWidget *_parent ) :
     SETUP_VFILTER_OPTION( extractComponentText, textChanged( const QString& ) )
 
     SETUP_VFILTER( posterize )
-    SETUP_VFILTER_OPTION( posterizeLevelSpin, valueChanged( int ) )
 
     SETUP_VFILTER( colorthres )
     SETUP_VFILTER_OPTION( colorthresColorText, textChanged( const QString& ) )
@@ -163,8 +164,6 @@ ExtVideo::ExtVideo( intf_thread_t *_p_intf, QTabWidget *_parent ) :
     SETUP_VFILTER_OPTION( blurFactorSlider, valueChanged( int ) )
 
     SETUP_VFILTER( motiondetect )
-
-//    SETUP_VFILTER( noise )
 
     SETUP_VFILTER( psychedelic )
 
@@ -197,10 +196,6 @@ ExtVideo::ExtVideo( intf_thread_t *_p_intf, QTabWidget *_parent ) :
     SETUP_VFILTER_OPTION( wallRowsSpin, valueChanged( int ) )
     SETUP_VFILTER_OPTION( wallColsSpin, valueChanged( int ) )
 
-    SETUP_VFILTER( panoramix )
-    SETUP_VFILTER_OPTION( panoramixRowsSpin, valueChanged( int ) )
-    SETUP_VFILTER_OPTION( panoramixColsSpin, valueChanged( int ) )
-
 
     SETUP_VFILTER( erase )
     SETUP_VFILTER_OPTION( eraseMaskText, editingFinished() )
@@ -224,6 +219,15 @@ ExtVideo::ExtVideo( intf_thread_t *_p_intf, QTabWidget *_parent ) :
 
     SETUP_VFILTER( grain )
     SETUP_VFILTER_OPTION( grainVarianceSlider, valueChanged( int ) )
+
+    SETUP_VFILTER( mirror )
+
+    SETUP_VFILTER( gaussianblur )
+    SETUP_VFILTER_OPTION( gaussianbluSigmaSlider, valueChanged( int ) )
+
+    SETUP_VFILTER( antiflicker )
+    SETUP_VFILTER_OPTION( antiflickerSofteningSizeSlider, valueChanged( int ) )
+
 
     if( module_exists( "atmo" ) )
     {
@@ -313,11 +317,9 @@ static void ChangeVFiltersString( struct intf_thread_t *p_intf, const char *psz_
     }
     else
     {
-        module_release (p_obj);
         msg_Err( p_intf, "Unknown video filter type." );
         return;
     }
-    module_release (p_obj);
 
     psz_string = config_GetPsz( p_intf, psz_filter_type );
 
@@ -340,6 +342,7 @@ static void ChangeVFiltersString( struct intf_thread_t *p_intf, const char *psz_
         }
         else
         {
+            free( psz_string );
             return;
         }
     }
@@ -563,14 +566,6 @@ void ExtVideo::updateFilterOptions()
         b_is_command = ( i_type & VLC_VAR_ISCOMMAND );
     }
 
-    if( !b_is_command )
-    {
-        msg_Warn( p_intf, "Module %s's %s variable isn't a command. You'll need to restart the filter to take change into account.",
-                 qtu( module ),
-                 qtu( option ) );
-        /* FIXME: restart automatically somewhere near the end of this function */
-    }
-
     /* Try to cast to all the widgets we're likely to encounter. Only
      * one of the casts is expected to work. */
     QSlider        *slider        = qobject_cast<QSlider*>       ( sender() );
@@ -632,6 +627,15 @@ void ExtVideo::updateFilterOptions()
                  qtu( module ),
                  qtu( option ),
                  i_type );
+
+    if( !b_is_command )
+    {
+        msg_Warn( p_intf, "Module %s's %s variable isn't a command. Brute-restarting the filter.",
+                 qtu( module ),
+                 qtu( option ) );
+        ChangeVFiltersString( p_intf, qtu( module ), false );
+        ChangeVFiltersString( p_intf, qtu( module ), true );
+    }
 
     if( p_obj ) vlc_object_release( p_obj );
 }
@@ -1459,16 +1463,42 @@ void Spatializer::addCallbacks( vlc_object_t *p_aout )
 #define SUBSDELAY_MODE_RELATIVE_SOURCE_DELAY   1
 #define SUBSDELAY_MODE_RELATIVE_SOURCE_CONTENT 2
 
+SyncWidget::SyncWidget( QWidget *_parent ) : QWidget( _parent )
+{
+    QHBoxLayout *layout = new QHBoxLayout;
+    spinBox.setAlignment( Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter );
+    spinBox.setDecimals( 3 );
+    spinBox.setMinimum( -600.0 );
+    spinBox.setMaximum( 600.0 );
+    spinBox.setSingleStep( 0.1 );
+    spinBox.setSuffix( " s" );
+    spinBox.setButtonSymbols( QDoubleSpinBox::PlusMinus );
+    CONNECT( &spinBox, valueChanged( double ), this, valueChangedHandler( double ) );
+    layout->addWidget( &spinBox );
+    layout->addWidget( &spinLabel );
+    layout->setContentsMargins( 0, 0, 0, 0 );
+    setLayout( layout );
+}
+
+void SyncWidget::valueChangedHandler( double d )
+{
+    if ( d < 0 )
+        spinLabel.setText( qtr("(Hastened)") );
+    else if ( d > 0 )
+        spinLabel.setText( qtr("(Delayed)") );
+    else
+        spinLabel.setText( "" );
+}
+
+void SyncWidget::setValue( double d )
+{
+    spinBox.setValue( d );
+}
+
 SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent ) :
                             QWidget( _parent ) , p_intf( _p_intf )
 {
     QGroupBox *AVBox, *subsBox;
-
-    QToolButton *moinsAV, *plusAV;
-    QToolButton *moinssubs, *plussubs;
-    QToolButton *moinssubSpeed, *plussubSpeed;
-    QToolButton *moinssubDuration, *plussubDuration;
-
     QToolButton *updateButton;
 
     b_userAction = true;
@@ -1479,81 +1509,27 @@ SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent ) :
     AVBox = new QGroupBox( qtr( "Audio/Video" ) );
     QGridLayout *AVLayout = new QGridLayout( AVBox );
 
-    moinsAV = new QToolButton;
-    moinsAV->setToolButtonStyle( Qt::ToolButtonTextOnly );
-    moinsAV->setAutoRaise( true );
-    moinsAV->setText( "-" );
-    AVLayout->addWidget( moinsAV, 0, 1, 1, 1 );
-
-    plusAV = new QToolButton;
-    plusAV->setToolButtonStyle( Qt::ToolButtonTextOnly );
-    plusAV->setAutoRaise( true );
-    plusAV->setText( "+" );
-    AVLayout->addWidget( plusAV, 0, 3, 1, 1 );
-
     QLabel *AVLabel = new QLabel;
-    AVLabel->setText( qtr( "Advance of audio over video:" ) );
+    AVLabel->setText( qtr( "Audio track synchronization:" ) );
     AVLayout->addWidget( AVLabel, 0, 0, 1, 1 );
 
-    AVSpin = new QDoubleSpinBox;
-    AVSpin->setAlignment( Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter );
-    AVSpin->setDecimals( 3 );
-    AVSpin->setMinimum( -600.0 );
-    AVSpin->setMaximum( 600.0 );
-    AVSpin->setSingleStep( 0.1 );
-    AVSpin->setToolTip( qtr( "A positive value means that\n"
-                             "the audio is ahead of the video" ) );
-    AVSpin->setSuffix( " s" );
+    AVSpin = new SyncWidget( this );
     AVLayout->addWidget( AVSpin, 0, 2, 1, 1 );
     mainLayout->addWidget( AVBox, 1, 0, 1, 5 );
-
 
     /* Subs */
     subsBox = new QGroupBox( qtr( "Subtitles/Video" ) );
     QGridLayout *subsLayout = new QGridLayout( subsBox );
 
-    moinssubs = new QToolButton;
-    moinssubs->setToolButtonStyle( Qt::ToolButtonTextOnly );
-    moinssubs->setAutoRaise( true );
-    moinssubs->setText( "-" );
-    subsLayout->addWidget( moinssubs, 0, 1, 1, 1 );
-
-    plussubs = new QToolButton;
-    plussubs->setToolButtonStyle( Qt::ToolButtonTextOnly );
-    plussubs->setAutoRaise( true );
-    plussubs->setText( "+" );
-    subsLayout->addWidget( plussubs, 0, 3, 1, 1 );
-
     QLabel *subsLabel = new QLabel;
-    subsLabel->setText( qtr( "Advance of subtitles over video:" ) );
+    subsLabel->setText( qtr( "Subtitle track syncronization:" ) );
     subsLayout->addWidget( subsLabel, 0, 0, 1, 1 );
 
-    subsSpin = new QDoubleSpinBox;
-    subsSpin->setAlignment( Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter );
-    subsSpin->setDecimals( 3 );
-    subsSpin->setMinimum( -600.0 );
-    subsSpin->setMaximum( 600.0 );
-    subsSpin->setSingleStep( 0.1 );
-    subsSpin->setToolTip( qtr( "A positive value means that\n"
-                             "the subtitles are ahead of the video" ) );
-    subsSpin->setSuffix( " s" );
+    subsSpin = new SyncWidget( this );
     subsLayout->addWidget( subsSpin, 0, 2, 1, 1 );
 
-
-    moinssubSpeed = new QToolButton;
-    moinssubSpeed->setToolButtonStyle( Qt::ToolButtonTextOnly );
-    moinssubSpeed->setAutoRaise( true );
-    moinssubSpeed->setText( "-" );
-    subsLayout->addWidget( moinssubSpeed, 1, 1, 1, 1 );
-
-    plussubSpeed = new QToolButton;
-    plussubSpeed->setToolButtonStyle( Qt::ToolButtonTextOnly );
-    plussubSpeed->setAutoRaise( true );
-    plussubSpeed->setText( "+" );
-    subsLayout->addWidget( plussubSpeed, 1, 3, 1, 1 );
-
     QLabel *subSpeedLabel = new QLabel;
-    subSpeedLabel->setText( qtr( "Speed of the subtitles:" ) );
+    subSpeedLabel->setText( qtr( "Subtitles speed:" ) );
     subsLayout->addWidget( subSpeedLabel, 1, 0, 1, 1 );
 
     subSpeedSpin = new QDoubleSpinBox;
@@ -1563,19 +1539,8 @@ SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent ) :
     subSpeedSpin->setMaximum( 100 );
     subSpeedSpin->setSingleStep( 0.2 );
     subSpeedSpin->setSuffix( " fps" );
+    subSpeedSpin->setButtonSymbols( QDoubleSpinBox::PlusMinus );
     subsLayout->addWidget( subSpeedSpin, 1, 2, 1, 1 );
-
-    moinssubDuration = new QToolButton;
-    moinssubDuration->setToolButtonStyle( Qt::ToolButtonTextOnly );
-    moinssubDuration->setAutoRaise( true );
-    moinssubDuration->setText( "-" );
-    subsLayout->addWidget( moinssubDuration, 2, 1, 1, 1 );
-
-    plussubDuration = new QToolButton;
-    plussubDuration->setToolButtonStyle( Qt::ToolButtonTextOnly );
-    plussubDuration->setAutoRaise( true );
-    plussubDuration->setText( "+" );
-    subsLayout->addWidget( plussubDuration, 2, 3, 1, 1 );
 
     QLabel *subDurationLabel = new QLabel;
     subDurationLabel->setText( qtr( "Subtitles duration factor:" ) );
@@ -1587,6 +1552,7 @@ SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent ) :
     subDurationSpin->setMinimum( 0 );
     subDurationSpin->setMaximum( 20 );
     subDurationSpin->setSingleStep( 0.2 );
+    subDurationSpin->setButtonSymbols( QDoubleSpinBox::PlusMinus );
     subsLayout->addWidget( subDurationSpin, 2, 2, 1, 1 );
 
     mainLayout->addWidget( subsBox, 2, 0, 2, 5 );
@@ -1595,16 +1561,7 @@ SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent ) :
     updateButton->setAutoRaise( true );
     mainLayout->addWidget( updateButton, 0, 4, 1, 1 );
 
-
     /* Various Connects */
-    CONNECT( moinsAV, clicked(), AVSpin, stepDown () );
-    CONNECT( plusAV, clicked(), AVSpin, stepUp () );
-    CONNECT( moinssubs, clicked(), subsSpin, stepDown () );
-    CONNECT( plussubs, clicked(), subsSpin, stepUp () );
-    CONNECT( moinssubSpeed, clicked(), subSpeedSpin, stepDown () );
-    CONNECT( plussubSpeed, clicked(), subSpeedSpin, stepUp () );
-    CONNECT( moinssubDuration, clicked(), subDurationSpin, stepDown () );
-    CONNECT( plussubDuration, clicked(), subDurationSpin, stepUp () );
     CONNECT( AVSpin, valueChanged ( double ), this, advanceAudio( double ) ) ;
     CONNECT( subsSpin, valueChanged ( double ), this, advanceSubs( double ) ) ;
     CONNECT( subSpeedSpin, valueChanged ( double ),

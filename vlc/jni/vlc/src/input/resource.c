@@ -2,7 +2,7 @@
  * resource.c
  *****************************************************************************
  * Copyright (C) 2008 Laurent Aimar
- * $Id: ea33fba679cecca4b8b9e0054fd6258ef0526b5d $
+ * $Id: 794cef8727977af03d1abacfd05a7399e48696d2 $
  *
  * Authors: Laurent Aimar < fenrir _AT_ videolan _DOT_ org >
  *
@@ -72,7 +72,7 @@ struct input_resource_t
 
     /* TODO? track more than one audio output (like video outputs) */
     bool            b_aout_busy;
-    aout_instance_t *p_aout;
+    audio_output_t *p_aout;
 };
 
 /* */
@@ -328,26 +328,36 @@ exit:
 static void DestroyAout( input_resource_t *p_resource )
 {
     if( p_resource->p_aout )
-        vlc_object_release( p_resource->p_aout );
-    p_resource->p_aout = NULL;
+    {
+        aout_Destroy( p_resource->p_aout );
+        p_resource->p_aout = NULL;
+    }
 }
 
 static void ReleaseAout( input_resource_t *p_resource,
-                         aout_instance_t *p_aout )
+                         audio_output_t *p_aout )
 {
-    msg_Dbg( p_resource->p_parent, "releasing audio output" );
     if( likely(p_aout == p_resource->p_aout) )
+    {
+        assert( p_resource->b_aout_busy );
         p_resource->b_aout_busy = false;
-    vlc_object_release( p_aout );
+        msg_Dbg( p_resource->p_parent, "releasing audio output" );
+        vlc_object_release( p_aout );
+    }
+    else
+    {
+        msg_Dbg( p_resource->p_parent, "destroying extra audio output" );
+        aout_Destroy( p_aout );
+    }
 }
 
-static aout_instance_t *AllocateAout( input_resource_t *p_resource )
+static audio_output_t *AllocateAout( input_resource_t *p_resource )
 {
-    aout_instance_t *p_aout;
+    audio_output_t *p_aout;
 
     if( unlikely(p_resource->b_aout_busy) )
     {
-        msg_Dbg( p_resource->p_parent, "creating audio output" );
+        msg_Dbg( p_resource->p_parent, "creating extra audio output" );
         return aout_New( p_resource->p_parent );
     }
 
@@ -360,6 +370,7 @@ static aout_instance_t *AllocateAout( input_resource_t *p_resource )
             return NULL;
 
         vlc_mutex_lock( &p_resource->lock_hold );
+        assert( p_resource->p_aout == NULL );
         p_resource->p_aout = p_aout;
         vlc_mutex_unlock( &p_resource->lock_hold );
     }
@@ -371,7 +382,7 @@ static aout_instance_t *AllocateAout( input_resource_t *p_resource )
     return p_aout;
 }
 
-static aout_instance_t *RequestAout( input_resource_t *p_resource, aout_instance_t *p_aout )
+static audio_output_t *RequestAout( input_resource_t *p_resource, audio_output_t *p_aout )
 {
     vlc_assert_locked( &p_resource->lock );
 
@@ -383,11 +394,11 @@ static aout_instance_t *RequestAout( input_resource_t *p_resource, aout_instance
     return AllocateAout( p_resource );
 }
 
-static aout_instance_t *HoldAout( input_resource_t *p_resource )
+static audio_output_t *HoldAout( input_resource_t *p_resource )
 {
     vlc_mutex_lock( &p_resource->lock_hold );
 
-    aout_instance_t *p_aout = p_resource->p_aout;
+    audio_output_t *p_aout = p_resource->p_aout;
     if( p_aout )
         vlc_object_hold( p_aout );
 
@@ -400,13 +411,13 @@ static void TerminateAout( input_resource_t *p_resource )
 {
     vlc_mutex_lock( &p_resource->lock_hold );
 
-    aout_instance_t *p_aout = p_resource->p_aout;
+    audio_output_t *p_aout = p_resource->p_aout;
     p_resource->p_aout = NULL;
 
     vlc_mutex_unlock( &p_resource->lock_hold );
 
     if( p_aout )
-        vlc_object_release( p_aout );
+        aout_Destroy( p_aout );
 }
 
 static void Destructor( gc_object_t *p_gc )
@@ -497,15 +508,15 @@ bool input_resource_HasVout( input_resource_t *p_resource )
 }
 
 /* */
-aout_instance_t *input_resource_RequestAout( input_resource_t *p_resource, aout_instance_t *p_aout )
+audio_output_t *input_resource_RequestAout( input_resource_t *p_resource, audio_output_t *p_aout )
 {
     vlc_mutex_lock( &p_resource->lock );
-    aout_instance_t *p_ret = RequestAout( p_resource, p_aout );
+    audio_output_t *p_ret = RequestAout( p_resource, p_aout );
     vlc_mutex_unlock( &p_resource->lock );
 
     return p_ret;
 }
-aout_instance_t *input_resource_HoldAout( input_resource_t *p_resource )
+audio_output_t *input_resource_HoldAout( input_resource_t *p_resource )
 {
     return HoldAout( p_resource );
 }

@@ -2,7 +2,7 @@
  * MainMenu.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 77b16626ee25da7183152e252f3232f402da8fce $
+ * $Id: 4cddd1452f273e777bfa4cb042c6541b78003b6a $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -37,8 +37,9 @@
 #import "coredialogs.h"
 #import "controls.h"
 #import "playlistinfo.h"
-#import "vout.h"
+#import "VideoView.h"
 #import "CoreInteraction.h"
+#import "MainWindow.h"
 
 @implementation VLCMainMenu
 static VLCMainMenu *_o_sharedInstance = nil;
@@ -101,6 +102,7 @@ static VLCMainMenu *_o_sharedInstance = nil;
     playlist_t *p_playlist;
     vlc_value_t val;
     id o_vlcmain = [VLCMain sharedInstance];
+    char * key;
 
     /* Check if we already did this once. Opening the other nibs calls it too,
      because VLCMain is the owner */
@@ -108,54 +110,101 @@ static VLCMainMenu *_o_sharedInstance = nil;
 
     [self initStrings];
 
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-quit" )];
+    key = config_GetPsz( p_intf, "key-quit" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_quit setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_quit setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-play-pause" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-play-pause" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_play setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_play setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-stop" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-stop" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_stop setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_stop setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-prev" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-prev" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_previous setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_previous setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-next" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-next" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_next setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_next setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-jump+short" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-jump+short" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_fwd setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_fwd setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-jump-short" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-jump-short" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_bwd setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_bwd setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-vol-up" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-vol-up" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_vol_up setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_vol_up setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-vol-down" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-vol-down" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_vol_down setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_vol_down setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-vol-mute" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-vol-mute" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_mute setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_mute setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-toggle-fullscreen" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-toggle-fullscreen" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_fullscreen setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_fullscreen setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-snapshot" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-snapshot" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_snapshot setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_snapshot setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-random" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-random" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_random setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_random setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-zoom-half" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-zoom-half" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_half_window setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_half_window setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-zoom-original" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-zoom-original" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_normal_window setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_normal_window setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
-    o_key = [NSString stringWithFormat:@"%s", config_GetPsz( p_intf, "key-zoom-double" )];
+    FREENULL( key );
+
+    key = config_GetPsz( p_intf, "key-zoom-double" );
+    o_key = [NSString stringWithFormat:@"%s", key];
     [o_mi_double_window setKeyEquivalent: [o_vlcmain VLCKeyToString: o_key]];
     [o_mi_double_window setKeyEquivalentModifierMask: [o_vlcmain VLCModifiersToCocoa:o_key]];
+    FREENULL( key );
 
     [self setSubmenusEnabled: FALSE];
 
@@ -206,6 +255,7 @@ static VLCMainMenu *_o_sharedInstance = nil;
     [o_mu_controls setTitle: _NS("Playback")];
     [o_mi_play setTitle: _NS("Play")];
     [o_mi_stop setTitle: _NS("Stop")];
+    [o_mi_record setTitle: _NS("Record")];
     [o_mi_rate setView: o_mi_rate_view];
     [o_mi_rate_lbl setStringValue: _NS("Playback Speed")];
     [o_mi_rate_lbl_gray setStringValue: _NS("Playback Speed")];
@@ -279,7 +329,7 @@ static VLCMainMenu *_o_sharedInstance = nil;
     [o_mi_minimize setTitle: _NS("Minimize Window")];
     [o_mi_close_window setTitle: _NS("Close Window")];
     [o_mi_player setTitle: _NS("Player...")];
-    [o_mi_controller setTitle: _NS("Controller...")];
+    [o_mi_controller setTitle: _NS("Main Window...")];
     [o_mi_audioeffects setTitle: _NS("Audio Effects...")];
     [o_mi_videoeffects setTitle: _NS("Video Filters...")];
     [o_mi_bookmarks setTitle: _NS("Bookmarks...")];
@@ -326,7 +376,8 @@ static VLCMainMenu *_o_sharedInstance = nil;
     if( !p_intf ) return;
     
     NSArray *menuitems_array = [the_menu itemArray];
-    for( int i=0; i<[menuitems_array count]; i++ )
+    NSUInteger menuItemCount = [menuitems_array count];
+    for( NSUInteger i=0; i < menuItemCount; i++ )
     {
         NSMenuItem *one_item = [menuitems_array objectAtIndex: i];
         if( [one_item hasSubmenu] )
@@ -345,6 +396,8 @@ static VLCMainMenu *_o_sharedInstance = nil;
     input_thread_t * p_input = playlist_CurrentInput( p_playlist );
     if( p_input != NULL )
     {
+        [o_mi_record setEnabled: var_GetBool( p_input, "can-record" )];
+
         [self setupVarMenuItem: o_mi_program target: (vlc_object_t *)p_input
                                  var: "program" selector: @selector(toggleVar:)];
 
@@ -367,7 +420,7 @@ static VLCMainMenu *_o_sharedInstance = nil;
         if( [o_mi_videotrack isEnabled] == YES )
             [o_mi_subtitle setEnabled: YES];
 
-        aout_instance_t * p_aout = input_GetAout( p_input );
+        audio_output_t * p_aout = input_GetAout( p_input );
         if( p_aout != NULL )
         {
             [self setupVarMenuItem: o_mi_channels target: (vlc_object_t *)p_aout
@@ -410,6 +463,10 @@ static VLCMainMenu *_o_sharedInstance = nil;
             vlc_object_release( (vlc_object_t *)p_vout );
         }
         vlc_object_release( p_input );
+    }
+    else
+    {
+        [o_mi_record setEnabled: NO];
     }
 }
 
@@ -460,6 +517,7 @@ static VLCMainMenu *_o_sharedInstance = nil;
 
 - (void)setRateControlsEnabled:(BOOL)b_enabled
 {
+    NSAutoreleasePool *o_pool = [[NSAutoreleasePool alloc] init];
     [o_mi_rate_sld setEnabled: b_enabled];
     [o_mi_rate_sld setIntValue: [[VLCCoreInteraction sharedInstance] playbackRate]];
     int i = [[VLCCoreInteraction sharedInstance] playbackRate];
@@ -475,6 +533,7 @@ static VLCMainMenu *_o_sharedInstance = nil;
         [o_mi_rate_lbl setHidden: YES];
         [o_mi_rate_lbl_gray setHidden: NO];
     }
+    [o_pool release];
 }
 
 #pragma mark -
@@ -492,6 +551,16 @@ static VLCMainMenu *_o_sharedInstance = nil;
 
 #pragma mark -
 #pragma mark Playback
+- (IBAction)toggleRecord:(id)sender
+{
+    [[VLCCoreInteraction sharedInstance] toggleRecord];
+}
+
+- (void)updateRecordState:(BOOL)b_value
+{
+    [o_mi_record setState:b_value];
+}
+
 - (IBAction)setPlaybackRate:(id)sender
 {
     [[VLCCoreInteraction sharedInstance] setPlaybackRate: [o_mi_rate_sld intValue]];
@@ -501,6 +570,80 @@ static VLCMainMenu *_o_sharedInstance = nil;
     [o_mi_rate_fld setStringValue: [NSString stringWithFormat:@"%ix", i]];
 }
 
+- (void)updatePlaybackRate
+{
+    int i = [[VLCCoreInteraction sharedInstance] playbackRate];
+    if (i == 0)
+        i = 1;
+    [o_mi_rate_fld setStringValue: [NSString stringWithFormat:@"%ix", i]];
+    [o_mi_rate_sld setIntValue: i];
+}
+
+#pragma mark -
+#pragma video menu
+- (IBAction)toggleFullscreen:(id)sender
+{
+    [[VLCCoreInteraction sharedInstance] toggleFullscreen];
+}
+
+- (IBAction)resizeVideoWindow:(id)sender
+{
+    input_thread_t *p_input = pl_CurrentInput( VLCIntf );
+    if (p_input)
+    {
+        vout_thread_t *p_vout = getVout();
+        if (p_vout)
+        {
+            if (sender == o_mi_half_window)
+                var_SetFloat( p_vout, "zoom", 0.5 );
+            else if (sender == o_mi_normal_window)
+                var_SetFloat( p_vout, "zoom", 1.0 );
+            else if (sender == o_mi_double_window)
+                var_SetFloat( p_vout, "zoom", 2.0 );
+            else
+            {
+                var_ToggleBool( p_vout, "autoscale" );
+            }
+            vlc_object_release( p_vout );
+        }
+        vlc_object_release( p_input );
+    }
+}
+
+- (IBAction)floatOnTop:(id)sender
+{
+    input_thread_t *p_input = pl_CurrentInput( VLCIntf );
+    if (p_input)
+    {
+        vout_thread_t *p_vout = getVout();
+        if (p_vout)
+        {
+            var_ToggleBool( p_vout, "video-on-top" );
+            vlc_object_release( p_vout );
+        }
+        vlc_object_release( p_input );
+    }
+}
+
+- (IBAction)createVideoSnapshot:(id)sender
+{
+    input_thread_t *p_input = pl_CurrentInput( VLCIntf );
+    if (p_input)
+    {
+        vout_thread_t *p_vout = getVout();
+        if (p_vout)
+        {
+            var_TriggerCallback( p_vout, "video-snapshot" );
+            vlc_object_release( p_vout );
+        }
+        vlc_object_release( p_input );
+    }
+}
+
+- (id)voutMenu
+{
+    return o_vout_menu;
+}
 
 #pragma mark -
 #pragma mark Panels
@@ -671,6 +814,32 @@ static VLCMainMenu *_o_sharedInstance = nil;
     [o_mi_play setTitle: _NS("Pause")];
     [o_dmi_play setTitle: _NS("Pause")];
     [o_vmi_play setTitle: _NS("Pause")];
+}
+
+- (void)setRepeatOne
+{
+    [o_mi_repeat setState: NSOnState];
+    [o_mi_loop setState: NSOffState];
+}
+
+- (void)setRepeatAll
+{
+    [o_mi_repeat setState: NSOffState];
+    [o_mi_loop setState: NSOnState];
+}
+
+- (void)setRepeatOff
+{
+    [o_mi_repeat setState: NSOffState];
+    [o_mi_loop setState: NSOffState];
+}
+
+- (void)setShuffle
+{
+    bool b_value;
+    playlist_t *p_playlist = pl_Get( VLCIntf );
+    b_value = var_GetBool( p_playlist, "random" );
+	[o_mi_random setState: b_value];
 }
 
 #pragma mark -
@@ -1048,9 +1217,6 @@ static VLCMainMenu *_o_sharedInstance = nil;
             [o_title isEqualToString: _NS("Fullscreen")] ||
             [o_title isEqualToString: _NS("Float on Top")] )
     {
-        id o_window;
-        NSArray *o_windows = [NSApp orderedWindows];
-        NSEnumerator *o_enumerator = [o_windows objectEnumerator];
         bEnabled = FALSE;
 
         if( p_input != NULL )
@@ -1060,28 +1226,17 @@ static VLCMainMenu *_o_sharedInstance = nil;
             {
                 if( [o_title isEqualToString: _NS("Float on Top")] )
                 {
-                    var_Get( p_vout, "video-on-top", &val );
-                    [o_mi setState: val.b_bool ?  NSOnState : NSOffState];
+                    [o_mi setState: var_GetBool( p_vout, "video-on-top" )];
                 }
 
-                while( (o_window = [o_enumerator nextObject]))
-                {
-                    if( [[o_window className] isEqualToString: @"VLCVoutWindow"] ||
-                       [[[VLCMain sharedInstance] embeddedList]
-                        windowContainsEmbedded: o_window])
-                    {
-                        bEnabled = TRUE;
-                        break;
-                    }
-                }
+                bEnabled = TRUE;
 
                 vlc_object_release( (vlc_object_t *)p_vout );
             }
         }
         if( [o_title isEqualToString: _NS("Fullscreen")] )
         {
-            var_Get( p_playlist, "fullscreen", &val );
-            [o_mi setState: val.b_bool];
+        [o_mi setState: var_GetBool( p_playlist, "fullscreen" )];
             bEnabled = TRUE;
         }
         [self setupMenus]; /* Make sure video menu is up to date */

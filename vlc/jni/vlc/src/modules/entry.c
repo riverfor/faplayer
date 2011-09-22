@@ -34,38 +34,43 @@
 #include "config/configuration.h"
 #include "libvlc.h"
 
-static void vlc_module_destruct (gc_object_t *obj)
+static char *strdup_null (const char *str)
 {
-    module_t *module = vlc_priv (obj, module_t);
-
-    free (module->pp_shortcuts);
-    free (module->psz_object_name);
-    free (module);
+    return (str != NULL) ? strdup (str) : NULL;
 }
 
-static const char default_name[] = "unnamed";
-
-module_t *vlc_module_create (void)
+module_t *vlc_module_create (module_t *parent)
 {
     module_t *module = malloc (sizeof (*module));
     if (module == NULL)
         return NULL;
 
-    module->psz_object_name = strdup( default_name );
-    module->next = NULL;
+    /* TODO: replace module/submodules with plugin/modules */
+    if (parent == NULL)
+    {
+        module->next = NULL;
+        module->parent = NULL;
+    }
+    else
+    {
+        module->next = parent->submodule;
+        parent->submodule = module;
+        parent->submodule_count++;
+        module->parent = parent;
+    }
+
     module->submodule = NULL;
-    module->parent = NULL;
     module->submodule_count = 0;
-    vlc_gc_init (module, vlc_module_destruct);
 
     module->psz_shortname = NULL;
-    module->psz_longname = (char*)default_name;
+    module->psz_longname = NULL;
     module->psz_help = NULL;
     module->pp_shortcuts = NULL;
     module->i_shortcuts = 0;
-    module->psz_capability = (char*)"";
-    module->i_score = 1;
-    module->b_unloadable = true;
+    module->psz_capability = NULL;
+    module->i_score = (parent != NULL) ? parent->i_score : 1;
+    module->b_loaded = false;
+    module->b_unloadable = parent == NULL;
     module->pf_activate = NULL;
     module->pf_deactivate = NULL;
     module->p_config = NULL;
@@ -75,47 +80,35 @@ module_t *vlc_module_create (void)
     /*module->handle = garbage */
     module->psz_filename = NULL;
     module->domain = NULL;
-    module->b_builtin = false;
-    module->b_loaded = false;
     return module;
 }
 
-
-static void vlc_submodule_destruct (gc_object_t *obj)
+/**
+ * Destroys a plug-in.
+ * @warning If the plug-in is loaded in memory, the handle will be leaked.
+ */
+void vlc_module_destroy (module_t *module)
 {
-    module_t *module = vlc_priv (obj, module_t);
+    assert (!module->b_loaded || !module->b_unloadable);
+
+    for (module_t *m = module->submodule, *next; m != NULL; m = next)
+    {
+        next = m->next;
+        vlc_module_destroy (m);
+    }
+
+    config_Free (module->p_config, module->confsize);
+
+    free (module->domain);
+    free (module->psz_filename);
+    for (unsigned i = 0; i < module->i_shortcuts; i++)
+        free (module->pp_shortcuts[i]);
     free (module->pp_shortcuts);
-    free (module->psz_object_name);
+    free (module->psz_capability);
+    free (module->psz_help);
+    free (module->psz_longname);
+    free (module->psz_shortname);
     free (module);
-}
-
-module_t *vlc_submodule_create (module_t *module)
-{
-    assert (module != NULL);
-
-    module_t *submodule = calloc( 1, sizeof(*submodule) );
-    if( !submodule )
-        return NULL;
-
-    vlc_gc_init (submodule, vlc_submodule_destruct);
-
-    submodule->next = module->submodule;
-    submodule->parent = module;
-    module->submodule = submodule;
-    module->submodule_count++;
-
-    /* Muahahaha! Heritage! Polymorphism! Ugliness!! */
-    submodule->pp_shortcuts = malloc( sizeof( char ** ) );
-    submodule->pp_shortcuts[0] = module->pp_shortcuts[0]; /* object name */
-    submodule->i_shortcuts = 1;
-
-    submodule->psz_object_name = strdup( module->psz_object_name );
-    submodule->psz_shortname = module->psz_shortname;
-    submodule->psz_longname = module->psz_longname;
-    submodule->psz_capability = module->psz_capability;
-    submodule->i_score = module->i_score;
-    submodule->domain = module->domain;
-    return submodule;
 }
 
 static module_config_t *vlc_config_create (module_t *module, int type)
@@ -152,20 +145,44 @@ static module_config_t *vlc_config_create (module_t *module, int type)
 }
 
 
-int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
+/**
+ * Callback for the plugin descriptor functions.
+ */
+static int vlc_plugin_setter (void *plugin, void *tgt, int propid, ...)
 {
+    module_t **pprimary = plugin;
+    module_t *module = tgt;
+    module_config_t *item = tgt;
     va_list ap;
     int ret = 0;
 
     va_start (ap, propid);
     switch (propid)
     {
-        case VLC_SUBMODULE_CREATE:
+        case VLC_MODULE_CREATE:
         {
-            module_t **pp = va_arg (ap, module_t **);
-            *pp = vlc_submodule_create (module);
-            if (*pp == NULL)
+            module = *pprimary;
+            module_t *submodule = vlc_module_create (module);
+            if (unlikely(submodule == NULL))
+            {
                 ret = -1;
+                break;
+            }
+
+            *(va_arg (ap, module_t **)) = submodule;
+            if (*pprimary == NULL)
+            {
+                *pprimary = submodule;
+                break;
+            }
+            /* Inheritance. Ugly!! */
+            submodule->pp_shortcuts = xmalloc (sizeof (char **));
+            submodule->pp_shortcuts[0] = strdup_null (module->pp_shortcuts[0]);
+            submodule->i_shortcuts = 1; /* object name */
+
+            submodule->psz_shortname = strdup_null (module->psz_shortname);
+            submodule->psz_longname = strdup_null (module->psz_longname);
+            submodule->psz_capability = strdup_null (module->psz_capability);
             break;
         }
 
@@ -173,9 +190,14 @@ int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
         {
             int type = va_arg (ap, int);
             module_config_t **pp = va_arg (ap, module_config_t **);
-            *pp = vlc_config_create (module, type);
-            if (*pp == NULL)
+
+            item = vlc_config_create (*pprimary, type);
+            if (unlikely(item == NULL))
+            {
                 ret = -1;
+                break;
+            }
+            *pp = item;
             break;
         }
 
@@ -196,12 +218,15 @@ int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
             }
             module->pp_shortcuts = pp;
             module->i_shortcuts = index + i_shortcuts;
-            memcpy (pp + index, tab, sizeof (pp[0]) * i_shortcuts);
+            pp += index;
+            for (unsigned i = 0; i < i_shortcuts; i++)
+                pp[i] = strdup (tab[i]);
             break;
         }
 
         case VLC_MODULE_CAPABILITY:
-            module->psz_capability = va_arg (ap, char *);
+            free (module->psz_capability);
+            module->psz_capability = strdup (va_arg (ap, char *));
             break;
 
         case VLC_MODULE_SCORE:
@@ -217,37 +242,46 @@ int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
             break;
 
         case VLC_MODULE_NO_UNLOAD:
+            assert (module->parent == NULL);
             module->b_unloadable = false;
             break;
 
         case VLC_MODULE_NAME:
         {
             const char *value = va_arg (ap, const char *);
-            free( module->psz_object_name );
-            module->psz_object_name = strdup( value );
+
+            assert (module->i_shortcuts == 0);
             module->pp_shortcuts = malloc( sizeof( char ** ) );
-            module->pp_shortcuts[0] = (char*)value; /* dooh! */
+            module->pp_shortcuts[0] = strdup (value);
             module->i_shortcuts = 1;
 
-            if (module->psz_longname == default_name)
-                module->psz_longname = (char*)value; /* dooh! */
+            assert (module->psz_longname == NULL);
+            module->psz_longname = strdup (value);
             break;
         }
 
         case VLC_MODULE_SHORTNAME:
-            module->psz_shortname = va_arg (ap, char *);
+            assert (module->psz_shortname == NULL || module->parent != NULL);
+            free (module->psz_shortname);
+            module->psz_shortname = strdup (va_arg (ap, char *));
             break;
 
         case VLC_MODULE_DESCRIPTION:
-            module->psz_longname = va_arg (ap, char *);
+            // TODO: do not set this in VLC_MODULE_NAME
+            free (module->psz_longname);
+            module->psz_longname = strdup (va_arg (ap, char *));
             break;
 
         case VLC_MODULE_HELP:
-            module->psz_help = va_arg (ap, char *);
+            assert (module->parent == NULL);
+            assert (module->psz_help == NULL);
+            module->psz_help = strdup (va_arg (ap, char *));
             break;
 
         case VLC_MODULE_TEXTDOMAIN:
-            module->domain = va_arg (ap, char *);
+            assert (module->parent == NULL);
+            assert (module->domain == NULL);
+            module->domain = strdup (va_arg (ap, char *));
             break;
 
         case VLC_CONFIG_NAME:
@@ -285,17 +319,15 @@ int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
 
         case VLC_CONFIG_RANGE:
         {
-            if (IsConfigIntegerType (item->i_type)
-             || !CONFIG_ITEM(item->i_type))
-            {
-                item->min.i = va_arg (ap, int64_t);
-                item->max.i = va_arg (ap, int64_t);
-            }
-            else
             if (IsConfigFloatType (item->i_type))
             {
                 item->min.f = va_arg (ap, double);
                 item->max.f = va_arg (ap, double);
+            }
+            else
+            {
+                item->min.i = va_arg (ap, int64_t);
+                item->max.i = va_arg (ap, int64_t);
             }
             break;
         }
@@ -443,4 +475,20 @@ int vlc_plugin_set (module_t *module, module_config_t *item, int propid, ...)
 
     va_end (ap);
     return ret;
+}
+
+/**
+ * Runs a plug-in descriptor. This loads the plug-in meta-data in memory.
+ */
+module_t *vlc_plugin_describe (vlc_plugin_cb entry)
+{
+    module_t *module = NULL;
+
+    if (entry (vlc_plugin_setter, &module) != 0)
+    {
+        if (module != NULL) /* partially initialized plug-in... */
+            vlc_module_destroy (module);
+        module = NULL;
+    }
+    return module;
 }

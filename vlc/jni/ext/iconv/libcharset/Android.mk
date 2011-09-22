@@ -21,5 +21,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     lib/localcharset.c
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+
 include $(BUILD_STATIC_LIBRARY)
 

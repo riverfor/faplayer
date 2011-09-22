@@ -2,7 +2,7 @@
  * omxil_utils.h: helper functions
  *****************************************************************************
  * Copyright (C) 2010 the VideoLAN team
- * $Id: e4aad8d72eacb590360b4f0ebb63fcc3758485ad $
+ * $Id: eefdeb490f5b8f2e1b61da5f05a43c8f47e26389 $
  *
  * Authors: Gildas Bazin <gbazin@videolan.org>
  *
@@ -111,4 +111,6 @@ struct decoder_sys_t
     date_t end_date;
 
     int i_nal_size_length; /* Length of the NAL size field for H264 */
+
+    OMX_BUFFERHEADERTYPE sentinel_buffer;
 };

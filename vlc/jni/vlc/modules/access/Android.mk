@@ -12,6 +12,7 @@ LOCAL_MODULE := filesystem_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"filesystem\" \
     -DMODULE_NAME=filesystem
 
@@ -25,7 +26,9 @@ LOCAL_SRC_FILES := \
     file.c \
     fs.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -38,6 +41,7 @@ LOCAL_MODULE := access_http_plugin
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
+    -D__PLUGIN__ \
     -DMODULE_STRING=\"access_http\" \
     -DMODULE_NAME=access_http
 
@@ -49,7 +53,11 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     http.c
 
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_SHARED_LIBRARIES += libvlccore
+
+LOCAL_LDLIBS += -lz
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 

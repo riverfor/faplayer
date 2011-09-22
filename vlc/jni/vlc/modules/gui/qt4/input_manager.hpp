@@ -2,7 +2,7 @@
  * input_manager.hpp : Manage an input and interact with its GUI elements
  ****************************************************************************
  * Copyright (C) 2006-2008 the VideoLAN team
- * $Id: f7533d948beb6080c8ab10ed9630d0534ba2552c $
+ * $Id: a03801a154a1900f34a2372482abda18f8e3dd80 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Baptiste <jb@videolan.org>
@@ -73,8 +73,8 @@ enum {
 };
 
 enum { NORMAL,    /* loop: 0, repeat: 0 */
-       REPEAT_ONE,/* loop: 1, repeat: 0 */
-       REPEAT_ALL,/* loop: 0, repeat: 1 */
+       REPEAT_ONE,/* loop: 0, repeat: 1 */
+       REPEAT_ALL,/* loop: 1, repeat: 0 */
 };
 
 class IMEvent : public QEvent
@@ -259,7 +259,7 @@ public:
     }
 
     vout_thread_t* getVout();
-    aout_instance_t *getAout();
+    audio_output_t *getAout();
 
     bool getPlayExitState();
 private:

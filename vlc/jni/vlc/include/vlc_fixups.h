@@ -64,7 +64,8 @@ typedef struct
 # include <sys/types.h> /* ssize_t, pid_t */
 #endif
 
-#ifndef HAVE_DIRFD
+#if !defined (HAVE_DIRFD) || \
+    !defined (HAVE_FDOPENDIR)
 # include <dirent.h>
 #endif
 
@@ -188,6 +189,10 @@ int fsync (int fd);
 int dirfd (DIR *);
 #endif
 
+#ifndef HAVE_FDOPENDIR
+DIR *fdopendir (int);
+#endif
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
@@ -252,7 +257,7 @@ void swab (const void *, void *, ssize_t);
 # define inet_ntop vlc_inet_ntop
 #endif
 
-#ifndef HAVE_POLL
+#ifndef HAVE_STRUCT_POLLFD
 enum
 {
     POLLIN=1,
@@ -269,7 +274,8 @@ struct pollfd
     unsigned events;
     unsigned revents;
 };
-
+#endif
+#ifndef HAVE_POLL
 # define poll(a, b, c) vlc_poll(a, b, c)
 #elif defined (HAVE_MAEMO)
 # include <poll.h>

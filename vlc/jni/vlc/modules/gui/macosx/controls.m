@@ -2,7 +2,7 @@
  * controls.m: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2002-2011 the VideoLAN team
- * $Id: d331bb19795320cda05278f9a4618c53c4f9a5de $
+ * $Id: 0ad95d84037ff4e741cf9d5644d1996326488aa6 $
  *
  * Authors: Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Christophe Massiot <massiot@via.ecp.fr>
@@ -33,7 +33,7 @@
 #include <string.h>
 
 #import "intf.h"
-#import "vout.h"
+#import "VideoView.h"
 #import "open.h"
 #import "controls.h"
 #import "playlist.h"
@@ -45,13 +45,6 @@
  * VLCControls implementation
  *****************************************************************************/
 @implementation VLCControls
-
-- (id)init
-{
-    [super init];
-    o_fs_panel = [[VLCFSPanel alloc] init];
-    return self;
-}
 
 - (void)awakeFromNib
 {
@@ -80,21 +73,6 @@
     [[VLCCoreInteraction sharedInstance] stop];
 }
 
-- (IBAction)faster:(id)sender
-{
-    [[VLCCoreInteraction sharedInstance] faster];
-}
-
-- (IBAction)slower:(id)sender
-{
-    [[VLCCoreInteraction sharedInstance] slower];
-}
-
-- (IBAction)normalSpeed:(id)sender
-{
-    [[VLCCoreInteraction sharedInstance] normalSpeed];
-}
-
 - (IBAction)prev:(id)sender
 {
     [[VLCCoreInteraction sharedInstance] previous];
@@ -108,56 +86,7 @@
 - (IBAction)random:(id)sender
 {
     [[VLCCoreInteraction sharedInstance] shuffle];
-
-    vlc_value_t val;
-    playlist_t *p_playlist = pl_Get( VLCIntf );
-    var_Get( p_playlist, "random", &val );
-	if(val.b_bool) {
-        [o_btn_shuffle setImage: [NSImage imageNamed:@"shuffle-on"]];
-        [o_btn_shuffle setAlternateImage: [NSImage imageNamed:@"shuffle-blue-pressed"]];
-    }
-    else
-    {
-        [o_btn_shuffle setImage: [NSImage imageNamed:@"shuffle"]];
-        [o_btn_shuffle setAlternateImage: [NSImage imageNamed:@"shuffle-pressed"]];
-    }
 }
-
-- (IBAction)repeatButtonAction:(id)sender
-{
-    vlc_value_t looping,repeating;
-    intf_thread_t * p_intf = VLCIntf;
-    playlist_t * p_playlist = pl_Get( p_intf );
-
-    var_Get( p_playlist, "repeat", &repeating );
-    var_Get( p_playlist, "loop", &looping );
-
-    if( !repeating.b_bool && !looping.b_bool )
-    {
-        /* was: no repeating at all, switching to Repeat One */
-        [[VLCCoreInteraction sharedInstance] repeatOne];
-
-        [o_btn_repeat setImage: [NSImage imageNamed:@"repeat-one"]];
-        [o_btn_repeat setAlternateImage: [NSImage imageNamed:@"repeat-one-pressed"]];
-    }
-    else if( repeating.b_bool && !looping.b_bool )
-    {
-        /* was: Repeat One, switching to Repeat All */
-        [[VLCCoreInteraction sharedInstance] repeatAll];
-
-        [o_btn_repeat setImage: [NSImage imageNamed:@"repeat-all"]];
-        [o_btn_repeat setAlternateImage: [NSImage imageNamed:@"repeat-all-pressed"]];
-    }
-    else
-    {
-        /* was: Repeat All or bug in VLC, switching to Repeat Off */
-        [[VLCCoreInteraction sharedInstance] repeatOff];
-
-        [o_btn_repeat setImage: [NSImage imageNamed:@"repeat"]];
-        [o_btn_repeat setAlternateImage: [NSImage imageNamed:@"repeat-pressed"]];
-    }
-}
-
 
 - (IBAction)repeat:(id)sender
 {
@@ -202,7 +131,6 @@
     [[VLCCoreInteraction sharedInstance] backward];
 }
 
-
 - (IBAction)volumeUp:(id)sender
 {
     [[VLCCoreInteraction sharedInstance] volumeUp];
@@ -233,65 +161,6 @@
         {
             var_SetInteger( VLCIntf->p_libvlc, "key-action", ACTIONID_POSITION );
             vlc_object_release( (vlc_object_t *)p_vout );
-        }
-        vlc_object_release( p_input );
-    }
-}
-
-- (IBAction)toogleFullscreen:(id)sender {
-    [[VLCCoreInteraction sharedInstance] toggleFullscreen];
-}
-
-- (BOOL) isFullscreen {
-    id o_vout_view = [[VLCCoreInteraction sharedInstance] voutView];
-    if( o_vout_view )
-    {
-        return [o_vout_view isFullscreen];
-    }
-    return NO;
-}
-
-- (IBAction)windowAction:(id)sender
-{
-    NSString *o_title = [sender title];
-    input_thread_t * p_input = pl_CurrentInput( VLCIntf );
-
-    if( p_input != NULL )
-    {
-        vout_thread_t *p_vout = input_GetVout( p_input );
-        if( p_vout != NULL )
-        {
-            id o_vout_view = [[VLCCoreInteraction sharedInstance] voutView];
-            if( o_vout_view )
-            {
-                if( [o_title isEqualToString: _NS("Half Size") ] )
-                    [o_vout_view scaleWindowWithFactor: 0.5 animate: YES];
-                else if( [o_title isEqualToString: _NS("Normal Size") ] )
-                    [o_vout_view scaleWindowWithFactor: 1.0 animate: YES];
-                else if( [o_title isEqualToString: _NS("Double Size") ] )
-                    [o_vout_view scaleWindowWithFactor: 2.0 animate: YES];
-                else if( [o_title isEqualToString: _NS("Float on Top") ] )
-                    [o_vout_view toggleFloatOnTop];
-                else if( [o_title isEqualToString: _NS("Fit to Screen") ] )
-                {
-                    id o_window = [o_vout_view voutWindow];
-                    if( ![o_window isZoomed] )
-                        [o_window performZoom:self];
-                }
-                else if( [o_title isEqualToString: _NS("Snapshot") ] )
-                {
-                    [o_vout_view snapshot];
-                }
-                else
-                {
-                    [[VLCCoreInteraction sharedInstance] toggleFullscreen];
-                }
-            }
-            vlc_object_release( (vlc_object_t *)p_vout );
-        }
-        else
-        {
-            [[VLCCoreInteraction sharedInstance] toggleFullscreen];
         }
         vlc_object_release( p_input );
     }
@@ -379,22 +248,11 @@
     }
 }
 
-- (id)fspanel
-{
-    if( o_fs_panel )
-        return o_fs_panel;
-    else
-    {
-        msg_Err( VLCIntf, "FSPanel is nil" );
-        return NULL;
-    }
-}
-
 - (void)scrollWheel:(NSEvent *)theEvent
 {
     intf_thread_t * p_intf = VLCIntf;
     BOOL b_invertedEventFromDevice = NO;
-    if ([theEvent respondsToSelector:@selector(isDirectionInvertedFromDevice)])
+    if (OSX_LION)
     {
         if ([theEvent isDirectionInvertedFromDevice])
             b_invertedEventFromDevice = YES;
@@ -458,11 +316,14 @@
                 /* Escape */
                 if( key == (unichar) 0x1b )
                 {
-                    id o_vout_view = [[VLCCoreInteraction sharedInstance] voutView];
-                    if( o_vout_view && [o_vout_view isFullscreen] )
+                    vout_thread_t *p_vout = getVout();
+                    if (p_vout)
                     {
-                        [o_vout_view toggleFullscreen];
-                        eventHandled = YES;
+                        if (var_GetBool( p_vout, "fullscreen" ))
+                        {
+                            [[VLCCoreInteraction sharedInstance] toggleFullscreen];
+                            eventHandled = YES;
+                        }
                     }
                 }
                 else if( key == ' ' )

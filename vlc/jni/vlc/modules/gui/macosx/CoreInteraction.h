@@ -2,7 +2,7 @@
  * CoreInteraction.h: MacOS X interface module
  *****************************************************************************
  * Copyright (C) 2011 Felix Paul Kühne
- * $Id: 1da5c53c1b53679818853b7e8ace375bb008f19b $
+ * $Id: 085997a4e11a2434ba2b26f1bdf78322992af457 $
  *
  * Authors: Felix Paul Kühne <fkuehne -at- videolan -dot- org>
  *
@@ -36,12 +36,27 @@
 - (void)faster;
 - (void)slower;
 - (void)normalSpeed;
+- (void)toggleRecord;
 - (void)setPlaybackRate:(int)i_value;
 - (int)playbackRate;
 - (void)next;
 - (void)previous;
-- (void)forward;
-- (void)backward;
+- (BOOL)isPlaying;
+- (int)currentTime;
+- (void)setCurrentTime:(int)i_value;
+- (int)durationOfCurrentPlaylistItem;
+- (NSURL*)URLOfCurrentPlaylistItem;
+- (NSString*)nameOfCurrentPlaylistItem;
+- (void)forward;        //LEGACY SUPPORT
+- (void)backward;       //LEGACY SUPPORT
+- (void)forwardExtraShort;
+- (void)backwardExtraShort;
+- (void)forwardShort;
+- (void)backwardShort;
+- (void)forwardMedium;
+- (void)backwardMedium;
+- (void)forwardLong;
+- (void)backwardLong;
 
 - (void)repeatOne;
 - (void)repeatAll;
@@ -51,10 +66,11 @@
 - (void)volumeUp;
 - (void)volumeDown;
 - (void)mute;
-- (void)setVolume: (int)i_value;
+- (BOOL)isMuted;
+- (int)volume;
+- (void)setVolume:(int)i_value;
 
 - (void)setAspectRatioLocked:(BOOL)b_value;
 - (BOOL)aspectRatioIsLocked;
 - (void)toggleFullscreen;
-- (id)voutView;
 @end

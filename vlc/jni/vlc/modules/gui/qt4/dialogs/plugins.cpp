@@ -2,7 +2,7 @@
  * plugins.hpp : Plug-ins and extensions listing
  ****************************************************************************
  * Copyright (C) 2008-2010 the VideoLAN team
- * $Id: effda5451b7aedbe7ec8f8f964ec2bc738963099 $
+ * $Id: dd265b60faacc9776bb48d44d58049d5b60e39d8 $
  *
  * Authors: Jean-Baptiste Kempf <jb (at) videolan.org>
  *          Jean-Philippe André <jpeg (at) videolan.org>
@@ -169,6 +169,15 @@ PluginTab::~PluginTab()
                              treePlugins->header()->saveState() );
 }
 
+void PluginTab::keyPressEvent( QKeyEvent *keyEvent )
+{
+    if( keyEvent->key() == Qt::Key_Return ||
+        keyEvent->key() == Qt::Key_Enter )
+        keyEvent->accept();
+    else
+        keyEvent->ignore();
+}
+
 bool PluginTreeItem::operator< ( const QTreeWidgetItem & other ) const
 {
     int col = treeWidget()->sortColumn();
@@ -236,7 +245,11 @@ ExtensionTab::~ExtensionTab()
 // Do not close on ESC or ENTER
 void ExtensionTab::keyPressEvent( QKeyEvent *keyEvent )
 {
-    keyEvent->ignore();
+    if( keyEvent->key() == Qt::Key_Return ||
+        keyEvent->key() == Qt::Key_Enter )
+        keyEvent->accept();
+    else
+        keyEvent->ignore();
 }
 
 // Show more information
@@ -325,7 +338,7 @@ void ExtensionListModel::updateList()
     FOREACH_ARRAY( p_ext, p_mgr->extensions )
     {
         ext = new ExtensionCopy( p_ext );
-        extensions.push_back( ext );
+        extensions.append( ext );
     }
     FOREACH_END()
     vlc_mutex_unlock( &p_mgr->lock );
@@ -367,7 +380,7 @@ QModelIndex ExtensionListModel::index( int row, int column,
 {
     if( column != 0 )
         return QModelIndex();
-    if( row < 0 || row >= extensions.size() )
+    if( row < 0 || row >= extensions.count() )
         return QModelIndex();
 
     return createIndex( row, 0, extensions.at( row ) );

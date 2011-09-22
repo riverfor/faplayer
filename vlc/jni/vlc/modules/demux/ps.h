@@ -2,7 +2,7 @@
  * ps.h: Program Stream demuxer helper
  *****************************************************************************
  * Copyright (C) 2004-2009 the VideoLAN team
- * $Id: 23bcead383d21d336d2dc56f617c85c762d5d93a $
+ * $Id: 674c36517ba0b2e1898a5e562f181f685bce92e0 $
  *
  * Authors: Laurent Aimar <fenrir@via.ecp.fr>
  *
@@ -577,7 +577,7 @@ static inline int ps_psm_fill( ps_psm_t *p_psm, block_t *p_pkt,
 {
     int i_buffer = p_pkt->i_buffer;
     uint8_t *p_buffer = p_pkt->p_buffer;
-    int i_length, i_version, i_info_length, i_esm_length, i_es_base;
+    int i_length, i_version, i_info_length, i_es_base;
 
     if( !p_psm || p_buffer[3] != 0xbc ) return VLC_EGENERIC;
 
@@ -595,8 +595,8 @@ static inline int ps_psm_fill( ps_psm_t *p_psm, block_t *p_pkt,
     if( i_info_length + 10 > i_length ) return VLC_EGENERIC;
 
     /* Elementary stream map */
-    i_esm_length = (uint16_t)(p_buffer[ 10 + i_info_length ] << 8) +
-        p_buffer[ 11 + i_info_length];
+    /* int i_esm_length = (uint16_t)(p_buffer[ 10 + i_info_length ] << 8) +
+        p_buffer[ 11 + i_info_length]; */
     i_es_base = 12 + i_info_length;
 
     while( i_es_base + 4 < i_length )

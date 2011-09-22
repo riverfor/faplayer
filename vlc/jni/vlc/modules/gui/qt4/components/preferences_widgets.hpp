@@ -2,7 +2,7 @@
  * preferences_widgets.hpp : Widgets for preferences panels
  ****************************************************************************
  * Copyright (C) 2006-2007 the VideoLAN team
- * $Id: 99a7957a311fc239e26ed369820a00135a232ae5 $
+ * $Id: d629e65f6dff804b37efea0059b4e5461daa340e $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Antoine Cellerier <dionoea@videolan.org>
@@ -416,7 +416,7 @@ public:
     virtual ~StringConfigControl();
     virtual QString getValue();
 private:
-    std::vector<ModuleCheckBox> checkboxes;
+    QVector<ModuleCheckBox> checkboxes;
     QLineEdit *text;
 private slot:
     void OnUpdate();
