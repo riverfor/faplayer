@@ -54,7 +54,7 @@ LOCAL_SRC_FILES := \
     swscale.c \
     ../codec/avcodec/chroma.c
 
-LOCAL_STATIC_LIBRARIES += swscale avutil
+LOCAL_SHARED_LIBRARIES += libswscale
 
 LOCAL_SHARED_LIBRARIES += libvlccore
 

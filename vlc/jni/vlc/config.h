@@ -53,7 +53,7 @@
 /* #undef CAN_COMPILE_SSSE3 */
 
 /* The ./configure command line */
-#define CONFIGURE_LINE "nothing special (vlc-0ad141d394dd86e930d1f27be2ea6ea7e698fddf)"
+#define CONFIGURE_LINE "nothing special (vlc-5eac86a0e5c3ae5a00ad49a4d405b5bc917fc302)"
 
 /* Copyright string */
 #define COPYRIGHT_MESSAGE "Copyright © 1996-2011 the VideoLAN team"

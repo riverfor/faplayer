@@ -860,9 +860,13 @@ LOCAL_SRC_FILES += $(FF_AVCODEC_ARM_NEON_SRC)
 endif
 endif
 
+LOCAL_SHARED_LIBRARIES += libavutil
+
+LOCAL_LDLIBS += -lz
+
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -870,7 +874,7 @@ ifeq ($(BUILD_WITH_ARM),1)
 LOCAL_ARM_MODE := arm
 endif
 
-LOCAL_MODULE := libavdevice
+#LOCAL_MODULE := libavdevice
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
@@ -883,7 +887,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
 
-include $(BUILD_STATIC_LIBRARY)
+#include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -891,7 +895,7 @@ ifeq ($(BUILD_WITH_ARM),1)
 LOCAL_ARM_MODE := arm
 endif
 
-LOCAL_MODULE := libavfilter
+#LOCAL_MODULE := libavfilter
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
@@ -902,9 +906,13 @@ LOCAL_CFLAGS += $(FF_CFLAGS)
 LOCAL_SRC_FILES := \
     $(FF_AVFILTER_SRC)
 
+LOCAL_SHARED_LIBRARIES += libavutil libavformat libavcodec libswscale
+
+LOCAL_LDLIBS += -lz
+
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
 
-include $(BUILD_STATIC_LIBRARY)
+#include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -923,9 +931,13 @@ LOCAL_CFLAGS += $(FF_CFLAGS)
 LOCAL_SRC_FILES := \
     $(FF_AVFORMAT_SRC)
 
+LOCAL_SHARED_LIBRARIES += libavutil libavcodec
+
+LOCAL_LDLIBS += -lz
+
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -944,9 +956,11 @@ LOCAL_CFLAGS += $(FF_CFLAGS)
 LOCAL_SRC_FILES := \
     $(FF_AVUTIL_SRC)
 
+LOCAL_LDLIBS += -lz
+
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -965,7 +979,9 @@ LOCAL_CFLAGS += $(FF_CFLAGS)
 LOCAL_SRC_FILES := \
     $(FF_SWSCALE_SRC)
 
+LOCAL_SHARED_LIBRARIES += libavutil libavformat libavcodec
+
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 

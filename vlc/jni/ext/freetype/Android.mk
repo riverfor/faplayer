@@ -63,5 +63,5 @@ LOCAL_MODULE:= libfreetype
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 endif

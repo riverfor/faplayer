@@ -27,7 +27,7 @@ LOCAL_SRC_FILES := \
     ../../codec/avcodec/chroma.c \
     ../../codec/avcodec/fourcc.c
 
-LOCAL_STATIC_LIBRARIES += libavformat libavcodec libavutil
+LOCAL_SHARED_LIBRARIES += libavcodec libavformat libavutil
 
 LOCAL_SHARED_LIBRARIES += libvlccore
 

@@ -32,7 +32,7 @@ LOCAL_SRC_FILES := \
     subtitle.c \
     video.c
 
-LOCAL_STATIC_LIBRARIES += libavcodec libavformat libavdevice libavutil
+LOCAL_SHARED_LIBRARIES += libavcodec libavutil
 
 LOCAL_SHARED_LIBRARIES += libvlccore
 

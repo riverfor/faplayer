@@ -24,7 +24,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     freetype.c
 
-LOCAL_STATIC_LIBRARIES += libfreetype
+LOCAL_SHARED_LIBRARIES += libfreetype
 
 LOCAL_SHARED_LIBRARIES += libvlccore
 

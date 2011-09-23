@@ -178,7 +178,7 @@ LOCAL_LDLIBS += -ldl -llog -lz
 
 LOCAL_STATIC_LIBRARIES += compat
 
-LOCAL_STATIC_LIBRARIES += libiconv libcharset
+LOCAL_SHARED_LIBRARIES += libiconv
 
 ifeq ($(BUILD_WITH_ARM_NEON),1)
 LOCAL_STATIC_LIBRARIES += arm_neon

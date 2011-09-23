@@ -1097,7 +1097,6 @@ endif
 ifdef HAVE_WIN32
 	sed -i "s/std=c99/std=gnu99/" ffmpeg/configure
 endif
-	(cd ffmpeg; patch -p1 < ../Patches/libavformat-ape.c.patch )
 	touch $@
 
 else
@@ -2458,6 +2457,7 @@ libupnp: libupnp-$(UPNP_VERSION).tar.bz2
 ifdef HAVE_WIN32
 	patch -p0 < Patches/libupnp-configure.patch
 	patch -p0 < Patches/libupnp-win32.patch
+	patch -p0 < Patches/libupnp-win64.patch
 endif
 	cd $@; libtoolize && autoreconf
 

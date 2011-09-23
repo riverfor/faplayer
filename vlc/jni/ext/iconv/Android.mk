@@ -25,7 +25,7 @@ LOCAL_STATIC_LIBRARIES += libcharset
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 

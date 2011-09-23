@@ -335,7 +335,7 @@ static libvlc_event_type_t mp_listening[] = {
 JNIEXPORT void JNICALL NAME(nativeCreate)(JNIEnv *env, jobject thiz)
 {
     /* XXX: lock */
-    /* set VLC_PLUGIN_PATH */
+    /* set LD_LIBRARY_PATH and VLC_PLUGIN_PATH */
     jclass vlc_media_player_clz = (*env)->GetObjectClass(env, thiz);
     jfieldID vlc_plugin_path_fid = (*env)->GetStaticFieldID(env, vlc_media_player_clz, "sPluginPath", "Ljava/lang/String;");
     jobject vlc_plugin_path_obj = (*env)->GetStaticObjectField(env, vlc_media_player_clz, vlc_plugin_path_fid);
@@ -343,6 +343,12 @@ JNIEXPORT void JNICALL NAME(nativeCreate)(JNIEnv *env, jobject thiz)
     if (vlc_plugin_path)
     {
         setenv("VLC_PLUGIN_PATH", vlc_plugin_path, 1);
+        char *ld_library_path = getenv("LD_LIBRARY_PATH"), *temp;
+        if (((vlc_plugin_path == NULL) || (strstr(ld_library_path, vlc_plugin_path) == NULL)) && !(asprintf(&temp, "%s:%s", ld_library_path ? ld_library_path : "", vlc_plugin_path) < 0))
+        {
+            setenv("LD_LIBRARY_PATH", temp, 1);
+            free(temp);
+        }
         (*env)->ReleaseStringUTFChars(env, vlc_plugin_path_obj, vlc_plugin_path);
     }
     (*env)->DeleteLocalRef(env, vlc_media_player_clz);

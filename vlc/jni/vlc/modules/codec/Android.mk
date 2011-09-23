@@ -80,9 +80,11 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     libass.c
 
-LOCAL_SHARED_LIBRARIES += libvlccore
+LOCAL_STATIC_LIBRARIES += libass
 
-LOCAL_STATIC_LIBRARIES += libass libiconv libfreetype
+LOCAL_SHARED_LIBRARIES += libiconv libfreetype
+
+LOCAL_SHARED_LIBRARIES += libvlccore
 
 include $(BUILD_SHARED_LIBRARY)
 
