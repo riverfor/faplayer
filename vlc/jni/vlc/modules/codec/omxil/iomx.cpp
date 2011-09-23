@@ -33,6 +33,7 @@
 #include <media/IOMX.h>
 #include <binder/MemoryDealer.h>
 #include <OMX_Component.h>
+#include <cutils/properties.h>
 
 #include "iomx.h"
 extern "C" {
@@ -368,8 +369,19 @@ static OMX_ERRORTYPE iomx_get_roles_of_component(OMX_STRING component_name, OMX_
     return OMX_ErrorInvalidComponentName;
 }
 
+static int get_sdk_version()
+{
+    char value[PROPERTY_VALUE_MAX + 1];
+
+    if (property_get("ro.build.version.sdk", value, NULL) < 0)
+        return 0;
+    return atoi(value);
+}
+
 void* iomx_dlopen(const char *name)
 {
+    if (get_sdk_version() < TARGET_SDK_VERSION)
+        return NULL;
     if (!ctx)
         ctx = new IOMXContext();
     ctx->refcount++;

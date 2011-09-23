@@ -15,7 +15,8 @@ LOCAL_CFLAGS += \
     -D__PLUGIN__ \
     -DMODULE_STRING=\"iomx_gingerbread\" \
     -DMODULE_NAME=iomx_gingerbread \
-    -DUSE_IOMX
+    -DUSE_IOMX \
+    -DTARGET_SDK_VERSION=9
 
 LOCAL_CPPFLAGS += \
     -fno-exceptions \
