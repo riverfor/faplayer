@@ -36,7 +36,7 @@ ifeq ($(BUILD_WITH_ARM),1)
 LOCAL_ARM_MODE := arm
 endif
 
-LOCAL_MODULE := converter_fixed_plugin
+#LOCAL_MODULE := converter_fixed_plugin
 
 LOCAL_CFLAGS += \
     -std=gnu99 \
@@ -55,7 +55,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_SHARED_LIBRARIES += libvlccore
 
-include $(BUILD_SHARED_LIBRARY)
+#include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 

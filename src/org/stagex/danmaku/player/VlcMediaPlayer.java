@@ -26,8 +26,10 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	private static final String sThisAbi = "armeabiv7a";
 	private static final String sThisFeature = "neon";
 	private static final String sPackagePrefix = "org.stagex.danmaku.player.vlc";
-	private static final String sSoName = "vlccore";
-	private static final String sSoFullName = "libvlccore.so";
+	private static final String sSoLoaderName = "vlc-loader";
+	private static final String sSoLoaderFullName = "libvlc-loader.so";
+	private static final String sSoVlcCoreName = "vlccore";
+	private static final String sSoVlcCoreFullName = "libvlccore.so";
 
 	protected AbsMediaPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener = null;
 	protected AbsMediaPlayer.OnCompletionListener mOnCompletionListener = null;
@@ -37,10 +39,6 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 	protected AbsMediaPlayer.OnProgressUpdateListener mOnProgressUpdateListener = null;
 	/* double check this */
 	protected AbsMediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener = null;
-
-	/* */
-	private static String sCorePath = null;
-	private static String sPluginPath = null;
 
 	private int mTime = -1;
 
@@ -243,11 +241,13 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 			try {
 				ApplicationInfo info = pm.getApplicationInfo(pn,
 						PackageManager.GET_SHARED_LIBRARY_FILES);
-				sCorePath = String.format("%s/lib/%s", info.dataDir,
-						sSoFullName);
-				sPluginPath = String.format("%s/lib", info.dataDir);
+				String loaderPath = String.format("%s/lib/%s", info.dataDir,
+						sSoLoaderFullName);
+				String vlcCorePath = String.format("%s/lib/%s", info.dataDir,
+						sSoVlcCoreFullName);
 				try {
-					System.load(sCorePath);
+					System.load(loaderPath);
+					System.load(vlcCorePath);
 					return new VlcMediaPlayer();
 				} catch (UnsatisfiedLinkError e) {
 					Log.e(LOGTAG, e.getMessage());
@@ -265,9 +265,8 @@ public class VlcMediaPlayer extends AbsMediaPlayer {
 		}
 
 		/* use the built-in libraries */
-		ApplicationInfo info = context.getApplicationInfo();
-		sPluginPath = String.format("%s/lib", info.dataDir);
-		System.loadLibrary(sSoName);
+		System.loadLibrary(sSoLoaderName);
+		System.loadLibrary(sSoVlcCoreName);
 		return new VlcMediaPlayer();
 	}
 

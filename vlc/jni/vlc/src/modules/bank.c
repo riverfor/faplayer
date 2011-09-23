@@ -277,7 +277,7 @@ static void AllocateAllPlugins (vlc_object_t *p_this)
      * executable. Set it to <vlc path>/plugins. */
     assert( vlcpath );
 
-    if( asprintf( &paths, "%s" DIR_SEP "plugins", vlcpath ) != -1 )
+    if( asprintf( &paths, "%s", vlcpath ) != -1 )
     {
         AllocatePluginPath (p_this, paths, mode);
         free( paths );

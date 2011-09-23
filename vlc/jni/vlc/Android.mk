@@ -3,10 +3,6 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := libvlccore
 
 LOCAL_CFLAGS += \
@@ -174,15 +170,15 @@ LOCAL_SRC_FILES := \
     lib/video.c \
     libvlcjni.c
 
-LOCAL_LDLIBS += -ldl -llog -lz
-
 LOCAL_STATIC_LIBRARIES += compat
-
-LOCAL_SHARED_LIBRARIES += libiconv
 
 ifeq ($(BUILD_WITH_ARM_NEON),1)
 LOCAL_STATIC_LIBRARIES += arm_neon
 endif
+
+LOCAL_SHARED_LIBRARIES += libiconv
+
+LOCAL_LDLIBS += -ldl -llog -lz
 
 include $(BUILD_SHARED_LIBRARY)
 
