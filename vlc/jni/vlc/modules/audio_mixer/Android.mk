@@ -3,10 +3,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := fixed32_mixer_plugin
 
 LOCAL_CFLAGS += \
@@ -29,10 +25,6 @@ LOCAL_SHARED_LIBRARIES += libvlccore
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
 
 LOCAL_MODULE := float32_mixer_plugin
 

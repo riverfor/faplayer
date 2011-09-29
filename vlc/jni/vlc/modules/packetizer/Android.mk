@@ -3,10 +3,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := packetizer_copy_plugin
 
 LOCAL_CFLAGS += \
@@ -29,10 +25,6 @@ LOCAL_SHARED_LIBRARIES += libvlccore
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
 
 LOCAL_MODULE := packetizer_dirac_plugin
 
@@ -57,10 +49,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := packetizer_flac_plugin
 
 LOCAL_CFLAGS += \
@@ -83,10 +71,6 @@ LOCAL_SHARED_LIBRARIES += libvlccore
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
 
 LOCAL_MODULE := packetizer_h264_plugin
 
@@ -111,10 +95,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := packetizer_mlp_plugin
 
 LOCAL_CFLAGS += \
@@ -137,10 +117,6 @@ LOCAL_SHARED_LIBRARIES += libvlccore
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
 
 LOCAL_MODULE := packetizer_mpeg4audio_plugin
 
@@ -165,10 +141,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := packetizer_mpeg4video_plugin
 
 LOCAL_CFLAGS += \
@@ -192,10 +164,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := packetizer_mpegvideo_plugin
 
 LOCAL_CFLAGS += \
@@ -218,10 +186,6 @@ LOCAL_SHARED_LIBRARIES += libvlccore
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
 
 LOCAL_MODULE := packetizer_vc1_plugin
 

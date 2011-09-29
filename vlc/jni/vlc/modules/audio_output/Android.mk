@@ -3,10 +3,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := amem_plugin
 
 LOCAL_CFLAGS += \
@@ -30,18 +26,14 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
-LOCAL_MODULE := audiotrack_android_plugin
+LOCAL_MODULE := android_audiotrack_plugin
 
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
     -D__PLUGIN__ \
-    -DMODULE_STRING=\"audiotrack_android\" \
-    -DMODULE_NAME=audiotrack_android
+    -DMODULE_STRING=\"android_audiotrack\" \
+    -DMODULE_NAME=android_audiotrack
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
@@ -57,18 +49,14 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
-LOCAL_MODULE := opensles_android_plugin
+LOCAL_MODULE := android_opensles_plugin
 
 LOCAL_CFLAGS += \
     -std=gnu99 \
     -DHAVE_CONFIG_H \
     -D__PLUGIN__ \
-    -DMODULE_STRING=\"opensles_android\" \
-    -DMODULE_NAME=opensles_android
+    -DMODULE_STRING=\"android_opensles\" \
+    -DMODULE_NAME=android_opensles
 
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \

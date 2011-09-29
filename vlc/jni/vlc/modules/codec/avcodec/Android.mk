@@ -3,10 +3,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := avcodec_plugin
 
 LOCAL_CFLAGS += \
@@ -19,8 +15,7 @@ LOCAL_CFLAGS += \
 LOCAL_C_INCLUDES += \
     $(VLCROOT) \
     $(VLCROOT)/include \
-    $(VLCROOT)/src \
-    $(EXTROOT)/ffmpeg
+    $(VLCROOT)/src
 
 LOCAL_SRC_FILES := \
     audio.c \

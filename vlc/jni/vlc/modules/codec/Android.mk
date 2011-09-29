@@ -3,10 +3,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := a52_plugin
 
 LOCAL_CFLAGS += \
@@ -32,10 +28,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := dts_plugin
 
 LOCAL_CFLAGS += \
@@ -58,10 +50,6 @@ LOCAL_SHARED_LIBRARIES += libvlccore
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
 
 LOCAL_MODULE := liblibass_plugin
 
@@ -90,10 +78,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := mpeg_audio_plugin
 
 LOCAL_CFLAGS += \
@@ -117,10 +101,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
-
 LOCAL_MODULE := subsdec_plugin
 
 LOCAL_CFLAGS += \
@@ -143,10 +123,6 @@ LOCAL_SHARED_LIBRARIES += libvlccore
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
-ifeq ($(BUILD_WITH_ARM),1)
-LOCAL_ARM_MODE := arm
-endif
 
 LOCAL_MODULE := subsusf_plugin
 

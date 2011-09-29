@@ -3,11 +3,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_ARM_MODE := arm
-ifeq ($(BUILD_WITH_ARM_NEON),1)
-LOCAL_ARM_NEON := true
-endif
-
 LOCAL_MODULE := liblibmp4_plugin
 
 LOCAL_CFLAGS += \
