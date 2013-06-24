@@ -27,6 +27,7 @@
 
 #include "avcodec.h"
 #include "dsputil.h"
+#include "mathops.h"
 #include "mpegvideo.h"
 
 #include "mpeg12.h"
@@ -681,8 +682,7 @@ static void mpeg1_encode_motion(MpegEncContext *s, int val, int f_or_b_code)
         int bit_size = f_or_b_code - 1;
         int range = 1 << bit_size;
         /* modulo encoding */
-        int l= INT_BIT - 5 - bit_size;
-        val= (val<<l)>>l;
+        val = sign_extend(val, 5 + bit_size);
 
         if (val >= 0) {
             val--;
@@ -761,10 +761,9 @@ void ff_mpeg1_encode_init(MpegEncContext *s)
 
                 if(mv==0) len= ff_mpeg12_mbMotionVectorTable[0][1];
                 else{
-                    int val, bit_size, range, code;
+                    int val, bit_size, code;
 
                     bit_size = f_code - 1;
-                    range = 1 << bit_size;
 
                     val=mv;
                     if (val < 0)

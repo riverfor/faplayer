@@ -172,13 +172,16 @@ static int fourxm_read_header(AVFormatContext *s,
                 goto fail;
             }
             if (current_track + 1 > fourxm->track_count) {
-                fourxm->track_count = current_track + 1;
-                fourxm->tracks = av_realloc(fourxm->tracks,
-                    fourxm->track_count * sizeof(AudioTrack));
+                fourxm->tracks = av_realloc_f(fourxm->tracks,
+                                              sizeof(AudioTrack),
+                                              current_track + 1);
                 if (!fourxm->tracks) {
-                    ret=  AVERROR(ENOMEM);
+                    ret = AVERROR(ENOMEM);
                     goto fail;
                 }
+                memset(&fourxm->tracks[fourxm->track_count], 0,
+                       sizeof(AudioTrack) * (current_track + 1 - fourxm->track_count));
+                fourxm->track_count = current_track + 1;
             }
             fourxm->tracks[current_track].adpcm       = AV_RL32(&header[i + 12]);
             fourxm->tracks[current_track].channels    = AV_RL32(&header[i + 36]);
@@ -246,7 +249,7 @@ static int fourxm_read_packet(AVFormatContext *s,
     FourxmDemuxContext *fourxm = s->priv_data;
     AVIOContext *pb = s->pb;
     unsigned int fourcc_tag;
-    unsigned int size, out_size;
+    unsigned int size;
     int ret = 0;
     unsigned int track_number;
     int packet_read = 0;
@@ -295,7 +298,7 @@ static int fourxm_read_packet(AVFormatContext *s,
 
         case snd__TAG:
             track_number = avio_rl32(pb);
-            out_size= avio_rl32(pb);
+            avio_skip(pb, 4);
             size-=8;
 
             if (track_number < fourxm->track_count && fourxm->tracks[track_number].channels>0) {

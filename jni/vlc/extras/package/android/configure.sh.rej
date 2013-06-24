@@ -1,0 +1,16 @@
+***************
+*** 47,52 ****
+                  --enable-avcodec \
+                  --enable-opensles \
+                  --enable-android-surface \
+                  --enable-debug \
+                  --enable-mkv \
+                  --enable-taglib \
+--- 47,53 ----
+                  --enable-avcodec \
+                  --enable-opensles \
+                  --enable-android-surface \
++                 --enable-audiotrack \
+                  --enable-debug \
+                  --enable-mkv \
+                  --enable-taglib \

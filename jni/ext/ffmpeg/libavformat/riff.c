@@ -33,6 +33,7 @@ const AVCodecTag ff_codec_bmp_tags[] = {
     { CODEC_ID_H264,         MKTAG('X', '2', '6', '4') },
     { CODEC_ID_H264,         MKTAG('x', '2', '6', '4') },
     { CODEC_ID_H264,         MKTAG('a', 'v', 'c', '1') },
+    { CODEC_ID_H264,         MKTAG('D', 'A', 'V', 'C') },
     { CODEC_ID_H264,         MKTAG('V', 'S', 'S', 'H') },
     { CODEC_ID_H263,         MKTAG('H', '2', '6', '3') },
     { CODEC_ID_H263,         MKTAG('X', '2', '6', '3') },
@@ -129,6 +130,7 @@ const AVCodecTag ff_codec_bmp_tags[] = {
     { CODEC_ID_MPEG2VIDEO,   MKTAG('s', 'l', 'i', 'f') },
     { CODEC_ID_MPEG2VIDEO,   MKTAG('E', 'M', '2', 'V') },
     { CODEC_ID_MPEG2VIDEO,   MKTAG('M', '7', '0', '1') }, /* Matrox MPEG2 intra-only */
+    { CODEC_ID_MPEG2VIDEO,   MKTAG('m', 'p', 'g', 'v') },
     { CODEC_ID_MJPEG,        MKTAG('M', 'J', 'P', 'G') },
     { CODEC_ID_MJPEG,        MKTAG('L', 'J', 'P', 'G') },
     { CODEC_ID_MJPEG,        MKTAG('d', 'm', 'b', '1') },
@@ -249,6 +251,7 @@ const AVCodecTag ff_codec_bmp_tags[] = {
     { CODEC_ID_ZMBV,         MKTAG('Z', 'M', 'B', 'V') },
     { CODEC_ID_KMVC,         MKTAG('K', 'M', 'V', 'C') },
     { CODEC_ID_CAVS,         MKTAG('C', 'A', 'V', 'S') },
+    { CODEC_ID_JPEG2000,     MKTAG('m', 'j', 'p', '2') },
     { CODEC_ID_JPEG2000,     MKTAG('M', 'J', '2', 'C') },
     { CODEC_ID_VMNC,         MKTAG('V', 'M', 'n', 'c') },
     { CODEC_ID_TARGA,        MKTAG('t', 'g', 'a', ' ') },
@@ -284,6 +287,7 @@ const AVCodecTag ff_codec_wav_tags[] = {
     { CODEC_ID_ADPCM_YAMAHA,    0x0020 },
     { CODEC_ID_TRUESPEECH,      0x0022 },
     { CODEC_ID_GSM_MS,          0x0031 },
+    { CODEC_ID_AMR_NB,          0x0038 },  /* rogue format number */
     { CODEC_ID_ADPCM_G726,      0x0045 },
     { CODEC_ID_MP2,             0x0050 },
     { CODEC_ID_MP3,             0x0055 },
@@ -442,7 +446,7 @@ int ff_put_wav_header(AVIOContext *pb, AVCodecContext *enc)
     if(waveformatextensible) {                                    /* write WAVEFORMATEXTENSIBLE extensions */
         hdrsize += 22;
         avio_wl16(pb, riff_extradata - riff_extradata_start + 22); /* 22 is WAVEFORMATEXTENSIBLE size */
-        avio_wl16(pb, enc->bits_per_coded_sample);                 /* ValidBitsPerSample || SamplesPerBlock || Reserved */
+        avio_wl16(pb, bps);                                        /* ValidBitsPerSample || SamplesPerBlock || Reserved */
         avio_wl32(pb, enc->channel_layout);                        /* dwChannelMask */
         avio_wl32(pb, enc->codec_tag);                             /* GUID + next 3 */
         avio_wl32(pb, 0x00100000);
@@ -535,6 +539,7 @@ int ff_get_wav_header(AVIOContext *pb, AVCodecContext *codec, int size)
         }
         codec->extradata_size = cbSize;
         if (cbSize > 0) {
+            av_free(codec->extradata);
             codec->extradata = av_mallocz(codec->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
             if (!codec->extradata)
                 return AVERROR(ENOMEM);

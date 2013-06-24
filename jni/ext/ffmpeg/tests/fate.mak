@@ -128,7 +128,7 @@ FATE_TESTS += fate-id-cin-video
 fate-id-cin-video: CMD = framecrc  -i $(SAMPLES)/idcin/idlog-2MB.cin -pix_fmt rgb24
 FATE_TESTS += fate-idroq-video-dpcm
 fate-idroq-video-dpcm: CMD = framecrc  -i $(SAMPLES)/idroq/idlogo.roq
-FATE_TESTS += fate-idroq-video-encode
+FATE_TESTS-$(CONFIG_AVFILTER) += fate-idroq-video-encode
 fate-idroq-video-encode: CMD = md5  -t 0.2 -f image2 -vcodec pgmyuv -i $(SAMPLES)/ffmpeg-synthetic/vsynth1/%02d.pgm -sws_flags +bitexact -vf pad=512:512:80:112 -f RoQ
 FATE_TESTS += fate-iff-byterun1
 fate-iff-byterun1: CMD = framecrc  -i $(SAMPLES)/iff/ASH.LBM -pix_fmt rgb24
@@ -175,7 +175,7 @@ fate-maxis-xa: CMD = md5  -i $(SAMPLES)/maxis-xa/SC2KBUG.XA -f s16le
 FATE_TESTS += fate-mimic
 fate-mimic: CMD = framecrc  -idct simple -i $(SAMPLES)/mimic/mimic2-womanloveffmpeg.cam -vsync 0
 FATE_TESTS += fate-motionpixels
-fate-motionpixels: CMD = framecrc  -i $(SAMPLES)/motion-pixels/INTRO-partial.MVI -an -pix_fmt rgb24
+fate-motionpixels: CMD = framecrc  -i $(SAMPLES)/motion-pixels/INTRO-partial.MVI -an -pix_fmt rgb24 -vframes 111
 FATE_TESTS += fate-mpc7-demux
 fate-mpc7-demux: CMD = crc  -i $(SAMPLES)/musepack/inside-mp7.mpc -acodec copy
 FATE_TESTS += fate-mpc8-demux

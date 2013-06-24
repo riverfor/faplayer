@@ -59,7 +59,7 @@ static AudioTrack_stop at_stop = NULL;
 static AudioTrack_write at_write = NULL;
 static AudioTrack_flush at_flush = NULL;
 
-static void *InitLibrary();
+static void *InitLibrary(vlc_object_t *);
 
 static int  Open(vlc_object_t *);
 static void Close(vlc_object_t *);
@@ -68,25 +68,31 @@ static void Play(aout_instance_t *);
 vlc_module_begin ()
     set_shortname("AndroidAudioTrack")
     set_description(N_("Android AudioTrack audio output"))
-    set_capability("audio output", 25)
+    set_capability("audio output", 185)
     set_category(CAT_AUDIO)
     set_subcategory(SUBCAT_AUDIO_AOUT)
     add_shortcut("android")
     set_callbacks(Open, Close)
 vlc_module_end ()
 
-void *InitLibrary() {
+void *InitLibrary(vlc_object_t *p_this) {
     void *p_library;
 
-    p_library = dlopen("libmedia.so", RTLD_NOW);
-    if (!p_library)
+    p_library = dlopen("libmedia.so", RTLD_LAZY); //RTLD_GLOBAL
+    if (!p_library) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary" ); 
+        msg_Err(VLC_OBJECT(p_this), dlerror() );
         return NULL;
+    }
     as_getOutputFrameCount = (AudioSystem_getOutputFrameCount)(dlsym(p_library, "_ZN7android11AudioSystem19getOutputFrameCountEPii"));
     as_getOutputLatency = (AudioSystem_getOutputLatency)(dlsym(p_library, "_ZN7android11AudioSystem16getOutputLatencyEPji"));
     as_getOutputSamplingRate = (AudioSystem_getOutputSamplingRate)(dlsym(p_library, "_ZN7android11AudioSystem21getOutputSamplingRateEPii"));
+
     at_getMinFrameCount = (AudioTrack_getMinFrameCount)(dlsym(p_library, "_ZN7android10AudioTrack16getMinFrameCountEPiij"));
+
     at_ctor = (AudioTrack_ctor)(dlsym(p_library, "_ZN7android10AudioTrackC1EijiiijPFviPvS1_ES1_ii"));
     at_ctor_legacy = (AudioTrack_ctor_legacy)(dlsym(p_library, "_ZN7android10AudioTrackC1EijiiijPFviPvS1_ES1_i"));
+
     at_dtor = (AudioTrack_dtor)(dlsym(p_library, "_ZN7android10AudioTrackD1Ev"));
     at_initCheck = (AudioTrack_initCheck)(dlsym(p_library, "_ZNK7android10AudioTrack9initCheckEv"));
     at_start = (AudioTrack_start)(dlsym(p_library, "_ZN7android10AudioTrack5startEv"));
@@ -94,12 +100,49 @@ void *InitLibrary() {
     at_write = (AudioTrack_write)(dlsym(p_library, "_ZN7android10AudioTrack5writeEPKvj"));
     at_flush = (AudioTrack_flush)(dlsym(p_library, "_ZN7android10AudioTrack5flushEv"));
     // need the first 3 or the last 1
+    if (!((as_getOutputFrameCount && as_getOutputSamplingRate))) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary as_getOutputFrameCount && as_getOutputSamplingRate null" ); 
+    }
+    if (!at_getMinFrameCount) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary at_getMinFrameCount null" ); 
+    }
+
+    if (!(at_ctor || at_ctor_legacy)) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary at_ctor || at_ctor_legacy null" ); 
+    }
+    if (!at_dtor) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary at_dtor null" ); 
+    }
+    if (!at_initCheck) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary at_initCheck null" ); 
+    }
+    if (!at_start) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary at_start null" ); 
+    }
+    if (!at_stop) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary at_stop null" ); 
+    }
+    if (!at_write) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary at_write null" ); 
+    }
+    if (!at_flush) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary at_flush null" ); 
+    }
+
+
+    /*
+    OLD VER
     if (!((as_getOutputFrameCount && as_getOutputLatency && as_getOutputSamplingRate) || at_getMinFrameCount)) {
+    */
+    if (!((as_getOutputFrameCount && as_getOutputSamplingRate) || at_getMinFrameCount)) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary ((as_getOutputFrameCount && as_getOutputSamplingRate) || at_getMinFrameCount) null" ); 
         dlclose(p_library);
         return NULL;
     }
+
     // need all in the list
     if (!((at_ctor || at_ctor_legacy) && at_dtor && at_initCheck && at_start && at_stop && at_write && at_flush)) {
+        msg_Err(VLC_OBJECT(p_this), "InitLibrary ((at_ctor || at_ctor_legacy) && at_dtor && at_initCheck && at_start && at_stop && at_write && at_flush) null" ); 
         dlclose(p_library);
         return NULL;
     }
@@ -114,9 +157,9 @@ static int Open(vlc_object_t *p_this) {
     int afSampleRate, afFrameCount, afLatency, minBufCount, minFrameCount;
     int type, channel, rate, format, size;
 
-    p_library = InitLibrary();
+    p_library = InitLibrary(p_this);
     if (!p_library) {
-        msg_Err(VLC_OBJECT(p_this), "Could not initialize libmedia.so!");
+        msg_Err(VLC_OBJECT(p_this), "Could not initialize libmedia.so now!");
         return VLC_EGENERIC;
     }
     p_sys = (struct aout_sys_t*)malloc(sizeof(aout_sys_t));
@@ -141,6 +184,8 @@ static int Open(vlc_object_t *p_this) {
     format = (p_aout->output.output.i_format == VLC_CODEC_S16L) ? 1 : 2;
     p_sys->format = format;
     // TODO: android supports more channels
+
+    msg_Err(VLC_OBJECT(p_this), "Open TAG 14");
     channel = aout_FormatNbChannels(&p_aout->output.output);
     if (channel > 2) {
         channel = 2;
@@ -152,22 +197,52 @@ static int Open(vlc_object_t *p_this) {
     p_sys->channel = channel;
     // use the minium value
     if (!at_getMinFrameCount) {
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 1");
+
         status = as_getOutputSamplingRate(&afSampleRate, type);
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 1-2");
+
         status ^= as_getOutputFrameCount(&afFrameCount, type);
-        status ^= as_getOutputLatency((uint32_t*)(&afLatency), type);
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 1-3");
+
+        if (as_getOutputLatency) { // added for 4.1.x
+            msg_Err(VLC_OBJECT(p_this), "Open TAG 1-4");
+            status ^= as_getOutputLatency((uint32_t*)(&afLatency), type);
+
+            msg_Err(VLC_OBJECT(p_this), "Open TAG 3");
+        }
         if (status != 0) {
+            msg_Err(VLC_OBJECT(p_this), "Open TAG 16");
+
             free(p_sys);
             return VLC_EGENERIC;
         }
-        minBufCount = afLatency / ((1000 * afFrameCount) / afSampleRate);
-        if (minBufCount < 2)
+
+        if (as_getOutputLatency) { // added for 4.1.x
+            msg_Err(VLC_OBJECT(p_this), "Open TAG 13");
+
+            minBufCount = afLatency / ((1000 * afFrameCount) / afSampleRate);
+        } else {
             minBufCount = 2;
+        }
+
+        if (minBufCount < 2) {
+            minBufCount = 2;
+        }
+
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 17");
         minFrameCount = (afFrameCount * rate * minBufCount) / afSampleRate;
         p_aout->output.i_nb_samples = minFrameCount;
+
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 2");
     }
     else {
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 5");
+
         status = at_getMinFrameCount(&p_aout->output.i_nb_samples, type, rate);
         if (status != 0) {
+
+            msg_Err(VLC_OBJECT(p_this), "Open TAG 12");
             free(p_sys);
             return VLC_EGENERIC;
         }
@@ -177,29 +252,40 @@ static int Open(vlc_object_t *p_this) {
     // sizeof(AudioTrack) == 0x58 (not sure) on 2.2.1, this should be enough
     p_sys->AudioTrack = malloc(256);
     if (!p_sys->AudioTrack) {
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 15");
+
         free(p_sys);
         return VLC_ENOMEM;
     }
     // higher than android 2.2
-    if (at_ctor)
+    if (at_ctor) {
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 7");
         at_ctor(p_sys->AudioTrack, p_sys->type, p_sys->rate, p_sys->format, p_sys->channel, p_sys->size, 0, NULL, NULL, 0, 0);
+    }
     // higher than android 1.6
-    else if (at_ctor_legacy)
+    else if (at_ctor_legacy) {
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 8");
         at_ctor_legacy(p_sys->AudioTrack, p_sys->type, p_sys->rate, p_sys->format, p_sys->channel, p_sys->size, 0, NULL, NULL, 0);
+    }
     status = at_initCheck(p_sys->AudioTrack);
     // android 1.6
     if (status != 0) {
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 9");
+
         p_sys->channel = (p_sys->channel == 12) ? 2 : 1;
         at_ctor_legacy(p_sys->AudioTrack, p_sys->type, p_sys->rate, p_sys->format, p_sys->channel, p_sys->size, 0, NULL, NULL, 0);
         status = at_initCheck(p_sys->AudioTrack);
     }
     if (status != 0) {
+        msg_Err(VLC_OBJECT(p_this), "Open TAG 10");
+
         msg_Err(p_aout, "Cannot create AudioTrack!");
         free(p_sys->AudioTrack);
         free(p_sys);
         return VLC_EGENERIC;
     }
 
+    msg_Err(VLC_OBJECT(p_this), "Open TAG 11");
     p_aout->output.p_sys = p_sys;
     p_aout->output.pf_play = Play;
 
@@ -209,6 +295,8 @@ static int Open(vlc_object_t *p_this) {
 }
 
 static void Close(vlc_object_t *p_this) {
+
+    msg_Err(VLC_OBJECT(p_this), "Close TAG 1");
     aout_instance_t *p_aout = (aout_instance_t*)p_this;
     struct aout_sys_t *p_sys = p_aout->output.p_sys;
 

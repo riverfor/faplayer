@@ -223,12 +223,13 @@ static int mxf_get_d10_aes3_packet(AVIOContext *pb, AVStream *st, AVPacket *pkt,
 
     if (length > 61444) /* worst case PAL 1920 samples 8 channels */
         return -1;
-    av_new_packet(pkt, length);
-    avio_read(pb, pkt->data, length);
+    length = av_get_packet(pb, pkt, length);
+    if (length < 0)
+        return length;
     data_ptr = pkt->data;
     end_ptr = pkt->data + length;
     buf_ptr = pkt->data + 4; /* skip SMPTE 331M header */
-    for (; buf_ptr < end_ptr; ) {
+    for (; buf_ptr + st->codec->channels*4 < end_ptr; ) {
         for (i = 0; i < st->codec->channels; i++) {
             uint32_t sample = bytestream_get_le32(&buf_ptr);
             if (st->codec->bits_per_coded_sample == 24)
@@ -238,7 +239,7 @@ static int mxf_get_d10_aes3_packet(AVIOContext *pb, AVStream *st, AVPacket *pkt,
         }
         buf_ptr += 32 - st->codec->channels*4; // always 8 channels stored SMPTE 331M
     }
-    pkt->size = data_ptr - pkt->data;
+    av_shrink_packet(pkt, data_ptr - pkt->data);
     return 0;
 }
 
@@ -290,12 +291,16 @@ static int mxf_decrypt_triplet(AVFormatContext *s, AVPacket *pkt, KLVPacket *klv
     if (memcmp(tmpbuf, checkv, 16))
         av_log(s, AV_LOG_ERROR, "probably incorrect decryption key\n");
     size -= 32;
-    av_get_packet(pb, pkt, size);
+    size = av_get_packet(pb, pkt, size);
+    if (size < 0)
+        return size;
+    else if (size < plaintext_size)
+        return AVERROR_INVALIDDATA;
     size -= plaintext_size;
     if (mxf->aesc)
         av_aes_crypt(mxf->aesc, &pkt->data[plaintext_size],
                      &pkt->data[plaintext_size], size >> 4, ivec, 1);
-    pkt->size = orig_size;
+    av_shrink_packet(pkt, orig_size);
     pkt->stream_index = index;
     avio_skip(pb, end - avio_tell(pb));
     return 0;
@@ -309,7 +314,7 @@ static int mxf_read_packet(AVFormatContext *s, AVPacket *pkt)
         if (klv_read_packet(&klv, s->pb) < 0)
             return -1;
         PRINT_KEY(s, "read packet", klv.key);
-        av_dlog(s, "size %lld offset %#llx\n", klv.length, klv.offset);
+        av_dlog(s, "size %"PRIu64" offset %#"PRIx64"\n", klv.length, klv.offset);
         if (IS_KLV_KEY(klv.key, mxf_encrypted_triplet_key)) {
             int res = mxf_decrypt_triplet(s, pkt, &klv);
             if (res < 0) {
@@ -332,8 +337,11 @@ static int mxf_read_packet(AVFormatContext *s, AVPacket *pkt)
                     av_log(s, AV_LOG_ERROR, "error reading D-10 aes3 frame\n");
                     return -1;
                 }
-            } else
-                av_get_packet(s->pb, pkt, klv.length);
+            } else {
+                int ret = av_get_packet(s->pb, pkt, klv.length);
+                if (ret < 0)
+                    return ret;
+            }
             pkt->stream_index = index;
             pkt->pos = klv.offset;
             return 0;
@@ -522,8 +530,8 @@ static int mxf_read_index_table_segment(void *arg, AVIOContext *pb, int tag, int
     case 0x3F06: av_dlog(NULL, "IndexSID %d\n", avio_rb32(pb)); break;
     case 0x3F07: av_dlog(NULL, "BodySID %d\n", avio_rb32(pb)); break;
     case 0x3F0B: av_dlog(NULL, "IndexEditRate %d/%d\n", avio_rb32(pb), avio_rb32(pb)); break;
-    case 0x3F0C: av_dlog(NULL, "IndexStartPosition %lld\n", avio_rb64(pb)); break;
-    case 0x3F0D: av_dlog(NULL, "IndexDuration %lld\n", avio_rb64(pb)); break;
+    case 0x3F0C: av_dlog(NULL, "IndexStartPosition %"PRIu64"\n", avio_rb64(pb)); break;
+    case 0x3F0D: av_dlog(NULL, "IndexDuration %"PRIu64"\n", avio_rb64(pb)); break;
     }
     return 0;
 }
@@ -599,7 +607,7 @@ static int mxf_read_generic_descriptor(void *arg, AVIOContext *pb, int tag, int 
     default:
         /* Private uid used by SONY C0023S01.mxf */
         if (IS_KLV_KEY(uid, mxf_sony_mpeg4_extradata)) {
-            descriptor->extradata = av_malloc(size);
+            descriptor->extradata = av_malloc(size + FF_INPUT_BUFFER_PADDING_SIZE);
             if (!descriptor->extradata)
                 return -1;
             descriptor->extradata_size = size;
@@ -920,7 +928,7 @@ static int mxf_read_header(AVFormatContext *s, AVFormatParameters *ap)
         if (klv_read_packet(&klv, s->pb) < 0)
             return -1;
         PRINT_KEY(s, "read header", klv.key);
-        av_dlog(s, "size %lld offset %#llx\n", klv.length, klv.offset);
+        av_dlog(s, "size %"PRIu64" offset %#"PRIx64"\n", klv.length, klv.offset);
         if (IS_KLV_KEY(klv.key, mxf_encrypted_triplet_key) ||
             IS_KLV_KEY(klv.key, mxf_essence_element_key)) {
             /* FIXME avoid seek */

@@ -1,6 +1,6 @@
 # FFmpeg
 
-FFMPEG_VERSION=0.4.8
+FFMPEG_VERSION=0.8.11
 FFMPEG_URL=$(SF)/ffmpeg/ffmpeg-$(FFMPEG_VERSION).tar.gz
 FFMPEG_SVN=svn://svn.ffmpeg.org/ffmpeg/trunk
 FFMPEG_SVN_REV=26400

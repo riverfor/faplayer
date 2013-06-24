@@ -470,6 +470,7 @@ static av_cold int decode_init(AVCodecContext *avctx)
 
     c->bpp = avctx->bits_per_coded_sample;
     c->bpp2 = c->bpp/8;
+    avcodec_get_frame_defaults(&c->pic);
 
     switch(c->bpp){
     case 8:
@@ -483,6 +484,7 @@ static av_cold int decode_init(AVCodecContext *avctx)
         break;
     default:
         av_log(avctx, AV_LOG_ERROR, "Unsupported bitdepth %i\n", c->bpp);
+        return AVERROR_INVALIDDATA;
     }
 
     return 0;

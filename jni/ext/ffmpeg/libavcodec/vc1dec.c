@@ -137,7 +137,7 @@ static int vc1_init_common(VC1Context *v)
 
 /***********************************************************************/
 /**
- * @defgroup vc1bitplane VC-1 Bitplane decoding
+ * @name VC-1 Bitplane decoding
  * @see 8.7, p56
  * @{
  */
@@ -243,7 +243,7 @@ static void vc1_loop_filter_iblk(VC1Context *v, int pq)
     }
     v->vc1dsp.vc1_v_loop_filter16(s->dest[0] + 8*s->linesize, s->linesize, pq);
 
-    if (s->mb_y == s->mb_height-1) {
+    if (s->mb_y == s->end_mb_y-1) {
         if (s->mb_x) {
             v->vc1dsp.vc1_h_loop_filter16(s->dest[0], s->linesize, pq);
             v->vc1dsp.vc1_h_loop_filter8(s->dest[1], s->uvlinesize, pq);
@@ -295,7 +295,7 @@ static void vc1_loop_filter_iblk_delayed(VC1Context *v, int pq)
             v->vc1dsp.vc1_v_loop_filter16(s->dest[0] - 8 * s->linesize, s->linesize, pq);
         }
 
-        if (s->mb_y == s->mb_height) {
+        if (s->mb_y == s->end_mb_y) {
             if (s->mb_x) {
                 if (s->mb_x >= 2)
                     v->vc1dsp.vc1_h_loop_filter16(s->dest[0] - 16 * s->linesize - 16, s->linesize, pq);
@@ -774,7 +774,7 @@ static void vc1_mc_4mv_chroma(VC1Context *v)
 
 /***********************************************************************/
 /**
- * @defgroup vc1block VC-1 Block-level functions
+ * @name VC-1 Block-level functions
  * @see 7.1.4, p91 and 8.1.1.7, p(1)04
  * @{
  */
@@ -1512,7 +1512,7 @@ static inline int vc1_pred_dc(MpegEncContext *s, int overlap, int pq, int n,
 /** @} */ // Block group
 
 /**
- * @defgroup vc1_std_mb VC1 Macroblock-level functions in Simple/Main Profiles
+ * @name VC1 Macroblock-level functions in Simple/Main Profiles
  * @see 7.1.4, p91 and 8.1.1.7, p(1)04
  * @{
  */
@@ -2330,7 +2330,7 @@ static av_always_inline void vc1_apply_p_v_loop_filter(VC1Context *v, int block_
     } else {
         dst      = s->dest[0] + (block_num & 1) * 8 + ((block_num & 2) * 4 - 8) * linesize;
     }
-    if (s->mb_y != s->mb_height || block_num < 2) {
+    if (s->mb_y != s->end_mb_y || block_num < 2) {
         int16_t (*mv)[2];
         int mv_stride;
 
@@ -3020,7 +3020,7 @@ static void vc1_decode_i_blocks_adv(VC1Context *v)
         s->mb_x = 0;
         ff_init_block_index(s);
         memset(&s->coded_block[s->block_index[0]-s->b8_stride], 0,
-               s->b8_stride * sizeof(*s->coded_block));
+               (1 + s->b8_stride) * sizeof(*s->coded_block));
     }
     for(; s->mb_y < s->end_mb_y; s->mb_y++) {
         s->mb_x = 0;
@@ -3096,7 +3096,7 @@ static void vc1_decode_i_blocks_adv(VC1Context *v)
         if(v->s.loop_filter) vc1_loop_filter_iblk_delayed(v, v->pq);
     }
     if (v->s.loop_filter)
-        ff_draw_horiz_band(s, (s->mb_height-1)*16, 16);
+        ff_draw_horiz_band(s, (s->end_mb_y-1)*16, 16);
     ff_er_add_slice(s, 0, s->start_mb_y, s->mb_width - 1, s->end_mb_y - 1, (AC_END|DC_END|MV_END));
 }
 
@@ -3219,7 +3219,7 @@ static void vc1_decode_b_blocks(VC1Context *v)
         s->first_slice_line = 0;
     }
     if (v->s.loop_filter)
-        ff_draw_horiz_band(s, (s->mb_height-1)*16, 16);
+        ff_draw_horiz_band(s, (s->end_mb_y-1)*16, 16);
     ff_er_add_slice(s, 0, s->start_mb_y, s->mb_width - 1, s->end_mb_y - 1, (AC_END|DC_END|MV_END));
 }
 
@@ -3227,9 +3227,9 @@ static void vc1_decode_skip_blocks(VC1Context *v)
 {
     MpegEncContext *s = &v->s;
 
-    ff_er_add_slice(s, 0, 0, s->mb_width - 1, s->mb_height - 1, (AC_END|DC_END|MV_END));
+    ff_er_add_slice(s, 0, s->start_mb_y, s->mb_width - 1, s->end_mb_y - 1, (AC_END|DC_END|MV_END));
     s->first_slice_line = 1;
-    for(s->mb_y = 0; s->mb_y < s->mb_height; s->mb_y++) {
+    for(s->mb_y = s->start_mb_y; s->mb_y < s->end_mb_y; s->mb_y++) {
         s->mb_x = 0;
         ff_init_block_index(s);
         ff_update_block_index(s);
@@ -3398,7 +3398,7 @@ static av_cold int vc1_decode_init(AVCodecContext *avctx)
     VC1Context *v = avctx->priv_data;
     MpegEncContext *s = &v->s;
     GetBitContext gb;
-    int i;
+    int i, cur_width, cur_height;
 
     if (!avctx->extradata_size || !avctx->extradata) return -1;
     if (!(avctx->flags & CODEC_FLAG_GRAY))
@@ -3419,8 +3419,8 @@ static av_cold int vc1_decode_init(AVCodecContext *avctx)
     if (vc1_init_common(v) < 0) return -1;
     ff_vc1dsp_init(&v->vc1dsp);
 
-    avctx->coded_width = avctx->width;
-    avctx->coded_height = avctx->height;
+    cur_width = avctx->coded_width = avctx->width;
+    cur_height = avctx->coded_height = avctx->height;
     if (avctx->codec_id == CODEC_ID_WMV3)
     {
         int count = 0;
@@ -3491,6 +3491,19 @@ static av_cold int vc1_decode_init(AVCodecContext *avctx)
         }
         v->res_sprite = (avctx->codec_tag == MKTAG('W','V','P','2'));
     }
+    // Sequence header information may not have been parsed
+    // yet when ff_msmpeg4_decode_init was called the fist time
+    // above.  If sequence information changes, we need to call
+    // it again.
+    if (cur_width != avctx->width ||
+        cur_height != avctx->height) {
+        MPV_common_end(s);
+        if(ff_msmpeg4_decode_init(avctx) < 0)
+            return -1;
+        avctx->coded_width = avctx->width;
+        avctx->coded_height = avctx->height;
+    }
+
     avctx->profile = v->profile;
     if (v->profile == PROFILE_ADVANCED)
         avctx->level = v->level;

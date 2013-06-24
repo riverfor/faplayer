@@ -35,6 +35,7 @@
 #include "libavutil/opt.h"
 #include "libavutil/imgutils.h"
 #include "libavformat/avformat.h"
+#include "avcodec.h"
 #include "avfilter.h"
 
 typedef struct {
@@ -91,9 +92,9 @@ static int movie_init(AVFilterContext *ctx)
     iformat = movie->format_name ? av_find_input_format(movie->format_name) : NULL;
 
     movie->format_ctx = NULL;
-    if ((ret = av_open_input_file(&movie->format_ctx, movie->file_name, iformat, 0, NULL)) < 0) {
+    if ((ret = avformat_open_input(&movie->format_ctx, movie->file_name, iformat, NULL)) < 0) {
         av_log(ctx, AV_LOG_ERROR,
-               "Failed to av_open_input_file '%s'\n", movie->file_name);
+               "Failed to avformat_open_input '%s'\n", movie->file_name);
         return ret;
     }
     if ((ret = av_find_stream_info(movie->format_ctx)) < 0)
@@ -152,7 +153,7 @@ static int movie_init(AVFilterContext *ctx)
     movie->w = movie->codec_ctx->width;
     movie->h = movie->codec_ctx->height;
 
-    av_log(ctx, AV_LOG_INFO, "seek_point:%lld format_name:%s file_name:%s stream_index:%d\n",
+    av_log(ctx, AV_LOG_INFO, "seek_point:%"PRIi64" format_name:%s file_name:%s stream_index:%d\n",
            movie->seek_point, movie->format_name, movie->file_name,
            movie->stream_index);
 
@@ -202,7 +203,7 @@ static int query_formats(AVFilterContext *ctx)
     MovieContext *movie = ctx->priv;
     enum PixelFormat pix_fmts[] = { movie->codec_ctx->pix_fmt, PIX_FMT_NONE };
 
-    avfilter_set_common_formats(ctx, avfilter_make_format_list(pix_fmts));
+    avfilter_set_common_pixel_formats(ctx, avfilter_make_format_list(pix_fmts));
     return 0;
 }
 
@@ -239,20 +240,15 @@ static int movie_get_frame(AVFilterLink *outlink)
                 av_image_copy(movie->picref->data, movie->picref->linesize,
                               movie->frame->data,  movie->frame->linesize,
                               movie->picref->format, outlink->w, outlink->h);
+                avfilter_copy_frame_props(movie->picref, movie->frame);
 
                 /* FIXME: use a PTS correction mechanism as that in
                  * ffplay.c when some API will be available for that */
                 /* use pkt_dts if pkt_pts is not available */
                 movie->picref->pts = movie->frame->pkt_pts == AV_NOPTS_VALUE ?
                     movie->frame->pkt_dts : movie->frame->pkt_pts;
-
-                movie->picref->pos                    = movie->frame->pkt_pos;
                 if (!movie->frame->sample_aspect_ratio.num)
                     movie->picref->video->sample_aspect_ratio = st->sample_aspect_ratio;
-                movie->picref->video->interlaced      = movie->frame->interlaced_frame;
-                movie->picref->video->top_field_first = movie->frame->top_field_first;
-                movie->picref->video->key_frame       = movie->frame->key_frame;
-                movie->picref->video->pict_type       = movie->frame->pict_type;
                 av_dlog(outlink->src,
                         "movie_get_frame(): file:'%s' pts:%"PRId64" time:%lf pos:%"PRId64" aspect:%d/%d\n",
                         movie->file_name, movie->picref->pts,

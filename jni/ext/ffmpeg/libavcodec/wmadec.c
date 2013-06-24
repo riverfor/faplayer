@@ -109,6 +109,11 @@ static int wma_decode_init(AVCodecContext * avctx)
         }
     }
 
+    if(avctx->channels > MAX_CHANNELS){
+        av_log(avctx, AV_LOG_ERROR, "Invalid number of channels (%d)\n", avctx->channels);
+        return -1;
+    }
+
     if(ff_wma_init(avctx, flags2)<0)
         return -1;
 
@@ -359,7 +364,7 @@ static int decode_exp_vlc(WMACodecContext *s, int ch)
         }
         /* NOTE: this offset is the same as MPEG4 AAC ! */
         last_exp += code - 60;
-        if ((unsigned)last_exp + 60 > FF_ARRAY_ELEMS(pow_tab)) {
+        if ((unsigned)last_exp + 60 >= FF_ARRAY_ELEMS(pow_tab)) {
             av_log(s->avctx, AV_LOG_ERROR, "Exponent out of range: %d\n",
                    last_exp);
             return -1;
@@ -827,8 +832,9 @@ static int wma_decode_superframe(AVCodecContext *avctx,
         return 0;
     }
     if (buf_size < s->block_align)
-        return 0;
-    buf_size = s->block_align;
+        return AVERROR(EINVAL);
+    if(s->block_align)
+        buf_size = s->block_align;
 
     samples = data;
 
@@ -876,6 +882,8 @@ static int wma_decode_superframe(AVCodecContext *avctx,
 
         /* read each frame starting from bit_offset */
         pos = bit_offset + 4 + 4 + s->byte_offset_bits + 3;
+        if (pos >= MAX_CODED_SUPERFRAME_SIZE * 8)
+            return AVERROR_INVALIDDATA;
         init_get_bits(&s->gb, buf + (pos >> 3), (MAX_CODED_SUPERFRAME_SIZE - (pos >> 3))*8);
         len = pos & 7;
         if (len > 0)
@@ -911,9 +919,8 @@ static int wma_decode_superframe(AVCodecContext *avctx,
     }
 
 //av_log(NULL, AV_LOG_ERROR, "%d %d %d %d outbytes:%d eaten:%d\n", s->frame_len_bits, s->block_len_bits, s->frame_len, s->block_len,        (int8_t *)samples - (int8_t *)data, s->block_align);
-
     *data_size = (int8_t *)samples - (int8_t *)data;
-    return s->block_align;
+    return buf_size;
  fail:
     /* when error, we reset the bit reservoir */
     s->last_superframe_len = 0;

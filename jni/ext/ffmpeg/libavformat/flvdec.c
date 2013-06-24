@@ -25,6 +25,7 @@
  */
 
 #include "libavutil/avstring.h"
+#include "libavutil/dict.h"
 #include "libavcodec/bytestream.h"
 #include "libavcodec/mpeg4audio.h"
 #include "avformat.h"
@@ -172,8 +173,8 @@ static int parse_keyframes_index(AVFormatContext *s, AVIOContext *ioc, AVStream 
         }
     }
 
-    if (timeslen == fileposlen) {
-         for(i = 0; i < timeslen; i++)
+    if (!ret && timeslen == fileposlen) {
+         for (i = 0; i < fileposlen; i++)
              av_add_index_entry(vstream, filepositions[i], times[i]*1000, 0, 0, AVINDEX_KEYFRAME);
     } else
         av_log(s, AV_LOG_WARNING, "Invalid keyframes object, skipping.\n");
@@ -209,7 +210,7 @@ static int amf_parse_object(AVFormatContext *s, AVStream *astream, AVStream *vst
         case AMF_DATA_TYPE_OBJECT: {
             unsigned int keylen;
 
-            if (ioc->seekable && key && !strcmp(KEYFRAMES_TAG, key) && depth == 1)
+            if (vstream && ioc->seekable && key && !strcmp(KEYFRAMES_TAG, key) && depth == 1)
                 if (parse_keyframes_index(s, ioc, vstream, max_pos) < 0)
                     av_log(s, AV_LOG_ERROR, "Keyframe index parsing failed\n");
 
@@ -259,17 +260,21 @@ static int amf_parse_object(AVFormatContext *s, AVStream *astream, AVStream *vst
 
         if(amf_type == AMF_DATA_TYPE_BOOL) {
             av_strlcpy(str_val, num_val > 0 ? "true" : "false", sizeof(str_val));
-            av_metadata_set2(&s->metadata, key, str_val, 0);
+            av_dict_set(&s->metadata, key, str_val, 0);
         } else if(amf_type == AMF_DATA_TYPE_NUMBER) {
             snprintf(str_val, sizeof(str_val), "%.f", num_val);
-            av_metadata_set2(&s->metadata, key, str_val, 0);
+            av_dict_set(&s->metadata, key, str_val, 0);
             if(!strcmp(key, "duration")) s->duration = num_val * AV_TIME_BASE;
             else if(!strcmp(key, "videodatarate") && vcodec && 0 <= (int)(num_val * 1024.0))
                 vcodec->bit_rate = num_val * 1024.0;
             else if(!strcmp(key, "audiodatarate") && acodec && 0 <= (int)(num_val * 1024.0))
                 acodec->bit_rate = num_val * 1024.0;
+        } else if(amf_type == AMF_DATA_TYPE_OBJECT){
+            if(s->nb_streams==1 && ((!acodec && !strcmp(key, "audiocodecid")) || (!vcodec && !strcmp(key, "videocodecid")))){
+                s->ctx_flags &= ~AVFMTCTX_NOHEADER; //If there is either audio/video missing, codecid will be an empty object
+            }
         } else if (amf_type == AMF_DATA_TYPE_STRING)
-            av_metadata_set2(&s->metadata, key, str_val, 0);
+            av_dict_set(&s->metadata, key, str_val, 0);
     }
 
     return 0;
@@ -375,7 +380,7 @@ static int flv_read_packet(AVFormatContext *s, AVPacket *pkt)
     size = avio_rb24(s->pb);
     dts = avio_rb24(s->pb);
     dts |= avio_r8(s->pb) << 24;
-//    av_log(s, AV_LOG_DEBUG, "type:%d, size:%d, dts:%d\n", type, size, dts);
+    av_dlog(s, "type:%d, size:%d, dts:%"PRId64"\n", type, size, dts);
     if (url_feof(s->pb))
         return AVERROR_EOF;
     avio_skip(s->pb, 3); /* stream id, always 0 */
@@ -421,7 +426,7 @@ static int flv_read_packet(AVFormatContext *s, AVPacket *pkt)
         st= create_stream(s, is_audio);
         s->ctx_flags &= ~AVFMTCTX_NOHEADER;
     }
-//    av_log(s, AV_LOG_DEBUG, "%d %X %d \n", is_audio, flags, st->discard);
+    av_dlog(s, "%d %X %d \n", is_audio, flags, st->discard);
     if(  (st->discard >= AVDISCARD_NONKEY && !((flags & FLV_VIDEO_FRAMETYPE_MASK) == FLV_FRAME_KEY ||         is_audio))
        ||(st->discard >= AVDISCARD_BIDIR  &&  ((flags & FLV_VIDEO_FRAMETYPE_MASK) == FLV_FRAME_DISP_INTER && !is_audio))
        || st->discard >= AVDISCARD_ALL

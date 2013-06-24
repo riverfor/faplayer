@@ -63,13 +63,14 @@ typedef struct {
     FilterParam chroma; ///< chroma parameters (width, height, amount)
 } UnsharpContext;
 
-static void unsharpen(uint8_t *dst, uint8_t *src, int dst_stride, int src_stride, int width, int height, FilterParam *fp)
+static void unsharpen(uint8_t *dst, const uint8_t *src, int dst_stride, int src_stride, int width, int height, FilterParam *fp)
 {
     uint32_t **sc = fp->sc;
     uint32_t sr[(MAX_SIZE * MAX_SIZE) - 1], tmp1, tmp2;
 
     int32_t res;
     int x, y, z;
+    const uint8_t *src2;
 
     if (!fp->amount) {
         if (dst_stride == src_stride)
@@ -84,9 +85,12 @@ static void unsharpen(uint8_t *dst, uint8_t *src, int dst_stride, int src_stride
         memset(sc[y], 0, sizeof(sc[y][0]) * (width + 2 * fp->steps_x));
 
     for (y = -fp->steps_y; y < height + fp->steps_y; y++) {
+        if (y < height)
+            src2 = src;
+
         memset(sr, 0, sizeof(sr[0]) * (2 * fp->steps_x - 1));
         for (x = -fp->steps_x; x < width + fp->steps_x; x++) {
-            tmp1 = x <= 0 ? src[0] : x >= width ? src[width-1] : src[x];
+            tmp1 = x <= 0 ? src2[0] : x >= width ? src2[width-1] : src2[x];
             for (z = 0; z < fp->steps_x * 2; z += 2) {
                 tmp2 = sr[z + 0] + tmp1; sr[z + 0] = tmp1;
                 tmp1 = sr[z + 1] + tmp2; sr[z + 1] = tmp2;
@@ -96,7 +100,7 @@ static void unsharpen(uint8_t *dst, uint8_t *src, int dst_stride, int src_stride
                 tmp1 = sc[z + 1][x + fp->steps_x] + tmp2; sc[z + 1][x + fp->steps_x] = tmp2;
             }
             if (x >= fp->steps_x && y >= fp->steps_y) {
-                uint8_t* srx = src - fp->steps_y * src_stride + x - fp->steps_x;
+                const uint8_t* srx = src - fp->steps_y * src_stride + x - fp->steps_x;
                 uint8_t* dsx = dst - fp->steps_y * dst_stride + x - fp->steps_x;
 
                 res = (int32_t)*srx + ((((int32_t) * srx - (int32_t)((tmp1 + fp->halfscale) >> fp->scalebits)) * fp->amount) >> 16);
@@ -125,8 +129,8 @@ static void set_filter_param(FilterParam *fp, int msize_x, int msize_y, double a
 static av_cold int init(AVFilterContext *ctx, const char *args, void *opaque)
 {
     UnsharpContext *unsharp = ctx->priv;
-    int lmsize_x = 5, cmsize_x = 0;
-    int lmsize_y = 5, cmsize_y = 0;
+    int lmsize_x = 5, cmsize_x = 5;
+    int lmsize_y = 5, cmsize_y = 5;
     double lamount = 1.0f, camount = 0.0f;
 
     if (args)
@@ -155,7 +159,7 @@ static int query_formats(AVFilterContext *ctx)
         PIX_FMT_YUVJ444P, PIX_FMT_YUVJ440P, PIX_FMT_NONE
     };
 
-    avfilter_set_common_formats(ctx, avfilter_make_format_list(pix_fmts));
+    avfilter_set_common_pixel_formats(ctx, avfilter_make_format_list(pix_fmts));
 
     return 0;
 }

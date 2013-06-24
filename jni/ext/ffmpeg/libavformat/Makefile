@@ -24,7 +24,7 @@ OBJS-$(CONFIG_AC3_MUXER)                 += rawenc.o
 OBJS-$(CONFIG_ADTS_MUXER)                += adtsenc.o
 OBJS-$(CONFIG_AEA_DEMUXER)               += aea.o pcm.o
 OBJS-$(CONFIG_AIFF_DEMUXER)              += aiffdec.o riff.o pcm.o isom.o
-OBJS-$(CONFIG_AIFF_MUXER)                += aiffenc.o riff.o
+OBJS-$(CONFIG_AIFF_MUXER)                += aiffenc.o riff.o isom.o
 OBJS-$(CONFIG_AMR_DEMUXER)               += amr.o
 OBJS-$(CONFIG_AMR_MUXER)                 += amr.o
 OBJS-$(CONFIG_ANM_DEMUXER)               += anm.o
@@ -48,6 +48,7 @@ OBJS-$(CONFIG_BFI_DEMUXER)               += bfi.o
 OBJS-$(CONFIG_BINK_DEMUXER)              += bink.o
 OBJS-$(CONFIG_C93_DEMUXER)               += c93.o vocdec.o voc.o
 OBJS-$(CONFIG_CAF_DEMUXER)               += cafdec.o caf.o mov.o riff.o isom.o
+OBJS-$(CONFIG_CAF_MUXER)                 += cafenc.o caf.o riff.o isom.o
 OBJS-$(CONFIG_CAVSVIDEO_DEMUXER)         += cavsvideodec.o rawdec.o
 OBJS-$(CONFIG_CAVSVIDEO_MUXER)           += rawenc.o
 OBJS-$(CONFIG_CDG_DEMUXER)               += cdg.o
@@ -232,6 +233,7 @@ OBJS-$(CONFIG_RSO_MUXER)                 += rsoenc.o rso.o
 OBJS-$(CONFIG_RPL_DEMUXER)               += rpl.o
 OBJS-$(CONFIG_RTP_MUXER)                 += rtp.o         \
                                             rtpenc_aac.o     \
+                                            rtpenc_latm.o    \
                                             rtpenc_amr.o     \
                                             rtpenc_h263.o    \
                                             rtpenc_mpv.o     \
@@ -245,6 +247,7 @@ OBJS-$(CONFIG_RTPDEC)                    += rdt.o         \
                                             rtpdec.o      \
                                             rtpdec_amr.o  \
                                             rtpdec_asf.o  \
+                                            rtpdec_g726.o \
                                             rtpdec_h263.o \
                                             rtpdec_h264.o \
                                             rtpdec_latm.o \
@@ -338,7 +341,6 @@ OBJS-$(CONFIG_UDP_PROTOCOL)              += udp.o
 # libavdevice dependencies
 OBJS-$(CONFIG_JACK_INDEV)                += timefilter.o
 
-EXAMPLES  = output
 TESTPROGS = timefilter
 
 include $(SUBDIR)../subdir.mak

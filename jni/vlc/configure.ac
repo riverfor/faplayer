@@ -50,6 +50,18 @@ vlclibdir="\${libdir}/\${PKGDIR}"
 AC_SUBST(vlclibdir)
 
 dnl
+dnl  android AudioTrack module
+dnl
+AC_ARG_ENABLE(audiotrack,
+[  --enable-audiotrack   Android native AudioTrack audio output module (default disabled)])
+if test "${enable_audiotrack}" = "yes"; then
+    if test "${HAVE_ANDROID}" = "1"; then
+        VLC_ADD_PLUGIN([android_audiotrack])
+        VLC_ADD_LDFLAGS([android_audiotrack], [-ldl])
+    fi
+fi
+
+dnl
 dnl  Save *FLAGS
 dnl
 VLC_SAVE_FLAGS

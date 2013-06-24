@@ -5,6 +5,8 @@ FF_AVCODEC_SRC := \
     libavcodec/4xm.c \
     libavcodec/8bps.c \
     libavcodec/8svx.c \
+    libavcodec/s302m.c \
+    libavcodec/eac3enc.c \
     libavcodec/a64multienc.c \
     libavcodec/aac_ac3_parser.c \
     libavcodec/aac_adtstoasc_bsf.c \
@@ -42,9 +44,11 @@ FF_AVCODEC_SRC := \
     libavcodec/amrwbdec.c \
     libavcodec/anm.c \
     libavcodec/ansi.c \
+    libavcodec/ac3enc.c \
     libavcodec/apedec.c \
     libavcodec/arm/ac3dsp_arm.S \
     libavcodec/arm/ac3dsp_armv6.S \
+    libavcodec/arm/mpegaudiodsp_fixed_armv6.S \
     libavcodec/arm/ac3dsp_init_arm.c \
     libavcodec/arm/dcadsp_init_arm.c \
     libavcodec/arm/dsputil_arm.S \
@@ -67,6 +71,10 @@ FF_AVCODEC_SRC := \
     libavcodec/arm/vp56dsp_init_arm.c \
     libavcodec/arm/vp8_armv6.S \
     libavcodec/arm/vp8dsp_init_arm.c \
+    libavcodec/arm/mpegaudiodsp_init_arm.c \
+    libavcodec/mpegaudiodsp.c \
+    libavcodec/mpegaudiodsp_fixed.c \
+    libavcodec/mpegaudiodsp_float.c \
     libavcodec/ass.c \
     libavcodec/ass_split.c \
     libavcodec/assdec.c \
@@ -110,6 +118,8 @@ FF_AVCODEC_SRC := \
     libavcodec/dca_parser.c \
     libavcodec/dcadsp.c \
     libavcodec/dcaenc.c \
+    libavcodec/dct32_fixed.c \
+    libavcodec/dct32_float.c \
     libavcodec/dct.c \
     libavcodec/dfa.c \
     libavcodec/dirac.c \
@@ -183,7 +193,6 @@ FF_AVCODEC_SRC := \
     libavcodec/h264_cabac.c \
     libavcodec/h264_cavlc.c \
     libavcodec/h264_direct.c \
-    libavcodec/h264_hl_motion.c \
     libavcodec/h264_loopfilter.c \
     libavcodec/h264_mp4toannexb_bsf.c \
     libavcodec/h264_parser.c \
@@ -459,6 +468,9 @@ FF_AVDEVICE_SRC := \
 
 FF_AVFILTER_SRC := \
     libavfilter/af_anull.c \
+    libavfilter/vf_split.c \
+    libavfilter/vf_select.c \
+    libavfilter/vsink_buffer.c \
     libavfilter/allfilters.c \
     libavfilter/asink_anullsink.c \
     libavfilter/asrc_anullsrc.c \
@@ -494,6 +506,8 @@ FF_AVFILTER_SRC := \
     libavfilter/vsrc_buffer.c \
     libavfilter/vsrc_color.c \
     libavfilter/vsrc_movie.c \
+    libavfilter/vf_lut.c \
+    libavfilter/avcodec.c \
     libavfilter/vsrc_nullsrc.c
 
 FF_AVFORMAT_SRC := \
@@ -535,6 +549,7 @@ FF_AVFORMAT_SRC := \
     libavformat/c93.c \
     libavformat/caf.c \
     libavformat/cafdec.c \
+    libavformat/cafenc.c \
     libavformat/cavsvideodec.c \
     libavformat/cdg.c \
     libavformat/concat.c \
@@ -683,6 +698,8 @@ FF_AVFORMAT_SRC := \
     libavformat/rtpdec_svq3.c \
     libavformat/rtpdec_vp8.c \
     libavformat/rtpdec_xiph.c \
+    libavformat/rtpdec_g726.c \
+    libavformat/rtpenc_latm.c \
     libavformat/rtpenc.c \
     libavformat/rtpenc_aac.c \
     libavformat/rtpenc_amr.c \
@@ -766,6 +783,7 @@ FF_AVUTIL_SRC := \
     libavutil/md5.c \
     libavutil/mem.c \
     libavutil/opt.c \
+    libavutil/dict.c \
     libavutil/parseutils.c \
     libavutil/pixdesc.c \
     libavutil/random_seed.c \
@@ -781,6 +799,7 @@ FF_SWSCALE_SRC := \
     libswscale/rgb2rgb.c \
     libswscale/swscale.c \
     libswscale/utils.c \
+    libswscale/swscale_unscaled.c \
     libswscale/yuv2rgb.c
 
 FF_CFLAGS := -std=c99

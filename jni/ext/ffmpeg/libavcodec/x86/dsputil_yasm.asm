@@ -16,7 +16,7 @@
 ;*
 ;* You should have received a copy of the GNU Lesser General Public
 ;* License along with FFmpeg; if not, write to the Free Software
-;* 51, Inc., Foundation Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+;* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 ;******************************************************************************
 
 %include "x86inc.asm"
@@ -30,7 +30,7 @@ pb_zz11zz55zz99zzdd: db -1,-1,1,1,-1,-1,5,5,-1,-1,9,9,-1,-1,13,13
 pb_revwords: db 14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1
 pd_16384: times 4 dd 16384
 
-section .text align=16
+SECTION_TEXT
 
 %macro SCALARPRODUCT 1
 ; int scalarproduct_int16(int16_t *v1, int16_t *v2, int order, int shift)
@@ -474,7 +474,7 @@ cglobal scalarproduct_float_sse, 3,3,2, v1, v2, offset
     shufps  xmm0, xmm0, 1
     addss   xmm0, xmm1
 %ifndef ARCH_X86_64
-    movd    r0m,  xmm0
+    movss   r0m,  xmm0
     fld     dword r0m
 %endif
     RET

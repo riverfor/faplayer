@@ -34,6 +34,7 @@
 #include "libavutil/intreadwrite.h"
 #include "libavutil/log.h"
 #include "mathops.h"
+#include "config.h"
 
 //#define ALT_BITSTREAM_WRITER
 //#define ALIGNED_BITSTREAM_WRITER
@@ -99,7 +100,8 @@ static inline void flush_put_bits(PutBitContext *s)
     align_put_bits(s);
 #else
 #ifndef BITSTREAM_WRITER_LE
-    s->bit_buf<<= s->bit_left;
+    if (s->bit_left < 32)
+        s->bit_buf<<= s->bit_left;
 #endif
     while (s->bit_left < 32) {
         /* XXX: should test end of buffer */

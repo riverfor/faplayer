@@ -176,7 +176,10 @@ LOCAL_SRC_FILES := \
     src/video_output/vout_wrapper.c \
     src/video_output/window.c
 
-LOCAL_LDLIBS += -ldl -llog -lz
+LOCAL_LDLIBS += -ldl -llog -lz 
+
+LOCAL_SHARED_LIBRARIES := \
+    libdl liblog libz
 
 include $(LOCAL_PATH)/Modules.mk
 

@@ -70,33 +70,27 @@ av_cold int ff_h263_decode_init(AVCodecContext *avctx)
     case CODEC_ID_MPEG4:
         break;
     case CODEC_ID_MSMPEG4V1:
-        s->h263_msmpeg4 = 1;
         s->h263_pred = 1;
         s->msmpeg4_version=1;
         break;
     case CODEC_ID_MSMPEG4V2:
-        s->h263_msmpeg4 = 1;
         s->h263_pred = 1;
         s->msmpeg4_version=2;
         break;
     case CODEC_ID_MSMPEG4V3:
-        s->h263_msmpeg4 = 1;
         s->h263_pred = 1;
         s->msmpeg4_version=3;
         break;
     case CODEC_ID_WMV1:
-        s->h263_msmpeg4 = 1;
         s->h263_pred = 1;
         s->msmpeg4_version=4;
         break;
     case CODEC_ID_WMV2:
-        s->h263_msmpeg4 = 1;
         s->h263_pred = 1;
         s->msmpeg4_version=5;
         break;
     case CODEC_ID_VC1:
     case CODEC_ID_WMV3:
-        s->h263_msmpeg4 = 1;
         s->h263_pred = 1;
         s->msmpeg4_version=6;
         avctx->chroma_sample_location = AVCHROMA_LOC_LEFT;
@@ -386,7 +380,7 @@ uint64_t time= rdtsc();
 
 
 retry:
-    if(s->divx_packed && s->xvid_build>=0 && s->bitstream_buffer_size){
+    if(s->divx_packed && s->bitstream_buffer_size){
         int i;
         for(i=0; i<buf_size-3; i++){
             if(buf[i]==0 && buf[i+1]==0 && buf[i+2]==1){
@@ -570,8 +564,7 @@ retry:
 #if HAVE_MMX
     if (s->codec_id == CODEC_ID_MPEG4 && s->xvid_build>=0 && avctx->idct_algo == FF_IDCT_AUTO && (av_get_cpu_flags() & AV_CPU_FLAG_MMX)) {
         avctx->idct_algo= FF_IDCT_XVIDMMX;
-        avctx->coded_width= 0; // force reinit
-//        dsputil_init(&s->dsp, avctx);
+        ff_dct_common_init(s);
         s->picture_number=0;
     }
 #endif
@@ -585,6 +578,12 @@ retry:
         || s->height != avctx->coded_height) {
         /* H.263 could change picture size any time */
         ParseContext pc= s->parse_context; //FIXME move these demuxng hack to avformat
+
+        if (HAVE_THREADS && (s->avctx->active_thread_type&FF_THREAD_FRAME)) {
+            av_log_missing_feature(s->avctx, "Width/height/bit depth/chroma idc changing with threads is", 0);
+            return -1;   // width / height changed during parallelized decoding
+        }
+
         s->parse_context.buffer=0;
         MPV_common_end(s);
         s->parse_context= pc;
@@ -662,8 +661,11 @@ retry:
             if(s->slice_height==0 || s->mb_x!=0 || (s->mb_y%s->slice_height)!=0 || get_bits_count(&s->gb) > s->gb.size_in_bits)
                 break;
         }else{
+            int prev_x=s->mb_x, prev_y=s->mb_y;
             if(ff_h263_resync(s)<0)
                 break;
+            if (prev_y * s->mb_width + prev_x < s->mb_y * s->mb_width + s->mb_x)
+                s->error_occurred = 1;
         }
 
         if(s->msmpeg4_version<4 && s->h263_pred)
@@ -672,7 +674,7 @@ retry:
         decode_slice(s);
     }
 
-    if (s->h263_msmpeg4 && s->msmpeg4_version<4 && s->pict_type==AV_PICTURE_TYPE_I)
+    if (s->msmpeg4_version && s->msmpeg4_version<4 && s->pict_type==AV_PICTURE_TYPE_I)
         if(!CONFIG_MSMPEG4_DECODER || msmpeg4_decode_ext_header(s, buf_size) < 0){
             s->error_status_table[s->mb_num-1]= AC_ERROR|DC_ERROR|MV_ERROR;
         }
@@ -681,21 +683,17 @@ retry:
 frame_end:
     /* divx 5.01+ bistream reorder stuff */
     if(s->codec_id==CODEC_ID_MPEG4 && s->divx_packed){
-        int current_pos= get_bits_count(&s->gb)>>3;
+        int current_pos= s->gb.buffer == s->bitstream_buffer ? 0 : (get_bits_count(&s->gb)>>3);
         int startcode_found=0;
 
-        if(buf_size - current_pos > 5){
+        if(buf_size - current_pos > 7){
             int i;
-            for(i=current_pos; i<buf_size-3; i++){
+            for(i=current_pos; i<buf_size-4; i++){
                 if(buf[i]==0 && buf[i+1]==0 && buf[i+2]==1 && buf[i+3]==0xB6){
-                    startcode_found=1;
+                    startcode_found=!(buf[i+4]&0x40);
                     break;
                 }
             }
-        }
-        if(s->gb.buffer == s->bitstream_buffer && buf_size>7 && s->xvid_build>=0){ //xvid style
-            startcode_found=1;
-            current_pos=0;
         }
 
         if(startcode_found){

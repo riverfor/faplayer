@@ -37,6 +37,25 @@ static const char* context_to_name(void* ptr) {
         return "NULL";
 }
 
+static const AVOption *opt_find(void *obj, const char *name, const char *unit, int opt_flags, int search_flags)
+{
+    AVCodecContext *s = obj;
+    AVCodec        *c = NULL;
+
+    if (s->priv_data) {
+        if (s->codec->priv_class)
+            return av_opt_find(s->priv_data, name, unit, opt_flags, search_flags);
+        return NULL;
+    }
+
+    while ((c = av_codec_next(c))) {
+        const AVOption *o;
+        if (c->priv_class && (o = av_opt_find(&c->priv_class, name, unit, opt_flags, search_flags)))
+            return o;
+    }
+    return NULL;
+}
+
 #define OFFSET(x) offsetof(AVCodecContext,x)
 #define DEFAULT 0 //should be NAN but it does not work as it is not a constant in glibc as required by ANSI/ISO C
 //these names are too long to be readable
@@ -103,7 +122,7 @@ static const AVOption options[]={
 {"umh", "umh motion estimation", 0, FF_OPT_TYPE_CONST, {.dbl = ME_UMH }, INT_MIN, INT_MAX, V|E, "me_method" },
 {"iter", "iter motion estimation", 0, FF_OPT_TYPE_CONST, {.dbl = ME_ITER }, INT_MIN, INT_MAX, V|E, "me_method" },
 {"extradata_size", NULL, OFFSET(extradata_size), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX},
-{"time_base", NULL, OFFSET(time_base), FF_OPT_TYPE_RATIONAL, {.dbl=0}, INT_MIN, INT_MAX},
+{"time_base", NULL, OFFSET(time_base), FF_OPT_TYPE_RATIONAL, {.dbl = 0}, INT_MIN, INT_MAX},
 {"g", "set the group of picture size", OFFSET(gop_size), FF_OPT_TYPE_INT, {.dbl = 12 }, INT_MIN, INT_MAX, V|E},
 {"ar", "set audio sampling rate (in Hz)", OFFSET(sample_rate), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX},
 {"ac", "set number of audio channels", OFFSET(channels), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX},
@@ -224,7 +243,7 @@ static const AVOption options[]={
 {"left", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_PRED_LEFT }, INT_MIN, INT_MAX, V|E, "pred"},
 {"plane", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_PRED_PLANE }, INT_MIN, INT_MAX, V|E, "pred"},
 {"median", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_PRED_MEDIAN }, INT_MIN, INT_MAX, V|E, "pred"},
-{"aspect", "sample aspect ratio", OFFSET(sample_aspect_ratio), FF_OPT_TYPE_RATIONAL, {.dbl=0}, 0, 10, V|E},
+{"aspect", "sample aspect ratio", OFFSET(sample_aspect_ratio), FF_OPT_TYPE_RATIONAL, {.dbl = 0}, 0, 10, V|E},
 {"debug", "print specific debug info", OFFSET(debug), FF_OPT_TYPE_FLAGS, {.dbl = DEFAULT }, 0, INT_MAX, V|A|S|E|D, "debug"},
 {"pict", "picture info", 0, FF_OPT_TYPE_CONST, {.dbl = FF_DEBUG_PICT_INFO }, INT_MIN, INT_MAX, V|D, "debug"},
 {"rc", "rate control", 0, FF_OPT_TYPE_CONST, {.dbl = FF_DEBUG_RC }, INT_MIN, INT_MAX, V|E, "debug"},
@@ -305,11 +324,11 @@ static const AVOption options[]={
 {"error", NULL, OFFSET(error_rate), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX, V|E},
 #if FF_API_ANTIALIAS_ALGO
 {"antialias", "MP3 antialias algorithm", OFFSET(antialias_algo), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX, V|D, "aa"},
-#endif
 {"auto", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_AA_AUTO }, INT_MIN, INT_MAX, V|D, "aa"},
 {"fastint", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_AA_FASTINT }, INT_MIN, INT_MAX, V|D, "aa"},
 {"int", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_AA_INT }, INT_MIN, INT_MAX, V|D, "aa"},
 {"float", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_AA_FLOAT }, INT_MIN, INT_MAX, V|D, "aa"},
+#endif
 {"qns", "quantizer noise shaping", OFFSET(quantizer_noise_shaping), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX, V|E},
 {"threads", NULL, OFFSET(thread_count), FF_OPT_TYPE_INT, {.dbl = 1 }, INT_MIN, INT_MAX, V|E|D},
 {"me_threshold", "motion estimaton threshold", OFFSET(me_threshold), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX},
@@ -353,8 +372,8 @@ static const AVOption options[]={
 {"brd_scale", "downscales frames for dynamic B-frame decision", OFFSET(brd_scale), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, 0, 10, V|E},
 {"crf", "enables constant quality mode, and selects the quality (x264/VP8)", OFFSET(crf), FF_OPT_TYPE_FLOAT, {.dbl = DEFAULT }, 0, 63, V|E},
 {"cqp", "constant quantization parameter rate control method", OFFSET(cqp), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, V|E},
-{"keyint_min", "minimum interval between IDR-frames (x264)", OFFSET(keyint_min), FF_OPT_TYPE_INT, {.dbl = 25 }, INT_MIN, INT_MAX, V|E},
-{"refs", "reference frames to consider for motion compensation (Snow)", OFFSET(refs), FF_OPT_TYPE_INT, {.dbl = 1 }, INT_MIN, INT_MAX, V|E},
+{"keyint_min", "minimum interval between IDR-frames", OFFSET(keyint_min), FF_OPT_TYPE_INT, {.dbl = 25 }, INT_MIN, INT_MAX, V|E},
+{"refs", "reference frames to consider for motion compensation", OFFSET(refs), FF_OPT_TYPE_INT, {.dbl = 1 }, INT_MIN, INT_MAX, V|E},
 {"chromaoffset", "chroma qp offset from luma", OFFSET(chromaoffset), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX, V|E},
 {"bframebias", "influences how often B-frames are used", OFFSET(bframebias), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX, V|E},
 {"trellis", "rate-distortion optimal quantization", OFFSET(trellis), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, INT_MIN, INT_MAX, V|A|E},
@@ -380,12 +399,14 @@ static const AVOption options[]={
 {"ivlc", "intra vlc table", 0, FF_OPT_TYPE_CONST, {.dbl = CODEC_FLAG2_INTRA_VLC }, INT_MIN, INT_MAX, V|E, "flags2"},
 {"b_sensitivity", "adjusts sensitivity of b_frame_strategy 1", OFFSET(b_sensitivity), FF_OPT_TYPE_INT, {.dbl = 40 }, 1, INT_MAX, V|E},
 {"compression_level", NULL, OFFSET(compression_level), FF_OPT_TYPE_INT, {.dbl = FF_COMPRESSION_DEFAULT }, INT_MIN, INT_MAX, V|A|E},
-{"lpc_coeff_precision", "LPC coefficient precision (FLAC)", OFFSET(lpc_coeff_precision), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, 0, INT_MAX, A|E},
 {"min_prediction_order", NULL, OFFSET(min_prediction_order), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
 {"max_prediction_order", NULL, OFFSET(max_prediction_order), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
-{"prediction_order_method", "search method for selecting prediction order", OFFSET(prediction_order_method), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
-{"min_partition_order", NULL, OFFSET(min_partition_order), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
-{"max_partition_order", NULL, OFFSET(max_partition_order), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
+#if FF_API_FLAC_GLOBAL_OPTS
+{"lpc_coeff_precision", "deprecated, use flac-specific options", OFFSET(lpc_coeff_precision), FF_OPT_TYPE_INT, {.dbl = DEFAULT }, 0, INT_MAX, A|E},
+{"prediction_order_method", "deprecated, use flac-specific options", OFFSET(prediction_order_method), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
+{"min_partition_order", "deprecated, use flac-specific options", OFFSET(min_partition_order), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
+{"max_partition_order", "deprecated, use flac-specific options", OFFSET(max_partition_order), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
+#endif
 {"timecode_frame_start", "GOP timecode frame start number, in non drop frame format", OFFSET(timecode_frame_start), FF_OPT_TYPE_INT64, {.dbl = 0 }, 0, INT64_MAX, V|E},
 {"drop_frame_timecode", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = CODEC_FLAG2_DROP_FRAME_TIMECODE }, INT_MIN, INT_MAX, V|E, "flags2"},
 {"non_linear_q", "use non linear quantizer", 0, FF_OPT_TYPE_CONST, {.dbl = CODEC_FLAG2_NON_LINEAR_QUANT }, INT_MIN, INT_MAX, V|E, "flags2"},
@@ -416,17 +437,18 @@ static const AVOption options[]={
 {"intra_refresh", "use periodic insertion of intra blocks instead of keyframes", 0, FF_OPT_TYPE_CONST, {.dbl = CODEC_FLAG2_INTRA_REFRESH }, INT_MIN, INT_MAX, V|E, "flags2"},
 {"crf_max", "in crf mode, prevents vbv from lowering quality beyond this point", OFFSET(crf_max), FF_OPT_TYPE_FLOAT, {.dbl = DEFAULT }, 0, 51, V|E},
 {"log_level_offset", "set the log level offset", OFFSET(log_level_offset), FF_OPT_TYPE_INT, {.dbl = 0 }, INT_MIN, INT_MAX },
-{"lpc_type", "specify LPC algorithm", OFFSET(lpc_type), FF_OPT_TYPE_INT, {.dbl = AV_LPC_TYPE_DEFAULT }, AV_LPC_TYPE_DEFAULT, AV_LPC_TYPE_NB-1, A|E},
+#if FF_API_FLAC_GLOBAL_OPTS
+{"lpc_type", "deprecated, use flac-specific options", OFFSET(lpc_type), FF_OPT_TYPE_INT, {.dbl = AV_LPC_TYPE_DEFAULT }, AV_LPC_TYPE_DEFAULT, AV_LPC_TYPE_NB-1, A|E},
 {"none",     NULL, 0, FF_OPT_TYPE_CONST, {.dbl = AV_LPC_TYPE_NONE },     INT_MIN, INT_MAX, A|E, "lpc_type"},
 {"fixed",    NULL, 0, FF_OPT_TYPE_CONST, {.dbl = AV_LPC_TYPE_FIXED },    INT_MIN, INT_MAX, A|E, "lpc_type"},
 {"levinson", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = AV_LPC_TYPE_LEVINSON }, INT_MIN, INT_MAX, A|E, "lpc_type"},
 {"cholesky", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = AV_LPC_TYPE_CHOLESKY }, INT_MIN, INT_MAX, A|E, "lpc_type"},
-{"lpc_passes", "number of passes to use for Cholesky factorization during LPC analysis", OFFSET(lpc_passes), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
+{"lpc_passes", "deprecated, use flac-specific options", OFFSET(lpc_passes), FF_OPT_TYPE_INT, {.dbl = -1 }, INT_MIN, INT_MAX, A|E},
+#endif
 {"slices", "number of slices, used in parallelized decoding", OFFSET(slices), FF_OPT_TYPE_INT, {.dbl = 0 }, 0, INT_MAX, V|E},
-{"thread_type", "select multithreading type", OFFSET(thread_type), FF_OPT_TYPE_INT, {.dbl = FF_THREAD_SLICE|FF_THREAD_FRAME }, 0, INT_MAX, V|E|D, "thread_type"},
+{"thread_type", "select multithreading type", OFFSET(thread_type), FF_OPT_TYPE_FLAGS, {.dbl = FF_THREAD_SLICE|FF_THREAD_FRAME }, 0, INT_MAX, V|E|D, "thread_type"},
 {"slice", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_THREAD_SLICE }, INT_MIN, INT_MAX, V|E|D, "thread_type"},
 {"frame", NULL, 0, FF_OPT_TYPE_CONST, {.dbl = FF_THREAD_FRAME }, INT_MIN, INT_MAX, V|E|D, "thread_type"},
-{"vbv_delay", "initial buffer fill time in periods of 27Mhz clock", 0, FF_OPT_TYPE_INT64, {.dbl = 0 }, 0, INT64_MAX},
 {"audio_service_type", "audio service type", OFFSET(audio_service_type), FF_OPT_TYPE_INT, {.dbl = AV_AUDIO_SERVICE_TYPE_MAIN }, 0, AV_AUDIO_SERVICE_TYPE_NB-1, A|E, "audio_service_type"},
 {"ma", "Main Audio Service", 0, FF_OPT_TYPE_CONST, {.dbl = AV_AUDIO_SERVICE_TYPE_MAIN },              INT_MIN, INT_MAX, A|E, "audio_service_type"},
 {"ef", "Effects",            0, FF_OPT_TYPE_CONST, {.dbl = AV_AUDIO_SERVICE_TYPE_EFFECTS },           INT_MIN, INT_MAX, A|E, "audio_service_type"},
@@ -437,7 +459,12 @@ static const AVOption options[]={
 {"em", "Emergency",          0, FF_OPT_TYPE_CONST, {.dbl = AV_AUDIO_SERVICE_TYPE_EMERGENCY },         INT_MIN, INT_MAX, A|E, "audio_service_type"},
 {"vo", "Voice Over",         0, FF_OPT_TYPE_CONST, {.dbl = AV_AUDIO_SERVICE_TYPE_VOICE_OVER },        INT_MIN, INT_MAX, A|E, "audio_service_type"},
 {"ka", "Karaoke",            0, FF_OPT_TYPE_CONST, {.dbl = AV_AUDIO_SERVICE_TYPE_KARAOKE },           INT_MIN, INT_MAX, A|E, "audio_service_type"},
-{"request_sample_fmt", "sample format audio decoders should prefer", OFFSET(request_sample_fmt), FF_OPT_TYPE_INT, {.dbl = AV_SAMPLE_FMT_NONE }, AV_SAMPLE_FMT_NONE, AV_SAMPLE_FMT_NB-1, A|D},
+{"request_sample_fmt", "sample format audio decoders should prefer", OFFSET(request_sample_fmt), FF_OPT_TYPE_INT, {.dbl = AV_SAMPLE_FMT_NONE }, AV_SAMPLE_FMT_NONE, AV_SAMPLE_FMT_NB-1, A|D, "request_sample_fmt"},
+{"u8" , "8-bit unsigned integer", 0, FF_OPT_TYPE_CONST, {.dbl = AV_SAMPLE_FMT_U8  }, INT_MIN, INT_MAX, A|D, "request_sample_fmt"},
+{"s16", "16-bit signed integer",  0, FF_OPT_TYPE_CONST, {.dbl = AV_SAMPLE_FMT_S16 }, INT_MIN, INT_MAX, A|D, "request_sample_fmt"},
+{"s32", "32-bit signed integer",  0, FF_OPT_TYPE_CONST, {.dbl = AV_SAMPLE_FMT_S32 }, INT_MIN, INT_MAX, A|D, "request_sample_fmt"},
+{"flt", "32-bit float",           0, FF_OPT_TYPE_CONST, {.dbl = AV_SAMPLE_FMT_FLT }, INT_MIN, INT_MAX, A|D, "request_sample_fmt"},
+{"dbl", "64-bit double",          0, FF_OPT_TYPE_CONST, {.dbl = AV_SAMPLE_FMT_DBL }, INT_MIN, INT_MAX, A|D, "request_sample_fmt"},
 {NULL},
 };
 
@@ -448,7 +475,7 @@ static const AVOption options[]={
 #undef D
 #undef DEFAULT
 
-static const AVClass av_codec_context_class = { "AVCodecContext", context_to_name, options, LIBAVUTIL_VERSION_INT, OFFSET(log_level_offset) };
+static const AVClass av_codec_context_class = { "AVCodecContext", context_to_name, options, LIBAVUTIL_VERSION_INT, OFFSET(log_level_offset), .opt_find = opt_find};
 
 void avcodec_get_context_defaults2(AVCodecContext *s, enum AVMediaType codec_type){
     int flags=0;

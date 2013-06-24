@@ -30,6 +30,7 @@
 #include "libavutil/samplefmt.h"
 #include "libavutil/avutil.h"
 #include "libavutil/cpu.h"
+#include "libavutil/dict.h"
 
 #include "libavcodec/version.h"
 
@@ -204,6 +205,7 @@ enum CodecID {
     CODEC_ID_PRORES,
     CODEC_ID_JV,
     CODEC_ID_DFA,
+    CODEC_ID_8SVX_RAW,
 
     /* various PCM "codecs" */
     CODEC_ID_PCM_S16LE= 0x10000,
@@ -232,6 +234,7 @@ enum CodecID {
     CODEC_ID_PCM_F64LE,
     CODEC_ID_PCM_BLURAY,
     CODEC_ID_PCM_LXF,
+    CODEC_ID_S302M,
 
     /* various ADPCM codecs */
     CODEC_ID_ADPCM_IMA_QT= 0x11000,
@@ -516,6 +519,7 @@ enum AVChromaLocation{
     AVCHROMA_LOC_NB           , ///< Not part of ABI
 };
 
+#if FF_API_FLAC_GLOBAL_OPTS
 /**
  * LPC analysis type
  */
@@ -527,6 +531,7 @@ enum AVLPCType {
     AV_LPC_TYPE_CHOLESKY    =  3, ///< Cholesky factorization
     AV_LPC_TYPE_NB              , ///< Not part of ABI
 };
+#endif
 
 enum AVAudioServiceType {
     AV_AUDIO_SERVICE_TYPE_MAIN              = 0,
@@ -684,6 +689,10 @@ typedef struct RcOverride{
  * Codec supports slice-based (or partition-based) multithreading.
  */
 #define CODEC_CAP_SLICE_THREADS    0x2000
+/**
+ * Codec is lossless.
+ */
+#define CODEC_CAP_LOSSLESS         0x80000000
 
 //The following defines may change, don't expect compatibility if you use them.
 #define MB_TYPE_INTRA4x4   0x0001
@@ -1018,6 +1027,22 @@ typedef struct AVPanScan{
      * - decoding: Read by user.\
      */\
     AVRational sample_aspect_ratio;\
+\
+    /**\
+     * width and height of the video frame\
+     * - encoding: unused\
+     * - decoding: Read by user.\
+     */\
+    int width, height;\
+\
+    /**\
+     * format of the frame, -1 if unknown or unset\
+     * It should be cast to the corresponding enum (enum PixelFormat\
+     * for video, enum AVSampleFormat for audio)\
+     * - encoding: unused\
+     * - decoding: Read by user.\
+     */\
+    int format;\
 
 
 #define FF_QSCALE_TYPE_MPEG1 0
@@ -2498,13 +2523,6 @@ typedef struct AVCodecContext {
 #define FF_COMPRESSION_DEFAULT -1
 
     /**
-     * LPC coefficient precision - used by FLAC encoder
-     * - encoding: Set by user.
-     * - decoding: unused
-     */
-    int lpc_coeff_precision;
-
-    /**
      * - encoding: Set by user.
      * - decoding: unused
      */
@@ -2516,24 +2534,42 @@ typedef struct AVCodecContext {
      */
     int max_prediction_order;
 
+#if FF_API_FLAC_GLOBAL_OPTS
+    /**
+     * @name FLAC options
+     * @deprecated Use FLAC encoder private options instead.
+     * @{
+     */
+
+    /**
+     * LPC coefficient precision - used by FLAC encoder
+     * - encoding: Set by user.
+     * - decoding: unused
+     */
+    attribute_deprecated int lpc_coeff_precision;
+
     /**
      * search method for selecting prediction order
      * - encoding: Set by user.
      * - decoding: unused
      */
-    int prediction_order_method;
+    attribute_deprecated int prediction_order_method;
 
     /**
      * - encoding: Set by user.
      * - decoding: unused
      */
-    int min_partition_order;
+    attribute_deprecated int min_partition_order;
 
     /**
      * - encoding: Set by user.
      * - decoding: unused
      */
-    int max_partition_order;
+    attribute_deprecated int max_partition_order;
+    /**
+     * @}
+     */
+#endif
 
     /**
      * GOP timecode frame start number, in non drop frame format
@@ -2571,7 +2607,6 @@ typedef struct AVCodecContext {
 
     /**
      * Bits per sample/pixel of internal libavcodec pixel/sample format.
-     * This field is applicable only when sample_fmt is AV_SAMPLE_FMT_S32.
      * - encoding: set by user.
      * - decoding: set by libavcodec.
      */
@@ -2580,7 +2615,7 @@ typedef struct AVCodecContext {
     /**
      * Audio channel layout.
      * - encoding: set by user.
-     * - decoding: set by libavcodec.
+     * - decoding: set by user, may be overwritten by libavcodec.
      */
     int64_t channel_layout;
 
@@ -2751,19 +2786,21 @@ typedef struct AVCodecContext {
 
     int log_level_offset;
 
+#if FF_API_FLAC_GLOBAL_OPTS
     /**
      * Determines which LPC analysis algorithm to use.
      * - encoding: Set by user
      * - decoding: unused
      */
-    enum AVLPCType lpc_type;
+    attribute_deprecated enum AVLPCType lpc_type;
 
     /**
      * Number of passes to use for Cholesky factorization during LPC analysis
      * - encoding: Set by user
      * - decoding: unused
      */
-    int lpc_passes;
+    attribute_deprecated int lpc_passes;
+#endif
 
     /**
      * Number of slices.
@@ -2848,6 +2885,14 @@ typedef struct AVCodecContext {
     enum AVAudioServiceType audio_service_type;
 
     /**
+     * desired sample format
+     * - encoding: Not used.
+     * - decoding: Set by user.
+     * Decoder will decode to this format if it can.
+     */
+    enum AVSampleFormat request_sample_fmt;
+
+    /**
      * Current statistics for PTS correction.
      * - decoding: maintained and used by libavcodec, not intended to be used by user apps
      * - encoding: unused
@@ -2857,13 +2902,6 @@ typedef struct AVCodecContext {
     int64_t pts_correction_last_pts;       /// PTS of the last frame
     int64_t pts_correction_last_dts;       /// DTS of the last frame
 
-    /**
-     * desired sample format
-     * - encoding: Not used.
-     * - decoding: Set by user.
-     * Decoder will decode to this format if it can.
-     */
-    enum AVSampleFormat request_sample_fmt;
 
 } AVCodecContext;
 
@@ -2919,7 +2957,7 @@ typedef struct AVCodec {
     const AVProfile *profiles;              ///< array of recognized profiles, or NULL if unknown, array is terminated by {FF_PROFILE_UNKNOWN}
 
     /**
-     * @defgroup framethreading Frame-level threading support functions.
+     * @name Frame-level threading support functions
      * @{
      */
     /**
@@ -3195,6 +3233,11 @@ uint8_t* av_packet_new_side_data(AVPacket *pkt, enum AVPacketSideDataType type,
 uint8_t* av_packet_get_side_data(AVPacket *pkt, enum AVPacketSideDataType type,
                                  int *size);
 
+int av_packet_merge_side_data(AVPacket *pkt);
+
+int av_packet_split_side_data(AVPacket *pkt);
+
+
 /* resample.c */
 
 struct ReSampleContext;
@@ -3352,12 +3395,16 @@ int avpicture_layout(const AVPicture* src, enum PixelFormat pix_fmt, int width, 
 int avpicture_get_size(enum PixelFormat pix_fmt, int width, int height);
 void avcodec_get_chroma_sub_sample(enum PixelFormat pix_fmt, int *h_shift, int *v_shift);
 
+#if FF_API_GET_PIX_FMT_NAME
 /**
  * Return the short name for a pixel format.
  *
  * \see av_get_pix_fmt(), av_get_pix_fmt_string().
+ * @deprecated Deprecated in favor of av_get_pix_fmt_name().
  */
+attribute_deprecated
 const char *avcodec_get_pix_fmt_name(enum PixelFormat pix_fmt);
+#endif
 
 void avcodec_set_dimensions(AVCodecContext *s, int width, int height);
 
@@ -3637,6 +3684,7 @@ int avcodec_default_execute(AVCodecContext *c, int (*func)(AVCodecContext *c2, v
 int avcodec_default_execute2(AVCodecContext *c, int (*func)(AVCodecContext *c2, void *arg2, int, int),void *arg, int *ret, int count);
 //FIXME func typedef
 
+#if FF_API_AVCODEC_OPEN
 /**
  * Initialize the AVCodecContext to use the given AVCodec. Prior to using this
  * function the context has to be allocated.
@@ -3663,8 +3711,44 @@ int avcodec_default_execute2(AVCodecContext *c, int (*func)(AVCodecContext *c2, 
  * @param codec The codec to use within the context.
  * @return zero on success, a negative value on error
  * @see avcodec_alloc_context, avcodec_find_decoder, avcodec_find_encoder, avcodec_close
+ *
+ * @deprecated use avcodec_open2
  */
 int avcodec_open(AVCodecContext *avctx, AVCodec *codec);
+#endif
+
+/**
+ * Initialize the AVCodecContext to use the given AVCodec. Prior to using this
+ * function the context has to be allocated with avcodec_alloc_context().
+ *
+ * The functions avcodec_find_decoder_by_name(), avcodec_find_encoder_by_name(),
+ * avcodec_find_decoder() and avcodec_find_encoder() provide an easy way for
+ * retrieving a codec.
+ *
+ * @warning This function is not thread safe!
+ *
+ * @code
+ * avcodec_register_all();
+ * av_dict_set(&opts, "b", "2.5M", 0);
+ * codec = avcodec_find_decoder(CODEC_ID_H264);
+ * if (!codec)
+ *     exit(1);
+ *
+ * context = avcodec_alloc_context();
+ *
+ * if (avcodec_open(context, codec, opts) < 0)
+ *     exit(1);
+ * @endcode
+ *
+ * @param avctx The context to initialize.
+ * @param options A dictionary filled with AVCodecContext and codec-private options.
+ *                On return this object will be filled with options that were not found.
+ *
+ * @return zero on success, a negative value on error
+ * @see avcodec_alloc_context3(), avcodec_find_decoder(), avcodec_find_encoder(),
+ *      av_dict_set(), av_opt_find().
+ */
+int avcodec_open2(AVCodecContext *avctx, AVCodec *codec, AVDictionary **options);
 
 /**
  * Decode the audio frame of size avpkt->size from avpkt->data into samples.
@@ -3868,7 +3952,7 @@ int av_get_bits_per_sample(enum CodecID codec_id);
 
 #if FF_API_OLD_SAMPLE_FMT
 /**
- * @deprecated Use av_get_bits_per_sample_fmt() instead.
+ * @deprecated Use av_get_bytes_per_sample() instead.
  */
 attribute_deprecated
 int av_get_bits_per_sample_format(enum AVSampleFormat sample_fmt);

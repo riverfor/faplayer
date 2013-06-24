@@ -7,6 +7,7 @@ SOURCES_auhal = auhal.c
 SOURCES_jack = jack.c
 SOURCES_audioqueue = audioqueue.c
 SOURCES_opensles_android = opensles_android.c
+SOURCES_android_audiotrack = audiotrack.c
 
 libamem_plugin_la_SOURCES = amem.c
 libamem_plugin_la_CFLAGS = $(AM_CFLAGS)

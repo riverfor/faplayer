@@ -233,7 +233,6 @@ static int smacker_read_packet(AVFormatContext *s, AVPacket *pkt)
     int i;
     int frame_size = 0;
     int palchange = 0;
-    int pos;
 
     if (url_feof(s->pb) || smk->cur_frame >= smk->frames)
         return AVERROR_EOF;
@@ -244,7 +243,6 @@ static int smacker_read_packet(AVFormatContext *s, AVPacket *pkt)
         frame_size = smk->frm_size[smk->cur_frame] & (~3);
         flags = smk->frm_flags[smk->cur_frame];
         /* handle palette change event */
-        pos = avio_tell(s->pb);
         if(flags & SMACKER_PAL){
             int size, sz, t, off, j, pos;
             uint8_t *pal = smk->pal;
@@ -263,8 +261,15 @@ static int smacker_read_packet(AVFormatContext *s, AVPacket *pkt)
                     sz += (t & 0x7F) + 1;
                     pal += ((t & 0x7F) + 1) * 3;
                 } else if(t & 0x40){ /* copy with offset */
-                    off = avio_r8(s->pb) * 3;
+                    off = avio_r8(s->pb);
                     j = (t & 0x3F) + 1;
+                    if (off + j > 0xff) {
+                        av_log(s, AV_LOG_ERROR,
+                               "Invalid palette update, offset=%d length=%d extends beyond palette size\n",
+                               off, j);
+                        return AVERROR_INVALIDDATA;
+                    }
+                    off *= 3;
                     while(j-- && sz < 256) {
                         *pal++ = oldpal[off + 0];
                         *pal++ = oldpal[off + 1];
@@ -288,11 +293,16 @@ static int smacker_read_packet(AVFormatContext *s, AVPacket *pkt)
         for(i = 0; i < 7; i++) {
             if(flags & 1) {
                 int size;
+                uint8_t *tmpbuf;
+
                 size = avio_rl32(s->pb) - 4;
                 frame_size -= size;
                 frame_size -= 4;
                 smk->curstream++;
-                smk->bufs[smk->curstream] = av_realloc(smk->bufs[smk->curstream], size);
+                tmpbuf = av_realloc(smk->bufs[smk->curstream], size);
+                if (!tmpbuf)
+                    return AVERROR(ENOMEM);
+                smk->bufs[smk->curstream] = tmpbuf;
                 smk->buf_sizes[smk->curstream] = size;
                 ret = avio_read(s->pb, smk->bufs[smk->curstream], size);
                 if(ret != size)
@@ -301,7 +311,9 @@ static int smacker_read_packet(AVFormatContext *s, AVPacket *pkt)
             }
             flags >>= 1;
         }
-        if (av_new_packet(pkt, frame_size + 768))
+        if (frame_size < 0)
+            return AVERROR_INVALIDDATA;
+        if (av_new_packet(pkt, frame_size + 769))
             return AVERROR(ENOMEM);
         if(smk->frm_size[smk->cur_frame] & 1)
             palchange |= 2;

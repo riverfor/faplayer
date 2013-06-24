@@ -132,7 +132,7 @@ static int tm2_build_huff_table(TM2Context *ctx, TM2Codes *code)
                huff.val_bits, huff.max_bits);
         return -1;
     }
-    if((huff.nodes < 0) || (huff.nodes > 0x10000)) {
+    if((huff.nodes <= 0) || (huff.nodes > 0x10000)) {
         av_log(ctx->avctx, AV_LOG_ERROR, "Incorrect number of Huffman tree nodes: %i\n", huff.nodes);
         return -1;
     }
@@ -201,7 +201,6 @@ static inline int tm2_read_header(TM2Context *ctx, const uint8_t *buf)
 {
     uint32_t magic;
     const uint8_t *obuf;
-    int length;
 
     obuf = buf;
 
@@ -212,19 +211,6 @@ static inline int tm2_read_header(TM2Context *ctx, const uint8_t *buf)
 /*      av_log (ctx->avctx, AV_LOG_ERROR, "TM2 old header: not implemented (yet)\n"); */
         return 40;
     } else if(magic == 0x00000101) { /* new header */
-        int w, h, size, flags, xr, yr;
-
-        length = AV_RL32(buf);
-        buf += 4;
-
-        init_get_bits(&ctx->gb, buf, 32 * 8);
-        size = get_bits_long(&ctx->gb, 31);
-        h = get_bits(&ctx->gb, 15);
-        w = get_bits(&ctx->gb, 15);
-        flags = get_bits_long(&ctx->gb, 31);
-        yr = get_bits(&ctx->gb, 9);
-        xr = get_bits(&ctx->gb, 9);
-
         return 40;
     } else {
         av_log (ctx->avctx, AV_LOG_ERROR, "Not a TM2 header: 0x%08X\n", magic);
@@ -831,6 +817,7 @@ static av_cold int decode_init(AVCodecContext *avctx){
     l->avctx = avctx;
     l->pic.data[0]=NULL;
     avctx->pix_fmt = PIX_FMT_BGR24;
+    avcodec_get_frame_defaults(&l->pic);
 
     dsputil_init(&l->dsp, avctx);
 

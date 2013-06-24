@@ -48,6 +48,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES := \
     android_AudioTrack.c
+#    audiotrack.c
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -59,6 +60,14 @@ LOCAL_ARM_NEON := true
 endif
 
 # TODO: enable this when >= android-9
+#LOCAL_MODULE := android_audiotrack_plugin
+
+#LOCAL_CFLAGS += \
+#    -std=c99 \
+#    -DHAVE_CONFIG_H \
+#    -DMODULE_STRING=\"android_audiotrack\" \
+#    -DMODULE_NAME=android_audiotrack
+
 #LOCAL_MODULE := opensles_android_plugin
 
 LOCAL_CFLAGS += \

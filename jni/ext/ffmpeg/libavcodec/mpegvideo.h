@@ -88,6 +88,7 @@ typedef struct Picture{
      * halfpel luma planes.
      */
     uint8_t *interpolated[3];
+    int8_t *qscale_table_base;
     int16_t (*motion_val_base[2])[2];
     uint32_t *mb_type_base;
 #define MB_TYPE_INTRA MB_TYPE_INTRA4x4 //default mb_type if there is just one type
@@ -122,7 +123,7 @@ typedef struct Picture{
     int pic_id;                 /**< h264 pic_num (short -> no wrap version of pic_num,
                                      pic_num & max_pic_num; long -> long_pic_num) */
     int long_ref;               ///< 1->long term reference 0->short term reference
-    int ref_poc[2][2][16];      ///< h264 POCs of the frames used as reference (FIXME need per slice)
+    int ref_poc[2][2][32];      ///< h264 POCs of the frames/fields used as reference (FIXME need per slice)
     int ref_count[2][2];        ///< number of entries in ref_poc              (FIXME need per slice)
     int mbaff;                  ///< h264 1 -> MBAFF frame 0-> not MBAFF
     int field_picture;          ///< whether or not the picture was encoded in seperate fields
@@ -152,7 +153,7 @@ typedef struct MotionEstContext{
     int best_bits;
     uint32_t *map;                     ///< map to avoid duplicate evaluations
     uint32_t *score_map;               ///< map to store the scores
-    int map_generation;
+    unsigned map_generation;
     int pre_penalty_factor;
     int penalty_factor;                /*!< an estimate of the bits required to
                                         code a given mv value, e.g. (1,0) takes
@@ -316,8 +317,7 @@ typedef struct MpegEncContext {
     uint8_t *mbintra_table;       ///< used to avoid setting {ac, dc, cbp}-pred stuff to zero on inter MB decoding
     uint8_t *cbp_table;           ///< used to store cbp, ac_pred for partitioned decoding
     uint8_t *pred_dir_table;      ///< used to store pred_dir for partitioned decoding
-    uint8_t *allocated_edge_emu_buffer;
-    uint8_t *edge_emu_buffer;     ///< points into the middle of allocated_edge_emu_buffer
+    uint8_t *edge_emu_buffer;     ///< temporary buffer for if MVs point to out-of-frame data
     uint8_t *rd_scratchpad;       ///< scratchpad for rate distortion mb decision
     uint8_t *obmc_scratchpad;
     uint8_t *b_scratchpad;        ///< scratchpad used for writing into write only buffers
@@ -475,7 +475,7 @@ typedef struct MpegEncContext {
     int last_bits; ///< temp var used for calculating the above vars
 
     /* error concealment / resync */
-    int error_count;
+    int error_count, error_occurred;
     uint8_t *error_status_table;       ///< table of the error status of each MB
 #define VP_START            1          ///< current MB is the first after a resync marker
 #define AC_ERROR            2
@@ -843,4 +843,3 @@ void ff_wmv2_encode_mb(MpegEncContext * s,
                        int motion_x, int motion_y);
 
 #endif /* AVCODEC_MPEGVIDEO_H */
-

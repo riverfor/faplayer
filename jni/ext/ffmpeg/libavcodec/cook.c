@@ -66,7 +66,6 @@
 
 #define SUBBAND_SIZE    20
 #define MAX_SUBPACKETS   5
-//#define COOKDEBUG
 
 typedef struct {
     int *now;
@@ -165,38 +164,6 @@ typedef struct cook {
 
 static float     pow2tab[127];
 static float rootpow2tab[127];
-
-/* debug functions */
-
-#ifdef COOKDEBUG
-static void dump_float_table(float* table, int size, int delimiter) {
-    int i=0;
-    av_log(NULL,AV_LOG_ERROR,"\n[%d]: ",i);
-    for (i=0 ; i<size ; i++) {
-        av_log(NULL, AV_LOG_ERROR, "%5.1f, ", table[i]);
-        if ((i+1)%delimiter == 0) av_log(NULL,AV_LOG_ERROR,"\n[%d]: ",i+1);
-    }
-}
-
-static void dump_int_table(int* table, int size, int delimiter) {
-    int i=0;
-    av_log(NULL,AV_LOG_ERROR,"\n[%d]: ",i);
-    for (i=0 ; i<size ; i++) {
-        av_log(NULL, AV_LOG_ERROR, "%d, ", table[i]);
-        if ((i+1)%delimiter == 0) av_log(NULL,AV_LOG_ERROR,"\n[%d]: ",i+1);
-    }
-}
-
-static void dump_short_table(short* table, int size, int delimiter) {
-    int i=0;
-    av_log(NULL,AV_LOG_ERROR,"\n[%d]: ",i);
-    for (i=0 ; i<size ; i++) {
-        av_log(NULL, AV_LOG_ERROR, "%d, ", table[i]);
-        if ((i+1)%delimiter == 0) av_log(NULL,AV_LOG_ERROR,"\n[%d]: ",i+1);
-    }
-}
-
-#endif
 
 /*************** init functions ***************/
 
@@ -368,7 +335,7 @@ static av_cold int cook_decode_close(AVCodecContext *avctx)
  * Fill the gain array for the timedomain quantization.
  *
  * @param gb          pointer to the GetBitContext
- * @param gaininfo[9] array of gain indexes
+ * @param gaininfo    array[9] of gain indexes
  */
 
 static void decode_gain_info(GetBitContext *gb, int *gaininfo)
@@ -1037,7 +1004,7 @@ static int cook_decode_frame(AVCodecContext *avctx,
     return avctx->block_align;
 }
 
-#ifdef COOKDEBUG
+#ifdef DEBUG
 static void dump_cook_context(COOKContext *q)
 {
     //int i=0;
@@ -1055,7 +1022,6 @@ static void dump_cook_context(COOKContext *q)
     PRINT("samples_per_channel",q->subpacket[0].samples_per_channel);
     PRINT("samples_per_frame",q->subpacket[0].samples_per_frame);
     PRINT("subbands",q->subpacket[0].subbands);
-    PRINT("random_state",q->random_state);
     PRINT("js_subband_start",q->subpacket[0].js_subband_start);
     PRINT("log2_numvector_size",q->subpacket[0].log2_numvector_size);
     PRINT("numvector_size",q->subpacket[0].numvector_size);
@@ -1100,6 +1066,10 @@ static av_cold int cook_decode_init(AVCodecContext *avctx)
     q->sample_rate = avctx->sample_rate;
     q->nb_channels = avctx->channels;
     q->bit_rate = avctx->bit_rate;
+    if (!q->nb_channels) {
+        av_log(avctx, AV_LOG_ERROR, "Invalid number of channels\n");
+        return AVERROR_INVALIDDATA;
+    }
 
     /* Initialize RNG. */
     av_lfg_init(&q->random_state, 0);
@@ -1113,7 +1083,7 @@ static av_cold int cook_decode_init(AVCodecContext *avctx)
             q->subpacket[s].subbands = bytestream_get_be16(&edata_ptr);
             extradata_size -= 8;
         }
-        if (avctx->extradata_size >= 8){
+        if (extradata_size >= 8){
             bytestream_get_be32(&edata_ptr);    //Unknown unused
             q->subpacket[s].js_subband_start = bytestream_get_be16(&edata_ptr);
             q->subpacket[s].js_vlc_bits = bytestream_get_be16(&edata_ptr);
@@ -1209,8 +1179,9 @@ static av_cold int cook_decode_init(AVCodecContext *avctx)
             return -1;
         }
 
-        if ((q->subpacket[s].js_vlc_bits > 6) || (q->subpacket[s].js_vlc_bits < 0)) {
-            av_log(avctx,AV_LOG_ERROR,"js_vlc_bits = %d, only >= 0 and <= 6 allowed!\n",q->subpacket[s].js_vlc_bits);
+        if ((q->subpacket[s].js_vlc_bits > 6) || (q->subpacket[s].js_vlc_bits < 2*q->subpacket[s].joint_stereo)) {
+            av_log(avctx,AV_LOG_ERROR,"js_vlc_bits = %d, only >= %d and <= 6 allowed!\n",
+                   q->subpacket[s].js_vlc_bits, 2*q->subpacket[s].joint_stereo);
             return -1;
         }
 
@@ -1280,7 +1251,7 @@ static av_cold int cook_decode_init(AVCodecContext *avctx)
     else
         avctx->channel_layout = (avctx->channels==2) ? AV_CH_LAYOUT_STEREO : AV_CH_LAYOUT_MONO;
 
-#ifdef COOKDEBUG
+#ifdef DEBUG
     dump_cook_context(q);
 #endif
     return 0;

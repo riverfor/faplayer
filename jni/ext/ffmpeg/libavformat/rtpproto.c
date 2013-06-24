@@ -115,6 +115,7 @@ static void build_udp_url(char *buf, int buf_size,
         url_add_option(buf, buf_size, "pkt_size=%d", max_packet_size);
     if (connect)
         url_add_option(buf, buf_size, "connect=1");
+    url_add_option(buf, buf_size, "fifo_size=0");
 }
 
 /**
@@ -138,14 +139,12 @@ static int rtp_open(URLContext *h, const char *uri, int flags)
 {
     RTPContext *s;
     int rtp_port, rtcp_port,
-        is_output, ttl, connect,
+        ttl, connect,
         local_rtp_port, local_rtcp_port, max_packet_size;
     char hostname[256];
     char buf[1024];
     char path[1024];
     const char *p;
-
-    is_output = (flags & AVIO_FLAG_WRITE);
 
     s = av_mallocz(sizeof(RTPContext));
     if (!s)

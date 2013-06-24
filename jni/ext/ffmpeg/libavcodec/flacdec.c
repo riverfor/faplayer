@@ -228,9 +228,11 @@ static int get_metadata_size(const uint8_t *buf, int buf_size)
 
     buf += 4;
     do {
+        if (buf_end - buf < 4)
+            return 0;
         ff_flac_parse_block_header(buf, &metadata_last, NULL, &metadata_size);
         buf += 4;
-        if (buf + metadata_size > buf_end) {
+        if (buf_end - buf < metadata_size) {
             /* need more data in order to read the complete header */
             return 0;
         }
@@ -418,7 +420,16 @@ static inline int decode_subframe(FLACContext *s, int channel)
     type = get_bits(&s->gb, 6);
 
     if (get_bits1(&s->gb)) {
+        int left = get_bits_left(&s->gb);
         wasted = 1;
+        if ( left < 0 ||
+            (left < s->curr_bps && !show_bits_long(&s->gb, left)) ||
+                                   !show_bits_long(&s->gb, s->curr_bps)) {
+            av_log(s->avctx, AV_LOG_ERROR,
+                   "Invalid number of wasted bits > available bits (%d) - left=%d\n",
+                   s->curr_bps, left);
+            return AVERROR_INVALIDDATA;
+        }
         while (!get_bits1(&s->gb))
             wasted++;
         s->curr_bps -= wasted;

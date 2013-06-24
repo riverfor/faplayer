@@ -235,7 +235,7 @@ int rv_decode_dc(MpegEncContext *s, int n)
 /* read RV 1.0 compatible frame header */
 static int rv10_decode_picture_header(MpegEncContext *s)
 {
-    int mb_count, pb_frame, marker, unk, mb_xy;
+    int mb_count, pb_frame, marker, mb_xy;
 
     marker = get_bits1(&s->gb);
 
@@ -282,7 +282,7 @@ static int rv10_decode_picture_header(MpegEncContext *s)
         s->mb_y = 0;
         mb_count = s->mb_width * s->mb_height;
     }
-    unk= get_bits(&s->gb, 3);   /* ignored */
+    skip_bits(&s->gb, 3);   /* ignored */
     s->f_code = 1;
     s->unrestricted_mv = 1;
 
@@ -559,7 +559,13 @@ static int rv10_decode_packet(AVCodecContext *avctx,
         if(MPV_frame_start(s, avctx) < 0)
             return -1;
         ff_er_frame_start(s);
+    } else {
+        if (s->current_picture_ptr->pict_type != s->pict_type) {
+            av_log(s->avctx, AV_LOG_ERROR, "Slice type mismatch\n");
+            return -1;
+        }
     }
+
 
     av_dlog(avctx, "qscale=%d\n", s->qscale);
 
@@ -666,8 +672,12 @@ static int rv10_decode_frame(AVCodecContext *avctx,
 
     if(!avctx->slice_count){
         slice_count = (*buf++) + 1;
+        buf_size--;
         slices_hdr = buf + 4;
         buf += 8 * slice_count;
+        buf_size -= 8 * slice_count;
+        if (buf_size <= 0)
+            return AVERROR_INVALIDDATA;
     }else
         slice_count = avctx->slice_count;
 
@@ -706,7 +716,7 @@ static int rv10_decode_frame(AVCodecContext *avctx,
         s->current_picture_ptr= NULL; //so we can detect if frame_end wasnt called (find some nicer solution...)
     }
 
-    return buf_size;
+    return avpkt->size;
 }
 
 AVCodec ff_rv10_decoder = {

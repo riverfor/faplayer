@@ -95,6 +95,8 @@ sh $VLC_SOURCEDIR/configure --host=arm-eabi-linux --build=x86_64-unknown-linux $
                 --disable-udev \
                 --disable-libxml2 \
                 --enable-android-surface \
+                --enable-audiotrack \
+                --enable-media-library \
                 --disable-caca \
                 --disable-glx \
                 --disable-egl \

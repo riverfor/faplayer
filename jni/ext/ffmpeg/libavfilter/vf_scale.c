@@ -229,8 +229,15 @@ static int config_props(AVFilterLink *outlink)
     scale->isws[1] = sws_getContext(inlink ->w, inlink ->h/2, inlink ->format,
                                     outlink->w, outlink->h/2, outlink->format,
                                     scale->flags, NULL, NULL, NULL);
-    if (!scale->sws)
+    if (!scale->sws || !scale->isws[0] || !scale->isws[1])
         return AVERROR(EINVAL);
+
+    if (inlink->sample_aspect_ratio.num)
+        outlink->sample_aspect_ratio = av_mul_q((AVRational){outlink->h*inlink->w,
+                                                             outlink->w*inlink->h},
+                                                inlink->sample_aspect_ratio);
+    else
+        outlink->sample_aspect_ratio = inlink->sample_aspect_ratio;
 
     return 0;
 
@@ -270,7 +277,8 @@ static int scale_slice(AVFilterLink *link, struct SwsContext *sws, int y, int h,
     ScaleContext *scale = link->dst->priv;
     AVFilterBufferRef *cur_pic = link->cur_buf;
     AVFilterBufferRef *out_buf = link->dst->outputs[0]->out_buf;
-    const uint8_t *in[4], *out[4];
+    const uint8_t *in[4];
+    uint8_t *out[4];
     int in_stride[4],out_stride[4];
     int i;
 

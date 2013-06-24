@@ -1,0 +1,1916 @@
+
+libmedia.so:     file format elf32-little
+
+DYNAMIC SYMBOL TABLE:
+00036f39 g    DF .text	00000004 _ZN7android10AudioTrack16AudioTrackThread10readyToRunEv
+00000000      DF *UND*	00000000 __aeabi_unwind_cpp_pr0
+00036f3d g    DF .text	00000002 _ZTv0_n16_N7android10AudioTrack16AudioTrackThread10onFirstRefEv
+00036f3d g    DF .text	00000002 _ZN7android10AudioTrack16AudioTrackThread10onFirstRefEv
+00036f3f g    DF .text	0000000c _ZTv0_n12_N7android10AudioTrack16AudioTrackThreadD1Ev
+00036f4d g    DF .text	00000044 _ZN7android10AudioTrack16AudioTrackThreadD1Ev
+00000000      DF *UND*	00000000 pthread_cond_destroy
+00000000      DF *UND*	00000000 pthread_mutex_destroy
+00000000      DF *UND*	00000000 _ZN7android6ThreadD2Ev
+00000000      DF *UND*	00000000 _ZN7android7RefBaseD2Ev
+00036f91 g    DF .text	0000000c _ZTv0_n12_N7android10AudioTrack16AudioTrackThreadD0Ev
+00036f9d g    DF .text	00000012 _ZN7android10AudioTrack16AudioTrackThreadD0Ev
+00000000      DF *UND*	00000000 _ZdlPv
+00000000      DF *UND*	00000000 pthread_mutex_lock
+00000000      DF *UND*	00000000 __aeabi_unwind_cpp_pr1
+00000000      DF *UND*	00000000 pthread_mutex_unlock
+00000000      DF *UND*	00000000 __aeabi_idiv
+00000000      DF *UND*	00000000 __aeabi_uidiv
+00036fbd g    DF .text	00000062 _ZN7android10AudioTrack16getMinFrameCountEPi19audio_stream_type_tj
+0003eee5 g    DF .text	00000034 _ZN7android11AudioSystem21getOutputSamplingRateEPi19audio_stream_type_t
+0003eead g    DF .text	00000034 _ZN7android11AudioSystem19getOutputFrameCountEPi19audio_stream_type_t
+0003ee79 g    DF .text	00000034 _ZN7android11AudioSystem16getOutputLatencyEPj19audio_stream_type_t
+0003701f g    DF .text	0000003e _ZN7android10AudioTrackC2Ev
+00000000      DF *UND*	00000000 pthread_mutex_init
+0003705d g    DF .text	00000050 _ZN7android10AudioTrackC1Ev
+00000000      DF *UND*	00000000 _ZN7android7RefBaseC2Ev
+000370ad g    DF .text	00000004 _ZNK7android10AudioTrack9initCheckEv
+000370b1 g    DF .text	00000004 _ZNK7android10AudioTrack7latencyEv
+000370b5 g    DF .text	00000004 _ZNK7android10AudioTrack10streamTypeEv
+000370b9 g    DF .text	00000004 _ZNK7android10AudioTrack6formatEv
+000370bd g    DF .text	00000006 _ZNK7android10AudioTrack12channelCountEv
+000370c3 g    DF .text	00000006 _ZNK7android10AudioTrack10frameCountEv
+000370c9 g    DF .text	0000002c _ZNK7android10AudioTrack9frameSizeEv
+000370f5 g    DF .text	00000004 _ZN7android10AudioTrack12sharedBufferEv
+000370f9 g    DF .text	00000020 _ZNK7android10AudioTrack7stoppedEv
+00037119 g    DF .text	00000030 _ZN7android10AudioTrack7flush_lEv
+00000000      DF *UND*	00000000 pthread_cond_signal
+00037149 g    DF .text	0000001e _ZN7android10AudioTrack5flushEv
+00037167 g    DF .text	00000034 _ZN7android10AudioTrack5pauseEv
+0003719b g    DF .text	00000016 _ZN7android10AudioTrack4muteEb
+000371b1 g    DF .text	0000000c _ZNK7android10AudioTrack5mutedEv
+000371bd g    DF .text	00000090 _ZN7android10AudioTrack9setVolumeEff
+0003724d g    DF .text	0000000e _ZNK7android10AudioTrack9getVolumeEPfS1_
+0003725d g    DF .text	00000060 _ZN7android10AudioTrack21setAuxEffectSendLevelEf
+000372bd g    DF .text	00000008 _ZNK7android10AudioTrack21getAuxEffectSendLevelEPf
+000372c5 g    DF .text	0000004a _ZN7android10AudioTrack13setSampleRateEi
+0003730f g    DF .text	00000028 _ZNK7android10AudioTrack13getSampleRateEv
+00037339 g    DF .text	000000bc _ZN7android10AudioTrack9setLoop_lEjji
+00000000      DF *UND*	00000000 __android_log_print
+000373f5 g    DF .text	00000030 _ZN7android10AudioTrack7setLoopEjji
+00037425 g    DF .text	00000016 _ZN7android10AudioTrack17setMarkerPositionEj
+0003743b g    DF .text	00000010 _ZNK7android10AudioTrack17getMarkerPositionEPj
+0003744b g    DF .text	00000010 _ZNK7android10AudioTrack23getPositionUpdatePeriodEPj
+0003745b g    DF .text	0000005e _ZN7android10AudioTrack11setPositionEj
+00000000      DF *UND*	00000000 android_atomic_or
+000374b9 g    DF .text	00000032 _ZN7android10AudioTrack11getPositionEPj
+000374eb g    DF .text	00000022 _ZN7android10AudioTrack23setPositionUpdatePeriodEj
+0003750d g    DF .text	00000018 _ZN7android10AudioTrack11getOutput_lEv
+0003ee11 g    DF .text	00000026 _ZN7android11AudioSystem9getOutputE19audio_stream_type_tj14audio_format_tj20audio_output_flags_t
+00037525 g    DF .text	00000020 _ZN7android10AudioTrack9getOutputEv
+00037545 g    DF .text	00000004 _ZNK7android10AudioTrack12getSessionIdEv
+00037549 g    DF .text	00000016 _ZN7android10AudioTrack15attachAuxEffectEi
+0003755f g    DF .text	00000022 _ZN7android15TimedAudioTrackC2Ev
+00037581 g    DF .text	00000040 _ZN7android15TimedAudioTrackC1Ev
+0005f128  w   DO .data.rel.ro	00000010 _ZTTN7android15TimedAudioTrackE
+0005f138  w   DO .data.rel.ro	00000048 _ZTVN7android15TimedAudioTrackE
+000375c1 g    DF .text	00000068 _ZN7android15TimedAudioTrack16queueTimedBufferERKNS_2spINS_7IMemoryEEEx
+00000000      DF *UND*	00000000 _ZNK7android7IMemory4sizeEv
+00000000      DF *UND*	00000000 android_atomic_and
+00037629 g    DF .text	0000000c _ZN7android15TimedAudioTrack21setMediaTimeTransformERKNS_15LinearTransformENS0_14TargetTimelineE
+00037635 g    DF .text	000000f0 _ZNK7android10AudioTrack4dumpEiRKNS_6VectorINS_8String16EEE
+00000000      DF *UND*	00000000 _ZN7android7String8C1Ev
+00000000      DF *UND*	00000000 _ZN7android7String86appendEPKc
+00000000      DF *UND*	00000000 snprintf
+00000000      DF *UND*	00000000 write
+00000000      DF *UND*	00000000 _ZN7android7String8D1Ev
+00000000      DF *UND*	00000000 __stack_chk_fail
+00000000      DO *UND*	00000000 __stack_chk_guard
+00037725 g    DF .text	0000003c _ZN7android10AudioTrack16AudioTrackThreadC2ERS0_b
+00000000      DF *UND*	00000000 _ZN7android6ThreadC2Eb
+00000000      DF *UND*	00000000 pthread_cond_init
+00037761 g    DF .text	00000054 _ZN7android10AudioTrack16AudioTrackThreadC1ERS0_b
+000377b5 g    DF .text	0000002e _ZN7android10AudioTrack16AudioTrackThreadD2Ev
+000377e3 g    DF .text	0000001e _ZN7android10AudioTrack16AudioTrackThread5pauseEv
+00037801 g    DF .text	0000002c _ZN7android10AudioTrack16AudioTrackThread6resumeEv
+0003782d g    DF .text	00000012 _ZN7android10AudioTrack16AudioTrackThread11requestExitEv
+00000000      DF *UND*	00000000 _ZN7android6Thread11requestExitEv
+0003783f g    DF .text	00000062 _ZN7android18audio_track_cblk_tC2Ev
+00000000      DF *UND*	00000000 pthread_mutexattr_init
+00000000      DF *UND*	00000000 pthread_mutexattr_setpshared
+00000000      DF *UND*	00000000 pthread_mutexattr_destroy
+00000000      DF *UND*	00000000 pthread_condattr_init
+00000000      DF *UND*	00000000 pthread_condattr_setpshared
+00000000      DF *UND*	00000000 pthread_condattr_destroy
+000378a1 g    DF .text	00000074 _ZN7android18audio_track_cblk_t8stepUserEj
+00037915 g    DF .text	00000068 _ZN7android10AudioTrack13releaseBufferEPNS0_6BufferE
+0003797d g    DF .text	00000032 _ZN7android10AudioTrack6reloadEv
+000379af g    DF .text	00000010 _ZNK7android18audio_track_cblk_t6bufferEj
+000379bf g    DF .text	00000026 _ZN7android18audio_track_cblk_t17framesAvailable_lEv
+000379e5 g    DF .text	0000001a _ZN7android18audio_track_cblk_t15framesAvailableEv
+000379ff g    DF .text	0000002a _ZN7android18audio_track_cblk_t7tryLockEv
+00000000      DF *UND*	00000000 pthread_mutex_trylock
+00000000      DF *UND*	00000000 usleep
+00037a29 g    DF .text	00000068 _ZN7android18audio_track_cblk_t11framesReadyEv
+00037a91 g    DF .text	000000cc _ZN7android18audio_track_cblk_t10stepServerEj
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_11IAudioTrackEED2Ev
+00000000      DF *UND*	00000000 _ZNK7android7RefBase9decStrongEPKv
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_7IMemoryEED2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_10AudioTrack16AudioTrackThreadEED2Ev
+00037b77 g    DF .text	0000008a _ZN7android10AudioTrack4stopEv
+00000000      DF *UND*	00000000 _ZNK7android7RefBase9incStrongEPKv
+00000000      DF *UND*	00000000 setpriority
+00000000      DF *UND*	00000000 set_sched_policy
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_10AudioTrack16AudioTrackThreadEED1Ev
+00037c01  w   DF .text	0000001a _ZN7android2spINS_7IMemoryEEC2EPS1_
+00037c1b  w   DF .text	0000001c _ZN7android2spINS_10AudioTrack16AudioTrackThreadEE5clearEv
+00037c37 g    DF .text	0000000c _ZTv0_n12_N7android10AudioTrackD1Ev
+00037c45 g    DF .text	00000094 _ZN7android10AudioTrackD1Ev
+00000000      DF *UND*	00000000 _ZN7android6Thread18requestExitAndWaitEv
+00000000      DF *UND*	00000000 _ZN7android14IPCThreadState4selfEv
+00000000      DF *UND*	00000000 _ZN7android14IPCThreadState13flushCommandsEv
+0003e8b9 g    DF .text	00000018 _ZN7android11AudioSystem21releaseAudioSessionIdEi
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_7IMemoryEED1Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_11IAudioTrackEED1Ev
+00037cd9 g    DF .text	0000000c _ZTv0_n12_N7android10AudioTrackD0Ev
+00037ce5 g    DF .text	00000012 _ZN7android10AudioTrackD0Ev
+00037cf7 g    DF .text	00000082 _ZN7android10AudioTrackD2Ev
+00037ddb  w   DF .text	0000002e _ZN7android2spINS_7IMemoryEEaSERKS2_
+00000000      DF *UND*	00000000 __popcountsi2
+00037e09 g    DF .text	00000358 _ZN7android10AudioTrack13createTrack_lE19audio_stream_type_tj14audio_format_tji20audio_output_flags_tRKNS_2spINS_7IMemoryEEEi
+0003e361 g    DF .text	00000254 _ZN7android11AudioSystem17get_audio_flingerEv
+0003e8e9 g    DF .text	00000074 _ZN7android11AudioSystem10getLatencyEi19audio_stream_type_tPj
+0003e95d g    DF .text	00000074 _ZN7android11AudioSystem13getFrameCountEi19audio_stream_type_tPi
+00000000      DF *UND*	00000000 _ZNK7android7IMemory7pointerEv
+0003e9d1 g    DF .text	00000074 _ZN7android11AudioSystem15getSamplingRateEi19audio_stream_type_tPi
+00000000      DF *UND*	00000000 _ZNK7android6Thread6getTidEv
+00000000      DF *UND*	00000000 getpid
+00038161 g    DF .text	00000250 _ZN7android10AudioTrack14restoreTrack_lERPNS_18audio_track_cblk_tEb
+00000000      DF *UND*	00000000 gettid
+00000000      DF *UND*	00000000 pthread_cond_broadcast
+0003e339 g    DF .text	00000028 _ZN7android11AudioSystem21clearAudioConfigCacheEv
+00000000      DF *UND*	00000000 memset
+00000000      DF *UND*	00000000 pthread_cond_timedwait_relative_np
+000383b1 g    DF .text	00000068 _ZN7android15TimedAudioTrack19allocateTimedBufferEjPNS_2spINS_7IMemoryEEE
+00000000      DF *UND*	00000000 __aeabi_ldivmod
+00038419 g    DF .text	00000248 _ZN7android10AudioTrack12obtainBufferEPNS0_6BufferEi
+00038661 g    DF .text	00000278 _ZN7android10AudioTrack3setE19audio_stream_type_tj14audio_format_tii20audio_output_flags_tPFviPvS4_ES4_iRKNS_2spINS_7IMemoryEEEbi
+00000000      DF *UND*	00000000 _Znwj
+0003e8d1 g    DF .text	00000018 _ZN7android11AudioSystem21acquireAudioSessionIdEi
+000388d9 g    DF .text	00000098 _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_tiRKNS_2spINS_7IMemoryEEE20audio_output_flags_tPFviPvS9_ES9_ii
+00038971 g    DF .text	00000074 _ZN7android10AudioTrackC2E19audio_stream_type_tj14audio_format_tiRKNS_2spINS_7IMemoryEEE20audio_output_flags_tPFviPvS9_ES9_ii
+000389e5 g    DF .text	000000a8 _ZN7android10AudioTrackC1EijiiijPFviPvS1_ES1_ii
+00037c01  w   DF .text	0000001a _ZN7android2spINS_7IMemoryEEC1EPS1_
+00038a8d g    DF .text	00000088 _ZN7android10AudioTrackC2EijiiijPFviPvS1_ES1_ii
+000389e5 g    DF .text	000000a8 _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_tii20audio_output_flags_tPFviPvS4_ES4_ii
+00038a8d g    DF .text	00000088 _ZN7android10AudioTrackC2E19audio_stream_type_tj14audio_format_tii20audio_output_flags_tPFviPvS4_ES4_ii
+00038b15  w   DF .text	0000001c _ZN7android2spINS_11IAudioTrackEEC2ERKS2_
+00038b15  w   DF .text	0000001c _ZN7android2spINS_7IMemoryEEC2ERKS2_
+00038b31 g    DF .text	000001d0 _ZN7android10AudioTrack18processAudioBufferERKNS_2spINS0_16AudioTrackThreadEEE
+00038b15  w   DF .text	0000001c _ZN7android2spINS_11IAudioTrackEEC1ERKS2_
+00038b15  w   DF .text	0000001c _ZN7android2spINS_7IMemoryEEC1ERKS2_
+00000000      DF *UND*	00000000 memcpy_to_i16_from_u8
+00038d01 g    DF .text	0000005e _ZN7android10AudioTrack16AudioTrackThread10threadLoopEv
+00000000      DF *UND*	00000000 pthread_cond_wait
+00038d61 g    DF .text	000000f0 _ZN7android10AudioTrack5writeEPKvj
+00000000      DF *UND*	00000000 memcpy
+00038e51 g    DF .text	00000128 _ZN7android10AudioTrack5startEv
+00000000      DF *UND*	00000000 getpriority
+00000000      DF *UND*	00000000 get_sched_policy
+00000000      DF *UND*	00000000 androidSetThreadPriority
+0005f1c8 g    DO .data.rel.ro	00000058 _ZTCN7android10AudioTrack16AudioTrackThreadE0_NS_6ThreadE
+0005f2d0 g    DO .data.rel.ro	00000010 _ZTTN7android10AudioTrack16AudioTrackThreadE
+0005f270 g    DO .data.rel.ro	0000005c _ZTVN7android10AudioTrack16AudioTrackThreadE
+0005f268 g    DO .data.rel.ro	00000008 _ZTTN7android10AudioTrackE
+0005f220 g    DO .data.rel.ro	00000048 _ZTVN7android10AudioTrackE
+0005f180  w   DO .data.rel.ro	00000048 _ZTCN7android15TimedAudioTrackE0_NS_10AudioTrackE
+00000000      DF *UND*	00000000 _ZN7android7RefBase10onFirstRefEv
+00000000      DF *UND*	00000000 _ZN7android7RefBase15onLastStrongRefEPKv
+00000000      DF *UND*	00000000 _ZN7android7RefBase20onIncStrongAttemptedEjPKv
+00000000      DF *UND*	00000000 _ZN7android7RefBase13onLastWeakRefEPKv
+0003783f g    DF .text	00000062 _ZN7android18audio_track_cblk_tC1Ev
+00000000      DF *UND*	00000000 _ZN7android6ThreadD1Ev
+00000000      DF *UND*	00000000 _ZN7android6ThreadD0Ev
+00000000      DF *UND*	00000000 _ZN7android6Thread3runEPKcij
+00000000      DF *UND*	00000000 _ZN7android6Thread10readyToRunEv
+00000000      DF *UND*	00000000 __cxa_pure_virtual
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android6ThreadD1Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android6ThreadD0Ev
+00038f79 g    DF .text	0000000c _ZNK7android13IAudioFlinger22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_13IAudioFlingerEE10onAsBinderEv
+00000000      DF *UND*	00000000 strzcmp16
+00038fed g    DF .text	0000000c _ZTv0_n12_N7android13IAudioFlingerD1Ev
+00038ff9 g    DF .text	00000030 _ZN7android13IAudioFlingerD1Ev
+00000000      DF *UND*	00000000 _ZN7android10IInterfaceD2Ev
+00039029 g    DF .text	0000000c _ZTv0_n12_N7android13IAudioFlingerD0Ev
+00039035 g    DF .text	00000012 _ZN7android13IAudioFlingerD0Ev
+00000000      DF *UND*	00000000 _ZN7android6ParcelC1Ev
+00000000      DF *UND*	00000000 _ZN7android6Parcel19writeInterfaceTokenERKNS_8String16E
+00000000      DF *UND*	00000000 _ZN7android6Parcel12writeCStringEPKc
+00000000      DF *UND*	00000000 _ZNK7android6Parcel9readInt32Ev
+00000000      DF *UND*	00000000 _ZN7android6ParcelD1Ev
+00000000      DF *UND*	00000000 _ZN7android6Parcel10writeInt32Ei
+00000000      DF *UND*	00000000 _ZN7android6Parcel10writeFloatEf
+00000000      DF *UND*	00000000 _ZN7android6Parcel12writeString8ERKNS_7String8E
+00000000      DF *UND*	00000000 _ZN7android6Parcel5writeEPKvj
+00000000      DF *UND*	00000000 _ZNK7android6Parcel4readEPvj
+00000000      DF *UND*	00000000 _ZNK7android6Parcel11readString8Ev
+00000000      DF *UND*	00000000 _ZNK7android6Parcel9readFloatEv
+00039f21 g    DF .text	0000001c _ZN7android13IAudioFlingerC2Ev
+00000000      DF *UND*	00000000 _ZN7android10IInterfaceC2Ev
+00039f3d g    DF .text	000000d0 _ZN7android13IAudioFlinger11asInterfaceERKNS_2spINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZN7android9BpRefBaseC2ERKNS_2spINS_7IBinderEEE
+0005f2e0  w   DO .data.rel.ro	00000030 _ZTTN7android14BpAudioFlingerE
+0005f428  w   DO .data.rel.ro	00000118 _ZTVN7android14BpAudioFlingerE
+0003a00d g    DF .text	00000030 _ZN7android13IAudioFlingerC1Ev
+0003a03d g    DF .text	0000001c _ZN7android13IAudioFlingerD2Ev
+00000000      DF *UND*	00000000 _ZN7android7BBinderD2Ev
+0005f540  w   DO .data.rel.ro	0000014c _ZTVN7android11BnInterfaceINS_13IAudioFlingerEEE
+0005f690  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_13IAudioFlingerEEE
+00000000      DF *UND*	00000000 _ZN7android9BpRefBaseD2Ev
+0005f310  w   DO .data.rel.ro	00000118 _ZTCN7android14BpAudioFlingerE0_NS_11BpInterfaceINS_13IAudioFlingerEEE
+0005f6c0  w   DO .data.rel.ro	00000118 _ZTVN7android11BpInterfaceINS_13IAudioFlingerEEE
+0005f7d8  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_13IAudioFlingerEEE
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_7IBinderEED2Ev
+00000000      DF *UND*	00000000 _ZN7android10IInterface8asBinderEv
+00000000      DF *UND*	00000000 _ZN7android6Parcel17writeStrongBinderERKNS_2spINS_7IBinderEEE
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_7IBinderEED1Ev
+00000000      DF *UND*	00000000 strerror
+00000000      DF *UND*	00000000 _ZNK7android6Parcel16readStrongBinderEv
+0003b83d g    DF .text	000000d0 _ZN7android11IAudioTrack11asInterfaceERKNS_2spINS_7IBinderEEE
+0003c1dd g    DF .text	000000d0 _ZN7android12IAudioRecord11asInterfaceERKNS_2spINS_7IBinderEEE
+0004da9d g    DF .text	000000d0 _ZN7android7IEffect11asInterfaceERKNS_2spINS_7IBinderEEE
+0003a689 g    DF .text	00000008 _ZThn4_N7android14BnAudioFlinger10onTransactEjRKNS_6ParcelEPS1_j
+0003a691 g    DF .text	000008c0 _ZN7android14BnAudioFlinger10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 _ZNK7android6Parcel14checkInterfaceEPNS_7IBinderE
+00000000      DF *UND*	00000000 _ZN7android7IMemory11asInterfaceERKNS_2spINS_7IBinderEEE
+0003b1a5 g    DF .text	000000d0 _ZN7android19IAudioFlingerClient11asInterfaceERKNS_2spINS_7IBinderEEE
+0004e0c9 g    DF .text	000000d0 _ZN7android13IEffectClient11asInterfaceERKNS_2spINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZNK7android6Parcel11readCStringEv
+00000000      DF *UND*	00000000 _ZN7android7BBinder10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 _ZN7android8String16C1EPKc
+00000000      DF *UND*	00000000 __aeabi_atexit
+00000000      DF *UND*	00000000 _ZN7android8String16D1Ev
+0006f0e0 g    D  .bss	00000000 __dso_handle
+000600b8 g    DO .data.rel.ro	0000004c _ZTCN7android13IAudioFlingerE0_NS_10IInterfaceE
+0005ff58 g    DO .data.rel.ro	00000010 _ZTTN7android13IAudioFlingerE
+00060108 g    DO .data.rel.ro	000000f8 _ZTVN7android13IAudioFlingerE
+0005fed8 g    DO .data.rel.ro	00000080 _ZTCN7android14BnAudioFlingerE4_NS_7IBinderE
+00060200 g    DO .data.rel.ro	00000084 _ZTCN7android14BnAudioFlingerE4_NS_7BBinderE
+0005fe88 g    DO .data.rel.ro	0000004c _ZTCN7android14BnAudioFlingerE0_NS_10IInterfaceE
+0005fd90 g    DO .data.rel.ro	000000f8 _ZTCN7android14BnAudioFlingerE0_NS_13IAudioFlingerE
+0005ff68 g    DO .data.rel.ro	0000014c _ZTCN7android14BnAudioFlingerE0_NS_11BnInterfaceINS_13IAudioFlingerEEE
+000603d8 g    DO .data.rel.ro	00000038 _ZTTN7android14BnAudioFlingerE
+00060288 g    DO .data.rel.ro	00000150 _ZTVN7android14BnAudioFlingerE
+0006f020 g    DO .bss	00000004 _ZN7android13IAudioFlinger10descriptorE
+0005f800  w   DO .data.rel.ro	000000f8 _ZTCN7android14BpAudioFlingerE0_NS_13IAudioFlingerE
+0005f8f8  w   DO .data.rel.ro	0000004c _ZTCN7android14BpAudioFlingerE0_NS_10IInterfaceE
+0005f948  w   DO .data.rel.ro	00000054 _ZTCN7android14BpAudioFlingerE4_NS_9BpRefBaseE
+00000000      DF *UND*	00000000 _ZN7android9BpRefBase10onFirstRefEv
+00000000      DF *UND*	00000000 _ZN7android9BpRefBase15onLastStrongRefEPKv
+00000000      DF *UND*	00000000 _ZN7android9BpRefBase20onIncStrongAttemptedEjPKv
+00000000      DF *UND*	00000000 _ZTv0_n16_N7android9BpRefBase10onFirstRefEv
+00000000      DF *UND*	00000000 _ZTv0_n20_N7android9BpRefBase15onLastStrongRefEPKv
+00000000      DF *UND*	00000000 _ZTv0_n24_N7android9BpRefBase20onIncStrongAttemptedEjPKv
+00000000      DF *UND*	00000000 _ZNK7android7BBinder13isBinderAliveEv
+00000000      DF *UND*	00000000 _ZN7android7BBinder10pingBinderEv
+00000000      DF *UND*	00000000 _ZN7android7BBinder4dumpEiRKNS_6VectorINS_8String16EEE
+00000000      DF *UND*	00000000 _ZN7android7BBinder8transactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 _ZN7android7BBinder11linkToDeathERKNS_2spINS_7IBinder14DeathRecipientEEEPvj
+00000000      DF *UND*	00000000 _ZN7android7BBinder13unlinkToDeathERKNS_2wpINS_7IBinder14DeathRecipientEEEPvjPS4_
+00000000      DF *UND*	00000000 _ZNK7android7IBinder13checkSubclassEPKv
+00000000      DF *UND*	00000000 _ZN7android7BBinder12attachObjectEPKvPvS3_PFvS2_S3_S3_E
+00000000      DF *UND*	00000000 _ZNK7android7BBinder10findObjectEPKv
+00000000      DF *UND*	00000000 _ZN7android7BBinder12detachObjectEPKv
+00000000      DF *UND*	00000000 _ZN7android7BBinder11localBinderEv
+00000000      DF *UND*	00000000 _ZN7android7IBinder12remoteBinderEv
+0005f9a0  w   DO .data.rel.ro	000000f8 _ZTCN7android11BnInterfaceINS_13IAudioFlingerEEE0_S1_
+0005fa98  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_13IAudioFlingerEEE0_NS_10IInterfaceE
+0005fae8  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_13IAudioFlingerEEE4_NS_7BBinderE
+0005fb70  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_13IAudioFlingerEEE4_NS_7IBinderE
+0005fbf0  w   DO .data.rel.ro	000000f8 _ZTCN7android11BpInterfaceINS_13IAudioFlingerEEE0_S1_
+0005fce8  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_13IAudioFlingerEEE0_NS_10IInterfaceE
+0005fd38  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_13IAudioFlingerEEE4_NS_9BpRefBaseE
+00000000      DF *UND*	00000000 _ZN7android10IInterfaceD1Ev
+00000000      DF *UND*	00000000 _ZN7android10IInterfaceD0Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android10IInterfaceD1Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android10IInterfaceD0Ev
+00000000      DF *UND*	00000000 _ZN7android9BpRefBaseD1Ev
+00000000      DF *UND*	00000000 _ZN7android9BpRefBaseD0Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android9BpRefBaseD1Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android9BpRefBaseD0Ev
+00000000      DF *UND*	00000000 _ZN7android7IBinder19queryLocalInterfaceERKNS_8String16E
+00000000      DF *UND*	00000000 _ZNK7android7BBinder22getInterfaceDescriptorEv
+00000000      DF *UND*	00000000 _ZN7android7BBinderD1Ev
+00000000      DF *UND*	00000000 _ZN7android7BBinderD0Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android7BBinderD1Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android7BBinderD0Ev
+00000000      DF *UND*	00000000 _ZN7android7IBinder11localBinderEv
+00000000      DF *UND*	00000000 _ZN7android7IBinderD1Ev
+00000000      DF *UND*	00000000 _ZN7android7IBinderD0Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android7IBinderD1Ev
+00000000      DF *UND*	00000000 _ZTv0_n12_N7android7IBinderD0Ev
+0003af89 g    DF .text	0000000c _ZNK7android19IAudioFlingerClient22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_19IAudioFlingerClientEE10onAsBinderEv
+0003aff5 g    DF .text	0000000c _ZTv0_n12_N7android19IAudioFlingerClientD1Ev
+0003b001 g    DF .text	00000030 _ZN7android19IAudioFlingerClientD1Ev
+0003b031 g    DF .text	0000000c _ZTv0_n12_N7android19IAudioFlingerClientD0Ev
+0003b03d g    DF .text	00000012 _ZN7android19IAudioFlingerClientD0Ev
+0003b0ed g    DF .text	00000008 _ZThn4_N7android20BnAudioFlingerClient10onTransactEjRKNS_6ParcelEPS1_j
+0003b0f5 g    DF .text	000000ae _ZN7android20BnAudioFlingerClient10onTransactEjRKNS_6ParcelEPS1_j
+00039f21 g    DF .text	0000001c _ZN7android19IAudioFlingerClientC2Ev
+00060410  w   DO .data.rel.ro	00000030 _ZTTN7android20BpAudioFlingerClientE
+000604b8  w   DO .data.rel.ro	00000074 _ZTVN7android20BpAudioFlingerClientE
+0003b275 g    DF .text	00000030 _ZN7android19IAudioFlingerClientC1Ev
+0003a03d g    DF .text	0000001c _ZN7android19IAudioFlingerClientD2Ev
+00060440  w   DO .data.rel.ro	00000074 _ZTCN7android20BpAudioFlingerClientE0_NS_11BpInterfaceINS_19IAudioFlingerClientEEE
+00060608  w   DO .data.rel.ro	00000074 _ZTVN7android11BpInterfaceINS_19IAudioFlingerClientEEE
+00060680  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_19IAudioFlingerClientEEE
+00060530  w   DO .data.rel.ro	000000a8 _ZTVN7android11BnInterfaceINS_19IAudioFlingerClientEEE
+000605d8  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_19IAudioFlingerClientEEE
+00060a58 g    DO .data.rel.ro	0000004c _ZTCN7android19IAudioFlingerClientE0_NS_10IInterfaceE
+00060c90 g    DO .data.rel.ro	00000010 _ZTTN7android19IAudioFlingerClientE
+00060aa8 g    DO .data.rel.ro	00000054 _ZTVN7android19IAudioFlingerClientE
+00060c10 g    DO .data.rel.ro	00000080 _ZTCN7android20BnAudioFlingerClientE4_NS_7IBinderE
+00060b00 g    DO .data.rel.ro	00000084 _ZTCN7android20BnAudioFlingerClientE4_NS_7BBinderE
+00060bc0 g    DO .data.rel.ro	0000004c _ZTCN7android20BnAudioFlingerClientE0_NS_10IInterfaceE
+00060df8 g    DO .data.rel.ro	00000054 _ZTCN7android20BnAudioFlingerClientE0_NS_19IAudioFlingerClientE
+00060ca0 g    DO .data.rel.ro	000000a8 _ZTCN7android20BnAudioFlingerClientE0_NS_11BnInterfaceINS_19IAudioFlingerClientEEE
+00060b88 g    DO .data.rel.ro	00000038 _ZTTN7android20BnAudioFlingerClientE
+00060d48 g    DO .data.rel.ro	000000ac _ZTVN7android20BnAudioFlingerClientE
+0006f024 g    DO .bss	00000004 _ZN7android19IAudioFlingerClient10descriptorE
+000606a8  w   DO .data.rel.ro	00000054 _ZTCN7android20BpAudioFlingerClientE0_NS_19IAudioFlingerClientE
+00060700  w   DO .data.rel.ro	0000004c _ZTCN7android20BpAudioFlingerClientE0_NS_10IInterfaceE
+00060750  w   DO .data.rel.ro	00000054 _ZTCN7android20BpAudioFlingerClientE4_NS_9BpRefBaseE
+000607a8  w   DO .data.rel.ro	00000054 _ZTCN7android11BnInterfaceINS_19IAudioFlingerClientEEE0_S1_
+00060800  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_19IAudioFlingerClientEEE0_NS_10IInterfaceE
+00060850  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_19IAudioFlingerClientEEE4_NS_7BBinderE
+000608d8  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_19IAudioFlingerClientEEE4_NS_7IBinderE
+00060958  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_19IAudioFlingerClientEEE0_S1_
+000609b0  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_19IAudioFlingerClientEEE0_NS_10IInterfaceE
+00060a00  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_19IAudioFlingerClientEEE4_NS_9BpRefBaseE
+0003b4f1 g    DF .text	0000000c _ZNK7android11IAudioTrack22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_11IAudioTrackEE10onAsBinderEv
+0003b55d g    DF .text	0000000c _ZTv0_n12_N7android11IAudioTrackD1Ev
+0003b569 g    DF .text	00000030 _ZN7android11IAudioTrackD1Ev
+0003b599 g    DF .text	0000000c _ZTv0_n12_N7android11IAudioTrackD0Ev
+0003b5a5 g    DF .text	00000012 _ZN7android11IAudioTrackD0Ev
+00000000      DF *UND*	00000000 _ZN7android6Parcel10writeInt64Ex
+00039f21 g    DF .text	0000001c _ZN7android11IAudioTrackC2Ev
+00060e50  w   DO .data.rel.ro	00000030 _ZTTN7android12BpAudioTrackE
+00060f18  w   DO .data.rel.ro	00000098 _ZTVN7android12BpAudioTrackE
+0003b90d g    DF .text	00000030 _ZN7android11IAudioTrackC1Ev
+0003a03d g    DF .text	0000001c _ZN7android11IAudioTrackD2Ev
+00060fb0  w   DO .data.rel.ro	000000cc _ZTVN7android11BnInterfaceINS_11IAudioTrackEEE
+00061080  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_11IAudioTrackEEE
+00060e80  w   DO .data.rel.ro	00000098 _ZTCN7android12BpAudioTrackE0_NS_11BpInterfaceINS_11IAudioTrackEEE
+000610b0  w   DO .data.rel.ro	00000098 _ZTVN7android11BpInterfaceINS_11IAudioTrackEEE
+00061148  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_11IAudioTrackEEE
+0003bb4f g    DF .text	00000008 _ZThn4_N7android12BnAudioTrack10onTransactEjRKNS_6ParcelEPS1_j
+0003bb57 g    DF .text	000001e6 _ZN7android12BnAudioTrack10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 _ZNK7android6Parcel9readInt64Ev
+00061648 g    DO .data.rel.ro	0000004c _ZTCN7android11IAudioTrackE0_NS_10IInterfaceE
+000619f0 g    DO .data.rel.ro	00000010 _ZTTN7android11IAudioTrackE
+00061580 g    DO .data.rel.ro	00000078 _ZTVN7android11IAudioTrackE
+000618c0 g    DO .data.rel.ro	00000080 _ZTCN7android12BnAudioTrackE4_NS_7IBinderE
+00061838 g    DO .data.rel.ro	00000084 _ZTCN7android12BnAudioTrackE4_NS_7BBinderE
+000615f8 g    DO .data.rel.ro	0000004c _ZTCN7android12BnAudioTrackE0_NS_10IInterfaceE
+00061978 g    DO .data.rel.ro	00000078 _ZTCN7android12BnAudioTrackE0_NS_11IAudioTrackE
+00061698 g    DO .data.rel.ro	000000cc _ZTCN7android12BnAudioTrackE0_NS_11BnInterfaceINS_11IAudioTrackEEE
+00061940 g    DO .data.rel.ro	00000038 _ZTTN7android12BnAudioTrackE
+00061768 g    DO .data.rel.ro	000000d0 _ZTVN7android12BnAudioTrackE
+0006f028 g    DO .bss	00000004 _ZN7android11IAudioTrack10descriptorE
+00061170  w   DO .data.rel.ro	00000078 _ZTCN7android12BpAudioTrackE0_NS_11IAudioTrackE
+000611e8  w   DO .data.rel.ro	0000004c _ZTCN7android12BpAudioTrackE0_NS_10IInterfaceE
+00061238  w   DO .data.rel.ro	00000054 _ZTCN7android12BpAudioTrackE4_NS_9BpRefBaseE
+00061290  w   DO .data.rel.ro	00000078 _ZTCN7android11BnInterfaceINS_11IAudioTrackEEE0_S1_
+00061308  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_11IAudioTrackEEE0_NS_10IInterfaceE
+00061358  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_11IAudioTrackEEE4_NS_7BBinderE
+000613e0  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_11IAudioTrackEEE4_NS_7IBinderE
+00061460  w   DO .data.rel.ro	00000078 _ZTCN7android11BpInterfaceINS_11IAudioTrackEEE0_S1_
+000614d8  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_11IAudioTrackEEE0_NS_10IInterfaceE
+00061528  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_11IAudioTrackEEE4_NS_9BpRefBaseE
+0003bee1 g    DF .text	0000000c _ZNK7android12IAudioRecord22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_12IAudioRecordEE10onAsBinderEv
+0003bf4d g    DF .text	00000008 _ZThn4_N7android13BnAudioRecord10onTransactEjRKNS_6ParcelEPS1_j
+0003bf55 g    DF .text	000000c0 _ZN7android13BnAudioRecord10onTransactEjRKNS_6ParcelEPS1_j
+0003c015 g    DF .text	0000000c _ZTv0_n12_N7android12IAudioRecordD1Ev
+0003c021 g    DF .text	00000030 _ZN7android12IAudioRecordD1Ev
+0003c051 g    DF .text	0000000c _ZTv0_n12_N7android12IAudioRecordD0Ev
+0003c05d g    DF .text	00000012 _ZN7android12IAudioRecordD0Ev
+00039f21 g    DF .text	0000001c _ZN7android12IAudioRecordC2Ev
+00061a00  w   DO .data.rel.ro	00000030 _ZTTN7android13BpAudioRecordE
+00061ab0  w   DO .data.rel.ro	0000007c _ZTVN7android13BpAudioRecordE
+0003c2ad g    DF .text	00000030 _ZN7android12IAudioRecordC1Ev
+0003a03d g    DF .text	0000001c _ZN7android12IAudioRecordD2Ev
+00061b30  w   DO .data.rel.ro	000000b0 _ZTVN7android11BnInterfaceINS_12IAudioRecordEEE
+00061be0  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_12IAudioRecordEEE
+00061a30  w   DO .data.rel.ro	0000007c _ZTCN7android13BpAudioRecordE0_NS_11BpInterfaceINS_12IAudioRecordEEE
+00061c10  w   DO .data.rel.ro	0000007c _ZTVN7android11BpInterfaceINS_12IAudioRecordEEE
+00061c90  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_12IAudioRecordEEE
+00062130 g    DO .data.rel.ro	0000004c _ZTCN7android12IAudioRecordE0_NS_10IInterfaceE
+00062408 g    DO .data.rel.ro	00000010 _ZTTN7android12IAudioRecordE
+000622b8 g    DO .data.rel.ro	0000005c _ZTVN7android12IAudioRecordE
+00062418 g    DO .data.rel.ro	00000080 _ZTCN7android13BnAudioRecordE4_NS_7IBinderE
+00062180 g    DO .data.rel.ro	00000084 _ZTCN7android13BnAudioRecordE4_NS_7BBinderE
+00062268 g    DO .data.rel.ro	0000004c _ZTCN7android13BnAudioRecordE0_NS_10IInterfaceE
+00062208 g    DO .data.rel.ro	0000005c _ZTCN7android13BnAudioRecordE0_NS_12IAudioRecordE
+00062080 g    DO .data.rel.ro	000000b0 _ZTCN7android13BnAudioRecordE0_NS_11BnInterfaceINS_12IAudioRecordEEE
+000623d0 g    DO .data.rel.ro	00000038 _ZTTN7android13BnAudioRecordE
+00062318 g    DO .data.rel.ro	000000b4 _ZTVN7android13BnAudioRecordE
+0006f02c g    DO .bss	00000004 _ZN7android12IAudioRecord10descriptorE
+00061cb8  w   DO .data.rel.ro	0000005c _ZTCN7android13BpAudioRecordE0_NS_12IAudioRecordE
+00061d18  w   DO .data.rel.ro	0000004c _ZTCN7android13BpAudioRecordE0_NS_10IInterfaceE
+00061d68  w   DO .data.rel.ro	00000054 _ZTCN7android13BpAudioRecordE4_NS_9BpRefBaseE
+00061dc0  w   DO .data.rel.ro	0000005c _ZTCN7android11BnInterfaceINS_12IAudioRecordEEE0_S1_
+00061e20  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_12IAudioRecordEEE0_NS_10IInterfaceE
+00061e70  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_12IAudioRecordEEE4_NS_7BBinderE
+00061ef8  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_12IAudioRecordEEE4_NS_7IBinderE
+00061f78  w   DO .data.rel.ro	0000005c _ZTCN7android11BpInterfaceINS_12IAudioRecordEEE0_S1_
+00061fd8  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_12IAudioRecordEEE0_NS_10IInterfaceE
+00062028  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_12IAudioRecordEEE4_NS_9BpRefBaseE
+0003c529 g    DF .text	0000000c _ZNK7android7ICrypto22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_7ICryptoEE10onAsBinderEv
+0003c595 g    DF .text	00000008 _ZThn4_N7android8BnCrypto10onTransactEjRKNS_6ParcelEPS1_j
+0003c59d g    DF .text	0000022c _ZN7android8BnCrypto10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 malloc
+00000000      DF *UND*	00000000 free
+00000000      DF *UND*	00000000 _Znaj
+00000000      DF *UND*	00000000 _ZNK7android6Parcel10readIntPtrEv
+00000000      DF *UND*	00000000 _ZN7android7AStringC1Ev
+00000000      DF *UND*	00000000 _ZNK7android7AString5c_strEv
+00000000      DF *UND*	00000000 _ZdaPv
+00000000      DF *UND*	00000000 _ZN7android7AStringD1Ev
+0003c7c9 g    DF .text	0000000c _ZTv0_n12_N7android7ICryptoD1Ev
+0003c7d5 g    DF .text	00000030 _ZN7android7ICryptoD1Ev
+0003c805 g    DF .text	0000000c _ZTv0_n12_N7android7ICryptoD0Ev
+0003c811 g    DF .text	00000012 _ZN7android7ICryptoD0Ev
+00000000      DF *UND*	00000000 _ZN7android6Parcel11writeIntPtrEi
+00000000      DF *UND*	00000000 _ZN7android7AString5setToEPKc
+0005726b  w   DO .rodata	00000010 _ZZN7android8BpCrypto7decryptEbPKhS2_NS_12CryptoPlugin4ModeEPKvPKNS3_9SubSampleEjPvPNS_7AStringEE6kDummy
+00039f21 g    DF .text	0000001c _ZN7android7ICryptoC2Ev
+0003cb05 g    DF .text	000000d0 _ZN7android7ICrypto11asInterfaceERKNS_2spINS_7IBinderEEE
+00062498  w   DO .data.rel.ro	00000030 _ZTTN7android8BpCryptoE
+00062550  w   DO .data.rel.ro	00000088 _ZTVN7android8BpCryptoE
+0003cbd5 g    DF .text	00000030 _ZN7android7ICryptoC1Ev
+0003a03d g    DF .text	0000001c _ZN7android7ICryptoD2Ev
+000625d8  w   DO .data.rel.ro	000000bc _ZTVN7android11BnInterfaceINS_7ICryptoEEE
+00062698  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_7ICryptoEEE
+000624c8  w   DO .data.rel.ro	00000088 _ZTCN7android8BpCryptoE0_NS_11BpInterfaceINS_7ICryptoEEE
+000626c8  w   DO .data.rel.ro	00000088 _ZTVN7android11BpInterfaceINS_7ICryptoEEE
+00062750  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_7ICryptoEEE
+00062f10 g    DO .data.rel.ro	0000004c _ZTCN7android7ICryptoE0_NS_10IInterfaceE
+00062c18 g    DO .data.rel.ro	00000010 _ZTTN7android7ICryptoE
+00062cf8 g    DO .data.rel.ro	00000068 _ZTVN7android7ICryptoE
+00062c78 g    DO .data.rel.ro	00000080 _ZTCN7android8BnCryptoE4_NS_7IBinderE
+00062e20 g    DO .data.rel.ro	00000084 _ZTCN7android8BnCryptoE4_NS_7BBinderE
+00062c28 g    DO .data.rel.ro	0000004c _ZTCN7android8BnCryptoE0_NS_10IInterfaceE
+00062ea8 g    DO .data.rel.ro	00000068 _ZTCN7android8BnCryptoE0_NS_7ICryptoE
+00062b58 g    DO .data.rel.ro	000000bc _ZTCN7android8BnCryptoE0_NS_11BnInterfaceINS_7ICryptoEEE
+00062f60 g    DO .data.rel.ro	00000038 _ZTTN7android8BnCryptoE
+00062d60 g    DO .data.rel.ro	000000c0 _ZTVN7android8BnCryptoE
+0006f030 g    DO .bss	00000004 _ZN7android7ICrypto10descriptorE
+00062778  w   DO .data.rel.ro	00000068 _ZTCN7android8BpCryptoE0_NS_7ICryptoE
+000627e0  w   DO .data.rel.ro	0000004c _ZTCN7android8BpCryptoE0_NS_10IInterfaceE
+00062830  w   DO .data.rel.ro	00000054 _ZTCN7android8BpCryptoE4_NS_9BpRefBaseE
+00062888  w   DO .data.rel.ro	00000068 _ZTCN7android11BnInterfaceINS_7ICryptoEEE0_S1_
+000628f0  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_7ICryptoEEE0_NS_10IInterfaceE
+00062940  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_7ICryptoEEE4_NS_7BBinderE
+000629c8  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_7ICryptoEEE4_NS_7IBinderE
+00062a48  w   DO .data.rel.ro	00000068 _ZTCN7android11BpInterfaceINS_7ICryptoEEE0_S1_
+00062ab0  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_7ICryptoEEE0_NS_10IInterfaceE
+00062b00  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_7ICryptoEEE4_NS_9BpRefBaseE
+0003ceaf g    DF .text	0000002c _ZN7android11AudioRecord18ClientRecordThread10readyToRunEv
+0003cedd g    DF .text	00000090 _ZN7android11AudioRecord16getMinFrameCountEPij14audio_format_ti
+0003e605 g    DF .text	000000c4 _ZN7android11AudioSystem18getInputBufferSizeEj14audio_format_tiPj
+0003cf6d g    DF .text	00000040 _ZN7android11AudioRecordC2Ev
+0003cfad g    DF .text	00000050 _ZN7android11AudioRecordC1Ev
+0003cffd g    DF .text	00000004 _ZNK7android11AudioRecord9initCheckEv
+000370ad g    DF .text	00000004 _ZNK7android11AudioRecord7latencyEv
+000370b9 g    DF .text	00000004 _ZNK7android11AudioRecord6formatEv
+0003d001 g    DF .text	00000006 _ZNK7android11AudioRecord12channelCountEv
+0003d007 g    DF .text	00000004 _ZNK7android11AudioRecord10frameCountEv
+0003d00d g    DF .text	0000002c _ZNK7android11AudioRecord9frameSizeEv
+0003d039 g    DF .text	00000004 _ZNK7android11AudioRecord11inputSourceEv
+0003d03d g    DF .text	0000000c _ZNK7android11AudioRecord7stoppedEv
+0003d049 g    DF .text	0000001c _ZNK7android11AudioRecord13getSampleRateEv
+0003d065 g    DF .text	00000016 _ZN7android11AudioRecord17setMarkerPositionEj
+0003d07b g    DF .text	00000010 _ZNK7android11AudioRecord17getMarkerPositionEPj
+0003d08b g    DF .text	00000010 _ZNK7android11AudioRecord23getPositionUpdatePeriodEPj
+0003d09b g    DF .text	00000028 _ZNK7android11AudioRecord11getPositionEPj
+0003d0c3 g    DF .text	00000022 _ZN7android11AudioRecord23setPositionUpdatePeriodEj
+0003d0e5 g    DF .text	0000000e _ZNK7android11AudioRecord18getInputFramesLostEv
+0003e5c9 g    DF .text	0000001e _ZN7android11AudioSystem18getInputFramesLostEi
+0003d0f3 g    DF .text	00000022 _ZN7android11AudioRecord13releaseBufferEPNS0_6BufferE
+0003d115 g    DF .text	0000001a _ZNK7android11AudioRecord8getInputEv
+0003d12f g    DF .text	0000001e _ZN7android11AudioRecord10getInput_lEv
+0003ed85 g    DF .text	0000002e _ZN7android11AudioSystem8getInputE14audio_source_tj14audio_format_tj20audio_in_acoustics_ti
+0003d14d g    DF .text	00000004 _ZNK7android11AudioRecord12getSessionIdEv
+0003d151 g    DF .text	00000022 _ZN7android11AudioRecord18ClientRecordThreadC2ERS0_b
+0003d175 g    DF .text	0000003c _ZN7android11AudioRecord18ClientRecordThreadC1ERS0_b
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_12IAudioRecordEED2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_11AudioRecord18ClientRecordThreadEED2Ev
+0003d1b1 g    DF .text	00000074 _ZN7android11AudioRecord4stopEv
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_11AudioRecord18ClientRecordThreadEED1Ev
+00037c1b  w   DF .text	0000001c _ZN7android2spINS_12IAudioRecordEE5clearEv
+0003d225 g    DF .text	0000000c _ZTv0_n12_N7android11AudioRecordD1Ev
+0003d231 g    DF .text	00000084 _ZN7android11AudioRecordD1Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_12IAudioRecordEED1Ev
+0003d2b5 g    DF .text	0000000c _ZTv0_n12_N7android11AudioRecordD0Ev
+0003d2c1 g    DF .text	00000012 _ZN7android11AudioRecordD0Ev
+0003d2d3 g    DF .text	00000076 _ZN7android11AudioRecordD2Ev
+0003d349 g    DF .text	00000144 _ZN7android11AudioRecord12openRecord_lEj14audio_format_tjii
+0003d48d g    DF .text	00000134 _ZN7android11AudioRecord15restoreRecord_lERPNS_18audio_track_cblk_tE
+0003d5c1 g    DF .text	00000208 _ZN7android11AudioRecord12obtainBufferEPNS0_6BufferEi
+0003d7c9 g    DF .text	00000208 _ZN7android11AudioRecord3setE14audio_source_tj14audio_format_tjiNS0_12record_flagsEPFviPvS4_ES4_ibi
+0003e5b5 g    DF .text	00000014 _ZN7android11AudioSystem17newAudioSessionIdEv
+0003d9d1 g    DF .text	000000a0 _ZN7android11AudioRecordC1E14audio_source_tj14audio_format_tjiNS0_12record_flagsEPFviPvS4_ES4_ii
+0003da71 g    DF .text	0000007a _ZN7android11AudioRecordC2E14audio_source_tj14audio_format_tjiNS0_12record_flagsEPFviPvS4_ES4_ii
+00038b15  w   DF .text	0000001c _ZN7android2spINS_12IAudioRecordEEC2ERKS2_
+0003daed g    DF .text	00000138 _ZN7android11AudioRecord18processAudioBufferERKNS_2spINS0_18ClientRecordThreadEEE
+00038b15  w   DF .text	0000001c _ZN7android2spINS_12IAudioRecordEEC1ERKS2_
+0003dc25 g    DF .text	0000002c _ZN7android11AudioRecord18ClientRecordThread10threadLoopEv
+0003dc51 g    DF .text	000000c0 _ZN7android11AudioRecord4readEPvj
+0003dd11 g    DF .text	0000016c _ZN7android11AudioRecord5startENS_11AudioSystem12sync_event_tEi
+00000000      DF *UND*	00000000 _ZNK7android6Thread11exitPendingEv
+00062ff8 g    DO .data.rel.ro	00000058 _ZTCN7android11AudioRecord18ClientRecordThreadE0_NS_6ThreadE
+00062fa0 g    DO .data.rel.ro	00000010 _ZTTN7android11AudioRecord18ClientRecordThreadE
+00063050 g    DO .data.rel.ro	0000005c _ZTVN7android11AudioRecord18ClientRecordThreadE
+00062f98 g    DO .data.rel.ro	00000008 _ZTTN7android11AudioRecordE
+00062fb0 g    DO .data.rel.ro	00000048 _ZTVN7android11AudioRecordE
+00036f3d  w   DF .text	00000002 _ZNK7android12SortedVectorINS_16key_value_pair_tIiPNS_11AudioSystem16OutputDescriptorEEEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android12SortedVectorINS_16key_value_pair_tIiPNS_11AudioSystem16OutputDescriptorEEEE10do_destroyEPvj
+0003de7d  w   DF .text	0000001a _ZNK7android12SortedVectorINS_16key_value_pair_tIiPNS_11AudioSystem16OutputDescriptorEEEE8do_splatEPvPKvj
+0003de97  w   DF .text	00000018 _ZNK7android12SortedVectorINS_16key_value_pair_tIiPNS_11AudioSystem16OutputDescriptorEEEE10do_compareEPKvS8_
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl13finish_vectorEv
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImplD2Ev
+00063100  w   DO .data.rel.ro	0000006c _ZTVN7android12SortedVectorINS_16key_value_pair_tIiPNS_11AudioSystem16OutputDescriptorEEEEE
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_11AudioSystem24AudioPolicyServiceClientEED2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_19IAudioPolicyServiceEED2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_11AudioSystem18AudioFlingerClientEED2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_13IAudioFlingerEED2Ev
+0003defb  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tIiPNS_11AudioSystem16OutputDescriptorEEEE15do_move_forwardEPvPKvj
+00000000      DF *UND*	00000000 memmove
+0003defb  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tIiPNS_11AudioSystem16OutputDescriptorEEEE16do_move_backwardEPvPKvj
+0003df07  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tIiPNS_11AudioSystem16OutputDescriptorEEEE7do_copyEPvPKvj
+000630b0  w   DO .data.rel.ro	0000004c _ZTVN7android7IBinder14DeathRecipientE
+0003dfb1 g    DF .text	00000054 _ZN7android11AudioSystem24AudioPolicyServiceClient10binderDiedERKNS_2wpINS_7IBinderEEE
+0003e005 g    DF .text	00000070 _ZN7android11AudioSystem18AudioFlingerClient10binderDiedERKNS_2wpINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl5clearEv
+0003e075 g    DF .text	00000008 _ZThn4_N7android11AudioSystem18AudioFlingerClient15ioConfigChangedEiiPKv
+0003e07d g    DF .text	00000110 _ZN7android11AudioSystem18AudioFlingerClient15ioConfigChangedEiiPKv
+00000000      DF *UND*	00000000 _ZNK7android16SortedVectorImpl7indexOfEPKv
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl6removeEPKv
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl3addEPKv
+0003e261 g    DF .text	00000044 _ZN7android11AudioSystem11linearToLogEi
+00000000      DF *UND*	00000000 exp
+0003e2a5 g    DF .text	00000054 _ZN7android11AudioSystem11logToLinearEf
+00000000      DF *UND*	00000000 log
+0003e2f9 g    DF .text	00000028 _ZN7android11AudioSystem16setErrorCallbackEPFviE
+0003e321 g    DF .text	00000018 _ZN7android11AudioSystem18routedToA2dpOutputE19audio_stream_type_t
+00037ddb  w   DF .text	0000002e _ZN7android2spINS_7IBinderEEaSERKS2_
+00000000      DF *UND*	00000000 _ZN7android21defaultServiceManagerEv
+00000000      DF *UND*	00000000 _ZN7android7BBinderC2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_13IAudioFlingerEED1Ev
+0003e5e7 g    DF .text	0000001e _ZN7android11AudioSystem14setVoiceVolumeEf
+0003e6c9 g    DF .text	00000040 _ZN7android11AudioSystem13getParametersEiRKNS_7String8E
+00000000      DF *UND*	00000000 _ZN7android7String8C1EPKc
+00000000      DF *UND*	00000000 _ZN7android7String85setToERKS0_
+0003e709 g    DF .text	00000020 _ZN7android11AudioSystem13setParametersEiRKNS_7String8E
+0003e729 g    DF .text	00000026 _ZN7android11AudioSystem7setModeE12audio_mode_t
+0003e74f g    DF .text	0000002c _ZN7android11AudioSystem13getStreamMuteE19audio_stream_type_tPb
+0003e77b g    DF .text	00000030 _ZN7android11AudioSystem15getStreamVolumeE19audio_stream_type_tPfi
+0003e7ab g    DF .text	0000002c _ZN7android11AudioSystem13setStreamMuteE19audio_stream_type_tb
+0003e7d7 g    DF .text	00000030 _ZN7android11AudioSystem15setStreamVolumeE19audio_stream_type_tfi
+0003e807 g    DF .text	0000001e _ZN7android11AudioSystem13getMasterMuteEPb
+0003e825 g    DF .text	0000001e _ZN7android11AudioSystem15getMasterVolumeEPf
+0003e843 g    DF .text	0000001e _ZN7android11AudioSystem13setMasterMuteEb
+0003e861 g    DF .text	0000001e _ZN7android11AudioSystem15setMasterVolumeEf
+0003e87f g    DF .text	0000001e _ZN7android11AudioSystem17isMicrophoneMutedEPb
+0003e89d g    DF .text	0000001c _ZN7android11AudioSystem14muteMicrophoneEb
+0003ea45 g    DF .text	000001a8 _ZN7android11AudioSystem24get_audio_policy_serviceEv
+0004a2e5 g    DF .text	000000d0 _ZN7android19IAudioPolicyService11asInterfaceERKNS_2spINS_7IBinderEEE
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_19IAudioPolicyServiceEED1Ev
+0003ebed g    DF .text	0000002e _ZN7android11AudioSystem14isStreamActiveE19audio_stream_type_tPbj
+0003ec1b g    DF .text	00000020 _ZN7android11AudioSystem16setEffectEnabledEib
+0003ec3b g    DF .text	0000001c _ZN7android11AudioSystem16unregisterEffectEi
+0003ec57 g    DF .text	0000002c _ZN7android11AudioSystem14registerEffectEP19effect_descriptor_sijii
+0003ec83 g    DF .text	0000001c _ZN7android11AudioSystem18getOutputForEffectEP19effect_descriptor_s
+0003ec9f g    DF .text	00000016 _ZN7android11AudioSystem19getDevicesForStreamE19audio_stream_type_t
+0003ecb5 g    DF .text	00000016 _ZN7android11AudioSystem20getStrategyForStreamE19audio_stream_type_t
+0003eccb g    DF .text	00000024 _ZN7android11AudioSystem20getStreamVolumeIndexE19audio_stream_type_tPi15audio_devices_t
+0003ecef g    DF .text	00000024 _ZN7android11AudioSystem20setStreamVolumeIndexE19audio_stream_type_ti15audio_devices_t
+0003ed13 g    DF .text	00000024 _ZN7android11AudioSystem16initStreamVolumeE19audio_stream_type_tii
+0003ed37 g    DF .text	00000016 _ZN7android11AudioSystem12releaseInputEi
+0003ed4d g    DF .text	0000001c _ZN7android11AudioSystem9stopInputEi
+0003ed69 g    DF .text	0000001c _ZN7android11AudioSystem10startInputEi
+0003edb3 g    DF .text	00000016 _ZN7android11AudioSystem13releaseOutputEi
+0003edc9 g    DF .text	00000024 _ZN7android11AudioSystem10stopOutputEi19audio_stream_type_ti
+0003eded g    DF .text	00000024 _ZN7android11AudioSystem11startOutputEi19audio_stream_type_ti
+0003ee37 g    DF .text	00000042 _ZN7android11AudioSystem17getRenderPositionEPjS1_19audio_stream_type_t
+0003eee1 g    DF .text	00000004 _ZN7android11AudioSystem19getOutputFrameCountEPii
+0003ef19 g    DF .text	00000004 _ZN7android11AudioSystem21getOutputSamplingRateEPii
+0003ef1d g    DF .text	00000016 _ZN7android11AudioSystem11getForceUseE24audio_policy_force_use_t
+0003ef33 g    DF .text	00000020 _ZN7android11AudioSystem11setForceUseE24audio_policy_force_use_t25audio_policy_forced_cfg_t
+0003ef53 g    DF .text	00000026 _ZN7android11AudioSystem13setPhoneStateE12audio_mode_t
+0003ef79 g    DF .text	0000001a _ZN7android11AudioSystem24getDeviceConnectionStateE15audio_devices_tPKc
+0003ef95 g    DF .text	00000030 _ZN7android11AudioSystem24setDeviceConnectionStateE15audio_devices_t24audio_policy_dev_state_tPKc
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImplC2Ejj
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_11AudioSystem18AudioFlingerClientEED1Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_11AudioSystem24AudioPolicyServiceClientEED1Ev
+00063178 g    DO .data.rel.ro	00000080 _ZTCN7android11AudioSystem18AudioFlingerClientE8_NS_7IBinderE
+000633a8 g    DO .data.rel.ro	00000084 _ZTCN7android11AudioSystem18AudioFlingerClientE8_NS_7BBinderE
+000635f8 g    DO .data.rel.ro	0000004c _ZTCN7android11AudioSystem18AudioFlingerClientE4_NS_10IInterfaceE
+000631f8 g    DO .data.rel.ro	00000054 _ZTCN7android11AudioSystem18AudioFlingerClientE4_NS_19IAudioFlingerClientE
+00063300 g    DO .data.rel.ro	000000a8 _ZTCN7android11AudioSystem18AudioFlingerClientE4_NS_11BnInterfaceINS_19IAudioFlingerClientEEE
+00063548 g    DO .data.rel.ro	000000ac _ZTCN7android11AudioSystem18AudioFlingerClientE4_NS_20BnAudioFlingerClientE
+00063260 g    DO .data.rel.ro	0000004c _ZTCN7android11AudioSystem18AudioFlingerClientE0_NS_7IBinder14DeathRecipientE
+000632b0 g    DO .data.rel.ro	00000050 _ZTTN7android11AudioSystem18AudioFlingerClientE
+00063480 g    DO .data.rel.ro	000000c8 _ZTVN7android11AudioSystem18AudioFlingerClientE
+00063648 g    DO .data.rel.ro	0000004c _ZTCN7android11AudioSystem24AudioPolicyServiceClientE0_NS_7IBinder14DeathRecipientE
+00063250 g    DO .data.rel.ro	00000010 _ZTTN7android11AudioSystem24AudioPolicyServiceClientE
+00063430 g    DO .data.rel.ro	0000004c _ZTVN7android11AudioSystem24AudioPolicyServiceClientE
+0006f060 g    DO .bss	00000004 _ZN7android11AudioSystem25gAudioPolicyServiceClientE
+0006f068 g    DO .bss	00000004 _ZN7android11AudioSystem19gAudioPolicyServiceE
+0006f058 g    DO .bss	00000004 _ZN7android11AudioSystem11gInBuffSizeE
+0006f000 g    DO .data	00000004 _ZN7android11AudioSystem19gPrevInChannelCountE
+0006f008 g    DO .data	00000004 _ZN7android11AudioSystem13gPrevInFormatE
+0006f004 g    DO .data	00000004 _ZN7android11AudioSystem19gPrevInSamplingRateE
+0006f03c g    DO .bss	00000018 _ZN7android11AudioSystem8gOutputsE
+0006f06c g    DO .bss	00000004 _ZN7android11AudioSystem19gAudioErrorCallbackE
+0006f054 g    DO .bss	00000004 _ZN7android11AudioSystem19gAudioFlingerClientE
+0006f034 g    DO .bss	00000004 _ZN7android11AudioSystem13gAudioFlingerE
+0006f05c g    DO .bss	00000004 _ZN7android11AudioSystem5gLockE
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl19reservedVectorImpl1Ev
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl19reservedVectorImpl2Ev
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl19reservedVectorImpl3Ev
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl19reservedVectorImpl4Ev
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl19reservedVectorImpl5Ev
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl19reservedVectorImpl6Ev
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl19reservedVectorImpl7Ev
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl19reservedVectorImpl8Ev
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl25reservedSortedVectorImpl1Ev
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl25reservedSortedVectorImpl2Ev
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl25reservedSortedVectorImpl3Ev
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl25reservedSortedVectorImpl4Ev
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl25reservedSortedVectorImpl5Ev
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl25reservedSortedVectorImpl6Ev
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl25reservedSortedVectorImpl7Ev
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImpl25reservedSortedVectorImpl8Ev
+00063170  w   DO .data.rel.ro	00000008 _ZTTN7android7IBinder14DeathRecipientE
+0003f0b1 g    DF .text	0000000c _ZTv0_n20_N7android11MediaPlayer4diedEv
+0003f0bd g    DF .text	00000012 _ZN7android11MediaPlayer4diedEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_18IMediaPlayerClientEE10onAsBinderEv
+00040ed5 g    DF .text	0000000c _ZNK7android18IMediaPlayerClient22getInterfaceDescriptorEv
+0003a03d g    DF .text	0000001c _ZN7android18IMediaPlayerClientD2Ev
+000636e8  w   DO .data.rel.ro	000000a8 _ZTVN7android11BnInterfaceINS_18IMediaPlayerClientEEE
+00063790  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_18IMediaPlayerClientEEE
+00000000      DF *UND*	00000000 _ZNK7android7RefBase10createWeakEPKv
+0004b049 g    DF .text	0000002c _ZN7android19IMediaDeathNotifier19removeObitRecipientERKNS_2wpIS0_EE
+00000000      DF *UND*	00000000 _ZN7android7RefBase12weakref_type7decWeakEPKv
+00063698  w   DO .data.rel.ro	0000004c _ZTVN7android19IMediaDeathNotifierE
+0006f074 g    DO .bss	00000004 _ZN7android18IMediaPlayerClient10descriptorE
+00064e88 g    DO .data.rel.ro	000000ac _ZTVN7android19BnMediaPlayerClientE
+00065020 g    DO .data.rel.ro	00000038 _ZTTN7android19BnMediaPlayerClientE
+00039f21 g    DF .text	0000001c _ZN7android18IMediaPlayerClientC2Ev
+0003f307 g    DF .text	00000016 _ZN7android11MediaPlayer7clear_lEv
+0003f31d g    DF .text	00000044 _ZN7android11MediaPlayer11setListenerERKNS_2spINS_19MediaPlayerListenerEEE
+0003f361 g    DF .text	0000005c _ZN7android11MediaPlayer6invokeERKNS_6ParcelEPS1_
+0003f3bd g    DF .text	00000044 _ZN7android11MediaPlayer17setMetadataFilterERKNS_6ParcelE
+0003f401 g    DF .text	0000004c _ZN7android11MediaPlayer11getMetadataEbbPNS_6ParcelE
+0003f44d g    DF .text	0000002c _ZN7android11MediaPlayer22setVideoSurfaceTextureERKNS_2spINS_15ISurfaceTextureEEE
+0003f479 g    DF .text	00000044 _ZN7android11MediaPlayer14prepareAsync_lEv
+0003f4bd g    DF .text	0000005e _ZN7android11MediaPlayer7prepareEv
+00000000      DF *UND*	00000000 androidGetThreadId
+0003f51b g    DF .text	00000020 _ZN7android11MediaPlayer12prepareAsyncEv
+0003f53d g    DF .text	0000007c _ZN7android11MediaPlayer5startEv
+0003f5b9 g    DF .text	0000005c _ZN7android11MediaPlayer4stopEv
+0003f615 g    DF .text	00000058 _ZN7android11MediaPlayer5pauseEv
+0003f66d g    DF .text	00000058 _ZN7android11MediaPlayer9isPlayingEv
+0003f6c5 g    DF .text	0000002a _ZN7android11MediaPlayer13getVideoWidthEPi
+0003f6ef g    DF .text	0000002a _ZN7android11MediaPlayer14getVideoHeightEPi
+0003f719 g    DF .text	0000003a _ZN7android11MediaPlayer18getCurrentPositionEPi
+0003f755 g    DF .text	0000004c _ZN7android11MediaPlayer13getDuration_lEPi
+0003f7a1 g    DF .text	00000024 _ZN7android11MediaPlayer11getDurationEPi
+0003f7c5 g    DF .text	0000009c _ZN7android11MediaPlayer8seekTo_lEi
+0003f861 g    DF .text	0000002e _ZN7android11MediaPlayer6seekToEi
+0003f891 g    DF .text	0000006c _ZN7android11MediaPlayer7reset_lEv
+0003f8fd g    DF .text	0000003a _ZN7android11MediaPlayer23doSetRetransmitEndpointERKNS_2spINS_12IMediaPlayerEEE
+0003f937 g    DF .text	00000020 _ZN7android11MediaPlayer5resetEv
+0003f959 g    DF .text	0000004c _ZN7android11MediaPlayer18setAudioStreamTypeE19audio_stream_type_t
+0003f9a5 g    DF .text	00000032 _ZN7android11MediaPlayer10setLoopingEi
+0003f9d7 g    DF .text	00000024 _ZN7android11MediaPlayer9isLoopingEv
+0003f9fb g    DF .text	00000030 _ZN7android11MediaPlayer9setVolumeEff
+0003fa2d g    DF .text	0000005c _ZN7android11MediaPlayer17setAudioSessionIdEi
+0003fa89 g    DF .text	0000001a _ZN7android11MediaPlayer17getAudioSessionIdEv
+0003faa3 g    DF .text	0000002a _ZN7android11MediaPlayer21setAuxEffectSendLevelEf
+0003facd g    DF .text	00000050 _ZN7android11MediaPlayer15attachAuxEffectEi
+0003fb1d g    DF .text	00000030 _ZN7android11MediaPlayer12setParameterEiRKNS_6ParcelE
+0003fb4d g    DF .text	00000030 _ZN7android11MediaPlayer12getParameterEiPNS_6ParcelE
+0003fb7d g    DF .text	00000070 _ZN7android11MediaPlayer21setRetransmitEndpointEPKct
+00000000      DF *UND*	00000000 inet_aton
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_12IMediaPlayerEED2Ev
+0003fbed g    DF .text	0000003e _ZN7android11MediaPlayer18setNextMediaPlayerERKNS_2spIS0_EE
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_12IMediaPlayerEED1Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_19MediaPlayerListenerEED2Ev
+0003fc2d g    DF .text	00000198 _ZN7android11MediaPlayer6notifyEiiiPKNS_6ParcelE
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_19MediaPlayerListenerEED1Ev
+0003fdc5  w   DF .text	0000002e _ZN7android2spINS_19MediaPlayerListenerEEaSEPS1_
+0003fdf5 g    DF .text	000000f0 _ZN7android11MediaPlayerC1Ev
+0004b01d g    DF .text	0000002c _ZN7android19IMediaDeathNotifier16addObitRecipientERKNS_2wpIS0_EE
+0003fee5 g    DF .text	00000096 _ZN7android11MediaPlayerC2Ev
+00037ddb  w   DF .text	0000002e _ZN7android2spINS_12IMediaPlayerEEaSERKS2_
+0003ff7d g    DF .text	00000098 _ZN7android11MediaPlayer15attachNewPlayerERKNS_2spINS_12IMediaPlayerEEE
+00037c1b  w   DF .text	0000001c _ZN7android2spINS_12IMediaPlayerEE5clearEv
+00040015 g    DF .text	0000003a _ZN7android11MediaPlayer10disconnectEv
+0004004f g    DF .text	00000008 _ZThn4_N7android11MediaPlayerD1Ev
+00040057 g    DF .text	0000000c _ZTv0_n12_N7android11MediaPlayerD1Ev
+00040063 g    DF .text	0000000c _ZTv0_n16_N7android11MediaPlayerD1Ev
+00040071 g    DF .text	000000d0 _ZN7android11MediaPlayerD1Ev
+00040141 g    DF .text	00000008 _ZThn4_N7android11MediaPlayerD0Ev
+00040149 g    DF .text	0000000c _ZTv0_n12_N7android11MediaPlayerD0Ev
+00040155 g    DF .text	0000000c _ZTv0_n16_N7android11MediaPlayerD0Ev
+00040161 g    DF .text	00000012 _ZN7android11MediaPlayerD0Ev
+00040173 g    DF .text	0000007a _ZN7android11MediaPlayerD2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_18IMediaPlayerClientEED2Ev
+000401ed g    DF .text	00000088 _ZN7android11MediaPlayer13setDataSourceERKNS_2spINS_13IStreamSourceEEE
+0004b075 g    DF .text	000001dc _ZN7android19IMediaDeathNotifier21getMediaPlayerServiceEv
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_18IMediaPlayerClientEED1Ev
+00040275 g    DF .text	00000098 _ZN7android11MediaPlayer13setDataSourceEixx
+0004030d g    DF .text	0000008e _ZN7android11MediaPlayer13setDataSourceEPKcPKNS_11KeyedVectorINS_7String8ES4_EE
+0004039d g    DF .text	00000074 _ZN7android11MediaPlayer6decodeEixxPjPiP14audio_format_t
+00040411 g    DF .text	00000064 _ZN7android11MediaPlayer6decodeEPKcPjPiP14audio_format_t
+000639f8 g    DO .data.rel.ro	0000004c _ZTCN7android11MediaPlayerE128_NS_19IMediaDeathNotifierE
+00063978 g    DO .data.rel.ro	00000080 _ZTCN7android11MediaPlayerE4_NS_7IBinderE
+00063aa0 g    DO .data.rel.ro	00000084 _ZTCN7android11MediaPlayerE4_NS_7BBinderE
+00063b28 g    DO .data.rel.ro	0000004c _ZTCN7android11MediaPlayerE0_NS_10IInterfaceE
+00063a48 g    DO .data.rel.ro	00000054 _ZTCN7android11MediaPlayerE0_NS_18IMediaPlayerClientE
+00063c28 g    DO .data.rel.ro	000000a8 _ZTCN7android11MediaPlayerE0_NS_11BnInterfaceINS_18IMediaPlayerClientEEE
+00063b78 g    DO .data.rel.ro	000000ac _ZTCN7android11MediaPlayerE0_NS_19BnMediaPlayerClientE
+00063cd0 g    DO .data.rel.ro	00000050 _ZTTN7android11MediaPlayerE
+00063d20 g    DO .data.rel.ro	000000d4 _ZTVN7android11MediaPlayerE
+000637c8  w   DO .data.rel.ro	00000054 _ZTCN7android11BnInterfaceINS_18IMediaPlayerClientEEE0_S1_
+00063820  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_18IMediaPlayerClientEEE0_NS_10IInterfaceE
+00063870  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_18IMediaPlayerClientEEE4_NS_7BBinderE
+000638f8  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_18IMediaPlayerClientEEE4_NS_7IBinderE
+000637c0  w   DO .data.rel.ro	00000008 _ZTTN7android19IMediaDeathNotifierE
+00040eed g    DF .text	00000030 _ZN7android18IMediaPlayerClientD1Ev
+00040f29 g    DF .text	00000012 _ZN7android18IMediaPlayerClientD0Ev
+00040ee1 g    DF .text	0000000c _ZTv0_n12_N7android18IMediaPlayerClientD1Ev
+00040f1d g    DF .text	0000000c _ZTv0_n12_N7android18IMediaPlayerClientD0Ev
+00040fc5 g    DF .text	00000092 _ZN7android19BnMediaPlayerClient10onTransactEjRKNS_6ParcelEPS1_j
+00040fbd g    DF .text	00000008 _ZThn4_N7android19BnMediaPlayerClient10onTransactEjRKNS_6ParcelEPS1_j
+00040475 g    DF .text	0000000c _ZNK7android19IMediaPlayerService22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_19IMediaPlayerServiceEE10onAsBinderEv
+000404e1 g    DF .text	0000000c _ZTv0_n12_N7android19IMediaPlayerServiceD1Ev
+000404ed g    DF .text	00000030 _ZN7android19IMediaPlayerServiceD1Ev
+0004051d g    DF .text	0000000c _ZTv0_n12_N7android19IMediaPlayerServiceD0Ev
+00040529 g    DF .text	00000012 _ZN7android19IMediaPlayerServiceD0Ev
+00039f21 g    DF .text	0000001c _ZN7android19IMediaPlayerServiceC2Ev
+000405c9 g    DF .text	000000d0 _ZN7android19IMediaPlayerService11asInterfaceERKNS_2spINS_7IBinderEEE
+00063df8  w   DO .data.rel.ro	00000030 _ZTTN7android20BpMediaPlayerServiceE
+00063ec0  w   DO .data.rel.ro	00000094 _ZTVN7android20BpMediaPlayerServiceE
+00040699 g    DF .text	00000030 _ZN7android19IMediaPlayerServiceC1Ev
+0003a03d g    DF .text	0000001c _ZN7android19IMediaPlayerServiceD2Ev
+00063f58  w   DO .data.rel.ro	000000c8 _ZTVN7android11BnInterfaceINS_19IMediaPlayerServiceEEE
+00064020  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_19IMediaPlayerServiceEEE
+00063e28  w   DO .data.rel.ro	00000094 _ZTCN7android20BpMediaPlayerServiceE0_NS_11BpInterfaceINS_19IMediaPlayerServiceEEE
+00064050  w   DO .data.rel.ro	00000094 _ZTVN7android11BpInterfaceINS_19IMediaPlayerServiceEEE
+000640e8  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_19IMediaPlayerServiceEEE
+00045959 g    DF .text	000000d0 _ZN7android23IMediaMetadataRetriever11asInterfaceERKNS_2spINS_7IBinderEEE
+000420e5 g    DF .text	000000d0 _ZN7android12IMediaPlayer11asInterfaceERKNS_2spINS_7IBinderEEE
+0004314d g    DF .text	000000d0 _ZN7android14IMediaRecorder11asInterfaceERKNS_2spINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZN7android6Parcel19writeFileDescriptorEib
+0004827d g    DF .text	000000d0 _ZN7android4IOMX11asInterfaceERKNS_2spINS_7IBinderEEE
+00040c0d g    DF .text	00000008 _ZThn4_N7android20BnMediaPlayerService10onTransactEjRKNS_6ParcelEPS1_j
+00040c15 g    DF .text	00000288 _ZN7android20BnMediaPlayerService10onTransactEjRKNS_6ParcelEPS1_j
+00041059 g    DF .text	000000d0 _ZN7android18IMediaPlayerClient11asInterfaceERKNS_2spINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZNK7android6Parcel18readFileDescriptorEv
+00000000      DF *UND*	00000000 dup
+00064878 g    DO .data.rel.ro	0000004c _ZTCN7android19IMediaPlayerServiceE0_NS_10IInterfaceE
+00064868 g    DO .data.rel.ro	00000010 _ZTTN7android19IMediaPlayerServiceE
+00064620 g    DO .data.rel.ro	00000074 _ZTVN7android19IMediaPlayerServiceE
+000647e8 g    DO .data.rel.ro	00000080 _ZTCN7android20BnMediaPlayerServiceE4_NS_7IBinderE
+00064520 g    DO .data.rel.ro	00000084 _ZTCN7android20BnMediaPlayerServiceE4_NS_7BBinderE
+00064698 g    DO .data.rel.ro	0000004c _ZTCN7android20BnMediaPlayerServiceE0_NS_10IInterfaceE
+000645a8 g    DO .data.rel.ro	00000074 _ZTCN7android20BnMediaPlayerServiceE0_NS_19IMediaPlayerServiceE
+00064720 g    DO .data.rel.ro	000000c8 _ZTCN7android20BnMediaPlayerServiceE0_NS_11BnInterfaceINS_19IMediaPlayerServiceEEE
+000646e8 g    DO .data.rel.ro	00000038 _ZTTN7android20BnMediaPlayerServiceE
+000648c8 g    DO .data.rel.ro	000000cc _ZTVN7android20BnMediaPlayerServiceE
+0006f070 g    DO .bss	00000004 _ZN7android19IMediaPlayerService10descriptorE
+00064110  w   DO .data.rel.ro	00000074 _ZTCN7android20BpMediaPlayerServiceE0_NS_19IMediaPlayerServiceE
+00064188  w   DO .data.rel.ro	0000004c _ZTCN7android20BpMediaPlayerServiceE0_NS_10IInterfaceE
+000641d8  w   DO .data.rel.ro	00000054 _ZTCN7android20BpMediaPlayerServiceE4_NS_9BpRefBaseE
+00064230  w   DO .data.rel.ro	00000074 _ZTCN7android11BnInterfaceINS_19IMediaPlayerServiceEEE0_S1_
+000642a8  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_19IMediaPlayerServiceEEE0_NS_10IInterfaceE
+000642f8  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_19IMediaPlayerServiceEEE4_NS_7BBinderE
+00064380  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_19IMediaPlayerServiceEEE4_NS_7IBinderE
+00064400  w   DO .data.rel.ro	00000074 _ZTCN7android11BpInterfaceINS_19IMediaPlayerServiceEEE0_S1_
+00064478  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_19IMediaPlayerServiceEEE0_NS_10IInterfaceE
+000644c8  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_19IMediaPlayerServiceEEE4_NS_9BpRefBaseE
+00000000      DF *UND*	00000000 _ZNK7android6Parcel8dataSizeEv
+00000000      DF *UND*	00000000 _ZN7android6Parcel10appendFromEPKS0_jj
+00000000      DF *UND*	00000000 _ZNK7android6Parcel9dataAvailEv
+00000000      DF *UND*	00000000 _ZNK7android6Parcel12dataPositionEv
+00064998  w   DO .data.rel.ro	00000030 _ZTTN7android19BpMediaPlayerClientE
+00064a40  w   DO .data.rel.ro	00000074 _ZTVN7android19BpMediaPlayerClientE
+00041129 g    DF .text	00000030 _ZN7android18IMediaPlayerClientC1Ev
+000649c8  w   DO .data.rel.ro	00000074 _ZTCN7android19BpMediaPlayerClientE0_NS_11BpInterfaceINS_18IMediaPlayerClientEEE
+00064ab8  w   DO .data.rel.ro	00000074 _ZTVN7android11BpInterfaceINS_18IMediaPlayerClientEEE
+00064b30  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_18IMediaPlayerClientEEE
+00065100 g    DO .data.rel.ro	0000004c _ZTCN7android18IMediaPlayerClientE0_NS_10IInterfaceE
+00064fb8 g    DO .data.rel.ro	00000010 _ZTTN7android18IMediaPlayerClientE
+00065058 g    DO .data.rel.ro	00000054 _ZTVN7android18IMediaPlayerClientE
+00064f38 g    DO .data.rel.ro	00000080 _ZTCN7android19BnMediaPlayerClientE4_NS_7IBinderE
+00064d58 g    DO .data.rel.ro	00000084 _ZTCN7android19BnMediaPlayerClientE4_NS_7BBinderE
+000650b0 g    DO .data.rel.ro	0000004c _ZTCN7android19BnMediaPlayerClientE0_NS_10IInterfaceE
+00064fc8 g    DO .data.rel.ro	00000054 _ZTCN7android19BnMediaPlayerClientE0_NS_18IMediaPlayerClientE
+00064de0 g    DO .data.rel.ro	000000a8 _ZTCN7android19BnMediaPlayerClientE0_NS_11BnInterfaceINS_18IMediaPlayerClientEEE
+00064b58  w   DO .data.rel.ro	00000054 _ZTCN7android19BpMediaPlayerClientE0_NS_18IMediaPlayerClientE
+00064bb0  w   DO .data.rel.ro	0000004c _ZTCN7android19BpMediaPlayerClientE0_NS_10IInterfaceE
+00064c00  w   DO .data.rel.ro	00000054 _ZTCN7android19BpMediaPlayerClientE4_NS_9BpRefBaseE
+00064c58  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_18IMediaPlayerClientEEE0_S1_
+00064cb0  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_18IMediaPlayerClientEEE0_NS_10IInterfaceE
+00064d00  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_18IMediaPlayerClientEEE4_NS_9BpRefBaseE
+0004129d g    DF .text	0000000c _ZNK7android20IMediaRecorderClient22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_20IMediaRecorderClientEE10onAsBinderEv
+00041309 g    DF .text	0000000c _ZTv0_n12_N7android20IMediaRecorderClientD1Ev
+00041315 g    DF .text	00000030 _ZN7android20IMediaRecorderClientD1Ev
+00041345 g    DF .text	0000000c _ZTv0_n12_N7android20IMediaRecorderClientD0Ev
+00041351 g    DF .text	00000012 _ZN7android20IMediaRecorderClientD0Ev
+000413c5 g    DF .text	00000008 _ZThn4_N7android21BnMediaRecorderClient10onTransactEjRKNS_6ParcelEPS1_j
+000413cd g    DF .text	0000005e _ZN7android21BnMediaRecorderClient10onTransactEjRKNS_6ParcelEPS1_j
+00039f21 g    DF .text	0000001c _ZN7android20IMediaRecorderClientC2Ev
+0004142d g    DF .text	000000d0 _ZN7android20IMediaRecorderClient11asInterfaceERKNS_2spINS_7IBinderEEE
+00065150  w   DO .data.rel.ro	00000030 _ZTTN7android21BpMediaRecorderClientE
+000651f8  w   DO .data.rel.ro	00000074 _ZTVN7android21BpMediaRecorderClientE
+000414fd g    DF .text	00000030 _ZN7android20IMediaRecorderClientC1Ev
+0003a03d g    DF .text	0000001c _ZN7android20IMediaRecorderClientD2Ev
+00065270  w   DO .data.rel.ro	000000a8 _ZTVN7android11BnInterfaceINS_20IMediaRecorderClientEEE
+00065318  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_20IMediaRecorderClientEEE
+00065180  w   DO .data.rel.ro	00000074 _ZTCN7android21BpMediaRecorderClientE0_NS_11BpInterfaceINS_20IMediaRecorderClientEEE
+00065348  w   DO .data.rel.ro	00000074 _ZTVN7android11BpInterfaceINS_20IMediaRecorderClientEEE
+000653c0  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_20IMediaRecorderClientEEE
+00065b40 g    DO .data.rel.ro	0000004c _ZTCN7android20IMediaRecorderClientE0_NS_10IInterfaceE
+00065918 g    DO .data.rel.ro	00000010 _ZTTN7android20IMediaRecorderClientE
+000657e8 g    DO .data.rel.ro	00000054 _ZTVN7android20IMediaRecorderClientE
+00065898 g    DO .data.rel.ro	00000080 _ZTCN7android21BnMediaRecorderClientE4_NS_7IBinderE
+00065928 g    DO .data.rel.ro	00000084 _ZTCN7android21BnMediaRecorderClientE4_NS_7BBinderE
+00065798 g    DO .data.rel.ro	0000004c _ZTCN7android21BnMediaRecorderClientE0_NS_10IInterfaceE
+00065840 g    DO .data.rel.ro	00000054 _ZTCN7android21BnMediaRecorderClientE0_NS_20IMediaRecorderClientE
+00065a98 g    DO .data.rel.ro	000000a8 _ZTCN7android21BnMediaRecorderClientE0_NS_11BnInterfaceINS_20IMediaRecorderClientEEE
+000659b0 g    DO .data.rel.ro	00000038 _ZTTN7android21BnMediaRecorderClientE
+000659e8 g    DO .data.rel.ro	000000ac _ZTVN7android21BnMediaRecorderClientE
+0006f078 g    DO .bss	00000004 _ZN7android20IMediaRecorderClient10descriptorE
+000653e8  w   DO .data.rel.ro	00000054 _ZTCN7android21BpMediaRecorderClientE0_NS_20IMediaRecorderClientE
+00065440  w   DO .data.rel.ro	0000004c _ZTCN7android21BpMediaRecorderClientE0_NS_10IInterfaceE
+00065490  w   DO .data.rel.ro	00000054 _ZTCN7android21BpMediaRecorderClientE4_NS_9BpRefBaseE
+000654e8  w   DO .data.rel.ro	00000054 _ZTCN7android11BnInterfaceINS_20IMediaRecorderClientEEE0_S1_
+00065540  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_20IMediaRecorderClientEEE0_NS_10IInterfaceE
+00065590  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_20IMediaRecorderClientEEE4_NS_7BBinderE
+00065618  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_20IMediaRecorderClientEEE4_NS_7IBinderE
+00065698  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_20IMediaRecorderClientEEE0_S1_
+000656f0  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_20IMediaRecorderClientEEE0_NS_10IInterfaceE
+00065740  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_20IMediaRecorderClientEEE4_NS_9BpRefBaseE
+00041791 g    DF .text	0000000c _ZNK7android12IMediaPlayer22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_12IMediaPlayerEE10onAsBinderEv
+000417fd  w   DF .text	00000020 _ZNK7android12SortedVectorINS_16key_value_pair_tINS_7String8ES2_EEE10do_compareEPKvS6_
+00000000      DF *UND*	00000000 strcmp
+0003defb  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tINS_7String8ES2_EEE15do_move_forwardEPvPKvj
+0003defb  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tINS_7String8ES2_EEE16do_move_backwardEPvPKvj
+0004181d  w   DF .text	0000002c _ZNK7android12SortedVectorINS_16key_value_pair_tINS_7String8ES2_EEE8do_splatEPvPKvj
+00000000      DF *UND*	00000000 _ZN7android7String8C1ERKS0_
+00041849  w   DF .text	00000028 _ZNK7android12SortedVectorINS_16key_value_pair_tINS_7String8ES2_EEE7do_copyEPvPKvj
+00041871  w   DF .text	00000020 _ZNK7android12SortedVectorINS_16key_value_pair_tINS_7String8ES2_EEE10do_destroyEPvj
+00041891  w   DF .text	00000024 _ZNK7android12SortedVectorINS_16key_value_pair_tINS_7String8ES2_EEE12do_constructEPvj
+00065fb0  w   DO .data.rel.ro	0000006c _ZTVN7android12SortedVectorINS_16key_value_pair_tINS_7String8ES2_EEEE
+0004191b g    DF .text	0000000c _ZTv0_n12_N7android12IMediaPlayerD1Ev
+00041929 g    DF .text	00000030 _ZN7android12IMediaPlayerD1Ev
+00041959 g    DF .text	0000000c _ZTv0_n12_N7android12IMediaPlayerD0Ev
+00041965 g    DF .text	00000012 _ZN7android12IMediaPlayerD0Ev
+00039f21 g    DF .text	0000001c _ZN7android12IMediaPlayerC2Ev
+00065b90  w   DO .data.rel.ro	00000030 _ZTTN7android13BpMediaPlayerE
+00065c98  w   DO .data.rel.ro	000000d8 _ZTVN7android13BpMediaPlayerE
+000421b5 g    DF .text	00000030 _ZN7android12IMediaPlayerC1Ev
+0003a03d g    DF .text	0000001c _ZN7android12IMediaPlayerD2Ev
+00065d70  w   DO .data.rel.ro	0000010c _ZTVN7android11BnInterfaceINS_12IMediaPlayerEEE
+00065e80  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_12IMediaPlayerEEE
+00065bc0  w   DO .data.rel.ro	000000d8 _ZTCN7android13BpMediaPlayerE0_NS_11BpInterfaceINS_12IMediaPlayerEEE
+00065eb0  w   DO .data.rel.ro	000000d8 _ZTVN7android11BpInterfaceINS_12IMediaPlayerEEE
+00065f88  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_12IMediaPlayerEEE
+00042525 g    DF .text	00000008 _ZThn4_N7android13BnMediaPlayer10onTransactEjRKNS_6ParcelEPS1_j
+0004252d g    DF .text	000004c8 _ZN7android13BnMediaPlayer10onTransactEjRKNS_6ParcelEPS1_j
+00043de1 g    DF .text	000000d0 _ZN7android13IStreamSource11asInterfaceERKNS_2spINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZN7android15ISurfaceTexture11asInterfaceERKNS_2spINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZNK7android6Parcel15setDataPositionEj
+000664f0 g    DO .data.rel.ro	0000004c _ZTCN7android12IMediaPlayerE0_NS_10IInterfaceE
+00066840 g    DO .data.rel.ro	00000010 _ZTTN7android12IMediaPlayerE
+00066678 g    DO .data.rel.ro	000000b8 _ZTVN7android12IMediaPlayerE
+00066540 g    DO .data.rel.ro	00000080 _ZTCN7android13BnMediaPlayerE4_NS_7IBinderE
+000669e8 g    DO .data.rel.ro	00000084 _ZTCN7android13BnMediaPlayerE4_NS_7BBinderE
+00066850 g    DO .data.rel.ro	0000004c _ZTCN7android13BnMediaPlayerE0_NS_10IInterfaceE
+000665c0 g    DO .data.rel.ro	000000b8 _ZTCN7android13BnMediaPlayerE0_NS_12IMediaPlayerE
+000668d8 g    DO .data.rel.ro	0000010c _ZTCN7android13BnMediaPlayerE0_NS_11BnInterfaceINS_12IMediaPlayerEEE
+000668a0 g    DO .data.rel.ro	00000038 _ZTTN7android13BnMediaPlayerE
+00066730 g    DO .data.rel.ro	00000110 _ZTVN7android13BnMediaPlayerE
+0006f07c g    DO .bss	00000004 _ZN7android12IMediaPlayer10descriptorE
+00066020  w   DO .data.rel.ro	000000b8 _ZTCN7android13BpMediaPlayerE0_NS_12IMediaPlayerE
+000660d8  w   DO .data.rel.ro	0000004c _ZTCN7android13BpMediaPlayerE0_NS_10IInterfaceE
+00066128  w   DO .data.rel.ro	00000054 _ZTCN7android13BpMediaPlayerE4_NS_9BpRefBaseE
+00066180  w   DO .data.rel.ro	000000b8 _ZTCN7android11BnInterfaceINS_12IMediaPlayerEEE0_S1_
+00066238  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_12IMediaPlayerEEE0_NS_10IInterfaceE
+00066288  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_12IMediaPlayerEEE4_NS_7BBinderE
+00066310  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_12IMediaPlayerEEE4_NS_7IBinderE
+00066390  w   DO .data.rel.ro	000000b8 _ZTCN7android11BpInterfaceINS_12IMediaPlayerEEE0_S1_
+00066448  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_12IMediaPlayerEEE0_NS_10IInterfaceE
+00066498  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_12IMediaPlayerEEE4_NS_9BpRefBaseE
+00042a2d g    DF .text	0000000c _ZNK7android14IMediaRecorder22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_14IMediaRecorderEE10onAsBinderEv
+00042a99 g    DF .text	0000000c _ZTv0_n12_N7android14IMediaRecorderD1Ev
+00042aa5 g    DF .text	00000030 _ZN7android14IMediaRecorderD1Ev
+00042ad5 g    DF .text	0000000c _ZTv0_n12_N7android14IMediaRecorderD0Ev
+00042ae1 g    DF .text	00000012 _ZN7android14IMediaRecorderD0Ev
+00000000      DF *UND*	00000000 _ZN7android7Surface13writeToParcelERKNS_2spIS0_EEPNS_6ParcelE
+00039f21 g    DF .text	0000001c _ZN7android14IMediaRecorderC2Ev
+00066a70  w   DO .data.rel.ro	00000030 _ZTTN7android15BpMediaRecorderE
+00066b68  w   DO .data.rel.ro	000000c8 _ZTVN7android15BpMediaRecorderE
+0004321d g    DF .text	00000030 _ZN7android14IMediaRecorderC1Ev
+0003a03d g    DF .text	0000001c _ZN7android14IMediaRecorderD2Ev
+00066c30  w   DO .data.rel.ro	000000fc _ZTVN7android11BnInterfaceINS_14IMediaRecorderEEE
+00066d30  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_14IMediaRecorderEEE
+00066aa0  w   DO .data.rel.ro	000000c8 _ZTCN7android15BpMediaRecorderE0_NS_11BpInterfaceINS_14IMediaRecorderEEE
+00066d60  w   DO .data.rel.ro	000000c8 _ZTVN7android11BpInterfaceINS_14IMediaRecorderEEE
+00066e28  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_14IMediaRecorderEEE
+000435a9 g    DF .text	00000008 _ZThn4_N7android15BnMediaRecorder10onTransactEjRKNS_6ParcelEPS1_j
+000435b1 g    DF .text	0000039e _ZN7android15BnMediaRecorder10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 close
+00000000      DF *UND*	00000000 _ZN7android7Surface14readFromParcelERKNS_6ParcelE
+00000000      DF *UND*	00000000 _ZN7android7ICamera11asInterfaceERKNS_2spINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZN7android21ICameraRecordingProxy11asInterfaceERKNS_2spINS_7IBinderEEE
+000677e0 g    DO .data.rel.ro	0000004c _ZTCN7android14IMediaRecorderE0_NS_10IInterfaceE
+00067620 g    DO .data.rel.ro	00000010 _ZTTN7android14IMediaRecorderE
+00067630 g    DO .data.rel.ro	000000a8 _ZTVN7android14IMediaRecorderE
+00067728 g    DO .data.rel.ro	00000080 _ZTCN7android15BnMediaRecorderE4_NS_7IBinderE
+00067598 g    DO .data.rel.ro	00000084 _ZTCN7android15BnMediaRecorderE4_NS_7BBinderE
+000676d8 g    DO .data.rel.ro	0000004c _ZTCN7android15BnMediaRecorderE0_NS_10IInterfaceE
+000673f0 g    DO .data.rel.ro	000000a8 _ZTCN7android15BnMediaRecorderE0_NS_14IMediaRecorderE
+00067498 g    DO .data.rel.ro	000000fc _ZTCN7android15BnMediaRecorderE0_NS_11BnInterfaceINS_14IMediaRecorderEEE
+000677a8 g    DO .data.rel.ro	00000038 _ZTTN7android15BnMediaRecorderE
+000672f0 g    DO .data.rel.ro	00000100 _ZTVN7android15BnMediaRecorderE
+0006f080 g    DO .bss	00000004 _ZN7android14IMediaRecorder10descriptorE
+00066e50  w   DO .data.rel.ro	000000a8 _ZTCN7android15BpMediaRecorderE0_NS_14IMediaRecorderE
+00066ef8  w   DO .data.rel.ro	0000004c _ZTCN7android15BpMediaRecorderE0_NS_10IInterfaceE
+00066f48  w   DO .data.rel.ro	00000054 _ZTCN7android15BpMediaRecorderE4_NS_9BpRefBaseE
+00066fa0  w   DO .data.rel.ro	000000a8 _ZTCN7android11BnInterfaceINS_14IMediaRecorderEEE0_S1_
+00067048  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_14IMediaRecorderEEE0_NS_10IInterfaceE
+00067098  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_14IMediaRecorderEEE4_NS_7BBinderE
+00067120  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_14IMediaRecorderEEE4_NS_7IBinderE
+000671a0  w   DO .data.rel.ro	000000a8 _ZTCN7android11BpInterfaceINS_14IMediaRecorderEEE0_S1_
+00067248  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_14IMediaRecorderEEE0_NS_10IInterfaceE
+00067298  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_14IMediaRecorderEEE4_NS_9BpRefBaseE
+00067c10  w   DO .data.rel.ro	00000018 _ZTVN7android22ReferenceConverterBaseE
+00043999 g    DF .text	0000000c _ZNK7android13IStreamSource22getInterfaceDescriptorEv
+000439a5 g    DF .text	0000000c _ZNK7android15IStreamListener22getInterfaceDescriptorEv
+000439b1  w   DF .text	00000012 _ZNK7android6VectorINS_2spINS_7IMemoryEEEE12do_constructEPvj
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_15IStreamListenerEE10onAsBinderEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_13IStreamSourceEE10onAsBinderEv
+00043a1d  w   DF .text	0000002c _ZNK7android6VectorINS_2spINS_7IMemoryEEEE7do_copyEPvPKvj
+00043a49  w   DF .text	0000002a _ZNK7android6VectorINS_2spINS_7IMemoryEEEE8do_splatEPvPKvj
+00043a73  w   DF .text	00000026 _ZNK7android6VectorINS_2spINS_7IMemoryEEEE10do_destroyEPvj
+00000000      DF *UND*	00000000 _ZN7android10VectorImplD2Ev
+00067bc8  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorINS_2spINS_7IMemoryEEEEE
+00043acb g    DF .text	0000000c _ZTv0_n12_N7android15IStreamListenerD1Ev
+00043ad9 g    DF .text	00000030 _ZN7android15IStreamListenerD1Ev
+00043b09 g    DF .text	0000000c _ZTv0_n12_N7android15IStreamListenerD0Ev
+00043b15 g    DF .text	00000012 _ZN7android15IStreamListenerD0Ev
+00043b27 g    DF .text	0000000c _ZTv0_n12_N7android13IStreamSourceD1Ev
+00043b35 g    DF .text	00000030 _ZN7android13IStreamSourceD1Ev
+00043b65 g    DF .text	0000000c _ZTv0_n12_N7android13IStreamSourceD0Ev
+00043b71 g    DF .text	00000012 _ZN7android13IStreamSourceD0Ev
+00000000      DF *UND*	00000000 _ZNK7android8AMessage13writeToParcelEPNS_6ParcelE
+00043c9d g    DF .text	00000008 _ZThn4_N7android16BnStreamListener10onTransactEjRKNS_6ParcelEPS1_j
+00043ca5 g    DF .text	000000cc _ZN7android16BnStreamListener10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 _ZN7android8AMessage10FromParcelERKNS_6ParcelE
+00039f21 g    DF .text	0000001c _ZN7android13IStreamSourceC2Ev
+00067830  w   DO .data.rel.ro	00000030 _ZTTN7android14BpStreamSourceE
+000678e0  w   DO .data.rel.ro	0000007c _ZTVN7android14BpStreamSourceE
+00043eb1 g    DF .text	00000030 _ZN7android13IStreamSourceC1Ev
+0003a03d g    DF .text	0000001c _ZN7android13IStreamSourceD2Ev
+00067ae8  w   DO .data.rel.ro	000000b0 _ZTVN7android11BnInterfaceINS_13IStreamSourceEEE
+00067b98  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_13IStreamSourceEEE
+00067860  w   DO .data.rel.ro	0000007c _ZTCN7android14BpStreamSourceE0_NS_11BpInterfaceINS_13IStreamSourceEEE
+00067960  w   DO .data.rel.ro	0000007c _ZTVN7android11BpInterfaceINS_13IStreamSourceEEE
+000679e0  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_13IStreamSourceEEE
+00039f21 g    DF .text	0000001c _ZN7android15IStreamListenerC2Ev
+000440f5 g    DF .text	000000d0 _ZN7android15IStreamListener11asInterfaceERKNS_2spINS_7IBinderEEE
+00067c40  w   DO .data.rel.ro	00000030 _ZTTN7android16BpStreamListenerE
+00067ce8  w   DO .data.rel.ro	00000078 _ZTVN7android16BpStreamListenerE
+000441c5 g    DF .text	00000030 _ZN7android15IStreamListenerC1Ev
+0003a03d g    DF .text	0000001c _ZN7android15IStreamListenerD2Ev
+00067a08  w   DO .data.rel.ro	000000ac _ZTVN7android11BnInterfaceINS_15IStreamListenerEEE
+00067ab8  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_15IStreamListenerEEE
+00067c70  w   DO .data.rel.ro	00000078 _ZTCN7android16BpStreamListenerE0_NS_11BpInterfaceINS_15IStreamListenerEEE
+00067d60  w   DO .data.rel.ro	00000078 _ZTVN7android11BpInterfaceINS_15IStreamListenerEEE
+00067dd8  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_15IStreamListenerEEE
+00044465 g    DF .text	00000008 _ZThn4_N7android14BnStreamSource10onTransactEjRKNS_6ParcelEPS1_j
+0004446d g    DF .text	00000100 _ZN7android14BnStreamSource10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 _ZN7android10VectorImplC2Ejj
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl4pushEPKv
+00000000      DF *UND*	00000000 _ZN7android7RefBase14moveReferencesEPvPKvjRKNS_22ReferenceConverterBaseE
+00067c28  w   DO .data.rel.ro	00000018 _ZTVN7android14ReferenceMover19StrongReferenceCastINS_7IMemoryEEE
+00044611  w   DF .text	0000000a _ZNK7android6VectorINS_2spINS_7IMemoryEEEE16do_move_backwardEPvPKvj
+00044611  w   DF .text	0000000a _ZNK7android6VectorINS_2spINS_7IMemoryEEEE15do_move_forwardEPvPKvj
+00068ae0 g    DO .data.rel.ro	0000004c _ZTCN7android13IStreamSourceE0_NS_10IInterfaceE
+00068630 g    DO .data.rel.ro	00000010 _ZTTN7android13IStreamSourceE
+00068a80 g    DO .data.rel.ro	0000005c _ZTVN7android13IStreamSourceE
+00068c90 g    DO .data.rel.ro	0000004c _ZTCN7android15IStreamListenerE0_NS_10IInterfaceE
+00068888 g    DO .data.rel.ro	00000010 _ZTTN7android15IStreamListenerE
+00068d38 g    DO .data.rel.ro	00000058 _ZTVN7android15IStreamListenerE
+000687a8 g    DO .data.rel.ro	00000080 _ZTCN7android14BnStreamSourceE4_NS_7IBinderE
+00068c08 g    DO .data.rel.ro	00000084 _ZTCN7android14BnStreamSourceE4_NS_7BBinderE
+00068b30 g    DO .data.rel.ro	0000004c _ZTCN7android14BnStreamSourceE0_NS_10IInterfaceE
+00068828 g    DO .data.rel.ro	0000005c _ZTCN7android14BnStreamSourceE0_NS_13IStreamSourceE
+000689d0 g    DO .data.rel.ro	000000b0 _ZTCN7android14BnStreamSourceE0_NS_11BnInterfaceINS_13IStreamSourceEEE
+00068898 g    DO .data.rel.ro	00000038 _ZTTN7android14BnStreamSourceE
+00068578 g    DO .data.rel.ro	000000b4 _ZTVN7android14BnStreamSourceE
+000686f0 g    DO .data.rel.ro	00000080 _ZTCN7android16BnStreamListenerE4_NS_7IBinderE
+00068b80 g    DO .data.rel.ro	00000084 _ZTCN7android16BnStreamListenerE4_NS_7BBinderE
+000688d0 g    DO .data.rel.ro	0000004c _ZTCN7android16BnStreamListenerE0_NS_10IInterfaceE
+00068ce0 g    DO .data.rel.ro	00000058 _ZTCN7android16BnStreamListenerE0_NS_15IStreamListenerE
+00068920 g    DO .data.rel.ro	000000ac _ZTCN7android16BnStreamListenerE0_NS_11BnInterfaceINS_15IStreamListenerEEE
+00068770 g    DO .data.rel.ro	00000038 _ZTTN7android16BnStreamListenerE
+00068640 g    DO .data.rel.ro	000000b0 _ZTVN7android16BnStreamListenerE
+0006f084 g    DO .bss	00000004 _ZN7android15IStreamListener10descriptorE
+0006f088 g    DO .bss	00000004 _ZN7android13IStreamSource10descriptorE
+0005f040 g    DO .data.rel.ro.local	00000004 _ZN7android15IStreamListener21kKeyDiscontinuityMaskE
+0005f044 g    DO .data.rel.ro.local	00000004 _ZN7android15IStreamListener15kKeyResumeAtPTSE
+00067e00  w   DO .data.rel.ro	0000005c _ZTCN7android14BpStreamSourceE0_NS_13IStreamSourceE
+00067e60  w   DO .data.rel.ro	0000004c _ZTCN7android14BpStreamSourceE0_NS_10IInterfaceE
+00067eb0  w   DO .data.rel.ro	00000054 _ZTCN7android14BpStreamSourceE4_NS_9BpRefBaseE
+00067f08  w   DO .data.rel.ro	0000005c _ZTCN7android11BpInterfaceINS_13IStreamSourceEEE0_S1_
+00067f68  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_13IStreamSourceEEE0_NS_10IInterfaceE
+00067fb8  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_13IStreamSourceEEE4_NS_9BpRefBaseE
+00068010  w   DO .data.rel.ro	00000058 _ZTCN7android11BnInterfaceINS_15IStreamListenerEEE0_S1_
+00068068  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_15IStreamListenerEEE0_NS_10IInterfaceE
+000680b8  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_15IStreamListenerEEE4_NS_7BBinderE
+00068140  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_15IStreamListenerEEE4_NS_7IBinderE
+000681c0  w   DO .data.rel.ro	0000005c _ZTCN7android11BnInterfaceINS_13IStreamSourceEEE0_S1_
+00068220  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_13IStreamSourceEEE0_NS_10IInterfaceE
+00068270  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_13IStreamSourceEEE4_NS_7BBinderE
+000682f8  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_13IStreamSourceEEE4_NS_7IBinderE
+00068378  w   DO .data.rel.ro	00000058 _ZTCN7android16BpStreamListenerE0_NS_15IStreamListenerE
+000683d0  w   DO .data.rel.ro	0000004c _ZTCN7android16BpStreamListenerE0_NS_10IInterfaceE
+00068420  w   DO .data.rel.ro	00000054 _ZTCN7android16BpStreamListenerE4_NS_9BpRefBaseE
+00068478  w   DO .data.rel.ro	00000058 _ZTCN7android11BpInterfaceINS_15IStreamListenerEEE0_S1_
+000684d0  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_15IStreamListenerEEE0_NS_10IInterfaceE
+00068520  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_15IStreamListenerEEE4_NS_9BpRefBaseE
+00044679 g    DF .text	00000012 _ZN7android5media8MetadataC2EPNS_6ParcelE
+00036f3d g    DF .text	00000002 _ZN7android5media8MetadataD2Ev
+0004468b g    DF .text	00000006 _ZN7android5media8Metadata11resetParcelEv
+00044691 g    DF .text	0000002a _ZN7android5media8Metadata12updateLengthEv
+000446bd g    DF .text	0000002c _ZN7android5media8Metadata12appendHeaderEv
+000446e9 g    DF .text	000000c4 _ZN7android5media8Metadata8checkKeyEi
+000447ad g    DF .text	0000004e _ZN7android5media8Metadata11appendInt32Eii
+000447fb g    DF .text	0000004e _ZN7android5media8Metadata10appendBoolEib
+00044679 g    DF .text	00000012 _ZN7android5media8MetadataC1EPNS_6ParcelE
+00036f3d g    DF .text	00000002 _ZN7android5media8MetadataD1Ev
+00044849 g    DF .text	0000000c _ZTv0_n20_N7android13MediaRecorder4diedEv
+00044855 g    DF .text	00000010 _ZN7android13MediaRecorder4diedEv
+00044865 g    DF .text	00000054 _ZN7android13MediaRecorder9setCameraERKNS_2spINS_7ICameraEEERKNS1_INS_21ICameraRecordingProxyEEE
+000448b9 g    DF .text	00000068 _ZN7android13MediaRecorder17setPreviewSurfaceERKNS_2spINS_7SurfaceEEE
+00044921 g    DF .text	0000008c _ZN7android13MediaRecorder4initEv
+000449ad g    DF .text	00000084 _ZN7android13MediaRecorder14setVideoSourceEi
+00044a31 g    DF .text	00000084 _ZN7android13MediaRecorder14setAudioSourceEi
+00044ab5 g    DF .text	000000a8 _ZN7android13MediaRecorder15setOutputFormatEi
+00044b5d g    DF .text	00000088 _ZN7android13MediaRecorder15setVideoEncoderEi
+00044be5 g    DF .text	00000088 _ZN7android13MediaRecorder15setAudioEncoderEi
+00044c6d g    DF .text	00000070 _ZN7android13MediaRecorder13setOutputFileEPKc
+00044cdd g    DF .text	000000a4 _ZN7android13MediaRecorder13setOutputFileEixx
+00044d81 g    DF .text	00000084 _ZN7android13MediaRecorder12setVideoSizeEii
+00044e05 g    DF .text	00000084 _ZN7android13MediaRecorder17setVideoFrameRateEi
+00044e89 g    DF .text	00000070 _ZN7android13MediaRecorder13setParametersERKNS_7String8E
+00044ef9 g    DF .text	000000d4 _ZN7android13MediaRecorder7prepareEv
+00044fcd g    DF .text	00000050 _ZN7android13MediaRecorder15getMaxAmplitudeEPi
+0004501d g    DF .text	00000070 _ZN7android13MediaRecorder5startEv
+0004508d g    DF .text	00000084 _ZN7android13MediaRecorder4stopEv
+00045111 g    DF .text	0000005c _ZN7android13MediaRecorder5closeEv
+0004516d g    DF .text	00000034 _ZN7android13MediaRecorder7doResetEv
+000451a1 g    DF .text	0000008c _ZN7android13MediaRecorder5resetEv
+0004522d g    DF .text	00000018 _ZN7android13MediaRecorder9doCleanUpEv
+00045245 g    DF .text	00000014 _ZN7android13MediaRecorder7releaseEv
+00045259 g    DF .text	0000000e _ZN7android13MediaRecorder9initCheckEv
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_15ISurfaceTextureEED2Ev
+00045269 g    DF .text	00000088 _ZN7android13MediaRecorder38querySurfaceMediaSourceFromMediaServerEv
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_15ISurfaceTextureEED1Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_14IMediaRecorderEED2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_21MediaRecorderListenerEED2Ev
+000452f1 g    DF .text	00000008 _ZThn4_N7android13MediaRecorderD1Ev
+000452f9 g    DF .text	0000000c _ZTv0_n12_N7android13MediaRecorderD1Ev
+00045305 g    DF .text	0000000c _ZTv0_n16_N7android13MediaRecorderD1Ev
+00045311 g    DF .text	000000e8 _ZN7android13MediaRecorderD1Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_21MediaRecorderListenerEED1Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_14IMediaRecorderEED1Ev
+000453f9 g    DF .text	00000008 _ZThn4_N7android13MediaRecorderD0Ev
+00045401 g    DF .text	0000000c _ZTv0_n12_N7android13MediaRecorderD0Ev
+0004540d g    DF .text	0000000c _ZTv0_n16_N7android13MediaRecorderD0Ev
+00045419 g    DF .text	00000012 _ZN7android13MediaRecorderD0Ev
+0004542b g    DF .text	00000096 _ZN7android13MediaRecorderD2Ev
+00037ddb  w   DF .text	0000002e _ZN7android2spINS_14IMediaRecorderEEaSERKS2_
+000454c1 g    DF .text	000000e0 _ZN7android13MediaRecorderC1Ev
+000455a1 g    DF .text	0000008c _ZN7android13MediaRecorderC2Ev
+00037ddb  w   DF .text	0000002e _ZN7android2spINS_21MediaRecorderListenerEEaSERKS2_
+0004562d g    DF .text	00000024 _ZN7android13MediaRecorder11setListenerERKNS_2spINS_21MediaRecorderListenerEEE
+00045651 g    DF .text	00000058 _ZN7android13MediaRecorder6notifyEiii
+00068e18 g    DO .data.rel.ro	0000004c _ZTCN7android13MediaRecorderE56_NS_19IMediaDeathNotifierE
+00068e68 g    DO .data.rel.ro	00000080 _ZTCN7android13MediaRecorderE4_NS_7IBinderE
+00068d90 g    DO .data.rel.ro	00000084 _ZTCN7android13MediaRecorderE4_NS_7BBinderE
+000690b8 g    DO .data.rel.ro	0000004c _ZTCN7android13MediaRecorderE0_NS_10IInterfaceE
+000691b8 g    DO .data.rel.ro	00000054 _ZTCN7android13MediaRecorderE0_NS_20IMediaRecorderClientE
+00068ee8 g    DO .data.rel.ro	000000a8 _ZTCN7android13MediaRecorderE0_NS_11BnInterfaceINS_20IMediaRecorderClientEEE
+00069108 g    DO .data.rel.ro	000000ac _ZTCN7android13MediaRecorderE0_NS_21BnMediaRecorderClientE
+00069068 g    DO .data.rel.ro	00000050 _ZTTN7android13MediaRecorderE
+00068f90 g    DO .data.rel.ro	000000d4 _ZTVN7android13MediaRecorderE
+000456a9 g    DF .text	0000000c _ZNK7android23IMediaMetadataRetriever22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_23IMediaMetadataRetrieverEE10onAsBinderEv
+0004573b g    DF .text	0000000c _ZTv0_n12_N7android23IMediaMetadataRetrieverD1Ev
+00045749 g    DF .text	00000030 _ZN7android23IMediaMetadataRetrieverD1Ev
+00045779 g    DF .text	0000000c _ZTv0_n12_N7android23IMediaMetadataRetrieverD0Ev
+00045785 g    DF .text	00000012 _ZN7android23IMediaMetadataRetrieverD0Ev
+00039f21 g    DF .text	0000001c _ZN7android23IMediaMetadataRetrieverC2Ev
+00069210  w   DO .data.rel.ro	00000030 _ZTTN7android24BpMediaMetadataRetrieverE
+000692c8  w   DO .data.rel.ro	00000088 _ZTVN7android24BpMediaMetadataRetrieverE
+00045a29 g    DF .text	00000030 _ZN7android23IMediaMetadataRetrieverC1Ev
+0003a03d g    DF .text	0000001c _ZN7android23IMediaMetadataRetrieverD2Ev
+00069350  w   DO .data.rel.ro	000000bc _ZTVN7android11BnInterfaceINS_23IMediaMetadataRetrieverEEE
+00069410  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_23IMediaMetadataRetrieverEEE
+00069240  w   DO .data.rel.ro	00000088 _ZTCN7android24BpMediaMetadataRetrieverE0_NS_11BpInterfaceINS_23IMediaMetadataRetrieverEEE
+00069440  w   DO .data.rel.ro	00000088 _ZTVN7android11BpInterfaceINS_23IMediaMetadataRetrieverEEE
+000694c8  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_23IMediaMetadataRetrieverEEE
+00045d61 g    DF .text	00000008 _ZThn4_N7android24BnMediaMetadataRetriever10onTransactEjRKNS_6ParcelEPS1_j
+00045d69 g    DF .text	00000244 _ZN7android24BnMediaMetadataRetriever10onTransactEjRKNS_6ParcelEPS1_j
+000699f8 g    DO .data.rel.ro	0000004c _ZTCN7android23IMediaMetadataRetrieverE0_NS_10IInterfaceE
+00069a98 g    DO .data.rel.ro	00000010 _ZTTN7android23IMediaMetadataRetrieverE
+00069ba0 g    DO .data.rel.ro	00000068 _ZTVN7android23IMediaMetadataRetrieverE
+00069c08 g    DO .data.rel.ro	00000080 _ZTCN7android24BnMediaMetadataRetrieverE4_NS_7IBinderE
+00069c88 g    DO .data.rel.ro	00000084 _ZTCN7android24BnMediaMetadataRetrieverE4_NS_7BBinderE
+00069a48 g    DO .data.rel.ro	0000004c _ZTCN7android24BnMediaMetadataRetrieverE0_NS_10IInterfaceE
+00069990 g    DO .data.rel.ro	00000068 _ZTCN7android24BnMediaMetadataRetrieverE0_NS_23IMediaMetadataRetrieverE
+000698d0 g    DO .data.rel.ro	000000bc _ZTCN7android24BnMediaMetadataRetrieverE0_NS_11BnInterfaceINS_23IMediaMetadataRetrieverEEE
+00069aa8 g    DO .data.rel.ro	00000038 _ZTTN7android24BnMediaMetadataRetrieverE
+00069ae0 g    DO .data.rel.ro	000000c0 _ZTVN7android24BnMediaMetadataRetrieverE
+0006f08c g    DO .bss	00000004 _ZN7android23IMediaMetadataRetriever10descriptorE
+000694f0  w   DO .data.rel.ro	00000068 _ZTCN7android24BpMediaMetadataRetrieverE0_NS_23IMediaMetadataRetrieverE
+00069558  w   DO .data.rel.ro	0000004c _ZTCN7android24BpMediaMetadataRetrieverE0_NS_10IInterfaceE
+000695a8  w   DO .data.rel.ro	00000054 _ZTCN7android24BpMediaMetadataRetrieverE4_NS_9BpRefBaseE
+00069600  w   DO .data.rel.ro	00000068 _ZTCN7android11BnInterfaceINS_23IMediaMetadataRetrieverEEE0_S1_
+00069668  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_23IMediaMetadataRetrieverEEE0_NS_10IInterfaceE
+000696b8  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_23IMediaMetadataRetrieverEEE4_NS_7BBinderE
+00069740  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_23IMediaMetadataRetrieverEEE4_NS_7IBinderE
+000697c0  w   DO .data.rel.ro	00000068 _ZTCN7android11BpInterfaceINS_23IMediaMetadataRetrieverEEE0_S1_
+00069828  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_23IMediaMetadataRetrieverEEE0_NS_10IInterfaceE
+00069878  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_23IMediaMetadataRetrieverEEE4_NS_9BpRefBaseE
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_22MediaMetadataRetriever13DeathNotifierEED2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_19IMediaPlayerServiceEED2Ev
+00045fe5 g    DF .text	00000054 _ZN7android22MediaMetadataRetriever13DeathNotifier10binderDiedERKNS_2wpINS_7IBinderEEE
+00046039 g    DF .text	00000068 _ZN7android22MediaMetadataRetriever13setDataSourceEPKcPKNS_11KeyedVectorINS_7String8ES4_EE
+000460a1 g    DF .text	00000084 _ZN7android22MediaMetadataRetriever13setDataSourceEixx
+00046125 g    DF .text	00000054 _ZN7android22MediaMetadataRetriever14getFrameAtTimeExi
+00046179 g    DF .text	00000044 _ZN7android22MediaMetadataRetriever15extractMetadataEi
+000461bd g    DF .text	00000044 _ZN7android22MediaMetadataRetriever15extractAlbumArtEv
+00046201 g    DF .text	000001dc _ZN7android22MediaMetadataRetriever10getServiceEv
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_19IMediaPlayerServiceEED1Ev
+000463dd g    DF .text	0000000c _ZTv0_n12_N7android22MediaMetadataRetriever13DeathNotifierD1Ev
+000463e9 g    DF .text	0000009c _ZN7android22MediaMetadataRetriever13DeathNotifierD1Ev
+00046485 g    DF .text	0000000c _ZTv0_n12_N7android22MediaMetadataRetriever13DeathNotifierD0Ev
+00046491 g    DF .text	00000012 _ZN7android22MediaMetadataRetriever13DeathNotifierD0Ev
+000464a5 g    DF .text	00000094 _ZN7android22MediaMetadataRetriever13DeathNotifierD2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_23IMediaMetadataRetrieverEED2Ev
+00037ddb  w   DF .text	0000002e _ZN7android2spINS_23IMediaMetadataRetrieverEEaSERKS2_
+00046539 g    DF .text	00000080 _ZN7android22MediaMetadataRetrieverC2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_23IMediaMetadataRetrieverEED1Ev
+000465b9 g    DF .text	00000052 _ZN7android22MediaMetadataRetriever10disconnectEv
+0004660d g    DF .text	00000038 _ZN7android22MediaMetadataRetrieverD2Ev
+00046645 g    DF .text	00000012 _ZN7android22MediaMetadataRetrieverD0Ev
+0004660d g    DF .text	00000038 _ZN7android22MediaMetadataRetrieverD1Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_22MediaMetadataRetriever13DeathNotifierEED1Ev
+00069d80 g    DO .data.rel.ro	0000004c _ZTCN7android22MediaMetadataRetriever13DeathNotifierE0_NS_7IBinder14DeathRecipientE
+00069dd0 g    DO .data.rel.ro	00000010 _ZTTN7android22MediaMetadataRetriever13DeathNotifierE
+00069d30 g    DO .data.rel.ro	0000004c _ZTVN7android22MediaMetadataRetriever13DeathNotifierE
+00069d10 g    DO .data.rel.ro	00000020 _ZTVN7android22MediaMetadataRetrieverE
+0006f094 g    DO .bss	00000004 _ZN7android22MediaMetadataRetriever14sDeathNotifierE
+0006f090 g    DO .bss	00000004 _ZN7android22MediaMetadataRetriever8sServiceE
+0006f098 g    DO .bss	00000004 _ZN7android22MediaMetadataRetriever12sServiceLockE
+00046539 g    DF .text	00000080 _ZN7android22MediaMetadataRetrieverC1Ev
+00036f3d  w   DF .text	00000002 _ZNK7android12SortedVectorINS_16key_value_pair_tItPNS_13ToneGenerator13WaveGeneratorEEEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android12SortedVectorINS_16key_value_pair_tItPNS_13ToneGenerator13WaveGeneratorEEEE10do_destroyEPvj
+0003de7d  w   DF .text	0000001a _ZNK7android12SortedVectorINS_16key_value_pair_tItPNS_13ToneGenerator13WaveGeneratorEEEE8do_splatEPvPKvj
+000466c1  w   DF .text	00000018 _ZNK7android12SortedVectorINS_16key_value_pair_tItPNS_13ToneGenerator13WaveGeneratorEEEE10do_compareEPKvS8_
+0003defb  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tItPNS_13ToneGenerator13WaveGeneratorEEEE15do_move_forwardEPvPKvj
+0003defb  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tItPNS_13ToneGenerator13WaveGeneratorEEEE16do_move_backwardEPvPKvj
+0003df07  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tItPNS_13ToneGenerator13WaveGeneratorEEEE7do_copyEPvPKvj
+00069de0  w   DO .data.rel.ro	0000006c _ZTVN7android12SortedVectorINS_16key_value_pair_tItPNS_13ToneGenerator13WaveGeneratorEEEEE
+00046751 g    DF .text	000000a8 _ZN7android13ToneGenerator14initAudioTrackEv
+00046e25 g    DF .text	00000280 _ZN7android13ToneGenerator13audioCallbackEiPvS1_
+000467f9 g    DF .text	00000100 _ZN7android13ToneGeneratorC2E19audio_stream_type_tfb
+00000000      DF *UND*	00000000 property_get
+000468f9 g    DF .text	0000001a _ZN7android13ToneGenerator8numWavesEj
+00046913 g    DF .text	0000002a _ZN7android13ToneGenerator13clearWaveGensEv
+00046941 g    DF .text	00000080 _ZN7android13ToneGenerator8stopToneEv
+000469c1 g    DF .text	0000003a _ZN7android13ToneGeneratorD2Ev
+000469fd g    DF .text	00000034 _ZN7android13ToneGenerator16getToneForRegionENS0_9tone_typeE
+00046a31 g    DF .text	000000e0 _ZN7android13ToneGenerator13WaveGeneratorC2Ettf
+00000000      DF *UND*	00000000 sin
+00000000      DF *UND*	00000000 cos
+00046b11 g    DF .text	00000104 _ZN7android13ToneGenerator11prepareWaveEv
+00046a31 g    DF .text	000000e0 _ZN7android13ToneGenerator13WaveGeneratorC1Ettf
+00046c19 g    DF .text	00000178 _ZN7android13ToneGenerator9startToneENS0_9tone_typeEi
+00000000      DF *UND*	00000000 systemTime
+00036f3d g    DF .text	00000002 _ZN7android13ToneGenerator13WaveGeneratorD2Ev
+00046d91 g    DF .text	00000092 _ZN7android13ToneGenerator13WaveGenerator10getSamplesEPsjj
+0005727f g    DO .rodata	00000010 _ZN7android13ToneGenerator17sToneMappingTableE
+00057290 g    DO .rodata	00005a48 _ZN7android13ToneGenerator16sToneDescriptorsE
+000467f9 g    DF .text	00000100 _ZN7android13ToneGeneratorC1E19audio_stream_type_tfb
+000469c1 g    DF .text	0000003a _ZN7android13ToneGeneratorD1Ev
+00036f3d g    DF .text	00000002 _ZN7android13ToneGenerator13WaveGeneratorD1Ev
+00069e60  w   DO .data.rel.ro	00000058 _ZTVN7android9JetPlayer15JetPlayerThreadE
+00069e50  w   DO .data.rel.ro	00000010 _ZTTN7android9JetPlayer15JetPlayerThreadE
+00047103 g    DF .text	00000050 _ZN7android9JetPlayerC2EPvii
+00047155 g    DF .text	000001b4 _ZN7android9JetPlayer4initEv
+00000000      DF *UND*	00000000 EAS_Config
+00000000      DF *UND*	00000000 EAS_Init
+00000000      DF *UND*	00000000 JET_Init
+00047309 g    DF .text	0000001a _ZN7android9JetPlayer16setEventCallbackEPFviiiPvE
+00047323 g    DF .text	00000072 _ZN7android9JetPlayer7releaseEv
+00000000      DF *UND*	00000000 JET_Pause
+00000000      DF *UND*	00000000 JET_CloseFile
+00000000      DF *UND*	00000000 JET_Shutdown
+00000000      DF *UND*	00000000 EAS_Shutdown
+00047395 g    DF .text	00000034 _ZN7android9JetPlayerD2Ev
+000473c9 g    DF .text	0000005e _ZN7android9JetPlayer24fireUpdateOnStatusChangeEv
+00047427 g    DF .text	00000036 _ZN7android9JetPlayer22fireEventsFromJetQueueEv
+00000000      DF *UND*	00000000 JET_GetEvent
+0004745d g    DF .text	000001a0 _ZN7android9JetPlayer6renderEv
+00000000      DF *UND*	00000000 EAS_Render
+00000000      DF *UND*	00000000 JET_Status
+00047609 g    DF .text	00000068 _ZN7android9JetPlayer12loadFromFileEPKc
+00000000      DF *UND*	00000000 strncpy
+00000000      DF *UND*	00000000 JET_OpenFile
+00047671 g    DF .text	0000004c _ZN7android9JetPlayer10loadFromFDEixx
+000476bd g    DF .text	00000020 _ZN7android9JetPlayer9closeFileEv
+000476dd g    DF .text	00000040 _ZN7android9JetPlayer4playEv
+00000000      DF *UND*	00000000 JET_Play
+0004771d g    DF .text	00000038 _ZN7android9JetPlayer5pauseEv
+00047755 g    DF .text	0000003e _ZN7android9JetPlayer12queueSegmentEiiiimh
+00000000      DF *UND*	00000000 JET_QueueSegment
+00047793 g    DF .text	00000028 _ZN7android9JetPlayer12setMuteFlagsEmb
+00000000      DF *UND*	00000000 JET_SetMuteFlags
+000477bb g    DF .text	0000002c _ZN7android9JetPlayer11setMuteFlagEibb
+00000000      DF *UND*	00000000 JET_SetMuteFlag
+000477e7 g    DF .text	00000024 _ZN7android9JetPlayer11triggerClipEi
+00000000      DF *UND*	00000000 JET_TriggerClip
+0004780b g    DF .text	00000020 _ZN7android9JetPlayer10clearQueueEv
+00000000      DF *UND*	00000000 JET_Clear_Queue
+0004782d g    DF .text	0000001c _ZN7android9JetPlayer4dumpEv
+00047849 g    DF .text	0000001c _ZN7android9JetPlayer13dumpJetStatusEP16s_jet_status_tag
+00069eb8  w   DO .data.rel.ro	00000058 _ZTCN7android9JetPlayer15JetPlayerThreadE0_NS_6ThreadE
+00047103 g    DF .text	00000050 _ZN7android9JetPlayerC1EPvii
+00047395 g    DF .text	00000034 _ZN7android9JetPlayerD1Ev
+00047865 g    DF .text	0000000c _ZNK7android4IOMX22getInterfaceDescriptorEv
+00047871 g    DF .text	0000000c _ZNK7android12IOMXObserver22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_12IOMXObserverEE10onAsBinderEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_4IOMXEE10onAsBinderEv
+0006a3c0  w   DO .data.rel.ro	00000010 _ZTVN7android4ListINS_7String8EEE
+000478f7 g    DF .text	0000000c _ZTv0_n12_N7android12IOMXObserverD1Ev
+00047905 g    DF .text	00000030 _ZN7android12IOMXObserverD1Ev
+00047935 g    DF .text	0000000c _ZTv0_n12_N7android12IOMXObserverD0Ev
+00047941 g    DF .text	00000012 _ZN7android12IOMXObserverD0Ev
+00047953 g    DF .text	0000000c _ZTv0_n12_N7android4IOMXD1Ev
+00047961 g    DF .text	00000030 _ZN7android4IOMXD1Ev
+00047991 g    DF .text	0000000c _ZTv0_n12_N7android4IOMXD0Ev
+0004799d g    DF .text	00000012 _ZN7android4IOMXD0Ev
+00000000      DF *UND*	00000000 _ZN7android6Parcel5writeERKNS_11FlattenableE
+000481a1 g    DF .text	00000008 _ZThn4_N7android13BnOMXObserver10onTransactEjRKNS_6ParcelEPS1_j
+000481a9 g    DF .text	00000064 _ZN7android13BnOMXObserver10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 _ZNK7android6Parcel16enforceInterfaceERKNS_8String16EPNS_14IPCThreadStateE
+00039f21 g    DF .text	0000001c _ZN7android4IOMXC2Ev
+00069f10  w   DO .data.rel.ro	00000030 _ZTTN7android5BpOMXE
+0006a008  w   DO .data.rel.ro	000000c4 _ZTVN7android5BpOMXE
+0004834d g    DF .text	00000030 _ZN7android4IOMXC1Ev
+0003a03d g    DF .text	0000001c _ZN7android4IOMXD2Ev
+0006a298  w   DO .data.rel.ro	000000f8 _ZTVN7android11BnInterfaceINS_4IOMXEEE
+0006a390  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_4IOMXEEE
+00069f40  w   DO .data.rel.ro	000000c4 _ZTCN7android5BpOMXE0_NS_11BpInterfaceINS_4IOMXEEE
+0006a0d0  w   DO .data.rel.ro	000000c4 _ZTVN7android11BpInterfaceINS_4IOMXEEE
+0006a198  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_4IOMXEEE
+00039f21 g    DF .text	0000001c _ZN7android12IOMXObserverC2Ev
+00048591 g    DF .text	000000d0 _ZN7android12IOMXObserver11asInterfaceERKNS_2spINS_7IBinderEEE
+0006a3e0  w   DO .data.rel.ro	00000030 _ZTTN7android13BpOMXObserverE
+0006a488  w   DO .data.rel.ro	00000074 _ZTVN7android13BpOMXObserverE
+00048661 g    DF .text	00000030 _ZN7android12IOMXObserverC1Ev
+0003a03d g    DF .text	0000001c _ZN7android12IOMXObserverD2Ev
+0006a1c0  w   DO .data.rel.ro	000000a8 _ZTVN7android11BnInterfaceINS_12IOMXObserverEEE
+0006a268  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_12IOMXObserverEEE
+0006a410  w   DO .data.rel.ro	00000074 _ZTCN7android13BpOMXObserverE0_NS_11BpInterfaceINS_12IOMXObserverEEE
+0006a500  w   DO .data.rel.ro	00000074 _ZTVN7android11BpInterfaceINS_12IOMXObserverEEE
+0006a578  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_12IOMXObserverEEE
+0006a3d0  w   DO .data.rel.ro	00000010 _ZTVN7android4ListINS_4IOMX13ComponentInfoEEE
+00048aa9 g    DF .text	00000008 _ZThn4_N7android5BnOMX10onTransactEjRKNS_6ParcelEPS1_j
+00048ab1 g    DF .text	00000768 _ZN7android5BnOMX10onTransactEjRKNS_6ParcelEPS1_j
+00000000      DF *UND*	00000000 _ZN7android13GraphicBufferC1Ev
+00000000      DF *UND*	00000000 android_atomic_inc
+00000000      DF *UND*	00000000 _ZNK7android6Parcel4readERNS_11FlattenableE
+00000000      DF *UND*	00000000 android_atomic_dec
+0006af00 g    DO .data.rel.ro	0000004c _ZTCN7android4IOMXE0_NS_10IInterfaceE
+0006adf0 g    DO .data.rel.ro	00000010 _ZTTN7android4IOMXE
+0006b020 g    DO .data.rel.ro	000000a4 _ZTVN7android4IOMXE
+0006ae00 g    DO .data.rel.ro	0000004c _ZTCN7android12IOMXObserverE0_NS_10IInterfaceE
+0006b3e0 g    DO .data.rel.ro	00000010 _ZTTN7android12IOMXObserverE
+0006b150 g    DO .data.rel.ro	00000054 _ZTVN7android12IOMXObserverE
+0006af50 g    DO .data.rel.ro	00000080 _ZTCN7android5BnOMXE4_NS_7IBinderE
+0006b1a8 g    DO .data.rel.ro	00000084 _ZTCN7android5BnOMXE4_NS_7BBinderE
+0006b100 g    DO .data.rel.ro	0000004c _ZTCN7android5BnOMXE0_NS_10IInterfaceE
+0006b678 g    DO .data.rel.ro	000000a4 _ZTCN7android5BnOMXE0_NS_4IOMXE
+0006b2e8 g    DO .data.rel.ro	000000f8 _ZTCN7android5BnOMXE0_NS_11BnInterfaceINS_4IOMXEEE
+0006b230 g    DO .data.rel.ro	00000038 _ZTTN7android5BnOMXE
+0006b3f0 g    DO .data.rel.ro	000000fc _ZTVN7android5BnOMXE
+0006b268 g    DO .data.rel.ro	00000080 _ZTCN7android13BnOMXObserverE4_NS_7IBinderE
+0006b548 g    DO .data.rel.ro	00000084 _ZTCN7android13BnOMXObserverE4_NS_7BBinderE
+0006afd0 g    DO .data.rel.ro	0000004c _ZTCN7android13BnOMXObserverE0_NS_10IInterfaceE
+0006b4f0 g    DO .data.rel.ro	00000054 _ZTCN7android13BnOMXObserverE0_NS_12IOMXObserverE
+0006b5d0 g    DO .data.rel.ro	000000a8 _ZTCN7android13BnOMXObserverE0_NS_11BnInterfaceINS_12IOMXObserverEEE
+0006b0c8 g    DO .data.rel.ro	00000038 _ZTTN7android13BnOMXObserverE
+0006ae50 g    DO .data.rel.ro	000000ac _ZTVN7android13BnOMXObserverE
+0006f0a0 g    DO .bss	00000004 _ZN7android12IOMXObserver10descriptorE
+0006f0a4 g    DO .bss	00000004 _ZN7android4IOMX10descriptorE
+0006a5a0  w   DO .data.rel.ro	000000a4 _ZTCN7android5BpOMXE0_NS_4IOMXE
+0006a648  w   DO .data.rel.ro	0000004c _ZTCN7android5BpOMXE0_NS_10IInterfaceE
+0006a698  w   DO .data.rel.ro	00000054 _ZTCN7android5BpOMXE4_NS_9BpRefBaseE
+0006a6f0  w   DO .data.rel.ro	000000a4 _ZTCN7android11BpInterfaceINS_4IOMXEEE0_S1_
+0006a798  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_4IOMXEEE0_NS_10IInterfaceE
+0006a7e8  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_4IOMXEEE4_NS_9BpRefBaseE
+0006a840  w   DO .data.rel.ro	00000054 _ZTCN7android11BnInterfaceINS_12IOMXObserverEEE0_S1_
+0006a898  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_12IOMXObserverEEE0_NS_10IInterfaceE
+0006a8e8  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_12IOMXObserverEEE4_NS_7BBinderE
+0006a970  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_12IOMXObserverEEE4_NS_7IBinderE
+0006a9f0  w   DO .data.rel.ro	000000a4 _ZTCN7android11BnInterfaceINS_4IOMXEEE0_S1_
+0006aa98  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_4IOMXEEE0_NS_10IInterfaceE
+0006aae8  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_4IOMXEEE4_NS_7BBinderE
+0006ab70  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_4IOMXEEE4_NS_7IBinderE
+0006abf0  w   DO .data.rel.ro	00000054 _ZTCN7android13BpOMXObserverE0_NS_12IOMXObserverE
+0006ac48  w   DO .data.rel.ro	0000004c _ZTCN7android13BpOMXObserverE0_NS_10IInterfaceE
+0006ac98  w   DO .data.rel.ro	00000054 _ZTCN7android13BpOMXObserverE4_NS_9BpRefBaseE
+0006acf0  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_12IOMXObserverEEE0_S1_
+0006ad48  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_12IOMXObserverEEE0_NS_10IInterfaceE
+0006ad98  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_12IOMXObserverEEE4_NS_9BpRefBaseE
+000493e9 g    DF .text	0000000c _ZNK7android19IAudioPolicyService22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_19IAudioPolicyServiceEE10onAsBinderEv
+00049409 g    DF .text	00000008 _ZThn4_N7android20BnAudioPolicyService10onTransactEjRKNS_6ParcelEPS1_j
+00049411 g    DF .text	000004b8 _ZN7android20BnAudioPolicyService10onTransactEjRKNS_6ParcelEPS1_j
+000498c9 g    DF .text	0000000c _ZTv0_n12_N7android19IAudioPolicyServiceD1Ev
+000498d5 g    DF .text	00000030 _ZN7android19IAudioPolicyServiceD1Ev
+00049905 g    DF .text	0000000c _ZTv0_n12_N7android19IAudioPolicyServiceD0Ev
+00049911 g    DF .text	00000012 _ZN7android19IAudioPolicyServiceD0Ev
+00039f21 g    DF .text	0000001c _ZN7android19IAudioPolicyServiceC2Ev
+0006b720  w   DO .data.rel.ro	00000030 _ZTTN7android20BpAudioPolicyServiceE
+0006b820  w   DO .data.rel.ro	000000d0 _ZTVN7android20BpAudioPolicyServiceE
+0004a3b5 g    DF .text	00000030 _ZN7android19IAudioPolicyServiceC1Ev
+0003a03d g    DF .text	0000001c _ZN7android19IAudioPolicyServiceD2Ev
+0006b8f0  w   DO .data.rel.ro	00000104 _ZTVN7android11BnInterfaceINS_19IAudioPolicyServiceEEE
+0006b9f8  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_19IAudioPolicyServiceEEE
+0006b750  w   DO .data.rel.ro	000000d0 _ZTCN7android20BpAudioPolicyServiceE0_NS_11BpInterfaceINS_19IAudioPolicyServiceEEE
+0006ba28  w   DO .data.rel.ro	000000d0 _ZTVN7android11BpInterfaceINS_19IAudioPolicyServiceEEE
+0006baf8  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_19IAudioPolicyServiceEEE
+0006c2e0 g    DO .data.rel.ro	0000004c _ZTCN7android19IAudioPolicyServiceE0_NS_10IInterfaceE
+0006c148 g    DO .data.rel.ro	00000010 _ZTTN7android19IAudioPolicyServiceE
+0006c488 g    DO .data.rel.ro	000000b0 _ZTVN7android19IAudioPolicyServiceE
+0006c158 g    DO .data.rel.ro	00000080 _ZTCN7android20BnAudioPolicyServiceE4_NS_7IBinderE
+0006c088 g    DO .data.rel.ro	00000084 _ZTCN7android20BnAudioPolicyServiceE4_NS_7BBinderE
+0006c330 g    DO .data.rel.ro	0000004c _ZTCN7android20BnAudioPolicyServiceE0_NS_10IInterfaceE
+0006bfd8 g    DO .data.rel.ro	000000b0 _ZTCN7android20BnAudioPolicyServiceE0_NS_19IAudioPolicyServiceE
+0006c380 g    DO .data.rel.ro	00000104 _ZTCN7android20BnAudioPolicyServiceE0_NS_11BnInterfaceINS_19IAudioPolicyServiceEEE
+0006c110 g    DO .data.rel.ro	00000038 _ZTTN7android20BnAudioPolicyServiceE
+0006c1d8 g    DO .data.rel.ro	00000108 _ZTVN7android20BnAudioPolicyServiceE
+0006f0a8 g    DO .bss	00000004 _ZN7android19IAudioPolicyService10descriptorE
+0006bb20  w   DO .data.rel.ro	000000b0 _ZTCN7android20BpAudioPolicyServiceE0_NS_19IAudioPolicyServiceE
+0006bbd0  w   DO .data.rel.ro	0000004c _ZTCN7android20BpAudioPolicyServiceE0_NS_10IInterfaceE
+0006bc20  w   DO .data.rel.ro	00000054 _ZTCN7android20BpAudioPolicyServiceE4_NS_9BpRefBaseE
+0006bc78  w   DO .data.rel.ro	000000b0 _ZTCN7android11BnInterfaceINS_19IAudioPolicyServiceEEE0_S1_
+0006bd28  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_19IAudioPolicyServiceEEE0_NS_10IInterfaceE
+0006bd78  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_19IAudioPolicyServiceEEE4_NS_7BBinderE
+0006be00  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_19IAudioPolicyServiceEEE4_NS_7IBinderE
+0006be80  w   DO .data.rel.ro	000000b0 _ZTCN7android11BpInterfaceINS_19IAudioPolicyServiceEEE0_S1_
+0006bf30  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_19IAudioPolicyServiceEEE0_NS_10IInterfaceE
+0006bf80  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_19IAudioPolicyServiceEEE4_NS_9BpRefBaseE
+0004a631 g    DF .text	0000001e _ZN7android12MediaScanner9setLocaleEPKc
+00000000      DF *UND*	00000000 strdup
+0004a651 g    DF .text	00000028 _ZN7android12MediaScannerD2Ev
+0004a679 g    DF .text	00000012 _ZN7android12MediaScannerD0Ev
+0004a651 g    DF .text	00000028 _ZN7android12MediaScannerD1Ev
+0004a68b g    DF .text	00000004 _ZNK7android12MediaScanner6localeEv
+0004a691 g    DF .text	0000009c _ZN7android12MediaScanner12loadSkipListEv
+00000000      DF *UND*	00000000 strtok
+00000000      DF *UND*	00000000 strlen
+0004a72d g    DF .text	00000024 _ZN7android12MediaScannerC2Ev
+0004a751 g    DF .text	00000058 _ZN7android12MediaScanner19shouldSkipDirectoryEPc
+00000000      DF *UND*	00000000 strncmp
+0004a7a9 g    DF .text	0000013c _ZN7android12MediaScanner23doProcessDirectoryEntryEPciRNS_18MediaScannerClientEbP6direntS1_
+00000000      DF *UND*	00000000 strcpy
+00000000      DF *UND*	00000000 stat
+00000000      DF *UND*	00000000 __errno
+00000000      DF *UND*	00000000 strcat
+0004a8e5 g    DF .text	000000d0 _ZN7android12MediaScanner18doProcessDirectoryEPciRNS_18MediaScannerClientEb
+00000000      DF *UND*	00000000 access
+00000000      DF *UND*	00000000 opendir
+00000000      DF *UND*	00000000 readdir
+00000000      DF *UND*	00000000 closedir
+0004a9b5 g    DF .text	0000007a _ZN7android12MediaScanner16processDirectoryEPKcRNS_18MediaScannerClientE
+0004aa85 g    DF .text	00000060 _ZN7android18MediaScannerClient9setLocaleEPKc
+0006c538 g    DO .data.rel.ro	0000001c _ZTVN7android12MediaScannerE
+0004a72d g    DF .text	00000024 _ZN7android12MediaScannerC1Ev
+0004aa31 g    DF .text	00000028 _ZN7android18MediaScannerClientD2Ev
+0004aa59 g    DF .text	00000012 _ZN7android18MediaScannerClientD0Ev
+0004aa31 g    DF .text	00000028 _ZN7android18MediaScannerClientD1Ev
+0004aa6d g    DF .text	00000018 _ZN7android18MediaScannerClientC2Ev
+0004aae5 g    DF .text	00000022 _ZN7android18MediaScannerClient9beginFileEv
+00000000      DF *UND*	00000000 _ZN7android11StringArrayC1Ev
+0004ab07 g    DF .text	0000003c _ZN7android18MediaScannerClient12addStringTagEPKcS2_
+00000000      DF *UND*	00000000 _ZN7android11StringArray9push_backEPKc
+0004ab45 g    DF .text	000001a4 _ZN7android18MediaScannerClient13convertValuesEj
+00000000      DF *UND*	00000000 ucnv_open_48
+00000000      DF *UND*	00000000 ucnv_convertEx_48
+00000000      DF *UND*	00000000 _ZN7android11StringArray8setEntryEiPKc
+00000000      DF *UND*	00000000 ucnv_close_48
+0004ace9 g    DF .text	000000dc _ZN7android18MediaScannerClient7endFileEv
+0004adf5 g    DF .text	00000068 _Z21findPossibleEncodingsi
+0006c558 g    DO .data.rel.ro	0000001c _ZTVN7android18MediaScannerClientE
+0004aa6d g    DF .text	00000018 _ZN7android18MediaScannerClientC1Ev
+0004ae5d  w   DF .text	00000012 _ZNK7android12SortedVectorINS_2wpINS_19IMediaDeathNotifierEEEE12do_constructEPvj
+0004ae6f  w   DF .text	0000003a _ZNK7android12SortedVectorINS_2wpINS_19IMediaDeathNotifierEEEE10do_compareEPKvS6_
+0006c578  w   DO .data.rel.ro	0000006c _ZTVN7android12SortedVectorINS_2wpINS_19IMediaDeathNotifierEEEEE
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_19IMediaDeathNotifier13DeathNotifierEED2Ev
+0004aedf  w   DF .text	00000026 _ZNK7android12SortedVectorINS_2wpINS_19IMediaDeathNotifierEEEE8do_splatEPvPKvj
+00000000      DF *UND*	00000000 _ZN7android7RefBase12weakref_type7incWeakEPKv
+0004af05  w   DF .text	00000028 _ZNK7android12SortedVectorINS_2wpINS_19IMediaDeathNotifierEEEE7do_copyEPvPKvj
+0004af2d  w   DF .text	00000020 _ZNK7android12SortedVectorINS_2wpINS_19IMediaDeathNotifierEEEE10do_destroyEPvj
+0004af4d g    DF .text	000000d0 _ZN7android19IMediaDeathNotifier13DeathNotifier10binderDiedERKNS_2wpINS_7IBinderEEE
+00000000      DF *UND*	00000000 _ZN7android16SortedVectorImplaSERKS0_
+00000000      DF *UND*	00000000 _ZN7android7RefBase12weakref_type16attemptIncStrongEPKv
+0004b251 g    DF .text	0000000c _ZTv0_n12_N7android19IMediaDeathNotifier13DeathNotifierD1Ev
+0004b25d g    DF .text	000000a8 _ZN7android19IMediaDeathNotifier13DeathNotifierD1Ev
+0004b305 g    DF .text	0000000c _ZTv0_n12_N7android19IMediaDeathNotifier13DeathNotifierD0Ev
+0004b311 g    DF .text	00000012 _ZN7android19IMediaDeathNotifier13DeathNotifierD0Ev
+0004b325 g    DF .text	000000a0 _ZN7android19IMediaDeathNotifier13DeathNotifierD2Ev
+0006c5e8  w   DO .data.rel.ro	00000018 _ZTVN7android14ReferenceMover17WeakReferenceCastINS_19IMediaDeathNotifierEEE
+0004b3f5  w   DF .text	0000000a _ZNK7android12SortedVectorINS_2wpINS_19IMediaDeathNotifierEEEE16do_move_backwardEPvPKvj
+0004b3f5  w   DF .text	0000000a _ZNK7android12SortedVectorINS_2wpINS_19IMediaDeathNotifierEEEE15do_move_forwardEPvPKvj
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_19IMediaDeathNotifier13DeathNotifierEED1Ev
+0006c600 g    DO .data.rel.ro	0000004c _ZTCN7android19IMediaDeathNotifier13DeathNotifierE0_NS_7IBinder14DeathRecipientE
+0006c650 g    DO .data.rel.ro	00000010 _ZTTN7android19IMediaDeathNotifier13DeathNotifierE
+0006c660 g    DO .data.rel.ro	0000004c _ZTVN7android19IMediaDeathNotifier13DeathNotifierE
+0006f0b4 g    DO .bss	00000014 _ZN7android19IMediaDeathNotifier15sObitRecipientsE
+0006f0b0 g    DO .bss	00000004 _ZN7android19IMediaDeathNotifier14sDeathNotifierE
+0006f0c8 g    DO .bss	00000004 _ZN7android19IMediaDeathNotifier19sMediaPlayerServiceE
+0006f0ac g    DO .bss	00000004 _ZN7android19IMediaDeathNotifier12sServiceLockE
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13audio_decoderEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13audio_decoderEE10do_destroyEPvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13audio_decoderEE7do_copyEPvPKvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorINS_13audio_decoderEE8do_splatEPvPKvj
+0004b4c5  w   DF .text	00000022 _ZNK7android6VectorINS_13audio_decoderEE15do_move_forwardEPvPKvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13audio_decoderEE16do_move_backwardEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13video_decoderEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13video_decoderEE10do_destroyEPvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13video_decoderEE7do_copyEPvPKvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorINS_13video_decoderEE8do_splatEPvPKvj
+0004b4c5  w   DF .text	00000022 _ZNK7android6VectorINS_13video_decoderEE15do_move_forwardEPvPKvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13video_decoderEE16do_move_backwardEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13audio_encoderEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13audio_encoderEE10do_destroyEPvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13audio_encoderEE7do_copyEPvPKvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorINS_13audio_encoderEE8do_splatEPvPKvj
+0004b4c5  w   DF .text	00000022 _ZNK7android6VectorINS_13audio_encoderEE15do_move_forwardEPvPKvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13audio_encoderEE16do_move_backwardEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13video_encoderEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13video_encoderEE10do_destroyEPvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13video_encoderEE7do_copyEPvPKvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorINS_13video_encoderEE8do_splatEPvPKvj
+0004b4c5  w   DF .text	00000022 _ZNK7android6VectorINS_13video_encoderEE15do_move_forwardEPvPKvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13video_encoderEE16do_move_backwardEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles18ExportVideoProfileEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles18ExportVideoProfileEE10do_destroyEPvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorIPNS_13MediaProfiles18ExportVideoProfileEE8do_splatEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android12SortedVectorINS_16key_value_pair_tIiiEEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android12SortedVectorINS_16key_value_pair_tIiiEEE10do_destroyEPvj
+0003de7d  w   DF .text	0000001a _ZNK7android12SortedVectorINS_16key_value_pair_tIiiEEE8do_splatEPvPKvj
+0003de97  w   DF .text	00000018 _ZNK7android12SortedVectorINS_16key_value_pair_tIiiEEE10do_compareEPKvS5_
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles26ImageEncodingQualityLevelsEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles26ImageEncodingQualityLevelsEE10do_destroyEPvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorIPNS_13MediaProfiles26ImageEncodingQualityLevelsEE8do_splatEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13output_formatEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_13output_formatEE10do_destroyEPvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13output_formatEE7do_copyEPvPKvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorINS_13output_formatEE8do_splatEPvPKvj
+0004b4c5  w   DF .text	00000022 _ZNK7android6VectorINS_13output_formatEE15do_move_forwardEPvPKvj
+0004b499  w   DF .text	00000016 _ZNK7android6VectorINS_13output_formatEE16do_move_backwardEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles15VideoDecoderCapEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles15VideoDecoderCapEE10do_destroyEPvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorIPNS_13MediaProfiles15VideoDecoderCapEE8do_splatEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles15AudioDecoderCapEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles15AudioDecoderCapEE10do_destroyEPvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorIPNS_13MediaProfiles15AudioDecoderCapEE8do_splatEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles15VideoEncoderCapEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles15VideoEncoderCapEE10do_destroyEPvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorIPNS_13MediaProfiles15VideoEncoderCapEE8do_splatEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles15AudioEncoderCapEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles15AudioEncoderCapEE10do_destroyEPvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorIPNS_13MediaProfiles15AudioEncoderCapEE8do_splatEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles16CamcorderProfileEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIPNS_13MediaProfiles16CamcorderProfileEE10do_destroyEPvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorIPNS_13MediaProfiles16CamcorderProfileEE8do_splatEPvPKvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIiE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorIiE10do_destroyEPvj
+0004b4af  w   DF .text	00000016 _ZNK7android6VectorIiE8do_splatEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles18ExportVideoProfileEE15do_move_forwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles18ExportVideoProfileEE16do_move_backwardEPvPKvj
+0003defb  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tIiiEEE15do_move_forwardEPvPKvj
+0003defb  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tIiiEEE16do_move_backwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles26ImageEncodingQualityLevelsEE15do_move_forwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles26ImageEncodingQualityLevelsEE16do_move_backwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15VideoDecoderCapEE15do_move_forwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15VideoDecoderCapEE16do_move_backwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15AudioDecoderCapEE15do_move_forwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15AudioDecoderCapEE16do_move_backwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15VideoEncoderCapEE15do_move_forwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15VideoEncoderCapEE16do_move_backwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15AudioEncoderCapEE15do_move_forwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15AudioEncoderCapEE16do_move_backwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles16CamcorderProfileEE15do_move_forwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles16CamcorderProfileEE16do_move_backwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIiE15do_move_forwardEPvPKvj
+0004b4e7  w   DF .text	0000000c _ZNK7android6VectorIiE16do_move_backwardEPvPKvj
+0004b4f3  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles18ExportVideoProfileEE7do_copyEPvPKvj
+0003df07  w   DF .text	0000000c _ZNK7android12SortedVectorINS_16key_value_pair_tIiiEEE7do_copyEPvPKvj
+0004b4f3  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles26ImageEncodingQualityLevelsEE7do_copyEPvPKvj
+0004b4f3  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15VideoDecoderCapEE7do_copyEPvPKvj
+0004b4f3  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15AudioDecoderCapEE7do_copyEPvPKvj
+0004b4f3  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15VideoEncoderCapEE7do_copyEPvPKvj
+0004b4f3  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles15AudioEncoderCapEE7do_copyEPvPKvj
+0004b4f3  w   DF .text	0000000c _ZNK7android6VectorIPNS_13MediaProfiles16CamcorderProfileEE7do_copyEPvPKvj
+0004b4f3  w   DF .text	0000000c _ZNK7android6VectorIiE7do_copyEPvPKvj
+0006ca80  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorINS_13audio_decoderEEE
+0006ca38  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorINS_13video_decoderEEE
+0006c9f0  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorINS_13audio_encoderEEE
+0006c9a8  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorINS_13video_encoderEEE
+0006c960  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorIPNS_13MediaProfiles18ExportVideoProfileEEE
+0006c6b0  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorIiEE
+0006c8a8  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorIPNS_13MediaProfiles26ImageEncodingQualityLevelsEEE
+0006c860  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorINS_13output_formatEEE
+0006c818  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorIPNS_13MediaProfiles15VideoDecoderCapEEE
+0006c7d0  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorIPNS_13MediaProfiles15AudioDecoderCapEEE
+0006c788  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorIPNS_13MediaProfiles15VideoEncoderCapEEE
+0006c740  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorIPNS_13MediaProfiles15AudioEncoderCapEEE
+0006c6f8  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorIPNS_13MediaProfiles16CamcorderProfileEEE
+0006c8f0  w   DO .data.rel.ro	0000006c _ZTVN7android12SortedVectorINS_16key_value_pair_tIiiEEEE
+00036f3d g    DF .text	00000002 _ZN7android13MediaProfiles13logVideoCodecERKNS0_10VideoCodecE
+00036f3d g    DF .text	00000002 _ZN7android13MediaProfiles13logAudioCodecERKNS0_10AudioCodecE
+00036f3d g    DF .text	00000002 _ZN7android13MediaProfiles18logVideoEncoderCapERKNS0_15VideoEncoderCapE
+00036f3d g    DF .text	00000002 _ZN7android13MediaProfiles18logAudioEncoderCapERKNS0_15AudioEncoderCapE
+00036f3d g    DF .text	00000002 _ZN7android13MediaProfiles18logVideoDecoderCapERKNS0_15VideoDecoderCapE
+00036f3d g    DF .text	00000002 _ZN7android13MediaProfiles18logAudioDecoderCapERKNS0_15AudioDecoderCapE
+00036f3d g    DF .text	00000002 _ZN7android13MediaProfiles17logVideoEditorCapERKNS0_14VideoEditorCapE
+0004b8e9 g    DF .text	00000030 _ZN7android13MediaProfiles14findTagForNameEPKNS0_12NameToTagMapEjPKc
+0004b919 g    DF .text	0000011c _ZN7android13MediaProfiles16createVideoCodecEPPKcPS0_
+00000000      DF *UND*	00000000 __android_log_assert
+00000000      DF *UND*	00000000 atoi
+0004ba35 g    DF .text	00000100 _ZN7android13MediaProfiles16createAudioCodecEPPKcPS0_
+0004bb35 g    DF .text	0000008c _ZN7android13MediaProfiles21createAudioDecoderCapEPPKc
+0004bbc1 g    DF .text	0000008c _ZN7android13MediaProfiles21createVideoDecoderCapEPPKc
+0004bc4d g    DF .text	0000016c _ZN7android13MediaProfiles21createVideoEncoderCapEPPKc
+0004bdb9 g    DF .text	00000130 _ZN7android13MediaProfiles21createAudioEncoderCapEPPKc
+0004bee9 g    DF .text	00000070 _ZN7android13MediaProfiles29createEncoderOutputFileFormatEPPKc
+0004bf59 g    DF .text	00000128 _ZN7android13MediaProfiles22createCamcorderProfileEiPPKcRNS_6VectorIiEE
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl3addEPKv
+0004c081 g    DF .text	00000024 _ZNK7android13MediaProfiles30findImageEncodingQualityLevelsEi
+0004c0a5 g    DF .text	0000009c _ZN7android13MediaProfiles28addImageEncodingQualityLevelEiPPKc
+0004c141 g    DF .text	00000048 _ZN7android13MediaProfiles11getCameraIdEPPKc
+0004c189 g    DF .text	00000064 _ZN7android13MediaProfiles18addStartTimeOffsetEiPPKc
+0004c1ed g    DF .text	000000b0 _ZN7android13MediaProfiles24createExportVideoProfileEPPKc
+0004c29d g    DF .text	000000c0 _ZN7android13MediaProfiles20createVideoEditorCapEPPKcPS0_
+0004c35d g    DF .text	000001d0 _ZN7android13MediaProfiles19startElementHandlerEPvPKcPS3_
+0004c52d g    DF .text	000000b0 _ZN7android13MediaProfiles23initRequiredProfileRefsERKNS_6VectorIiEE
+0004c5dd g    DF .text	00000026 _ZN7android13MediaProfiles26getRequiredProfileRefIndexEi
+0004c605 g    DF .text	00000038 _ZN7android13MediaProfiles32createDefaultH263VideoEncoderCapEv
+0004c63d g    DF .text	0000003c _ZN7android13MediaProfiles31createDefaultM4vVideoEncoderCapEv
+0004c679 g    DF .text	0000002a _ZN7android13MediaProfiles26createDefaultVideoEncodersEPS0_
+0004c6a5 g    DF .text	00000054 _ZN7android13MediaProfiles42createDefaultCamcorderTimeLapseQcifProfileENS_17camcorder_qualityE
+0004c6f9 g    DF .text	00000058 _ZN7android13MediaProfiles42createDefaultCamcorderTimeLapse480pProfileENS_17camcorder_qualityE
+0004c751 g    DF .text	0000001c _ZN7android13MediaProfiles42createDefaultCamcorderTimeLapseLowProfilesEPPNS0_16CamcorderProfileES3_
+0004c76d g    DF .text	0000001c _ZN7android13MediaProfiles43createDefaultCamcorderTimeLapseHighProfilesEPPNS0_16CamcorderProfileES3_
+0004c789 g    DF .text	00000054 _ZN7android13MediaProfiles33createDefaultCamcorderQcifProfileENS_17camcorder_qualityE
+0004c7dd g    DF .text	00000058 _ZN7android13MediaProfiles32createDefaultCamcorderCifProfileENS_17camcorder_qualityE
+0004c835 g    DF .text	00000018 _ZN7android13MediaProfiles33createDefaultCamcorderLowProfilesEPPNS0_16CamcorderProfileES3_
+0004c84d g    DF .text	00000018 _ZN7android13MediaProfiles34createDefaultCamcorderHighProfilesEPPNS0_16CamcorderProfileES3_
+0004c865 g    DF .text	0000007c _ZN7android13MediaProfiles30createDefaultCamcorderProfilesEPS0_
+0004c8e1 g    DF .text	0000001e _ZN7android13MediaProfiles26createDefaultVideoDecodersEPS0_
+0004c8ff g    DF .text	0000001e _ZN7android13MediaProfiles26createDefaultAudioDecodersEPS0_
+0004c91d g    DF .text	00000026 _ZN7android13MediaProfiles37createDefaultEncoderOutputFileFormatsEPS0_
+0004c943 g    DF .text	00000026 _ZN7android13MediaProfiles28createDefaultAmrNBEncoderCapEv
+0004c969 g    DF .text	00000018 _ZN7android13MediaProfiles26createDefaultAudioEncodersEPS0_
+0004c981 g    DF .text	00000074 _ZN7android13MediaProfiles39createDefaultImageEncodingQualityLevelsEPS0_
+0004c9f5 g    DF .text	00000024 _ZN7android13MediaProfiles27createDefaultVideoEditorCapEPS0_
+0004ca19 g    DF .text	00000060 _ZN7android13MediaProfiles32createDefaultExportVideoProfilesEPS0_
+0004ca79 g    DF .text	00000048 _ZN7android13MediaProfiles21createDefaultInstanceEv
+0004cac1 g    DF .text	0000001c _ZNK7android13MediaProfiles20getOutputFileFormatsEv
+00000000      DF *UND*	00000000 _ZN7android10VectorImplC2ERKS0_
+0004cadd g    DF .text	00000038 _ZNK7android13MediaProfiles16getVideoEncodersEv
+0004cb15 g    DF .text	00000100 _ZNK7android13MediaProfiles26getVideoEncoderParamByNameEPKcNS_13video_encoderE
+0004cc15 g    DF .text	0000008c _ZNK7android13MediaProfiles31getVideoEditorExportParamByNameEPKci
+0004cca1 g    DF .text	000000c8 _ZNK7android13MediaProfiles28getVideoEditorCapParamByNameEPKc
+0004cd69 g    DF .text	00000038 _ZNK7android13MediaProfiles16getAudioEncodersEv
+0004cda1 g    DF .text	000000d8 _ZNK7android13MediaProfiles26getAudioEncoderParamByNameEPKcNS_13audio_encoderE
+0004ce79 g    DF .text	00000038 _ZNK7android13MediaProfiles16getVideoDecodersEv
+0004ceb1 g    DF .text	00000038 _ZNK7android13MediaProfiles16getAudioDecodersEv
+0004cee9 g    DF .text	0000002c _ZNK7android13MediaProfiles24getCamcorderProfileIndexEiNS_17camcorder_qualityE
+0004cf15 g    DF .text	0000026c _ZN7android13MediaProfiles38checkAndAddRequiredProfilesIfNecessaryEv
+0004d181 g    DF .text	00000180 _ZNK7android13MediaProfiles30getCamcorderProfileParamByNameEPKciNS_17camcorder_qualityE
+0004d301 g    DF .text	0000000e _ZNK7android13MediaProfiles19hasCamcorderProfileEiNS_17camcorder_qualityE
+0004d311 g    DF .text	00000034 _ZNK7android13MediaProfiles29getImageEncodingQualityLevelsEi
+00000000      DF *UND*	00000000 _ZN7android10VectorImplaSERKS0_
+0004d345 g    DF .text	0000003c _ZNK7android13MediaProfiles20getStartTimeOffsetMsEi
+0004d381 g    DF .text	00000028 _ZN7android13MediaProfilesD2Ev
+0004d3a9 g    DF .text	00000148 _ZN7android13MediaProfiles25createInstanceFromXmlFileEPKc
+00000000      DF *UND*	00000000 fopen
+00000000      DF *UND*	00000000 XML_GetBuffer
+0004d381 g    DF .text	00000028 _ZN7android13MediaProfilesD1Ev
+00000000      DF *UND*	00000000 fread
+00000000      DF *UND*	00000000 XML_ParseBuffer
+00000000      DF *UND*	00000000 XML_ParserFree
+00000000      DF *UND*	00000000 fclose
+00000000      DF *UND*	00000000 XML_ParserCreate
+00000000      DF *UND*	00000000 XML_SetUserData
+00000000      DF *UND*	00000000 XML_SetElementHandler
+0004d4f1 g    DF .text	00000110 _ZN7android13MediaProfiles11getInstanceEv
+0005f048 g    DO .data.rel.ro.local	00000080 _ZN7android13MediaProfiles24sCamcorderQualityNameMapE
+0005f0c8 g    DO .data.rel.ro.local	00000008 _ZN7android13MediaProfiles20sAudioDecoderNameMapE
+0005f0d0 g    DO .data.rel.ro.local	00000008 _ZN7android13MediaProfiles20sVideoDecoderNameMapE
+0005f0d8 g    DO .data.rel.ro.local	00000010 _ZN7android13MediaProfiles14sFileFormatMapE
+0005f0e8 g    DO .data.rel.ro.local	00000028 _ZN7android13MediaProfiles20sAudioEncoderNameMapE
+0005f110 g    DO .data.rel.ro.local	00000018 _ZN7android13MediaProfiles20sVideoEncoderNameMapE
+0006f0cc g    DO .bss	00000004 _ZN7android13MediaProfiles9sInstanceE
+0006f0d4 g    DO .bss	00000001 _ZN7android13MediaProfiles14sIsInitializedE
+0006f0d0 g    DO .bss	00000004 _ZN7android13MediaProfiles5sLockE
+0004d631 g    DF .text	0000000c _ZNK7android7IEffect22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_7IEffectEE10onAsBinderEv
+0004d69d g    DF .text	00000008 _ZThn4_N7android8BnEffect10onTransactEjRKNS_6ParcelEPS1_j
+0004d6a5 g    DF .text	00000160 _ZN7android8BnEffect10onTransactEjRKNS_6ParcelEPS1_j
+0004d805 g    DF .text	0000000c _ZTv0_n12_N7android7IEffectD1Ev
+0004d811 g    DF .text	00000030 _ZN7android7IEffectD1Ev
+0004d841 g    DF .text	0000000c _ZTv0_n12_N7android7IEffectD0Ev
+0004d84d g    DF .text	00000012 _ZN7android7IEffectD0Ev
+00039f21 g    DF .text	0000001c _ZN7android7IEffectC2Ev
+0006cac8  w   DO .data.rel.ro	00000030 _ZTTN7android8BpEffectE
+0006cb80  w   DO .data.rel.ro	00000084 _ZTVN7android8BpEffectE
+0004db6d g    DF .text	00000030 _ZN7android7IEffectC1Ev
+0003a03d g    DF .text	0000001c _ZN7android7IEffectD2Ev
+0006cc08  w   DO .data.rel.ro	000000b8 _ZTVN7android11BnInterfaceINS_7IEffectEEE
+0006ccc0  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_7IEffectEEE
+0006caf8  w   DO .data.rel.ro	00000084 _ZTCN7android8BpEffectE0_NS_11BpInterfaceINS_7IEffectEEE
+0006ccf0  w   DO .data.rel.ro	00000084 _ZTVN7android11BpInterfaceINS_7IEffectEEE
+0006cd78  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_7IEffectEEE
+0006d2b0 g    DO .data.rel.ro	0000004c _ZTCN7android7IEffectE0_NS_10IInterfaceE
+0006d2a0 g    DO .data.rel.ro	00000010 _ZTTN7android7IEffectE
+0006d3d8 g    DO .data.rel.ro	00000064 _ZTVN7android7IEffectE
+0006d220 g    DO .data.rel.ro	00000080 _ZTCN7android8BnEffectE4_NS_7IBinderE
+0006d300 g    DO .data.rel.ro	00000084 _ZTCN7android8BnEffectE4_NS_7BBinderE
+0006d388 g    DO .data.rel.ro	0000004c _ZTCN7android8BnEffectE0_NS_10IInterfaceE
+0006d180 g    DO .data.rel.ro	00000064 _ZTCN7android8BnEffectE0_NS_7IEffectE
+0006d440 g    DO .data.rel.ro	000000b8 _ZTCN7android8BnEffectE0_NS_11BnInterfaceINS_7IEffectEEE
+0006d1e8 g    DO .data.rel.ro	00000038 _ZTTN7android8BnEffectE
+0006d4f8 g    DO .data.rel.ro	000000bc _ZTVN7android8BnEffectE
+0006f0d8 g    DO .bss	00000004 _ZN7android7IEffect10descriptorE
+0006cda0  w   DO .data.rel.ro	00000064 _ZTCN7android8BpEffectE0_NS_7IEffectE
+0006ce08  w   DO .data.rel.ro	0000004c _ZTCN7android8BpEffectE0_NS_10IInterfaceE
+0006ce58  w   DO .data.rel.ro	00000054 _ZTCN7android8BpEffectE4_NS_9BpRefBaseE
+0006ceb0  w   DO .data.rel.ro	00000064 _ZTCN7android11BnInterfaceINS_7IEffectEEE0_S1_
+0006cf18  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_7IEffectEEE0_NS_10IInterfaceE
+0006cf68  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_7IEffectEEE4_NS_7BBinderE
+0006cff0  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_7IEffectEEE4_NS_7IBinderE
+0006d070  w   DO .data.rel.ro	00000064 _ZTCN7android11BpInterfaceINS_7IEffectEEE0_S1_
+0006d0d8  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_7IEffectEEE0_NS_10IInterfaceE
+0006d128  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_7IEffectEEE4_NS_9BpRefBaseE
+0004dde9 g    DF .text	0000000c _ZNK7android13IEffectClient22getInterfaceDescriptorEv
+00038f89  w   DF .text	00000004 _ZN7android11BnInterfaceINS_13IEffectClientEE10onAsBinderEv
+0004de55 g    DF .text	00000008 _ZThn4_N7android14BnEffectClient10onTransactEjRKNS_6ParcelEPS1_j
+0004de5d g    DF .text	000000e6 _ZN7android14BnEffectClient10onTransactEjRKNS_6ParcelEPS1_j
+0004df43 g    DF .text	0000000c _ZTv0_n12_N7android13IEffectClientD1Ev
+0004df51 g    DF .text	00000030 _ZN7android13IEffectClientD1Ev
+0004df81 g    DF .text	0000000c _ZTv0_n12_N7android13IEffectClientD0Ev
+0004df8d g    DF .text	00000012 _ZN7android13IEffectClientD0Ev
+00039f21 g    DF .text	0000001c _ZN7android13IEffectClientC2Ev
+0006d5b8  w   DO .data.rel.ro	00000030 _ZTTN7android14BpEffectClientE
+0006d668  w   DO .data.rel.ro	0000007c _ZTVN7android14BpEffectClientE
+0004e199 g    DF .text	00000030 _ZN7android13IEffectClientC1Ev
+0003a03d g    DF .text	0000001c _ZN7android13IEffectClientD2Ev
+0006d6e8  w   DO .data.rel.ro	000000b0 _ZTVN7android11BnInterfaceINS_13IEffectClientEEE
+0006d798  w   DO .data.rel.ro	0000002c _ZTTN7android11BnInterfaceINS_13IEffectClientEEE
+0006d5e8  w   DO .data.rel.ro	0000007c _ZTCN7android14BpEffectClientE0_NS_11BpInterfaceINS_13IEffectClientEEE
+0006d7c8  w   DO .data.rel.ro	0000007c _ZTVN7android11BpInterfaceINS_13IEffectClientEEE
+0006d848  w   DO .data.rel.ro	00000024 _ZTTN7android11BpInterfaceINS_13IEffectClientEEE
+0006ddd8 g    DO .data.rel.ro	0000004c _ZTCN7android13IEffectClientE0_NS_10IInterfaceE
+0006e040 g    DO .data.rel.ro	00000010 _ZTTN7android13IEffectClientE
+0006df90 g    DO .data.rel.ro	0000005c _ZTVN7android13IEffectClientE
+0006de28 g    DO .data.rel.ro	00000080 _ZTCN7android14BnEffectClientE4_NS_7IBinderE
+0006dea8 g    DO .data.rel.ro	00000084 _ZTCN7android14BnEffectClientE4_NS_7BBinderE
+0006dff0 g    DO .data.rel.ro	0000004c _ZTCN7android14BnEffectClientE0_NS_10IInterfaceE
+0006df30 g    DO .data.rel.ro	0000005c _ZTCN7android14BnEffectClientE0_NS_13IEffectClientE
+0006dc38 g    DO .data.rel.ro	000000b0 _ZTCN7android14BnEffectClientE0_NS_11BnInterfaceINS_13IEffectClientEEE
+0006dda0 g    DO .data.rel.ro	00000038 _ZTTN7android14BnEffectClientE
+0006dce8 g    DO .data.rel.ro	000000b4 _ZTVN7android14BnEffectClientE
+0006f0dc g    DO .bss	00000004 _ZN7android13IEffectClient10descriptorE
+0006d870  w   DO .data.rel.ro	0000005c _ZTCN7android14BpEffectClientE0_NS_13IEffectClientE
+0006d8d0  w   DO .data.rel.ro	0000004c _ZTCN7android14BpEffectClientE0_NS_10IInterfaceE
+0006d920  w   DO .data.rel.ro	00000054 _ZTCN7android14BpEffectClientE4_NS_9BpRefBaseE
+0006d978  w   DO .data.rel.ro	0000005c _ZTCN7android11BnInterfaceINS_13IEffectClientEEE0_S1_
+0006d9d8  w   DO .data.rel.ro	0000004c _ZTCN7android11BnInterfaceINS_13IEffectClientEEE0_NS_10IInterfaceE
+0006da28  w   DO .data.rel.ro	00000084 _ZTCN7android11BnInterfaceINS_13IEffectClientEEE4_NS_7BBinderE
+0006dab0  w   DO .data.rel.ro	00000080 _ZTCN7android11BnInterfaceINS_13IEffectClientEEE4_NS_7IBinderE
+0006db30  w   DO .data.rel.ro	0000005c _ZTCN7android11BpInterfaceINS_13IEffectClientEEE0_S1_
+0006db90  w   DO .data.rel.ro	0000004c _ZTCN7android11BpInterfaceINS_13IEffectClientEEE0_NS_10IInterfaceE
+0006dbe0  w   DO .data.rel.ro	00000054 _ZTCN7android11BpInterfaceINS_13IEffectClientEEE4_NS_9BpRefBaseE
+0004e441 g    DF .text	0000002c _ZN7android11AudioEffect20controlStatusChangedEb
+0004e46d g    DF .text	00000022 _ZN7android11AudioEffect19enableStatusChangedEb
+0004e48f g    DF .text	00000040 _ZN7android11AudioEffect15commandExecutedEjjPvjS1_
+0004e4cf g    DF .text	0000008a _ZN7android11AudioEffect20setParameterDeferredEP14effect_param_s
+0004e559 g    DF .text	00000054 _ZN7android11AudioEffect12getParameterEP14effect_param_s
+0004e5ad g    DF .text	00000054 _ZN7android11AudioEffect18setParameterCommitEv
+0004e601 g    DF .text	0000004e _ZN7android11AudioEffect12setParameterEP14effect_param_s
+0004e64f g    DF .text	000000b2 _ZN7android11AudioEffect7commandEjjPvPjS1_
+0004e701 g    DF .text	00000046 _ZN7android11AudioEffect10setEnabledEb
+0006e208  w   DO .data.rel.ro	0000004c _ZTCN7android11AudioEffect12EffectClientE16_NS_7IBinder14DeathRecipientE
+0006e150  w   DO .data.rel.ro	000000b4 _ZTCN7android11AudioEffect12EffectClientE0_NS_14BnEffectClientE
+0006e050  w   DO .data.rel.ro	00000050 _ZTTN7android11AudioEffect12EffectClientE
+0004e7e1 g    DF .text	00000038 _ZN7android11AudioEffectC2Ev
+0004e819 g    DF .text	00000004 _ZNK7android11AudioEffect9initCheckEv
+0004e81d g    DF .text	00000010 _ZNK7android11AudioEffect10descriptorEv
+0004e82d g    DF .text	00000004 _ZNK7android11AudioEffect10getEnabledEv
+0004e831 g    DF .text	00000050 _ZN7android11AudioEffect10binderDiedEv
+0004e88f g    DF .text	0000001e _ZN7android11AudioEffect18queryNumberEffectsEPj
+0004e8ad g    DF .text	00000022 _ZN7android11AudioEffect11queryEffectEjP19effect_descriptor_s
+0004e8cf g    DF .text	00000022 _ZN7android11AudioEffect19getEffectDescriptorEPK13effect_uuid_sP19effect_descriptor_s
+0004e8f1 g    DF .text	00000024 _ZN7android11AudioEffect25queryDefaultPreProcessingEiP19effect_descriptor_sPj
+0004e915 g    DF .text	0000008c _ZN7android11AudioEffect12stringToGuidEPKcP13effect_uuid_s
+00000000      DF *UND*	00000000 sscanf
+0004e9a1 g    DF .text	0000005c _ZN7android11AudioEffect12guidToStringEPK13effect_uuid_sPcj
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_7IEffectEED2Ev
+0004e9fd g    DF .text	0000012c _ZN7android11AudioEffectD2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_7IEffectEED1Ev
+0004eb29 g    DF .text	00000012 _ZN7android11AudioEffectD0Ev
+0004e9fd g    DF .text	0000012c _ZN7android11AudioEffectD1Ev
+00037ddb  w   DF .text	0000002e _ZN7android2spINS_7IEffectEEaSERKS2_
+0004eb3d g    DF .text	000002f0 _ZN7android11AudioEffect3setEPK13effect_uuid_sS3_iPFviPvS4_ES4_ii
+0006e258  w   DO .data.rel.ro	000000d0 _ZTVN7android11AudioEffect12EffectClientE
+0004ee2d g    DF .text	00000090 _ZN7android11AudioEffectC2EPKcS2_iPFviPvS3_ES3_ii
+0004eebd g    DF .text	00000060 _ZN7android11AudioEffectC2EPK13effect_uuid_sS3_iPFviPvS4_ES4_ii
+0006e4e0 g    DO .data.rel.ro	00000044 _ZTVN7android11AudioEffectE
+0006e0a0  w   DO .data.rel.ro	000000b0 _ZTCN7android11AudioEffect12EffectClientE0_NS_11BnInterfaceINS_13IEffectClientEEE
+0006e328  w   DO .data.rel.ro	0000005c _ZTCN7android11AudioEffect12EffectClientE0_NS_13IEffectClientE
+0006e388  w   DO .data.rel.ro	0000004c _ZTCN7android11AudioEffect12EffectClientE0_NS_10IInterfaceE
+0006e3d8  w   DO .data.rel.ro	00000084 _ZTCN7android11AudioEffect12EffectClientE4_NS_7BBinderE
+0006e460  w   DO .data.rel.ro	00000080 _ZTCN7android11AudioEffect12EffectClientE4_NS_7IBinderE
+0004e7e1 g    DF .text	00000038 _ZN7android11AudioEffectC1Ev
+0004ee2d g    DF .text	00000090 _ZN7android11AudioEffectC1EPKcS2_iPFviPvS3_ES3_ii
+0004eebd g    DF .text	00000060 _ZN7android11AudioEffectC1EPK13effect_uuid_sS3_iPFviPvS4_ES4_ii
+00036f39 g    DF .text	00000004 _ZN7android10Visualizer13CaptureThread10readyToRunEv
+00036f3d g    DF .text	00000002 _ZTv0_n16_N7android10Visualizer13CaptureThread10onFirstRefEv
+00036f3d g    DF .text	00000002 _ZN7android10Visualizer13CaptureThread10onFirstRefEv
+0004ef83 g    DF .text	00000068 _ZN7android10Visualizer14setCaptureSizeEj
+0004efeb g    DF .text	0000004a _ZN7android10Visualizer14setScalingModeEj
+0004f035 g    DF .text	00000026 _ZN7android10Visualizer20controlStatusChangedEb
+0004f05b g    DF .text	00000050 _ZN7android10Visualizer11getWaveFormEPh
+0004f0ad g    DF .text	000000d8 _ZN7android10Visualizer5doFftEPhS1_
+00000000      DF *UND*	00000000 fixed_fft_real
+0004f185 g    DF .text	00000078 _ZN7android10Visualizer6getFftEPh
+0004f1fd g    DF .text	000000d0 _ZN7android10Visualizer15periodicCaptureEv
+0004f2cd g    DF .text	00000020 _ZN7android10Visualizer13CaptureThread10threadLoopEv
+0004f2ed g    DF .text	0000002e _ZN7android10Visualizer15initCaptureSizeEv
+0004f31d g    DF .text	00000070 _ZN7android10VisualizerC2EiPFviPvS1_ES1_i
+0004f38d g    DF .text	00000040 _ZN7android10Visualizer13CaptureThreadC2ERS0_jb
+0004f3cd g    DF .text	00000054 _ZN7android10Visualizer13CaptureThreadC1ERS0_jb
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_10Visualizer13CaptureThreadEED2Ev
+0004f421 g    DF .text	0000002c _ZN7android10VisualizerD2Ev
+00037b5d  w   DF .text	0000001a _ZN7android2spINS_10Visualizer13CaptureThreadEED1Ev
+0004f44d g    DF .text	00000012 _ZN7android10VisualizerD0Ev
+0004f421 g    DF .text	0000002c _ZN7android10VisualizerD1Ev
+0004f461 g    DF .text	000000a8 _ZN7android10Visualizer10setEnabledEb
+0004f509 g    DF .text	000000e2 _ZN7android10Visualizer18setCaptureCallBackEPFvPvjPhjS2_jES1_jj
+0006e528 g    DO .data.rel.ro	00000058 _ZTCN7android10Visualizer13CaptureThreadE0_NS_6ThreadE
+0006e628 g    DO .data.rel.ro	00000010 _ZTTN7android10Visualizer13CaptureThreadE
+0006e5c8 g    DO .data.rel.ro	0000005c _ZTVN7android10Visualizer13CaptureThreadE
+0006e580 g    DO .data.rel.ro	00000044 _ZTVN7android10VisualizerE
+0004f31d g    DF .text	00000070 _ZN7android10VisualizerC1EiPFviPvS1_ES1_i
+0004f5ed g    DF .text	0000024c _ZN7android19dumpMemoryAddressesEi
+00000000      DF *UND*	00000000 get_malloc_leak_info
+00000000      DF *UND*	00000000 free_malloc_leak_info
+0004f839  w   DF .text	0000001a _ZNK7android12SortedVectorINS_16key_value_pair_tIiNS_2spINS_6SampleEEEEEE12do_constructEPvj
+0003de97  w   DF .text	00000018 _ZNK7android12SortedVectorINS_16key_value_pair_tIiNS_2spINS_6SampleEEEEEE10do_compareEPKvS8_
+0006e638  w   DO .data.rel.ro	0000006c _ZTVN7android12SortedVectorINS_16key_value_pair_tIiNS_2spINS_6SampleEEEEEEE
+0004f8e7 g    DF .text	00000036 _ZN7android9SoundPool16addToRestartListEPNS_12SoundChannelE
+0004f91d g    DF .text	00000036 _ZN7android9SoundPool13addToStopListEPNS_12SoundChannelE
+0004f953 g    DF .text	0000002c _ZN7android9SoundPool4quitEv
+0004f981 g    DF .text	00000040 _ZN7android9SoundPool12startThreadsEv
+00000000      DF *UND*	00000000 androidCreateThreadEtc
+00050ced g    DF .text	00000064 _ZN7android15SoundPoolThreadC1EPNS_9SoundPoolE
+00050a87 g    DF .text	00000004 _ZN7android9SoundPool11beginThreadEPv
+0004f9c1 g    DF .text	00000022 _ZN7android9SoundPool11findChannelEi
+0004f9e3 g    DF .text	00000022 _ZN7android9SoundPool15findNextChannelEi
+0004fa05 g    DF .text	0000001c _ZN7android9SoundPool6doLoadERNS_2spINS_6SampleEEE
+00050d71 g    DF .text	00000014 _ZN7android15SoundPoolThread10loadSampleEi
+0004fa21 g    DF .text	00000054 _ZN7android9SoundPool17allocateChannel_lEi
+0004fa75 g    DF .text	0000003a _ZN7android9SoundPool13moveToFront_lEPNS_12SoundChannelE
+0004faaf g    DF .text	00000024 _ZN7android9SoundPool11setPriorityEii
+0004fad3 g    DF .text	0000000c _ZN7android9SoundPool6done_lEPNS_12SoundChannelE
+0004fadf g    DF .text	0000001e _ZN7android9SoundPool11setCallbackEPFvNS_14SoundPoolEventEPS0_PvES3_
+0004fafd g    DF .text	0000003a _ZN7android9SoundPool6notifyENS_14SoundPoolEventE
+00036f3d g    DF .text	00000002 _ZN7android9SoundPool4dumpEv
+0004fb37 g    DF .text	00000040 _ZN7android6Sample4initEv
+0004fb79 g    DF .text	00000040 _ZN7android6SampleC2Eiixx
+0004fbb9 g    DF .text	00000030 _ZN7android6SampleC2EiPKc
+0004fbe9 g    DF .text	00000004 _ZN7android12SoundChannel4initEPNS_9SoundPoolE
+0004fbed g    DF .text	00000026 _ZN7android12SoundChannel5pauseEv
+0004fc13 g    DF .text	00000024 _ZN7android9SoundPool5pauseEi
+0004fc37 g    DF .text	0000002c _ZN7android12SoundChannel9autoPauseEv
+0004fc63 g    DF .text	0000002c _ZN7android9SoundPool9autoPauseEv
+0004fc8f g    DF .text	0000002c _ZN7android12SoundChannel6resumeEv
+0004fcbb g    DF .text	00000024 _ZN7android9SoundPool6resumeEi
+0004fcdf g    DF .text	00000032 _ZN7android12SoundChannel10autoResumeEv
+0004fd11 g    DF .text	0000002c _ZN7android9SoundPool10autoResumeEv
+0004fd3d g    DF .text	00000058 _ZN7android12SoundChannel7setRateEf
+0004fd95 g    DF .text	00000028 _ZN7android9SoundPool7setRateEif
+0004fdbd g    DF .text	0000000e _ZN7android12SoundChannel11setVolume_lEff
+0004fdcb g    DF .text	00000034 _ZN7android12SoundChannel8doStop_lEv
+0004fdff g    DF .text	00000028 _ZN7android12SoundChannel4stopEv
+0004fe27 g    DF .text	00000034 _ZN7android9SoundPool4stopEi
+0004fe5b g    DF .text	00000018 _ZN7android12SoundChannel6stop_lEv
+0004fe73 g    DF .text	00000024 _ZN7android12SoundChannel9setVolumeEff
+0004fe97 g    DF .text	0000002c _ZN7android9SoundPool9setVolumeEiff
+0004fec3 g    DF .text	00000044 _ZN7android12SoundChannel7setLoopEi
+0004ff07 g    DF .text	00000028 _ZN7android9SoundPool7setLoopEii
+00036f3d g    DF .text	00000002 _ZN7android12SoundChannel4dumpEv
+0004ff31 g    DF .text	0000004c _ZN7android6SampleD2Ev
+0004ff7d g    DF .text	00000012 _ZN7android6SampleD0Ev
+0004ff31 g    DF .text	0000004c _ZN7android6SampleD1Ev
+0004ff91 g    DF .text	00000118 _ZN7android6Sample6doLoadEv
+000500a9  w   DF .text	00000012 _ZN7android2spINS_6SampleEED2Ev
+000500bb g    DF .text	00000044 _ZN7android12SoundChannelD2Ev
+000500a9  w   DF .text	00000012 _ZN7android2spINS_6SampleEED1Ev
+000500ff g    DF .text	00000038 _ZN7android9SoundPool6unloadEi
+00050137  w   DF .text	0000001a _ZNK7android12SortedVectorINS_16key_value_pair_tIiNS_2spINS_6SampleEEEEEE10do_destroyEPvj
+00050151  w   DF .text	00000014 _ZN7android2spINS_6SampleEEC2ERKS2_
+00050165 g    DF .text	0000008c _ZN7android9SoundPool4loadEixxi
+0004fb79 g    DF .text	00000040 _ZN7android6SampleC1Eiixx
+00050151  w   DF .text	00000014 _ZN7android2spINS_6SampleEEC1ERKS2_
+000501f1 g    DF .text	00000078 _ZN7android9SoundPool4loadEPKci
+0004fbb9 g    DF .text	00000030 _ZN7android6SampleC1EiPKc
+00050269 g    DF .text	000000bc _ZN7android12SoundChannel7processEiPvm
+00050325 g    DF .text	00000016 _ZN7android12SoundChannel8callbackEiPvS1_
+0005033b  w   DF .text	00000034 _ZNK7android12SortedVectorINS_16key_value_pair_tIiNS_2spINS_6SampleEEEEEE16do_move_backwardEPvPKvj
+0005036f  w   DF .text	00000038 _ZNK7android12SortedVectorINS_16key_value_pair_tIiNS_2spINS_6SampleEEEEEE15do_move_forwardEPvPKvj
+000503a7  w   DF .text	0000002a _ZNK7android12SortedVectorINS_16key_value_pair_tIiNS_2spINS_6SampleEEEEEE8do_splatEPvPKvj
+000503d1  w   DF .text	00000028 _ZNK7android12SortedVectorINS_16key_value_pair_tIiNS_2spINS_6SampleEEEEEE7do_copyEPvPKvj
+0006e6a8  w   DO .data.rel.ro	00000010 _ZTVN7android4ListIPNS_12SoundChannelEEE
+00050429 g    DF .text	000001c0 _ZN7android9SoundPoolC2Ei19audio_stream_type_ti
+0005063f g    DF .text	000000ae _ZN7android9SoundPoolD2Ev
+00050ca5 g    DF .text	00000048 _ZN7android15SoundPoolThread4quitEv
+000500bb g    DF .text	00000044 _ZN7android12SoundChannelD1Ev
+00050d51 g    DF .text	00000020 _ZN7android15SoundPoolThreadD1Ev
+000506ed  w   DF .text	00000020 _ZN7android2spINS_6SampleEEaSERKS2_
+0005070d g    DF .text	00000022 _ZN7android10SoundEvent3setERKNS_2spINS_6SampleEEEiffiif
+00050731 g    DF .text	00000218 _ZN7android12SoundChannel4playERKNS_2spINS_6SampleEEEiffiif
+00050949 g    DF .text	00000076 _ZN7android12SoundChannel9nextEventEv
+000509bf g    DF .text	000000c8 _ZN7android9SoundPool3runEv
+00050a8d g    DF .text	000000d4 _ZN7android9SoundPool4playEiffiif
+0006e6b8 g    DO .data.rel.ro	00000020 _ZTVN7android6SampleE
+0006f018 g    DO .data	00000004 _ZN7android18kDefaultFrameCountE
+0006f014 g    DO .data	00000004 _ZN7android18kDefaultSampleRateE
+0006f00c g    DO .data	00000004 _ZN7android14kMaxSampleRateE
+0006f010 g    DO .data	00000004 _ZN7android19kDefaultBufferCountE
+00050429 g    DF .text	000001c0 _ZN7android9SoundPoolC1Ei19audio_stream_type_ti
+0005063f g    DF .text	000000ae _ZN7android9SoundPoolD1Ev
+00050b61  w   DF .text	00000016 _ZNK7android6VectorINS_12SoundPoolMsgEE12do_constructEPvj
+00036f3d  w   DF .text	00000002 _ZNK7android6VectorINS_12SoundPoolMsgEE10do_destroyEPvj
+00050b77  w   DF .text	00000026 _ZNK7android6VectorINS_12SoundPoolMsgEE7do_copyEPvPKvj
+00050b9d  w   DF .text	00000020 _ZNK7android6VectorINS_12SoundPoolMsgEE8do_splatEPvPKvj
+00050bbd  w   DF .text	00000026 _ZNK7android6VectorINS_12SoundPoolMsgEE15do_move_forwardEPvPKvj
+00050b77  w   DF .text	00000026 _ZNK7android6VectorINS_12SoundPoolMsgEE16do_move_backwardEPvPKvj
+0006e6d8  w   DO .data.rel.ro	00000048 _ZTVN7android6VectorINS_12SoundPoolMsgEEE
+00050c17 g    DF .text	0000003a _ZN7android15SoundPoolThread5writeENS_12SoundPoolMsgE
+00050c51 g    DF .text	00000054 _ZN7android15SoundPoolThread4readEv
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl13removeItemsAtEjj
+00050ced g    DF .text	00000064 _ZN7android15SoundPoolThreadC2EPNS_9SoundPoolE
+00000000      DF *UND*	00000000 _ZN7android10VectorImpl11setCapacityEj
+00050e59 g    DF .text	00000004 _ZN7android15SoundPoolThread11beginThreadEPv
+00050d51 g    DF .text	00000020 _ZN7android15SoundPoolThreadD2Ev
+00050d97 g    DF .text	0000006e _ZN7android15SoundPoolThread12doLoadSampleEi
+00050e05 g    DF .text	00000054 _ZN7android15SoundPoolThread3runEv
+00050e5c g    DF .text	0000000c __on_dlclose
+00000000      DF *UND*	00000000 __cxa_finalize
+0006e770 g    D  .init_array	00000000 __INIT_ARRAY__
+0006e778 g    D  .fini_array	00000000 __FINI_ARRAY__
+0006f01c g    D  *ABS*	00000000 _edata
+0006f01c g    D  *ABS*	00000000 __bss_start
+0006f0f0 g    D  *ABS*	00000000 _end
+
+

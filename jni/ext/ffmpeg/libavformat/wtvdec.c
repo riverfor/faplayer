@@ -398,11 +398,16 @@ static void crazytime_to_iso8601(char *buf, int buf_size, int64_t value)
 
 /**
  * Convert OLE DATE to ISO-8601 string
+ * @return <0 on error
  */
-static void oledate_to_iso8601(char *buf, int buf_size, int64_t value)
+static int oledate_to_iso8601(char *buf, int buf_size, int64_t value)
 {
-    time_t t = 631112400LL + 86400*av_int2dbl(value);
-    strftime(buf, buf_size, "%Y-%m-%d %H:%M:%S", gmtime(&t));
+    time_t t = (av_int2dbl(value) - 25569.0) * 86400;
+    struct tm *result= gmtime(&t);
+    if (!result)
+        return -1;
+    strftime(buf, buf_size, "%Y-%m-%d %H:%M:%S", result);
+    return 0;
 }
 
 static void get_attachment(AVFormatContext *s, AVIOContext *pb, int length)
@@ -426,7 +431,7 @@ static void get_attachment(AVFormatContext *s, AVIOContext *pb, int length)
     st = av_new_stream(s, 0);
     if (!st)
         goto done;
-    av_metadata_set2(&st->metadata, "title", description, 0);
+    av_dict_set(&st->metadata, "title", description, 0);
     st->codec->codec_id   = CODEC_ID_MJPEG;
     st->codec->codec_type = AVMEDIA_TYPE_ATTACHMENT;
     st->codec->extradata  = av_mallocz(filesize);
@@ -463,9 +468,12 @@ static void get_tag(AVFormatContext *s, AVIOContext *pb, const char *key, int ty
         else if (!strcmp(key, "WM/WMRVEncodeTime") ||
                  !strcmp(key, "WM/WMRVEndTime"))
             crazytime_to_iso8601(buf, buf_size, num);
-        else if (!strcmp(key, "WM/WMRVExpirationDate"))
-            oledate_to_iso8601(buf, buf_size, num);
-        else if (!strcmp(key, "WM/WMRVBitrate"))
+        else if (!strcmp(key, "WM/WMRVExpirationDate")) {
+            if (oledate_to_iso8601(buf, buf_size, num) < 0 ) {
+                av_free(buf);
+                return;
+            }
+        } else if (!strcmp(key, "WM/WMRVBitrate"))
             snprintf(buf, buf_size, "%f", av_int2dbl(num));
         else
             snprintf(buf, buf_size, "%"PRIi64, num);
@@ -486,7 +494,7 @@ static void get_tag(AVFormatContext *s, AVIOContext *pb, const char *key, int ty
         return;
     }
 
-    av_metadata_set2(&s->metadata, key, buf, 0);
+    av_dict_set(&s->metadata, key, buf, 0);
     av_freep(&buf);
 }
 
@@ -810,7 +818,7 @@ static int parse_chunks(AVFormatContext *s, int mode, int64_t seekts, int *len_p
                 avio_read(pb, language, 3);
                 if (language[0]) {
                     language[3] = 0;
-                    av_metadata_set2(&st->metadata, "language", language, 0);
+                    av_dict_set(&st->metadata, "language", language, 0);
                     if (!strcmp(language, "nar") || !strcmp(language, "NAR"))
                         st->disposition |= AV_DISPOSITION_VISUAL_IMPAIRED;
                 }

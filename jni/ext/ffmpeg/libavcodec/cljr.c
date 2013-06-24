@@ -67,7 +67,7 @@ static int decode_frame(AVCodecContext *avctx,
     p->pict_type= AV_PICTURE_TYPE_I;
     p->key_frame= 1;
 
-    init_get_bits(&a->gb, buf, buf_size);
+    init_get_bits(&a->gb, buf, buf_size * 8);
 
     for(y=0; y<avctx->height; y++){
         uint8_t *luma= &a->picture.data[0][ y*a->picture.linesize[0] ];
@@ -118,6 +118,7 @@ static int encode_frame(AVCodecContext *avctx, unsigned char *buf, int buf_size,
 static av_cold void common_init(AVCodecContext *avctx){
     CLJRContext * const a = avctx->priv_data;
 
+    avcodec_get_frame_defaults(&a->picture);
     avctx->coded_frame= (AVFrame*)&a->picture;
     a->avctx= avctx;
 }

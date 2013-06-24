@@ -2,7 +2,7 @@
 
 rm -rf libs
 ruby pre-build.rb
-ndk-build $@ || exit 1
+/Users/river/MobileDev/android-ndk-r7/ndk-build $@ || exit 1
 rm -rf assets/lib
 ruby post-build.rb
 rm -rf bin

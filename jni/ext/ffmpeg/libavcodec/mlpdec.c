@@ -340,6 +340,7 @@ static int read_major_sync(MLPDecodeContext *m, GetBitContext *gb)
             m->avctx->channel_layout = ff_truehd_layout(mh.channels_thd_stream1);
         }
         if (m->avctx->channels &&
+            !m->avctx->request_channels && !m->avctx->request_channel_layout &&
             av_get_channel_layout_nb_channels(m->avctx->channel_layout) != m->avctx->channels) {
             m->avctx->channel_layout = 0;
             av_log_ask_for_sample(m->avctx, "Unknown channel layout.");
@@ -459,13 +460,13 @@ static int read_restart_header(MLPDecodeContext *m, GetBitContext *gbp,
     }
 
     if (m->avctx->codec_id == CODEC_ID_MLP && m->needs_reordering) {
-        if (m->avctx->channel_layout == (AV_CH_LAYOUT_2_2|AV_CH_LOW_FREQUENCY) ||
-            m->avctx->channel_layout == AV_CH_LAYOUT_5POINT0) {
+        if (m->avctx->channel_layout == (AV_CH_LAYOUT_QUAD|AV_CH_LOW_FREQUENCY) ||
+            m->avctx->channel_layout == AV_CH_LAYOUT_5POINT0_BACK) {
             int i = s->ch_assign[4];
             s->ch_assign[4] = s->ch_assign[3];
             s->ch_assign[3] = s->ch_assign[2];
             s->ch_assign[2] = i;
-        } else if (m->avctx->channel_layout == AV_CH_LAYOUT_5POINT1) {
+        } else if (m->avctx->channel_layout == AV_CH_LAYOUT_5POINT1_BACK) {
             FFSWAP(int, s->ch_assign[2], s->ch_assign[4]);
             FFSWAP(int, s->ch_assign[3], s->ch_assign[5]);
         }
@@ -949,7 +950,12 @@ static int output_data_internal(MLPDecodeContext *m, unsigned int substr,
     int32_t *data_32 = (int32_t*) data;
     int16_t *data_16 = (int16_t*) data;
 
-    if (*data_size < (s->max_channel + 1) * s->blockpos * (is32 ? 4 : 2))
+    if (m->avctx->channels != s->max_matrix_channel + 1) {
+        av_log(m->avctx, AV_LOG_ERROR, "channel count mismatch\n");
+        return AVERROR_INVALIDDATA;
+    }
+
+    if (*data_size < m->avctx->channels * s->blockpos * (is32 ? 4 : 2))
         return -1;
 
     for (i = 0; i < s->blockpos; i++) {
